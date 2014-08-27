@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyCOLLADA Internals &mdash; Env  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../../_static/highstock/highstock.js"></script>
+    <script type="text/javascript" src="../../../../_static/highstock/modules/exporting.js"></script>
+    <link rel="top" title="Env  documentation" href="../../../../" />
+    <link rel="up" title="Geant4 Geometry in Collada" href="../" />
+    <link rel="next" title="PyCOLLADA Triangulation" href="../triangulation/" />
+    <link rel="prev" title="XMLDAE : raw G4DAE node structure" href="../xmldae/" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../triangulation/" title="PyCOLLADA Triangulation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../xmldae/" title="XMLDAE : raw G4DAE node structure"
+             accesskey="P">previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../" >geant4</a> &raquo;</li>
+          <li><a href="../../" >Geant4 Geometry Export</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Geant4 Geometry in Collada</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>Links</h3>
+<ul class="this-page-menu">
+	<li><a href="/tracs/env"> env </a>  <a href="/tracs/env/timeline"> tl </a> <a href="/repos/env/trunk"> repo </a> <a href="/e"> edocs </a> </li>
+	<li><a href="/tracs/heprez"> heprez </a>  <a href="/tracs/heprez/timeline"> tl </a> <a href="/repos/heprez/trunk"> repo</a> <a href="/h">hdocs</a>   </li>
+        <li><a href="/e/scm/monitor/" > backup status </a> </li>
+</ul>
+
+<h3>Content Skeleton</h3>
+
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/">Installing <strong>env</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../base/">Base Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../log/May2012/">LOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../TODO/">TODO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sysadmin/">Sys Admin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../plot/">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scm/">SCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../trac/">Trac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../root/">ROOT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sphinxext/">Sphinx Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../matplotlib/">Matplotlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nose/">nose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../svn/">SVN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../npy/">Numerical Python, numpy et al</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pypy/">PyPy : faster python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mysqlhotcopy/">MySQL hotcopy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mysql/">MySQL Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sqlite/">SQLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../db/">DB scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../qxml/">QXML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../fossil/">Fossil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../java/">Java Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pycuda/">pycuda</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../">geant4</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../release_notes/">Geant4 Release Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geant4_gpu/">Geant4 GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geant4_profiling/">Geant4 Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../release_notes/">Geant4 Release Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../verbosity/">Verbosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../docs/">Geant4 Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../giga/">GiGa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/">Geant4 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../opticalphoton/">Geant4 Optical Photon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../processes/">Geant4 Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../medical/">Medical Communities Using Geant4 (esp. optical photon)</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../">Geant4 Geometry Export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../g4py/">g4py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../nuwa/">nuwa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../event/">Geant4 Event</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geant4_future_doe/">Geant4</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../muon_simulation/">muon_simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chroma/">chroma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../llvm/">llvm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graphics/">Graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../opencl/">opencl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linux/">Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cloud/">Cloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../package_management/">Package Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ui/">ui</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../debugging/">debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mercurial/">mercurial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../javascript/">javascript</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nuwa/">nuwa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ccgpu/">ccgpu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pygame/">pygame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../zeromq/">zeromq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../doc/">doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../python/">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../osx/">osx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../hg/">hg</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/geant4/geometry/collada/pycollada_internals.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../xmldae/"
+                        title="previous chapter">XMLDAE : raw G4DAE node structure</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../triangulation/"
+                        title="next chapter">PyCOLLADA Triangulation</a></p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pycollada-internals">
+<h1>PyCOLLADA Internals<a class="headerlink" href="#pycollada-internals" title="Permalink to this headline">¶</a></h1>
+<p>Examinine pycollada to see how to extract info needed for Chroma.</p>
+<div class="section" id="xml-parsing-into-indexlists">
+<h2>XML parsing into IndexLists<a class="headerlink" href="#xml-parsing-into-indexlists" title="Permalink to this headline">¶</a></h2>
+<p>Collada object holds IndexLists <cite>_geometries</cite> <cite>_nodes</cite> that behave like both
+lists and dicts based on <cite>id</cite>:</p>
+<div class="highlight-python"><pre>In [106]: dae._geometries['near-radslab-box-10xb3e60a0']
+Out[106]: &lt;Geometry id=near-radslab-box-10xb3e60a0, 1 primitives&gt;
+
+In [118]: len(dae.geometries)   // properties provide dict and list access to these IndexedLists
+Out[118]: 249
+
+In [125]: len(dae.nodes)
+Out[125]: 249
+
+In [126]: len(dae.materials)
+Out[126]: 36
+
+In [119]: dae.geometries['near-radslab-box-10xb3e60a0']
+Out[119]: &lt;Geometry id=near-radslab-box-10xb3e60a0, 1 primitives&gt;
+
+In [120]: dae.geometries[-1]
+Out[120]: &lt;Geometry id=WorldBox0xb3e6f60, 1 primitives&gt;
+
+In [121]: dae.geometries[-2]
+Out[121]: &lt;Geometry id=near_rock0xb3e6e30, 1 primitives&gt;
+
+In [122]: dae.geometries[0]
+Out[122]: &lt;Geometry id=near_top_cover_box0x9390f48, 1 primitives&gt;
+
+In [123]: dae.geometries[1]
+Out[123]: &lt;Geometry id=RPCStrip0x9391088, 1 primitives&gt;</pre>
+</div>
+</div>
+<div class="section" id="collada-loadnodes">
+<h2>collada._loadNodes<a class="headerlink" href="#collada-loadnodes" title="Permalink to this headline">¶</a></h2>
+<p>collada/__init__.py:</p>
+<div class="highlight-python"><pre>397     def _loadNodes(self):
+398         libnodes = self.xmlnode.findall(tag('library_nodes'))
+399         if libnodes is not None:
+400             for libnode in libnodes:
+401                 if libnode is not None:
+402                     tried_loading = []
+403                     succeeded = False
+404                     for node in libnode.findall(tag('node')):
+405                         try:
+406                             N = scene.loadNode(self, node, {})
+407                         except scene.DaeInstanceNotLoadedError as ex:
+408                             tried_loading.append((node, ex))
+409                         except DaeError as ex:
+410                             self.handleError(ex)
+411                         else:
+412                             if N is not None:
+413                                 self.nodes.append(N)
+414                                 succeeded = True</pre>
+</div>
+<div class="section" id="scene-loadnode">
+<h3>scene.loadNode<a class="headerlink" href="#scene-loadnode" title="Permalink to this headline">¶</a></h3>
+<p>Node classes for each XML tag collada/scene.py:</p>
+<div class="highlight-python"><pre>829 def loadNode( collada, node, localscope ):
+830     """Generic scene node loading from a xml `node` and a `collada` object.
+831
+832     Knowing the supported nodes, create the appropiate class for the given node
+833     and return it.
+834
+835     """
+836     if node.tag == tag('node'): return Node.load(collada, node, localscope)
+837     elif node.tag == tag('translate'): return TranslateTransform.load(collada, node)
+838     elif node.tag == tag('rotate'): return RotateTransform.load(collada, node)
+839     elif node.tag == tag('scale'): return ScaleTransform.load(collada, node)
+840     elif node.tag == tag('matrix'): return MatrixTransform.load(collada, node)
+841     elif node.tag == tag('lookat'): return LookAtTransform.load(collada, node)
+842     elif node.tag == tag('instance_geometry'): return GeometryNode.load(collada, node)
+843     elif node.tag == tag('instance_camera'): return CameraNode.load(collada, node)
+844     elif node.tag == tag('instance_light'): return LightNode.load(collada, node)
+845     elif node.tag == tag('instance_controller'): return ControllerNode.load(collada, node)
+846     elif node.tag == tag('instance_node'): return NodeNode.load(collada, node, localscope)
+847     elif node.tag == tag('extra'):
+848         return ExtraNode.load(collada, node)
+849     elif node.tag == tag('asset'):
+850         return None
+851     else: raise DaeUnsupportedError('Unknown scene node %s' % str(node.tag))</pre>
+</div>
+</div>
+<div class="section" id="node-load">
+<h3>Node.load<a class="headerlink" href="#node-load" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>transform subnodes are appended to transforms which is used to construct the parent <cite>Node</cite>
+other subnodes become the children</li>
+<li>source XML id is reused, this <em>id</em> will not be unique after instance-ing reuse in scene graph formation</li>
+</ol>
+<p>collada/scene.py:</p>
+<div class="highlight-python"><pre>307 class Node(SceneNode):
+308     """Represents a node object, which is a point on the scene graph, as defined in the collada &lt;node&gt; tag.
+309
+310     Contains the list of transformations effecting the node as well as any children.
+311     """
+...
+402     @staticmethod
+403     def load( collada, node, localscope ):
+404         id = node.get('id')
+405         children = []
+406         transforms = []
+407
+408         for subnode in node:
+409             try:
+410                 n = loadNode(collada, subnode, localscope)
+411                 if isinstance(n, Transform):
+412                     transforms.append(n)
+413                 elif n is not None:
+414                     children.append(n)
+415             except DaeError as ex:
+416                 collada.handleError(ex)
+417
+418         return Node(id, children, transforms, xmlnode=node)
+419
+420     def __str__(self):
+421         return '&lt;Node transforms=%d, children=%d&gt;' % (len(self.transforms), len(self.children))</pre>
+</div>
+<p>Dump source xml:</p>
+<div class="highlight-python"><pre>In [131]: from collada.xmlutil import etree as ElementTree
+
+In [136]: print ElementTree.tostring(dae.nodes[-1].xmlnode)
+
+&lt;node xmlns="http://www.collada.org/2005/11/COLLADASchema" id="World0xb5b2048"&gt;
+      &lt;instance_geometry url="#WorldBox0xb3e6f60"&gt;
+        &lt;bind_material&gt;
+          &lt;technique_common&gt;
+            &lt;instance_material symbol="WHITE" target="#_dd_Materials_Vacuum0x93ab6a0"/&gt;
+          &lt;/technique_common&gt;
+        &lt;/bind_material&gt;
+      &lt;/instance_geometry&gt;
+      &lt;node name="_dd_Structure_Sites_db-rock0xb5b2188"&gt;
+        &lt;matrix&gt;
+                                -0.543174 0.83962 0 -16520
+-0.83962 -0.543174 0 -802110
+0 0 1 -2110
+0.0 0.0 0.0 1.0
+&lt;/matrix&gt;
+        &lt;instance_node url="#_dd_Geometry_Sites_lvNearSiteRock0xb5b1f08"/&gt;
+      &lt;/node&gt;
+    &lt;/node&gt;</pre>
+</div>
+</div>
+</div>
+<div class="section" id="binding-objects-to-a-list-of-transforms">
+<h2>Binding objects to a list of transforms<a class="headerlink" href="#binding-objects-to-a-list-of-transforms" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>029 class Geometry(DaeObject):
+030     """A class containing the data coming from a COLLADA &lt;geometry&gt; tag"""
+031
+...
+304     def bind(self, matrix, materialnodebysymbol):
+305         """Binds this geometry to a transform matrix and material mapping.
+306         The geometry's points get transformed by the given matrix and its
+307         inputs get mapped to the given materials.
+308
+309         :param numpy.array matrix:
+310           A 4x4 numpy float matrix
+311         :param dict materialnodebysymbol:
+312           A dictionary with the material symbols inside the primitive
+313           assigned to :class:`collada.scene.MaterialNode` defined in the
+314           scene
+315
+316         :rtype: :class:`collada.geometry.BoundGeometry`
+317
+318         """
+319         return BoundGeometry(self, matrix, materialnodebysymbol)
+320
+321     def __str__(self):
+322         return '&lt;Geometry id=%s, %d primitives&gt;' % (self.id, len(self.primitives))
+323
+324     def __repr__(self):
+325         return str(self)
+326
+327
+328 class BoundGeometry( object ):
+329     """A geometry bound to a transform matrix and material mapping.
+330         This gets created when a geometry is instantiated in a scene.
+331         Do not create this manually."""
+332
+333     def __init__(self, geom, matrix, materialnodebysymbol):
+334         self.matrix = matrix
+335         """The matrix bound to"""
+336         self.materialnodebysymbol = materialnodebysymbol
+337         """Dictionary with the material symbols inside the primitive
+338           assigned to :class:`collada.scene.MaterialNode` defined in the
+339           scene"""
+340         self._primitives = geom.primitives
+341         self.original = geom
+342         """The original :class:`collada.geometry.Geometry` object this
+343         is bound to"""
+344
+345     def __len__(self):
+346         """Returns the number of primitives in the bound geometry"""
+347         return len(self._primitives)
+348
+349     def primitives(self):
+350         """Returns an iterator that iterates through the primitives in
+351         the bound geometry. Each value returned will be of base type
+352         :class:`collada.primitive.BoundPrimitive`"""
+353         for p in self._primitives:
+354             boundp = p.bind( self.matrix, self.materialnodebysymbol )
+355             yield boundp
+356
+357     def __str__(self):
+358         return '&lt;BoundGeometry id=%s, %d primitives&gt;' % (self.original.id, len(self))</pre>
+</div>
+<div class="section" id="scenenodes">
+<h3>SceneNodes<a class="headerlink" href="#scenenodes" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>43 class SceneNode(DaeObject):
+44     """Abstract base class for all nodes within a scene."""
+45
+46     def objects(self, tipo, matrix=None):
+47         """Iterate through all objects under this node that match `tipo`.
+48         The objects will be bound and transformed via the scene transformations.
+49
+50         :param str tipo:
+51           A string for the desired object type. This can be one of 'geometry',
+52           'camera', 'light', or 'controller'.
+53         :param numpy.matrix matrix:
+54           An optional transformation matrix
+55
+56         :rtype: generator that yields the type specified
+57
+58         """
+59         pass</pre>
+</div>
+<div class="highlight-python"><pre>simon:collada blyth$ grep SceneNode *.py
+scene.py:class SceneNode(DaeObject):
+scene.py:class Node(SceneNode):
+scene.py:class GeometryNode(SceneNode):
+scene.py:class ControllerNode(SceneNode):
+scene.py:class MaterialNode(SceneNode):
+scene.py:class CameraNode(SceneNode):
+scene.py:class LightNode(SceneNode):
+scene.py:class ExtraNode(SceneNode):</pre>
+</div>
+<div class="highlight-python"><pre>479 class GeometryNode(SceneNode):
+480     """Represents a geometry instance in a scene, as defined in the collada &lt;instance_geometry&gt; tag."""
+481
+...
+515     def objects(self, tipo, matrix=None):
+516         """Yields a :class:`collada.geometry.BoundGeometry` if ``tipo=='geometry'``"""
+517         if tipo == 'geometry':
+518             if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
+519             materialnodesbysymbol = {}
+520             for mat in self.materials:
+521                 materialnodesbysymbol[mat.symbol] = mat
+522             yield self.geometry.bind(matrix, materialnodesbysymbol)</pre>
+</div>
+<div class="sidebar">
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../triangulation/" title="PyCOLLADA Triangulation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../xmldae/" title="XMLDAE : raw G4DAE node structure"
+             >previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../" >geant4</a> &raquo;</li>
+          <li><a href="../../" >Geant4 Geometry Export</a> &raquo;</li>
+          <li><a href="../" >Geant4 Geometry in Collada</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

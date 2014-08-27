@@ -1,0 +1,734 @@
+
+.. include:: <s5defs.txt>
+
+
+.. s5_background_image::
+
+    #
+    # slide titles and background image urls, 
+    # including server relative urls like /env/geant4/geometry/collada/daeview/20140419-170713.png
+    # and protocol relative urls like //localhost/env/test/LANS_AD3_CoverGas_Humidity.png
+    #
+    # first slide id is exceptionally: slide0, not the mangled title
+    slide0
+    /env/geant4/geometry/collada/g4daeview/20140419-170713.png auto_auto 0px_0px
+
+    Full Screen
+    images/chroma/chroma_dayabay_adlid.png
+ 
+    Full Screen 2
+    images/chroma/chroma_dayabay_pool_pmts.png
+
+    g4daeview.py : Fast OpenGL 3D viewer for G4DAE files
+    /env/geant4/geometry/collada/g4daeview/20140419-170713.png
+
+    G4DAE viewer : Pool Bottom
+    /env/geant4/geometry/collada/g4daeview/20140419-170957.png
+
+    G4DAE viewer : Pool Bottom, Chroma Raycast 
+    /env/geant4/geometry/collada/g4daeview/20140419-171014.png
+ 
+    # the image is too big to be shown as is 
+    #G4DAE Dayabay Near Site 
+    #images/osx_preview/osx_preview_g4dae_dayabay.png 
+    
+    #Chroma Raycast Illustration
+    #/env/chroma/chroma_camera/chroma_raycast_illustration.png 1000px_auto 200px_100px
+    #
+    #g4daeview.py : Near Site parallel projection with near plane clipping
+    #/env/geant4/geometry/collada/g4daeview/20140427-115528.png
+    
+
+======================================================================
+200x Faster Optical Photon Propagation with NuWa + Chroma ?
+======================================================================
+
+.. class:: small
+
+    http://dayabay.phys.ntu.edu.tw/env/muon_simulation/presentation/gpu_optical_photon_simulation.html
+    http://dayabay.phys.ntu.edu.tw/env/muon_simulation/presentation/gpu_optical_photon_simulation.pdf
+    http://dayabay.phys.ntu.edu.tw/env/muon_simulation/presentation/gpu_optical_photon_simulation.txt
+
+.. sidebar:: Objective 
+
+   Make GPU accelerated Optical Photon Propagation **routine**
+
+Introducing Chroma 
+
+* http://chroma.bitbucket.org
+
+Fivefold path:
+
+#. :green:`Export G4 Geometry as DAE`
+#. :green:`Convert DAE to Chroma` 
+#. :green:`Chroma Validation, raycasting`
+#. :blue:`G4/Chroma Integration`
+#. :red:`Chroma vs G4 Validation`
+
+Chroma : Ultra-fast Photon MC
+------------------------------
+
+**Developed by Stan Seibert, University of Pennsylvania.**
+
+Chroma tracks photons through a :red:`triangle-mesh detector geometry`, 
+simulating processes like diffuse and specular reflections, 
+refraction, Rayleigh scattering and absorption. Using triangle meshes 
+eliminate geometry code as :red:`just one code path`.
+
+200x performance claim:
+
+   *With a CUDA GPU Chroma has propagated 2.5M photons per second 
+   in a detector with 29k photomultiplier tubes. This is
+   200x faster than GEANT4.*
+
+**BUT:** Chroma needs : :red:`triangles + inside/outside materials`
+
+.. class:: small
+
+   http://on-demand.gputechconf.com/gtc/2013/presentations/S3304-Particle-Physics-With-PyCUDA.pdf
+
+
+:small:`G4DAE : Export Geant4 Geometry into DAE files`
+-------------------------------------------------------
+
+.. class:: small
+
+    General Geant4 geometry exporter based on GDML+VRML2 exporters, writes COLLADA DAE, including:
+
+    * volume tree: PV/LV hierarchy 
+    * geometry: vertices, triangles+quads 
+    * materials 
+    * surfaces (skin and border surfaces)
+    * material/surface properties as function of wavelength 
+
+.. class:: small
+
+   * http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/DAE 
+   * http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/export
+   * http://www.khronos.org/collada/
+
+:small:`G4DAE capable NuWa`: ``./dybinst -X geant4_with_dae trunk all``
+
+.. image:: images/G4DAEWrite.png 
+   :height: 700px
+   :align: center
+
+
+:small:`G4DAE : Export Compared to VRML2(WRL)`
+-----------------------------------------------
+
+.. class:: small
+
+    * Comparison of all vertices/faces reveals :red:`boolean solids are discrepant`. 
+    * Perfect [#perfect]_ agreement only achieved by *cheating* : :blue:`perform triangulation once and reuse`.
+
+.. class:: small
+
+    ====================  ==============  ===========  ===============  =================
+     Qty                    DayaBay         Lingao          Far          Juno x0.5 
+    ====================  ==============  ===========  ===============  =================
+    Volumes                     12,229        12,229          18,903         25,000
+    Triangles                2,448,064     2,448,064       4,189,680     21,886,158
+    Vertices                 1,245,996     1,245,996       2,128,208     10,993,079
+    DAE/GDML/WRL (MB)        6.9/4.0/98   6.9/4.0/96     8.6/6.0/167     6.1M/-/-                 
+    ====================  ==============  ===========  ===============  =================
+
+
+
+.. class:: tiny
+
+    ``VGDX_20140414`` counts using ``g4daeview.py -g 0: --with-chroma``, Juno geometry truncated
+
+.. class:: small
+
+    * Triangulation sensitivity impact :red:`needs checking`
+    * DAE not much bigger than GDML, but includes all triangles/vertices
+
+.. class:: tiny
+
+    .. [#perfect] Maximum DAE WRL offset < 0.13 mm, after patching VRML2 export precision bug. 
+                  Details: http://dayabay.phys.ntu.edu.tw/e/geant4/geometry/collada/dae_cf_wrl/ 
+
+
+:small:`G4DAE : Triangular Advantage` 
+--------------------------------------
+
+.. class:: small
+
+    Surface representation simplicity (vertices+triangles) and COLLADA standard 
+    file format means many tools/libraries available, allowing high level development.
+    Basis libraries used for developments:
+
+    * ``daenode.py`` : G4DAE => Chroma geometry
+
+       * https://github.com/pycollada/pycollada  numpy based DAE parsing
+       * http://www.numpy.org
+
+    * ``daeserver.py`` : 3D WebGL interface to G4DAE geometry
+
+       * https://github.com/mrdoob/three.js/  Javascript 3D 
+
+    * ``g4daeview.py`` : Fast OpenGL 3D viewer/navigator
+
+       * http://pyopengl.sourceforge.net   OpenGL from python 
+       * https://code.google.com/p/glumpy/  pyopengl+numpy integration
+
+.. class:: small
+
+   http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/daenode.py
+   http://belle7.nuu.edu.tw/dae/tree/3148.html
+
+
+
+:small:`Why HEP Visualization is stuck in the 1990s` 
+----------------------------------------------------------
+
+.. class:: small 
+
+   Young Physicists are often eager to use Event display software 
+   on joining HEP experiments. But following a difficult installation 
+   they are rewarded by a slow and clunky interface prone to lock ups and crashes.
+   Graphics performance from years prior to their birth in some cases makes   
+   them never return to HEP visualization.    
+
+   The Geant4 geometry model is a tree of high level C++ objects 
+   representing different detector volumes, backed by a cache of
+   polyhedra obtained by triangulating the shapes. 
+   Rendering to screen requires a traversal of the tree in CPU memory 
+   issuing several OpenGL calls for each of the typically millions of vertices. 
+   The process is repeated for every frame, with geometry data for millions
+   of vertices continuously being transferred from CPU to GPU.
+   This "painterly" OpenGL approach was prevalent in the mid-1990s when Geant4 
+   was first developed.
+   Meanwhile 20 years of GPU revolution occurred with OpenGL 
+   transforming itself many times over to keep up with GPU improvements
+   and constraints. 
+
+   The G4DAE approach that I have developed transfers the Geant4 
+   triangulated geometry data to GPU memory **once only** at application launch.  
+   As a result the entire geometry is rendered with **a single OpenGL draw call**, 
+   involving minimal data transfers to the GPU.
+   The stark contrast between per-frame GPU data transfers 
+   of a handful of bytes for a 4x4 transformation matrix used by G4DAE 
+   compared to typically megabytes of geometry data with standard approaches 
+   result in a transformative leap in graphics performance. 
+   Also, with CPU and GPU processing power to spare it has been 
+   straightfoward to develop unprecedented interface features 
+   such as forward/backward time scrubbing through an event propagation.
+
+   Stopping G4DAE development will postpone by years the advent   
+   of HEP visualization joining the 21st century due to the 
+   extreme rarity of Physicists with the depth of HEP, Geant4, 
+   OpenGL and CUDA experience required to make this revolution happen.
+   Delaying progress will not only impact the worldwide HEP 
+   community but also other fields that use Geant4 such 
+   as the space and medical physics communities (http://geant4.in2p3.fr/2013/).
+
+  
+   
+:small:`How G4DAE relates to Chroma and GPU optical photon propagation` 
+-----------------------------------------------------------------------
+
+.. class:: small
+
+   The G4DAE processing approach I adopted for OpenGL visualization 
+   was inspired and enabled by the analogous approach taken by the Chroma project 
+   for propagation of optical photons using CUDA.
+
+   Chroma minimizes data transfers to the GPU by transferring geometry data **once** 
+   and creating a GPU resident Bounding Volume Heirarchy that accelerates calculation
+   of geometry intersections, the single most expensive aspect of optical photon 
+   propagation. In addition Chroma simulates optical photon processes 
+   such as absorption, re-emission, Rayleigh scattering, diffuse and specular 
+   reflection and surface absorption using the wavelength dependant
+   material and surface properties contained within the Chroma geometry.
+
+   Unfortunately Chroma does not provide a way to translate an existing Geant4
+   geometry into a Chroma geometry. G4DAE seeks to provide this missing 
+   aspect by adding the Geant4 material and surface properties to the exported
+   geometry and providing a mapping from there into a Chroma geometry. 
+   This is intended to enable any Geant4 user of optical photon propagation to 
+   benefit from the transformative speedup factors provided by Chroma.
+
+   In addition G4DAE provides a visualization of the propagation 
+   as it happens from GPU resident photon data. This enables 
+   the detailed development work of performing the mapping 
+   between the Geant4 and Chroma models of material and surface properties
+
+   Working together G4DAE and Chroma can bring GPU accelerated optical photon 
+   propagation to any Geant4 user, especially those with existing Geant4 detector
+   geometries.
+   Stopping G4DAE development will prevent the benefits of this
+   partnership from being realised and will leave these projects 
+   to remain obscure curiosities. Termination will delay the day that 
+   Geant4 GPU optical photon propagation can become mainstream by years, 
+   due to the rarity of Physicists with the necessary depth and breadth of experience to be 
+   productive in this area.  
+
+
+ 
+
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+https://bitbucket.org/scb-/chroma :small:`Forked, changes so far:` 
+-------------------------------------------------------------------
+
+.. class:: small
+
+    * Stability + efficiency improvements, enabling mobile development [#hw]_
+    * Add recording of propagation steps into VBO [#vbo]_ datastructure
+    * Animated visualization 
+
+.. class:: tiny
+
+   .. [#hw] MacBook Pro (2013), NVIDIA GeForce GT 750M 2048 MB ; 
+            Workstation GPUs such as NVIDIA Kepler K20 expected at least ~3x faster
+
+.. image:: /env/chroma/chroma_fork.png 
+   :width: 700px
+   :align: center
+
+
+:small:`Chroma Raycasting : exercises geometry intersection`
+-------------------------------------------------------------
+
+.. class:: small
+
+    Raycasting exercises slowest part of optical photon propagation: :red:`geometry intersection`. 
+ 
+.. image:: /env/chroma/chroma_camera/chroma_raycast_illustration.png 
+   :width: 600px
+   :align: center
+
+.. class:: small
+
+    * Shoot rays thru every pixel out into geometry, 1 CUDA thread for each, typically >1M rays
+    * Find triangle intersections using BVH [#bvh]_ acceleration structure
+    * Determine color based on ray to triangle normal angle
+    * Alpha blend nearest 10 surfaces, providing transparency effect  
+
+.. class:: tiny
+
+    .. [#bvh] Boundary Volume Heirarchy, a tree of bounding boxes with triangles inside leaf nodes
+
+
+
+:small:`Chroma Stability/Efficiency Improvements Made`
+------------------------------------------------------
+
+.. class:: small
+
+    :green:`Split work into multiple CUDA kernel launch, arranged in 2D pattern` [#cuda2d]_ 
+
+    * avoids kernel launch times exceeding 5 seconds 
+    * 2D equalizes thread workload across CUDA warp(32 threads)  
+
+    :green:`Reduced CPU load by reducing transfers`
+
+    * create pixels on GPU, share between OpenGL and CUDA/Chroma [#pbo]_ 
+    * compute photon directions via 4x4 uniform matrix rather than passing arrays 
+    * change matrix to navigate, rather than array manipulating kernel launches 
+
+    These improvements were necessary as *Chroma Camera* [#presume]_ with Dayabay geometry had
+    
+    * very heavy CPU load [#burn]_ and unusably laggy GUI 
+    * frequent GPU panic, GUI freeze, hard system crash forcing reboot
+
+ 
+.. class:: tiny
+
+    .. [#cuda2d] http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/cuda/cuda_launch.py 
+
+    .. [#pbo] Using OpenGL pixel buffer objects (PBO) and CUDA-OpenGL interoperability techniques, 
+              http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/pycuda/pycuda_pyopengl_interop/pixel_buffer.py
+              http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/chroma/chroma_camera/pbo_renderer.py
+
+    .. [#presume] Presumably Chroma was developed using fast Linux desktop GPUs where the kernel time limit can be avoided. 
+
+    .. [#burn] :red:`burning CPU errors` in system log
+
+
+
+:small:`Chroma Raycast Worst Case (~entire geometry) Example` 
+---------------------------------------------------------------- 
+
+.. class:: small
+
+    Render Split into 3x3 CUDA kernel launches, 1 thread per pixel, ~1.8s for 1.23M pixels, 2.4M tris.
+
+.. image:: /env/chroma/chroma_camera/20140423-162109.png
+   :width: 800px
+   :align: center
+
+.. class:: tiny 
+
+
+    g4daeview.py --target=.. --eye="-0.3,-1.1,1.7" --look="0.1,0.4,-0.6" --up="1.2,2.0,1.6" --size=1440,852 --near=30.00000 --far=10000.0 --yfov=50.0 --with-chroma
+
+
+.. wrk (1440, 852) [1226880]  lch  [3, 3, 1] [9]  blk [16, 16, 1] [256]  0.03,0.26,0.12,0.15,0.79,0.20,0.06,0.20,0.04 TOT 1.84
+
+.. http://dayabay.phys.ntu.edu.tw/env/geant4/geometry/export/DayaBay_VGDX_20140414-1300/
+
+
+:small:`Chroma Raycast Triangle count (Dyb with RPC)`
+----------------------------------------------------------------
+
+.. class:: tiny
+
+    g4daeview.py --with-chroma --metric tri --flags 1,0    # tri/time/intersect
+
+.. image:: /env/chroma/chroma_camera/pmt-tri-count-hotspots.png
+   :height: 500px
+   :align: center
+
+:small:`All triangle intersections made, even when no visible contribution to render. (Potential for optimisation?)`
+
+
+:small:`g4daeview.py : Fast OpenGL 3D viewer for G4DAE files`  
+-----------------------------------------------------------------------------   
+
+.. class:: small
+
+   G4DAE visualization [#g4daeview_usage]_ and "backbone" application for Chroma testing.
+
+   * very fast/responsive 3D OpenGL visualization [#vbo]_
+   * flexible tree/list based partial geometry loading 
+   * intuitive virtual trackball translate/rotate 
+   * parallel or perspective projections 
+   * interactive fov and near/far plane clipping 
+   * persistent viewpoint bookmarks 
+   * animation by interpolation between bookmarks or orbiting 
+   * numerical control via UDP remote messaging 
+   * Chroma interactive raycasting, including animated 
+   * live Geant4 connection, photon visualization, single stepping 
+   * easily extensible python implementation [#g4daeview_code]_ 
+   * Chroma propagation visualization, with time slider 
+   * photon picking interface, with property inspection
+
+.. class:: tiny
+
+   .. [#g4daeview_usage] http://dayabay.phys.ntu.edu.tw/e/geant4/geometry/collada/g4daeview/g4daeview_usage/
+
+   .. [#vbo] Implemented with single OpenGL Vertex Buffer Object (VBO) for entire geometry  
+
+   .. [#g4daeview_code] http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/g4daeview/
+
+
+
+:small:`g4daeview.py : Dayabay Chroma Photon Propagation` 
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   Chroma GPU photon propagation at 12 nanoseconds.  The photons are generated by Geant4 
+   simulation of a 100 GeV muon travelling from right to left. 
+   Photon colors indicate reemission (green), absorption(red),
+   specular reflection (magenta), scattering(blue), no history (white). 
+
+.. image:: /env/geant4/geometry/collada/g4daeview/20140716-161445.png
+   :height: 600px
+   :align: center
+
+
+:small:`g4daeview.py : Dayabay Chroma Photon Propagation` 
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   Chroma GPU photon propagation at 14 nanoseconds. 
+   The interface provides interactive control of the propagation time 
+   allowing any stage of the propagation to be viewed by 
+   scrubbing time backwards/forwards. The speed of this visualization 
+   is achieved by interoperation of CUDA kernels and OpenGL shaders accessing
+   the same GPU resident photon propagation data. 
+
+.. image:: /env/geant4/geometry/collada/g4daeview/20140716-163403.png
+   :height: 600px
+   :align: center
+
+
+:small:`g4daeview.py : Photon Selection Interface` 
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   Propagation steps OR photons can be selected by materials, propagation history, or special selection by photon identifier.
+   Photons can be selected by clicking their 3D representations allowing inspection of the
+   propagation history of individual photons.
+
+.. image:: /env/geant4/geometry/collada/g4daeview/grab_glut_menu.png
+   :height: 650px
+   :align: center
+
+
+:small:`g4daeview.py : Propagation Step Selection Interface` 
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   Photon propagation steps with material pair GdDopedLS,Acrylic. The larger
+   squares represent selected photons, providing access to numerical details of propagation history.
+
+.. image:: /env/geant4/geometry/collada/g4daeview/20140716-183318.png
+   :height: 650px
+   :align: center
+
+
+
+:small:`g4daeview.py : Individual Photon Selection` 
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   Propagation steps of a single photon, the steps at either sides of the inner
+   and outer acrylic vessels are visible. The line color represents the photon
+   history starting white and turning magenta following a specular reflection.
+
+.. image:: /env/geant4/geometry/collada/g4daeview/20140716-184148.png
+   :height: 650px
+   :align: center
+
+
+:small:`g4daeview.py : Initial Photon Positions` 
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   Initial photon positions of a Geant4 simulated muon that crosses
+   between the Dayabay Near hall ADs. Colors represent photon wavelengths. 
+
+.. image:: /env/geant4/geometry/collada/g4daeview/20140518-174941.png
+   :height: 650px
+   :align: center
+
+
+
+:small:`g4daeview.py : OpenGL view of Juno Geometry`
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   External view of Juno geometry with cutaway. The extreme size of the Juno geometry (50 million nodes in Chroma representation)
+   provides a challenge for development on mobile GPUs. 
+   As my developments operate at the Geant4 level wherever possible it   
+   was relatively straightforward to apply the machinery developed for 
+   Dayabay to the Juno detector. In collaboration with 
+   Juno simulation experts the geometry was exported from   
+   Geant4 and GPU visualized in under a days work. 
+
+
+.. image:: /env/geant4/geometry/collada/g4daeview/20140716-194144.png
+   :height: 650px
+   :align: center
+
+
+
+:small:`g4daeview.py : Chroma Raycast of Juno Geometry`
+-------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   External view of Juno geometry. The extreme size of the  Juno geometry (50 million nodes in Chroma representation)
+   provides a challenge for development on mobile GPUs. The black rectangle arises due to aborts to avoid GPU
+   crashes. 
+
+
+.. image:: /env/geant4/geometry/collada/g4daeview/20140716-191232.png
+   :height: 650px
+   :align: center
+
+
+
+
+
+
+
+:small:`g4daeview.py : Video Tour`  
+-----------------------------------------------------
+
+.. s5_video:: /env/g4daeview_001.m4v
+    :poster: /env/geant4/geometry/collada/g4daeview/20140419-170713.png
+    :width: 60%
+
+
+:small:`Runtime Geant4/Chroma integration with ZMQRoot` 
+-----------------------------------------------------------
+
+.. class:: small
+
+   ``ZMQRoot`` [#zmqroot]_ sends/receives ``ChromaPhotonList``, 3 node [#topology]_
+
+
+   **client**
+      ``nuwa.py/Geant4`` [#client]_ live collect/send/receive photons
+
+   **broker**
+      ``czmq_broker.sh`` [#broker]_ routes requests, returns replies 
+
+   **worker**
+      ``g4daeview.py/Chroma`` [#worker]_ photon visualization/Chroma stepping 
+
+
+
+.. class:: tiny
+
+   .. [#zmqroot] ROOT+ZeroMQ messaging http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Utilities/ZMQRoot
+
+   .. [#topology] Workaround for a network blockage, server/client or threaded also possible     
+
+   .. [#client] http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Simulation/DetSimChroma/src/DsChromaStackAction.cc
+
+   .. [#broker] http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/zeromq/czmq/czmq_broker.c
+
+   .. [#worker] http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/g4daeview/daeresponder.py
+
+
+
+
+:small:`Status/Issues for Steps 1,2,3` 
+---------------------------------------------
+
+.. class:: small
+
+    :green:`Export G4 Geometry as DAE`  
+
+    * boolean solid triangulation sensitivity :blue:`a future systematic`
+    * pointer addresses used in identifiers :red:`attempt to eliminate`
+
+    :green:`DAE to Chroma` 
+
+    * material/surface properties, :red:`mapping choices validation`, 
+    * Geant4/Chroma model mismatch causes all 8 bordersurfaces including ESR mirrors to be omitted 
+      :red:`add double sided surfaces to Chroma model` [#g4logicalbordersurface]_
+    * :red:`remove GPU geometry duplication` between OpenGL and Chroma, mandatory 
+      for Juno (less so for Dayabay) 
+
+    :green:`Chroma Validation`
+
+    * raycasting: :green:`stability issue resolved` using OpenGL/CUDA interop
+    * :green:`propagation visualization` provides qualitative confidence  
+    * also the visualization provides a working environment within which the details 
+      of matching Geant4/Chroma models can be done 
+
+.. class:: tiny
+
+   .. [#g4logicalbordersurface] G4LogicalBorderSurface class comprises an **ordered pair of volume references** and surface properties 
+
+
+
+:small:`Status/Issues for Step 4 : G4/Chroma Runtime Integration` 
+------------------------------------------------------------------
+
+.. class:: small
+
+    :blue:`Geant4 -> Chroma` in development, 1/1000 photon scaledown
+
+    * messaging :blue:`operational`
+    * :red:`add compression`
+    * :red:`push to full photon operation`
+
+    :red:`Chroma -> Geant4`
+
+    * photon information returned from Chroma to Geant4 is :blue:`technically operational` 
+    * various techniques of merging detected 
+      photon info back into Geant4/NuWa :red:`need to be investigated`. 
+
+
+
+
+
+
+G4DAE Dayabay Near Site 
+---------------------------------------------------
+
+.. image:: images/osx_preview/osx_preview_g4dae_dayabay.png 
+   :height: 700px
+   :align: center
+
+
+.. class:: small
+
+   OSX Preview.app render
+
+
+G4DAE Dayabay AD
+---------------------------------------------
+
+.. image:: images/osx_preview/osx_preview_g4dae_dayabay_ad.png 
+   :width: 800px
+   :align: center
+
+.. class:: small
+
+   OSX Preview.app render
+
+
+Chroma Ray Tracing Dayabay Geometry (1)
+--------------------------------------------
+
+.. image:: images/chroma/chroma_dayabay_pmt_peek.png
+   :width: 800px
+   :align: center
+
+Chroma Ray Tracing Dayabay Geometry (2)
+--------------------------------------------
+
+.. image:: images/chroma/chroma_dayabay_wall_pmts.png
+   :width: 800px
+   :align: center
+
+Chroma Ray Tracing Dayabay Geometry (3)
+--------------------------------------------
+
+.. image:: images/chroma/chroma_dayabay_pool_pmts.png
+   :width: 800px
+   :align: center
+
+Chroma Ray Tracing Dayabay Geometry (4)
+--------------------------------------------
+
+.. image:: images/chroma/chroma_dayabay_adlid.png
+   :width: 800px
+   :align: center
+
+
+``G4DAE viewer : Pool Bottom``
+-------------------------------
+
+``G4DAE viewer : Pool Bottom, Chroma Raycast`` 
+-----------------------------------------------
+
+
+
+:small:`Chroma : Hardware requirements` 
+-----------------------------------------
+
+
+.. sidebar:: Suitable GPUs only ~250-350 USD
+
+   eg NVIDIA GeForce GTX 680 (1536 CUDA cores, 2048 MB, Compute Capability 3.0) ~ 330 USD
+
+.. class:: small
+
+    * NVIDIA GPU with CUDA Compute Capability (CCC) 2.0 at least 
+    * 1.5G of GPU memory (estimated minimum for Dayabay geometry)
+
+
+
+ 

@@ -1,0 +1,569 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GDML Export Implementation &mdash; Env  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../../_static/highstock/highstock.js"></script>
+    <script type="text/javascript" src="../../../../_static/highstock/modules/exporting.js"></script>
+    <link rel="top" title="Env  documentation" href="../../../../" />
+    <link rel="up" title="GDML" href="../" />
+    <link rel="next" title="detdesc" href="../../detdesc/" />
+    <link rel="prev" title="GDML from Geant4Py" href="../gdml_g4py/" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../detdesc/" title="detdesc"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../gdml_g4py/" title="GDML from Geant4Py"
+             accesskey="P">previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../" >geant4</a> &raquo;</li>
+          <li><a href="../../" >Geant4 Geometry Export</a> &raquo;</li>
+          <li><a href="../" accesskey="U">GDML</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>Links</h3>
+<ul class="this-page-menu">
+	<li><a href="/tracs/env"> env </a>  <a href="/tracs/env/timeline"> tl </a> <a href="/repos/env/trunk"> repo </a> <a href="/e"> edocs </a> </li>
+	<li><a href="/tracs/heprez"> heprez </a>  <a href="/tracs/heprez/timeline"> tl </a> <a href="/repos/heprez/trunk"> repo</a> <a href="/h">hdocs</a>   </li>
+        <li><a href="/e/scm/monitor/" > backup status </a> </li>
+</ul>
+
+<h3>Content Skeleton</h3>
+
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/">Installing <strong>env</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../base/">Base Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../log/May2012/">LOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../TODO/">TODO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sysadmin/">Sys Admin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../plot/">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scm/">SCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../trac/">Trac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../root/">ROOT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sphinxext/">Sphinx Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../matplotlib/">Matplotlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nose/">nose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../svn/">SVN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../npy/">Numerical Python, numpy et al</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pypy/">PyPy : faster python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mysqlhotcopy/">MySQL hotcopy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mysql/">MySQL Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sqlite/">SQLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../db/">DB scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../qxml/">QXML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../fossil/">Fossil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../java/">Java Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pycuda/">pycuda</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../">geant4</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../release_notes/">Geant4 Release Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geant4_gpu/">Geant4 GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geant4_profiling/">Geant4 Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../release_notes/">Geant4 Release Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../verbosity/">Verbosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../docs/">Geant4 Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../giga/">GiGa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/">Geant4 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../opticalphoton/">Geant4 Optical Photon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../processes/">Geant4 Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../medical/">Medical Communities Using Geant4 (esp. optical photon)</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../">Geant4 Geometry Export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../g4py/">g4py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../nuwa/">nuwa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../event/">Geant4 Event</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geant4_future_doe/">Geant4</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../muon_simulation/">muon_simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chroma/">chroma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../llvm/">llvm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graphics/">Graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../opencl/">opencl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linux/">Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cloud/">Cloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../package_management/">Package Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ui/">ui</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../debugging/">debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mercurial/">mercurial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../javascript/">javascript</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nuwa/">nuwa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ccgpu/">ccgpu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pygame/">pygame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../zeromq/">zeromq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../doc/">doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../python/">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../osx/">osx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../hg/">hg</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/geant4/geometry/gdml/implementation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../gdml_g4py/"
+                        title="previous chapter">GDML from Geant4Py</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../detdesc/"
+                        title="next chapter">detdesc</a></p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="gdml-export-implementation">
+<h1>GDML Export Implementation<a class="headerlink" href="#gdml-export-implementation" title="Permalink to this headline">¶</a></h1>
+<p>Intend to borrow from here for Collada export, so need to know details of
+the exporter implementation.</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www-geant4.kek.jp/Reference/9.6.p02/classG4GDMLWrite.html">http://www-geant4.kek.jp/Reference/9.6.p02/classG4GDMLWrite.html</a></li>
+</ul>
+<p>Inverted inheritance chain structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G4GDMLWrite</span> <span class="o">&lt;</span> <span class="o">...</span> <span class="o">&lt;</span> <span class="n">G4GDMLWriteStructure</span>
+</pre></div>
+</div>
+<p>Contary to expectations from the name <cite>G4GDMLWriteStructure</cite> is top dog inheriting
+from all the other <cite>G4GDMLWrite*</cite> classes including <cite>G4GDMLWrite</cite> at the base.
+Inheritance misused for categorisation.</p>
+<p>$DYB/NuWa-trunk/lhcb/Sim/GaussTools/src/Components/GiGaRunActionGDML.cpp:</p>
+<div class="highlight-python"><pre>55    G4VPhysicalVolume* wpv = G4TransportationManager::GetTransportationManager()-&gt;
+56       GetNavigatorForTracking()-&gt;GetWorldVolume();
+57
+58    G4String outFilePath("g4_00.gdml");
+59    G4GDMLParser parser ;
+60    if(wpv)
+61    {
+62        std::cout &lt;&lt; "GiGaRunActionGDML::BeginOfRunAction writing to " &lt;&lt; m_outFilePath &lt;&lt; std::endl ;
+63        parser.Write(outFilePath, wpv);
+64    }</pre>
+</div>
+<p>$DYB/external/build/LCG/geant4.9.2.p01/source/persistency/gdml/src/G4GDMLParser.cc:</p>
+<div class="highlight-python"><pre>37 G4GDMLParser::G4GDMLParser()
+38   : ucode(false)
+39 {
+40   reader = new G4GDMLReadStructure;
+41   writer = new G4GDMLWriteStructure;
+42   xercesc::XMLPlatformUtils::Initialize();
+43 }</pre>
+</div>
+<p>$DYB/external/build/LCG/geant4.9.2.p01/source/persistency/gdml/include/G4GDMLParser.icc:</p>
+<div class="highlight-python"><pre>47 inline
+48 void G4GDMLParser::Write(const G4String&amp; filename,
+49                          const G4VPhysicalVolume* const pvol,
+50                                G4bool refs,
+51                          const G4String&amp; schemaLocation)
+52 {
+53   const G4int depth = 0;
+54   G4LogicalVolume* lvol = 0;
+55
+56   if (!pvol)
+57   {
+58     G4VPhysicalVolume* worldPV = GetWorldVolume();
+59     if (!worldPV)
+60     {
+61       G4Exception("G4DMLParser::Write()", "InvalidSetup", FatalException,
+62                   "Detector-Construction needs to be registered first!");
+63     }
+64     lvol = worldPV-&gt;GetLogicalVolume();
+65   }
+66   else
+67   {
+68     lvol = pvol-&gt;GetLogicalVolume();
+69   }
+70   writer-&gt;Write(filename,lvol,schemaLocation,depth,refs);
+71 }</pre>
+</div>
+<p>$DYB/external/build/LCG/geant4.9.2.p01/source/persistency/gdml/src/G4GDMLWrite.cc:</p>
+<div class="highlight-python"><pre>107 G4Transform3D G4GDMLWrite::Write(const G4String&amp; fname,
+108                                  const G4LogicalVolume* const logvol,
+109                                  const G4String&amp; setSchemaLocation,
+110                                  const G4int depth,
+111                                        G4bool refs)
+112 {
+///
+///    xercesc XML writer/doc setup
+///
+161    DefineWrite(gdml);         // open "define" element
+162    MaterialsWrite(gdml);      // open "materials" element and clear materialsList, isotopeList
+163    SolidsWrite(gdml);         // open "solids" element and clear solidsList
+164    StructureWrite(gdml);      // open "structure" element
+165    SetupWrite(gdml,logvol);   // open "setup" element and populate
+166
+167    G4Transform3D R = TraverseVolumeTree(logvol,depth);   // the meat, kicking off the recursive traverse
+168
+///
+///    xercesc XML writing
+///
+216    return R;
+217 }</pre>
+</div>
+<p>$DYB/external/build/LCG/geant4.9.2.p01/source/persistency/gdml/src/G4GDMLWriteStructure.cc:</p>
+<div class="highlight-python"><pre>189 G4Transform3D G4GDMLWriteStructure::
+190 TraverseVolumeTree(const G4LogicalVolume* const volumePtr, const G4int depth)
+191 {
+192    if (VolumeMap().find(volumePtr) != VolumeMap().end())
+193    {
+194      return VolumeMap()[volumePtr]; // Volume is already processed
+195    }
+196
+197    G4VSolid* solidPtr = volumePtr-&gt;GetSolid();
+198    G4Transform3D R,invR;
+///
+///    reflected solid handling skipped
+///
+235    const G4String name
+236          = GenerateName(volumePtr-&gt;GetName(),volumePtr);      // lvName
+237    const G4String materialref
+238          = GenerateName(volumePtr-&gt;GetMaterial()-&gt;GetName(),
+239                         volumePtr-&gt;GetMaterial());
+240    const G4String solidref
+241          = GenerateName(solidPtr-&gt;GetName(),solidPtr);
+...
+...    prep the volumeElement using name/materialref/solidref but dont append to structure yet
+...
+...    2181     &lt;volume name="/dd/Geometry/RPC/lvRPCGasgap140xb7491f8"&gt;
+...    2182       &lt;materialref ref="/dd/Materials/Air0xb830740"/&gt;
+...    2183       &lt;solidref ref="RPCGasgap140xbad5938"/&gt;
+...
+...
+232    if (reflected&gt;0) { invR = R.inverse(); }
+233      // Only compute the inverse when necessary!
+...
+252    const G4int daughterCount = volumePtr-&gt;GetNoDaughters();
+253
+254    for (G4int i=0;i&lt;daughterCount;i++)   // Traverse all the children!
+255    {
+256       const G4VPhysicalVolume* const physvol = volumePtr-&gt;GetDaughter(i);
+257       const G4String ModuleName = Modularize(physvol,depth);
+258
+259       G4Transform3D daughterR;
+260
+261       if (ModuleName.empty())   // Check if subtree requested to be
+262       {                         // a separate module!
+263          daughterR = TraverseVolumeTree(physvol-&gt;GetLogicalVolume(),depth+1);
+...
+...   Q: hmm, how come not getting a deeper GDML structure then ?
+...   A: because no matter what depth of the recursion the resulting volumeElement with 0 or more child physvol
+...      are appended to the fixed structureElement gdml/structure/
+...
+264       }
+265       else
+266       {
+267          G4GDMLWriteStructure writer;
+268          daughterR = writer.Write(ModuleName,physvol-&gt;GetLogicalVolume(),
+269                                   SchemaLocation,depth+1);
+270       }
+...
+272       if (const G4PVDivision* const divisionvol
+273          = dynamic_cast&lt;const G4PVDivision*&gt;(physvol)) // Is it division?
+274       {
+///
+///              divisional/replica/parameterized skipped
+///
+309       else   // Is it a physvol?
+310       {
+311          G4RotationMatrix rot;
+312
+313          if (physvol-&gt;GetFrameRotation() != 0)
+314          {
+315            rot = *(physvol-&gt;GetFrameRotation());
+316          }
+317          G4Transform3D P(rot,physvol-&gt;GetObjectTranslation());           // placement transform of daughter pv wrt mother
+318          PhysvolWrite(volumeElement,physvol,invR*P*daughterR,ModuleName);
+...
+...             R, invR are identity transforms when not dealing with reflections.. ?
+...
+319       }
+320    }
+321
+322    structureElement-&gt;appendChild(volumeElement);
+323      // Append the volume AFTER traversing the children so that
+324      // the order of volumes will be correct!
+325
+326    VolumeMap()[volumePtr] = R;
+327
+328    G4GDMLWriteMaterials::AddMaterial(volumePtr-&gt;GetMaterial());
+329      // Add the involved materials and solids!
+330
+331    G4GDMLWriteSolids::AddSolid(solidPtr);
+332
+333    return R;
+334 }</pre>
+</div>
+<div class="highlight-python"><pre>76 void G4GDMLWriteStructure::PhysvolWrite(xercesc::DOMElement* volumeElement,
+77                                         const G4VPhysicalVolume* const physvol,
+78                                         const G4Transform3D&amp; T,
+79                                         const G4String&amp; ModuleName)
+80 {
+81    HepGeom::Scale3D scale;
+82    HepGeom::Rotate3D rotate;
+83    HepGeom::Translate3D translate;
+84
+85    T.getDecomposition(scale,rotate,translate);
+86
+87    const G4ThreeVector scl(scale(0,0),scale(1,1),scale(2,2));
+88    const G4ThreeVector rot = GetAngles(rotate.getRotation());
+89    const G4ThreeVector pos = T.getTranslation();
+90
+91    const G4String name = GenerateName(physvol-&gt;GetName(),physvol);
+92
+93    xercesc::DOMElement* physvolElement = NewElement("physvol");
+94    physvolElement-&gt;setAttributeNode(NewAttribute("name",name));
+95    volumeElement-&gt;appendChild(physvolElement);
+96
+97    const G4String volumeref
+98          = GenerateName(physvol-&gt;GetLogicalVolume()-&gt;GetName(),
+99                         physvol-&gt;GetLogicalVolume());
+100
+101    if (ModuleName.empty())
+102    {
+103       xercesc::DOMElement* volumerefElement = NewElement("volumeref");
+104       volumerefElement-&gt;setAttributeNode(NewAttribute("ref",volumeref));
+105       physvolElement-&gt;appendChild(volumerefElement);
+106    }
+...
+...       physvol are the children of the mother lv.
+...       volumeref/@ref point to the lv of the child physvol
+...
+...       2181     &lt;volume name="/dd/Geometry/RPC/lvRPCGasgap140xb7491f8"&gt;
+...       2182       &lt;materialref ref="/dd/Materials/Air0xb830740"/&gt;
+...       2183       &lt;solidref ref="RPCGasgap140xbad5938"/&gt;
+...       2184       &lt;physvol name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:1#pvStrip14Unit0xbc1e930"&gt;
+...       2185         &lt;volumeref ref="/dd/Geometry/RPC/lvRPCStrip0xb839910"/&gt;
+...       2186         &lt;position name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:1#pvStrip14Unit0xbc1e930_pos" unit="mm" x="-910" y="0" z="0"/&gt;
+...       2187         &lt;rotation name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:1#pvStrip14Unit0xbc1e930_rot" unit="deg" x="0" y="0" z="-90"/&gt;
+...       2188       &lt;/physvol&gt;
+...
+...
+107    else
+108    {
+109       xercesc::DOMElement* fileElement = NewElement("file");
+110       fileElement-&gt;setAttributeNode(NewAttribute("name",ModuleName));
+111       fileElement-&gt;setAttributeNode(NewAttribute("volname",volumeref));
+112       physvolElement-&gt;appendChild(fileElement);
+113    }
+114
+115    if (std::fabs(pos.x()) &gt; kLinearPrecision
+116     || std::fabs(pos.y()) &gt; kLinearPrecision
+117     || std::fabs(pos.z()) &gt; kLinearPrecision)
+118    {
+119      PositionWrite(physvolElement,name+"_pos",pos);
+120    }
+121    if (std::fabs(rot.x()) &gt; kAngularPrecision
+122     || std::fabs(rot.y()) &gt; kAngularPrecision
+123     || std::fabs(rot.z()) &gt; kAngularPrecision)
+124    {
+125      RotationWrite(physvolElement,name+"_rot",rot);
+126    }
+127    if (std::fabs(scl.x()-1.0) &gt; kRelativePrecision
+128     || std::fabs(scl.y()-1.0) &gt; kRelativePrecision
+129     || std::fabs(scl.z()-1.0) &gt; kRelativePrecision)
+130    {
+131      ScaleWrite(physvolElement,name+"_scl",scl);
+132    }
+133 }</pre>
+</div>
+<p>$LOCAL_BASE/env/geant4/geometry/gdml/g4_01.gdml:</p>
+<div class="highlight-python"><pre>...
+...     structure only goes to two levels ?  structure/volume/physvol/volumeref
+...     presumably depth heirarchy being repesented via the volumeref linking up multiple such relations
+...
+...     Logical volumes with @name are pointed to by physvol/volumeref/@ref
+...
+2172   &lt;structure&gt;
+2173     &lt;volume name="/dd/Geometry/PoolDetails/lvNearTopCover0xbad46a0"&gt;
+2174       &lt;materialref ref="/dd/Materials/PPE0xb8310e0"/&gt;
+2175       &lt;solidref ref="near_top_cover_box0xbad4490"/&gt;
+2176     &lt;/volume&gt;
+2177     &lt;volume name="/dd/Geometry/RPC/lvRPCStrip0xb839910"&gt;
+2178       &lt;materialref ref="/dd/Materials/MixGas0xbad5d28"/&gt;
+2179       &lt;solidref ref="RPCStrip0xb751cc0"/&gt;
+2180     &lt;/volume&gt;
+2181     &lt;volume name="/dd/Geometry/RPC/lvRPCGasgap140xb7491f8"&gt;
+2182       &lt;materialref ref="/dd/Materials/Air0xb830740"/&gt;
+2183       &lt;solidref ref="RPCGasgap140xbad5938"/&gt;
+2184       &lt;physvol name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:1#pvStrip14Unit0xbc1e930"&gt;
+2185         &lt;volumeref ref="/dd/Geometry/RPC/lvRPCStrip0xb839910"/&gt;
+2186         &lt;position name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:1#pvStrip14Unit0xbc1e930_pos" unit="mm" x="-910" y="0" z="0"/&gt;
+2187         &lt;rotation name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:1#pvStrip14Unit0xbc1e930_rot" unit="deg" x="0" y="0" z="-90"/&gt;
+2188       &lt;/physvol&gt;
+2189       &lt;physvol name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:2#pvStrip14Unit0xbc1f8b8"&gt;
+2190         &lt;volumeref ref="/dd/Geometry/RPC/lvRPCStrip0xb839910"/&gt;
+2191         &lt;position name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:2#pvStrip14Unit0xbc1f8b8_pos" unit="mm" x="-650" y="0" z="0"/&gt;
+2192         &lt;rotation name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:2#pvStrip14Unit0xbc1f8b8_rot" unit="deg" x="0" y="0" z="-90"/&gt;
+2193       &lt;/physvol&gt;
+....
+2219       &lt;physvol name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:8#pvStrip14Unit0xbc1feb0"&gt;
+2220         &lt;volumeref ref="/dd/Geometry/RPC/lvRPCStrip0xb839910"/&gt;
+2221         &lt;position name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:8#pvStrip14Unit0xbc1feb0_pos" unit="mm" x="910" y="0" z="0"/&gt;
+2222         &lt;rotation name="/dd/Geometry/RPC/lvRPCGasgap14#pvStrip14Array#pvStrip14ArrayOne:8#pvStrip14Unit0xbc1feb0_rot" unit="deg" x="0" y="0" z="-90"/&gt;
+2223       &lt;/physvol&gt;
+2224     &lt;/volume&gt;
+2225     &lt;volume name="/dd/Geometry/RPC/lvRPCBarCham140xbad5978"&gt;
+2226       &lt;materialref ref="/dd/Materials/Bakelite0xb830008"/&gt;
+2227       &lt;solidref ref="RPCBarCham140xbd59170"/&gt;
+2228       &lt;physvol name="/dd/Geometry/RPC/lvRPCBarCham14#pvRPCGasgap140xbc1f360"&gt;
+2229         &lt;volumeref ref="/dd/Geometry/RPC/lvRPCGasgap140xb7491f8"/&gt;
+2230       &lt;/physvol&gt;
+2231     &lt;/volume&gt;
+....
+30919     &lt;volume name="/dd/Geometry/Sites/lvNearSiteRock0xb82e578"&gt;
+30920       &lt;materialref ref="/dd/Materials/Rock0xb849090"/&gt;
+30921       &lt;solidref ref="near_rock0xb8499c8"/&gt;
+30922       &lt;physvol name="/dd/Geometry/Sites/lvNearSiteRock#pvNearHallTop0xb7dd068"&gt;
+30923         &lt;volumeref ref="/dd/Geometry/Sites/lvNearHallTop0xb745f10"/&gt;
+30924         &lt;position name="/dd/Geometry/Sites/lvNearSiteRock#pvNearHallTop0xb7dd068_pos" unit="mm" x="2500" y="-500" z="7500"/&gt;
+30925       &lt;/physvol&gt;
+30926       &lt;physvol name="/dd/Geometry/Sites/lvNearSiteRock#pvNearHallBot0xc5065d0"&gt;
+30927         &lt;volumeref ref="/dd/Geometry/Sites/lvNearHallBot0xb7dd4a8"/&gt;
+30928         &lt;position name="/dd/Geometry/Sites/lvNearSiteRock#pvNearHallBot0xc5065d0_pos" unit="mm" x="0" y="0" z="-5150"/&gt;
+30929       &lt;/physvol&gt;
+30930     &lt;/volume&gt;
+30931     &lt;volume name="World0xc6337a8"&gt;
+30932       &lt;materialref ref="/dd/Materials/Vacuum0xbaff828"/&gt;
+30933       &lt;solidref ref="WorldBox0xc6328f0"/&gt;
+30934       &lt;physvol name="/dd/Structure/Sites/db-rock0xc633af8"&gt;
+30935         &lt;volumeref ref="/dd/Geometry/Sites/lvNearSiteRock0xb82e578"/&gt;
+30936         &lt;position name="/dd/Structure/Sites/db-rock0xc633af8_pos" unit="mm" x="-16519.9999999999" y="-802110" z="-2110"/&gt;
+30937         &lt;rotation name="/dd/Structure/Sites/db-rock0xc633af8_rot" unit="deg" x="0" y="0" z="-122.9"/&gt;
+30938       &lt;/physvol&gt;
+30939     &lt;/volume&gt;
+30940   &lt;/structure&gt;</pre>
+</div>
+<p>$LOCAL_BASE/env/geant4/geometry/gdml/g4_01.gdml:</p>
+<div class="highlight-python"><pre>1 &lt;?xml version="1.0" encoding="UTF-8" standalone="no" ?&gt;
+2 &lt;gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd"&gt;
+3
+4   &lt;define/&gt;
+5
+6   &lt;materials&gt;
+7     &lt;element Z="6" name="/dd/Materials/Carbon0xbad48f8"&gt;
+8       &lt;atom unit="g/mole" value="12.0109936803044"/&gt;
+9     &lt;/element&gt;
+10     &lt;element Z="1" name="/dd/Materials/Hydrogen0xbad34d0"&gt;
+11       &lt;atom unit="g/mole" value="1.00793946966331"/&gt;
+12     &lt;/element&gt;
+13     &lt;material name="/dd/Materials/PPE0xb8310e0" state="solid"&gt;
+14       &lt;P unit="pascal" value="101324.946686941"/&gt;
+15       &lt;D unit="g/cm3" value="0.919999515933733"/&gt;
+16       &lt;fraction n="0.798874855998063" ref="/dd/Materials/Carbon0xbad48f8"/&gt;
+17       &lt;fraction n="0.201125144001937" ref="/dd/Materials/Hydrogen0xbad34d0"/&gt;
+18     &lt;/material&gt;
+..
+401   &lt;solids&gt;
+402     &lt;box lunit="mm" name="near_top_cover0xbb2aa88" x="16000" y="10000" z="44"/&gt;
+403     &lt;box lunit="mm" name="near_top_cover_sub00xbad4c78" x="4249.00272282321" y="4249.00272282321" z="54"/&gt;
+404     &lt;subtraction name="near_top_cover-ChildFornear_top_cover_box0xbad6708"&gt;
+405       &lt;first ref="near_top_cover0xbb2aa88"/&gt;
+406       &lt;second ref="near_top_cover_sub00xbad4c78"/&gt;
+407       &lt;position name="near_top_cover-ChildFornear_top_cover_box0xbad6708_pos" unit="mm" x="8000" y="5000" z="0"/&gt;
+408       &lt;rotation name="near_top_cover-ChildFornear_top_cover_box0xbad6708_rot" unit="deg" x="0" y="0" z="45"/&gt;
+409     &lt;/subtraction&gt;
+...
+2172   &lt;structure&gt;
+....
+....     dealt with above
+....
+30940   &lt;/structure&gt;
+30941
+30942   &lt;setup name="Default" version="1.0"&gt;
+30943     &lt;world ref="World0xc6337a8"/&gt;
+30944   &lt;/setup&gt;
+30945
+30946 &lt;/gdml&gt;</pre>
+</div>
+<div class="sidebar">
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../detdesc/" title="detdesc"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../gdml_g4py/" title="GDML from Geant4Py"
+             >previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../" >geant4</a> &raquo;</li>
+          <li><a href="../../" >Geant4 Geometry Export</a> &raquo;</li>
+          <li><a href="../" >GDML</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
