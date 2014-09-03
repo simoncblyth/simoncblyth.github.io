@@ -460,18 +460,15 @@ in a detector with 29k photomultiplier tubes. This is
 <p><strong>BUT:</strong> Chroma needs : <span class="red">triangles + inside/outside materials</span></p>
 <p class="small"><a class="reference external" href="http://on-demand.gputechconf.com/gtc/2013/presentations/S3304-Particle-Physics-With-PyCUDA.pdf">http://on-demand.gputechconf.com/gtc/2013/presentations/S3304-Particle-Physics-With-PyCUDA.pdf</a></p>
 </div>
-<div class="slide" id="g4dae-export-geant4-geometry-into-dae-files">
-<h1><span class="small">G4DAE : Export Geant4 Geometry into DAE files</span></h1>
-<p class="small">General Geant4 geometry exporter based on GDML+VRML2 exporters, writes COLLADA DAE, including:</p>
+<div class="slide" id="https-bitbucket-org-simoncblyth-g4dae-exporter">
+<h1><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a> <span class="small">Exporter</span></h1>
+<p class="small">Export any Geant4 Geometry into COLLADA/DAE standard 3D files, including:</p>
 <ul class="small simple">
-<li>volume tree: PV/LV hierarchy</li>
+<li>volume tree: physical volume/logical volume heirarchy</li>
 <li>geometry: vertices, triangles+quads</li>
-<li>materials and surface with properties as function of wavelength</li>
+<li>materials and surfaces with properties as function of wavelength</li>
 </ul>
-<ul class="small simple">
-<li><a class="reference external" href="http://bitbucket.org/simoncblyth/g4dae">http://bitbucket.org/simoncblyth/g4dae</a></li>
-</ul>
-<img alt="images/bitbucket-g4dae.png" class="align-center" src="images/bitbucket-g4dae.png" style="height: 700px;" />
+<img alt="images/bitbucket-g4dae.png" class="align-center" src="images/bitbucket-g4dae.png" style="width: 700px;" />
 </div>
 <div class="slide" id="g4dae-dayabay-nuwa-integration">
 <h1><span class="small">G4DAE : DayaBay/NuWa integration</span></h1>
@@ -481,10 +478,8 @@ in a detector with 29k photomultiplier tubes. This is
 <li>builds Geant4 with G4DAE exporter and other necessary patches</li>
 <li>Details on patching <a class="reference external" href="http://simoncblyth.bitbucket.org/env/notes/geant4/nuwa/">http://simoncblyth.bitbucket.org/env/notes/geant4/nuwa/</a></li>
 </ul>
-<p class="small">NuWa LCG_builder grabs g4dae from bitbucket</p>
-<ul class="small simple">
-<li><span class="incremental">NuWa-trunk/lcgcmt/LCG_Builders/geant4/scripts/geant4_config.sh</span></li>
-</ul>
+<p class="tiny">NuWa LCG_builder grabs g4dae from bitbucket see
+NuWa-trunk/lcgcmt/LCG_Builders/geant4/scripts/geant4_config.sh</p>
 </div>
 <div class="slide" id="g4dae-export-compared-to-vrml2-wrl">
 <h1><span class="small">G4DAE : Export Compared to VRML2(WRL)</span></h1>
@@ -578,81 +573,11 @@ Basis libraries used for developments:</p>
 </blockquote>
 </li>
 </ul>
-<p class="small"><a class="reference external" href="http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/daenode.py">http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/daenode.py</a>
+<p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/daenode.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/daenode.py</a>
 <a class="reference external" href="http://belle7.nuu.edu.tw/dae/tree/3148.html">http://belle7.nuu.edu.tw/dae/tree/3148.html</a></p>
 </div>
-<div class="slide" id="why-hep-visualization-is-stuck-in-the-1990s">
-<h1><span class="small">Why HEP Visualization is stuck in the 1990s</span></h1>
-<p class="small">Young Physicists are often eager to use Event display software
-on joining HEP experiments. But following a difficult installation
-they are rewarded by a slow and clunky interface prone to lock ups and crashes.
-Graphics performance from years prior to their birth in some cases makes
-them never return to HEP visualization.</p>
-<p class="small">The Geant4 geometry model is a tree of high level C++ objects
-representing different detector volumes, backed by a cache of
-polyhedra obtained by triangulating the shapes.
-Rendering to screen requires a traversal of the tree in CPU memory
-issuing several OpenGL calls for each of the typically millions of vertices.
-The process is repeated for every frame, with geometry data for millions
-of vertices continuously being transferred from CPU to GPU.
-This &quot;painterly&quot; OpenGL approach was prevalent in the mid-1990s when Geant4
-was first developed.
-Meanwhile 20 years of GPU revolution occurred with OpenGL
-transforming itself many times over to keep up with GPU improvements
-and constraints.</p>
-<p class="small">The G4DAE approach that I have developed transfers the Geant4
-triangulated geometry data to GPU memory <strong>once only</strong> at application launch.
-As a result the entire geometry is rendered with <strong>a single OpenGL draw call</strong>,
-involving minimal data transfers to the GPU.
-The stark contrast between per-frame GPU data transfers
-of a handful of bytes for a 4x4 transformation matrix used by G4DAE
-compared to typically megabytes of geometry data with standard approaches
-result in a transformative leap in graphics performance.
-Also, with CPU and GPU processing power to spare it has been
-straightfoward to develop unprecedented interface features
-such as forward/backward time scrubbing through an event propagation.</p>
-<p class="small">Stopping G4DAE development will postpone by years the advent
-of HEP visualization joining the 21st century due to the
-extreme rarity of Physicists with the depth of HEP, Geant4,
-OpenGL and CUDA experience required to make this revolution happen.
-Delaying progress will not only impact the worldwide HEP
-community but also other fields that use Geant4 such
-as the space and medical physics communities (<a class="reference external" href="http://geant4.in2p3.fr/2013/">http://geant4.in2p3.fr/2013/</a>).</p>
-</div>
-<div class="slide" id="how-g4dae-relates-to-chroma-and-gpu-optical-photon-propagation">
-<h1><span class="small">How G4DAE relates to Chroma and GPU optical photon propagation</span></h1>
-<p class="small">The G4DAE processing approach I adopted for OpenGL visualization
-was inspired and enabled by the analogous approach taken by the Chroma project
-for propagation of optical photons using CUDA.</p>
-<p class="small">Chroma minimizes data transfers to the GPU by transferring geometry data <strong>once</strong>
-and creating a GPU resident Bounding Volume Heirarchy that accelerates calculation
-of geometry intersections, the single most expensive aspect of optical photon
-propagation. In addition Chroma simulates optical photon processes
-such as absorption, re-emission, Rayleigh scattering, diffuse and specular
-reflection and surface absorption using the wavelength dependant
-material and surface properties contained within the Chroma geometry.</p>
-<p class="small">Unfortunately Chroma does not provide a way to translate an existing Geant4
-geometry into a Chroma geometry. G4DAE seeks to provide this missing
-aspect by adding the Geant4 material and surface properties to the exported
-geometry and providing a mapping from there into a Chroma geometry.
-This is intended to enable any Geant4 user of optical photon propagation to
-benefit from the transformative speedup factors provided by Chroma.</p>
-<p class="small">In addition G4DAE provides a visualization of the propagation
-as it happens from GPU resident photon data. This enables
-the detailed development work of performing the mapping
-between the Geant4 and Chroma models of material and surface properties</p>
-<p class="small">Working together G4DAE and Chroma can bring GPU accelerated optical photon
-propagation to any Geant4 user, especially those with existing Geant4 detector
-geometries.
-Stopping G4DAE development will prevent the benefits of this
-partnership from being realised and will leave these projects
-to remain obscure curiosities. Termination will delay the day that
-Geant4 GPU optical photon propagation can become mainstream by years,
-due to the rarity of Physicists with the necessary depth and breadth of experience to be
-productive in this area.</p>
-</div>
-<div class="slide" id="https-bitbucket-org-simoncblyth-chroma-forked-changes-so-far">
-<h1><a class="reference external" href="https://bitbucket.org/simoncblyth/chroma">https://bitbucket.org/simoncblyth/chroma</a> <span class="small">Forked, changes so far:</span></h1>
+<div class="slide" id="https-bitbucket-org-simoncblyth-chroma-forked">
+<h1><a class="reference external" href="https://bitbucket.org/simoncblyth/chroma">https://bitbucket.org/simoncblyth/chroma</a> <span class="small">Forked:</span></h1>
 <ul class="small simple">
 <li>Stability + efficiency improvements, enabling mobile development <a class="footnote-reference" href="#hw" id="id2">[2]</a></li>
 <li>Add recording of propagation steps into VBO <a class="footnote-reference" href="#vbo" id="id3">[9]</a> datastructure</li>
@@ -705,15 +630,15 @@ Workstation GPUs such as NVIDIA Kepler K20 expected at least ~3x faster</td></tr
 <table class="tiny docutils footnote" frame="void" id="cuda2d" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[4]</a></td><td><a class="reference external" href="http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/cuda/cuda_launch.py">http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/cuda/cuda_launch.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id5">[4]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/cuda/cuda_launch.py">https://bitbucket.org/simoncblyth/env/src/tip/cuda/cuda_launch.py</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="pbo" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id6">[5]</a></td><td>Using OpenGL pixel buffer objects (PBO) and CUDA-OpenGL interoperability techniques,
-<a class="reference external" href="http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/pycuda/pycuda_pyopengl_interop/pixel_buffer.py">http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/pycuda/pycuda_pyopengl_interop/pixel_buffer.py</a>
-<a class="reference external" href="http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/chroma/chroma_camera/pbo_renderer.py">http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/chroma/chroma_camera/pbo_renderer.py</a></td></tr>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/pycuda/pycuda_pyopengl_interop/pixel_buffer.py">https://bitbucket.org/simoncblyth/env/src/tip/pycuda/pycuda_pyopengl_interop/pixel_buffer.py</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/chroma/chroma_camera/pbo_renderer.py">https://bitbucket.org/simoncblyth/env/src/tip/chroma/chroma_camera/pbo_renderer.py</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="presume" rules="none">
@@ -776,7 +701,7 @@ Workstation GPUs such as NVIDIA Kepler K20 expected at least ~3x faster</td></tr
 <table class="tiny docutils footnote" frame="void" id="g4daeview-code" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id11">[10]</a></td><td><a class="reference external" href="http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/g4daeview/">http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/g4daeview/</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id11">[10]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/</a></td></tr>
 </tbody>
 </table>
 </div>
@@ -883,13 +808,13 @@ crashes.</p>
 <table class="tiny docutils footnote" frame="void" id="broker" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id16">[14]</a></td><td><a class="reference external" href="http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/zeromq/czmq/czmq_broker.c">http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/zeromq/czmq/czmq_broker.c</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id16">[14]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c">https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="worker" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id17">[15]</a></td><td><a class="reference external" href="http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/g4daeview/daeresponder.py">http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/g4daeview/daeresponder.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id17">[15]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py</a></td></tr>
 </tbody>
 </table>
 </div>
