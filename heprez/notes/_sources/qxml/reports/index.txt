@@ -1,0 +1,89 @@
+Reports
+========
+
+.. contents:: :local:
+
+
+find the paths within a container
+-----------------------------------
+
+
+
+::
+
+    simon:reports blyth$ echo "collection('dbxml:////tmp/hfagc/remote.dbxml')/dbxml:metadata('dbxml:name')" | qxml - | grep cdfyasmine
+    collection('dbxml:////tmp/hfagc/remote.dbxml')/dbxml:metadata('dbxml:name')
+
+    containers:    hfc : /tmp/hfagc/hfagc.dbxml ? 6
+    containers:    rem : /tmp/hfagc/remote.dbxml ? 6
+    containers:    sys : /tmp/hfagc/hfagc_system.dbxml ? 6
+    containers:    tmp : /tmp/hfagc/scratch.dbxml ? 6
+    loadMaps code2latex : for $glyph in collection('sys')/*[dbxml:metadata('dbxml:name')='pdgs.xml' or dbxml:metadata('dbxml:name')='extras.xml' ]//glyph return (data($glyph/@code), data($glyph/@latex))
+    loadMaps code2latex read 700 kv pairs 
+    loadMaps qtag2latex : for $qtag in doc("sys/qtag2latex.xml")//qtag return ($qtag/@value/string(),$qtag/latex/string())
+    loadMaps qtag2latex read 501 kv pairs 
+    namespaces:    exist : http://exist.sourceforge.net/NS/exist
+    namespaces:    qxml : http://dayabay.phys.ntu.edu.tw/qxml
+    namespaces:    rez : http://hfag.phys.ntu.edu.tw/hfagc/rez
+
+    cdf/cdfyasmine/cdf_fall2012_Bs2JpsiKst.xml
+    cdf/cdfyasmine/cdf_fall2012_Bs2JpsiKs.xml
+    cdf/cdfyasmine/cdf_fall2012_Xib.xml
+    cdf/cdfyasmine/cdf_fall2012_Omega_b.xml
+    cdf/cdfyasmine/cdf_fall2012_Bs2Jpsif0.xml
+    cdf/cdfyasmine/cdf_fall2012_Lb2Lc3pi.xml
+    cdf/cdfyasmine/cdf_fall2012_Lb2Lc3pi_abs.xml
+    cdf/cdfyasmine/cdf_fall2012_Bs2JpsiPhi_over_Bd2JpsiKst.xml
+
+    sequence count 264
+    init       0.2478 s [read config and setup containers]
+    load       0.3435 s [load maps]
+    qprep    0.004056 s [prepare query context]
+    query     0.02667 s [execute query]
+    output    0.01243 s [write results]
+    TOTAL      0.6344 s 
+
+
+.. warning:: Notice that in some containers that names have leading slashes and some like the above do not
+
+
+check latex within a single rez using `byrez-one.xq`
+------------------------------------------------------
+
+::
+
+    simon:reports blyth$ ./byrez-one.xq -k col -v dbxml:/rem -k name -v cdf/cdfyasmine/cdf_fall2012_Omega_b.xml
+    ...
+    \hfagcurl{cdf/cdfyasmine/cdf\_fall2012\_Omega\_b.xml}
+    \begin{center}
+    \begin{tabular}{ll}
+    1 &  $ \frac{\sigma ( \Omega_b^- )\times {\cal{B}} ( \Omega_b^- \to J/\psi(1S) \Omega^- )}{\sigma ( \Lambda_b^0 )\times {\cal{B}} ( \Lambda_b^0 \to J/\psi(1S) \Lambda )} $ \\
+    \end{tabular}
+    \end{center}
+
+    sequence count 7
+    init       0.2342 s [read config and setup containers]
+    load       0.3432 s [load maps]
+    qprep     0.00767 s [prepare query context]
+    query      0.5611 s [execute query]
+    output   0.006736 s [write results]
+    TOTAL       1.153 s 
+
+
+
+make a document of that with `byrez.xq`
+-----------------------------------------
+
+::
+
+    simon:reports blyth$ ./byrez.xq -k col -v dbxml:/rem -k pfx -v cdf/cdfyasmine/cdf_fall2012_Omega_b.xml > cdfyasmine.tex
+
+
+Might as well include all::
+
+    simon:reports blyth$ ./byrez.xq -k col -v dbxml:/rem -k pfx -v cdf/cdfyasmine/ > cdfyasmine_all.tex
+
+    latex cdfyasmine_all
+    dvipdf cdfyasmine_all    
+
+

@@ -1,0 +1,105 @@
+Environment for heprez installation
+=====================================
+
+It is cleaner to keep the installs and their data separate from 
+sources within HOME, so::
+
+        sudo bash -c "mkdir -p /data/env    && chown -R heprez:staff /data/env "
+        sudo bash -c "mkdir -p /data/heprez && chown -R heprez:staff /data/heprez "
+
+
+
+OSX installation
+-----------------
+
+Xcode
+~~~~~~~
+
+Version check::
+
+    b2mc:~ heprez$ mdls -name kMDItemVersion /Applications/XCode.app
+    kMDItemVersion = "4.3.1"
+
+    b2mc:~ heprez$ /usr/bin/xcodebuild -version
+    Xcode 4.3.1
+    Build version 4E1019
+
+    
+`xcode-select` manages the path to the Xcode folder for Xcode BSD tools.
+
+::
+
+    b2mc:~ heprez$  xcode-select -print-path
+    /Applications/Xcode.app/Contents/Developer
+
+Xcode Command Line Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* http://developer.apple.com/library/ios/#documentation/DeveloperTools/Conceptual/WhatsNewXcode/Articles/xcode_4_3.html
+
+After installing Xcode 4.3, the Command Line Tools must be installed. 
+This is done from the Downloads section of Xcode's preferences.
+I guess this has been done already::
+
+    b2mc:bin heprez$ ll /usr/bin | wc -l
+        1067
+
+    b2mc:bin heprez$ ll `xcode-select -print-path`/usr/bin | wc -l 
+         116
+
+macports
+~~~~~~~~~
+
+heprez uses basis packages from the macports package distribution system, which provides
+the `port` tool
+
+::
+
+    b2mc:~ heprez$ which port
+    b2mc:~ heprez$ 
+
+
+Command line macports installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* http://www.macports.org/install.php
+
+::
+
+   curl -L -O https://distfiles.macports.org/MacPorts/MacPorts-2.1.3-10.7-Lion.pkg
+
+
+* http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/pkgutil.1.html
+* http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man8/installer.8.html
+
+
+Check the pkg::
+
+    b2mc:~ heprez$ pkg=MacPorts-2.1.3-10.7-Lion.pkg 
+    b2mc:~ heprez$ pkgutil --payload-files $pkg
+    .
+    ./opt
+    ./opt/local
+    ./opt/local/bin
+    ./opt/local/bin/daemondo
+    ./opt/local/bin/port
+    ./opt/local/bin/portf
+    ./opt/local/bin/portindex
+    ./opt/local/bin/portmirror
+    ./opt/local/etc
+    ...
+
+    b2mc:~ heprez$ which installer
+    /usr/sbin/installer
+
+    b2mc:~ heprez$ installer -pkginfo -pkg $pkg 
+    MacPorts
+
+
+Install pkg::
+
+    pkg=MacPorts-2.1.3-10.7-Lion.pkg 
+    sudo /usr/sbin/installer -pkg $pkg -target /
+       
+
+

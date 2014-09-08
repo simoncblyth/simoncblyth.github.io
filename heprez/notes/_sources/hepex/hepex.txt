@@ -1,0 +1,211 @@
+Hepex Document Building
+=======================
+
+.. contents:: :local:
+
+
+Current GNUMakefile
+--------------------
+
+
+Current make commands, omit the special sauce that creates a crisper **screen** (as opposed to **printed**) pdf::
+
+        simon:EndOfYear11 blyth$ make -n
+        echo Remaking EndOfYear11.dvi
+        latex EndOfYear11
+        bibtex EndOfYear11 
+        ./fix_bbl < EndOfYear11.bbl > EndOfYear11.bbl.fixed; mv EndOfYear11.bbl{.fixed,}
+        latex EndOfYear11
+        latex EndOfYear11
+        echo Remaking EndOfYear11.ps
+        dvips -o EndOfYear11.ps EndOfYear11.dvi 
+        simon:EndOfYear11 blyth$ 
+
+
+Build ps and create pdf with::
+
+       simon:EndOfYear11 blyth$ make
+       simon:EndOfYear11 blyth$ ps2pdf -sPAPERSIZE=a4 -dMaxSubsetPct=100 -dCompatibilityLevel=1.2 -dSubsetFonts=true -dEmbedAllFonts=true EndOfYear11.ps
+       simon:EndOfYear11 blyth$ du -hs *.pdf
+       4.4M    EndOfYear11.pdf
+
+
+
+failure with older latex (cms01)
+----------------------------------
+
+::
+
+        LaTeX Warning: Citation `Buskulic:1995ty' on page 266 undefined on input line 1
+        67.
+
+        [266]
+
+        Package longtable Warning: Column widths have changed
+        (longtable)                in table 175 on input line 169.
+
+        ! Undefined control sequence.
+        \HfagTauBrCorr ...th } \begin {center} \captionof 
+                                                          {table}{Base nodes correla...
+                                                          l.181 \HfagTauBrCorr
+                                                                              
+                                                          ? 
+
+
+link check
+-----------
+
+b2c tables 
+
+#. cyan link boxes are suitably eliminated for b2c tables 
+
+#. links still work OSX Leopard Preview.app
+
+     #. cursor changes to gloved hand and hover message provides the URL, **must keep cursor still for a second or so** 
+
+#. links after b2c section in the references look standard and work, charmless url is simply a tt, not using hyperref package
+
+::
+
+    the rare web page: {\tt http://www.slac.stanford.edu/xorg/hfag/rare/index.html}.
+
+
+
+quality
+--------
+
+#. ps2pdf .pdf looks blurry on OSX Leopard in Preview.app 
+
+   #. horrendous quality without anti-aliasing 
+   #. OK but a bit blurry with anti-aliasing 
+   #. pixelation apparent even with moderate zooming (curiously math is using scalable fonts but text is bitmapped)
+   #. compare with b2c section alone, that uses scalable fonts for text and math
+
+
+#. Decay angle Figure ~63, ~p228 the planes have psychedelic colors (doing gradients is ambitious)
+
+secret sauce
+-------------
+
+Even with secret sauce still getting blurry pdf.
+
+::
+
+        $(NAME).pdf : $(NAME).ps
+                ps2pdf -sPAPERSIZE=a4 -dMaxSubsetPct=100 -dCompatibilityLevel=1.2 -dSubsetFonts=true -dEmbedAllFonts=true $(NAME).ps
+
+        $(NAME).ps: $(NAME).dvi
+                dvips -z -Ppdf -G0 $(NAME).dvi -o $(NAME).ps 
+                # suspect that only -Ppdf is important to creating goodquality pdf nowadays
+
+::
+
+  -z     Pass html hyperdvi specials through to the output for eventual distillation into PDF.  
+         This is not enabled by default to avoid including the header files unnecessarily, and use of temporary files in
+         creating the output.
+
+  -P printername
+          Sets up the output for the appropriate printer.  
+          This is implemented by reading in config.printername , which can then set the output pipe 
+          (as in, !lpr -Pprintername as well as the  font  paths  and
+          any  other  config.ps  defaults for that printer only.  
+          Note that config.ps is read before config.printername 
+          In addition, another file called ~/.dvipsrc is searched for immediately after config.ps;
+          this file is intended for user defaults.  
+          If no -P command is given, the environment variable PRINTER is checked.  
+          If that variable exists, and a corresponding configuration file exists,  
+          that  configuration file is read in.
+
+    -G     Causes dvips to shift non-printing characters to higher-numbered positions.  This may be useful sometimes.
+
+
+
+simpler approach
+-----------------
+
+
+Looks just as grotty::
+
+    simon:EndOfYear11 blyth$ PRINTER=pdf make pdf    ## 4.4 MB pdf
+
+Add some sauce, hmm but still just as blurry::
+
+    simon:EndOfYear11 blyth$ ps2pdf -sPAPERSIZE=a4 -dMaxSubsetPct=100 -dCompatibilityLevel=1.2 -dSubsetFonts=true -dEmbedAllFonts=true EndOfYear11.ps
+
+Back to dvi::
+
+    NAME=EndOfYear11
+
+Hmm still blurry.
+
+    * https://www.linux.com/learn/tutorials/442405-creating-pdf-files-with-ps2pdf
+
+
+Suggestion that blurryness is due to bitmap fonts, that can be remedied using scalable fonts    
+    * http://shreevatsa.wordpress.com/2011/05/05/converting-old-ps-files-generated-with-latex-to-searchable-pdfs/
+    * http://www.ctan.org/pkg/cm-super
+
+
+compare preambles between b2c alone and full hepex
+----------------------------------------------------
+
+Commenting the line, gets to scalable everywhere::
+   
+   \usepackage[T1]{fontenc}
+
+Alternatives to this involve moving to a newer tex distribution or installing fonts. 
+
+  * http://tex.stackexchange.com/questions/1291/why-are-bitmap-fonts-used-automatically
+  * http://tex.stackexchange.com/questions/1390/latin-modern-vs-cm-super
+
+
+
+
+migrate teTeX to texlive
+--------------------------
+
+::
+
+        simon:00000 blyth$ port info tex-cm-super
+        Warning: port definitions are more than two weeks old, consider using selfupdate
+        tex-cm-super @0.3.4, Revision 1 (tex, print)
+        Replaced by:          texlive-fonts-recommended
+        Variants:             universal
+
+        Description:          The CM-Super package contains Type 1 fonts converted from METAFONT fonts and covers entire EC/TC, EC Concrete, EC Bright and LH fonts
+                              (Computer Modern font families). All European and Cyrillic writings are covered.
+                              Each Type 1 font program contains ALL glyphs from the following standard LaTeX font encodings: T1, TS1, T2A, T2B, T2C, X2, 
+                              and also Adobe StandardEncoding (585 glyphs per non-SC font and 468 glyphs per SC font),
+                              and could be reencoded to any of these encodings using standard dvips or pdftex facilities (the corresponding support files are also included).
+
+        Platforms:            darwin
+        License:              unknown
+        Maintainers:          nomaintainer@macports.org
+
+
+
+
+My latex hails from teTeX, that was abandoned in 2006 http://en.wikipedia.org/wiki/TeX_Live
+
+
+::
+
+        simon:00000 blyth$ port provides /opt/local/bin/latex
+        /opt/local/bin/latex is provided by: teTeX
+
+        simon:00000 blyth$ port info teTeX
+        Warning: port definitions are more than two weeks old, consider using selfupdate
+        teTeX @3.0, Revision 7 (print, textproc)
+        Replaced by:          texlive
+        Variants:             universal
+
+        Description:          teTeX is a TeX distribution for UNIX compatible systems. It contains the latest versions of TeX & friends and nearly everything you need for happy TeX'ing. For more information have a look at the lengthy FEATURES
+                              file of the distribution.
+        Homepage:             http://www.tug.org/teTeX/
+
+        Platforms:            darwin
+        License:              unknown
+        Maintainers:          nomaintainer@macports.org
+
+
+

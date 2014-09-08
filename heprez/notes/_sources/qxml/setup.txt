@@ -1,0 +1,221 @@
+
+Setup : getting qxml operational
+==================================
+
+.. contents:: :local:
+
+
+Setup of BDBXML containers
+---------------------------
+
+::
+
+    simon:~ blyth$ cd ~/h/qxml 
+    simon:qxml blyth$ ./qty.xq
+    (:#!/usr/bin/env qxml -k qt -v BR:-511:-411,411:)
+    ...
+    containers:    hfc : /tmp/hfagc/hfagc.dbxml ? 0
+    Exception: Error: /tmp/hfagc/hfagc.dbxml: container file not found, or not a container
+    init   -1.355e+09 s [read config and setup containers]
+    load            0 s [load maps]
+    qprep           0 s [prepare query context]
+    query           0 s [execute query]
+    output  1.355e+09 s [write results]
+    TOTAL      0.2291 s 
+
+
+
+.. literalinclude:: qty.xq
+
+
+exist2qxml to recreate the containers
+---------------------------------------
+
+Need `/Users/blyth/env/db/bdbxml/qxml/exist2qxml.py` 
+
+
+::
+
+    simon:h blyth$ /Users/blyth/env/db/bdbxml/qxml/exist2qxml.py
+    INFO:__main__:using srcpfx_ None 
+    INFO:__main__:ingest sys creating /tmp/hfagc/hfagc_system.dbxml from xml files from http://localhost/servlet/db/hfagc_system/ 
+    INFO:__main__:creating folder /tmp/hfagc 
+    XmlException ( 4 ):  Error: XML Indexer: Fatal Parse error in document at line 1, char 50. Parser message: whitespace expected
+    INFO:__main__:ingest hfc creating /tmp/hfagc/hfagc.dbxml from xml files from /data/heprez/data/backup/part/localhost/last/db/hfagc 
+    {'mimetype': 'text/xml', 'group': 'babar', 'name': 'b0d0kpi.xml', 'created': '2005-06-20T13:28:35+08:00', 'modified': '2006-09-28T02:17:17+08:00', 'filename': 'b0d0kpi.xml', 'mode': '775', 'owner': 'cecilia', 'type': 'XMLResource'}
+    {'mimetype': 'text/xml', 'group': 'babar', 'name': 'b0dsa02.xml', 'created': '2005-06-20T12:58:06+08:00', 'modified': '2006-09-29T02:23:49+08:00', 'filename': 'b0dsa02.xml', 'mode': '775', 'owner': 'cecilia', 'type': 'XMLResource'}
+    ...
+    INFO:__main__:using srcpfx_ None 
+    INFO:__main__:ingest rem creating /tmp/hfagc/remote.dbxml from xml files from http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/ 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_BsDst1Xmunu.xml lhcb/yasmine/lhcb_winter2011_BsDst1Xmunu.xml 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_Lb2Lcpipipi.xml lhcb/yasmine/lhcb_winter2011_Lb2Lcpipipi.xml 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_B2etacK.xml lhcb/yasmine/lhcb_winter2011_B2etacK.xml 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_Bs2Jpsif0.xml lhcb/yasmine/lhcb_winter2011_Bs2Jpsif0.xml 
+    ...
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/babar/cecilia/Summer2005/b0dsds.xml babar/cecilia/Summer2005/b0dsds.xml 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/babar/cecilia/Summer2005/bchdsphi.xml babar/cecilia/Summer2005/bchdsphi.xml 
+    simon:h blyth$ 
+
+
+Rerunning does nothing::
+
+    simon:dayabay blyth$ /Users/blyth/env/db/bdbxml/qxml/exist2qxml.py
+    WARNING:__main__:tag tmp dbxml "/tmp/hfagc/scratch.dbxml" exists already : delete it and rerun to update from src ""  
+    WARNING:__main__:tag sys dbxml "/tmp/hfagc/hfagc_system.dbxml" exists already : delete it and rerun to update from src "http://localhost/servlet/db/hfagc_system/"  
+    WARNING:__main__:tag hfc dbxml "/tmp/hfagc/hfagc.dbxml" exists already : delete it and rerun to update from src "/data/heprez/data/backup/part/localhost/last/db/hfagc"  
+    WARNING:__main__:tag rem dbxml "/tmp/hfagc/remote.dbxml" exists already : delete it and rerun to update from src "http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/"  
+    simon:dayabay blyth$ 
+
+The issue is that the localhost server is not running, http://localhost/servlet/db/hfagc_system/  gives `Service Temporarily Unavailable`
+
+Starting it with::
+
+    simon:~ blyth$ heprez-
+    simon:~ blyth$ exist-
+    simon:~ blyth$ exist-start
+
+Brings up http://localhost/servlet/db/hfagc_system/ 
+
+Now rerunning after deletion, succeeds to populate the `sys` container::
+
+    simon:dayabay blyth$ rm /tmp/hfagc/hfagc_system.dbxml ; /Users/blyth/env/db/bdbxml/qxml/exist2qxml.py
+    WARNING:__main__:tag tmp dbxml "/tmp/hfagc/scratch.dbxml" exists already : delete it and rerun to update from src ""  
+    INFO:__main__:using srcpfx_ None 
+    INFO:__main__:ingest sys creating /tmp/hfagc/hfagc_system.dbxml from xml files from http://localhost/servlet/db/hfagc_system/ 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/pdgs.xml pdgs.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/pdg.xml pdg.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/qtag2latex.xml qtag2latex.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/pdg2008-v003.xml pdg2008-v003.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/qtag2svgs.xml qtag2svgs.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/v2qtags.xml v2qtags.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/v1qtags.xml v1qtags.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/qtags.xml qtags.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/svg-summary.xml svg-summary.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/qtag2pngs.xml qtag2pngs.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/pdg2010-v002.xml pdg2010-v002.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/examples.xml examples.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/members.xml members.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/pdg2006-v001.xml pdg2006-v001.xml 
+    INFO:__main__:ingesting http://localhost/servlet/db/hfagc_system/extras.xml extras.xml 
+    WARNING:__main__:tag hfc dbxml "/tmp/hfagc/hfagc.dbxml" exists already : delete it and rerun to update from src "/data/heprez/data/backup/part/localhost/last/db/hfagc"  
+    WARNING:__main__:tag rem dbxml "/tmp/hfagc/remote.dbxml" exists already : delete it and rerun to update from src "http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/"  
+    simon:dayabay blyth$ 
+
+
+
+
+
+
+Config for container recreation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    simon:h blyth$ echo $QXML_CONFIG
+    /Users/blyth/env/db/bdbxml/qxml/hfagc.cfg
+
+
+    simon:h blyth$ cat /Users/blyth/env/db/bdbxml/qxml/hfagc.cfg
+    [dbxml]
+    environment_dir = /tmp/dbxml
+    default_collection = dbxml:////tmp/hfagc/hfagc.dbxml
+    baseuri = dbxml:/
+    xqmpath = /Users/blyth/heprez/qxml/lib:/Users/blyth/env/db/bdbxml/xq
+
+
+    [container.source]
+    source = 
+    source = http://localhost/servlet/db/hfagc_system/
+    source = /data/heprez/data/backup/part/localhost/last/db/hfagc
+    #source = http://localhost/servlet/db/hfagc_prod/end_of_2011/indv
+    source = http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/
+    #source = http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/
+
+    [container.path]
+    path = /tmp/hfagc/scratch.dbxml
+    path = /tmp/hfagc/hfagc_system.dbxml
+    path = /tmp/hfagc/hfagc.dbxml
+    #path = /tmp/hfagc/avg.dbxml
+    path = /tmp/hfagc/remote.dbxml
+    #path = /tmp/hfagc/yasmine.dbxml
+
+    [container.tag]
+    tag = tmp
+    tag = sys
+    tag = hfc
+    #tag = avg
+    tag = rem
+    #tag = yas
+
+
+    [namespace.name]
+    name = rez 
+    name = exist
+    name = qxml
+
+    [namespace.uri]
+    uri = http://hfag.phys.ntu.edu.tw/hfagc/rez
+    uri = http://exist.sourceforge.net/NS/exist
+    uri = http://dayabay.phys.ntu.edu.tw/qxml
+
+    [map.name]
+    name = code2latex
+    name = qtag2latex
+
+    [map.query]      
+    query = for $glyph in collection('sys')/*[dbxml:metadata('dbxml:name')='pdgs.xml' or dbxml:metadata('dbxml:name')='extras.xml' ]//glyph return (data($glyph/@code), data($glyph/@latex)) 
+    query = for $qtag in doc("sys/qtag2latex.xml")//qtag return ($qtag/@value/string(),$qtag/latex/string())
+
+
+
+
+Hmm, container recreation did not create qtag2latex ?
+--------------------------------------------------------
+
+::
+
+    Exception: Error: Document does not exist: qtag2latex.xml [err:FODC0002], <query>:1:14
+
+
+After populating sys container from localhost
+----------------------------------------------
+
+
+::
+
+    simon:qxml blyth$ ./qty.xq   
+    (:#!/usr/bin/env qxml -k qt -v BR:-511:-411,411:)
+    ...
+    containers:    hfc : /tmp/hfagc/hfagc.dbxml ? 6
+    containers:    rem : /tmp/hfagc/remote.dbxml ? 6
+    containers:    sys : /tmp/hfagc/hfagc_system.dbxml ? 6
+    containers:    tmp : /tmp/hfagc/scratch.dbxml ? 6
+    loadMaps code2latex : for $glyph in collection('sys')/*[dbxml:metadata('dbxml:name')='pdgs.xml' or dbxml:metadata('dbxml:name')='extras.xml' ]//glyph return (data($glyph/@code), data($glyph/@latex))
+    loadMaps code2latex read 700 kv pairs 
+    loadMaps qtag2latex : for $qtag in doc("sys/qtag2latex.xml")//qtag return ($qtag/@value/string(),$qtag/latex/string())
+    loadMaps qtag2latex read 501 kv pairs 
+    namespaces:    exist : http://exist.sourceforge.net/NS/exist
+    namespaces:    qxml : http://dayabay.phys.ntu.edu.tw/qxml
+    namespaces:    rez : http://hfag.phys.ntu.edu.tw/hfagc/rez
+    variables:    qt : BR:-511:-411,411
+
+    <smry po="1" qtv="BR:-511:-321,211,421" status="active" latex="{\cal{B}} ( \bar{B}^0 \to D^0 K^- \pi^+ )"/>
+    <smry po="2" qtv="BR:-511:-421,-321,211" status="active" latex="{\cal{B}} ( \bar{B}^0 \to \bar{D}^0 K^- \pi^+ )"/>
+    ...
+
+    <smry po="685" qtv="BR:5122:-211,75*/BR:5122:-211,-211,211,4122*PartialBR:75:-211,211,4122" status="active" latex="\frac{{\cal{B}} ( \Lambda_b^0 \to \Lambda_{c}^{+}(2625) \pi^- )\times \, ( \Lambda_{c}^{+}(2625) \to \Lambda_c^+ \pi^- \pi^+ )}{{\cal{B}} ( \Lambda_b^0 \to \Lambda_c^+ \pi^- \pi^+ \pi^- )}"/>
+    <smry po="686" qtv="BR:5122:-321,421,2212*/BR:5122:-211,421,2212" status="active" latex="\frac{{\cal{B}} ( \Lambda_b^0 \to D^0 p K^- )}{{\cal{B}} ( \Lambda_b^0 \to D^0 p \pi^- )}"/>
+    <smry po="687" qtv="BR:5122:-211,-211,211,4122*/BR:5122:-211,4122" status="active" latex="\frac{{\cal{B}} ( \Lambda_b^0 \to \Lambda_c^+ \pi^- \pi^+ \pi^- )}{{\cal{B}} ( \Lambda_b^0 \to \Lambda_c^+ \pi^- )}"/>
+
+    sequence count 687
+    init         0.26 s [read config and setup containers]
+    load       0.3188 s [load maps]
+    qprep    0.005865 s [prepare query context]
+    query      0.6961 s [execute query]
+    output      1.379 s [write results]
+    TOTAL        2.66 s 
+
+
+
+
+

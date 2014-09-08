@@ -1,0 +1,504 @@
+b2mc installation notes
+===========================
+
+.. contents:: :local:
+
+pre-requisites for env and heprez
+-----------------------------------
+
+Setup the below
+
+* macports  :doc:`/macports/index`
+* python25
+* py25-sphinx
+
+heprez-propagate
+------------------
+
+pulling from remote permissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*heprez-propagate* fails to pull from remote due to lack of REMOTE_ADMIN_PASSWD
+which comes via::
+
+    simon:h blyth$ find . -name '*.bash' -exec grep -H REMOTE_ADMIN_PASSWD {} \;
+    ./exist_/exist.bash:   export REMOTE_ADMIN_PASSWD=$(private- ; private-val REMOTE_ADMIN_PASSWD)
+    ./register/register.bash:   local pass=$(private- ; private-val REMOTE_ADMIN_PASSWD)
+
+Resolved by resetting the password on cms01 using *exist-cli*
+and planting the new passwd into K:~/.bash_private
+
+
+restoring into local NPE
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*heprez-propagate* fails to restore with NPE::
+
+
+    [exec] ls -l /Users/heprez/data/data/backup/part/localhost/
+    [exec] ls: /Users/heprez/data/data/backup/part/localhost/: No such file or directory
+    [exec] Result: 1
+    [echo] restoring from local file system /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last/db/hfagc to target xmldb:exist://localhost:9090/xmlrpc 
+    [echo] THIS WILL FAIL WITH NPEs FROM RemoteUserManagement if the users.xml is not present in /db/system ...  use restore-users if necessary 
+    [xdb:create] Create child collection hfagc
+    [xdb:create] Created collection /db/hfagc.
+    [xdb:create] Created collection /db/hfagc
+    [xdb:restore] Restoring from /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last/db/hfagc
+    [xdb:restore] restoring file:/Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last/db/hfagc/__contents__.xml
+    [xdb:restore] restoring file:/Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last/db/hfagc/lhcb/__contents__.xml
+    [xdb:restore] restoring file:/Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last/db/hfagc/lhcb/yasmine/__contents__.xml
+    [xdb:restore] An unrecoverable error occurred while restoring
+    [xdb:restore] collection '/db/hfagc/lhcb/yasmine'. Aborting restore!
+    [xdb:restore] org.xmldb.api.base.XMLDBException: java.lang.NullPointerException
+    [xdb:restore]   at org.exist.xmldb.RemoteUserManagementService.chown(RemoteUserManagementService.java:226)
+    [xdb:restore]   at org.exist.backup.Restore.startElement(Restore.java:180)
+    [xdb:restore]   at org.apache.xerces.parsers.AbstractSAXParser.startElement(Unknown Source)
+
+
+Before failing to restore the function succeded to grab::
+
+    b2mc:~ heprez$ backup-users-path
+    /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last/db/system/users.xml
+
+So can use *backup-load-users-insitu*::
+
+    b2mc:~ heprez$ backup-load-users-insitu
+    === backup-load-users-insitu : exist_get users.xml to /tmp/heprez/backup-load-users-insitu/users.xml
+
+After which *heprez-propagate* completes OK.
+
+checking private webserver remotely
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* :e:`base/ssh/#private-web-server-access-over-ssh`
+
+
+backup-status incorrect on K
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**last-restore** link missing on K, so something was wrong with *heprez-propagate* causing incorrect *backup-status*::
+
+
+    b2mc:heprez heprez$ backup-status
+    === backup-status : propagating into new layout so lastrestore/safetybackup links do not exist ===> load
+    b2mc:heprez heprez$ 
+    b2mc:heprez heprez$ backup-vi    
+    b2mc:heprez heprez$ backup-status-dump
+
+    === backup-status-dump : verifying link status 
+
+    pro_lastbackup                  /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last-backup 2013/Jun21-1145
+    lastrestore                                /Users/heprez/data/data/backup/part/localhost/last-restore ...ERROR NOT A LINK..
+    safetybackup                                /Users/heprez/data/data/backup/part/localhost/last-backup 2013/Jun20-2054
+
+    === backup-status-dump : time stamps of the symbolic links with  ... not relevant for comparisons 
+
+    pro_lastbackup                  /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last-backup lrwxr-xr-x  1 heprez  staff  15 Jun 21 11:46 /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/last-backup -> 2013/Jun21-1145
+    lastrestore                                /Users/heprez/data/data/backup/part/localhost/last-restore NO SUCH LINK
+    safetybackup                                /Users/heprez/data/data/backup/part/localhost/last-backup lrwxr-xr-x  1 heprez  staff  15 Jun 20 20:56 /Users/heprez/data/data/backup/part/localhost/last-backup -> 2013/Jun20-2054
+
+    === backup-status-dump : looking at the times on the targets  relevant for nt/ot comparisons
+
+    pro_lastbackup              /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/2013/Jun21-1145 drwxr-xr-x  3 heprez  staff  102 Jun 21 11:45 Jun21-1145
+    lastrestore                                /Users/heprez/data/data/backup/part/localhost/last-restore NO SUCH LINK 
+    safetybackup                            /Users/heprez/data/data/backup/part/localhost/2013/Jun20-2054 drwxr-xr-x  3 heprez  staff  102 Jun 20 20:56 Jun20-2054
+    b2mc:heprez heprez$ 
+    b2mc:heprez heprez$ 
+
+
+Rerunning *heprez-propagate* note a warning::
+
+     [echo] leave a symbolic link in filesystem to indicate the previous backup stamp 
+     [exec] mv: rename last-restore to prev-restore: No such file or directory
+
+And no **last-restore** link is planted::
+
+    b2mc:backup heprez$ ll /Users/heprez/data/data/backup/part/cms01.phys.ntu.edu.tw/
+    total 32
+    lrwxr-xr-x  1 heprez  staff   15 Jun 20 20:36 prev-backup -> 2013/Jun20-2034
+    lrwxr-xr-x  1 heprez  staff   15 Jun 20 20:36 prev -> 2013/Jun20-2034
+    drwxr-xr-x  4 heprez  staff  136 Jun 20 20:56 ..
+    drwxr-xr-x  7 heprez  staff  238 Jun 21 17:08 2013
+    lrwxr-xr-x  1 heprez  staff   15 Jun 21 17:10 last-backup -> 2013/Jun21-1708
+    lrwxr-xr-x  1 heprez  staff   15 Jun 21 17:10 last -> 2013/Jun21-1708
+    drwxr-xr-x  7 heprez  staff  238 Jun 21 17:10 .
+    b2mc:backup heprez$ 
+
+Huh, trying to do what the ant build.xml does works from commandline::
+
+    b2mc:cms01.phys.ntu.edu.tw heprez$ tcsh -c " mv -f last-restore prev-restore ; ln -s 2013/Jun21-1708 last-restore "
+    mv: rename last-restore to prev-restore: No such file or directory
+    b2mc:cms01.phys.ntu.edu.tw heprez$ l
+    total 40
+    lrwxr-xr-x  1 heprez  staff   15 Jun 21 17:16 last-restore -> 2013/Jun21-1708
+    lrwxr-xr-x  1 heprez  staff   15 Jun 21 17:10 last -> 2013/Jun21-1708
+    lrwxr-xr-x  1 heprez  staff   15 Jun 21 17:10 last-backup -> 2013/Jun21-1708
+    drwxr-xr-x  7 heprez  staff  238 Jun 21 17:08 2013
+    lrwxr-xr-x  1 heprez  staff   15 Jun 20 20:36 prev -> 2013/Jun20-2034
+    lrwxr-xr-x  1 heprez  staff   15 Jun 20 20:36 prev-backup -> 2013/Jun20-2034
+
+Splitting into two execs succeeds to plant the link :heprez:`r884` and yields expected *backup-status*::
+
+    b2mc:part heprez$ backup-status     
+    === backup-status : no new results from production at the moment ===> skip
+
+This is a rare case, restoring onto a new node : normally a preexisting link will prevent the problem.
+
+
+
+*heprez-prepare--*
+-------------------
+
+Following along::
+
+    b2mc:heprez heprez$ t heprez-prepare--
+    heprez-prepare-- is a function
+    heprez-prepare-- () 
+    { 
+        local msg="=== $FUNCNAME :";
+        echo $msg preparing for a scrape ...;
+        echo $msg intended to do the right thing when running from an empty db or a full one;
+        echo $msg THIS COMPLETES IN ORDER A MINUTE ... WHEN NOTHING TO DO ...;
+        backup-;
+        backup-prepare;
+        images-;
+        images-prepare;
+        exist-;
+        exist-prepare;
+        chiba-;
+        chiba-prepare
+    }
+
+    b2mc:heprez heprez$ backup-prepare
+    === backup-status : no new results from production at the moment ===> skip
+    === backup-prepare : skipping
+
+    b2mc:heprez heprez$ images-prepare
+    === images-prepare-dev :
+    === images-prepare-check : missing latex
+    === images-prepare-dev : -prepare-check failed SLEEPING FOREVER
+
+
+Off to :doc:`/macports/b2mc_kek_jp` to get latex and other pre-requisites.
+
+
+Following satifaction of pre-requisites, are at *images-preillus*::
+
+    b2mc:heprez heprez$ t images-prepare-dev
+    images-prepare-dev is a function
+    images-prepare-dev () 
+    { 
+        local mode=${1:-default};
+        local msg="=== $FUNCNAME :";
+        echo $msg;
+        local-is-server && local-abort $msg;
+        ! images-prepare-check && echo $msg -prepare-check failed SLEEPING FOREVER && sleep 1000000000;
+        images-preillus $mode;
+        images-illus $mode
+    }
+    b2mc:heprez heprez$ 
+
+
+*tex2pdfpng-update* many errors due to no latex2html
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Attempt to get by without latex2html, excluding it by option in :heprez:`r886`
+This means **nofile** error in the XML, but does it matter::
+
+    b2mc:tex2pdfpng heprez$ extras=$(heprez-xtalk extras)
+    b2mc:tex2pdfpng heprez$ pdgs=$(heprez-xtalk pdgs)
+
+    b2mc:tex2pdfpng heprez$ head -10 $extras
+    <?xml version='1.0' encoding='UTF-8' ?>
+    <extras>
+    <metadata>
+    <timestamp>Fri Jun 21 18:20:54 JST 2013</timestamp>
+    </metadata>
+    <glyph code='MeV' latex='({\rm MeV})' name='MeV' group='Extras'  error='nofile' path='/Users/heprez/data/data/images/extras/html/MeV.html'  />
+    <glyph code='90' latex='X(4140)' name='p90' group='Extras'  error='nofile' path='/Users/heprez/data/data/images/extras/html/p90.html'  />
+    <glyph code='71' latex='\Sigma_{c}^{0}(2455)' name='p71' group='Extras'  error='nofile' path='/Users/heprez/data/data/images/extras/html/p71.html'  />
+    <glyph code='-71' latex='\bar{\Sigma}_{c}^{0}(2455)' name='n71' group='Extras'  error='nofile' path='/Users/heprez/data/data/images/extras/html/n71.html'  />
+    <glyph code='eV' latex='({\rm eV})' name='eV' group='Extras'  error='nofile' path='/Users/heprez/data/data/images/extras/html/eV.html'  />
+
+    b2mc:tex2pdfpng heprez$ head -10 $pdgs  
+    <?xml version='1.0' encoding='UTF-8' ?>
+    <pdgs>
+    <glyph code='1'  latex='d'  group='Quarks and Leptons'  n='0'  nr='0'  nl='0'  nq1='0'  nq2='0'  nq3='0'  nj='1'   error='nofile' path='/Users/heprez/data/data/images/pdgs/html/p1.html'  />
+    <glyph code='-1'  latex='\bar{d}'  group='Quarks and Leptons'  n='0'  nr='0'  nl='0'  nq1='0'  nq2='0'  nq3='0'  nj='1'   error='nofile' path='/Users/heprez/data/data/images/pdgs/html/n1.html'  />
+    <glyph code='2'  latex='u'  group='Quarks and Leptons'  n='0'  nr='0'  nl='0'  nq1='0'  nq2='0'  nq3='0'  nj='2'   error='nofile' path='/Users/heprez/data/data/images/pdgs/html/p2.html'  />
+
+
+*images-preillus*
+~~~~~~~~~~~~~~~~~~
+
+Succeeded to make http://130.87.106.59:9090/servlet/db/hfagc_system/qtag2latex.xml but fails in *indices-compare* as no refbackup.
+Resolved by confering refbackup with *backup-refbackup*
+
+
+*images-illus*
+~~~~~~~~~~~~~~~~~
+
+The heart of *images-illus* is a conversion of PDF files into SVG by illustrator::
+
+    pdf2svg-;
+    pdf2svg-extras;
+    [ $? -ne 0 ] && echo $msg pdf2svg-extras ... sleeping && sleep 10000000000;
+    pdf2svg-pdg;
+    [ $? -ne 0 ] && echo $msg pdf2svg-qtags ... sleeping && sleep 10000000000;
+    pdf2svg-pdgs;
+    [ $? -ne 0 ] && echo $msg pdf2svg-pdgs ... sleeping && sleep 10000000000;
+    pdf2svg-qtags;
+    [ $? -ne 0 ] && echo $msg pdf2svg-qtags ... sleeping && sleep 10000000000;
+
+
+In :doc:`/images/tex2svg/tex2svg` work on alternative approach using *latex* and *dvisvgm*
+
+* at :heprez:`r895` succeed to create the SVG summary index, based on non-illustrator SVG  
+* NEXT: 
+
+   * check plot creation using those
+   * :doc:`/images/indices/build`
+
+
+svg2png
+~~~~~~~~~~
+
+Integrated the batik SaveAsPNG transcoder in :heprez:`r???`
+
+
+
+images-prepare-dev
+-------------------
+
+::
+
+    b2mc:~ heprez$ heprez-
+    b2mc:~ heprez$ images-
+    === ant-env : prepended /Users/heprez/data/install/ant/apache-ant-1.6.5/bin to path
+    b2mc:~ heprez$ export INDICES_OK_NOBACKUP=1
+    b2mc:~ heprez$ images-post
+
+heprez-update on b2mc
+-----------------------
+
+* running with many JNI errors, some broken html created
+
+
+apache on b2mc
+---------------
+
+Start::
+
+    b2mc:~ heprez$ sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist 
+
+Stop::
+
+    b2mc:~ heprez$ sudo launchctl unload -w  /System/Library/LaunchDaemons/org.apache.httpd.plist 
+
+
+Must go via this route (not apachectl) as **IfDefine** keys including a new **HEPREZ** key 
+are set in the plist args, that are used within *apache-conf*.
+
+Tunnel in from G::
+
+    simon:~ blyth$ ssh -fND localhost:8080 K
+    simon:~ blyth$ 
+
+Configure browser requests from G to go via the 8080 socks server with ~/env/proxy/socks.pac::
+
+     31    if (url.substring(0,25) ==   "http://130.87.106.59:9090" ){
+     32       return "SOCKS 127.0.0.1:9090" ;
+     33    }
+
+Thence can check apache on K:
+
+* http://130.87.106.59:8080/b2charm/end_of_2011/index.html
+
+
+heprez-update on b2mc from cron
+---------------------------------
+
+After :heprez:`r905` can run *heprez-update* without huge numbers of errors in the *exist-start* stdout.
+Taking about 40 min (cf ~5 hours on old laptop).
+
+[FIXED] SVG plots are missing labels
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * http://130.87.106.59:8080/b2charm/end_of_2011/01214.svg
+
+Grab em for local check with Illustrator using the socks proxy::
+
+    simon:b2mc blyth$ curl -s --socks5 localhost:8080 -L -O http://130.87.106.59:8080/b2charm/end_of_2011/01216.svg
+
+With Illustrator observe that the labels are in the file, but drastically offset in y, and 
+maybe at incorrect x positions too.
+
+
+[FIXED] D0 key label and symbol missing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * with Illustrator observe they are not in the file 
+
+
+FIXED: Conversion of SVG to PNG not being done after scrape
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SVG to PNG conversion with batik does not like the form of the SVG, the *now* element 
+ 
+   * need to strip metadata with xsltproc, but for that to work had to: 
+   * eliminate the SVG DOCTYPE with some old DTD to get it past xsltproc, even with `--nonet`      
+   * fixed in :heprez:`r906`
+
+::
+
+   b2mc:~ heprez$ xmllint --format /Users/heprez/data/data/scrape/20130628/hfagc/00101/01101/01101.svg
+  
+
+launchd config for exist to allow unattended running
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* http://developer.apple.com/library/mac/#documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html
+
+   * /System/Library/LaunchAgents
+   * /System/Library/LaunchDaemons
+   * /Library/LaunchDaemons/
+
+   
+
+chiba on b2mc
+~~~~~~~~~~~~~~~~~
+
+#. Changed tomcat port to 7070 from 8080 default (as have been using apache on 8080 for non-root tunneling convenience) using *tomcat-changeport*
+
+#. Used *tomcat-start* to launch, will need a *tomcat-load/unload* and launchd plist for longterm running
+
+   * http://130.87.106.59:8080/rezdb/db/test/b0colsup.xml
+   * rezdb edit links that handoff from jetty/cocoon to tomcat/chiba have 8080 hardcoded
+ 
+      * nope, the :8080/chiba/ gets handed to chiba via jkmount via an AJP backdoor
+
+#. try direct to tomcat works (after tunneling 7070 with `ssh -fND localhost:7070 K` and adding updated socks.pac to Network Prefs proxt config)
+
+   * http://130.87.106.59:7070/index.jsp 
+
+::
+
+   b2mc:h heprez$ find . -name 'sitemap.xmap*' -exec grep -H rezdb {} \;
+
+   ./hfag/mods/webapp/sitemap.xmap  
+   ./hfag/mods/webapp/hfagc/stylesheets/present-instance.xsl
+   ./hfag/mods/webapp/hfagc/stylesheets/editurl.xsl 
+
+
+::
+
+    b2mc:h heprez$ cat $TOMCAT_HOME/webapps/chiba.xml 
+    <!--
+        Context configuration file following the example of
+            the Tomcat Manager Web App
+
+        generated by chibatomcat-context- Wed Jun 19 20:56:19 JST 2013
+    -->
+
+    <Context path="/chiba" docBase="/Users/heprez/data/install/chibatomcat/2" debug="0" privileged="true">
+      <!-- Link to the user database we will get roles from -->
+      <ResourceLink name="users" global="UserDatabase" type="org.apache.catalina.UserDatabase"/>
+    </Context>
+
+
+
+#. try to wake up chiba
+
+  * http://130.87.106.59:7070/chiba/forms/header/header.xhtml    unstyled form page 
+  * http://130.87.106.59:7070/chiba/forms/header/header-types.css OK
+  * http://130.87.106.59:7070/chiba/forms/styles/xforms.css   MISSING 
+
+  * http://130.87.106.59:8080/chiba/XFormsServlet?form=/forms/header/header.xhtml&JavaScript=enabled&action=Update&doc=/db/test/b0colsup.xml&template=&elem=header&start=1&ttart=&strip=no&howmany=1&user=&pass=
+
+      * tomcat 404 : The requested resource (/chiba/XFormsServlet) is not available. 
+
+
+Compare *tomcat-logs* 
+
+On b2mc localhost_log.2013-07-10.txt::
+
+      2 2013-07-10 19:22:53 HostConfig[localhost]: Deploying configuration descriptor chiba.xml
+      3 2013-07-10 19:22:53 WebappLoader[/chiba]: Deploying class repositories to work directory /Users/heprez/data/install/tomcat/apache-tomcat-4.1.39/work/Standalone/localhost/chiba
+      4 2013-07-10 19:22:53 ContextConfig[/chiba]: Missing application web.xml, using defaults only
+      5 2013-07-10 19:22:53 StandardManager[/chiba]: Seeding random number generator class java.security.SecureRandom
+      6 2013-07-10 19:22:53 StandardManager[/chiba]: Seeding of random number generator has been completed
+      7 2013-07-10 19:22:53 StandardWrapper[/chiba:default]: Loading container servlet default
+      8 2013-07-10 19:22:53 StandardWrapper[/chiba:invoker]: Loading container servlet invoker
+
+cf G::
+
+     02 2012-04-13 15:19:22 HostConfig[localhost]: Deploying configuration descriptor chiba.xml
+      3 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploying class repositories to work directory /data/heprez/install/tomcat/apache-tomcat-4.1.39/work/Standalone/localhost/chiba
+      4 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy class files /WEB-INF/classes to /data/heprez/install/chibatomcat/2/WEB-INF/classes
+      5 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/activation.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/activation.jar
+      6 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/chiba-1.2.0.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/chiba-1.2.0.jar
+      7 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/commons-codec-1.2.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/commons-codec-1.2.jar
+      8 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/commons-fileupload-1.1.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/commons-fileupload-1.1.jar
+      9 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/commons-httpclient-3.0.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/commons-httpclient-3.0.jar
+     10 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/commons-io-1.1.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/commons-io-1.1.jar
+     11 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/commons-jxpath-1.2.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/commons-jxpath-1.2.jar
+     12 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/commons-logging.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/commons-logging.jar
+     13 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/dwr-1.1.1.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/dwr-1.1.1.jar
+     14 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/dwr.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/dwr.jar
+     15 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/log4j-1.2.8.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/log4j-1.2.8.jar
+     16 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/mail.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/mail.jar
+     17 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/serializer.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/serializer.jar
+     18 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/xalan.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/xalan.jar
+     19 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/xercesImpl-2.7.1.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/xercesImpl-2.7.1.jar
+     20 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/xml-apis.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/xml-apis.jar
+     21 2012-04-13 15:19:22 WebappLoader[/chiba]: Deploy JAR /WEB-INF/lib/xmlrpc-1.2-b1.jar to /data/heprez/install/chibatomcat/2/WEB-INF/lib/xmlrpc-1.2-b1.jar
+     22 2012-04-13 15:19:23 StandardManager[/chiba]: Seeding random number generator class java.security.SecureRandom
+     23 2012-04-13 15:19:23 StandardManager[/chiba]: Seeding of random number generator has been completed
+     24 2012-04-13 15:19:23 StandardWrapper[/chiba:default]: Loading container servlet default
+     25 2012-04-13 15:19:23 StandardWrapper[/chiba:invoker]: Loading container servlet invoker
+
+
+
+
+
+
+::
+
+    b2mc:h heprez$ tar Ozxf /Users/heprez/data/install/chibacvs/chiba-project-svn-trunk-2139/chiba-web/dist/chiba-web-2.0.0rc1.war WEB-INF/web.xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/j2ee/dtd/web-app_2_3.dtd">
+    <web-app>
+        <display-name>Chiba</display-name>
+
+
+All the goodies are missing from slot 2 other than header and quote forms (customisation without the basis?)::
+
+    b2mc:chibatomcat heprez$ l 0/
+    total 0
+    drwxr-xr-x   3 heprez  staff   102 Jun 19 20:39 META-INF
+    drwxr-xr-x  10 heprez  staff   340 Jun 19 20:39 WEB-INF
+    drwxr-xr-x  17 heprez  staff   578 Jun 19 20:39 api
+    drwxr-xr-x  43 heprez  staff  1462 Jun 19 20:39 forms
+    drwxr-xr-x  13 heprez  staff   442 Jun 19 20:39 jsp
+    drwxr-xr-x   2 heprez  staff    68 Jun 19 20:39 upload
+    b2mc:chibatomcat heprez$ l 2/
+    total 0
+    drwxr-xr-x  3 heprez  staff  102 Jul 10 19:22 WEB-INF
+    drwxr-xr-x  4 heprez  staff  136 Jun 19 20:57 forms
+    b2mc:chibatomcat heprez$ pwd
+    /Users/heprez/data/install/chibatomcat
+
+Recover with::
+
+    chibatomcat-unwar-again
+    xsd2xhtml-
+    xsd2xhtml-build
+
+Succeed to rezdb edit on b2mc 
+
+* http://130.87.106.59:8080/rezdb/db/test/b0ddk.xml
+
+   * however the workflow expects to grab from a remote server ? Consult Thomas on how to proceed
+
+

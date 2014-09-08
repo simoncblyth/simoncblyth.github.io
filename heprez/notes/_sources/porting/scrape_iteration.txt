@@ -1,0 +1,751 @@
+Scrape Interation on b2mc without Illustrator
+=============================================
+
+.. contents:: :local:
+
+0702 2nd b2mc test heprez-update 
+------------------------------------
+
+Invoked from cron with::
+
+    b2mc:cron heprez$ crontab -l
+    SHELL=/bin/bash
+    PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:/opt/local/bin
+    NODE_TAG_OVERRIDE=K
+    HOME=/Users/heprez
+    ENV_HOME=/Users/heprez/env 
+    HEPREZ_HOME=/Users/heprez/heprez 
+    #
+    31 21 * * * (. /Users/heprez/env/env.bash ; env- ; . /Users/heprez/heprez/heprez.bash ; heprez-  ; heprez-update ) > $HOME/cron/heprez-update-$(date +"\%Y\%m\%d-\%H\%M").log  2>&1
+
+
+[FIXED] cron run chopped short 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Comparing last two logs shows very different size::
+
+    b2mc:cron heprez$  ll  heprez-update-20130702*
+    -rw-r--r--  1 heprez  staff  451635 Jul  2 20:42 heprez-update-20130702-1946.log
+    -rw-r--r--  1 heprez  staff  195618 Jul  2 22:16 heprez-update-20130702-2131.log
+
+Differences between the 2nd and 1st runs:
+
+#. new scrape date
+#. launchd exist for standalone running 
+
+
+2nd run got chopped short::
+
+    970      [exec] page type comb
+    971      [exec] page type comb
+    972      [exec] page type comb
+    973      [exec] cannot write to /Users/heprez/data/data/scrape/20130702/hfagc/00000/00000.log
+    974      [exec] Result: 13
+    975 
+    976 checklog:
+    977      [exec] ERROR log:/Users/heprez/data/data/scrape/20130702/log.xml not existing
+    978      [exec] Result: 2
+    979 
+    980 BUILD SUCCESSFUL
+    981 Total time: 24 minutes 27 seconds
+    982 === scrape-ant : Tue Jul 2 21:57:30 JST 2013 COMPLETED
+
+
+[AVOIDED] exist.log shows 42 do-tpdflatex.pl errors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. sidebar:: Issue Avoided by using apache commons exec rather than JNI embedded perl
+
+         The difference is that a separate process is spawned to perform conversions, rather than
+         effectively compiling java and perl together with JNI. This approach is more modular, probably 
+         a bit slower, much more flexible, much easier to support, more susceptible to lack of env
+         propagation problems as it adds yet another context inside launchd daemon which needs to have a consistent env.
+
+
+From *exist.log*  `EPerlScriptAdapter exception: org.apache.commons.exec.ExecuteException: Process exited with an error: 2 (Exit value: 2)`::
+
+    15045 2013-07-02 21:57:28,025 [P1-4] WARN  (LogFunction.java [eval]:93) - (Line: 351) c:src-valid (/db/cache/hfagc/20130702/Deltaperp_97_94+443/table.html) NOT VALID [/db/cache/hfagc/20130702/Deltaperp_97_94+443/table.html:nocache:]
+    15046 2013-07-02 21:57:28,026 [P1-4] WARN  (LogFunction.java [eval]:93) - (Line: 55) present-table:present-table [ is-valid=false present-src=/db/cache/hfagc/20130702/Deltaperp_97_94+443/table.html sm-end= sm-pos=Deltaperp_97_94+443 sm-dir=/db/cache/hfagc/2      0130702/Deltaperp_97_94+443 opt=plot,head,sabel,onlycom,tex,npo,dvi apt=save:save:: is-make=false is-save=true is-scrape=false is-remake=true ]
+    15047 2013-07-02 21:57:28,028 [P1-4] INFO  (EPerlScriptAdapter.java [execute]:192) - calling execute5s  subname:tpdflatex urlbody:http://localhost:9090/hfagc/Deltaperp_97_94+443/table_body/tex urlshell:http://localhost:9090/hfagc/Deltaperp_97_94+443/table_/      tex workdir:/Users/heprez/data/data/scrape/20130702/hfagc/indv/Deltaperp_97_94+443 opt:plot,head,sabel,onlycom,tex,npo,dvi apt:dummy,save
+    15048 2013-07-02 21:57:28,059 [P1-4] ERROR (EPerlScriptAdapter.java [execute]:213) - EPerlScriptAdapter exception: org.apache.commons.exec.ExecuteException: Process exited with an error: 2 (Exit value: 2)
+    15049 2013-07-02 21:57:28,060 [P1-4] DEBUG (CatchFunction.java [eval]:87) - Calling exception handler to process org.exist.xquery.XPathException
+    15050 2013-07-02 21:57:28,061 [P1-4] DEBUG (NativeBroker.java [openDocument]:661) - collection /db/cache/hfagc/20130702/Deltaperp_97_94+443/Deltaperp_97_94+443 not found!
+
+And the answer is 42::
+
+    b2mc:logs heprez$ grep ERROR exist.log
+    2013-07-02 21:56:07,054 [P1-4] ERROR (EPerlScriptAdapter.java [execute]:213) - EPerlScriptAdapter exception: org.apache.commons.exec.ExecuteException: Process exited with an error: 2 (Exit value: 2)
+    2013-07-02 21:56:12,222 [P1-4] ERROR (EPerlScriptAdapter.java [execute]:213) - EPerlScriptAdapter exception: org.apache.commons.exec.ExecuteException: Process exited with an error: 2 (Exit value: 2)
+    ...
+    2013-07-02 21:57:28,059 [P1-4] ERROR (EPerlScriptAdapter.java [execute]:213) - EPerlScriptAdapter exception: org.apache.commons.exec.ExecuteException: Process exited with an error: 2 (Exit value: 2)
+    2013-07-02 21:57:29,708 [P1-4] ERROR (EPerlScriptAdapter.java [execute]:213) - EPerlScriptAdapter exception: org.apache.commons.exec.ExecuteException: Process exited with an error: 2 (Exit value: 2)
+
+    b2mc:logs heprez$ grep ERROR exist.log | wc -l
+          42
+
+The rot starts with 00603, coincidence or something special about that ?::
+
+     843 2013-07-02 21:56:07,024 [P1-4] INFO  (EPerlScriptAdapter.java [execute]:192) - calling execute5s  subname:tpdflatex urlbody:http://localhost:9090/hfagc/00603/table_body/tex urlshell:http://localhost:9090/hfagc/00603/table_/tex workdir:/Users/heprez/da      ta/data/scrape/20130702/hfagc/00603/00603 opt:plot,head,sabel,onlycom,tex,npo,dvi apt:dummy,save
+      844 2013-07-02 21:56:07,054 [P1-4] ERROR (EPerlScriptAdapter.java [execute]:213) - EPerlScriptAdapter exception: org.apache.commons.exec.ExecuteException: Process exited with an error: 2 (Exit value: 2)
+      845 2013-07-02 21:56:07,054 [P1-4] DEBUG (CatchFunction.java [eval]:87) - Calling exception handler to process org.exist.xquery.XPathException
+      846 2013-07-02 21:56:07,055 [P1-4] DEBUG (NativeBroker.java [openDocument]:661) - collection /db/cache/hfagc/20130702/00603/00603 not found!
+      847 2013-07-02 21:56:07,059 [P1-4] DEBUG (CollectionConfigurationManager.java [getConfiguration]:113) - Reading config for /db/cache/hfagc/20130702/00603
+
+Many `not found` over that 90s period::
+
+    b2mc:logs heprez$ grep not\ found exist.log | head -1
+    2013-07-02 21:56:07,055 [P1-4] DEBUG (NativeBroker.java [openDocument]:661) - collection /db/cache/hfagc/20130702/00603/00603 not found!
+    b2mc:logs heprez$ grep not\ found exist.log | tail -1
+    2013-07-02 21:57:29,181 [P1-4] DEBUG (NativeBroker.java [openDocument]:661) - collection /db/cache/hfagc/20130702/all not found!
+    b2mc:logs heprez$ grep not\ found exist.log | wc -l  
+         897
+
+Failed to write the scrape log. It was created in previous run::
+
+    b2mc:20130628 heprez$ stat /Users/heprez/data/data/scrape/20130628/log.xml 
+    234881026 15243598 -rw-r--r-- 1 heprez staff 0 774871 "Jul  3 12:36:33 2013" "Jul  2 20:21:47 2013" "Jul  2 20:21:47 2013" "Jun 28 13:19:03 2013" 4096 1520 0 /Users/heprez/data/data/scrape/20130628/log.xml
+
+[FIXED] error.log xsl errors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Nine stylesheet table preamble errors occurred earlier::
+
+    b2mc:logs heprez$ grep ERROR error.log
+    ERROR   (2013-07-02) 21:37.28:642   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 178; Column 81; 
+    ERROR   (2013-07-02) 21:37.28:647   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 242; Column 2; 
+    ERROR   (2013-07-02) 21:37.28:649   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 243; Column 49; 
+    ERROR   (2013-07-02) 21:37.28:650   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 244; Column 60; 
+    ERROR   (2013-07-02) 21:37.28:651   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 245; Column 2; 
+    ERROR   (2013-07-02) 21:37.28:663   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 285; Column 2; 
+    ERROR   (2013-07-02) 21:37.28:664   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 286; Column 35; 
+    ERROR   (2013-07-02) 21:37.28:665   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 287; Column 33; 
+    ERROR   (2013-07-02) 21:37.28:665   [core.xslt-processor] (/hfagc/00000/table_preamble/tex) P1-7/TraxErrorHandler: Error in TraxTransformer: file:/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/resources/simple-html-table-5-latex.xsl; Line 288; Column 2; 
+    b2mc:logs heprez$ 
+
+From *access.log* can see the context of the error::
+
+     813 INFO    (2013-07-02) 21:37.20:037   [access] (/hfagc/1204024/html) P1-9/CocoonServlet: 'hfagc/1204024/html' Processed by Apache Cocoon 2.1.7 in 720 milliseconds.
+     814 INFO    (2013-07-02) 21:37.20:830   [access] (/hfagc/1204003/html) P1-9/CocoonServlet: 'hfagc/1204003/html' Processed by Apache Cocoon 2.1.7 in 750 milliseconds.
+     815 INFO    (2013-07-02) 21:37.21:877   [access] (/hfagc/1204028/html) P1-9/CocoonServlet: 'hfagc/1204028/html' Processed by Apache Cocoon 2.1.7 in 1.014 seconds.
+     816 INFO    (2013-07-02) 21:37.22:697   [access] (/hfagc/1204030/html) P1-9/CocoonServlet: 'hfagc/1204030/html' Processed by Apache Cocoon 2.1.7 in 786 milliseconds.
+     817 INFO    (2013-07-02) 21:37.28:561   [access] (/hfagc/01101/plot/svg) P1-8/CocoonServlet: 'hfagc/01101/plot/svg' Processed by Apache Cocoon 2.1.7 in 3.347 seconds.
+     818 INFO    (2013-07-02) 21:37.30:833   [access] (/hfagc/00000/table_preamble/tex) P1-7/CocoonServlet: 'hfagc/00000/table_preamble/tex' Processed by Apache Cocoon 2.1.7 in 2.22 seconds.
+     819 INFO    (2013-07-02) 21:37.30:991   [access] (/hfagc/00000/table_symbols/tex) P1-6/CocoonServlet: 'hfagc/00000/table_symbols/tex' Processed by Apache Cocoon 2.1.7 in 149 milliseconds.
+     820 INFO    (2013-07-02) 21:37.31:167   [access] (/hfagc/99999/table_body/tex) P1-5/CocoonServlet: 'hfagc/99999/table_body/tex' Processed by Apache Cocoon 2.1.7 in 170 milliseconds.
+     821 INFO    (2013-07-02) 21:37.33:320   [access] (/hfagc/02111/plot/svg) P1-4/CocoonServlet: 'hfagc/02111/plot/svg' Processed by Apache Cocoon 2.1.7 in 1.789 seconds.
+
+
+These appear to be due to bare text latex comments within the stylesheet. Dress these into *xsl:text* elements in :heprez:`r910`
+
+
+
+0702 partial rerun
+------------------
+
+::
+
+    b2mc:h heprez$ scrape-
+    b2mc:h heprez$ scrape-ant -Dpos=00603
+    === scrape-ant : Wed Jul 3 14:19:20 JST 2013 -Dpos=00603 STARTING
+    Buildfile: build.xml
+
+    scrape:
+
+    -scrape:
+         [exec] parsing file /Users/heprez/data/data/scrape/20130702/db/cache/hfagc/20130702/sidebar-html.xml 
+         [exec] scrape.pl 
+         [exec]  sm_hfag_scrape : [/Users/heprez/data/data/scrape/20130702] 
+         [exec]  sm_hfag_cache_scrape [/db/cache/hfagc/20130702] 
+         [exec]  sm_uri : [hfagc/00000/sidebar/html] 
+         [exec]  pbase : [/Users/heprez/data/data/scrape/20130702/db/cache/hfagc/20130702/sidebar-html.xml] 
+         [exec]  papt : [save,save,save] 
+         [exec]  plog : [/Users/heprez/data/data/scrape/20130702/log.xml] 
+         [exec]   apos:[00603] upos:[00603] aopt:[] picks:[00603 ] skip:[] 
+         [exec] <traverse path="/Users/heprez/data/data/scrape/20130702/db/cache/hfagc/20130702/sidebar-html.xml" slinks="34" >
+
+         [exec] picks 00603 1  (the chosen primary links ... select one with eg -Dpos=cdf,comb,comp,etc.. ) 
+
+Trace issue to mixed ownership, with exist running and root and the update running as heprez.
+But after adjusting exist to run as heprez still see some errors. Maybe cached leftovers, so tidy up in DB and FS::
+
+    b2mc:hfagc heprez$ echo rmcol /db/cache/hfagc/20130702/00603 | exist-cli
+    b2mc:hfagc heprez$ rm -rf /Users/heprez/data/data/scrape/20130702/hfagc/00603
+
+For clean logging::
+
+    b2mc:hfagc heprez$ exist-logs
+    /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs
+    total 4936
+    -rw-r--r--  1 heprez  staff     6419 Jul  3 17:08 access.log
+    -rw-r--r--  1 heprez  staff      590 Jul  3 16:59 core.log
+    -rw-r--r--  1 heprez  staff        0 Jul  3 16:59 error.log
+    -rw-r--r--  1 heprez  staff  2491253 Jul  3 17:18 exist.log
+    -rw-r--r--  1 heprez  staff        0 Jul  3 16:59 flow.log
+    -rw-r--r--  1 heprez  staff        0 Jul  3 16:59 handled-errors.log
+    -rw-r--r--  1 heprez  staff     1654 Jul  3 17:00 profile.log
+    -rw-r--r--  1 heprez  staff     1534 Jul  3 17:08 sitemap.log
+    -rw-r--r--  1 heprez  staff    10661 Jul  3 17:08 xmldb.log
+    b2mc:logs heprez$ cd ..
+    b2mc:WEB-INF heprez$ rm -rf logs ; mkdir logs ; cd logs 
+
+    b2mc:logs heprez$ exist-load
+    sudo launchctl load /Library/LaunchDaemons/org.heprez.exist.plist
+
+
+Iterating like this found a further issue, was lack of HEPREZ_HOME envvar in the launchd environment.
+
+
+0704 full rerun 
+-------------------
+
+[FIXED] SVG issues
+~~~~~~~~~~~~~~~~~~~~~
+
+* [FIXED] all SVG carrying now unused font info
+* [FIXED] LHCb key symbol abutts into plot zone
+* [FIXED] labels on plots are a bit high (maybe 12pt but not a fixed amount) compare with illustrator ones which are dead central 
+* [FIXED] single qty plot labels, are off the plot 
+* [FEATURE] http://130.87.106.59:8080/b2charm/end_of_2011/1204028.html labels of complex qtys a bit small
+
+[FIXED] PDF issues
+~~~~~~~~~~~~~~~~~~~~
+
+* http://130.87.106.59:8080/b2charm/end_of_2011/01113.pdf PDF plot links are broken 
+
+   * (expected as no svg2pdf capability without illustrator)  
+   * tried cairo svg, but that does not support svg paths yet so no chance
+   * turns out batik can do svg2pdf using fop
+
+[FIXED] TEX issues
+~~~~~~~~~~~~~~~~~~~~~
+
+* [REMOVED] TEX links provide a useless non-flattened file 
+ 
+     * `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-321+443-table.tex`
+        
+* [FIXED IN 0704] PDF links are broken http://130.87.106.59:8080/b2charm/end_of_2011/00101-table.pdf (not expected)
+  
+* [FIXED IN 0704] http://130.87.106.59:8080/b2charm/end_of_2011/00000.html  empty compilation page 
+
+   * BUT: the jpg (converted from .ps) are fuzzy, also 50 jpg on a single page are too much, 
+   * could move to SVG presentation or PNG from SVG
+
+
+[FIXED] single qty plot labels off the plot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-2212+443+3122.html`
+
+Find the dynamic url for SVG::
+
+    b2mc:20130704 heprez$ grep BR_-521_-2212+443+3122 log.xml
+    </traverse><get pos="BR_-521_-2212+443+3122"  status="NPPNCPUSRNSR"  err="0"  time="2.530"  size="20370"  pro-path="/Users/heprez/data/data/scrape/20130704/hfagc/indv/BR_-521_-2212+443+3122/BR_-521_-2212+443+3122.html"  >
+    <uurl><![CDATA[http://localhost:9090/hfagc/BR_-521_-2212+443+3122/html?apt=save&bpt=save]]></uurl>
+    <get pos="BR_-521_-2212+443+3122"  status="NPPNCPUSRNSR"  err="0"  time="0.006"  size="28283"  local-cache-path="/Users/heprez/data/data/scrape/20130704/db/cache/hfagc/20130704/BR_-521_-2212+443+3122/indv.html"  >
+    <uurl><![CDATA[http://localhost:9090/servlet/db/cache/hfagc/20130704/BR_-521_-2212+443+3122/indv.html]]></uurl>
+    <traverse path="/Users/heprez/data/data/scrape/20130704/db/cache/hfagc/20130704/BR_-521_-2212+443+3122/indv.html" ulinks="10" alinks="0" ><get pos="BR_-521_-2212+443+3122"  status="NPPUCPNCPUSRNSR"  err="0"  time="0.306"  size="186413"  pro-path="/Users/heprez/data/data/scrape/20130704/hfagc/indv/BR_-521_-2212+443+3122/BR_-521_-2212+443+3122.svg"  >
+    <uurl><![CDATA[http://localhost:9090/hfagc/BR_-521_-2212+443+3122/plot/svg?sqz=1.0&vmi=-100.0&vmx=100000.0&uni=1&opt=plot,head,sabel,tex,fvg&apt=save&bpt=save]]></uurl>
+
+
+* `http://130.87.106.59:9090/hfagc/BR_-521_-2212+443+3122/plot/svg?sqz=1.0&vmi=-100.0&vmx=100000.0&uni=1&opt=plot,head,sabel,tex,fvg&apt=save&bpt=save`
+
+My change to the qtags2svgs.xml has fixed this too, hard against the top edge : but maybe OK.
+
+
+[FIXED] adjusting key offset on plots
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Done in :heprez:`r915`
+
+Organized in *line* units, where a *N* meas takes *N+1* lines
+
+
+*rezs.xqm*::
+
+    1217     let $nlins     := rezu:line-count( $uqts , $vmi , $vmx , $unit , $ptype , $opt )   (: includes keyline when head opt  and botline always counts :)
+    1218 
+    1219     let $dbgl      :=if( contains($opt,"dbg")) then  concat(" vmi:",$vmi," vmx:",$vmx," unit:",$unit," nlins:",string-join($nlins,",") ) else ""
+    1220     let $dims      := rezu:plot-dimensions( $nlins , $ysqueeze , $ptype )      (: applies the squeeze only for combi type 1 plots :)
+    1221     let $width     := $rezu:pixel-width
+    1222     let $height    :=  sum( $dims )         (: NB needs to be consistent with plotobj :)
+    1223       
+    1224     let $hekey     :=  $ptype = 1 and     contains($opt,"head")
+    1225     let $inkey     :=  $ptype = 1 and not(contains($opt,"head"))
+    1226     let $ptkey     := if($hekey) then 1 else 0
+    1227 
+    1228     let $ndims   := count($dims)
+    1229     let $vdims   := if($hekey) then $dims[position() > 1 and position() < $ndims ]
+    1230                     else            $dims[ position() < $ndims ]
+    1231 
+    1232     let $keyoff  := if($hekey) then $dims[1] else 0
+    1233 
+    1234     let $yline   := ( for $rqt at $rpt in $uqts return $keyoff + sum( $vdims[ position() <  $rpt  ] ) ,
+    1235                       $keyoff + sum( $vdims ))
+
+
+*rezu.xqm*::
+
+     316 declare function rezu:plot-dimensions( $nlins as xs:integer* , $ysqueeze as xs:double , $ptype as xs:integer  ) as xs:integer* {   (::)
+     317    let $usqueeze := if( $ptype = 1 ) then $ysqueeze else 1.0
+     318    let $dims     := for $nlin in $nlins return round( $nlin * $rezu:pixel-ydelta * $usqueeze  )
+     319    return $dims
+     320 };
+
+
+
+[FIXED] missing binaries 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+None of the server created binaries are created::
+
+    b2mc:hfagc heprez$ find . -name '*.dvi'
+    ./00000/00000/b2charm_end_of_2011_v014.dvi
+    ./00101/00101/00101-table_.dvi
+    b2mc:hfagc heprez$ find . -name '*.pdf'
+    ./00000/00000/b2charm_end_of_2011_v014.pdf
+    ./00101/00101/00101-table_.pdf
+    b2mc:hfagc heprez$ find . -name '*.ps'
+    ./00000/00000/b2charm_end_of_2011_v014.ps
+    ./00101/00101/00101-table_.ps
+
+Interactive running of the commands that *tpdflatex.pl* does succeeds, so probably 
+a launchd environment issue. Yep missed the macports PATH.
+
+[FIXED] Missing plot PDF
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* https://github.com/Kozea/CairoSVG/issues/7
+
+   * cairoSVG is useless for heprez svg2pdf as it does not support `svg:path` but batik can do this
+
+* need a svg2pdf sweep following scrapes, maybe need to restrict the sweep to plot SVG ?
+
+
+0703 + 0704 + 0705
+--------------------
+
+
+[FIXED] fuzzy PS converted JPG
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Interactive convert .ps to multi .jpg::
+
+    b2mc:00101 heprez$ jpgfmt=$name%02d.jpg  
+    b2mc:00101 heprez$ echo $jpgfmt 
+    00101-table_%02d.jpg
+    b2mc:00101 heprez$ convert -rotate 90  $name.ps $jpgfmt 
+    b2mc:00101 heprez$ ll *.jpg
+    -rw-r--r--   1 heprez  staff   77317 Jul  3 20:37 00101-table_01.jpg
+    -rw-r--r--   1 heprez  staff   29503 Jul  3 20:37 00101-table_00.jpg
+    b2mc:00101 heprez$ pwd
+    /Users/heprez/data/data/scrape/20130703/hfagc/00101/00101
+
+Try using dvisvgm to convert dvi of latex tables into SVG::
+
+    b2mc:00000 heprez$ pwd   
+    /Users/heprez/data/data/scrape/20130704/hfagc/00000/00000
+    b2mc:00000 heprez$ latex 00000-table_
+    b2mc:00000 heprez$ dvisvgm --no-styles  00000-table_.dvi --page=1-60 --rotate=90 --output=%f%p.svg
+
+#. plucking non-contiguous pages to convert gives `DVI error: undefined font number 18`, presumably interdependencies between pages
+#. SVG from default conversions with fonts and styles yields scrambled text in Safari
+#. `--no-fonts` is better but color issue is apparent, as if the color gets stuck and doesnt revert 
+#. `--no-styles` SVG appears OK in Safari, and the batik transcoded PNG looks OK
+#. bounding box shrinks around the content, thats kinda nice but its too tight, 
+   need to expand the box somehow or add padding in the html layout
+
+Inplace edit the html::
+
+    b2mc:00000 heprez$ perl -pi -e 's,image/jpeg,image/svg+xml,' 00000.html
+    b2mc:00000 heprez$ perl -pi -e 's,(\d)\.jpg,$1.svg,g' 00000.html
+    b2mc:00000 heprez$ pwd
+    /Users/heprez/data/data/scrape/20130704/hfagc/00000
+
+* presenting ~50 SVG on a single page is too heavy for compilation page, might be OK for single tables
+* http://130.87.106.59:8080/b2charm/end_of_2011/00000-table-03.svg
+
+::
+
+    b2mc:00101 heprez$ cd $HFAG_SCRAPE_FOLDER/hfagc
+    b2mc:hfagc heprez$ code=00101
+    b2mc:hfagc heprez$ cd $code/$code
+    b2mc:00101 heprez$ latex $code-table_.tex
+    b2mc:00101 heprez$ dvisvgm --no-styles $code-table_.dvi  --page=1-60 --rotate=90 --output=%f%p.svg
+    b2mc:00101 heprez$ perl -pi -e 's,image/jpeg,image/svg+xml,' ../$code.html
+    b2mc:00101 heprez$ perl -pi -e 's,(\d)\.jpg,$1.svg,g' ../$code.html
+
+* argh, jpg uses 0-based indexing, svg uses 1-based, manually fixed
+
+
+* http://130.87.106.59:9090/xmldb/db/cache/hfagc/20130705/00201/00201-table.log
+
+   * log of conversions features 50 jpg paths 
+
+
+0709
+------
+
+[INVALID] image map areas shifted, maybe due to keyoffset change
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. sidebar:: Issue with Image map areas due to Safari glitch
+
+       Safari was in a funny state, attempting to exit crashed it, 
+       first restart unresponsive, 2nd restart working
+       OK with image map areas in correct locations
+
+Image map::
+
+   <area shape="rect" coords="x1,y1,x2,y2" ... />
+
+All plots are effected, take example from http://130.87.106.59:8080/b2charm/end_of_2011/00102.html
+Grab PNG,SVG and underlying docbook for the html::
+
+    simon:k blyth$ curl -sO --socks5 localhost:9090 http://130.87.106.59:9090/servlet/db/cache/hfagc/20130709/00102/01122/plot.html 
+    simon:k blyth$ curl -sO --socks5 localhost:8080 http://130.87.106.59:8080/b2charm/end_of_2011/01122.svg
+    simon:k blyth$ curl -sO --socks5 localhost:8080 http://130.87.106.59:8080/b2charm/end_of_2011/01122.png     
+
+#. confirm PNG size matches that of img element
+
+::
+
+     36                         <div>
+     37                             <para>This image provides 4 links to single quantity pages</para>
+     38                             <map xmlns="http://www.w3.org/1999/xhtml" id="01122" name="01122">
+     39                                 <area href="BR_-521_-431+421.html" alt="{\cal{B}} ( B^- \to D_s^- D^0 )" title="{\cal{B}} ( B^- \to D_s^- D^0 )" shape="rect" coords="0,144,600,198"/>
+     40                                 <area href="BR_-521_-433+421.html" alt="{\cal{B}} ( B^- \to D_s^{*-} D^0 )" title="{\cal{B}} ( B^- \to D_s^{*-} D^0 )" shape="rect" coords="0,198,600,234"/>
+     41                                 <area href="BR_-521_-431+423.html" alt="{\cal{B}} ( B^- \to D_s^- D^{*0}(2007) )" title="{\cal{B}} ( B^- \to D_s^- D^{*0}(2007) )" shape="rect" coords="0,234,600,270"/>
+     42                                 <area href="BR_-521_-433+423.html" alt="{\cal{B}} ( B^- \to D_s^{*-} D^{*0}(2007) )" title="{\cal{B}} ( B^- \to D_s^{*-} D^{*0}(2007) )" shape="rect" coords="0,270,600,306"/>
+     43                             </map>
+     44                             <img width="600" height="360" usemap="#01122" src="01122.png"/>
+     45                         </div>
+
+
+Make the areas visible in svg with::
+
+     46   <g>
+     47     <path d="M 0 144 H 600 V 198 H 0 Z" fill="purple" stroke="red" />
+     48     <path d="M 0 198 H 600 V 234 H 0 Z" fill="cyan" stroke="red" />
+     49     <path d="M 0 234 H 600 V 270 H 0 Z" fill="magenta" stroke="red" />
+     50     <path d="M 0 270 H 600 V 306 H 0 Z" fill="yellow" stroke="red" />
+     51   </g>
+
+
+This shows the areas are in the correct place ?
+
+
+[FIXED] indv pages missing latex table PNG, SVG
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For example 
+
+* `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-321+-211+431.html` msg: Problem displaying the PNG
+* `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-321+-211+431-table.pdf` OK
+* `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-321+-211+431-table-01.svg` MISSING   
+* `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-321+-211+431-table-01.png` MISSING
+
+Binaries are there with slightly different names, maybe apache url rewrites need some additions. Or
+simplifications to get rid of the rewrites.
+
+::
+
+    b2mc:~ heprez$ cd /Users/heprez/data/data/scrape/20130709/hfagc/indv/BR_-521_-321+-211+431/
+    b2mc:BR_-521_-321+-211+431 heprez$ ll
+    total 928
+    -rw-r--r--    1 heprez  staff    3227 Jul  9 21:17 BR_-521_-321+-211+431-table_body.tex
+    -rw-r--r--    1 heprez  staff    2356 Jul  9 21:17 BR_-521_-321+-211+431-table_.tex
+    -rw-r--r--    1 heprez  staff  225438 Jul  9 21:17 BR_-521_-321+-211+431-table_.ps
+    -rw-r--r--    1 heprez  staff       0 Jul  9 21:17 BR_-521_-321+-211+431-table_.out
+    -rw-r--r--    1 heprez  staff   13952 Jul  9 21:17 BR_-521_-321+-211+431-table_.log
+    -rw-r--r--    1 heprez  staff    5724 Jul  9 21:17 BR_-521_-321+-211+431-table_.dvi
+    -rw-r--r--    1 heprez  staff     606 Jul  9 21:17 BR_-521_-321+-211+431-table_.aux
+    -rw-r--r--    1 heprez  staff   60329 Jul  9 21:17 BR_-521_-321+-211+431-table_01.svg
+    -rw-r--r--    1 heprez  staff   24429 Jul  9 21:17 BR_-521_-321+-211+431-table_00.jpg
+    -rw-r--r--    1 heprez  staff   28537 Jul  9 21:17 BR_-521_-321+-211+431-table_.pdf
+    -rw-r--r--    1 heprez  staff   19074 Jul  9 21:17 BR_-521_-321+-211+431-table_01.png
+    -rw-r--r--    1 heprez  staff   14762 Jul  9 21:17 BR_-521_-321+-211+431.svg
+    -rw-r--r--    1 heprez  staff   21807 Jul  9 21:17 BR_-521_-321+-211+431.html
+    drwxr-xr-x  486 heprez  staff   16524 Jul  9 22:05 ..
+    -rw-r--r--    1 heprez  staff   11781 Jul  9 22:19 BR_-521_-321+-211+431.png
+    drwxr-xr-x   17 heprez  staff     578 Jul 10 14:03 .
+    -rw-r--r--    1 heprez  staff   19062 Jul 10 14:03 BR_-521_-321+-211+431.pdf
+    b2mc:BR_-521_-321+-211+431 heprez$ 
+    b2mc:BR_-521_-321+-211+431 heprez$ date
+    Wed Jul 10 14:18:55 JST 2013
+    b2mc:BR_-521_-321+-211+431 heprez$ 
+
+
+Maybe fixed by :heprez:`r927` 
+
+* apache url rewrite order twiddles now that both plot and table are using png and svg formats. 
+* formerly the issue did not happen as table binaries were distinct as only they used jpg format
+
+
+
+
+[FIXED] Six Compilation Latex Table chapts showing texlog error dump 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. sidebar:: Mostly fixed maybe
+
+    Five are expected fixed with :heprez:`r929` doing latex typo fixing immediately after the GET
+    by tpdflatex.py
+
+
+The tpdflatex xml log shows rc 1 at make_tex2dvi
+
+::
+
+    b2mc:hfagc heprez$ cd $HFAG_SCRAPE_FOLDER/hfagc
+    b2mc:hfagc heprez$ find . -name '*.html' -exec grep -l tpdflatex {} \;
+    ./00000/00000.html
+    ./00104/00104.html
+    ./00105/00105.html
+    ./00109/00109.html
+    ./indv/BR_-521_-211+443xoBR_-521_-321+443/BR_-521_-211+443xoBR_-521_-321+443.html
+    ./indv/BR_-521_-321+20443/BR_-521_-321+20443.html
+    b2mc:hfagc heprez$ 
+
+
+
+* http://130.87.106.59:8080/b2charm/end_of_2011/00000.html
+* http://130.87.106.59:8080/b2charm/end_of_2011/00104.html
+* http://130.87.106.59:8080/b2charm/end_of_2011/00105.html
+
+* `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-211+443xoBR_-521_-321+443.html`
+
+    * source of the `$B^c^+` typo from `/Users/heprez/data/data/scrape/20130709/hfagc/indv/BR_-521_-211+443xoBR_-521_-321+443/BR_-521_-211+443xoBR_-521_-321+443-table_.log` 
+
+* `http://130.87.106.59:8080/b2charm/end_of_2011/BR_-521_-321+20443.html`
+
+    * source of one `\rigtharrow` typo from `/Users/heprez/data/data/scrape/20130709/hfagc/indv/BR_-521_-321+20443/BR_-521_-321+20443-table_.log`
+
+
+00104 and 00105 (and 00000 by composition) are latex typos in footnotes that cause the latex runs to fail. 
+Was put off the trail on this by the *compilation-fix* which is done later meaning that rerunning the latex
+succeeds.
+
+
+::
+
+    115 compilation-fix(){
+    116     perl -pi -e 's,B\^c\^\+,B^{c+}, && print '       ../../00104/03104/03104-table_body.tex
+    117     perl -pi -e 's,rigtharrow,rightarrow, && print ' \
+    118         ../../00101/02101/02101-table_body.tex \
+    119         ../../00105/01105/01105-table_body.tex \
+    120         ../../00205/01205/01205-table_body.tex
+    121 
+    122    # surgical removal of non-ascii in footnotes  
+    123     local rep='Measurements of branching fractions for \$B^0 \\to D_s^{+} \\pi^{-} \$ and \$B^0 \\to D_s^{+} K^{-} \$'
+    124     perl -pi.bk -e "s,({ Measurements of branching fractions for B0 to Ds.*}),{ $rep  }," ../../00202/01202/01202-table_body.tex
+    125 
+    126 
+    127     diff ../../00202/01202/01202-table_body.tex.bk ../../00202/01202/01202-table_body.tex
+    128 
+    129 }
+
+
+Tree of latex input::
+
+    ../../00104/00104/00104-table_.tex
+
+        ../../00000/00000-table_preamble.tex
+        ../../00000/00000-table_symbols.tex
+        ../../00104/00104/00104-table_body.tex
+
+               ../../00104/01104/01104-table_body.tex
+               ../../00104/02104/02104-table_body.tex
+               ../../00104/03104/03104-table_body.tex 
+
+This tree explains why it is tough to reproduce the error, as need to re-get all the dependencies to unfix::
+
+    b2mc:00104 heprez$ grep rigtharrow  ../../00104/0?104/0?104-table_body.tex
+               
+
+The ones with fixes need to be done before 00000 will succeed
+
+::
+
+    tpdflatex.py -p 03104  
+    tpdflatex.py -p 01105  
+    tpdflatex.py -p 00000       
+
+    tpdflatex.py -p BR_-521_-321+20443
+    tpdflatex.py -p BR_-521_-211+443xoBR_-521_-321+443
+   
+
+0710 issues
+--------------
+
+* [FIXED] http://130.87.106.59:8080/b2charm/end_of_2011/00000.html
+
+   * first 10 page SVG links and PNGs only, funny PNG overscaling 
+
+* [FEATURE] `http://130.87.106.59:8080/b2charm/end_of_2011/BR_541_-211+211+211+443xoBR_541_211+443.html`
+
+   * single qty, no avg on plot, a feature perhaps
+
+* [FIXED] http://130.87.106.59:8080/rezdb/db/hfagc/babar/matteo/2012_BtoDDK.xml
+
+   * static html links from rezdb pages are broken eg http://130.87.106.59:8080/hfagc/1112008.html
+   * should be of this form http://130.87.106.59:8080/b2charm/end_of_2011/1112006.html
+   * OR maybe http://130.87.106.59:8080/b2charm/1112006.html
+
+* [FIXED] http://130.87.106.59:8080/rezdb/db/hfagc/d0/d0yasmine/d0_fall_2012_Lb2JpsiLambda.xml
+
+  * curly backet instead of f issue still there, http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall_2012_Lb2JpsiLambda.xml
+
+[FIXED] 00000 first 10 pages only
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* http://130.87.106.59:9090/hfagc/00000/html?apt=save&bpt=save
+
+Rescrape just the compilation page::
+
+    b2mc:logs heprez$ scrape-ant -Dpos=00000
+    checklog:
+         [exec] gets:2
+    BUILD SUCCESSFUL
+    Total time: 2 minutes 46 seconds
+
+
+[FIXED] broken Static HTML links
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`hfag/mods/webapp/hfagc/stylesheets/present-instance.xsl` 
+
+`hfag/mods/webapp/hfagc/stylesheets/sidebar-db-sm.xsl`::
+
+     89 <xsl:template name="toolbar" >
+     90    <xsl:param name="name"></xsl:param>
+     91    <xsl:param name="fold"></xsl:param>
+     92    <sidebar:toolbar  xmlns:sidebar="http://exist-db.org/NS/sidebar" >
+     93       <sidebar:oink href="html" > Static HTML</sidebar:oink>
+     94       <sidebar:link href="{concat('/xmldb',$fold,$name)}" > View XML </sidebar:link>
+     95       <sidebar:link href="{concat('/servlet',$fold,$name)}" > Raw XML </sidebar:link>
+     96     </sidebar:toolbar>
+     97 </xsl:template>
+
+* http://130.87.106.59:8080/rezdb/sidebar/db/hfagc/babar/matteo/2012_BtoDDK.xml
+
+::
+
+    <sidebar:toolbar>
+    <sidebar:oink href="html">Static HTML</sidebar:oink>
+    <sidebar:link href="/xmldb/db/hfagc/babar/matteo/2012_BtoDDK.xml">View XML</sidebar:link>
+    <sidebar:link href="/servlet/db/hfagc/babar/matteo/2012_BtoDDK.xml">Raw XML</sidebar:link>
+    </sidebar:toolbar>
+
+Aha, special cased in the db2html.xsl::
+
+    b2mc:h heprez$ find . -name '*.*' -exec grep -l oink {} \;
+    ./hfag/mods/webapp/hfagc/stylesheets/db2html-scb.xsl
+    ./hfag/mods/webapp/hfagc/stylesheets/sidebar-db-sm.xsl
+
+Propagation and place xsl::
+
+    541  exist-up-hfagc live
+    542  exist-place-xsl
+
+
+[FIXED] curly bracket instead of f 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+* http://130.87.106.59:8080/rezdb/db/hfagc/d0/d0yasmine/d0_fall_2012_Lb2JpsiLambda.xml
+
+  * curly backet instead of f issue still there, http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall_2012_Lb2JpsiLambda.xml
+  * qty is `f_5_5122xBR_5122_443+3122`
+
+The updated extras.pl not propagated into the .tex::
+
+    b2mc:extras heprez$ ll $HEPREZ_DATA/images/extras/tex/f.tex
+    -rw-r--r--  1 heprez  staff  116 Jun 27 15:07 /Users/heprez/data/data/images/extras/tex/f.tex
+
+Force tex update::
+
+    b2mc:00000 heprez$ rm  $HEPREZ_DATA/images/extras/tex/f.tex
+    b2mc:00000 heprez$ touch /Users/heprez/heprez/images/tex2pdfpng/extras.pl
+    b2mc:00000 heprez$ tex2pdfpng-extras
+
+Force full update::
+
+    b2mc:extras heprez$ l */f.*
+    -rw-r--r--  1 heprez  staff   119 Jul 11 17:22 tex/f.tex
+    -rw-r--r--  1 heprez  staff   282 Jun 27 15:07 png/f.png
+    -rw-r--r--  1 heprez  staff   204 Jun 27 15:07 dvi/f.dvi
+    -rw-r--r--  1 heprez  staff  1301 Jun 27 15:07 svg_nofonts/f.svg
+    -rw-r--r--  1 heprez  staff  8312 Jun 21 18:16 pdf/f.pdf
+    b2mc:extras heprez$ rm */f.*
+    b2mc:extras heprez$ touch  /Users/heprez/heprez/images/tex2pdfpng/extras.pl
+    b2mc:extras heprez$ images-basis
+    b2mc:extras heprez$ l */f.*
+    -rw-r--r--  1 heprez  staff   253 Jul 11 17:30 png/f.png
+    -rw-r--r--  1 heprez  staff   204 Jul 11 17:30 dvi/f.dvi
+    -rw-r--r--  1 heprez  staff  1095 Jul 11 17:30 svg_nofonts/f.svg
+    -rw-r--r--  1 heprez  staff   119 Jul 11 17:30 tex/f.tex
+    b2mc:extras heprez$ 
+
+
+From xquery interface http://130.87.106.59:9090/xmldb/db/hfagc_system/::
+
+    doc("extras.xml")//glyph[@code='f']
+    OR
+    doc("extras.xml")//glyph[substring(@code,0,1)='f'] 
+
+Shows updated indice in in DB::
+
+    <glyph exist:id ="65" exist:source ="/db/hfagc_system/extras.xml" code ="f" latex ="{\mathrm{f}}" name ="f" group ="Extras" />
+
+Other indices not updated though::
+
+    doc("qtag2svgs.xml")//qtag[substring(@value,0,1)='f']   # difficult to tell from raw SVG 
+
+::
+
+    b2mc:indices heprez$ pwd
+    /Users/heprez/data/data/images/indices
+    b2mc:indices heprez$ ll
+    total 25704
+    -rw-r--r--   1 heprez  staff       107 Jun 21 18:20 qtags.xml
+    -rw-r--r--   1 heprez  staff    118659 Jun 27 19:06 v2qtags.xml
+    drwxr-xr-x  13 heprez  staff       442 Jun 27 21:39 ..
+    -rw-r--r--   1 heprez  staff    261640 Jun 27 21:43 qtag2pngs.xml
+    -rw-r--r--   1 heprez  staff  12553452 Jul  4 19:16 qtag2svgs.xml
+    -rw-r--r--   1 heprez  staff    219826 Jul 11 17:31 qtag2latex.xml
+    drwxr-xr-x   7 heprez  staff       238 Jul 11 17:44 .
+    b2mc:indices heprez$     
+
+
+qtags too::
+
+    b2mc:qtags heprez$ l */*f*.*
+    -rw-r--r--  1 heprez  staff   1280 Jun 25 20:05 png/slf_5_5122xBR_5122_443+3122.png
+    -rw-r--r--  1 heprez  staff   2311 Jun 25 19:53 png/f_5_5122xBR_5122_443+3122.png
+    -rw-r--r--  1 heprez  staff    376 Jun 24 12:25 dvi/slf_5_5122xBR_5122_443+3122.dvi
+    -rw-r--r--  1 heprez  staff    476 Jun 24 12:23 dvi/f_5_5122xBR_5122_443+3122.dvi
+    -rw-r--r--  1 heprez  staff   7596 Jun 24 12:25 svg_nofonts/slf_5_5122xBR_5122_443+3122.svg
+    -rw-r--r--  1 heprez  staff  11908 Jun 24 12:23 svg_nofonts/f_5_5122xBR_5122_443+3122.svg
+    -rw-r--r--  1 heprez  staff  39334 Jun 21 19:44 pdf/f_5_5122xBR_5122_443+3122.pdf
+    -rw-r--r--  1 heprez  staff  31300 Jun 21 19:44 pdf/slf_5_5122xBR_5122_443+3122.pdf
+    -rw-r--r--  1 heprez  staff    195 Jun 21 19:44 tex/f_5_5122xBR_5122_443+3122.tex
+    -rw-r--r--  1 heprez  staff    141 Jun 21 19:44 tex/slf_5_5122xBR_5122_443+3122.tex
+    b2mc:qtags heprez$ 
+
+See :doc:`/images/tex2svgpngpdf/tex2svgpngpdf`
+
+
+
+
+[FIXED] note that the qtags PDF is not being regenerated
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Change *tex2svgpng-* into *tex2svgpngpdf-* using *batik-* **SaveAsPDF** capabilities back at qtags level. Already 
+done for plots.
+
+
+
+
+
+
+

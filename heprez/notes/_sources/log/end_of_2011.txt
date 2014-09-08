@@ -1,0 +1,1961 @@
+
+=====================
+end_of_2011 LOG
+=====================
+
+.. contents:: :local:
+
+
+Jun 18, 2013
+-------------
+
+14:50 :heprez:`ticket:188` 7 tables with stackoverflow dumps in exist stdout
+
+15:48 examine v011 tealeaves ~/heprez/logs/heprez-update-20130617.txt, total time ~6hr (about 1hr more than v010)::
+
+    === scrape-ant : Mon 17 Jun 2013 22:38:57 CST STARTING
+    ...
+    checklog:
+         [exec] gets:1898
+
+    BUILD SUCCESSFUL
+    Total time: 332 minutes 45 seconds
+    === scrape-ant : Tue 18 Jun 2013 04:11:47 CST COMPLETED
+    === scrape-images : Tue 18 Jun 2013 04:11:47 CST START
+    ...
+    real	40m15.206s
+    user	2m39.431s
+    sys	1m13.884s
+    === svg2pdfpng-convert-fast : done
+    === scrape-images : Tue 18 Jun 2013 04:52:14 CST COMPLETED
+    ...
+    -rw-r--r-- blyth/admin  183005 2013-06-18 04:52:18 b2charm_end_of_2011_v011_tables.tex
+
+
+
+Finally some time for heprez, Jun 17, 2013
+---------------------------------------------
+
+#. start exist on dev machine
+#. check cms01 status by following :doc:`/qxml/setup/` add 
+#. perform *heprez-propagate* and overnight *heprez-update*
+
+compilation/blurb.tex looks partially generated
+-------------------------------------------------
+
+BUT, not recently. It appears the generation is functionality is no longer used. 
+TODO: make this 
+
+
+::
+
+    simon:heprez blyth$ find . -name sitemap.\* -exec grep -H blurb {} \;
+    ./hfag/mods/webapp/hfagc/sitemap.xmap.template:             <map:match type="regexp" pattern="^([:alnum:]*[^/.]+)/(preamble|blurb)/(tml|tex)$"> <!-- both indv and multi tml tables --> 
+    simon:heprez blyth$ vi ./hfag/mods/webapp/hfagc/sitemap.xmap.template
+
+::
+
+     910              <map:match type="regexp" pattern="^([:alnum:]*[^/.]+)/(preamble|blurb)/(tml|tex)$"> <!-- both indv and multi tml tables -->
+     911                  <map:generate src="resources/latex-{2}-{global:hfag-conf}.xml" label="sauce" />
+     912                  <map:call resource="tml2fmt" >
+     913                      <map:parameter name="fmt"       value="{3}" />
+     914                      <map:parameter name="texopt"    value="{2}" />
+     915                      <map:parameter name="requrl"    value="{0}"/>
+     916                  </map:call>
+     917              </map:match>
+
+
+::
+
+    simon:heprez blyth$ find . -name latex-blurb-\*.\* 
+    ./hfag/mods/webapp/hfagc/resources/latex-blurb-2005.xml
+    ./hfag/mods/webapp/hfagc/resources/latex-blurb-summer2006-oct2-2006.xml
+    ./hfag/mods/webapp/hfagc/resources/latex-blurb-summer2006.xml
+
+
+
+
+Examining v010 scrape,  Tue 26 Mar 2013
+------------------------------------------
+
+14:14 ~/heprez/logs/heprez-update-20130325.txt timings::
+
+    Mon 25 Mar 2013 23:40:20 CST
+    === average-prepare : end 234828
+    === scrape-ant : Mon 25 Mar 2013 23:49:05 CST STARTING
+    checklog:
+         [exec] gets:1919
+    ...
+    BUILD SUCCESSFUL
+    Total time: 254 minutes 22 seconds
+    === scrape-ant : Tue 26 Mar 2013 04:03:31 CST COMPLETED
+    === scrape-images : Tue 26 Mar 2013 04:03:31 CST START
+    ...
+    real	37m41.479s
+    user	2m40.937s
+    sys	1m4.219s
+    === svg2pdfpng-convert-fast : done
+    === scrape-images : Tue 26 Mar 2013 04:41:23 CST COMPLETED
+    ...
+    -rw-r--r-- blyth/admin  236003 2013-03-26 04:41:27 b2charm_end_of_2011_v010_tables.tex
+
+14:20 hookup apache statics with new scrape env on G `heprez-check`
+      and bounce apache `sudo apachectl stop ; sleep 5 ; sudo apachectl start`
+
+14:33 Observations
+
+#. with D0 included, the key impinges into body of combination plots D0 
+
+   * probably simple to increase key space 
+
+#. D0 dark green, LHCb light green 
+
+   * maybe change colors, maybe magenta/red is easier to distinguish 
+
+#. extra D0 column in tables, makes wide tables fall off the page : 
+
+   * suppress empty columns 
+      
+       * not a huge space saving
+       * difficult to modify XQueries to do that
+
+   * simple font shrink via IPOLE/ICPAGS sign inversions will deal with many wides 
+
+       *  http://simon.phys.ntu.edu.tw/b2charm/00201.html    01201 
+       *  http://simon.phys.ntu.edu.tw/b2charm/00402.html    01402 03402
+       *  http://simon.phys.ntu.edu.tw/b2charm/00404.html    03404
+       *  http://simon.phys.ntu.edu.tw/b2charm/00603.html    03603 
+       * negating the IPOLES can be done with `scrape-vi` and tested with `compilation-?` 
+
+   * but some already using miniscule font
+
+       * http://cms01.phys.ntu.edu.tw/b2charm/00104.html      03104
+       * move to clever short latex labels *cabels* (avoiding repetition in chains) 
+       * *cabels* used already on plots + product BR tables BUT NOT ratio BR tables
+
+          * this is for good reason, as ambiguity remains : soln is to apply the chain squeeze logic to standard labels
+
+
+   * from `~/heprez/hfag/mods/webapp/hfagc/xquery/rezt.xqm` label type controlled by `lsc-indx`  label/sabel/cabel=1/2/3
+
+     487 declare function rezt:latex-table-base(
+     ...
+     530   let $is-collective := not(empty($groups))
+     531   let $is-global     := $group = "00000"
+     532   let $is-indv       := contains( $major , "indv" )
+     533   let $is-hepex      := contains( $xopt  , "hepex" )
+     534 
+     535   let $qwn-class     := if( $is-global or $is-indv or $is-collective ) then "0" else substring( $group , 2 , 1)
+     536   let $src-class     := if( $is-global or $is-indv or $is-collective ) then "0" else substring( $group , 3 , 1)
+     537   let $lsc-indx      := if( $src-class = "3" or $qwn-class = "4" or $qwn-class = "3" ) then 1 else 3        (: detailed labels for generic source or misc qwn  :)
+     538                                  OTHERS                              RATIO
+
+     # Others have to use full labels and misc qty have no choice but to use full labels
+
+     # qwn class (2nd digit of group code) corresponds to 1:BR, 2:ProductBR, 3:Ratio 4:Misc qty 
+     # src class (3rd digit of group code) corresponds to 1:Charged B, 2:Neutral B, 4:Strange B, 5:Charmed B, 6:Lambda b, 3:Others
+
+#. some? indv qty pages have png black backgrounds, 
+
+   * `http://localhost/b2charm/end_of_2011/BR_-521_-321+90xBR_90_333+443xoBR_-521_-321+333+443.html`
+   * this happened before : required separate Illustrator runs to fix
+
+
+
+19:41 :r:`851` acts upon the easy problems that do not require a full scrape rerun, but rather just::
+
+     heprez-
+     compilation-
+     compilation-pagination
+     compilation-update           # added a fix for 03104 that does a line replacement with new script replace_line.py and .cnf
+
+
+19:55 `heprez-sync` to cms01.phys.ntu.edu.tw::
+
+    simon:h blyth$ echo $HEPREZ_SERVER
+    cms01.phys.ntu.edu.tw
+    HEPREZ_SYNC_YES=1 heprez-sync   
+
+
+20:05 took 10min, oops forgot to delete the first scrape without D0, `$HEPREZ_DATA/scrape/20130323`, delete and sync again did not propagate the deletion to C::
+
+    simon:scrape blyth$ pwd
+    /data/heprez/data/scrape
+    simon:scrape blyth$ du -hs *
+    202M    20120524
+    375M    20130323
+    329M    20130325
+    simon:scrape blyth$ rm -rf 20130323
+
+20:10 `svn update` C to :r:`851`, and configure apache for new statics, with `heprez-check` and start apache, exist and tomcat::
+
+    [blyth@cms01 ~]$ sudo /sbin/service httpd start
+    Starting httpd:                                            [  OK  ]
+
+    blyth@cms01 ~]$ sudo /sbin/service exist start
+    Starting eXist Native XML Database...
+    [blyth@cms01 ~]$ 
+    [blyth@cms01 ~]$ 
+    [blyth@cms01 ~]$ sudo /sbin/service tomcat start
+    Starting Tomcat service: Using CATALINA_BASE:   /data/heprez/install/tomcat/apache-tomcat-4.1.39
+    Using CATALINA_HOME:   /data/heprez/install/tomcat/apache-tomcat-4.1.39
+    Using CATALINA_TMPDIR: /data/heprez/install/tomcat/apache-tomcat-4.1.39/temp
+    Using CATALINA_OUT:    /data/heprez/install/tomcat/apache-tomcat-4.1.39/logs/catalina.out
+    Using JAVA_HOME:       /usr/java/latest
+
+
+20:15 check http://cms01.phys.ntu.edu.tw 
+
+20:20 running `compilation-tgztest` fails the ascii check 
+
+    === compilation-asciicheck : /Users/blyth/env/bin/asciicheck.py b2charm_end_of_2011_v010_tables.tex
+    b2charm_end_of_2011_v010_tables.tex 6899          \item[ \hffootnotemark{2} ] \hffootnotetext{ First Observation of Bsbar0--Ds+/-K+/- and Measurement of the Ratio of Branching Fractions B(Bbar s0--Ds+/-K+/-)/B(B s0--Ds+/-[I]
+    lation-asciicheck : rc 1
+
+
+20:50 testing http://cms01.phys.ntu.edu.tw/rezdb/db/test/0460.xml if chiba interface works, yields error page `ElemTemplateElement error: editurl`
+      as suspected, a server start does not fill the templates
+
+
+::
+
+    [blyth@cms01 h]$ exist-propagate webapp
+    === exist-propagate-status : [webapp] target is stale cf the source ===> proceed
+    === exist-propagate- : proceed
+    === exist-propagate- : [svn export -q --force /home/blyth/heprez/hfag/mods/webapp /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp && echo 851 > /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp.version ]
+    === exist-propagate-touchjava : pass ls
+    === exist-propagate-touchjava : pass touch
+    === exist-propagate-touchjava : pass ls
+    === exist-propagate : WARNING : THE PROPAGATE DOES NOT DO XINCLUSION : MAY NEED TO exist-place-xsl NOW : SEE ticket:106 ticket:104
+    [blyth@cms01 h]$ exist-place-xsl
+    === exist-place-xsl : xmllint --xinclude present-instance.xsl --output /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/stylesheets/present-instance.xsl
+    === exist-place-xsl : xmllint --xinclude db2html-scb.xsl --output /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/stylesheets/db2html-scb.xsl
+
+    [blyth@cms01 h]$ sudo /sbin/service exist stop
+    Password:
+    Stopping eXist Native XML Database...
+    Stopped eXist Native XML Database.
+    [blyth@cms01 h]$ 
+    [blyth@cms01 h]$ 
+    [blyth@cms01 h]$ 
+    [blyth@cms01 h]$ exist-start    # this fails as cannot write the root owned log, but it succeeds to do template filling before it fails
+    ...
+    [blyth@cms01 h]$ sudo /sbin/service exist start
+
+Test can edit via rezdb and chiba succeeds with http://cms01.phys.ntu.edu.tw/rezdb/db/test/0460.xml    
+
+
+
+
+
+Examining v009 scrape,  Mon 25 2013
+--------------------------------------
+
+17:46 On G use `heprez-check` and bounce apache `sudo apachectl stop ; sleep 5 ; sudo apachectl start`
+
+::
+
+    simon:logs blyth$ heprez-check
+    === hapacheconf-hfagc : tmp:/tmp/heprez/hapacheconf-hfagc/b2charm.conf ret:UPDATED ... rc:0
+    === hapacheconf-hfagc : sudo cp /tmp/heprez/hapacheconf-hfagc/b2charm.conf /data/heprez/install/apache/conf/b2charm.conf
+    Password:
+    === hapacheconf-hfagc : tmp:/tmp/heprez/hapacheconf-hfagc/b2charm.conf tgt:/data/heprez/install/apache/conf/b2charm.conf ret: ... rc:0
+    === hapacheconf-hfagc : tmp:/tmp/heprez/hapacheconf-hfagc/modjk.conf ret:UPDATED ... rc:0
+    === hapacheconf-hfagc : sudo cp /tmp/heprez/hapacheconf-hfagc/modjk.conf /data/heprez/install/apache/conf/modjk.conf
+    === hapacheconf-hfagc : tmp:/tmp/heprez/hapacheconf-hfagc/modjk.conf tgt:/data/heprez/install/apache/conf/modjk.conf ret: ... rc:0
+    === hapacheconf-hfagc : tmp:/tmp/heprez/hapacheconf-hfagc/jkmount.conf ret:UPDATED ... rc:0
+    === hapacheconf-hfagc : sudo cp /tmp/heprez/hapacheconf-hfagc/jkmount.conf /data/heprez/install/apache/conf/jkmount.conf
+    === hapacheconf-hfagc : tmp:/tmp/heprez/hapacheconf-hfagc/jkmount.conf tgt:/data/heprez/install/apache/conf/jkmount.conf ret: ... rc:0
+    === hapacheconf-liststatic : writing /data/heprez/install/apache/conf/liststatic.conf
+    === hapacheconf-statics : /data/heprez/install/apache/conf/static/implicit.conf UPDATED
+    === hapacheconf-statics : /data/heprez/install/apache/conf/static/end_of_2011.conf UPDATED
+    === hapacheconf-statics : /data/heprez/install/apache/conf/static/end_of_2009.conf UPDATED
+    === hapacheconf-statics : /data/heprez/install/apache/conf/static/end_of_2007.conf UPDATED
+    === hapacheconf-statics : /data/heprez/install/apache/conf/static/summer2006.conf UPDATED
+    === hapacheconf-statics : /data/heprez/install/apache/conf/static/winter2005.conf UPDATED
+    === hapacheconf-statics : /data/heprez/install/apache/conf/static/legacy.conf UPDATED
+    === hapacheconf-statics : overall state dirty
+    === hapacheconf-tmplfill- : /data/heprez/install/apache/conf/workers.properties UPDATED
+    === hapacheconf-tmplfill- : diff /data/heprez/install/apache/conf/workers.properties /tmp/blyth/heprez/hapacheconf/workers.properties
+    === hapacheconf-tmplfill- : sudo cp -f /tmp/blyth/heprez/hapacheconf/workers.properties /data/heprez/install/apache/conf/workers.properties
+    === hapacheconf-tmplfill- : sudo cp -f /tmp/blyth/heprez/hapacheconf/workers.properties /data/heprez/install/apache/conf/workers.properties
+    === hapacheconf-tmplfill- : /data/heprez/install/apache/conf/heprez.conf UPDATED
+    === hapacheconf-tmplfill- : diff /data/heprez/install/apache/conf/heprez.conf /tmp/blyth/heprez/hapacheconf/heprez.conf
+    === hapacheconf-tmplfill- : sudo cp -f /tmp/blyth/heprez/hapacheconf/heprez.conf /data/heprez/install/apache/conf/heprez.conf
+    === hapacheconf-tmplfill- : sudo cp -f /tmp/blyth/heprez/hapacheconf/heprez.conf /data/heprez/install/apache/conf/heprez.conf
+    === apache-chcon : no chcon on NODE_TAG G
+    === apache-conf-connect : this may prompt for a sudoer password in order to connect /data/heprez/install/apache/conf/heprez.conf to /private/etc/apache2/httpd.conf
+    === apache-conf-connect : /data/heprez/install/apache/conf/heprez.conf is already connected to /private/etc/apache2/httpd.conf
+    === hapache-prepare : TO SEE ANY CHANGE YOU NEED TO BOUNCE APACHE TO PICK UP THE NEW CONFIG
+    simon:logs blyth$ 
+
+
+17:51 http://localhost/  redirects to http://localhost/b2charm/end_of_2011/index.html
+
+Front page states::
+
+    At last count the database contained 239 active references (cdf: 34 belle: 102
+    babar: 69 lhcb: 28 d0: 6), that comprise a total of 660 measurements (cdf: 57
+    belle: 240 babar: 318 lhcb: 39 d0: 6). There are 138 quantities with mutiple
+    determinations.
+
+    Creation stamp : 2013-03-24T00:26+0800
+
+17:55 site wander, to look for major issues
+
+#. D0 link appears in sidebar but is broken: http://localhost/b2charm/end_of_2011/d0.html
+#. SVG, PNG, PDF are produced without D0 in the plots
+#. tables omit D0 columns
+
+18:30 checking batik SVG progress regarding support for math font : looks to be worth a investigating again  
+
+   * http://xmlgraphics.apache.org/batik/status.html
+
+::
+
+   @font-face{font-family:'CMSY10';src:url("data:;base64,\
+   <text transform="matrix(1 0 0 1 24.1001 19.0156)" style="font-family:'CMMI8'; font-size:7.9701;"></text>
+
+
+19:30 compare d0 and lhcb occurences in the code::
+
+    simon:h blyth$ find . -not \( -name .svn -prune -o -name _build -prune -o -name logs -prune -o -name '*.class' -o -name '*.tex' -o -name '*.txt' -o -name '*.rst' -o -name '*.swp' \) -exec grep -l lhcb {} \;
+    ./apache/conf/static.conf.template     # ok
+    ./backup/part/build.xml                # one-off lhcb fix from when has the missing username NPE crashes
+    ./chiba/build.xml                      # ok
+    ./hfag/mods/webapp/hfagc/resources/latex-preamble.xml
+    ./hfag/mods/webapp/hfagc/resources/svgstyle.xml
+    ./hfag/mods/webapp/hfagc/stylesheets/sidebar-db-sm.xsl
+    ./hfag/mods/webapp/hfagc/system/members.xml
+    ./hfag/mods/webapp/hfagc/xquery/rezu.xqm
+    ./hfag/mods/webapp/hfagc/xquery/sidebar.xml
+    ./qxml/base/names.xq
+    ./qxml/base/rezdbg.xq
+    ./qxml/reports/byrez.xq
+    ./qxml/rez.bash
+    ./scrape/scrape.bash
+    ./scrape/scrape.pl
+
+
+    simon:h blyth$ find . -not \( -name .svn -prune -o -name _build -prune -o -name logs -prune -o -name '*.class' -o -name '*.tex' -o -name '*.txt' -o -name '*.rst' -o -name '*.swp' \) -exec grep -l d0 {} \;
+    # with manual edits for red-herrings  
+    #
+    ./apache/conf/static.conf.template                      # filled by heprez-check / hapache-prepare 
+    ./chiba/build.xml
+    ./hfag/mods/webapp/hfagc/resources/latex-preamble.xml
+    ./hfag/mods/webapp/hfagc/resources/svgstyle.xml
+    ./hfag/mods/webapp/hfagc/stylesheets/sidebar-db-sm.xsl
+    ./hfag/mods/webapp/hfagc/xquery/quotes.html              # used ?
+    ./hfag/mods/webapp/hfagc/xquery/rezt.xqm                 # hex color codes
+    ./hfag/mods/webapp/hfagc/xquery/rezu.xqm                 # ok 
+    ./hfag/mods/webapp/hfagc/xquery/sidebar.xml              # used ?
+    ./hfag/mods/webapp/hfagc/xquery/ssidebar.xml             # clearly not used, delete
+    ./hfag/mods/webapp/hfagc/xquery/x.xqm                    # hex colors
+    ./scrape/scrape.bash
+    ./scrape/scrape.pl
+
+
+
+20:12 knock on HFAG_PIPED_GROUPS  and rezu:group-names
+
+::
+  
+    simon:h blyth$ find . -not \( -name .svn -prune -o -name _build -prune -o -name logs -prune \) -exec grep -l HFAG_PIPED_GROUPS {} \;
+    ./hfag/mods/webapp/hfagc/sitemap.xmap.template        # an extremenly crucial one... hailing from scrape environment 
+    ./scrape/scrape.bash
+
+
+    simon:h blyth$ find . -not \( -name .svn -prune -o -name _build -prune -o -name logs -prune \) -exec grep -l rezu:group-names {} \;
+    ./hfag/mods/webapp/hfagc/table.xq
+    ./hfag/mods/webapp/hfagc/xquery/rezt.xqm
+    ./hfag/mods/webapp/hfagc/xquery/rezu.xqm
+    ./hfag/mods/webapp/hfagc/xquery/scrape.xqm
+
+
+20:20 :r:`848` 
+
+20:39 :r:`849` bump HFAG_SCRAPE_DATE and B2C_COMPILATION_NAME for this evenings scrape
+
+20:50  Propagate the bump and D0 changes, confirm that `encvhk-;envchk-cf` fails due to mismatches
+
+    simon:h blyth$ exist-propagate- webapp 
+    === exist-propagate-status : [webapp] target is stale cf the source ===> proceed
+    === exist-propagate- : proceed
+    === exist-propagate- : [svn export -q --force /Users/blyth/heprez/hfag/mods/webapp /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp && echo 849 > /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp.version ]
+    simon:h blyth$ 
+
+
+20:53 Purging for faster scrape::
+
+    simon:h blyth$ exist-
+    simon:h blyth$ exist-cli 
+    === exist-client : connecting locally to uri=xmldb:exist://localhost:9090/xmlrpc
+    ...
+    exist:/db>cd cache/hfagc
+    exist:/db/cache/hfagc>ls
+    drwur-ur-u admin     dba       20130323
+    exist:/db/cache/hfagc>rmcol 20130323
+    removing collection 20130323 ...
+    removing collection 20130323 ...done.
+    exist:/db/cache/hfagc> 
+
+21:02 Completed in 9 min (huh slower), perhaps eXist is leaking::
+
+    __PID COMMAND      %CPU   TIME   #TH #PRTS #MREGS RPRVT  RSHRD  RSIZE  VSIZE
+    95155 java         0.0%  0:01.89  10   255    186   11M    11M    19M   448M 
+
+
+23:23 complete the purging::
+
+    exist:/db/hfagc_prod>rmcol end_of_2011
+    removing collection end_of_2011 ...done.
+    exist:/db/hfagc_prod>
+
+
+23:25 exit heavy apps, stop eXist with `exist-stop` in order to pickup new env, via template filling, notice unclean shutdown::
+
+    Database shutdown: stopping server in 1sec ...
+    25 Mar 2013 23:25:24,375 [Acceptor ServerSocket[addr=0.0.0.0/0.0.0.0,port=0,localport=9090]] INFO  (ThreadedServer.java [run]:612) - Stopping Acceptor ServerSocket[addr=0.0.0.0/0.0.0.0,port=0,localport=9090]
+    25 Mar 2013 23:25:24,393 [Timer-0] INFO  (SocketListener.java [stop]:212) - Stopped SocketListener on 0.0.0.0:9090
+    25 Mar 2013 23:25:24,481 [Acceptor ServerSocket[addr=0.0.0.0/0.0.0.0,port=0,localport=9009]] INFO  (ThreadedServer.java [run]:612) - Stopping Acceptor ServerSocket[addr=0.0.0.0/0.0.0.0,port=0,localport=9009]
+    25 Mar 2013 23:25:24,485 [Timer-0] INFO  (AJP13Listener.java [stop]:152) - Stopped AJP13Listener on 0.0.0.0:9009
+    ^CException in thread "Thread-6" java.lang.IllegalStateException: The cocoon-ehcache-1 Cache is not alive.
+        at net.sf.ehcache.Cache.checkStatus(Cache.java:713)
+        at net.sf.ehcache.Cache.dispose(Cache.java:618)
+        at net.sf.ehcache.Cache$1.run(Cache.java:294)
+    25 Mar 2013 23:25:47,193 [Timer-0] INFO  (HttpContext.java [stop]:1700) - Stopped WebApplicationContext[eXist Server,eXist Server]
+    25 Mar 2013 23:25:47,199 [Timer-0] INFO  (HttpServer.java [stop]:760) - Stopped org.mortbay.http.NCSARequestLog@cda7e7
+    25 Mar 2013 23:25:47,201 [Timer-0] INFO  (HttpServer.java [stop]:763) - Stopped org.mortbay.jetty.Server@6b152b
+    25 Mar 2013 23:25:47,206 [Shutdown] INFO  (HttpContext.java [stop]:1700) - Stopped WebApplicationContext[eXist Server,eXist Server]
+    25 Mar 2013 23:25:47,207 [Shutdown] INFO  (HttpServer.java [stop]:763) - Stopped org.mortbay.jetty.Server@6b152b
+
+
+23:30 check the webapp version is up to svnversion::
+
+    simon:h blyth$ svnversion ~/h   # just this log
+    849M
+    g4pb:~ blyth$ cat $EXIST_HOME/webapp.version 
+    849
+
+23:33 `exist-start` in new Terminall.app window, expected templates were filled, `envchk-;envchk-cf` reports 0 mismatches
+
+23:35 note large eXist VSIZE before doing anything, at 1252M, maybe due to 37 threads::
+
+    __PID COMMAND      %CPU   TIME   #TH #PRTS #MREGS RPRVT  RSHRD  RSIZE  VSIZE
+    97258 java         0.2%  0:09.04  37   546    356   98M   200K    97M  1252M 
+
+
+23:40 launch::
+
+    g4pb:~ blyth$ date ; heprez-update
+    Mon 25 Mar 2013 23:40:20 CST
+    === heprez-update : updating the dev database and file system based on the new data from the server
+
+23:41 follow exist access log::
+
+    g4pb:~ blyth$ heprez-
+    g4pb:~ blyth$ exist-
+    g4pb:~ blyth$ exist-logs
+    tail -f access.log
+
+
+Preparing for v009,  Sat Mar 23 2013
+--------------------------------------
+
+09:19 Add function to env for commandline access to external ip::
+
+    local-ip(){ curl ifconfig.me ; } # http://ifconfig.me/  determine external ip
+
+09:20 open eXist port 9090 on editing machine to my dynamic home ip::
+      
+    g4pb:e blyth$ local-ip
+    118.***
+     
+    [blyth@cms01 ~]$ iptables- ; IPTABLES_PORT=9090 iptables-webopen-ip 118.***    # sudoer access required
+
+09:25 check eXist port on editing machine is now accessible from home ip::
+
+    g4pb:e blyth$ heprez-        # define heprez bash functions, mostly precursors
+    g4pb:e blyth$ exist_         # invoke exist precursor                 
+    g4pb:e blyth$ exist_<tab>    # tab completion to list functions                      
+    exist_                            exist_curl                        exist_get                         exist_put                         exist_rm                          exist_url
+    exist_assert_directly_accessible  exist_dir                         exist_gett                        exist_putt                        exist_running                     exist_usage
+    exist_assert_running              exist_env                         exist_gett_                       exist_putt_test                   exist_running_                    exist_vi
+    exist_authquery_                  exist_exists                      exist_is_directly_accessible      exist_py_                         exist_source                      
+    exist_chmod                       exist_exists_                     exist_is_directly_accessible_     exist_query_                      exist_src                         
+    exist_cq_                         exist_fstamp                      exist_lookup                      exist_recurse                     exist_test     
+                        
+    g4pb:e blyth$ t exist_is_directly_accessible_    # check definition
+    exist_is_directly_accessible_ is a function
+    exist_is_directly_accessible_ () 
+    { 
+        local host=${1:-localhost};
+        local port=$(exist_lookup port);
+        local cmd="nc -w 10 -z $host $port";
+        echo $msg $cmd;
+        eval $cmd
+    }
+    g4pb:e blyth$ exist_lookup port
+    9090
+    g4pb:e blyth$ exist_is_directly_accessible_ cms01.phys.ntu.edu.tw
+    nc -w 10 -z cms01.phys.ntu.edu.tw 9090
+    Connection to cms01.phys.ntu.edu.tw 9090 port [tcp/websm] succeeded!
+    g4pb:e blyth$ 
+
+
+09:51 stop eXist on G, as scrape env was changed yesterday a restart with new env (and templates) is needed::
+
+    simon:.heprez blyth$ exist-
+    simon:.heprez blyth$ exist-stop
+    === exist-stop : shutting down EXIST_HOME /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4
+    Shutting down database instance at 
+        xmldb:exist://localhost:9090/xmlrpc/db
+    === exist-stop : if this fails to connect ... try exist-stop-nopw
+    simon:.heprez blyth$ 
+
+
+09:55 restart in fresh Terminal.app, which fills templates as the env change is auto-detected, propagating env change into exist/cocoon::
+
+    Last login: Sat Mar 23 09:09:06 on ttys005
+    g4pb:~ blyth$ cd h
+    g4pb:h blyth$ svn up
+    Updating '.':
+    At revision 842.
+    g4pb:h blyth$ 
+    g4pb:h blyth$ heprez-
+    g4pb:h blyth$ exist-
+    g4pb:h blyth$ exist-start
+
+    4pb:h blyth$ exist-start
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/docs/security.xml from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/docs/security.xml.template
+    NOT updated
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.16april2012/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.16april2012/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.16april2012/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.16april2012/xquery/env.xqm.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.17april2012/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.17april2012/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.17april2012/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.17april2012/xquery/env.xqm.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/xquery/env.xqm.template
+    UPDATED
+    === exist-start : with JAVA_OPTIONS
+    ...
+
+
+10:00 check the latest changes again, just like yesterday apart from a stray `something.xml` that I deleted::
+
+    g4pb:e blyth$ rm "/tmp/hfagc/remote.dbxml" ; heprez-exist2qxml ; heprez-latest
+    ...
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2JpsiKst.xml                   2013-03-22T05:53:41Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2JpsiKs.xml                    2013-03-22T05:53:58Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2DsDs.xml                      2013-03-22T05:59:45Z
+
+    sequence count 279
+
+
+10:06 switch off editing on server (chiba lives inside the tomcat container)::
+
+    [blyth@cms01 ~]$ sudo /sbin/service tomcat stop
+    Stopping Tomcat service:                                   [  OK  ]
+
+10:08 Note that rezdb previewing still works even with chiba OFF
+
+    * http://cms01.phys.ntu.edu.tw/rezdb/db/test/ (eXist/cocoon/apache are still running) 
+    * http://cms01.phys.ntu.edu.tw/chiba/XFormsServlet?...  (chiba edit links hang, and eventually timeout with "Service Temporarily Unavailable" from apache)
+
+
+10:14 Check of env consistency with  `envchk-;envchk-cf` fails due to perl XML problem::
+
+    g4pb:~ blyth$ envchk-cf
+    === envchk-xqm : creating query to dump the exist xqm environment /tmp/envchk-xqm/envchk-xqm.xq
+    === envchk-xqdump : dumper /tmp/envchk-xqm/envchk-xqm.xq dumping /tmp/envchk-xqm/envchk-xqm.xml from local database
+    === envchk-xqdump : dumper /tmp/envchk-xqm/envchk-xqm.xq
+    (: /Users/blyth/heprez/scrape/envchk/envchk-dump.pl /Users/blyth/heprez/hfag/mods/webapp/hfagc/xquery/env.xqm.template  :)
+    import module namespace env = "http://hfag.phys.ntu.edu.tw/hfagc/env"   at  "webapp/hfagc/xquery/env.xqm" ;
+    (
+     concat('HFAG_CACHE_SCRAPE',':',$env:cache-scrape),
+     concat('HFAG_CLASS_BASE',':',$env:class-base),
+     concat('HFAG_CONF',':',$env:hfag-conf),
+     concat('HFAG_HOT_YEAR',':',$env:hfag-hot-year),
+     concat('HFAG_ICPAGS',':',$env:hfag-icpags),
+     concat('HFAG_IPOLES',':',$env:hfag-ipoles),
+     concat('HFAG_OTHER_CONF',':',$env:hfag-other-conf),
+     concat('HFAG_PDG_NAME',':',$env:hfag-pdg-name),
+     concat('HFAG_PDG_YEAR',':',$env:hfag-pdg-year),
+     concat('HFAG_PREFIX',':',$env:hfag-prefix),
+     concat('HFAG_SCRAPE_FOLDER',':',$env:hfag-scrape),
+     concat('HFAG_NEWAVG_CUT',':',$env:newavg-cut),
+     concat('HFAG_OTHER_SCRAPE_FOLDER',':',$env:other-hfag-scrape),
+     concat('HFAG_PREV_PDG_YEAR',':',$env:prev-pdg-year),
+     concat('HFAG_SCRAPE_DATE',':',$env:scrape-date)
+    )
+    === envchk-compare : betwixt local database and commandline dump /tmp/envchk-xqm/envchk-xqm.xml -rw-r--r-- 1 blyth wheel 1700 23 Mar 10:13 /tmp/envchk-xqm/envchk-xqm.xml
+    Can't locate XML/LibXML.pm in @INC (@INC contains: /opt/local/lib/perl5/site_perl/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/site_perl/5.12.4 /opt/local/lib/perl5/vendor_perl/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/vendor_perl/5.12.4 /opt/local/lib/perl5/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/5.12.4 /opt/local/lib/perl5/site_perl/5.12.3 /opt/local/lib/perl5/site_perl /opt/local/lib/perl5/vendor_perl/5.12.3 /opt/local/lib/perl5/vendor_perl .) at /Users/blyth/heprez/scrape/envchk/envchk-cf.pl line 3.
+    BEGIN failed--compilation aborted at /Users/blyth/heprez/scrape/envchk/envchk-cf.pl line 3.
+    === envchk-xqm : FAILED for dump /tmp/envchk-xqm/envchk-xqm.xml 
+    === bash-error : sleeping forever ... ctrl-C out of the sleep to continue the function or cmd-W to close the tab and kill me
+
+Notice the scripts all use `/usr/bin/perl` but some functions using bare perl, which would be macports perl::
+
+    g4pb:envchk blyth$ which perl
+    /opt/local/bin/perl
+
+    g4pb:envchk blyth$ head -1 *.pl
+    ==> envchk-cf.pl <==
+    #!/usr/bin/perl -w
+
+    ==> envchk-dump.pl <==
+    #!/usr/bin/perl -w
+
+    ==> envchk-java.pl <==
+    #!/usr/bin/perl -w
+
+    ==> envchk-xmap.pl <==
+    #!/usr/bin/perl -w
+
+::
+
+    g4pb:e blyth$ cd ~/h/scrape/envchk/        
+    g4pb:envchk blyth$ ll
+    total 40
+    -rw-r--r--   1 blyth  staff   295  1 Apr  2008 envchk-xmap.pl
+    -rw-r--r--   1 blyth  staff   850  1 Apr  2008 envchk-java.pl
+    -rw-r--r--@  1 blyth  staff  1072 24 Apr  2008 envchk-cf.pl
+    -rw-r--r--@  1 blyth  staff  1199 30 May  2009 envchk-dump.pl
+    -rw-r--r--@  1 blyth  staff  3166 14 May  2012 envchk.bash
+    drwxr-xr-x  20 blyth  staff   680 22 Mar 20:55 ..
+    drwxr-xr-x   7 blyth  staff   238 23 Mar 10:18 .
+
+    g4pb:envchk blyth$ /usr/bin/perl -MXML::LibXML  -e ''
+    g4pb:envchk blyth$ 
+    g4pb:envchk blyth$  perl -MXML::LibXML -e ''
+    Can't locate XML/LibXML.pm in @INC (@INC contains: /opt/local/lib/perl5/site_perl/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/site_perl/5.12.4 /opt/local/lib/perl5/vendor_perl/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/vendor_perl/5.12.4 /opt/local/lib/perl5/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/5.12.4 /opt/local/lib/perl5/site_perl/5.12.3 /opt/local/lib/perl5/site_perl /opt/local/lib/perl5/vendor_perl/5.12.3 /opt/local/lib/perl5/vendor_perl .).
+    BEGIN failed--compilation aborted.
+
+
+
+10:46 workaround the perl issue with :r:`843` see :ticket:`154`
+
+10:56 `heprez-propagate` failure::
+
+    g4pb:~ blyth$ heprez-propagate
+    === heprez-propagate : nc -w 10 -z cms01.phys.ntu.edu.tw 9090
+    Connection to cms01.phys.ntu.edu.tw 9090 port [tcp/websm] succeeded!
+    === heprez-propagate : doing remote registration on the server
+    === register-status : name rezregister host cms01.phys.ntu.edu.tw archbase /data/heprez/data/register/2013/Mar23-1052-rezregister
+    === register-get : curl http://cms01.phys.ntu.edu.tw/hfagc/xquery/register-list.xq?opt=\&cocoon-view=content -o rezregister.xml && cp -f rezregister.xml /data/heprez/data/register/2013/Mar23-1052-rezregister.xml
+      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                     Dload  Upload   Total   Spent    Left  Speed
+    100 28561    0 28561    0     0  18272      0 --:--:--  0:00:01 --:--:-- 18777
+    === register-status : cat rezregister.xml | python /Users/blyth/heprez/register/canonicalize.py > rezregister.txt
+    Traceback (most recent call last):
+      File "/Users/blyth/heprez/register/canonicalize.py", line 25, in <module>
+        canonize(sys.stdin)    
+      File "/Users/blyth/heprez/register/canonicalize.py", line 21, in canonize
+        for i,r in enumerate(et.parse(path)):print "%s" % Rez(r,i)()
+      File "/Users/blyth/heprez/register/canonicalize.py", line 7, in __init__
+        for q in "url cdate prior".split():self[q] = r.attrib[q]
+    KeyError: 'url'
+    ...
+    improper root {http://apache.org/cocoon/error/2.1}notify 
+    unexpected outcome from /Users/blyth/heprez/register/checkregister.py 
+    === backup-pro : there are unregistered results on server ABORT propagation ... sleeping
+
+
+11:01 the xml grabbed is an error dump::
+
+    g4pb:2013 blyth$ pwd
+    /data/heprez/data/register/2013
+    g4pb:2013 blyth$ 
+    g4pb:2013 blyth$ 
+    g4pb:2013 blyth$ head -10 Mar23-1052-rezregister.xml
+    <?xml version="1.0" encoding="UTF-8"?><error:notify xmlns:error="http://apache.org/cocoon/error/2.1" error:type="error" error:sender="org.apache.cocoon.components.treeprocessor.sitemap.ErrorHandlerHelper"><error:title>An Error Occurred</error:title><error:source>org.apache.cocoon.ProcessingException</error:source><error:message>error found while loading module rezu: Error while loading module webapp/hfagc/xquery/rezu.xqm: variable $env:prev-pdg-year is not bound [at line 101, column 55]</error:message><error:description>org.apache.cocoon.ProcessingException: XMLDBException occurred: error found while loading module rezu: Error while loading module webapp/hfagc/xquery/rezu.xqm: variable $env:prev-pdg-year is not bound [at line 101, column 55]: org.xmldb.api.base.XMLDBException: error found while loading module rezu: Error while loading module webapp/hfagc/xquery/rezu.xqm: variable $env:prev-pdg-year is not bound [at line 101, column 55]</error:description><error:extra error:description="cause">org.exist.xquery.XPathException: error found while loading module rezu: Error while loading module webapp/hfagc/xquery/rezu.xqm: variable $env:prev-pdg-year is not bound [at line 101, column 55]</error:extra><error:extra error:description="full exception chain stacktrace">org.apache.cocoon.ProcessingException: XMLDBException occurred: error found while loading module rezu: Error while loading module webapp/hfagc/xquery/rezu.xqm: variable $env:prev-pdg-year is not bound [at line 101, column 55]: org.xmldb.api.base.XMLDBException: error found while loading module rezu: Error while loading module webapp/hfagc/xquery/rezu.xqm: variable $env:prev-pdg-year is not bound [at line 101, column 55]
+            at org.exist.cocoon.XQueryGenerator.generate(XQueryGenerator.java:308)
+            at org.apache.cocoon.components.pipeline.AbstractProcessingPipeline.processXMLPipeline(AbstractProcessingPipeline.java:575)
+            at org.apache.cocoon.components.pipeline.impl.AbstractCachingProcessingPipeline.processXMLPipeline(AbstractCachingProcessingPipeline.java:183)
+            at org.apache.cocoon.components.pipeline.AbstractProcessingPipeline.process(AbstractProcessingPipeline.java:483)
+            at org.apache.cocoon.components.treeprocessor.sitemap.SerializeNode.invoke(SerializeNode.java:120)
+            at org.apache.cocoon.components.treeprocessor.AbstractParentProcessingNode.invokeNodes(AbstractParentProcessingNode.java:68)
+            at org.apache.cocoon.components.treeprocessor.ContainerNode.invoke(ContainerNode.java:31)
+            at org.apache.cocoon.components.treeprocessor.sitemap.GenerateNode.invoke(GenerateNode.java:83)
+            at org.apache.cocoon.components.treeprocessor.AbstractParentProcessingNode.invokeNodes(AbstractParentProcessingNode.java:46)
+    g4pb:2013 blyth$ o
+
+
+
+
+11:08 checking on the server, find the error in the log and offending line::
+
+    [blyth@cms01 ~]$ exist-
+    [blyth@cms01 ~]$ exist-logs
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs
+    total 31556
+    -rw-rw-r--  1 blyth blyth  1913688 Mar 23 11:02 access.log
+    -rw-rw-r--  1 blyth blyth      774 Sep 12  2012 core.log
+    -rw-rw-r--  1 blyth blyth        0 Sep 12  2012 error.log
+    -rw-rw-r--  1 blyth blyth   620231 May 10  2012 exist.log
+    -rw-rw-r--  1 blyth blyth        0 Sep 12  2012 flow.log
+    -rw-rw-r--  1 blyth blyth 28588366 Mar 23 11:02 handled-errors.log
+    -rw-rw-r--  1 blyth blyth        0 May  1  2009 profile.log
+    -rw-rw-r--  1 blyth blyth  1092090 Mar 23 11:02 sitemap.log
+    -rw-rw-r--  1 blyth blyth     1540 May  7  2009 xmldb.log
+
+
+    [blyth@cms01 logs]$ cd /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/
+    [blyth@cms01 webapp]$ find . -name rezu.xqm
+    ./hfagc.9dec2011/xquery/rezu.xqm
+    ./hfagc/xquery/rezu.xqm
+    [blyth@cms01 webapp]$ vi ./hfagc/xquery/rezu.xqm +101      # the env is imported from env.xqm that should be template filled at exist start
+
+
+    16 import module namespace env  = "http://hfag.phys.ntu.edu.tw/hfagc/env"  at "webapp/hfagc/xquery/env.xqm" ;
+    ...
+    100 
+    101 declare variable $rezu:prev-pdg-year as xs:integer { $env:prev-pdg-year };   (: former bug hardcoded 2004 : results before this year are labelled as old :)
+    102 declare variable $rezu:pdg-year as xs:integer { $env:hfag-pdg-year };
+    103 declare variable $rezu:hot-year as xs:integer { $env:hfag-hot-year };
+    104 declare variable $rezu:newavg-cut as xs:string { $env:newavg-cut };                   (: former bug hardcoded 0606 : avg with DB entries after this month as labelled a new avgs :)
+    105 
+
+
+
+
+11:12 I dont like debugging while doing the register, but find the `envchk-cf` also giving related error, probably missed template filling at exist startup
+
+11:15 try exist bounce::
+
+    [blyth@cms01 ~]$ sudo /sbin/service exist status
+    Password:
+    eXist Native XML Database is running (2827).
+    [blyth@cms01 ~]$ 
+    [blyth@cms01 ~]$ sudo /sbin/service exist stop
+    Stopping eXist Native XML Database...
+    Stopped eXist Native XML Database.
+    [blyth@cms01 ~]$ 
+    [blyth@cms01 ~]$ sudo /sbin/service exist start
+    Starting eXist Native XML Database...
+    [blyth@cms01 ~]$ 
+    [blyth@cms01 ~]$ sudo /sbin/service exist status
+    eXist Native XML Database is running (31245).
+    [blyth@cms01 ~]$ 
+
+11:16 still getting related error from `envchk-cf`::
+
+      variable $env:newavg-cut is not bound
+
+11:17 stop eXist and do a console `eixst-start`::
+
+    [blyth@cms01 ~]$ sudo /sbin/service exist stop
+    Stopping eXist Native XML Database...
+    Stopped eXist Native XML Database.
+    [blyth@cms01 ~]$ 
+
+
+11:22 checking the env module that gets imported, find it is behind the times, missing several keys::
+
+    [blyth@cms01 webapp]$ vi ./hfagc/xquery/env.xqm
+
+
+11:25 checking `env.xqm.template` that exist-start fills to create env.xqm see the two missing keys are in the template:: 
+
+    [blyth@cms01 webapp]$ echo $EXIST_HOME
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4
+    [blyth@cms01 webapp]$ find /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp -name '*.template'
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/docs/security.xml.template
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/sitemap.xmap.template
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/xquery/env.xqm.template
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/sitemap.xmap.template
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm.template
+    [blyth@cms01 webapp]$ 
+    [blyth@cms01 webapp]$ cat /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm.template
+
+
+11:29 question becomes why did `exist-fill-templates` not detect the staleness and regenerate the `env.xqm`  at `exist-start` ?
+
+11:34 comment in `common/tmpl/tmpl.py:filltmpl`::
+
+       NB for a change to the template to cause a refill ... need to include TMPL_MTIME in it 
+
+11:35 check the state of the templates, the upper two sets do not have TMPL_MTIME::
+
+    [blyth@cms01 heprez]$ find . -name '*.template'
+
+    ./tomcat/mods/bin/tomcat.sh.template
+    ./tomcat/mods/conf/tomcat-users.xml.template
+    ./compilation/b2charm.tex.template
+    ./compilation/b2charm-symbols.tex.template
+    ./compilation/Makefile2.template
+    ./compilation/b2charm-doc.tex.template
+
+    ./hfag/mods/tools/wrapper/conf/wrapper.conf.template
+    ./hfag/mods/webapp/hfagc/xquery/env.xqm.template
+    ./hfag/mods/webapp/docs/security.xml.template
+
+    ./hfag/mods/webapp/hfagc/sitemap.xmap.template
+    ./apache/conf/workflow.conf.template
+    ./apache/conf/workers.properties.template
+    ./apache/conf/static.conf.template
+    ./apache/conf/heprez.conf.template
+    ./apache/conf/b2charm.conf.template
+    ./apache/conf/jkmount.conf.template
+    ./apache/conf/modjk.conf.template   
+
+    [blyth@cms01 heprez]$ 
+    [blyth@cms01 heprez]$ 
+    [blyth@cms01 heprez]$ find . -name '*.template' -exec grep -H TMPL_MTIME {} \;
+    ./hfag/mods/webapp/hfagc/sitemap.xmap.template:                          @TMPL_MTIME@
+    ./apache/conf/workflow.conf.template:#      TMPL_MTIME : @TMPL_MTIME@
+    ./apache/conf/workers.properties.template:#      TMPL_MTIME : @TMPL_MTIME@
+    ./apache/conf/static.conf.template:#     TMPL_MTIME : @TMPL_MTIME@
+    ./apache/conf/heprez.conf.template:#   TMPL_MTIME : @TMPL_MTIME@
+    ./apache/conf/b2charm.conf.template:#      TMPL_MTIME : @TMPL_MTIME@
+    ./apache/conf/jkmount.conf.template:#      TMPL_MTIME : @TMPL_MTIME@
+    ./apache/conf/modjk.conf.template:#      TMPL_MTIME : @TMPL_MTIME@
+    [blyth@cms01 heprez]$ 
+
+
+11:50 record this issue in :ticket:`187` 
+
+11:54 add the **TMPL_MTIME** to two templates in :r:`844`
+
+11:56 record this logging :r:`845`
+
+
+12:04 propagate template change into exist webapp, ensure stopped then propagate::
+
+    [blyth@cms01 heprez]$ sudo /sbin/service exist status
+    Password:
+    eXist Native XML Database is not running.
+    [blyth@cms01 heprez]$ 
+
+
+12:06 check what the propagate is doing::
+
+    [blyth@cms01 h]$ exist-
+    [blyth@cms01 h]$ t exist-propagate-
+    exist-propagate- is a function
+    exist-propagate- () 
+    { 
+        local msg="=== $FUNCNAME :";
+        local rel=$1;
+        local src=$HEPREZ_HOME/hfag/mods/$rel;
+        local tgt=$EXIST_HOME/$rel;
+        local vfi=$tgt.version;
+        [ ! -d $src ] && local-abort $msg no such src $src;
+        [ ! -d $tgt ] && local-abort $msg no such tgt $tgt;
+        local srcv=$(svnversion $src);
+        local tgtv=$(cat $vfi 2>/dev/null);
+        local action=$(exist-propagate-status $* );
+        case $action in 
+            skip)
+                echo $msg $action && return 1
+            ;;
+            proceed)
+                echo $msg $action
+            ;;
+            abort)
+                local-abort $msg
+            ;;
+        esac;
+        local cmd="svn export -q --force $src $tgt && echo $srcv > $vfi ";
+        echo $msg [$cmd];
+        eval $cmd
+    }
+    [blyth@cms01 h]$ svn up
+    At revision 845.
+    [blyth@cms01 h]$ cat $EXIST_HOME/webapp/hfagc.version
+    662
+    [blyth@cms01 h]$ cat $EXIST_HOME/webapp.version
+    824
+    [blyth@cms01 h]$ 
+
+    [blyth@cms01 h]$ exist-propagate- webapp    ## I AM UNCOMFORTABLE DOING THIS WITHOUT A RECENT BACKUP
+    === exist-propagate-status : [webapp] target is stale cf the source ===> proceed
+    === exist-propagate- : proceed
+    === exist-propagate- : [svn export -q --force /home/blyth/heprez/hfag/mods/webapp /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp && echo 845 > /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp.version ]
+    [blyth@cms01 h]$ 
+
+
+
+
+
+12:15 manually fill the templates, and verify the missing keys are now there::
+
+    [blyth@cms01 heprez]$ scrape-
+    [blyth@cms01 heprez]$ exist-fill-templates webapp
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/docs/security.xml from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/docs/security.xml.template
+    NOT updated
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/xquery/env.xqm.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : [webapp] /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm.template
+    UPDATED
+    [blyth@cms01 heprez]$ 
+
+
+12:19 restart server::
+
+    [blyth@cms01 ~]$ sudo /sbin/service exist start
+    Starting eXist Native XML Database...
+    [blyth@cms01 ~]$ sudo /sbin/service exist status
+    eXist Native XML Database is running (4347).
+
+12:20 test rezdb interface working and results still there http://cms01.phys.ntu.edu.tw/rezdb/db/test/
+
+12:21 envchk now succeeds::
+
+    [blyth@cms01 heprez]$ envchk-
+    [blyth@cms01 heprez]$ envchk-cf
+    ...
+       [            ] name HFAG_NEWAVG_CUT                vxqm 1111                           venv 1111                            
+       [            ] name HFAG_OTHER_SCRAPE_FOLDER       vxqm /data/heprez/data/scrape/20080701 venv /data/heprez/data/scrape/20080701  
+       [            ] name HFAG_PREV_PDG_YEAR             vxqm 2008                           venv 2008                            
+       [            ] name HFAG_SCRAPE_DATE               vxqm 20130323                       venv 20130323                        
+    there are 0 mismatches 
+    /home/blyth/heprez/scrape/envchk/envchk-cf.pl success ... no mismatches 
+    [blyth@cms01 heprez]$ 
+
+
+12:23 now can try `heprez-propagate` from G again after removing the register xml which is an error dump::
+
+    g4pb:~ blyth$ cd /data/heprez/data/register/2013
+    g4pb:2013 blyth$ ll
+    total 56
+    drwxr-xr-x  10 blyth  admin    340 23 Mar 10:52 ..
+    -rw-r--r--   1 blyth  admin  28561 23 Mar 10:52 Mar23-1052-rezregister.xml
+    drwxr-xr-x   3 blyth  admin    102 23 Mar 11:01 .
+    g4pb:2013 blyth$ rm  Mar23-1052-rezregister.xml
+
+12:42 the `heprez-propagate` succeeded, 23 new results registered (from 256 to 279) and DB contents transfered to G, log :file:`~/heprez/logs/heprez-propagate-20130323.txt` 
+    
+12:50 had to scrub some register admin passwords, need to grab these more discretely via config file::
+
+      perl -pi -e 's,its-a-secret,censored,g' *.txt
+
+
+13:01 stop exist on server as scheduled power cut tomorrow::
+
+    [blyth@cms01 ~]$ sudo /sbin/service exist stop
+    Stopping eXist Native XML Database...
+    Stopped eXist Native XML Database.
+
+    [blyth@cms01 ~]$ sudo /sbin/service httpd stop
+    Stopping httpd:                                            [  OK  ]
+
+
+13:10 hmm adding D0 is going to take some time, cf LHCb
+
+  * http://dayabay.phys.ntu.edu.tw/tracs/heprez/search?q=LHCb
+
+13:15 good info http://dayabay.phys.ntu.edu.tw/tracs/heprez/wiki/StepByStepHeprezUpdating
+
+
+16:50 server shutdowns are real annoying with SVN+Trac as loose access to wikis+tickets+timeline, 
+      need to make progress on translating wiki content into Sphinx rst files residing in the repo
+      and investigate fossil scm further
+
+23:40 iterated on `heprez-prepare--` a few issues : switched from macport perl to system perl for working XML::LibXML plus a name clash, easily dealt with
+      slower than I recall ~40min : should have purged first perhaps 
+
+      NB the prepare acts to update indices within /db/hfagc_system and avgs in /db/hfagc_prod the /db/cache is not involved at that stage, 
+      so purging afterward did not wipe the indices, although it might have slowed down their creation
+
+
+23:45 purge on G with ``exist-cli`` for faster scrape::
+
+    g4pb:h blyth$ exist-
+    g4pb:h blyth$ exist-cli
+    === exist-client : connecting locally to uri=xmldb:exist://localhost:9090/xmlrpc
+    ...
+    exist:/db>cd cache
+    exist:/db/cache>ls
+    drwur-ur-u admin     dba       hfagc
+    exist:/db/cache>cd hfagc
+    exist:/db/cache/hfagc>ls
+    drwur-ur-u admin     dba       20120524
+    exist:/db/cache/hfagc>rmcol 20120524            # this is a heavy operation
+    removing collection 20120524 ...done.          # takes ~5 min
+    exist:/db/cache/hfagc>
+    exist:/db/cache/hfagc>cd ..
+    exist:/db/cache>cd ..
+    exist:/db>ls      
+    drwur-ur-u guest     guest     test
+    drwur-ur-u admin     dba       hfagc
+    drwur-ur-u admin     dba       hfagc_system
+    drwur-ur-u admin     dba       stylesheets
+    drwur-ur-u admin     dba       cache
+    drwur-ur-u admin     dba       hfagc_tags
+    drwur-ur-u admin     dba       chiba
+    drwurwu--- admin     dba       system
+    drwur-ur-u admin     dba       hfagc_prod
+    exist:/db>cd hfagc_prod
+    exist:/db/hfagc_prod>ls
+    drwur-ur-u admin     dba       end_of_2011
+    exist:/db/hfagc_prod>rmcol end_of_2011
+    removing collection end_of_2011 ...done.
+    exist:/db/hfagc_prod>
+    exist:/db/hfagc_prod>quit 
+    quit.
+    g4pb:h blyth$ 
+
+
+23:54 prepare for launch of `heprez-update` without any code changes for d0  : to see what happens, 
+      exit heavy apps: Safari + Mail leaving Illustrator and Terminals
+
+00:01 first try runs into perl XML troubles after a few minutes, ~/heprez/logs/heprez-update-20130323-perlxml-rezclassify.txt
+      solve by installing via macports ~/heprez/logs/macports-perl-xml-libxml.txt 
+
+00:25 second try runs to completion ~/heprez/logs/heprez-update-20130323.txt, extracts from the log::
+
+
+    3 g4pb:~ blyth$ date ; heprez-update
+    4 Sun 24 Mar 2013 00:25:14 CST
+    ...
+    390 === scrape-ant : Sun 24 Mar 2013 00:25:43 CST STARTING
+    ...
+    2996 checklog:
+    2997      [exec] gets:1911
+    2998 
+    2999 BUILD SUCCESSFUL
+    3000 Total time: 316 minutes 27 seconds
+    3001 === scrape-ant : Sun 24 Mar 2013 05:42:13 CST COMPLETED
+    3002 === scrape-images : Sun 24 Mar 2013 05:42:13 CST START
+    ....
+    3620 real    38m17.442s
+    3621 user    2m41.901s
+    3622 sys 1m4.585s
+    3623 === svg2pdfpng-convert-fast : done
+    3624 === scrape-images : Sun 24 Mar 2013 06:20:42 CST COMPLETED
+    ...
+    4718 Output written on b2charm_end_of_2011_v009.dvi (50 pages, 870820 bytes).
+    ...
+    4779 -rw-r--r-- blyth/admin  227464 2013-03-24 06:20:45 b2charm_end_of_2011_v009_tables.tex
+
+
+
+
+
+
+Preparing for v009,  Fri Mar 22 2013
+--------------------------------------
+
+20:57  scrape env changes in prep for tomorrows planned scrape
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:r:`841`
+
+
+20:50 do manual user propagation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning:: After adding new users must do manual propagation of users.xml before performing backups or `heprez-propagate` that calls backup
+
+Follow procedure documented in `backup-usage`::
+
+    simon:.heprez blyth$ cd new
+    simon:new blyth$ ll
+    total 8
+    -rw-r--r--  1 blyth  staff  2631 12 Sep  2012 users.xml
+    drwxr-xr-x  3 blyth  staff   102 12 Sep  2012 .
+    drwxr-xr-x  7 blyth  staff   238 12 Sep  2012 ..
+    simon:new blyth$ mv users.xml users-2012-sep-12.xml
+    simon:new blyth$ pwd
+    /Users/blyth/.heprez/new
+    simon:new blyth$ 
+    simon:new blyth$ scp C:.heprez/cur/users.xml .
+    Scientific Linux CERN SLC release 4.8 (Beryllium)
+    users.xml                                                                                                                                                         100% 3114     3.0KB/s   00:00    
+    simon:new blyth$ 
+
+    simon:.heprez blyth$ backup-users-load-new
+    === backup-users-check : diff /Users/blyth/.heprez/cur/users.xml /Users/blyth/.heprez/new/users.xml
+    11c11
+    <     <users last-id="26">
+    ---
+    >     <users last-id="29">
+    53a54,62
+    >         <user name="thomas" uid="27" password="4ccf399b5e25319d03c82f6310fd9551" home="/db/hfagc/belle/thomas">
+    >             <group>belle</group>
+    >         </user>
+    >         <user name="d0thomas" uid="28" password="b540e7c99e694149919f8794ea703c2f" home="/db/hfagc/d0/d0thomas">
+    >             <group>d0</group>
+    >         </user>
+    >         <user name="cdfthomas" uid="29" password="b0611c73f8ecf6ed4b74c8a759a07e79" home="/db/hfagc/cdf/cdfthomas">
+    >             <group>cdf</group>
+    >         </user>
+    Enter YES to proceed to load new /Users/blyth/.heprez/new/users.xml file YES
+    === exist_put : fsp /Users/blyth/.heprez/new/users.xml to url http://localhost:9090/servlet/db/system/users.xml
+    <html>
+    <head>
+    <title>Error 200 Document users.xml stored.</title>
+    </head>
+    ...
+
+20:00 checking last changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Force a regrab by deleting `/tmp/hfagc/remote.dbxml` first::
+
+    Last login: Fri Mar 22 17:58:24 on ttys007
+    simon:~ blyth$ heprez-
+    simon:~ blyth$ heprez-exist2qxml
+    INFO:config:reading config from /Users/blyth/env/db/bdbxml/qxml/hfagc.cfg 
+    WARNING:__main__:tag tmp dbxml "/tmp/hfagc/scratch.dbxml" exists already : delete it and rerun to update from src ""  
+    WARNING:__main__:tag sys dbxml "/tmp/hfagc/hfagc_system.dbxml" exists already : delete it and rerun to update from src "http://localhost/servlet/db/hfagc_system/"  
+    WARNING:__main__:tag hfc dbxml "/tmp/hfagc/hfagc.dbxml" exists already : delete it and rerun to update from src "/data/heprez/data/backup/part/localhost/last/db/hfagc"  
+    WARNING:__main__:tag rem dbxml "/tmp/hfagc/remote.dbxml" exists already : delete it and rerun to update from src "http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/"  
+    simon:~ blyth$ 
+    simon:~ blyth$ 
+    simon:~ blyth$ rm "/tmp/hfagc/remote.dbxml" 
+    simon:~ blyth$ 
+    simon:~ blyth$ heprez-exist2qxml
+    INFO:config:reading config from /Users/blyth/env/db/bdbxml/qxml/hfagc.cfg 
+    WARNING:__main__:tag tmp dbxml "/tmp/hfagc/scratch.dbxml" exists already : delete it and rerun to update from src ""  
+    WARNING:__main__:tag sys dbxml "/tmp/hfagc/hfagc_system.dbxml" exists already : delete it and rerun to update from src "http://localhost/servlet/db/hfagc_system/"  
+    WARNING:__main__:tag hfc dbxml "/tmp/hfagc/hfagc.dbxml" exists already : delete it and rerun to update from src "/data/heprez/data/backup/part/localhost/last/db/hfagc"  
+    INFO:__main__:using srcpfx_ None 
+    INFO:__main__:ingest rem creating /tmp/hfagc/remote.dbxml from xml files from http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/ 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_BsDst1Xmunu.xml lhcb/yasmine/lhcb_winter2011_BsDst1Xmunu.xml 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_Lb2Lcpipipi.xml lhcb/yasmine/lhcb_winter2011_Lb2Lcpipipi.xml 
+    INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_B2etacK.xml lhcb/yasmine/lhcb_winter2011_B2etacK.xml 
+    ...
+
+
+Check `heprez-latest` for modification time ordered rezdb urls::
+
+    simon:~ blyth$ heprez-latest
+    === heprez-latest : as at last exist2qxml.py migration into /tmp/hfagc/remote.dbxml
+    ...
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_dspi.xml                                 2012-05-22T09:09:52Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_DS1D.xml                                 2012-05-22T09:11:31Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/babar/matteo/2012_b0colsup.xml                               2012-05-23T01:01:38Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/babar/matteo/2012_BtoDPPbar.xml                              2012-05-24T12:30:09Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2Jpsif0.xml                    2012-12-03T01:02:48Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Lb2Lc3pi.xml                     2012-12-03T05:50:11Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Lb2Lc3pi_abs.xml                 2012-12-03T06:06:49Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Xib.xml                          2012-12-03T12:19:58Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Omega_b.xml                      2012-12-03T12:22:53Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall2012_Bs2Psi2sPhi.xml                     2013-01-08T12:13:41Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall2012_B2Jpsif1525.xml                     2013-01-08T12:48:18Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfthomas/Jan2011_BuY4140K.xml                           2013-03-14T03:32:54Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bd2DK_overBd2Dpi.xml             2013-03-15T04:36:12Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/Bu2JpsiK_overBu2JpsiK.xml                     2013-03-15T04:45:09Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bu2Jpsipi_overBu2JpsiK.xml       2013-03-15T04:55:07Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2DsPi_overBd2Dpi.xml           2013-03-15T05:17:28Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2DsK.xml                       2013-03-15T05:32:18Z
+    ... i deleted a something.xml via web interface and here too ...
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2psi2Sphi.xml                  2013-03-15T06:21:24Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Lb2Lcpi.xml                      2013-03-15T06:36:30Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall_2012_Lb2JpsiLambda.xml                  2013-03-15T06:46:48Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall2012_Bs2Jpsif0.xml                       2013-03-15T06:49:03Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall2012_Bu2Psi2sK.xml                       2013-03-15T06:52:13Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/d0/d0yasmine/d0_fall2012_Bs2DstDst.xml                       2013-03-15T06:57:02Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cjl/cdf_summer2007_CDFNOTE8237.xml                       2013-03-17T11:29:37Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cjl/cdf_summer2005_CDFNOTE7635.xml                       2013-03-19T10:03:51Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/a009.xml                                       2013-03-20T02:31:07Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/lhcb/yasmine/lhcb_winter2011_Bs2DsK.xml                      2013-03-22T04:39:11Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cjl/cdf_summer2007_BsDsK.xml                             2013-03-22T04:41:05Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cjl/cdf_summer2005_CDFNOTE7504.xml                       2013-03-22T05:02:21Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2JpsiPhi_over_Bd2JpsiKst.xml   2013-03-22T05:53:16Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2JpsiKst.xml                   2013-03-22T05:53:41Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2JpsiKs.xml                    2013-03-22T05:53:58Z
+    http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2DsDs.xml                      2013-03-22T05:59:45Z
+
+    sequence count 280
+    init       0.8208 s [read config and setup containers]
+    load       0.8025 s [load maps]
+    qprep    0.005428 s [prepare query context]
+    query       1.951 s [execute query]
+    output     0.8591 s [write results]
+    TOTAL       4.439 s 
+    -rw-r-----  1 blyth  wheel  8929280 22 Mar 19:59 /tmp/hfagc/remote.dbxml
+
+
+
+v008 May 24-25 
+---------------
+
+
+.. contents:: :local:
+
+
+19:10 Check the last updates by recreating remote.dbxml::
+
+        simon:~ blyth$ heprez-
+        simon:~ blyth$ heprez-exist2qxml
+        WARNING:__main__:tag tmp dbxml "/tmp/hfagc/scratch.dbxml" exists already : delete it and rerun to update from src ""  
+        WARNING:__main__:tag sys dbxml "/tmp/hfagc/hfagc_system.dbxml" exists already : delete it and rerun to update from src "http://localhost/servlet/db/hfagc_system/"  
+        WARNING:__main__:tag hfc dbxml "/tmp/hfagc/hfagc.dbxml" exists already : delete it and rerun to update from src "/data/heprez/data/backup/part/localhost/last/db/hfagc"  
+        WARNING:__main__:tag rem dbxml "/tmp/hfagc/remote.dbxml" exists already : delete it and rerun to update from src "http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/"  
+        simon:~ blyth$ 
+        simon:~ blyth$ rm "/tmp/hfagc/remote.dbxml"
+        simon:~ blyth$ heprez-exist2qxml
+        WARNING:__main__:tag tmp dbxml "/tmp/hfagc/scratch.dbxml" exists already : delete it and rerun to update from src ""  
+        WARNING:__main__:tag sys dbxml "/tmp/hfagc/hfagc_system.dbxml" exists already : delete it and rerun to update from src "http://localhost/servlet/db/hfagc_system/"  
+        WARNING:__main__:tag hfc dbxml "/tmp/hfagc/hfagc.dbxml" exists already : delete it and rerun to update from src "/data/heprez/data/backup/part/localhost/last/db/hfagc"  
+        INFO:__main__:using srcpfx_ None 
+        INFO:__main__:ingest rem creating /tmp/hfagc/remote.dbxml from xml files from http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/ 
+        INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_BsDst1Xmunu.xml lhcb/yasmine/lhcb_winter2011_BsDst1Xmunu.xml 
+        INFO:__main__:ingesting http://cms01.phys.ntu.edu.tw/servlet/db/hfagc/lhcb/yasmine/lhcb_winter2011_Lb2Lcpipipi.xml lhcb/yasmine/lhcb_winter2011_Lb2Lcpipipi.xml 
+        ...
+
+        simon:~ blyth$ heprez-latest
+        === heprez-latest : as at last exist2qxml.py migration into /tmp/hfagc/remote.dbxml
+        -rw-r-----  1 blyth  wheel  8421376 24 May 19:14 /tmp/hfagc/remote.dbxml
+        ...
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/lhcb/yasmine/lhcb_winter2011_Bs2DKst.xml                     2012-05-10T03:27:48Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/lhcb/yasmine/lhcb_winter2011_Bs2DKstoverB2Drho.xml           2012-05-10T03:29:49Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_dsstpi.xml                               2012-05-21T05:25:36Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_dspi.xml                                 2012-05-22T09:09:52Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_DS1D.xml                                 2012-05-22T09:11:31Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/babar/matteo/2012_b0colsup.xml                               2012-05-23T01:01:38Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/babar/matteo/2012_BtoDPPbar.xml                              2012-05-24T12:30:09Z
+
+        sequence count 256
+        init       0.3213 s [read config and setup containers]
+        load        0.315 s [load maps]
+        qprep     0.00503 s [prepare query context]
+        query      0.5861 s [execute query]
+        output     0.2824 s [write results]
+        TOTAL        1.51 s 
+        -rw-r-----  1 blyth  wheel  8421376 24 May 19:14 /tmp/hfagc/remote.dbxml
+        simon:~ blyth$ 
+
+19:15 switch off editing::
+
+        [blyth@cms01 ~]$ sudo /sbin/service tomcat stop
+
+19:19 do ``heprez-propagate`` ``2012/May24-1919`` and add entry to ``backup-log``
+
+19:29 purge with ``exist-cli``::
+
+         exist:/db/cache/hfagc>rmcol 20120514
+         exist:/db/hfagc_prod>rmcol end_of_2011
+
+
+22:58 Update scrape env :r:`804`  and get ``envchk-cf`` consistent by ``exist-stop/start`` in Terminal.app
+
+22:59 Kill all non-essential apps (Mail, Safari...) and fire up Illustrator
+
+23:06 ``heprez-prepare--`` in fresh Terminal.app (for clean logging and greater reliability):: 
+
+   ~/heprez/logs/heprez-prepare-20120524.txt 
+     note a few new qtags, so will probably need to manually do the ipng thang again
+
+23:41 ``heprez-update``   in a new Terminal.app session
+
+08:35 many latex errors in exist console (possible nothing new just different error msgs due to latex upgrade to texlive distro)::
+
+        This is dvips(k) 5.991 Copyright 2011 Radical Eye Software (www.radicaleye.com)
+        dvips: DVI file can't be opened: Deltapara_97_94+443-table_.dvi: No such file or directory
+        Error: /undefinedfilename in (Deltapara_97_94+443-table_.ps)
+        Operand stack:
+        Execution stack:
+        %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--   --nostringval--   --nostringval--   false   1   %stopped_push
+        Dictionary stack:
+        --dict:1167/1684(ro)(G)--   --dict:0/20(G)--   --dict:77/200(L)--
+        Current allocation mode is local
+        Last OS error: 2
+        GPL Ghostscript 9.05: Unrecoverable error, exit code 1
+
+
+08:42 but it got all way thru ``~/heprez/logs/heprez-update-20120524-latex-problem.txt`` before hanging on missing file at compilation stage::
+
+        ! LaTeX Error: File `pstcol.sty' not found.
+
+11:00 Reproduce the ``pstcol.sty`` error with ``compilation-update``
+
+11:08 comparing tables, shows expected diffs, again note unrepeatable footnote ordering:: 
+
+        diff /data/heprez/data/scrape/20120514/hfagc/00000/00000/b2charm_end_of_2011_v007_tables.tex /data/heprez/data/scrape/20120524/hfagc/00000/00000/b2charm_end_of_2011_v008_tables.tex
+
+11:18 try commenting pstcol ``g4pb-2:00000 blyth$ vi ../00000-table_preamble.tex`` , gets further meets ``relsize.sty not found``, now get undefined command::
+
+        \definecolor
+                 {hfviolet}{rgb}{0.5,0,0.5}
+
+
+11:30 https://trac.macports.org/wiki/TeXLivePackages  ``port installed | grep tex`` try installing ``texlive-pstricks`` (turned out not to need it)
+
+13:11 ``compilation-asciicheck`` is failing:: 
+
+        simon:00000 blyth$ compilation-asciicheck
+        -rw-r--r--  1 blyth  admin  216510 25 May 12:14 b2charm_end_of_2011_v008_tables.tex
+        === compilation-asciicheck : /Users/blyth/env/bin/asciicheck.py b2charm_end_of_2011_v008_tables.tex
+        3497      ;  \hffootnotemark{2a}  \hffootnotetext{ Measurements of branching fractions for B0 to Ds+pi[a]][ and B0 to Ds+K[a]][ } 
+
+        === compilation-asciicheck : rc 1
+
+::
+
+        simon:00202 blyth$ find . -name '\*.tex' -exec asciicheck.py {} \;
+        ./01202/01202-table_body.tex 476      ;  \hffootnotemark{2a}  \hffootnotetext{ Measurements of branching fractions for B0 to Ds+pi[a]][ and B0 to Ds+K[a]][ } 
+
+        simon:00202 blyth$ cp ./01202/01202-table_body.tex /tmp/a.tex
+        perl -pi -e 's,(Measurements of branching fractions for B0 to Ds.*)\},Klop,' /tmp/a.tex
+
+
+13:45 add bandaid to ``compilation-fix``  in :r:`806` propagate with ``compilation-update`` allowing ``compilation-asciicheck`` to pass
+
+
+pstcol is an obsolete kludge
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ftp://ctan.tug.org/pub/ctan//graphics/pstricks/base/doc/pstnews97-15.pdf
+* http://www.mail-archive.com/slug@slug.org.au/msg17125.html
+
+::
+
+        3.4 - Known pitfalls
+        a - To use the standard `color' package (which is available both
+        for plain TeX and LaTeX) with PSTricks, you must load the `pstcol' extra
+        package written by David Carlisle, which interface the two packages,
+        loading them in the right order, and overriding some small parts of PSTricks
+        to allow it to use the `color' package system for specifying color.
+        We STRONGLY recommend that you use this way today.
+
+        b - LaTeX users must also take care that the `pstcol' package is
+        required in place of the `pstricks' one if the `graphics' or `graphicx'
+        package is alos loaded.ur point that there are many packages, but as this was...
+
+
+replace **pstcol** with **xcolor**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Already have ``texlive-latex-recommended`` which includes::
+
+    xcolor: Driver-independent color extensions for LaTeX and pdfLaTeX.
+
+
+relsize needed for babar 
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+relsize comes from the ginormous ``texlive-latex-extra``
+Without it get::
+
+        ! Undefined control sequence.
+        <argument> \slshape B\kern -0.1em{\smaller 
+                                                   A}\kern -0.1em B\kern -0.1em{\sma...
+                                                   l.84 &  \hflbabar
+
+Eliminate silly relsize usage just for BABAR::
+
+    simon:00000 blyth$ vi ../00000-table_symbols.tex
+
+
+getting compilation to compile
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2 changes:
+
+ * swap **pstcol** with **xcolor**
+ * remove **relsize** and special BABAR typesetting
+
+
+12:25 ``hapache-prepare`` on G, then  ``sudo apachectl stop/start`` 
+
+
+localhost observations
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * DONE: latex preamble and symbol changes at source, rather than in the ``../00000*`` :r:`805`
+
+      * ``~/h/hfag/mods/webapp/hfagc/resources/latex-preamble.xml``
+
+v008 ipng fix
+~~~~~~~~~~~~~~~~
+
+
+  * PNG fix needs to be done again, and embedded in automated workflow
+
+      * one more afflicted, ie the last 54, this time : determined via html indices as before
+
+Find the number of days to pluck just the 54+54::
+
+        simon:00000 blyth$ ILLUSTRATOR_DAY=40 illustrator--svg2png $(illustrator--svgdir) - 
+        === illustrator--x2y- : svg2png found 108 source paths in /data/heprez/data/images/qtags/ilcs_svg_glyphs_used younger than 40 days to convert
+        /data/heprez/data/images/qtags/ilcs_svg_glyphs_used/BR_-521_-2212+-211+-211+411+2212.svg
+        ...
+
+        illustrator--ipng  ## gets lots of remains valid, which is true so can just swap em in
+
+        pdfpng2apache-
+        pdfpng2apache-sync-ipng
+
+
+        cd $HEPREZ_DATA/images/apache/png
+        images-index > index.html  ## update index for a few new qtags 
+        open index.html # ie file:///data/heprez/data/images/apache/png/index.html
+
+
+
+v008 eight single code png extras remain afflicted
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Notice 8 single code afflicted (all extras) this should only effect previews, the qtags being the relevant ones for final statics::
+
+ * file:///data/heprez/data/images/apache/png/Sigma.png
+ * file:///data/heprez/data/images/apache/png/n74.png
+ * file:///data/heprez/data/images/apache/png/n75.png
+ * file:///data/heprez/data/images/apache/png/PartialBR.png
+ * file:///data/heprez/data/images/apache/png/p75.png
+ * file:///data/heprez/data/images/apache/png/p50.png
+ * file:///data/heprez/data/images/apache/png/p74.png
+ * file:///data/heprez/data/images/apache/png/p90.png  
+
+
+
+15:34 sync to servers::
+
+       HEPREZ_SYNC_YES=1 heprez-sync   
+       HEPREZ_SYNC_YES=1 heprez-sync hfag.phys.ntu.edu.tw   
+       compilation-tgztest              ## this does the asciicheck, which passed
+
+
+15:50 sync SVN working copy on G,C,H to propagate v008 scrape envvars, then::
+
+    hapache-prepare
+    sudo /sbin/service httpd stop   ## now works the same on C and H (following apache cleanup at v007)
+    sudo /sbin/service httpd start
+
+15:56 Basic scan from hub http://dayabay.phys.ntu.edu.tw/ looks OK
+
+16:17 v008 notification :r:`808` 
+
+
+post v007 replace all qtag PNGs May 17
+----------------------------------------
+
+Replace illegible latex2html PNGs with illustrator svg2png conversions. 
+Determine extent of PNG affliction via creating html indices. The most recent 53 PNGs of each type have the black backgrounds::
+
+         heprez-
+         cd $HEPREZ_DATA/images/qtags/png
+
+         images-
+         ls -1t sl*.png | images-index- > index.html
+         ls -1t   *.png | grep -v sl | images-index- > index.html
+
+         ls -1tl sl*.png > out
+
+         52 -rw-r--r--  1 blyth  admin  1024 16 Apr 12:52 slBR_-531_313+443.png
+         53 -rw-r--r--  1 blyth  admin   581 16 Apr 12:52 slBR_-521_-211+20423xoBR_-521_-211+-211+211.png
+         54 -rw-r--r--  1 blyth  admin  1932  6 Mar 20:03 slBR_-511_-413+10433xBR_10433_0+311+321+413+423.png
+         55 -rw-r--r--  1 blyth  admin  1182  6 Mar 20:03 slBR_-511_81+311xBR_81_22+443.png
+
+         ls -1tl *.png | grep -v sl > out   
+
+         52 -rw-r--r--  1 blyth  admin  1390 16 Apr 12:52 BR_-531_313+443.png
+         53 -rw-r--r--  1 blyth  admin   941 16 Apr 12:52 BR_-521_-211+20423xoBR_-521_-211+-211+211.png
+         54 -rw-r--r--  1 blyth  admin  2745  6 Mar 20:03 BR_-511_-413+10433xBR_10433_0+311+321+413+423.png
+         55 -rw-r--r--  1 blyth  admin  2065  6 Mar 20:03 BR_-511_81+311xBR_81_22+443.png
+
+
+Swapped in with ``pdfpng2apache-sync-ipng`` 
+
+#. ratios are nice and legible using scaling of 300
+#. but single liners are excessibely big ... can detect this based on "xo" in the file name  
+
+   #. pick a lesser scaling for non-xo and check 
+   
+       * file:///data/heprez/data/images/apache/png/index.html
+       * file:///data/heprez/data/images/qtags/ipng/index.html
+
+::
+
+        simon:ipng blyth$ ls -1tr *.png  | grep -v xo  | wc -l       ## only 14 
+        simon:ipng blyth$ rm $(ls -1tr *.png  | grep -v xo)          ## remove the non-xo ie single decker 
+        simon:ipng blyth$ ILLUSTRATOR_DAY=30 illustrator--svg2png    ## regenerate with 200/300 single/double decker scaling 
+
+
+Overnight ``~/heprez/logs/ipng-20120517.txt``::
+
+        simon:ipng blyth$ ILLUSTRATOR_DAY=3650 illustrator--svg2png    ## push to consistent full set 
+        simon:ipng blyth$ ls -1tr *.png | wc -l                        ## full set of 1100 converted in ~70min
+        simon:ipng blyth$ images-index > index.html                    ## looks OK
+
+        simon:ipng blyth$ pdfpng2apache-sync-ipng   ## local sync over to apache 
+
+        simon:png blyth$ ls -ltr *.png | wc -l      ## 1800 = 1100 + 700     (700 single code PNGs, 1100 qtag PNGs)  
+
+
+13:00 May 17 Sync the now legible PNGs across to servers::
+
+        g4pb-2:ipng blyth$ HEPREZ_SYNC_YES=1 images-sync
+        g4pb-2:ipng blyth$ HEPREZ_SYNC_YES=1 images-sync hfag.phys.ntu.edu.tw
+
+
+
+
+v007 May 14
+------------
+
+21:39 Verify all code changes are propagated into webapp ``exist-up-hfagc``
+
+21:40 check for changes on cms01, using ``exist2qxml.py`` reveals nothing new, last change::
+
+   http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_dspi.xml    2012-05-10T10:33:13Z 
+
+21:41 Cleanup DB on G using ``exist-cli``::
+
+   exist:/db/cache/hfagc>rmcol 20120510    ## took ~6min 
+   exist:/db/hfagc_prod>rmcol end_of_2011  ## ~2min
+
+21:49 Update scrape dates :r:`788` adjust refbackup to try to avoid the warnings from v006::
+
+  simon:qxml blyth$ cd /data/heprez/data/backup/part/localhost/
+  simon:localhost blyth$ ln -sf 2012/May10-2244 refbackup
+
+21:54 Get ``envchk-cf`` consistent by ``exist-stop/start`` in Terminal.app
+
+22:02 Kill all non-essential apps (Mail, Safari...)
+
+22:04 ``heprez-prepare--`` in fresh Terminal.app (for clean logging and creater reliability):: 
+
+   ~/heprez/logs/heprez-prepare-20120514.txt 
+        completed quickly ~6 min as no new images/qtags to handle
+        no indice changes relative to updated refbackup
+
+22:14 ``heprez-update``   
+
+08:20  looking OK ``~/heprez/logs/heprez-update-20120514.txt``::
+
+       old=/data/heprez/data/scrape/20120510/hfagc/00000/00000/b2charm_end_of_2011_v006_tables.tex
+       new=/data/heprez/data/scrape/20120514/hfagc/00000/00000/b2charm_end_of_2011_v007_tables.tex
+       diff $old $new  | wc -l    
+           2072      ## in addition to expected pubold to pub etc.. changes, notice curiosity of  footnote reordering 
+
+10:35 ``hapache-prepare`` on G, then  ``sudo apachectl stop/start`` and will need to reload cached pages quick localhost check OK
+
+10:51 :r:`789` add ``compilation-asciicheck`` which passes
+
+10:52 ``HEPREZ_SYNC_YES=1 heprez-sync``  took ~6 min
+
+11:03 ``HEPREZ_SYNC_YES=1 heprez-sync hfag.phys.ntu.edu.tw`` took 
+
+11:08 sync SVN working copy on G,C,H as need common new scrape envvars prior to ``hapache-prepare`` on C,H followed by a bounce on C::
+
+    hapache-prepare
+    sudo /sbin/service httpd stop
+    sudo /sbin/service httpd start
+
+11:14 On H tidy up the multiple apache mess::
+
+        [blyth@hfag blyth]$ ll /etc/init.d/{apa,tt
+        lrwxrwxrwx    1 root     root           51 May 16  2008 /etc/init.d/apache -> /data/usr/local/apache2/httpd-2.0.59/sbin/apachectl
+        lrwxrwxrwx    1 root     root           51 May  7  2007 /etc/init.d/apache2 -> /data/usr/local/apache2/httpd-2.0.59/sbin/apachectl
+        -rwxr-xr-x    1 root     root         2601 Nov 12  2009 /etc/init.d/httpd
+
+        [blyth@hfag init.d]$ cp httpd ~/
+        [blyth@hfag init.d]$ sudo rm apache apache2 httpd
+        [blyth@hfag init.d]$ sudo ln -s /data/usr/local/apache2/httpd-2.0.59/sbin/apachectl httpd
+
+        Allowing to bounce on H in same way as C (in future)
+
+        [blyth@hfag blyth]$ sudo apachectl stop
+        [blyth@hfag blyth]$ sudo /sbin/service httpd start
+
+
+11:27 basic checks
+
+#. http://cms01.phys.ntu.edu.tw
+#. http://cms01.phys.ntu.edu.tw/downloads/
+#. http://hfag.phys.ntu.edu.tw
+#. http://hfag.phys.ntu.edu.tw/downloads/
+
+
+11:29 check the tarball ``compilation-tgztest``
+
+11:52 tighten loose language in key :r:`790` and propagate to downloads::
+
+   HEPREZ_SYNC_YES=1 compilation-sync cms01.phys.ntu.edu.tw
+   HEPREZ_SYNC_YES=1 compilation-sync hfag.phys.ntu.edu.tw
+
+12:03 notice that hfag is ~1hr behind::
+
+        [blyth@hfag blyth]$ date
+        Tue May 15 11:06:07 GMT+8 2012
+        [blyth@cms01 ~]$ date
+        Tue May 15 12:03:41 CST 2012
+
+12:00 link box visibility is controlled via hypersetup from preamble, presumably this is getting overriden in the report, so do this setup at head and tail of tables  :r:`790`
+
+12:38 propagate hypersetup location change to tarballs and test::
+
+        compilation-update
+        HEPREZ_SYNC_YES=1 compilation-sync cms01.phys.ntu.edu.tw
+        HEPREZ_SYNC_YES=1 compilation-sync hfag.phys.ntu.edu.tw
+        compilation-tgztest
+      
+12:59 notify group re v007 :r:`791`     
+
+
+
+v006 May 10
+-------------
+
+22:30 Cleanup DB on G using ``exist-cli``::
+
+    exist:/db/hfagc_prod>rmcol end_of_2011
+    exist:/db/cache/hfagc>rmcol 20120422
+
+22:35 Check last changes for v006 with an ``exist2qxml.py`` **remote.dbxml**  run::
+
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_dsstpi.xml                               2012-05-10T02:56:44Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/lhcb/yasmine/lhcb_winter2011_Bs2DsKoverBs2Dspi.xml           2012-05-10T03:26:07Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/lhcb/yasmine/lhcb_winter2011_Bs2DKst.xml                     2012-05-10T03:27:48Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/lhcb/yasmine/lhcb_winter2011_Bs2DKstoverB2Drho.xml           2012-05-10T03:29:49Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_DS1D.xml                                 2012-05-10T10:30:54Z
+        http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/belle/andrzej/belle_dspi.xml                                 2012-05-10T10:33:13Z
+
+22:44 ``heprez-propagate`` 
+
+22:50 Update scrape dates and versions, and do ``envchk-cf`` and ``exist-stop/start`` in **Terminal.app**
+
+22:59 ``heprez-prepare--`` after launching Illustrator and killing all non-essential apps 
+
+
+23:04 ctrl-C thru::
+
+        === indices-compare : NO BACKUP /data/heprez/data/backup/part/localhost/refbackup/db/hfagc_system/qtag2latex.xml 
+        === bash-error : sleeping forever ... ctrl-C out of the sleep to continue the function or cmd-W to close the tab and kill me
+
+23:08 ditto::
+
+        === indices-compare : NO BACKUP /data/heprez/data/backup/part/localhost/refbackup/db/hfagc_system/qtag2svgs.xml 
+        === bash-error : sleeping forever ... ctrl-C out of the sleep to continue the function or cmd-W to close the tab and kill me
+
+23:10 ditto::
+
+        === indices-compare : NO BACKUP /data/heprez/data/backup/part/localhost/refbackup/db/hfagc_system/qtag2pngs.xml 
+        === bash-error : sleeping forever ... ctrl-C out of the sleep to continue the function or cmd-W to close the tab and kill me
+
+23:20::
+
+        === indices-compare : NO BACKUP /data/heprez/data/backup/part/localhost/refbackup/db/hfagc_system/v2qtags.xml 
+        === bash-error : sleeping forever ... ctrl-C out of the sleep to continue the function or cmd-W to close the tab and kill me
+
+23:23 completed ``~/heprez/logs/heprez-prepare-20120510-pm.txt``        
+
+23:25 ``heprez-update``
+
+11:20 ``hapache-prepare`` on G, then **must** bounce apache to see the change  ``sudo apachectl stop/start`` and will need to reload cached pages 
+
+11:50 passes pure ascii check::
+
+    compilation-cd
+    asciicheck.py b2charm_end_of_2011_v006_tables.tex
+
+11:59 ``HEPREZ_SYNC_YES=1 heprez-sync``  took ~5 min
+12:15 ``HEPREZ_SYNC_YES=1 heprez-sync hfag.phys.ntu.edu.tw`` took ~7 min
+
+12:27 sync SVN working copy on G,C,H as need common new scrape envvars prior to ``hapache-prepare`` on C,H
+
+12:32 ``hapache-prepare`` on C+H followed by a bounce::
+
+    hapache-prepare
+    sudo /sbin/service httpd stop
+    sudo /sbin/service httpd start
+
+12:35 quick check OK on cms01
+
+#. http://cms01.phys.ntu.edu.tw
+#. http://cms01.phys.ntu.edu.tw/downloads/
+
+
+12:40 huh http://hfag.phys.ntu.edu.tw generic page, wrong apache?::
+
+        === apache-conf-connect : /data/usr/local/heprez/install/apache/conf/heprez.conf is already connected to /data/usr/local/apache2/httpd-2.0.59/etc/apache2/httpd.conf
+        [blyth@hfag blyth]$ ps aux | grep apache
+        apache   10888  0.0  3.6 21452 9312 ?        S    11:35   0:00 /usr/sbin/httpd
+        apache   10889  0.0  3.6 21452 9312 ?        S    11:35   0:00 /usr/sbin/httpd
+        apache   10890  0.0  3.6 21452 9328 ?        S    11:35   0:00 /usr/sbin/httpd
+
+YEP, wrong apache::
+
+        [blyth@hfag blyth]$ ll /etc/init.d/{apa*,htt*}
+        lrwxrwxrwx    1 root     root           51 May 16  2008 /etc/init.d/apache -> /data/usr/local/apache2/httpd-2.0.59/sbin/apachectl
+        lrwxrwxrwx    1 root     root           51 May  7  2007 /etc/init.d/apache2 -> /data/usr/local/apache2/httpd-2.0.59/sbin/apachectl
+        -rwxr-xr-x    1 root     root         2601 Nov 12  2009 /etc/init.d/httpd
+
+Fix::
+
+        [blyth@hfag blyth]$ sudo /sbin/service httpd stop
+        Stopping httpd:                                            [  OK  ]
+        [blyth@hfag blyth]$ sudo /sbin/service apache start
+
+
+
+#. http://hfag.phys.ntu.edu.tw
+#. http://hfag.phys.ntu.edu.tw/downloads/
+
+
+13:14 inhibit rezdb editing on cms01 with ``sudo /sbin/service tomcat stop``
+
+13:52 check the tarball ``compilation-tgztest``
+
+14:00 send v006 announcement :r:`781`
+
+
+
+
+v005 Weekend 21st 22nd April 2012
+-----------------------------------
+
+SVG2PDF : avoiding applescript path length limitation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First sign SVGs with caption::
+
+   rezs:qt2svglabel error the index needs to be created
+
+Looking back see that missed an error in pdf2svg similar to the file path limitation seen in svg2pdfpng ~/heprez/logs/heprez-prepare-20120422.txt::
+
+	=== pdf2svg-convert-fast : looking for conversions to perform beneath /data/heprez/data/images/qtags
+	/data/heprez/data/images/applescript/illustrator/pdf2svg_one.scpt: execution error: Adobe Illustrator got an error: Bad name for file. some object (-37)
+	make: *** [ilcs_svg_glyphs_used/BR_-511_-211+10413xoBR_-511_-211+-211+211+411xPartialBR_10413_-211+211+411.svg] Error 1
+
+
+
+	pdf2svg- svg2pdfpng BR_-521_-321+441xBR_441_-2212+2212xoBR_-521_-321+443xoBR_443_-2212+2212.svg
+	/data/heprez/data/images/applescript/illustrator/svg2pdfpng.scpt: execution error: Adobe Illustrator got an error: Bad name for file. some object (-37)
+	make[1]: *** [BR_-521_-321+441xBR_441_-2212+2212xoBR_-521_-321+443xoBR_443_-2212+2212.png] Error 1
+	make: *** [indv/BR_-521_-321+441xBR_441_-2212+2212xoBR_-521_-321+443xoBR_443_-2212+2212/] Error 2
+
+
+Finding the afflicted svg, regeneration will need a full rerun::
+
+	g4pb-2:hfagc blyth$ find . -name '*.svg' -exec grep -H -o rezs:qt2svglabel {} \;
+	./indv/BR_-521_-321+441xBR_441_-2212+2212xoBR_-521_-321+443xoBR_443_-2212+2212/BR_-521_-321+441xBR_441_-2212+2212xoBR_-521_-321+443xoBR_443_-2212+2212.svg:rezs:qt2svglabel
+	./indv/BR_-521_-321+90xBR_90_333+443xoBR_-521_-321+333+443/BR_-521_-321+90xBR_90_333+443xoBR_-521_-321+333+443.svg:rezs:qt2svglabel
+	./indv/BR_-531_-313+421/BR_-531_-313+421.svg:rezs:qt2svglabel
+	./indv/Sigma_541_xBR_541_211+443xoSigma_521_xoBR_521_321+443/Sigma_541_xBR_541_211+443xoSigma_521_xoBR_521_321+443.svg:rezs:qt2svglabel
+
+	g4pb-2:hfagc blyth$ find . -name '*.svg' -exec grep -H -o rezs:qt2svgsabel {} \;
+	./00103/03113/03113.svg:rezs:qt2svgsabel
+	./00104/03114/03114.svg:rezs:qt2svgsabel
+	./00106/03116/03116.svg:rezs:qt2svgsabel
+	rezs:qt2svgsabel
+	rezs:qt2svgsabel
+	rezs:qt2svgsabel
+	rezs:qt2svgsabel
+	rezs:qt2svgsabel
+	./00206/03216/03216.svg:rezs:qt2svgsabel
+	./00408/01408/01408.svg:rezs:qt2svgsabel
+	./00504/03504/03504.svg:rezs:qt2svgsabel
+	./00603/03613/03613.svg:rezs:qt2svgsabel
+	rezs:qt2svgsabel
+	rezs:qt2svgsabel
+	rezs:qt2svgsabel
+
+
+Eye Dropper Issue
+~~~~~~~~~~~~~~~~~~~~
+
+Before the path length workaround hit **eydropper options** at 03504.svg - on clicking OK : Illustrator crashes, proceeds normally on rerunning 
+Added debug to identify the SVG that induces it, see if same next time.
+
+Next time captured an error message from it::
+
+	/data/heprez/data/images/applescript/illustrator/svg2pdfpng.scpt: execution error: Adobe Illustrator got an error: File/Folder expected (1230)
+	make[1]: *** [BR_-531_443+10221xBR_10221_-211+211.png] Error 1
+	make: *** [indv/BR_-531_443+10221xBR_10221_-211+211/] Error 2
+
+
+Looks hopeful, **fingers crossed that eyedropper issue may be resolved now that shield illustrator from long paths** the one full run after the pathlength fix
+did not hit the eyedropper.
+
+
+Forcing recreation of qtag2svgs.xml : rerun 22nd April
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The problems from applescript path length restriction were twofold:
+
+#. PDG->SVG : resulting in not updating qtag2svgs.xml meaning that all new qtags (lhcb results) lacked SVG labels
+#. SVG->PDF/PNG : in comb and indv plot the new qtags had error msgs rezs:qt2 rather than labels 
+
+As the v005 rerun was fixing an issue inside the SVGs (lack of long labels), had to force recreation with a touch::
+
+        heprez-prepare-- failed to update the qtag2svgs.xml
+        exist:/db/hfagc_system>ls
+        -rwur-ur--      admin   dba     qtag2latex.xml  Sun Apr 22 00:59:55 CST 2012
+        -rwur-ur--      admin   dba     qtag2svgs.xml   Sun Apr 22 14:13:00 CST 2012   <<< was not updated, so forced it 
+        -rwur-ur--      admin   dba     v2qtags.xml     Sun Apr 22 01:14:56 CST 2012
+
+        g4pb-2:fonts blyth$ svgsmry-
+        g4pb-2:fonts blyth$ svgsmry-svgtouch
+        === svgsmry-svgtouch : touching /data/heprez/data/images/pdg/ilcs_svg_glyphs_used/p1.svg
+        g4pb-2:fonts blyth$ 
+
+
+Correcting when qtag2pngs.xml is updated 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Its outdated::
+
+        exist:/db/hfagc_system>
+        -rwur-ur--      admin   dba     qtag2pngs.xml   Wed Feb 03 20:26:39 CST 2010
+
+
+Provides tables of image links::
+
+        <qtag2pngs xmlns:exist="http://exist.sourceforge.net/NS/exist" exist:id="1" exist:source="/db/hfagc_system/qtag2pngs.xml" count="420">
+            <now stamp="1265199973018" modified="2010-02-03T20:26:13.18+08:00"/>
+            <qtag value="Apara:97:94,100443" index="1">
+                <pngs>
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="/images/pdf/Apara_97_94+100443.pdf">
+                                    <img src="/images/png/Apara_97_94+100443.png" alt="\vert{\cal{A}}_{\parallel}\vert~{2} ( B \to \psi(2S) K~{*} )"/>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </pngs>
+            </qtag>
+
+
+From "images-illus"::
+
+   local apachepng=$HFAG_IMAGES_FOLDER/png  ## this is $HEPREZ_DATA/images/apache/png
+   mkdir -p $apachepng
+   [ ! -d "$apachepng" ] && echo $msg ABORT no apachepng $apachepng sleeping ... && sleep 1000000000000
+
+   indices-update qtag2svgs $svgsummary
+   indices-update qtag2pngs $apachepng        ## HUH COMPARING AGAINST A DIRECTORY : DIRECTORY TIMESTAMPS ARE NOT A RELIABLE THING TO USE
+   #indices-update v1qtags   $qtag2latex  
+   indices-update v2qtags   $qtag2latex
+
+
+Using a directory as a trigger is unwise::
+
+        g4pb-2:~ blyth$ ls -ld $HFAG_IMAGES_FOLDER/png 
+        drwxr-xr-x  1799 blyth  admin  61166 20 May  2009 /data/heprez/data/images/apache/png
+
+        g4pb-2:~ blyth$ touch $HFAG_IMAGES_FOLDER/png          ## MANUAL KLUDGE AND RUN heprez-prepare-- again 
+        g4pb-2:~ blyth$  ls -ld $HFAG_IMAGES_FOLDER/png
+        drwxr-xr-x  1799 blyth  admin  61166 22 Apr 22:15 /data/heprez/data/images/apache/png
+        g4pb-2:~ blyth$ 
+
+
+Better to use files, which could be marker files only::
+
+        g4pb-2:~ blyth$ heprez-xtalk qtag2latex
+        /data/heprez/data/images/indices/qtag2latex.xml
+        g4pb-2:~ blyth$ heprez-xtalk qtag2svgs
+        /data/heprez/data/images/indices/qtag2svgs.xml
+        g4pb-2:~ blyth$ heprez-xtalk qtag2pngs
+        /data/heprez/data/images/indices/qtag2pngs.xml
+
+        g4pb-2:~ blyth$ ll /data/heprez/data/images/indices/qtag2pngs.xml
+        -rw-r--r--  1 blyth  admin  207504  3 Feb  2010 /data/heprez/data/images/indices/qtag2pngs.xml
+
+
+
+COMPILATION AVOID 4 BLANK PAGES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+4 blank portrait pages amidst the tables, due to a sideways with no content from empty precursors ?
+Presumably issue emerges now, due to many more empty categories in **v2** scheme.
+
+::
+
+	\end{\hftabletype}
+	\clearpage  % attempt to reduce memory consumption
+	\begin{\hftabletype}[\hftableposn]
+	%recurse::flat reading file:[../../00107/02107/02107-table_body.tex,] 
+	%recurse::flat reading file:[../../00107/03107/03107-table_body.tex,] 
+	%recurse::flat reading file:[../../00107/04107/04107-table_body.tex,] 
+	\end{\hftabletype}
+	\clearpage  % attempt to reduce memory consumption
+	\begin{\hftabletype}[\hftableposn]
+	\tiny  % controlled by negative ipole causing tinyization 
+
+	%recurse::flat reading file:[../../00108/01108/01108-table_body.tex,] 
+
+
+The src of the .tex is from :local:`xmldb/db/cache/hfagc/20120422/00000/00000/table.tml` which comprises bunch of inputbody elements that 
+is styled by :trunk:`hfag/mods/webapp/hfagc/resources/simple-html-table-5-latex.xsl`
+
+
+::
+
+      <inputshell p="1" src="../../00000/00000/00000-table_body.tex" dyn-url="/hfagc/00000/table_body/tex?" pro-fmt="tex" pro-pos="00000" is-leaf="true" pro-base="/hfagc/00000/00000/00000-table_body" src-path="/db/cache/hfagc/20120422/00000/00000/table.tml" src-time="1335046205016" src-date="2012-04-22T06:10:05.16+08:00"/>
+      <inputbody p="2" src="../../99999/99999/99999-table_body.tex" dyn-url="/hfagc/99999/table_body/tex?" pro-fmt="tex" pro-pos="99999" is-leaf="true" is-pole="false" is-tiny="false" is-cpag="false" tablin="-1" pro-base="/hfagc/99999/99999/99999-table_body" src-path="/db/cache/hfagc/20120422/99999/99999/table.tml"/>
+      <inputbody p="3" src="../../00101/01101/01101-table_body.tex" dyn-url="/hfagc/01101/table_body/tex?" pro-fmt="tex" pro-pos="01101" is-leaf="true" is-pole="true" is-tiny="false" is-cpag="false" tablin="8" pro-base="/hfagc/00101/01101/01101-table_body" src-path="/db/cache/hfagc/20120422/00101/01101/table.tml" src-time="1335031240329" src-date="2012-04-22T02:00:40.329+08:00"/>
+      <inputbody p="4" src="../../00101/02101/02101-table_body.tex" dyn-url="/hfagc/02101/table_body/tex?" pro-fmt="tex" pro-pos="02101" is-leaf="true" is-pole="true" is-tiny="true" is-cpag="false" tablin="37" pro-base="/hfagc/00101/02101/02101-table_body" src-path="/db/cache/hfagc/20120422/00101/02101/table.tml" src-time="1335031273927" src-date="2012-04-22T02:01:13.927+08:00"/>
+      <inputbody p="5" src="../../00101/03101/03101-table_body.tex" dyn-url="/hfagc/03101/table_body/tex?" pro-fmt="tex" pro-pos="03101" is-leaf="true" is-pole="false" is-tiny="false" is-cpag="false" tablin="-1" pro-base="/hfagc/00101/03101/03101-table_body" src-path="/db/cache/hfagc/20120422/00101/03101/table.tml"/>
+      <inputbody p="6" src="../../00101/04101/04101-table_body.tex" dyn-url="/hfagc/04101/table_body/tex?" pro-fmt="tex" pro-pos="04101" is-leaf="true" is-pole="false" is-tiny="false" is-cpag="false" tablin="-1" pro-base="/hfagc/00101/04101/04101-table_body" src-path="/db/cache/hfagc/20120422/00101/04101/table.tml"/>
+  
+
+Change stylesheet, add predicate to '//inputbody', but thats not so easy due to the rest of that template
+so instead change underlying xquery to prevent the pesky inputbody with not content appearing in 1st place.
+
+
+RAGBAG OF FIXES FOR LHCb INCORPORATION
+----------------------------------------
+
+#. 1st full with LHCb, FIXED THESE, **lhcb** was being mis-classified as qty::
+
+     [exec] <get pos="lhcb" status="NPPNCPUSRNSR" err="1" time="51.890" size="13068" pro-path="/data/heprez/data/scrape/20120417/hfagc/lhcb/lhcb.html">
+     [exec] <uurl><![CDATA[http://localhost:9090/hfagc/lhcb/html?apt=save&bpt=save]]></uurl>
+     [exec] </get>
+     [exec] <get pos="00000" status="NPPNCPUSRNSR" err="2" time="15.571" size="25353" pro-path="/data/heprez/data/scrape/20120417/hfagc/00000/00000.html">
+     [exec] <uurl><![CDATA[http://localhost:9090/hfagc/00000/html?apt=save&bpt=save]]></uurl>
+     [exec] </get>
+
+
+#. FIXED : links embedded in SVGs are broken : made them server relative
+
+#. FIXED : :local:`b2charm/end_of_2011/lhcb.html`
+
+      #. The requested URL :local:`b2charm/end_of_2011/lhcb.html` was not found on this server.
+      #. MODIFIED :trunk:`hfag/mods/webapp/hfagc/sitemap.xmap.template`
+      #. and **exist-fill-templates** after **exist-up**
+      #. then needed **hapache-statics** after static template update 
+      #. but apparents from "NO_SUCH_QTY" error from :trunk:`hfag/mods/webapp/hfagc/modes-indv.xq` that is misclassified, was a missing change in sitemap.xmap.template 
+         now using :envvar:`HFAG_PIPED_GROUPS`
+
+#. DONE add LHCb to plots : change the key 
+
+#. FIXED long term issue, Safari does not honour group transforms in SVG : works OK in illustrator
+
+#. DONE get apache full view operational
+
+   #. just needed hapache-prepare and an apachectl bounce
+
+#. DONE heprez-propagate the /db/hfagc  
+
+#. DONE backport the v2 scheme, test with target v2qtags-makeindex from $HEPREZ_HOME/images/indices
+
+#. DONE compare and achieve match between sys/backported with tmp/ 
+
+#. DONE images-prepare following yasmine fixes (images-prepare does v1qtags-makeindex, update to use new scheme v2 by default here and elsewhere )
+
+    #. DONE initially an xquery failure to create qtag2latex.xml went unnoticed, improved error checking to avoid that 
+    
+#. DONE perform old world avg with average-prepare
+
+#. DONE compare timings while purging exist DB, in hope of speed increases :ticket:`170` 
+
+#. DONE direct backup from live exist DB into dbxml containers, implemented via exist servlet URLs to avoid java, avoids tedious going via backups everytime
+
+#. DONE propagate new qwn into chiba forms, xsd2xhtml see :ticket:`176`
+
+#. DONE summary groups latex document with tables for each group and their names and qtys
+
+#. DONE LHCb and v2 scheme category additions needed for :trunk:`hfag/mods/webapp/hfagc/resources/latex-preamble.xml`
+
+
+

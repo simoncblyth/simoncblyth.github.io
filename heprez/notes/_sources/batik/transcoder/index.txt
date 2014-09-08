@@ -1,0 +1,119 @@
+SVG to JPEG demo
+===================
+
+* http://xmlgraphics.apache.org/batik/using/transcoder.html
+
+
+Demo
+-----
+
+Below steps have been made into `batik-` bash functions::
+
+    simon:transcoder blyth$ batik-
+    simon:transcoder blyth$ batik-get             # download the distribution
+    simon:transcoder blyth$ batik-svg2jpg-build   # compile the demo java
+    simon:transcoder blyth$ batik-svg2jpg-ex
+    /data/heprez/data/scrape/20130325/hfagc/00208/01218/01218.svg
+    simon:transcoder blyth$ batik-svg2jpg $(batik-svg2jpg-ex) /tmp/out.jpg
+    /data/heprez/data/scrape/20130325/hfagc/00208/01218/01218.svg:1: warning: failed to load external entity "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"
+    W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"
+                                                                                   ^
+    time java -cp /usr/local/heprez/future/batik/transcoder:/usr/local/heprez/future/batik/batik-1.7/batik.jar SaveAsJPEG 01218_nometa.svg
+
+    real    0m9.630s
+    user    0m5.883s
+    sys     0m0.784s
+    simon:transcoder blyth$ open /tmp/out.jpg 
+
+
+
+Step by Step
+--------------
+
+
+Compile
+~~~~~~~~
+
+::
+
+    simon:transcoder blyth$ batik-jar
+    /usr/local/heprez/future/batik/batik-1.7/batik.jar
+    simon:transcoder blyth$ javac -cp $(batik-jar) SaveAsJPEG.java 
+    simon:transcoder blyth$ ll
+    total 16
+    -rw-r--r--  1 blyth  staff  1009  4 Apr 17:25 SaveAsJPEG.java
+    -rw-r--r--  1 blyth  staff  1444  4 Apr 17:31 SaveAsJPEG.class
+
+
+Pick an SVG
+~~~~~~~~~~~~
+
+::
+
+    simon:data blyth$ find $HEPREZ_DATA -name '.svg' | wc -l
+        3042
+
+    simon:data blyth$ open $HEPREZ_DATA/scrape/20130325/hfagc/00208/01218/01218.svg
+    simon:transcoder blyth$ cp $HEPREZ_DATA/scrape/20130325/hfagc/00208/01218/01218.svg .
+
+
+Try to transcode
+~~~~~~~~~~~~~~~~~~
+
+::
+
+    simon:transcoder blyth$ java -cp .:$(batik-jar) SaveAsJPEG  01218.svg
+    Exception in thread "main" org.apache.batik.transcoder.TranscoderException: null
+    Enclosed Exception:
+    The current document is unable to create an element of the requested type (namespace: http://www.w3.org/2000/svg, name: now).
+            at org.apache.batik.transcoder.XMLAbstractTranscoder.transcode(XMLAbstractTranscoder.java:134)
+            at org.apache.batik.transcoder.SVGAbstractTranscoder.transcode(SVGAbstractTranscoder.java:156)
+            at SaveAsJPEG.main(SaveAsJPEG.java:27)
+
+
+Remove metadata element
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Despite the warning, succeed to remove the metadata element::
+
+    simon:transcoder blyth$ xsltproc $(heprez-home)/hfag/mods/webapp/hfagc/resources/strip-metadata.xsl 01218.svg > 01218_nometa.svg
+    01218.svg:1: warning: failed to load external entity "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"
+    W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"
+                                             
+    simon:transcoder blyth$ xmllint --format 01218_nometa.svg  | more
+
+
+Try again
+~~~~~~~~~~~
+
+::
+
+    simon:transcoder blyth$ time java -cp .:$(batik-jar) SaveAsJPEG  01218_nometa.svg
+
+    real    0m14.804s
+    user    0m5.878s
+    sys     0m0.856s
+
+
+Check the jpg
+~~~~~~~~~~~~~~~
+
+::
+
+    simon:transcoder blyth$ open out.jpg 
+
+
+#. not as bad as i recall
+#. dinky math font, but legible-ish
+
+   * numbers seem to use too large a font wrt other symbols, leading to overlapping
+
+#. title, key and axis text is missing
+
+
+
+
+
+
+
+

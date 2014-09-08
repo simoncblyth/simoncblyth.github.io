@@ -1,0 +1,173 @@
+
+=====
+TODO
+=====
+
+* URL change of Sphinx docs to be more google friendly 
+
+   * http://dayabay.phys.ntu.edu.tw/h/ to http://dayabay.phys.ntu.edu.tw/heprez/
+
+
+INTEGRATION
+===========
+
+AFS access
+-----------
+
+* try regain AFS via IHEP : sent to maqm 
+* try regain AFS via SLAC : sent to Tim
+
+Mars has AFS
+^^^^^^^^^^^^^
+
+::
+
+        [mars] /home/hep/blyth > export CVSROOT=/afs/slac.stanford.edu/www/xorg/hfag/cvs
+        [mars] /home/hep/blyth > cvs checkout Papers
+        cvs [checkout aborted]: /afs/slac.stanford.edu/www/xorg/hfag/cvs/CVSROOT: Permission denied
+        [mars] /home/hep/blyth > 
+
+
+
+URGENT DEVELOPMENT
+===================
+
+decouple fast from slow scraping
+----------------------------------
+
+Decouple fast text html,tex,svg pulling out of queries from slow conversions to pdf,jpg,png 
+
+    #. skip jpg rendition of the PDF compilation 
+    #. skip all binary conversions on query pass, do these (or omit where possible) in separate pass
+    #. combination page latex is not useful without flattening : so skip and just retain PDF link ? 
+    #. exist console full of convert errors failing to create jpg from ps :heprez:`ticket:177`
+
+
+NON URGENT DEVELOPMENT 
+========================
+
+enhancements
+-------------
+
+#. more prominent link to http://www.slac.stanford.edu/xorg/hfag/
+
+#. find home for reference links such as http://www.xquery.co.uk/tutorial_xquery_get_started/get_tutorial_page/xquery_global_variables
+
+#. fix rezdb previews for multi factor qwn (maybe with MathJax)
+
+#. investigate clientside javascript possibilities : MathJax and JSXChart 
+
+#. cache kicks in only on 3rd pass :ticket:`178`
+
+#. suppress non-contributors in tables (and plots?)
+
+#. automated charge conservation checking ? can the charge be systematically be determined from PDG code without too much pain ? or is that in pdg.xml ?
+
+#. factor out latex2html conversions in the automated workflow, this was manually done post v007 ``end_of_2011`` 
+
+   #. primary issue is if the metrics from the latex2html conversion are still needed ?
+
+.. digraph:: foo
+
+   "tex" -> "pdf";
+   "tex" -> "png" [label=latex2html, color=red] ;
+   "pdf" -> "svg";
+   "svg" -> "opdf";
+   "svg" -> "opng" [label=illustrator, color=green] ;
+
+#. longer term want to move away from commercial illustrator (eg to inkscape)
+
+#. Trac RST previews fail to handle the Sphinx toctree directive, eg 
+
+   * some Trac config switch to get rid of RST previewing ?
+   * http://dayabay.phys.ntu.edu.tw/tracs/heprez/browser/trunk/qxml/index.rst
+   * http://trac.edgewall.org/ticket/9915  takes approach of making error messages less objectionable, 
+   * I would prefer presentation of source RST as plain text, without renaming all .rst to .txt
+
+
+recursion inversion
+--------------------
+
+#. current hidden approach : inflexible, difficult to optimize, difficult error handling 
+
+#. do recursion at top level : quickly yield combination html (hmm maybe move to xhtml to avoid having to have xml fragments + final html) then recurse over links within that and so on 
+
+#. this differs from current arrangement where it the comb page waits on it dependents 
+
+#. compilation latex relies on having run scape and created already all the .tex : somewhat wrong ordering for setting shrinkages
+
+
+qxml : dbxml based alternative to eXist
+-----------------------------------------
+
+#. qxml : make which maps to load cli controllable
+
+#. exist2qxml.py : shakedown selective running, maybe getting interference with map loading ?
+
+#. exist2qxml.py : metadata checking, seeing some suprising timestamps reported, in the ballpark but hours off 
+
+#. look into qxml scrape based off transfered /db/hfagc_prod into avg.dbxml : ie retain exist avg but try to benefit from qxml speed for the scrape  
+
+#. mode presentation uses the product particle ordering from the first corresponding mode with the qtag 
+
+   #. this is not reproducible in dbxml due to node ordering differneces (eg 9 qtags in qtag2xml have different presentation)
+   #. this technique is liberally sprinkled, not so easy to change even if an approach can be identified 
+
+#. xquery module renaming and reorganisation, rezu rezt rezx meanings have been lost due to difficult exist development environment
+
+
+misc
+------
+
+* DONE : ``exist-up-hfagc`` warns ``WILL NEED exist-place-xsl`` but ``exist-place-xsl`` sees nothing to do, change it to be based on diffs :r:`776`
+
+* DONE : hfag, suspect that a reboot will lead to the wrong apache getting started .. cleaned up init.d
+
+* DONE : table 72, overlap  http://hfag.phys.ntu.edu.tw/b2charm/00109.html
+* DONE : missing key table : suspect r759 the 99999 collection not created 
+* DONE : broken table link in key caption due to incorrect hardcoded last table following classification change::
+
+    * ``table.xq`` is source for the key caption, changed::
+         \ref{tab:hfc03300} to \ref{tab:hfc04300}
+
+* DONE : Yasmine in the : "who we are"
+
+   #. /db/hfagc_system/members.xml is sourced from ~/heprez/hfag/mods/webapp/hfagc/system/members.xml 
+   #. propagated by `heprez-prepare--/exist-prepare`
+
+
+within 00104, one LHCb result appears twice (FIXED)
+-------------------------------------------------------
+
+  * :cms01:`b2charm/end_of_2011/BR_-521_-211+443xoBR_-521_-321+443.html`
+  * :cms01:`b2charm/end_of_2011/1204030.html`
+  * :cms01:`b2charm/end_of_2011/1204010.html`
+
+**pig-in-poke** issue, implicated with qwn mis-classification
+---------------------------------------------------------------
+
+:cms01:`b2charm/end_of_2011/00108.html`  :heprez:`ticket:171`
+
+  * also range based plot splitting involved
+  * DONE : belle result mis-classification implicated, so get that fixed before investigating further
+  * DONE : fixed up error SVG to avoid remedial ``simon:20120417 blyth$ mv ./hfagc/00108/01128/01128.svg ./hfagc/00108/01128/01128.svg.dud``
+  * :cms01:`b2charm/end_of_2011/01128.svg`
+
+SUPERCEEDED SINGLE REZ VISIBLE (FIXED v006)
+--------------------------------------------
+
+Superceeded results should be visible, only "inactive" are hidden, 
+
+* http://cms01.phys.ntu.edu.tw/b2charm/0905018.html
+
+* ``rez.xq`` invokes ``rezt:present-rez``, include superceeded in :r:`775`
+
+::
+
+   echo "distinct-values(collection('rem')//rez:status)" | qxml -
+
+   active
+   inactive
+   superceeded
+
+

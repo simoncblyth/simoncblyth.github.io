@@ -1,0 +1,76 @@
+CONTEXT OF SVG SUMMARY
+========================
+
+
+What uses svg-summary.xml ? How is it used ?
+-----------------------------------------------
+
+Snippets from the summary are grabbed by XQuery `$ss//svg:g[@id=$code]`
+
+
+::
+
+     b2mc:h heprez$ vi ./hfag/mods/webapp/hfagc/xquery/rezs.xqm
+
+     307 declare function rezs:qdisp-svgs-ilcs($codes as xdt:anyAtomicType* , $scale as xs:string , $squeeze as xs:string , $trans as xs:string , $opt as xs:string) as node()*
+     308 {
+     309     let $ss  := doc( "/db/hfagc_system/svg-summary.xml" )
+     310     let $ucodes := $codes
+     311                 (:
+     312                    if(fn:substring($codes,1,3) = "all") then
+     313                          rezs:all-codes(fn:substring-after($codes,"all")) else fn:tokenize($codes,",")
+     314                 :)
+     315     let $dscale := xs:double( $scale )
+     316     let $names  := (for $code in $ucodes return rezx:code2name( $code))
+     317     let     $svgs := (for $code in $ucodes return $ss//svg:g[@id=$code])
+     318     let    $nsvg  := fn:count($svgs)
+
+
+Unfortunately, many other forms of use (this code predates my seeing the light regards SCM)::
+
+     b2mc:h heprez$ vi ./hfag/mods/webapp/hfagc/xquery/make-plot.xqm
+
+     1166 declare function rezs:qtset2svg(      ## looks highly developed
+
+
+Actually qtag2svgs.xml looks more relevant::
+
+    39 declare variable $rezs:qtag2svgs_index  as xs:string { "/db/hfagc_system/qtag2svgs.xml" } ;
+
+    1637 declare function rezs:qt2svgsabel( $qt as xs:string , $opt as xs:string ) as element() {
+    1638 
+    1639     let $sabel := if( doc-available($rezs:qtag2svgs_index) ) then
+    1640                      doc($rezs:qtag2svgs_index)//qtag[@value=$qt]/svgs/sabel/*
+    1641                   else
+    1642                      <text x="0" y="0"> no sabel[{$qt}] </text>
+    1643     return
+    1644        if( not(empty($sabel))) then
+    1645           if( count($sabel) = 1 ) then
+    1646             $sabel
+    1647           else
+    1648             <g>multisabel {$sabel}</g>
+    1649      else
+    1650           <text x="0" y="0" > rezs:qt2svgsabel error the index needs to be created </text>
+    1651 };
+    1652 
+
+BUT that is constructed by `$ss//svg:g[@id=..]` lookups on the svg-summary:: 
+
+    1563 declare function rezs:qtag2svgs-makeindex( $pass as xs:string ) {
+    1564    let $hfagc := collection("/db/hfagc")
+    1565    let $col   := xdb:collection( "/db/hfagc_system" , "admin" , $pass )
+    1566    let $ss    := doc("/db/hfagc_system/svg-summary.xml")
+    1567    let $qtags := for $t in distinct-values( $hfagc//rez:qtag ) where $t castable as xs:string order by xs:string($t) return xs:string($t)
+    1568    return
+    1569       xdb:store( $col , "qtag2svgs.xml" ,
+    1570          <qtag2svgs count="{count($qtags)}" >
+    1571          { t:now() }
+    1572              {
+    1573                 for $qt at $pqt in $qtags
+    1574                 let $qtn   := rezu:qt2name( $qt )
+    1575                 let $slqtn    := concat("sl", $qtn )
+    1576                 let $ss-sabel := $ss//svg:g[@id=$slqtn]
+    1577                 let $ss-label := $ss//svg:g[@id=$qtn]
+
+
+

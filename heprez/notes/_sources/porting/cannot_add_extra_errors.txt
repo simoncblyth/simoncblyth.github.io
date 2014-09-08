@@ -1,0 +1,582 @@
+
+[MAYBE FIXED] Cannot Add Extra Errors
+======================================
+
+* http://130.87.106.59:8080/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2DsDs.xml
+
+  * cannot add extra errors issue, http://cms01.phys.ntu.edu.tw/rezdb/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2DsDs.xml
+
+
+Reproduce in test environment
+------------------------------
+
+Login as guest to /db/test
+
+#. http://130.87.106.59:8080/rezdb/db/test/
+#. replace default template `/db/stylesheets/rez-instance-template.xml` with `/db/hfagc/cdf/cdfyasmine/cdf_fall2012_Bs2DsDs.xml`
+#. change default resource name from something.xml to cdf_fall2012_Bs2DsDs.xml
+#. hit create
+
+#. edit the newly created test resource 
+#. the Xerrors/Xerr "Append" button does nothing
+
+
+Understanding why
+-------------------
+
+Examine the XML
+~~~~~~~~~~~~~~~~~~
+
+Raw xml shows a closed tags for http://130.87.106.59:8080/xmldb/db/test/cdf_fall2012_Bs2DsDs.xml::
+
+    <rez:xerrors/>
+ 
+In contrast the http://130.87.106.59:8080/xmldb/db/stylesheets/rez-instance-template.xml has a placeholder::
+
+    <xerrors>
+        <xerr>
+            <errname>model</errname>
+            <type>absolute</type>
+            <symm>0.2</symm>
+            <plus/>
+            <minus/>
+        </xerr>
+    </xerrors>
+
+Create new resource 
+~~~~~~~~~~~~~~~~~~~~~
+
+#. Create `test_xerror_adding.xml` using the default template 
+#. the 3rd error:model shows up 
+#. delete the Xerror and submit, gets you to::
+
+    <rez:xerrors/>
+
+#. thus only get a chance to set the Xerror at creation, and if you delete there is no way to get it back
+
+#. try deleting the syst::
+
+    <rez:errors>
+        <rez:err>
+            <rez:errname>stat</rez:errname>
+            <rez:type>absolute</rez:type>
+            <rez:symm/>
+            <rez:plus>1.3</rez:plus>
+            <rez:minus>1.4</rez:minus>
+        </rez:err>
+    </rez:errors>
+
+#. and then the stat::
+
+    <rez:errors/>
+    <rez:xerrors/>
+
+#. same issue : cannot append once down to zero
+
+
+#. try with mode specification, deleting the Prod down to zero::
+
+    <rez:mode>
+        <rez:src>-511</rez:src>
+        <rez:qwn>BR</rez:qwn>
+        <rez:ccimpl>on</rez:ccimpl>
+        <rez:mtag>BR:-511:</rez:mtag>
+    </rez:mode>
+
+#. in contrast this works, can create a prod out of nothing::
+
+    <rez:mode>
+    <rez:src>-511</rez:src>
+    <rez:prod>111</rez:prod>
+    <rez:qwn>BR</rez:qwn>
+    <rez:ccimpl>on</rez:ccimpl>
+    <rez:mtag>BR:-511:111</rez:mtag>
+    </rez:mode>
+
+#. a prod is very simple though, just an element with a code 
+
+Source check
+~~~~~~~~~~~~
+
+Check how the xforms are customized
+
+* h/chiba/xsd2xhtml/build.xml
+
+::
+
+    290              <!-- correct the empty repeat problem -->
+    291             <filter token="begin.empty.fix" value="${close}" />
+    292             <filter token="end.empty.fix"   value="${open}" />
+
+
+::
+
+    b2mc:xslxsd heprez$ vi fix-form-3.xsl
+    b2mc:xslxsd heprez$ pwd
+    /Users/heprez/h/chiba/xsd2xhtml/src/xslxsd
+
+
+::
+
+    410    <!--
+    411         handle the empty repeat problem 
+    412        as is done in actions.xhtml , by a constraint to skip the last
+    413        and by a preparation of the instance to stick a blank last entry in
+    414        the repeat ...
+    415 
+    416        the instances created will then need post-processing to regain standard
+    417        mode order and skip the last entry
+    418   
+    419        diddle the preexisting repeat nodeset to skip the last , and include
+    420        another that works with append
+    421 
+    422        this works for simple repeats like src and prod, but whatabout quote
+    423        and errors xerrors
+    424       
+    425 
+    426        doing an append and then a delete screws up the index somehow , seems
+    427        ok when all full
+    428       
+    429    -->
+
+
+::
+
+    464    <!--  
+    465   <xsl:template match="xforms:bind" >
+    466        <xsl:element name="xforms:bind" >
+    467            <xsl:apply-templates select="@*|node()" />
+    468         </xsl:element>   
+    469    </xsl:template>
+    470    -->
+    471 
+    472    <!--  begin.empty.fix(bind) @begin.empty.fix@  
+    473    <xsl:template match="xforms:bind[@xforms:nodeset='rez:src' 
+    474                                  or @xforms:nodeset='rez:prod' 
+    475                                  or @xforms:nodeset='rez:mode'
+    476                                  or @xforms:nodeset='rez:err'
+    477                                  or @xforms:nodeset='rez:xerr'
+    478                                  or @xforms:nodeset='rez:quote'
+    479                                  ]" >
+    480         
+    481         <xsl:variable name="bid"      select="@xforms:id"/> 
+    482         <xsl:variable name="bnodeset" select="substring-after(@xforms:nodeset,'rez:')" /> 
+    483 
+    484         <xsl:comment> add empty bind , allowing append </xsl:comment>
+    485         <xsl:element name="xforms:bind" >
+    486              <xsl:attribute name="dbg" ><xsl:value-of select="$bid" /></xsl:attribute>
+    487              <xsl:attribute name="id" ><xsl:value-of select="concat('empty-',$bid)" /> </xsl:attribute>
+    488              <xsl:attribute name="nodeset" ><xsl:value-of select="$bnodeset" /> </xsl:attribute>
+    489         </xsl:element>   
+    490 
+    491         <xsl:comment> 
+    492             modify the nodeset to skip the last in order to have a spare when
+    493             delete all visible NB cannot copy as need to process nested binds
+    494             the relevant seems not to do anything
+    495         </xsl:comment>
+    496         <xsl:element name="xforms:bind" >
+    497              <xsl:attribute name="nodeset" ><xsl:value-of select="concat($bnodeset,'[position()!=last()]')" /> </xsl:attribute>
+    498              <xsl:attribute name="relevant" ><xsl:value-of select="concat('count(../',$bnodeset,') &gt; 1')"/></xsl:attribute>
+    499              <xsl:for-each select="@*[local-name()!='nodeset' and local-name()!='relevant' ] " >
+    500                  <xsl:copy/>
+    501              </xsl:for-each>
+    502              <xsl:apply-templates select="*" /> 
+    503         </xsl:element>   
+    504 
+    505         <xsl:comment> following the magic incantation of actions.xhtml </xsl:comment>
+    506         <xsl:element name="xforms:bind" >
+    507               <xsl:attribute name="dbg" ><xsl:value-of select="$bid" /></xsl:attribute>
+    508               <xsl:attribute name="id" ><xsl:value-of select="concat('insert-',$bid)" /> </xsl:attribute>
+    509               <xsl:attribute name="nodeset" ><xsl:value-of select="$bnodeset"/></xsl:attribute>
+    510               <xsl:attribute name="readonly" ><xsl:value-of select="concat('count(../',$bnodeset,') = 1')"/></xsl:attribute>
+    511         </xsl:element>   
+    512    </xsl:template>
+    513   @end.empty.fix@  end.empty.fix (bind)  -->
+    514 
+    515
+    516    <!--
+    517        add "Append" button before the "Insert after selected" button 
+    518        and set a bind attribute on the insert after selected according to the
+    519        actions.xhtml example 
+    520    -->
+    521 
+    522  <!--  begin.empty.fix(group) @begin.empty.fix@       
+    523  <xsl:template match="xforms:group[
+    524                                 ./xforms:label='Src'
+    525                              or ./xforms:label='Prod' 
+    526                              or ./xforms:label='Mode'
+    527                              or ./xforms:label='Err'
+    528                              or ./xforms:label='Xerr'
+    529                              or ./xforms:label='Quote'
+    530                                     ]/xforms:trigger[./xforms:label='Insert after selected']">
+    531        
+    532  
+    533        <xsl:variable name="bbind" select="./xforms:action/xforms:insert/@xforms:bind"/> 
+    534        <xforms:trigger>
+    535             <xforms:label>Append</xforms:label>
+    536             <xforms:hint>appends a new entry at the end of this collection</xforms:hint>
+    537             <xforms:action>
+    538                 <xforms:insert>
+    539                     <xsl:attribute name="bind"><xsl:value-of select="concat('empty-',$bbind)" /></xsl:attribute>
+    540                     <xsl:attribute name="xforms:at">last() - 1</xsl:attribute>
+    541                     <xsl:attribute name="position">after</xsl:attribute>
+    542                 </xforms:insert>
+    543             </xforms:action>
+    544        </xforms:trigger>
+    545    
+    546        <xsl:element name="xforms:trigger" >
+    547              <xsl:attribute name="bind"><xsl:value-of select="concat('insert-',$bbind)" /></xsl:attribute>
+    548              <xsl:for-each select="@*[local-name()!='bind']" >
+    549                  <xsl:copy/>
+    550              </xsl:for-each>
+    551              <xsl:for-each select="*" >
+    552                   <xsl:copy-of select="."  />
+    553              </xsl:for-each>
+    554         </xsl:element>   
+    555                     
+    556    </xsl:template>
+    557    @end.empty.fix@ end.empty.fix(group) -->
+    558 
+
+
+Thoughts
+~~~~~~~~~~~
+
+The real fix requires more knowledge of chiba xforms (an obsolete project) that I care to acquire, 
+but some kind of workaround stylesheet that can be applied to a quote from the rezdb interface to add back 
+empties seems that it might be easily tractable.
+
+Maybe apply a stylesheet transform at creation from template that fills in empties.
+
+
+rezdb create button
+~~~~~~~~~~~~~~~~~~~~
+
+
+The rezdb interface is implemented in xquery and xtylesheets, the heart is the xquery.
+
+* `h/hfag/mods/webapp/hfagc/bookinfo-insert-sm.xq`
+
+
+Submission from the chiba xforms POSTS to the rezdb instance page::
+
+     <xforms:submission xforms:action="/rezdb{$doc}?elem={$elem}&amp;action={$action}&amp;start={$start}&amp;otart={$otart}&amp;howmany={$howmany}&amp;user={$user}&amp;pass={$pass}" id="submission_0" xforms:method="post"/>
+
+
+chiba access to instances of individual quotes or headers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+From `hfag/mods/webapp/hfagc/sitemap.xmap.template`::
+
+     703              <map:match  pattern="provide-instance.xq">
+     704                  <map:generate src="provide-instance.xq" type="xquery" label="sauce"  />
+     705                  <map:transform src="xmldb:exist:///db/stylesheets/no-ns-one-spare-no-exre.xsl" />
+     706                  <map:select type="request-parameter" >
+     707                        <map:parameter name="parameter-name" value="strip" />
+     708                        <map:when test="yes" >
+     709                             <map:transform src="context://hfagc/stylesheets/strip.xsl" />
+     710                        </map:when>
+     711                        <map:otherwise>
+     712                        </map:otherwise>
+     713                   </map:select>
+     714                   <map:serialize type="xml"/>
+     715              </map:match>
+
+
+
+Use **cocoon-view=sauce** to see the generator output::
+
+    b2mc:h heprez$ curl -s "http://localhost:9090/hfagc/provide-instance.xq?elem=quote&start=1&doc=/db/test/test_xerror_adding.xml&cocoon-view=sauce" | xmllint --format -
+    <?xml version="1.0" encoding="UTF-8"?>
+    <exist:result xmlns:exist="http://exist.sourceforge.net/NS/exist" hash="ixml:content-hash:-511111BRonBR:-511:111active-5.30.00001-BR:-511:111">
+      <rez:quote xmlns:rez="http://hfag.phys.ntu.edu.tw/hfagc/rez" exist:id="25" exist:source="/db/test/test_xerror_adding.xml" mode="pro" time="2013-07-15T18:21:35.841+0900" stamp="1373880095841" stamp_hash="ixml:content-hash:-511111BRonBR:-511:111active-5.30.00001-BR:-511:111" stamp_id="25" stamp_source="/db/test/test_xerror_adding.xml">
+        <rez:mode>
+          <rez:src>-511</rez:src>
+          <rez:prod>111</rez:prod>
+          <rez:qwn>BR</rez:qwn>
+          <rez:ccimpl>on</rez:ccimpl>
+          <rez:mtag>BR:-511:111</rez:mtag>
+        </rez:mode>
+        <rez:status>active</rez:status>
+        <rez:pdg>-</rez:pdg>
+        <rez:title/>
+        <rez:comment/>
+        <rez:value>
+          <rez:number>5.3</rez:number>
+          <rez:unit>0.00001</rez:unit>
+          <rez:signif/>
+          <rez:ltype>-</rez:ltype>
+          <rez:limit/>
+          <rez:cl/>
+        </rez:value>
+        <rez:errors/>
+        <rez:xerrors/>
+        <rez:qtag>BR:-511:111</rez:qtag>
+      </rez:quote>
+    </exist:result>
+    b2mc:h heprez$ 
+
+
+
+where the spares come from
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+`hfag/mods/webapp/hfagc/provide-instance.xq` gives single quotes or header based on request, with the spare src and prod added (for chiba benefit)::
+
+
+    b2mc:h heprez$ curl -s "http://localhost:9090/hfagc/provide-instance.xq?elem=quote&start=1&doc=/db/test/test_xerror_adding.xml" | xmllint --format -
+    <?xml version="1.0" encoding="UTF-8"?>
+    <quote stamp_hash="ixml:content-hash:-511111BRonBR:-511:111active-5.30.00001-BR:-511:111" stamp_id="25" stamp_source="/db/test/test_xerror_adding.xml" mode="pro" time="2013-07-15T18:21:35.841+0900" stamp="1373880095841">
+      <status>active</status>
+      <pdg>-</pdg>
+      <title/>
+      <comment/>
+      <value>
+        <number>5.3</number>
+        <unit>0.00001</unit>
+        <signif/>
+        <ltype>-</ltype>
+        <limit/>
+        <cl/>
+      </value>
+      <errors/>
+      <xerrors/>
+      <qtag>BR:-511:111</qtag>
+      <mode>
+        <src>-511</src>
+        <src/>
+        <prod>111</prod>
+        <prod/>
+        <qwn>BR</qwn>
+        <ccimpl>on</ccimpl>
+        <mtag>BR:-511:111</mtag>
+      </mode>
+      <mode>
+        <src>-511</src>
+        <src/>
+        <prod>111</prod>
+        <prod/>
+        <qwn>BR</qwn>
+        <ccimpl>on</ccimpl>
+        <mtag>BR:-511:111</mtag>
+      </mode>
+    </quote>
+
+
+Try document with a third error::
+
+     curl -s "http://localhost:9090/hfagc/provide-instance.xq?elem=quote&start=1&doc=/db/test/bchdspi0.xml" | xmllint --format -
+
+The last err or xerr is duplicated by the stylesheet::
+
+    b2mc:h heprez$ curl -s "http://localhost:9090/hfagc/provide-instance.xq?elem=quote&start=1&doc=/db/test/bchdspi0.xml" | xmllint --format -
+    <?xml version="1.0" encoding="UTF-8"?>
+    <quote stamp_hash="ixml:content-hash:-521-431111BRonBR:-521:-431,111active-$\bar{B}^- \rightarrow D_s^- \pi^0$1.50.000014.9-statabsolute0.50.4systabsolute0.1Ds BRabsolute0.2BR:-521:-431,111" stamp_id="51" stamp_source="/db/test/bchdspi0.xml" mode="pro" time="2008-06-05T16:43:34.062-0800" stamp="1212713014062">
+      <status>active</status>
+      <pdg>-</pdg>
+      <title>$\bar{B}^- \rightarrow D_s^- \pi^0$</title>
+      <comment/>
+      <value>
+        <number>1.5</number>
+        <unit>0.00001</unit>
+        <signif>4.9</signif>
+        <ltype>-</ltype>
+        <limit/>
+        <cl/>
+      </value>
+      <errors>
+        <err>
+          <errname>stat</errname>
+          <type>absolute</type>
+          <symm/>
+          <plus>0.5</plus>
+          <minus>0.4</minus>
+        </err>
+        <err>
+          <errname>syst</errname>
+          <type>absolute</type>
+          <symm>0.1</symm>
+          <plus/>
+          <minus/>
+        </err>
+        <err>
+          <errname>syst</errname>
+          <type>absolute</type>
+          <symm>0.1</symm>
+          <plus/>
+          <minus/>
+        </err>
+      </errors>
+      <xerrors>
+        <xerr>
+          <errname>Ds BR</errname>
+          <type>absolute</type>
+          <symm>0.2</symm>
+          <plus/>
+          <minus/>
+        </xerr>
+        <xerr>
+          <errname>Ds BR</errname>
+          <type>absolute</type>
+          <symm>0.2</symm>
+          <plus/>
+          <minus/>
+        </xerr>
+      </xerrors>
+      <qtag>BR:-521:-431,111</qtag>
+      <mode>
+        <src>-521</src>
+        <src/>
+        <prod>-431</prod>
+        <prod>111</prod>
+        <prod/>
+        <qwn>BR</qwn>
+        <ccimpl>on</ccimpl>
+        <mtag>BR:-521:-431,111</mtag>
+      </mode>
+      <mode>
+        <src>-521</src>
+        <src/>
+        <prod>-431</prod>
+        <prod>111</prod>
+        <prod/>
+        <qwn>BR</qwn>
+        <ccimpl>on</ccimpl>
+        <mtag>BR:-521:-431,111</mtag>
+      </mode>
+    </quote>
+
+
+Due to the xforms fixing the spares do not appear in the interface, but they are there ready to be used for appending
+from empty.
+
+
+When catching POST data with `hfag/mods/webapp/hfagc/bookinfo-insert-sm.xq` the 
+spares in the last slot are removed::
+
+    157                                  if ( $action = "Update" ) then
+    158                                       (: catch the edited data for the quote, parse it as xml, transform it, and store it temporarily :)
+    159                                       let $pdata  := util:catch( "java.lang.Exception",request:get-request-data(), "<error/>" )
+    160                                       let $tmpdoc := concat( "/db/chiba/",$user,$doc , "_" , $elem, "_", $start )
+    161 
+    162                                       (: 
+    163                                           add-ns-remove-spare.xsl has spare removal for the last "quote" "src" "prod" "err" and "xerr" 
+    164                                           which is applied to the parsed POST data prior to saving into /db/chiba 
+    165                                           eg http://130.87.106.59:8080/xmldb/db/chiba/guest/db/test/test_xerror_adding.xml_quote_1
+    166                                       :)
+    167                                       let $chiba  := util:catch( "java.lang.Exception" ,
+    168                                           ixml:parsetransform( $pdata , $tmpdoc  , $user , $pass , "xmldb:exist:///db/stylesheets/add-ns-remove-spare.xsl" ,
+    169                                                 <parameters>
+    170                                                 <param name="stamp"        value="{$tstamp}" />
+    171                                                 <param name="time"         value="{$fstamp}" />
+    172                                                 <param name="anno"         value="{$elem}" />
+    173                                                 </parameters>
+    174                                                 ),
+    175                                           concat( "exception in ixml:parsetransform", $util:exception-message)
+    176                                           )
+
+
+With http://130.87.106.59:8080/xmldb/db/stylesheets/add-ns-remove-spare.xsl
+
+
+    
+::
+
+    b2mc:h heprez$ find . -name add-ns-remove-spare.xsl
+    ./chiba/integration/add-ns-remove-spare.xsl
+         
+
+
+
+
+
+Possible Solution
+~~~~~~~~~~~~~~~~~
+
+Detect and recover instances with empty error or xerror by planting spares
+
+::
+
+    b2mc:h heprez$ find . -name no-ns-one-spare-no-exre.xsl
+    ./chiba/xsd2xhtml/src/xslxml/no-ns-one-spare-no-exre.xsl
+
+
+Grab a quote with the empty issue and a normal::
+
+    b2mc:h heprez$ curl -s "http://localhost:9090/hfagc/provide-instance.xq?elem=quote&start=1&doc=/db/test/test_xerror_adding.xml&cocoon-view=sauce" | xmllint --format - > /tmp/k/provide-instance-xq-demo.xml
+    b2mc:h heprez$ curl -s "http://localhost:9090/hfagc/provide-instance.xq?elem=quote&start=1&doc=/db/test/bchdspi0.xml&cocoon-view=sauce" | xmllint --format - > /tmp/k/provide-instance-xq-demo-normal.xml
+
+
+Test transform::
+
+    xsltproc ~/h/chiba/xsd2xhtml/src/xslxml/no-ns-one-spare-no-exre-no-empties.xsl  /tmp/k/provide-instance-xq-demo.xml 
+
+
+
+Where do these stylesheets get uploaded to xmldb ?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The contents of /db/stylesheets contains all the xsl from 
+
+* http://130.87.106.59:8080/xmldb/db/stylesheets/
+* *chiba-stylesheets*
+
+need to protect chiba from the namespaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Avoid putting bare elements in the stylesheet to keep ns-less.
+
+
+update exist/chiba on cms01
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    [blyth@cms01 ~]$ exist-
+    [blyth@cms01 ~]$ exist-propagate- webapp/hfagc 
+    [blyth@cms01 ~]$ exist-place-xsl
+    === exist-place-xsl : xmllint --xinclude present-instance.xsl --output /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/stylesheets/present-instance.xsl
+    === exist-place-xsl : xmllint --xinclude db2html-scb.xsl --output /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/stylesheets/db2html-scb.xsl
+
+    [blyth@cms01 ~]$ chiba-
+    [blyth@cms01 ~]$ chiba-stylesheets
+
+    [blyth@cms01 ~]$ exist-fill-templates 
+    === exist-fill-templates : a e /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/docs/security.xml from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/docs/security.xml.template
+    NOT updated
+    === exist-fill-templates : a e /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : a e /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc.9dec2011/xquery/env.xqm.template
+    UPDATED
+    === exist-fill-templates : a e /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/sitemap.xmap from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/sitemap.xmap.template
+    UPDATED
+    === exist-fill-templates : a e /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm from /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/xquery/env.xqm.template
+    UPDATED
+    [blyth@cms01 ~]$ 
+
+
+
+
+Test with http://cms01.phys.ntu.edu.tw/rezdb/db/test/b0colsup.xml before bouncing the problem is there
+
+::
+
+     curl -s "http://localhost:9090/hfagc/provide-instance.xq?elem=quote&start=1&doc=/db/test/b0colsup.xml&cocoon-view=sauce" | xmllint --format - 
+
+
+
+Failed to load the stylesheet::
+
+    [blyth@cms01 exist_]$ ./putt.py /db/stylesheets/no-ns-one-spare-no-exre-no-empties.xsl /home/blyth/heprez/chiba/xsd2xhtml/src/xslxml --host localhost --port 9090
+    empty result
+    fsmt 2013-07-16 11:56:18 
+    dbmt 1970-01-01 08:00:00 
+    empty result
+    error in putt ... not stamp change 1970-01-01 08:00:00 
+    [blyth@cms01 exist_]$ 
+
+
+This was due to a permission denied from out of date password.
+

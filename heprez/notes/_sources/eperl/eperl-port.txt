@@ -1,0 +1,384 @@
+
+EMBEDDED PERL ON b2mc
+=======================
+
+Missing EPerlLib
+-----------------
+
+from exist-start stdout during *heprez-update*  JNI issues
+
+::
+
+    ...
+    Method 0:       2.92 +/-   0.04
+    Method 2:       2.92 ( +0.04  -0.04)     
+    out to java
+    2.922532912058983
+    0.04333196209914236
+    -0.043331962099143695
+    hits: 934163; misses: 642; thrashing: 3; thrashing: 3
+    hits: 1885718; misses: 120; thrashing: 1; thrashing: 1
+    log4j: rolling over count=5002068
+    log4j: maxBackupIndex=1
+    log4j: Renaming file /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs/exist.log to /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs/exist.log.1
+    log4j: setFile called: /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs/exist.log, false
+    log4j: setFile ended
+    log4j: rolling over count=5000827
+    log4j: maxBackupIndex=1
+    log4j: Renaming file /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs/exist.log to /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs/exist.log.1
+    log4j: setFile called: /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/WEB-INF/logs/exist.log, false
+    log4j: setFile ended
+    hits: 1194034; misses: 972; thrashing: 4; thrashing: 4
+    no EPerlLib in java.library.path /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/lib/native
+    eperl.InterpreterException no EPerlLib in java.library.path, /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/lib/native 
+    27 Jun 2013 19:13:08,812 [P1-9] WARN  (ServletHandler.java [handle]:574) - Error for /hfagc/00101/html?apt=save&bpt=save
+    java.lang.UnsatisfiedLinkError: eperl.jni.PerlInterpreter.allocate(I)V
+        at eperl.jni.PerlInterpreter.allocate(Native Method)
+        at eperl.jni.PerlInterpreter.constructor(Unknown Source)
+        at eperl.jni.PerlInterpreter.<init>(Unknown Source)
+        at eperl.util.EPerlScript.<init>(Unknown Source)
+        at eperl.util.EPerlScript.getInstance(Unknown Source)
+        at org.hfag.util.EPerlScriptAdapter.<init>(EPerlScriptAdapter.java:142)
+        at org.hfag.xquery.modules.iperl.EPerlScriptFunction.eval(EPerlScriptFunction.java:121)
+        at org.exist.xquery.BasicFunction.eval(BasicFunction.java:52)
+        at org.exist.xquery.PathExpr.eval(PathExpr.java:144)
+
+java.lang.UnsatisfiedLinkError::
+
+        at org.mortbay.http.HttpConnection.handle(HttpConnection.java:846)
+        at org.mortbay.http.SocketListener.handleConnection(SocketListener.java:244)
+        at org.mortbay.util.ThreadedServer.handle(ThreadedServer.java:345)
+        at org.mortbay.util.ThreadPool$PoolThread.run(ThreadPool.java:530)
+        27 Jun 2013 19:13:10,551 [P1-9] WARN  (ServletHandler.java [handle]:574) - Error for /hfagc/00102/html?apt=save&bpt=save
+        java.lang.UnsatisfiedLinkError: eperl.jni.PerlInterpreter.allocate(I)V
+        at eperl.jni.PerlInterpreter.allocate(Native Method)
+        at eperl.jni.PerlInterpreter.constructor(Unknown Source)
+        at eperl.jni.PerlInterpreter.<init>(Unknown Source)
+        at eperl.util.EPerlScript.<init>(Unknown Source)
+        at eperl.util.EPerlScript.getInstance(Unknown Source)
+        at org.hfag.util.EPerlScriptAdapter.<init>(EPerlScriptAdapter.java:142)
+        at org.hfag.xquery.modules.iperl.EPerlScriptFunction.eval(EPerlScriptFunction.java:121)
+        at org.exist.xquery.BasicFunction.eval(BasicFunction.java:52)
+        at org.exist.xquery.PathExpr.eval(PathExpr.java:144)
+        at org.exist.xquery.DynamicCardinalityCheck.eval(DynamicCardinalityCheck.java:63)
+        at org.exist.xquery.functions.util.CatchFunction.eval(CatchFunction.java:74)
+        at org.exist.xquery.PathExpr.eval(PathExpr.java:144)
+
+
+can tickle with::
+
+   b2mc:~ heprez$ curl "http://localhost:9090/hfagc/00101/html?apt=save&bpt=save"
+
+
+::
+
+    == exist-start : with JAVA_OPTIONS
+    -Xms512M
+    -Xmx1024M
+    -Dfile.encoding=UTF-8
+    -Dwebapp.home=/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4
+    -Dlog4j.debug=
+    -Dlog4j.configuration=file:///Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/log4j.xml
+    -Djava.library.path=/Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/lib/native
+    -Dperl.script.path=/Users/heprez/data/install/eperl/scripts/tpdflatex.pl
+    -Dhfag.scrape=
+    -Dhfag.images.folder=/Users/heprez/data/data/images/apache
+    -Dlocal.admin.passwd=censored
+    -Djava.awt.headless=true
+
+
+No natives::
+
+    b2mc:~ heprez$ ll /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/lib/native/
+    total 0
+    drwxr-xr-x  8 heprez  staff  272 Mar 20 18:26 ..
+    drwxr-xr-x  2 heprez  staff   68 Mar 20 18:26 .
+    b2mc:~ heprez$ 
+
+From *exist-start*::
+
+    export JAVA_OPTIONS=$(cat << EOO
+       $jvm -Dfile.encoding=UTF-8 $EXIST_JVM_EXTRA
+      -Dwebapp.home=$EXIST_HOME 
+      -Dlog4j.debug=
+      -Dlog4j.configuration=file://$EXIST_HOME/log4j.xml 
+      -Djava.library.path=$EXIST_HOME/lib/native 
+      -Dperl.script.path=$HEPREZ_INSTALL/eperl/scripts/tpdflatex.pl
+      -Dhfag.scrape=$HFAG_SCRAPE 
+      -Dhfag.images.folder=$HFAG_IMAGES_FOLDER 
+      -Dlocal.admin.passwd=$LOCAL_ADMIN_PASSWD 
+      -Djava.awt.headless=true
+    EOO);
+
+
+From G::
+
+    simon:~ blyth$ heprez-
+    simon:~ blyth$ exist- 
+    simon:~ blyth$ ll $EXIST_HOME/lib/native/
+    total 2632
+    drwxr-xr-x  8 blyth  admin      272 19 May  2009 ..
+    -rw-r--r--  1 blyth  admin  1346880  4 Feb  2010 libEPerlLib.jnilib
+    drwxr-xr-x  3 blyth  admin      102  4 Feb  2010 .
+
+
+The K build is deficient. Due to non-ppc the is-darwin flag was not set and
+part of *eperl-build* was missing.::
+
+    b2mc:~ heprez$ eperl-build
+    === eperl-build :
+    === cpptasks-get : jar /Users/heprez/data/install/ant/cpptasks-1.0b5/target/lib/cpptasks.jar exists already
+    === cpptasks-get : lrwxr-xr-x 1 heprez staff 69 Mar 19 20:02 cpptasks.jar -> /Users/heprez/data/install/ant/cpptasks-1.0b5/target/lib/cpptasks.jar
+    === cpptasks-get : -rw-r--r-- 1 heprez staff 363944 Mar 19 20:02 /Users/heprez/data/install/ant/cpptasks-1.0b5/target/lib/cpptasks.jar
+    === junit-get : this is used by the eperl build
+    === log4j-get : this is used by the eperl build
+    Buildfile: build.xml
+
+    perl-place:
+         [echo] placing perl modules ready for inclusion in the jar 
+         [echo] placing perl modules ready for file system reads, flexible during development
+
+    example:
+         [echo] EPerl: /Users/heprez/heprez/eperl/build.xml
+
+    init:
+
+    jar:
+
+    java-compile:
+         [echo] EPerl: /Users/heprez/heprez/eperl/build.xml
+
+    jni-headers:
+        [javah] [Search path = /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsfd.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar:/System/Library/Frameworks/JavaVM.framework/Frameworks/JavaRuntimeSupport.framework/Resources/Java/JavaRuntimeSupport.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/ui.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/laf.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/sunrsasign.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsse.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jce.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/charsets.jar:/Users/heprez/data/install/log4j/log4j.jar:/Users/heprez/data/install/junit/junit.jar:/tmp/eperl.build/classes]
+        [javah] [Loaded /tmp/eperl.build/classes/eperl/jni/PerlInterpreter.class]
+        [javah] [Loaded /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar(java/lang/Object.class)]
+        [javah] [Loaded /tmp/eperl.build/classes/eperl/collections/StringArray.class]
+        [javah] [Loaded /tmp/eperl.build/classes/eperl/collections/StringHash.class]
+        [javah] [No need to update file /tmp/eperl.build/headers/eperl_jni_PerlInterpreter.h]
+
+    cpp-compile-darwin:
+           [cc] Starting dependency analysis for 1 files.
+           [cc] 1 files are up to date.
+           [cc] 0 files to be recompiled from dependency analysis.
+           [cc] 1 total files to be compiled.
+           [cc] /Users/heprez/heprez/eperl/src/cpp/EPerlInterpreter_jni.cpp:7:17: error: jni.h: No such file or directory
+           [cc] In file included from /Users/heprez/heprez/eperl/src/cpp/EPerlInterpreter_jni.cpp:12:
+           [cc] /Users/heprez/heprez/eperl/src/cpp/JniUtility.h:8: error: 'jni::ConvJString' declared as an 'inline' variable
+           [cc] /Users/heprez/heprez/eperl/src/cpp/JniUtility.h:8: error: 'JNIEnv' was not declared in this scope
+           [cc] /Users/heprez/heprez/eperl/src/cpp/JniUtility.h:8: error: 'env' was not declared in this scope
+           [cc] /Users/heprez/heprez/eperl/src/cpp/JniUtility.h:8: error: expected primary-expression before 'const'
+           [cc] /Users/heprez/heprez/eperl/src/cpp/JniUtility.h:8: error: initializer expression list treated as compound expression
+
+
+
+
+On G::
+
+    simon:e blyth$  echo $JAVA_HOME
+
+    simon:e blyth$ java-
+    simon:e blyth$  echo $JAVA_HOME
+    /Library/Java/Home
+    simon:e blyth$ 
+    simon:e blyth$ ll $JAVA_HOME/include/
+    total 488
+    drwxr-xr-x   8 root  wheel    272  7 Dec  2007 ..
+    -rw-r--r--   1 root  wheel  64940 11 Aug  2009 jvmti.h
+    -rw-r--r--   1 root  wheel  22210 11 Aug  2009 jvmpi.h
+    -rw-r--r--   1 root  wheel  39354 11 Aug  2009 jvmdi.h
+    -rw-r--r--   1 root  wheel    468 11 Aug  2009 jni_md.h
+    -rw-r--r--   1 root  wheel  68529 11 Aug  2009 jni.h
+    -rw-r--r--   1 root  wheel   5926 11 Aug  2009 jdwpTransport.h
+    -rw-r--r--   1 root  wheel    490 11 Aug  2009 jawt_md.h
+    -rw-r--r--   1 root  wheel   8498 11 Aug  2009 jawt.h
+    -rw-r--r--   1 root  wheel  10052 11 Aug  2009 JDWPCommands.h
+    -rw-r--r--   1 root  wheel   1701 11 Aug  2009 JDWP.h
+    -rw-r--r--   1 root  wheel    472 11 Aug  2009 AWTCocoaComponent.h
+    drwxr-xr-x  13 root  wheel    442 12 Sep  2009 .
+    simon:e blyth$ 
+
+
+On K, the java headers have moved::
+
+    b2mc:~ heprez$ echo $JAVA_HOME
+    /Library/Java/Home
+    b2mc:~ heprez$ ll $JAVA_HOME/include/
+    ls: /Library/Java/Home/include/: No such file or directory
+    b2mc:~ heprez$ 
+
+    b2mc:~ heprez$ ll /System/Library/Frameworks/JavaVM.framework/Headers/
+    total 408
+    -rw-r--r--   1 root  wheel  77539 Nov  8  2011 jvmti.h
+    -rw-r--r--   1 root  wheel    507 Nov  8  2011 jni_md.h
+    -rw-r--r--   1 root  wheel  68336 Nov  8  2011 jni.h
+    -rw-r--r--   1 root  wheel   5926 Nov  8  2011 jdwpTransport.h
+    -rw-r--r--   1 root  wheel   1987 Nov  8  2011 jawt_md.h
+    -rw-r--r--   1 root  wheel   8498 Nov  8  2011 jawt.h
+    -rw-r--r--   1 root  wheel   2060 Nov  8  2011 NSJavaVirtualMachine.h
+    -rw-r--r--   1 root  wheel   2390 Nov  8  2011 NSJavaConfiguration.h
+    -rw-r--r--   1 root  wheel    179 Nov  8  2011 JavaVM.h
+    -rw-r--r--   1 root  wheel  11217 Nov  8  2011 JDWPCommands.h
+    -rw-r--r--   1 root  wheel   1708 Nov  8  2011 JDWP.h
+    -rw-r--r--   1 root  wheel    472 Nov  8  2011 AWTCocoaComponent.h
+    drwxr-xr-x  14 root  wheel    476 Nov  8  2011 .
+    drwxr-xr-x   8 root  wheel    272 Sep  6  2012 ..
+    b2mc:~ heprez$ 
+
+
+* https://discussions.apple.com/thread/2630649?start=0&tstart=0
+
+
+Missing "$PERL_CORE/../auto/DynaLoader/DynaLoader.a" on K::
+
+    b2mc:~ heprez$ ll $PERL_CORE/../auto/DynaLoader/
+    total 32
+    -r--r--r--   1 root  admin  2970 Apr 19 15:12 dl_findfile.al
+    -r--r--r--   1 root  admin   505 Apr 19 15:12 dl_find_symbol_anywhere.al
+    -r--r--r--   1 root  admin  1115 Apr 19 15:12 dl_expandspec.al
+    -r--r--r--   1 root  admin   181 Apr 19 15:12 autosplit.ix
+    drwxr-xr-x  38 root  admin  1292 Jun 21 17:49 ..
+    drwxr-xr-x   6 root  admin   204 Jun 21 17:49 .
+
+
+* :google:`OSX ../auto/DynaLoader/DynaLoader.a`
+
+
+
+::
+
+    simon:~ blyth$ /usr/bin/perlsystem -MExtUtils::Embed -e ldopts
+      -arch ppc -arch i386 -L/usr/local/lib /System/Library/Perl/5.8.8/darwin-thread-multi-2level/auto/DynaLoader/DynaLoader.a -L/System/Library/Perl/5.8.8/darwin-thread-multi-2level/CORE -lperl -ldl -lm -lutil -lc
+
+    b2mc:eperl heprez$ perl -MExtUtils::Embed -e ldopts
+      -L/opt/local/lib  -fstack-protector  -L/opt/local/lib/perl5/5.12.4/darwin-thread-multi-2level/CORE -lperl -ldl -lm -lutil -lc
+
+    b2mc:eperl heprez$ /usr/bin/perl -MExtUtils::Embed -e ldopts
+      -arch x86_64 -arch i386 -fstack-protector -L/usr/local/lib  -L/System/Library/Perl/5.12/darwin-thread-multi-2level/CORE -lperl -ldl -lm -lutil -lc
+
+
+
+
+Segfault exist server
+-----------------------
+
+Succeed to build the libs with :heprez:`r903` but segfaulting::
+
+    b2mc:eperl heprez$ curl "http://localhost:9090/hfagc/00101/html?apt=save&bpt=save"
+    curl: (52) Empty reply from server
+    b2mc:eperl heprez$ 
+
+The JNI call from eperl causes the server to segfault::
+
+    28 Jun 2013 17:33:03,260 [main] INFO  (AJP13Listener.java [start]:143) - NOTICE: AJP13 is not a secure protocol. Please protect the port 0.0.0.0:9009
+    28 Jun 2013 17:33:03,260 [main] INFO  (HttpServer.java [start]:690) - Started org.mortbay.jetty.Server@7f6877f8
+    Loading mime table from file /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/mime-types.xml
+    Invalid memory access of location 0xffffffffffffffff rip=0x116e1da84
+    /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/bin/startup.sh: line 50: 88749 Segmentation fault: 11  $JAVA_CMD $JAVA_OPTIONS $OPTIONS -Djava.endorsed.dirs=$JAVA_ENDORSED_DIRS -jar "$EXIST_HOME/start.jar" jetty $*
+    b2mc:~ heprez$ 
+
+
+
+JNI Segfault
+~~~~~~~~~~~~~~~
+
+* reproduce the segfault outside of server environment with *eperl-check*
+
+Segmenting on the first native call
+
+::
+
+    401   protected native void allocate(int interpreterId)
+    402           throws InterpreterException;
+    403 
+
+
+
+
+CAN I REPLACE EPERL WITH SOMETHING BAREBONES ?
+------------------------------------------------------
+
+For example, just open a pipe to the run the perl script rather than 
+bothering to compile em together.
+
+::
+
+    b2mc:~ heprez$ cd ~/h/hfag/extensions/src/org/hfag/xquery/modules/iperl/
+    b2mc:iperl heprez$ l
+    total 48
+    -rw-r--r--  1 heprez  staff  5425 Mar 18 12:16 EPerlScriptFunction.java
+    -rw-r--r--  1 heprez  staff  4978 Mar 18 12:16 PerlFunction.java
+    -rw-r--r--  1 heprez  staff   898 Mar 18 12:16 PerlModule.java
+    -rw-r--r--  1 heprez  staff  2249 Mar 18 12:16 PerlSubFunction.java
+
+
+EPerlScriptFunction.java::
+
+     54     public final static FunctionSignature signature =
+     55         new FunctionSignature(
+     56             new QName("eperlscript", PerlModule.NAMESPACE_URI, PerlModule.PREFIX),
+     57             " convert tex, obtained from url to pdf and png returing XML log of actions ",
+
+
+
+* :env:`/java/runtime`
+
+
+Perl scripts used from XQueries via *iperl:eperlscript* function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+*hfag/mods/webapp/hfagc/xquery/present-table.xqm*::
+
+    125         let $params :=  if( $do-pdflatex ) then
+    126 
+    127             <parameters>
+    128                 <subname>tpdflatex</subname>
+    129                 <urlbody>{concat(  $rezu:dev-base-url , $ctx , "/table_body/tex",$reqpar)}</urlbody>
+    130                 <urlshell>{concat( $rezu:dev-base-url , $ctx , "/table_/tex",$reqpar)}</urlshell>
+    131                 <workdir>{$majordir}</workdir>
+    132                 <user>admin</user>
+    133                 <passwd>{$uppas}</passwd>
+    134                 <logfold>{$logdir}</logfold>
+    135                 <logname>{$logname}</logname>
+    136                 <opt>{$popt}</opt>
+    137                 <apt>{$uapt}</apt>
+    138             </parameters>
+    139 
+    140                 else
+    141                                     ()
+    ...
+    235              (: see ~/heprez/hfag/extensions/src/org/hfag/util/EPerlScriptAdapter.java :)
+    236    
+    237          let $tpdflatex := if( not(empty($params))) then
+    238                     <tpdflatex>
+    239                     {
+    240                         util:catch("java.lang.Exception",
+    241                                 iperl:eperlscript( $params )
+    242                                 ,x:error-table(
+    243                                    ("Exception in iperl:eperlscript bad passwd ? cannot create log folder ? ",$util:exception-message ))
+    244                         )
+    245                     }
+    246                 </tpdflatex>
+    247                  else
+    248                     x:info-table(( "No update required ", concat("papt:",string-join($papt,":") ) ))
+    249 
+    250 
+
+
+The *h/hfag/extensions/src/org/hfag/xquery/modules/iperl/EPerlScriptFunction.java*
+
+#. translates the *parameters* node argument of the function into a java.lang.Properties object *pars*
+#. *pars* is passed to the *EPerlScriptAdapter* which performs the script actions when execute is called
+#. an xml log document is written into the XMLDB following the execution, to the path returned by the execute  
+
+::
+
+    120    
+    121         EPerlScriptAdapter epsa = new EPerlScriptAdapter( pars , context );
+    122         String path = epsa.execute();
+    123 
+    124 
+
+      
+
+

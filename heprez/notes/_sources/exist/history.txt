@@ -1,0 +1,186 @@
+EXIST DEVELOPMENT HISTORY
+==========================
+
+.. contents:: :local:
+
+April 18 2012, speed impact of purging exist
+----------------------------------------------
+            
+* CONCLUSIVE LOOKS LIKE FACTOR ~5 FROM THE PURGE OF /db/cache/hfagc
+* PURGING IS A HUGE WIN FOR EXIST QUERY SPEED
+
+update scrape env and bounce exist and do "average-prepare"
+added error checking moving to bash rather than perl 
+estimate total time   502*4./60. ~ 33 min
+
+testing do nothing time using prefix average-prepare- (only 6 GETs)::
+
+    before purging      (36+33+41+27+26+36)/6 s      33s 
+    exist:/db/cache/hfagc>ls
+    drwur-ur-u admin     dba       20090530*
+    drwur-ur-u admin     dba       20100202*
+    drwur-ur-u admin     dba       20100204*
+    drwur-ur-u admin     dba       20100205*
+    drwur-ur-u admin     dba       20100307*
+    drwur-ur-u admin     dba       20100418*
+    drwur-ur-u admin     dba       20100426*
+    drwur-ur-u admin     dba       20111116*
+    drwur-ur-u admin     dba       20111217*
+    drwur-ur-u admin     dba       20120306
+
+    exist:/db/cache/hfagc>ls  
+    exist:/db/cache/hfagc>
+    after purging /db/cache/hfagc          (20+6+6+7+7+6+16+6+8+7)/10 s     8.9s
+                                                   
+
+    exist:/db/hfagc_prod>ls
+    drwur-ur-u admin     dba       end_of_2009
+    drwur-ur-u admin     dba       end_of_2007
+    drwur-ur-u admin     dba       end_of_2011
+    drwur-ur-u admin     dba       summer2009
+
+    exist:/db/hfagc_prod>ls
+    drwur-ur-u admin     dba       end_of_2011
+
+
+                               (14+3+4+4+5+5+6+4+13+8+5+4)
+
+
+April 17 2012, BACK PROPAGATE THE v2 GROUPING SCHEME
+-------------------------------------------------------
+
+
+::
+
+      cd $EXIST_HOME/webapp 
+      cp -r hfagc hfagc.17april2012
+
+      exist-up webapp/hfagc trial    ## check changes
+
+          xquery/rezt.xqm     whitespace only
+          xquery/rezu.xqm     the backport of v2 scheme 
+
+      exist-up webapp/hfagc live    ## proceed
+
+      cd ~/heprez/images/indices    ## test
+      ant v2qtags-makeindex
+
+             OUCH : Total time: 10 minutes 3 seconds
+
+Compare backported against dbxml variants::
+
+      echo "doc('sys/v2qtags.xml')" | qxml - | xmllint --format - > sys-v2qtags.xml
+      echo "doc('tmp/v2qtags.xml')" | qxml - | xmllint --format - > tmp-v2qtags.xml
+      diff tmp-v2qtags.xml sys-v2qtags.xml
+      #  many differenves from extra attributes added
+
+Regenerate the dbxml one with the extra atts removed::
+
+     cd ~/heprez/qxml
+     vi lib/rezu.xqm
+     ./indices/groups-makeindex.xq
+
+     TOTAL  172.6 s     (bit under 5X faster, and this is with very little DB access)
+
+Still differences from hfc being behind, bring it uptodate and re-index::
+
+      rm "/tmp/hfagc/hfagc.dbxml" 
+      ./exist2qxml.py
+      ~/heprez/qxml/indices/groups-makeindex.xq
+
+After align the hfc and /db/hfagc differences are expected ones::
+
+    simon:qxml blyth$ diff tmp-v2qtags.xml sys-v2qtags.xml
+    2c2
+    < <qtags scheme="v2" count="502">
+    ---
+    > <qtags xmlns:exist="http://exist.sourceforge.net/NS/exist" exist:id="1" exist:source="/db/hfagc_system/v2qtags.xml" scheme="v2" count="502">
+    4c4
+    <     <now modified="2012-04-17T20:01:58+08:00"/>
+    ---
+    >     <now modified="2012-04-17T17:57:40.665+08:00"/>
+    simon:qxml blyth$ 
+
+
+
+OOPS failed to see the below error creating qtag2latex.xml in images-prepare-20120417-1-failed.txt
+CONTRARY TO EXPECTATION THIS DID NOT STOP THE WORKFLOW :
+AND indices-status subsequently reported all OK nothing to do !!
+
+DONE: make the workflow detect such errors and refuse to proceed
+
+
+::
+
+    === indices-make : qtag2latex qtag2latex-makeindex
+    Buildfile: /Users/blyth/heprez/images/indices/build.xml
+
+    qtag2latex-makeindex:
+         [echo] creating latex labels from latex snippets, outputting to /db/hfagc_system/qtag2latex.xml
+
+         BUILD FAILED
+         /Users/blyth/heprez/images/indices/build.xml:51: XMLDB exception caught while executing query: error found while loading module rezx: Error while loading module webapp/hfagc/xquery/rezx.xqm: function rezu:particle-classify-src ( namespace-uri = http://hfag.phys.ntu.edu.tw/hfagc/rezu) is not defined [at line 869, column 29]
+
+         Total time: 7 seconds
+
+
+
+make the fix, propagate with exist-up and test with::
+
+        indices-force qtag2latex
+ 
+compare against dbxml after a full exist2qxml.py propagation into sys container 
+(selective propagation needs debugging) 
+
+rez-cf qtag2latex
+
+doc ordering differences : 
+DONE change old and new queries to have standardized doc ordering
+
+some latex product ordering swappage, 
+
+* TODO: find a more reproducible technique than "first corresponding mode with the qtag" 
+
+    * nine qtags have this presentational difference
+
+instructive timings, 14X quicker
+
+       exist qtag2latex : Total time: 2 minutes 30 seconds    150 s
+       qxml qtag2latex  :                                   11.48 s   
+
+
+April 16 2012, CODE PROPAGATION TO HANDLE 4 FACTOR MODES
+------------------------------------------------------------
+
+::
+
+    simon:webapp blyth$ cd $EXIST_HOME/webapp  
+    simon:webapp blyth$ pwd
+    /data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp
+    simon:webapp blyth$ cp -r hfagc hfagc.16april2012
+
+    simon:webapp blyth$ exist-up webapp/hfagc trial    ## check the changes to be propagated
+
+       === exist-up : mdfind -onlyin /Users/blyth/heprez/hfag/mods/webapp/hfagc 'kMDItemFSContentChangeDate > $time.iso(2011-12-09T19:06:35+0800) '
+       === exist-up : diff "/Users/blyth/heprez/hfag/mods/webapp/hfagc/plot.xq" "/data/heprez/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/plot.xq"
+       ...
+    simon:webapp blyth$ diff -r --brief hfagc.16april2012 hfagc    ## verify no changes yet 
+    simon:webapp blyth$ exist-up webapp/hfagc live      ## propagate into live webapp
+    simon:webapp blyth$ diff -r --brief hfagc.16april2012 hfagc
+
+    Files hfagc.16april2012/sitemap.xmap.template and hfagc/sitemap.xmap.template differ                   ## whitespace only 
+    Files hfagc.16april2012/stylesheets/sidebar-db-sm.xsl and hfagc/stylesheets/sidebar-db-sm.xsl differ   ## yasmine quicklink
+    Files hfagc.16april2012/xquery/make-plot.xqm and hfagc/xquery/make-plot.xqm differ                     ## whitespace only
+    Files hfagc.16april2012/xquery/rezt.xqm and hfagc/xquery/rezt.xqm differ                               ## ws
+    Files hfagc.16april2012/xquery/rezu.xqm and hfagc/xquery/rezu.xqm differ                               ## ws-o
+    Files hfagc.16april2012/xquery/rezx.xqm and hfagc/xquery/rezx.xqm differ                               ## 4-factors change
+    Files hfagc.16april2012/xquery/t.xqm and hfagc/xquery/t.xqm differ                                     ## ws-o
+
+    http://localhost:9090/xquery/xquery.xq
+
+     echo "count(collection('hfc')//rez:quote[count(rez:mode) > 3])" | qxml -
+     echo "collection('hfc')//rez:quote[count(rez:mode) > 3]/dbxml:metadata('dbxml:name')" | qxml -
+     echo "collection('hfc')//rez:quote[count(rez:mode) > 3]/rez:qtag" | qxml -
+
+
+

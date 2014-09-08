@@ -1,0 +1,332 @@
+Macports Pre-requisites installed on b2mc.kek.jp
+===================================================
+
+.. contents:: :local:
+
+python25
+--------
+
+Probably a newer python could be used, but stick to old py25 initially ::
+
+        sudo port install python25
+
+
+Make *python* use that by default::
+
+        b2mc:MacPorts-2.1.3 heprez$ sudo port select --set python python25
+	Selecting 'python25' for 'python' succeeded. 'python25' is now active.
+	b2mc:MacPorts-2.1.3 heprez$ python -V
+	Python 2.5.6
+	b2mc:MacPorts-2.1.3 heprez$ /usr/bin/python -V
+	Python 2.7.1
+
+env python hookup
+~~~~~~~~~~~~~~~~~~~~
+
+Plant a symbolic link::
+
+	b2mc:site-packages heprez$ pwd
+	/opt/local/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/site-packages
+	b2mc:site-packages heprez$ sudo ln -s ~heprez/env env
+	b2mc:site-packages heprez$ ll env
+	lrwxr-xr-x  1 root  wheel  17 Jun 20 19:11 env -> /Users/heprez/env
+
+Check access to env module::
+
+	b2mc:~ heprez$ ( cd /tmp ; python -c "import env as _ ; print _.__file__ " )
+	/opt/local/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/site-packages/env/__init__.pyc
+
+
+py25-sphinx
+------------
+
+Sphinx is used for building html documentation from .rst sources
+
+::
+
+	sudo port install py25-sphinx
+
+	b2mc:macports heprez$ sudo port select --set sphinx py25-sphinx
+	Selecting 'py25-sphinx' for 'sphinx' succeeded. 'py25-sphinx' is now active.
+
+
+texlive
+-----------
+
+This will bring in everything and the kitchen sink::
+
+	b2mc:~ heprez$ sudo port -v install texlive
+
+
+dvisvgm
+----------
+
+::
+
+	b2mc:~ heprez$ sudo port -v install dvisvgm
+
+
+Error in activation::
+
+	--->  Activating dvisvgm @1.3_0
+	x ./
+	x ./+COMMENT
+	x ./+CONTENTS
+	x ./+DESC
+	x ./+PORTFILE
+	x ./+STATE
+	x ./opt/
+	x ./opt/local/
+	x ./opt/local/bin/
+	x ./opt/local/share/
+	x ./opt/local/share/man/
+	x ./opt/local/share/man/man1/
+	x ./opt/local/share/man/man1/dvisvgm.1.gz
+	x ./opt/local/bin/dvisvgm
+	Error: org.macports.activate for port dvisvgm returned: Image error: /opt/local/bin/dvisvgm is being used by the active texlive-bin-extra port.  Please deactivate this port first, or use 'port -f activate dvisvgm' to force the activation.
+	Warning: targets not executed for dvisvgm: org.macports.activate
+	Please see the log file for port dvisvgm for details:
+	    /opt/local/var/macports/logs/_opt_local_var_macports_sources_rsync.macports.org_release_tarballs_ports_graphics_dvisvgm/dvisvgm/main.log
+	To report a bug, follow the instructions in the guide:
+	    http://guide.macports.org/#project.tickets
+	Error: Processing of port dvisvgm failed
+	b2mc:~ heprez$ 
+
+
+::
+
+	b2mc:~ heprez$ port info texlive-bin-extra
+	texlive-bin-extra @26926 (tex)
+	Variants:             [+]doc, src
+
+	Description:          Various useful, but non-essential, support programs. Includes programs and macros for DVI file manipulation, literate programming, patgen, and the TeX Works Editor.
+	Homepage:             http://www.tug.org/texlive/
+
+	Extract Dependencies: xz
+	Library Dependencies: texlive-basic, texlive-common, texlive-bin
+	Runtime Dependencies: latexmk, detex, latexdiff, pdfjam, dvipng
+	Platforms:            darwin
+	License:              Copyleft Permissive
+	Maintainers:          dports@macports.org
+	b2mc:~ heprez$ 
+
+
+
+Cannot deactivate due to the *texlive* meta port::
+
+	b2mc:~ heprez$ sudo port deactivate texlive-bin-extra
+	Password:
+	--->  Deactivating texlive-bin-extra @26926_0+doc
+	--->  Unable to deactivate texlive-bin-extra @26926_0+doc, the following ports depend on it:
+	--->    texlive @2012_0+doc+medium
+	Error: org.macports.deactivate for port texlive-bin-extra returned: Please uninstall the ports that depend on texlive-bin-extra first.
+	Please see the log file for port texlive-bin-extra for details:
+	    /opt/local/var/macports/logs/_opt_local_var_macports_registry_portfiles_texlive-bin-extra_26926_0+doc/texlive-bin-extra/main.log
+	Warning: Failed to execute portfile from registry for texlive-bin-extra @26926_0+doc
+	--->  Deactivating texlive-bin-extra @26926_0+doc
+	--->  Unable to deactivate texlive-bin-extra @26926_0+doc, the following ports depend on it:
+	--->    texlive @2012_0+doc+medium
+	Error: port deactivate failed: Please uninstall the ports that depend on texlive-bin-extra first.
+	b2mc:~ heprez$ 
+
+
+So deactivate that and *texlive-bin-extra* to enable installation of *dvisvgm*::
+
+	b2mc:~ heprez$ 
+	b2mc:~ heprez$ sudo port deactivate texlive          
+	--->  Deactivating texlive @2012_0+doc+medium
+	--->  Cleaning texlive
+	b2mc:~ heprez$ 
+	b2mc:~ heprez$ sudo port deactivate texlive-bin-extra
+	--->  Deactivating texlive-bin-extra @26926_0+doc
+	--->  Cleaning texlive-bin-extra
+	b2mc:~ heprez$ 
+	b2mc:~ heprez$ sudo port -v install dvisvgm
+	--->  Computing dependencies for dvisvgm.
+	--->  Activating dvisvgm @1.3_0
+	x ./
+	x ./+COMMENT
+	x ./+CONTENTS
+	x ./+DESC
+	x ./+PORTFILE
+	x ./+STATE
+	x ./opt/
+	x ./opt/local/
+	x ./opt/local/bin/
+	x ./opt/local/share/
+	x ./opt/local/share/man/
+	x ./opt/local/share/man/man1/
+	x ./opt/local/share/man/man1/dvisvgm.1.gz
+	x ./opt/local/bin/dvisvgm
+	--->  Cleaning dvisvgm
+	--->  Removing work directory for dvisvgm
+	--->  Updating database of binaries: 100.0%
+	--->  Scanning binaries for linking errors: 100.0%
+	--->  No broken files found.
+	b2mc:~ heprez$ 
+	b2mc:~ heprez$ 
+
+
+
+perl
+-------
+
+Perl 5.12.4 came along for the ride with something else.
+
+perl libxml
+~~~~~~~~~~~~~~
+
+Needed for qtags.pl and numerous other perl scripts.
+
+::
+
+    b2mc:localhost heprez$ perl -e "use XML::LibXML;"
+    Can't locate XML/LibXML.pm in @INC (@INC contains: /opt/local/lib/perl5/site_perl/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/site_perl/5.12.4 /opt/local/lib/perl5/vendor_perl/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/vendor_perl/5.12.4 /opt/local/lib/perl5/5.12.4/darwin-thread-multi-2level /opt/local/lib/perl5/5.12.4 /opt/local/lib/perl5/site_perl /opt/local/lib/perl5/vendor_perl .) at -e line 1.
+    BEGIN failed--compilation aborted at -e line 1.
+    b2mc:localhost heprez$ 
+
+
+
+::
+
+    b2mc:localhost heprez$ sudo port info p5.12-xml-libxml
+    Password:
+    p5.12-xml-libxml @1.840.0, Revision 2 (perl, textproc)
+    Variants:             universal
+
+    Description:          This module implements a Perl interface to the Gnome libxml2 library. The libxml2 library provides interfaces for parsing and manipulating XML Files. This Module allows Perl programmers to make use of the highly capable validating XML
+                          parser and the high performance DOM implementation.
+    Homepage:             http://search.cpan.org/dist/XML-LibXML/
+
+    Library Dependencies: perl5.12, p5.12-xml-sax, p5.12-xml-namespacesupport, libiconv, libxml2
+    Platforms:            darwin
+    License:              Artistic GPL
+    Maintainers:          l2g@macports.org
+    b2mc:localhost heprez$ 
+
+
+
+
+::
+
+    b2mc:localhost heprez$ sudo port -v install p5.12-xml-libxml
+    --->  Computing dependencies for p5.12-xml-libxml....
+    --->  Dependencies to be installed: p5.12-xml-namespacesupport p5.12-xml-sax p5.12-xml-sax-base
+    ...
+    --->  Scanning binaries for linking errors: 100.0%
+    --->  No broken files found.
+    b2mc:localhost heprez$ 
+    b2mc:localhost heprez$ perl -e "use XML::LibXML;"
+    b2mc:localhost heprez$ 
+
+
+
+
+
+ImageMagick
+-------------
+
+tpdflatex.pl needs *convert*::
+
+    b2mc:h heprez$ which convert
+    b2mc:h heprez$ port info  ImageMagick
+    ImageMagick @6.8.6-0 (graphics, devel)
+    Variants:             graphviz, jbig, jpeg2, lqr, no_x11, pango, perl, rsvg, universal, wmf, [+]x11
+
+    Description:          ImageMagick is a robust collection of tools and libraries to create, edit and compose bitmap images in a wide variety of formats. You can crop, resize, rotate, sharpen, color reduce or add effects or text or straight or curved lines to
+                          an image or image sequence and save your completed work in the same or differing image format. You can even create images from scratch. Image processing operations are available from the command line as well as through C, Ch, C++,
+                          Java, Perl, PHP, Python, Ruby and Tcl/Tk programming interfaces. Over 90 image formats are supported, including GIF, JPEG, JPEG 2000, PNG, PDF, PhotoCD and TIFF.
+    Homepage:             http://www.imagemagick.org/
+
+    Extract Dependencies: xz
+    Library Dependencies: bzip2, xz, jpeg, lcms2, libpng, tiff, webp, zlib, fftw-3, freetype, fontconfig, ghostscript, libiconv, libtool, expat, libxml2, pkgconfig, xorg-libXext, xorg-libXt
+    Runtime Dependencies: urw-fonts
+    Platforms:            darwin
+    License:              Apache-2
+    Maintainers:          ryandesign@macports.org
+    b2mc:h heprez$ 
+    b2mc:h heprez$ 
+    b2mc:h heprez$ sudo port -v install ImageMagick 
+    Password:
+    --->  Computing dependencies for ImageMagick....
+    --->  Dependencies to be installed: fftw-3 urw-fonts webp
+    --->  Fetching archive for fftw-3
+    --->  fftw-3-3.3.3_1.darwin_11.x86_64.tbz2 doesn't seem to exist in /opt/local/var/macports/incoming/verified
+
+
+
+py26-cairosvg
+---------------
+
+::
+
+    b2mc:h heprez$ port info py26-cairosvg
+    Warning: port definitions are more than two weeks old, consider using selfupdate
+    py26-cairosvg @0.5 (python, graphics)
+
+    Description:          CairoSVG is a SVG converter based on Cairo. It can export SVG files to PDF, PostScript and PNG files.
+    Homepage:             https://github.com/Kozea/CairoSVG
+
+    Library Dependencies: python26, py26-cairo
+    Runtime Dependencies: py-cairosvg_select
+    Platforms:            darwin
+    License:              LGPL-3+
+    Maintainers:          sean@macports.org, openmaintainer@macports.org
+    b2mc:h heprez$ 
+    b2mc:h heprez$ sudo port install -v py26-cairosvg
+    Password:
+    Warning: port definitions are more than two weeks old, consider using selfupdate
+    --->  Computing dependencies for py26-cairosvg
+    --->  Dependencies to be installed: py-cairosvg_select py26-cairo python26
+    --->  Fetching archive for py-cairosvg_select
+    --->  Attempting to fetch py-cairosvg_select-0.1_0.darwin_11.noarch.tbz2 from http://jog.id.packages.macports.org/macports/packages/py-cairosvg_select
+    --->  Attempting to fetch py-cairosvg_select-0.1_0.darwin_11.noarch.tbz2.rmd160 from http://jog.id.packages.macports.org/macports/packages/py-cairosvg_select
+    --->  Installing py-cairosvg_select @0.1_0
+    --->  Activating py-cairosvg_select @0.1_0
+    --->  Cleaning py-cairosvg_select
+    --->  Fetching archive for python26
+    --->  Attempting to fetch python26-2.6.8_0.darwin_11.x86_64.tbz2 from http://jog.id.packages.macports.org/macports/packages/python26
+    --->  Attempting to fetch python26-2.6.8_0.darwin_11.x86_64.tbz2.rmd160 from http://jog.id.packages.macports.org/macports/packages/python26
+    --->  Installing python26 @2.6.8_0
+    --->  Activating python26 @2.6.8_0
+
+    To make python 2.6 the default (i.e. the version you get when you run 'python'), please run:
+
+    sudo port select --set python python26
+
+    --->  Cleaning python26
+    --->  Fetching archive for py26-cairo
+    --->  Attempting to fetch py26-cairo-1.10.0_2+x11.darwin_11.x86_64.tbz2 from http://jog.id.packages.macports.org/macports/packages/py26-cairo
+    --->  Attempting to fetch py26-cairo-1.10.0_2+x11.darwin_11.x86_64.tbz2.rmd160 from http://jog.id.packages.macports.org/macports/packages/py26-cairo
+    --->  Installing py26-cairo @1.10.0_2+x11
+    --->  Activating py26-cairo @1.10.0_2+x11
+    --->  Cleaning py26-cairo
+    --->  Fetching archive for py26-cairosvg
+    --->  Attempting to fetch py26-cairosvg-0.5_0.darwin_11.noarch.tbz2 from http://jog.id.packages.macports.org/macports/packages/py26-cairosvg
+    --->  Attempting to fetch py26-cairosvg-0.5_0.darwin_11.noarch.tbz2.rmd160 from http://jog.id.packages.macports.org/macports/packages/py26-cairosvg
+    --->  Installing py26-cairosvg @0.5_0
+    --->  Activating py26-cairosvg @0.5_0
+
+    To make the Python 2.6 version of py-cairosvg the one that is run when you execute the commands without a version suffix, e.g. 'cairosvg', run:
+
+    port select --set py-cairosvg py26-cairosvg
+
+    --->  Cleaning py26-cairosvg
+    --->  Updating database of binaries: 100.0%
+    --->  Scanning binaries for linking errors: 100.0%
+    --->  No broken files found.
+    b2mc:h heprez$ 
+    b2mc:h heprez$ which python
+    /opt/local/bin/python
+    b2mc:h heprez$ python -V
+    Python 2.5.6
+    b2mc:h heprez$ 
+
+
+    b2mc:h heprez$ sudo port select --set python python26
+    Selecting 'python26' for 'python' succeeded. 'python26' is now active.
+    b2mc:h heprez$ sudo port select --set py-cairosvg py26-cairosvg
+    Selecting 'py26-cairosvg' for 'py-cairosvg' succeeded. 'py26-cairosvg' is now active.
+
+    b2mc:h heprez$ which cairosvg
+    /opt/local/bin/cairosvg

@@ -1,0 +1,322 @@
+
+Broken Plot Splitting
+========================
+
+In rare cases the plot split algoritm makes a bad split which has 
+no content in the 2nd plot, causing an errort text message SVG rather than a plot.
+
+
+broken plot, [INVALID actually broken splitting]
+----------------------------------------------------
+
+* http://130.87.106.59:8080/b2charm/end_of_2011/00201.html
+
+   * http://130.87.106.59:8080/b2charm/end_of_2011/03221.svg  
+   * formerly such an issue was caused by excessive range, but seems not the case here
+
+* http://130.87.106.59:8080/b2charm/end_of_2011/00109.html  No qtys in range ?
+
+* use HFAG_SCRAPE_FOLDER/log.xml to determine the dynamic call
+
+::
+
+    b2mc:~ heprez$ grep 03221 $HFAG_SCRAPE_FOLDER/log.xml
+    <get pos="03221"  status="NPPUCPNCPUSRNSR"  err="0"  time="0.137"  size="633"  pro-path="/Users/heprez/data/data/scrape/20130704/hfagc/00201/03221/03221.svg"  >
+    <uurl><![CDATA[http://localhost:9090/hfagc/03221/plot/svg?sqz=0.3&vmi=0.7033333333333333&vmx=100000.0&uni=1.0&opt=plot,head,sabel,onlycom,nex,npo,dvi&apt=save&bpt=save]]></uurl>
+
+* http://130.87.106.59:9090/hfagc/03221/plot/svg?sqz=0.3&vmi=0.7033333333333333&vmx=100000.0&uni=1.0&opt=plot,head,sabel,onlycom,nex,npo,dvi&apt=save&bpt=save
+
+    * this reproduces the text plot error message
+
+* http://130.87.106.59:9090/hfagc/03211/plot/svg?sqz=0.3&vmi=-100.0&vmx=0.7033333333333333&uni=1.0&opt=plot,head,sabel,onlycom,nex,npo,dvi&apt=save&bpt=save
+
+    * sibling plot is OK, seems the problem is an unneeded range split resulting in no qtys in the bad split range ?
+
+* http://130.87.106.59:9090/hfagc/03211/plot/svg?sqz=0.7&vmi=-100.0&vmx=0.7033333333333333&uni=1.0&opt=plot,head,sabel,onlycom,nex,npo,dvi&apt=save&bpt=save
+
+    * increasing *sqz* makes it easier to see the layout, spreading in y 
+
+* http://130.87.106.59:9090/hfagc/03211/plot/svg?sqz=0.7&vmi=-100.0&vmx=0.7033333333333333&uni=1.0&opt=plot,head,sabel,onlycom,nex,npo,dvi,dbg&apt=save&bpt=save
+
+    * add **dbg** to *opt* gives detailed info in the metadata element, use Safari inspect element on the SVG to inspect this
+
+
+broken range splitting (suspect algorithm edge case)
+-----------------------------------------------------
+
+A workaround of making the aflicted area invisible seems appropriate::
+
+    <div style="display:none;" >
+
+
+* http://130.87.106.59:9090/hfagc/00201/html?apt=save&bpt=save
+
+Lots of broken image links, but the bad split is apparent.
+
+Trace, thru :heprez:`source:trunk/hfag/mods/webapp/hfagc/sitemap.xmap.template` at top level an aggregate of many other things off the cocoon pipeline::
+
+    1038              <map:match type="regexp" pattern="^(\d\{5})/(htm|html)$">                             <!-- multi qty page -->
+    1039                   <map:aggregate element="book" label="sauce" >
+    1040                        <map:part src="cocoon:/{1}/bookinfo/{2}" element="bookinfo" strip-root="true" />
+    1041                        <map:part src="cocoon:/{1}/sidebar/{2}"  element="sidebar" strip-root="true" ns="http://exist-db.org/NS/sidebar" prefix="sidebar" />
+    1042                        <map:part src="cocoon:/{1}/comb/{2}"     element="chapter" strip-root="true" />
+    1043                        <map:part src="cocoon:/{1}/table/{2}" element="chapter" strip-root="true" />  <!-- remove table to get scrape working quickly -->
+    1044                        <map:part src="cocoon:/00000/key/{2}"     element="chapter" strip-root="true" />
+    1045                        <map:part src="cocoon:/{1}/notes/{2}"    element="chapter" strip-root="true" />
+    1046                   </map:aggregate>
+
+
+Like::
+
+
+     826              <map:match type="regexp" pattern="^(\d)(\d)(\d)(\d)(\d)/comb/(htm|html)$">   <!-- multi qty chapter -->
+     827                 <map:generate src="modes-comb.xq" type="xquery" label="sauce"  >
+     828                     <map:parameter name="create-session" value="true"/>
+     829                     <map:parameter name="sm-quo"   value="{1}"/>
+     830                     <map:parameter name="sm-qwn"   value="{2}"/>
+     831                     <map:parameter name="sm-src"   value="{3}"/>
+     832                     <map:parameter name="sm-zer"   value="{4}"/>
+     833                     <map:parameter name="sm-pro"   value="{5}"/>
+     834                     <map:parameter name="sm-grp"   value="{1}{2}{3}{4}{5}"/>
+     835                     <map:parameter name="sm-pos"   value="{1}{2}{3}{4}{5}"/>
+     836                     <map:parameter name="sm-beg"   value="{1}{2}{3}{4}{5}/comb"/>
+     837                     <map:parameter name="sm-end"   value="{6}"/>
+     838                     <map:parameter name="sm-uri"   value="{0}"/>
+     839                     <map:parameter name="sm-hfag-scrape" value="{global:hfag-scrape}"/>
+     840                     <map:parameter name="sm-cache-scrape" value="{global:cache-scrape}"/>
+     841                     <map:parameter name="sm-dir" value="{global:cache-scrape}/{1}{2}{3}{4}{5}"/>
+     842                     <map:parameter name="sm-path" value="{global:cache-scrape}/{1}{2}{3}{4}{5}/comb.{6}"/>
+     843                     <map:parameter name="sm-prefix" value="{global:hfag-prefix}" />
+     844                     <map:parameter name="sm-cnf"    value="{global:hfag-conf}" />
+     845                 </map:generate>
+     846                 <map:serialize type="xml"/>
+     847             </map:match>   
+
+
+
+Note that the cache path is passed into the query from the sitemap as **sm-path**
+
+* http://130.87.106.59:9090/xmldb/db/cache/hfagc/20130705/00201/
+
+Grab just the *comb* returns docbook xml with the issue apparent::
+
+    b2mc:20130704 heprez$ curl -s "http://130.87.106.59:9090/hfagc/00201/comb/html?apt=save&bpt=save" | xmllint --format -
+    <?xml version="1.0" encoding="UTF-8"?>
+    <div>
+      <chapter xmlns:exist="http://exist.sourceforge.net/NS/exist" exist:id="1" exist:source="/db/cache/hfagc/20130704/00201/comb.html">
+        <chapter>
+          <title>Neutral B,new particles</title>
+          <div>
+            <metadata>
+            ...
+             <table border="1">
+                <tr>
+                  <td align="center">
+                    <metadata papt="save:save::" is-indv="false" skip-get="true" src-path="/db/cache/hfagc/20130704/00201/03221/plot.svg" pend="html" narea="0" dynurl="http://localhost:9090/hfagc/03221/plot/svg?sqz=0.3&amp;vmi=0.7033333333333333&amp;vmx=100000.0&amp;uni=1.0&amp;opt=plot,head,sabel,onlycom,nex,npo,dvi&amp;apt=save"/>
+                    <div>
+                      <para>present-plot:present-plot ERROR the image map is not available : /db/cache/hfagc/20130704/00201/03221/plot.svg</para>
+                      <img width="600" height="198" src="03221.png"/>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+
+
+The *table* chapter, dumping some erros regarding unknown exist namespace prefix::
+
+    b2mc:~ heprez$ curl -s "http://130.87.106.59:9090/hfagc/00201/table/html?apt=save&bpt=save" | xmllint --format - 2> /dev/null 
+    <?xml version="1.0" encoding="UTF-8"?>
+    <chapter exist:id="1" exist:source="/db/cache/hfagc/20130705/00201/table.html">
+      <title>Compilation  Latex Table</title>
+      <metadata date="2013-07-05T13:10:52.099+09:00" time="1372997452099" table-src="/db/cache/hfagc/20130705/00201/00201/table.tml" msg="this presentation of the result table depends only on the table src, namely the tml">
+        <metalinks nraw="1" nbase="1">
+          <now stamp="1372997452099" modified="2013-07-05T13:10:52.099+09:00"/>
+          <ulink url="/xmldb/db/cache/hfagc/20130705/00201/00201/table.tml" src-path="/db/cache/hfagc/20130705/00201/00201/table.tml" src-time="1372997453872" src-date="2013-07-05T13:10:53.872+09:00">/db/cache/hfagc/20130705/00201/00201/table.tml</ulink>
+        </metalinks>
+      </metadata>
+      <table>
+        <tr>
+          <td>
+            <table>
+            ....
+
+
+
+From :heprez:`source:trunk/hfag/mods/webapp/hfagc/modes-comb.xq` find that range debug info given by `opt=rbg`
+
+* http://130.87.106.59:9090/hfagc/00201/html?apt=save&bpt=save&opt=rbg
+
+::
+
+       vi ./hfag/mods/webapp/hfagc/xquery/rezx.xqm ./hfag/mods/webapp/hfagc/modes-comb.xq
+
+
+::
+
+       <para>
+          <dbg>
+            <rnge>-0.984 3.332 4.316 -0.265 1.000 2.612 -3.000 2.877 -1.000 0.410 1.000 0.410 1.000 0.700 0.700 -1.000 0.703 0.163</rnge>
+            <args punit="1.0" nqts="2">BR:-511:-311,81*/BR:-521:-321,81 BR:-511:-311,83*/BR:-521:-321,83</args>
+            <lhvi msg="left hand edges from avg cache, and their min" lhvix="-0.265">-0.080 -0.265 -0.080 -0.265 0.068 0.068</lhvi>
+            <rhvi msg="right hand edges from avg cache, and their max" rhvix="2.612">0.900 2.612 0.900 2.612 1.525 1.525</rhvi>
+            <chvi msg="central values from avg cache " cavg="0.703" cmin="0.410" cmax="1.000" crng="0.590">0.410 1.000 0.410 1.000 0.700 0.700</chvi>
+            <pdgrng msg="incorp pdg ?" npdg="2" pdgfr="-1.1483466556119561">1.000 -3.000</pdgrng>
+            <lha msg="lhs after pdg" lhv="-0.265 1.000">-0.265</lha>
+            <rha msg="rhs after pdg" rhv="2.612 -3.000">2.612</rha>
+            <xha msg="range after pdg" lha="-0.265" rha="2.612">2.877</xha>
+            <xmargin xha="2.877">0.719</xmargin>
+            <lhf msg="lha/xha  to zero fraction ">-0.092</lhf>
+            <chf msg="cmin/crng left hand center point fraction of range " chfsnap="0.25">0.695</chf>
+            <lh msg="lhs after margin + zero snapping" cmin="0.410" lhf="-0.092">-0.984</lh>
+            <rh msg="rhs after margin " cmax="1.000">3.332</rh>
+            <ulh msg="ultimate lh">-0.984</ulh>
+            <urh msg="ultimate rh">3.332</urh>
+          </dbg>
+        </para>
+        <para>regi:1 -100.0 0.7033333333333333 
+                   2 0.7033333333333333 100000.0 
+              nreg:2 
+                     ulh                  urh                 urh - ulh      [     lhv              ] [  rhv              ] [ rhv - lhv     ]      [ chvi                  ]         cavg              xspl
+              rnge: -0.9842517174991172 3.3317922030914753 4.316043920590593 -0.26491106406735176 1.0 2.61245154965971 -3.0 2.877362613727062 -1.0 0.41 1.0 0.41 1.0 0.7 0.7 -1.0 0.7033333333333333 0.1629578721333057
+              unit: 1.0
+              nlins: 8 3 2 3
+
+
+                     0.70333333/4.316043920590593
+
+       </para>
+
+::
+
+    In [6]: 0.70333333/4.316043920590593       cavg/(urh - ulh) is less than $rezx:plot-split 0.2 causing the split .... how did the range get so wide, maybe an old value non-active value is sneaking in 
+    Out[6]: 0.16295787136099352
+
+
+
+
+[FIXED] cannot view cache html thru xmldb interface
+------------------------------------------------------
+
+.. sidebar:: Fixed by :heprez:`r942`
+
+    BUT there might be side effects
+
+
+Get `Resource not found` errors for cached docbook. 
+This is due to poor naming of this docbook as `.html` that trips up the pipeline.
+Maybe change the `.html` OR pipeline handling of `.html` within xmldb.
+
+
+* http://130.87.106.59:9090/xmldb/db/cache/hfagc/20130711/00201/
+* http://130.87.106.59:9090/xmldb/db/cache/hfagc/20130711/00201/comb.html
+
+
+
+Identifying the issue
+------------------------
+
+http://130.87.106.59:9090/xmldb/db/cache/hfagc/20130711/00201/
+
+::
+
+    doc("comb.html")//metadata[@narea=0]
+
+    <metadata exist:id ="1851018" exist:source ="/db/cache/hfagc/20130711/00201/comb.html" papt ="save:save::" is-indv ="false" skip-get ="false" src-path ="/db/cache/hfagc/20130711/00201/03221/plot.svg" pend ="html" narea ="0" dynurl ="http://localhost:9090/hfagc/03221/plot/svg?sqz=0.3&vmi=0.7033333333333333&vmx=100000.0&uni=1.0&opt=plot,head,sabel,onlycom,nex,npo,dvi&apt=save" />
+
+
+
+the immediate table::
+
+    doc("comb.html")//table[tr/td/metadata/@narea=0]
+
+    <table exist:id ="92489" exist:source ="/db/cache/hfagc/20130711/00201/comb.html" border ="1" >
+    <tr >
+    <td align ="center" >
+    <metadata papt ="save:save::" is-indv ="false" skip-get ="false" src-path ="/db/cache/hfagc/20130711/00201/03221/plot.svg" pend ="html" narea ="0" dynurl ="http://localhost:9090/hfagc/03221/plot/svg?sqz=0.3&vmi=0.7033333333333333&vmx=100000.0&uni=1.0&opt=plot,head,sabel,onlycom,nex,npo,dvi&apt=save" />
+    <div >
+    <para > present-plot:present-plot ERROR the image map is not available : /db/cache/hfagc/20130711/00201/03221/plot.svg </ para >
+    <img width ="600" height ="198" src ="03221.png" />
+    </ div >
+    </ td >
+    </ tr >
+    </ table >
+
+
+pluck the containing div that holds the empty region::
+
+    doc("comb.html")//div[table/tr/td/table/tr/td/metadata/@narea=0]
+
+* http://130.87.106.59:9090/xmldb/db/cache/hfagc/20130711/00201/comb.html combined presentation cache, incorporates the below
+* http://130.87.106.59:9090/xmldb/db/cache/hfagc/20130711/00201/03221/plot.html plot presentation cache for single region
+
+
+manual edit to render the errant div invisible
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For checking better to use::
+
+    style="background-color:grey;"
+
+::
+
+    b2mc:20130711 heprez$ vi ./hfagc/00201/00201.html
+
+    510 <div ireg="2"  style="display:none;" >
+    511 <table>
+    512 <tr>
+    513 <td>(</td><td>0.703</td><td>&lt;</td><td>values</td><td>)</td>
+    514 </tr>
+    515 </table>
+    516 <table date="2013-07-11T20:48:10.961+09:00" sm-path="/db/cache/hfagc/20130711/00201/03221/plot.html" >
+    517 <tr>
+    518 <td>
+    519 <table>
+    520 <tr>
+    521 <td><a href="03221.svg">SVG</a></td><td><a href="03221.pdf">PDF</a></td><td><a href="03221.png">PNG</a></td>
+    522 </tr>
+    523 </table>
+
+
+make that edit in stylesheet
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Try to apply this edit via `hfag/mods/webapp/hfagc/stylesheets/db2html-scb.xsl`::
+
+    030 <xsl:param name="sm-errstyle" >background-color:grey;</xsl:param>
+
+    624 
+    625    <xsl:template match="div[table/tr/td/table/tr/td/metadata/@narea=0]" >
+    626         <div>
+    627             <xsl:attribute name="style"><xsl:value-of select="$sm-errstyle" /></xsl:attribute>
+    628             <xsl:apply-templates/>
+    629         </div>
+    630    </xsl:template>
+
+
+
+Testing with http://130.87.106.59:9090/hfagc/00201/html?apt=save&bpt=save it failed to apply.
+
+Doing the transform stanfalone works howevee::
+
+    b2mc:logs heprez$ mkdir /tmp/k 
+    b2mc:logs heprez$ curl http://localhost:9090/servlet/db/cache/hfagc/20130711/00201/comb.html -o /tmp/k/comb.xml
+
+    b2mc:logs heprez$ find $EXIST_HOME -name db2html-scb.xsl
+    /Users/heprez/data/install/exist/eXist-snapshot-20051026/unpack/4/webapp/hfagc/stylesheets/db2html-scb.xsl
+
+    b2mc:logs heprez$ xsltproc $xsl /tmp/k/comb.xml > /Users/heprez/data/data/scrape/20130711/hfagc/00201/00201.html 
+
+
+Aha, was not applying as the metadata was stripped in the step before, retaining metadata with **met=yes** succeeds to apply
+
+* http://130.87.106.59:9090/hfagc/00201/html?apt=save&bpt=save&met=yes
+
+
+works after moving error style to strip-metadata.xsl 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Leaving as red for now, for a full scrape check.
+
+
+

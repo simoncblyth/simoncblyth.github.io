@@ -1,0 +1,165 @@
+DVISVGM
+==========
+
+.. sidebar:: Looking promising, BUT
+
+    What about latex2html : i used that for glyph metrics, can that be dispensed with 
+    OR is that needed for the combining of snippets of SVG into plots (ransom note style)
+
+
+which flavor to use
+---------------------
+
+::
+
+       -s, --stdout                  write SVG output to stdout
+       -n, --no-fonts[=variant]      draw glyphs by using path elements [0]
+       --no-styles               don't use styles to reference fonts
+
+
+default
+~~~~~~~~~
+
+no-styles
+~~~~~~~~~~
+
+no-fonts
+~~~~~~~~~
+
+
+how to decide ?
+~~~~~~~~~~~~~~~~~~
+
+Need to crank the handle on the workflow and observe the difficulty of
+fixing issues that arise with each flavor.
+
+
+
+create some test svg 
+----------------------
+
+::
+    samples
+    -rw-r--r--  1 blyth  staff  7028  5 Apr 18:04 no-styles.svg
+    -rw-r--r--  1 blyth  staff  7465  5 Apr 18:04 no-fonts.svg
+    -rw-r--r--  1 blyth  staff  6797  5 Apr 18:05 default.svg
+    -rw-r--r--@ 1 blyth  staff  6842  5 Apr 18:29 illustrator.svg
+
+
+one with pdflatex + illustrator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    simon:samples blyth$ pdflatex slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122
+    This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/MacPorts 2012_4)
+     restricted \write18 enabled.
+    entering extended mode
+
+    (./slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122.tex
+    LaTeX2e <2011/06/27>
+    Babel <v3.8m> and hyphenation patterns for english, dumylang, nohyphenation, cz
+    ech, slovak, dutch, ukenglish, usenglishmax, basque, french, german-x-2009-06-1
+    9, ngerman-x-2009-06-19, german, ngerman, swissgerman, italian, polish, portugu
+    ese, spanish, catalan, galician, loaded.
+    (/opt/local/share/texmf-texlive-dist/tex/latex/base/article.cls
+    Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+    (/opt/local/share/texmf-texlive-dist/tex/latex/base/size12.clo))
+    No file slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+412
+    2.aux.
+    [1{/opt/local/var/db/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+    (./slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122.aux
+    ) )</opt/local/share/texmf-texlive-dist/fonts/type1/public/amsfonts/cm/cmmi6.pf
+    b></opt/local/share/texmf-texlive-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb
+    ></opt/local/share/texmf-texlive-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb><
+    /opt/local/share/texmf-texlive-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></o
+    pt/local/share/texmf-texlive-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb>
+    Output written on slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-2
+    11+211+4122.pdf (1 page, 38113 bytes).
+    Transcript written on slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_7
+    4_-211+211+4122.log.
+    simon:samples blyth$ 
+
+
+Avoiding long paths that trip up applescript OR illustrator::
+
+    simon:samples blyth$ illustrator-pdf2svg-one /Users/blyth/heprez/dvisvgm/samples/slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122.pdf /tmp/illus.svg
+    /data/heprez/data/images/applescript/illustrator/pdf2svg_one.scpt: execution error: Adobe Illustrator got an error: Bad name for file. some object (-37)
+    simon:samples blyth$ cp /Users/blyth/heprez/dvisvgm/samples/slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122.pdf /tmp/i.pdf
+    simon:samples blyth$ illustrator-pdf2svg-one /tmp/i.pdf /tmp/o.svg
+    simon:samples blyth$ cp /tmp/o.svg illustrator.svg
+
+
+
+three with latex + dvisvgm
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    simon:samples blyth$ dvisvgm slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122 -s > default.svg
+    processing page 1 [1]
+      page size: 86.5158pt x 19.472pt (30.4068mm x 6.84361mm)
+      page written to <stdout>
+    1 of 1 page converted in 0.429627 seconds
+
+    simon:samples blyth$ dvisvgm --no-styles slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122 -s > no-styles.svg
+    processing page 1 [1]
+      page size: 86.5158pt x 19.472pt (30.4068mm x 6.84361mm)
+      page written to <stdout>
+    1 of 1 page converted in 0.404618 seconds
+
+    simon:samples blyth$ dvisvgm --no-fonts slBR_5122_-211+74xoBR_5122_-211+-211+211+4122xPartialBR_74_-211+211+4122 -s > no-fonts.svg
+    processing page 1 [1]
+      page size: 86.5158pt x 19.472pt (30.4068mm x 6.84361mm)
+      page written to <stdout>
+    1 of 1 page converted in 0.351966 seconds
+
+
+view with illustrator 
+------------------------
+
+Open in Illustrator gives loads of missing font warnings, and is represented by lots of empty boxes for `default` and `--no-styles`
+only `--no-fonts` looks OK but bounding box misses the text::
+
+    simon:samples blyth$ open -a Adobe\ Illustrator no-styles.svg  no-fonts.svg default.svg illustrator.svg
+
+Only the native one arrives unscathed and on target.
+
+
+view with squiggle/batik
+-------------------------
+
+Batik is referenced from http://dvisvgm.sourceforge.net/FAQ so maybe that is used during development.
+All three dvisvgm SVG look OK with squiggle/batik::
+
+    simon:samples blyth$ batik- 
+    simon:samples blyth$ batik-squiggle no-styles.svg  no-fonts.svg default.svg illustrator.svg
+    java -jar /usr/local/heprez/future/batik/batik-1.7/batik-squiggle.jar no-styles.svg no-fonts.svg default.svg illustrator.svg
+
+The illustrator has the dinky font, and a little glyph overlap
+
+
+view with safari
+------------------
+
+::
+
+    simon:samples blyth$ open -a Safari default.svg      # glyphs all there but on top of each other : illegible
+    simon:samples blyth$ open -a Safari no-styles.svg    # ok
+    simon:samples blyth$ open -a Safari no-fonts.svg     # ok
+    simon:samples blyth$ open -a Safari illustrator.svg  # ok
+
+
+
+Scaling this 
+-------------
+
+::
+
+    b2mc:images heprez$ pwd
+    /Users/heprez/data/data/images
+    b2mc:images heprez$ cp -r extras extras_dvisvgm_test
+
+    latex -output-directory=dvi tex/to.tex
+
+

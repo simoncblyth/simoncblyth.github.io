@@ -1,0 +1,121 @@
+Fonts
+======
+
+Issue : missing text 
+---------------------
+
+* http://mail-archives.apache.org/mod_mbox/xmlgraphics-batik-users/200707.mbox/%3Cs68cbe31.001@bristol.gov.uk%3E
+
+::
+
+       My guess is that it can't find _any_ fonts in the server JVM.
+     One option would be to use CSS or SVG to point directly to a
+     TrueType font file for rendering.  You can see an example of this
+     in "samples/tests/spec/fonts/fontFace.svg".
+
+maybe OSX specific
+~~~~~~~~~~~~~~~~~~~
+
+
+* http://www.nanoant.com/apple/leopards-java-105-update-2-breaks-quartz-pipeline-font-rendering
+
+::
+
+    simon:batik-svg2jpg blyth$ batik-svgs | grep textStyle
+    /usr/local/heprez/future/batik/batik-1.7/samples/tests/spec/text/textStyles.svg
+
+
+Both `batik-squiggle` and `batik-qsquiggle` missing chars::
+
+    simon:batik-svg2jpg blyth$ batik-qsquiggle /usr/local/heprez/future/batik/batik-1.7/samples/tests/spec/text/textStyles.svg
+    java -Dapple.awt.graphics.UseQuartz=true -jar /usr/local/heprez/future/batik/batik-1.7/batik-squiggle.jar /usr/local/heprez/future/batik/batik-1.7/samples/tests/spec/text/textStyles.svg
+    Loading document...
+    Loading document completed in 287 ms
+    Building document...
+    Building document completed in 591 ms
+    Rendering document preparation...
+    Rendering document preparation completed in 116 ms
+    Rendering document started...
+    Rendering document completed in 1219 ms
+
+
+try on cms01
+~~~~~~~~~~~~~~
+
+::
+
+     1000  svn up ~/h
+     1001  heprez-
+     1002  batik-
+     1003  batik-get
+     1004  batik-svg2jpg-build
+     1005  batik-svg2jpg-demo
+     1006  cp /tmp/blyth/heprez/batik-svg2jpg-demo/01218_nometa.jpg ~/
+
+
+No missing text in cms01 transcoded jpg, but still:
+
+#. dinky math font with some glyph overlapping
+
+
+try on b2mc
+~~~~~~~~~~~~~
+
+AWT Window server permissions::
+
+    b2mc:~ heprez$ heprez-
+    b2mc:~ heprez$ batik-
+    b2mc:~ heprez$ batik-svg2jpg-demo
+    === batik-svg2jpg: /Users/heprez/heprez/batik/samples/01218_nometa.svg : /tmp/heprez/heprez/batik-svg2jpg-demo/01218_nometa.jpg
+    === batik-svg2jpg: time java -cp /Users/heprez/local/heprez/future/batik/transcoder:/Users/heprez/local/heprez/future/batik/batik-1.7/batik.jar SaveAsJPEG /Users/heprez/heprez/batik/samples/01218_nometa.svg /tmp/heprez/heprez/batik-svg2jpg-demo/01218_nometa.jpg
+    Apr  4 21:29:45 b2mc.kek.jp java[27969] <Error>: kCGErrorFailure: Set a breakpoint @ CGErrorBreakpoint() to catch errors as they are logged.
+    Exception in thread "main" java.lang.InternalError: Can't connect to window server - not enough permissions.
+            at java.lang.ClassLoader$NativeLibrary.load(Native Method)
+            at java.lang.ClassLoader.loadLibrary0(ClassLoader.java:1827)
+            at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1724)
+            at java.lang.Runtime.loadLibrary0(Runtime.java:823)
+            at java.lang.System.loadLibrary(System.java:1045)
+            at sun.security.action.LoadLibraryAction.run(LoadLibraryAction.java:50)
+            at java.security.AccessController.doPrivileged(Native Method)
+            at java.awt.Toolkit.loadLibraries(Toolkit.java:1605)
+            at java.awt.Toolkit.<clinit>(Toolkit.java:1627)
+            at java.awt.Color.<clinit>(Color.java:263)
+            at org.apache.batik.transcoder.image.JPEGTranscoder.<init>(JPEGTranscoder.java:46)
+            at SaveAsJPEG.main(SaveAsJPEG.java:12)
+
+
+Require `-Djava.awt.headless=true`::
+
+    b2mc:~ heprez$ batik-
+    b2mc:~ heprez$ batik-svg2jpg-demo
+    === batik-svg2jpg: /Users/heprez/heprez/batik/samples/01218_nometa.svg : /tmp/heprez/heprez/batik-svg2jpg-demo/01218_nometa.jpg
+    === batik-svg2jpg: time java -Djava.awt.headless=true -cp /Users/heprez/local/heprez/future/batik/transcoder:/Users/heprez/local/heprez/future/batik/batik-1.7/batik.jar SaveAsJPEG /Users/heprez/heprez/batik/samples/01218_nometa.svg /tmp/heprez/heprez/batik-svg2jpg-demo/01218_nometa.jpg
+
+    real    0m7.948s
+    user    0m3.742s
+    sys     0m0.824s
+    b2mc:~ heprez$ 
+
+
+Copy back and view, shows no missing text in b2mc (Lion) transcodes::
+
+    simon:~ blyth$ scp K:01218_nometa.jpg k_01218_nometa.jpg
+    simon:~ blyth$ open k_01218_nometa.jpg 
+
+
+BUT, still have dinky math font and some glyph overlapping
+
+
+.. sidebar:: Just a start 
+
+   To be able to replace Illustrator need to test the full roundtrip, 
+   ie must be able to convert PDF (created by pdflatex) to SVG. 
+   Also latex2html enters somewhere too for glyph metrics extracted from the html.
+
+
+
+
+  
+
+
+

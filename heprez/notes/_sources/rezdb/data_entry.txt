@@ -1,0 +1,119 @@
+**rezdb** data entry
+=====================
+
+The below URL is the starting point for entry of results, 
+
+* :rezdb:`/db/test/` 
+
+The final part of the URL corresponds collection in the underlying **eXist** XMLDB. 
+Results are entered into collections such as :rezdb:`/db/hfagc/d0/d0thomas/` [#trailingslash]_.
+
+Create test OR learning entries **only** within :rezdb:`/db/test/` using the **guest** identity.
+
+.. warning:: Restrict test OR dummy entries to :rezdb:`/db/test/` keeping :rezdb:`/db/hfagc/`
+
+Use the sidebar quick links to get to your home directory. 
+In order to edit you will need to enter credentials. 
+The **rezdb** webapp has a separate login account to SVN/Trac
+although passwords may start out the same.     
+
+.. sidebar:: Collection Permissions
+
+     Each user initially only has permissions to edit within their home collection, although 
+     in some cases permissions have been modified to allow changes to other users collections within 
+     the same group [#onegroup]_.
+
+Although not strictly necessary, it is a good idea to name 
+resources(ie "files" in the XMLDB) corresponding to each reference 
+in a systematic manner as Gigi has done :rezdb:`/db/hfagc/babar/gigi/` 
+
+
+.. [#trailingslash] Note that **rezdb** directory URLs require the trailing slash, omitting it gives cocoon errors `No pipeline matched request: rezdb/db/hfagc` eg :rezdb:`/db/hfagc`
+
+.. [#onegroup] Although **eXist** supports users belonging to more than one group **rezdb** does not  
+
+
+
+
+copying entries
+----------------
+
+
+deleting entries
+-----------------
+
+.. sidebar:: Do not delete established entries
+
+    Entries that have already been registered with the system, which is done as the first step of a scrape, 
+    should not be deleted. Instead to prevent them appearing in reports set them to **inactive** at 
+    result level by using the `Edit Header` rezdb form.
+
+The rezdb web interface provides a **delete** button if you have the permissions for a collection. 
+However this should not be used for established entries that have 
+already been registered with the system.
+Note that you cannot delete a resource which you are currently previewing, 
+you need to enter the name of the resource you wish to delete while viewing 
+a collection or another resource. 
+
+Instead of deletion, entries should be flagged as **inactive** using the  *Edit Header* 
+form to prevent all quotes within a result from appearing in reports. Individual 
+quotes can also be flagged as **inactive** using the *Edit Quote* form.
+A header status of **inactive** takes precedence over individual quote status. 
+
+
+handling problematic modes
+----------------------------
+
+Considerations for problematic modes:
+
+#. are there other results already encoded that should align with this ?
+   if so the same approach has to be used in order to get an alignment 
+   of symbols : otherwise no combination is done and the "same" qty will
+   be listed twice
+
+#. can the extra particles already defined encode the mode ?
+
+   * :trunk:`images/tex2pdfpng/extras.pl`   
+   
+#. perhaps PDG code 0, used to correspond to **admixture plus** can be used, related tickets:
+
+   * :ticket:`162`  arrange PDG code 0 to represent admixtures via a spaced plus glyph
+   * :ticket:`166`  p0 still appearing as forMCinternalUse
+
+If the mode cannot be encoded using currently defined glyphs then 
+it is straightforward to declare more extras in :trunk:`images/tex2pdfpng/extras.pl`
+and these code can be used immediately in the rezdb interface, although their previews will 
+be broken (appearing as missing link question marks) 
+until new previews are created and propagated to the editing machine.
+
+This breakage is not important however as long as the agreed upon codes are appropriately 
+in place in the XML.
+
+
+adding new particles
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. sidebar:: Bootstrapping PDG particle codes
+
+     The PDG particle codes and corresponding latex snippets for well established particles 
+     were bootstrapped into the system by the parsing of PDG latex documents dated  March 11, 2004.
+     These source documents and parsing code are within :trunk:`images/pdgparse/` 
+     In future a re-bootstrap might be necessary as more particles become well established, assuming
+     that the PDG provides a parsable document or queryable interface.
+      
+
+To add a new particle glyph, add code and corresponding latex to the 
+perl hash datastructure in
+
+  * :trunk:`images/tex2pdfpng/extras.pl`
+  * :repo:`images/tex2pdfpng/extras.pl`
+
+Such additions should be coordinated with the heprez administrator, as
+it some actions are required to create the PDG/PNG/SVG from the latex snippets
+are re-create indices.
+
+Be careful to choose codes that do not overlap with existing extra or standard codes, and follow the convention
+of negating to get the conjugate.
+
+
+
