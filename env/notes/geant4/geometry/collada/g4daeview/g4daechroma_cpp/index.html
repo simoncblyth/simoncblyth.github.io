@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>G4DAEChroma.cpp : ZMQResponder, CUDA kernel call &mdash; Env  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../../../_static/highstock/highstock.js"></script>
+    <script type="text/javascript" src="../../../../../_static/highstock/modules/exporting.js"></script>
+    <link rel="top" title="Env  documentation" href="../../../../../" />
+    <link rel="up" title="g4daeview" href="../" />
+    <link rel="next" title="Optical Photon Marshalling" href="../photon_marshalling/" />
+    <link rel="prev" title="G4DAECHROMA transport testing" href="../g4daechroma_transport_testing/" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../photon_marshalling/" title="Optical Photon Marshalling"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../g4daechroma_transport_testing/" title="G4DAECHROMA transport testing"
+             accesskey="P">previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../../" >geant4</a> &raquo;</li>
+          <li><a href="../../../" >Geant4 Geometry Export</a> &raquo;</li>
+          <li><a href="../../" >Geant4 Geometry in Collada</a> &raquo;</li>
+          <li><a href="../" accesskey="U">g4daeview</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>Links</h3>
+<ul class="this-page-menu">
+	<li><a href="/tracs/env"> env </a>  <a href="/tracs/env/timeline"> tl </a> <a href="/repos/env/trunk"> repo </a> <a href="/e"> edocs </a> </li>
+	<li><a href="/tracs/heprez"> heprez </a>  <a href="/tracs/heprez/timeline"> tl </a> <a href="/repos/heprez/trunk"> repo</a> <a href="/h">hdocs</a>   </li>
+        <li><a href="/e/scm/monitor/" > backup status </a> </li>
+</ul>
+
+<h3>Content Skeleton</h3>
+
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install/">Installing <strong>env</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../base/">Base Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../log/May2012/">LOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../TODO/">TODO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sysadmin/">Sys Admin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../plot/">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../scm/">SCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../trac/">Trac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../root/">ROOT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sphinxext/">Sphinx Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../matplotlib/">Matplotlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../nose/">nose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../svn/">SVN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../npy/">Numerical Python, numpy et al</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pypy/">PyPy : faster python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tools/">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../mysqlhotcopy/">MySQL hotcopy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../mysql/">MySQL Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sqlite/">SQLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../db/">DB scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../qxml/">QXML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../fossil/">Fossil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../java/">Java Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pycuda/">pycuda</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../">geant4</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../../release_notes/">Geant4 Release Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../geant4_gpu/">Geant4 GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../geant4_profiling/">Geant4 Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../release_notes/">Geant4 Release Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../verbosity/">Verbosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../docs/">Geant4 Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../giga/">GiGa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/">Geant4 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../opticalphoton/">Geant4 Optical Photon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../processes/">Geant4 Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../medical/">Medical Communities Using Geant4 (esp. optical photon)</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../">Geant4 Geometry Export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../g4py/">g4py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../nuwa/">nuwa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../event/">Geant4 Event</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../geant4_future_doe/">Geant4</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../muon_simulation/">muon_simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../chroma/">chroma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../llvm/">llvm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../graphics/">Graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../opencl/">opencl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../linux/">Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../cloud/">Cloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../package_management/">Package Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../ui/">ui</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../debugging/">debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../mercurial/">mercurial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../javascript/">javascript</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../nuwa/">nuwa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../ccgpu/">ccgpu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pygame/">pygame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../zeromq/">zeromq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../doc/">doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../python/">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../osx/">osx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../hg/">hg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../numpy/">numpy</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/geant4/geometry/collada/g4daeview/g4daechroma_cpp.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../g4daechroma_transport_testing/"
+                        title="previous chapter">G4DAECHROMA transport testing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../photon_marshalling/"
+                        title="next chapter">Optical Photon Marshalling</a></p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="g4daechroma-cpp-zmqresponder-cuda-kernel-call">
+<h1>G4DAEChroma.cpp : ZMQResponder, CUDA kernel call<a class="headerlink" href="#g4daechroma-cpp-zmqresponder-cuda-kernel-call" title="Permalink to this headline">¶</a></h1>
+<p>C++ implementation of <cite>g4daechroma.py</cite> with few dependencies
+that just collects photons bytes streams,
+deserializes into arrays, copies to GPU, runs kernel,
+copy back, serialize and reply.</p>
+<div class="section" id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>installation simplicity, just a few Chroma/CUDA kernel calls
+and copying vectors,</li>
+<li>convenience of forking from Geant4 process to run the
+GPU propagation on same machine at the generation</li>
+<li>speed</li>
+</ul>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>CUDA (+thrust?)</li>
+<li>ZMQ</li>
+<li>(de)serialization</li>
+</ul>
+</div>
+<div class="section" id="initialization">
+<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>load geometry/materials/surface data from some persisted/cached format</li>
+<li>copy geometry/materials/surface data to GPU building GPU structs
+holding the GPU pointers from the copies</li>
+</ol>
+</div>
+<div class="section" id="propagation">
+<h2>Propagation<a class="headerlink" href="#propagation" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>ZMQ poll for bytes</li>
+<li>deserialize bytes into photon data objects of some type<ul>
+<li>container object with std::vector&lt;float&gt; members</li>
+<li>container with numpy array members</li>
+<li>single numpy array, using union int/float trickery for simple decoding from C++</li>
+</ul>
+</li>
+<li>copy arrays to GPU</li>
+<li>kernel call</li>
+<li>get arrays back to CPU</li>
+<li>recompose transport object with propagated photons</li>
+<li>serialize</li>
+<li>ZMQ reply</li>
+<li>avoid intermediate <cite>ChromaPhotonList</cite> and instead load
+photons into the transport class</li>
+</ol>
+</div>
+<div class="section" id="npy-geometry-cache">
+<h2>NPY Geometry Cache<a class="headerlink" href="#npy-geometry-cache" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>see <a class="reference internal" href="../../../../../numpy/numpy_persistency/"><em>NumPy Persistancy</em></a></li>
+</ul>
+<p>Do not want to recreate pycollada parsing again in C++,
+so need so do that in python and persist the gleaned data in numpy
+NPY serialization format, which can be read from C/C++.</p>
+<p>Intermediate geometry cache format that is written by
+the graphical <cite>g4daeview.py</cite> and can
+be used as an initialization speedup for the viewer.</p>
+<p>Performance not an major issue for initialization,
+so just use NPY as convenient to be written from python/numpy
+and read in C++ with CNPY.</p>
+<p>Use directory structure with single npy files:</p>
+<div class="highlight-python"><pre>materials/000/absorption_length.npy
+              reemission_probability.npy
+              ...
+          001/absorption_length.npy
+              ...
+
+surfaces/001/...
+
+geometry/000/vertices.npy
+             triangles.npy</pre>
+</div>
+</div>
+<div class="section" id="potential-dependencies">
+<h2>Potential Dependencies<a class="headerlink" href="#potential-dependencies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cupp">
+<h3>CuPP<a class="headerlink" href="#cupp" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://www.plm.eecs.uni-kassel.de/CuPP/">http://www.plm.eecs.uni-kassel.de/CuPP/</a><ul>
+<li>facilitating CUDA from C++, like pycuda does from python ?</li>
+<li>probably unnecessary</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section" id="boost-program-options">
+<h3>boost::program_options<a class="headerlink" href="#boost-program-options" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://stackoverflow.com/questions/7399688/cuda-with-boost">http://stackoverflow.com/questions/7399688/cuda-with-boost</a></li>
+<li>maybe unnecessary, handle config via bash script, envvars</li>
+</ul>
+</div>
+<div class="section" id="boost-numeric-ublas-vector-double">
+<h3><cite>boost::numeric::ublas::vector&lt;double&gt;</cite><a class="headerlink" href="#boost-numeric-ublas-vector-double" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://stackoverflow.com/questions/9059774/boostnumericublasvector-internal-data-storage-pointer">http://stackoverflow.com/questions/9059774/boostnumericublasvector-internal-data-storage-pointer</a></li>
+</ul>
+<div class="highlight-python"><pre>boost::numeric::ublas::vector&lt;double&gt; vector;
+double* ptr = &amp;vector[0];
+
+
+vector&lt;double, unbounded_array&lt;double,n_elements&gt;&gt; vector;
+cudaMemcpy(device_dest,
+           vector.data().begin(),
+           vector.data().size(),
+           cudaMemcpyHostToDevice);</pre>
+</div>
+</div>
+<div class="section" id="cuda-thrust">
+<h3>cuda::thrust<a class="headerlink" href="#cuda-thrust" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>comes with CUDA, so not really an extra dependency</li>
+<li><a class="reference external" href="http://docs.nvidia.com/cuda/thrust/">http://docs.nvidia.com/cuda/thrust/</a><ul>
+<li>allows to hide the memcpy</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-python"><pre>// Copy host_vector H to device_vector D
+thrust::device_vector&lt;int&gt; D = H;</pre>
+</div>
+</div>
+<div class="section" id="cuda-unified-memory">
+<h3>CUDA Unified Memory<a class="headerlink" href="#cuda-unified-memory" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>needs CUDA 6, compute capability 3, MBP should be capable of this</li>
+<li><a class="reference external" href="http://devblogs.nvidia.com/parallelforall/unified-memory-in-cuda-6/">http://devblogs.nvidia.com/parallelforall/unified-memory-in-cuda-6/</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="other-libs">
+<h2>Other Libs<a class="headerlink" href="#other-libs" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>pyublas : integrate Boost.UBlas and Boost.Python<ul>
+<li><a class="reference external" href="http://documen.tician.de/pyublas/">http://documen.tician.de/pyublas/</a></li>
+<li>allows to fill arrays in C++ that can be viewed
+as numpy arrays at python level off the same data, <strong>NO COPYING</strong></li>
+<li>what about serialization ?</li>
+</ul>
+</li>
+<li>Boost-python<ul>
+<li><a class="reference external" href="https://github.com/abingham/boost_python_tutorial">https://github.com/abingham/boost_python_tutorial</a></li>
+<li><a class="reference external" href="http://www.quora.com/How-do-I-convert-C++-vector-to-NumPy-array-using-Boost-Python">http://www.quora.com/How-do-I-convert-C++-vector-to-NumPy-array-using-Boost-Python</a></li>
+</ul>
+</li>
+</ol>
+<div class="sidebar">
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../photon_marshalling/" title="Optical Photon Marshalling"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../g4daechroma_transport_testing/" title="G4DAECHROMA transport testing"
+             >previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../../" >geant4</a> &raquo;</li>
+          <li><a href="../../../" >Geant4 Geometry Export</a> &raquo;</li>
+          <li><a href="../../" >Geant4 Geometry in Collada</a> &raquo;</li>
+          <li><a href="../" >g4daeview</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

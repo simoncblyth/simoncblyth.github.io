@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../../../_static/highstock/modules/exporting.js"></script>
     <link rel="top" title="Env  documentation" href="../../../" />
     <link rel="up" title="Geant4 Event" href="../" />
-    <link rel="next" title="Geant4" href="../../geant4_future_doe/" />
+    <link rel="next" title="Geant4 External Propagation" href="../geant4_external_propagation/" />
     <link rel="prev" title="Geant4 Navigator" href="../geant4_navigator/" /> 
   </head>
   <body>
@@ -42,7 +42,7 @@
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../../geant4_future_doe/" title="Geant4"
+          <a href="../geant4_external_propagation/" title="Geant4 External Propagation"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../geant4_navigator/" title="Geant4 Navigator"
@@ -156,8 +156,8 @@
   <p class="topless"><a href="../geant4_navigator/"
                         title="previous chapter">Geant4 Navigator</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../../geant4_future_doe/"
-                        title="next chapter">Geant4</a></p>
+  <p class="topless"><a href="../geant4_external_propagation/"
+                        title="next chapter">Geant4 External Propagation</a></p>
         </div>
       </div>
 
@@ -170,61 +170,58 @@
 <h1>Geant4 Process<a class="headerlink" href="#geant4-process" title="Permalink to this headline">¶</a></h1>
 <div class="contents local topic" id="contents">
 <ul class="simple">
-<li><a class="reference internal" href="#overview" id="id3">Overview</a><ul>
-<li><a class="reference internal" href="#complications" id="id4">complications</a></li>
+<li><a class="reference internal" href="#overview" id="id3">Overview</a></li>
+<li><a class="reference internal" href="#g4-stepping-process-mechanics" id="id4">G4 Stepping, Process mechanics</a><ul>
+<li><a class="reference internal" href="#what-is-a-process" id="id5">What is a Process?</a></li>
+<li><a class="reference internal" href="#what-is-a-particlechange" id="id6">What is a ParticleChange?</a></li>
+<li><a class="reference internal" href="#external-shoe-horning" id="id7">External Shoe-horning</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#g4-stepping-process-mechanics" id="id5">G4 Stepping, Process mechanics</a><ul>
-<li><a class="reference internal" href="#what-is-a-process" id="id6">What is a Process?</a></li>
-<li><a class="reference internal" href="#what-is-a-particlechange" id="id7">What is a ParticleChange?</a></li>
-<li><a class="reference internal" href="#external-shoe-horning" id="id8">External Shoe-horning</a></li>
+<li><a class="reference internal" href="#process-example-g4oprayleigh" id="id8">Process Example : G4OpRayleigh</a><ul>
+<li><a class="reference internal" href="#where-are-the-canonical-calls-to-getmeanfreepath" id="id9">Where are the canonical calls to GetMeanFreePath</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#process-example-g4oprayleigh" id="id9">Process Example : G4OpRayleigh</a><ul>
-<li><a class="reference internal" href="#where-are-the-canonical-calls-to-getmeanfreepath" id="id10">Where are the canonical calls to GetMeanFreePath</a></li>
+<li><a class="reference internal" href="#g4processmanager" id="id10">G4ProcessManager</a></li>
+<li><a class="reference internal" href="#g4steppingmanager" id="id11">G4SteppingManager</a></li>
+<li><a class="reference internal" href="#g4trackingmanager" id="id12">G4TrackingManager</a></li>
+<li><a class="reference internal" href="#g4eventmanager" id="id13">G4EventManager</a></li>
+<li><a class="reference internal" href="#modelling-processes" id="id14">Modelling Processes</a></li>
+<li><a class="reference internal" href="#tracking-of-photons-in-processes-optical" id="id15">Tracking of Photons in processes/optical</a><ul>
+<li><a class="reference internal" href="#absorption" id="id16">Absorption</a><ul>
+<li><a class="reference internal" href="#abslength" id="id17">ABSLENGTH</a></li>
+<li><a class="reference internal" href="#g4opabsorption-poststepdoit" id="id18">G4OpAbsorption::PostStepDoIt</a></li>
+<li><a class="reference internal" href="#g4opabsorption-getmeanfreepath" id="id19">G4OpAbsorption::GetMeanFreePath</a></li>
+<li><a class="reference internal" href="#g4vdiscreteprocess-poststepgetphysicalinteractionlength" id="id20">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a></li>
+<li><a class="reference internal" href="#g4vprocess-poststepgpil" id="id21">G4VProcess::PostStepGPIL</a></li>
+<li><a class="reference internal" href="#id1" id="id22">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a></li>
+<li><a class="reference internal" href="#processes-management-include-g4vprocess-hh" id="id23">processes/management/include/G4VProcess.hh</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#g4processmanager" id="id11">G4ProcessManager</a></li>
-<li><a class="reference internal" href="#g4steppingmanager" id="id12">G4SteppingManager</a></li>
-<li><a class="reference internal" href="#g4trackingmanager" id="id13">G4TrackingManager</a></li>
-<li><a class="reference internal" href="#g4eventmanager" id="id14">G4EventManager</a></li>
-<li><a class="reference internal" href="#modelling-processes" id="id15">Modelling Processes</a></li>
-<li><a class="reference internal" href="#tracking-of-photons-in-processes-optical" id="id16">Tracking of Photons in processes/optical</a><ul>
-<li><a class="reference internal" href="#absorption" id="id17">Absorption</a><ul>
-<li><a class="reference internal" href="#abslength" id="id18">ABSLENGTH</a></li>
-<li><a class="reference internal" href="#g4opabsorption-poststepdoit" id="id19">G4OpAbsorption::PostStepDoIt</a></li>
-<li><a class="reference internal" href="#g4opabsorption-getmeanfreepath" id="id20">G4OpAbsorption::GetMeanFreePath</a></li>
-<li><a class="reference internal" href="#g4vdiscreteprocess-poststepgetphysicalinteractionlength" id="id21">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a></li>
-<li><a class="reference internal" href="#g4vprocess-poststepgpil" id="id22">G4VProcess::PostStepGPIL</a></li>
-<li><a class="reference internal" href="#id1" id="id23">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a></li>
-<li><a class="reference internal" href="#processes-management-include-g4vprocess-hh" id="id24">processes/management/include/G4VProcess.hh</a></li>
+<li><a class="reference internal" href="#rayleigh-scattering" id="id24">Rayleigh Scattering</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rayleigh-scattering" id="id25">Rayleigh Scattering</a></li>
+<li><a class="reference internal" href="#g4steppingmanager-getprocessnumber" id="id25">G4SteppingManager::GetProcessNumber</a></li>
+<li><a class="reference internal" href="#how-are-the-relevant-processes-determined" id="id26">How are the relevant processes determined ?</a></li>
+<li><a class="reference internal" href="#what-distribution-is-used-for-op-times-energy" id="id27">What distribution is used for OP times, energy</a><ul>
+<li><a class="reference internal" href="#dspmtsensdet-processhits" id="id28">DsPmtSensDet::ProcessHits</a></li>
+<li><a class="reference internal" href="#where-do-the-times-come-from" id="id29">Where do the times come from ?</a></li>
+<li><a class="reference internal" href="#g4transportation-alongstepdoit" id="id30">G4Transportation::AlongStepDoIt</a></li>
+<li><a class="reference internal" href="#g4steppingmanager-definephysicalsteplength" id="id31">G4SteppingManager::DefinePhysicalStepLength</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#g4steppingmanager-getprocessnumber" id="id26">G4SteppingManager::GetProcessNumber</a></li>
-<li><a class="reference internal" href="#how-are-the-relevant-processes-determined" id="id27">How are the relevant processes determined ?</a></li>
-<li><a class="reference internal" href="#what-distribution-is-used-for-op-times-energy" id="id28">What distribution is used for OP times, energy</a><ul>
-<li><a class="reference internal" href="#dspmtsensdet-processhits" id="id29">DsPmtSensDet::ProcessHits</a></li>
-<li><a class="reference internal" href="#where-do-the-times-come-from" id="id30">Where do the times come from ?</a></li>
-<li><a class="reference internal" href="#g4transportation-alongstepdoit" id="id31">G4Transportation::AlongStepDoIt</a></li>
-<li><a class="reference internal" href="#g4steppingmanager-definephysicalsteplength" id="id32">G4SteppingManager::DefinePhysicalStepLength</a></li>
+<li><a class="reference internal" href="#id2" id="id32">G4SteppingManager::DefinePhysicalStepLength</a><ul>
+<li><a class="reference internal" href="#only-6-processes" id="id33">Only 6 processes ?</a></li>
+<li><a class="reference internal" href="#interaction-with-physics-processes" id="id34">2.4.4.  Interaction with Physics Processes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id2" id="id33">G4SteppingManager::DefinePhysicalStepLength</a><ul>
-<li><a class="reference internal" href="#only-6-processes" id="id34">Only 6 processes ?</a></li>
-<li><a class="reference internal" href="#interaction-with-physics-processes" id="id35">2.4.4.  Interaction with Physics Processes</a></li>
+<li><a class="reference internal" href="#g4transportation" id="id35">G4Transportation</a></li>
+<li><a class="reference internal" href="#nuwa-hookup" id="id36">NuWa hookup</a><ul>
+<li><a class="reference internal" href="#physicslist-setup" id="id37">PhysicsList setup</a></li>
+<li><a class="reference internal" href="#impingement" id="id38">Impingement</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#g4transportation" id="id36">G4Transportation</a></li>
-<li><a class="reference internal" href="#nuwa-hookup" id="id37">NuWa hookup</a><ul>
-<li><a class="reference internal" href="#physicslist-setup" id="id38">PhysicsList setup</a></li>
-<li><a class="reference internal" href="#impingement" id="id39">Impingement</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#wrapper-process" id="id40">Wrapper Process</a><ul>
-<li><a class="reference internal" href="#g4wrapperprocess-usage-for-event-biasing" id="id41">G4WrapperProcess usage for event biasing</a></li>
+<li><a class="reference internal" href="#wrapper-process" id="id39">Wrapper Process</a><ul>
+<li><a class="reference internal" href="#g4wrapperprocess-usage-for-event-biasing" id="id40">G4WrapperProcess usage for event biasing</a></li>
 </ul>
 </li>
 </ul>
@@ -234,34 +231,14 @@
 <p>Trace how Geant4 processes work, with a view to glueing
 external batched optical photon propagation into geant4 via
 a pseudo process.</p>
-<p>Requirements:</p>
-<ol class="arabic simple">
-<li>collect optical photon data for all generated optical photons</li>
-<li>suspend other processing of optical photons beyond capture</li>
-<li>once all (or some configured number) of optical photons are collected dispatch the external propagation
-and get the results back</li>
-<li>proceed with geant4 processing as if the propagation was standard geant4</li>
-</ol>
-<p>In summary: <strong>mapping external batch optical photon propagation onto Geant4 process</strong></p>
-<div class="section" id="complications">
-<h3><a class="toc-backref" href="#id4">complications</a><a class="headerlink" href="#complications" title="Permalink to this headline">¶</a></h3>
-<ol class="arabic simple">
-<li>processes operate at track level, need to propagate at event (or track collection level)<ul>
-<li>maybe, use stack action in tandem with pseudo process ?</li>
-<li>memory cost, diddling via placeholder duplicate object</li>
-<li>obvious optimization is to throw photons that dont get to PMTs, how to handle</li>
-</ul>
-</li>
-</ol>
-</div>
 </div>
 <div class="section" id="g4-stepping-process-mechanics">
-<h2><a class="toc-backref" href="#id5">G4 Stepping, Process mechanics</a><a class="headerlink" href="#g4-stepping-process-mechanics" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id4">G4 Stepping, Process mechanics</a><a class="headerlink" href="#g4-stepping-process-mechanics" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForApplicationDeveloper/html/ch05.html">https://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForApplicationDeveloper/html/ch05.html</a></li>
 </ul>
 <div class="section" id="what-is-a-process">
-<h3><a class="toc-backref" href="#id6">What is a Process?</a><a class="headerlink" href="#what-is-a-process" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id5">What is a Process?</a><a class="headerlink" href="#what-is-a-process" title="Permalink to this headline">¶</a></h3>
 <p>Only processes can change information of G4Track and add secondary tracks via
 ParticleChange. G4VProcess is a base class of all processes and it has 3 kinds
 of DoIt and GetPhysicalInteraction methods in order to describe interactions
@@ -270,7 +247,7 @@ SHOULD create a special process for the purpose and register the process to the
 particle.</p>
 </div>
 <div class="section" id="what-is-a-particlechange">
-<h3><a class="toc-backref" href="#id7">What is a ParticleChange?</a><a class="headerlink" href="#what-is-a-particlechange" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id6">What is a ParticleChange?</a><a class="headerlink" href="#what-is-a-particlechange" title="Permalink to this headline">¶</a></h3>
 <p>Processes do NOT change any information of G4Track directly in their DoIt.
 Instead, they proposes changes as a result of interactions by using
 ParticleChange. After each DoIt, ParticleChange updates PostStepPoint based on
@@ -278,7 +255,7 @@ proposed changes. Then, G4Track is updated after finishing all AlongStepDoIts
 and after each PostStepDoIt.</p>
 </div>
 <div class="section" id="external-shoe-horning">
-<h3><a class="toc-backref" href="#id8">External Shoe-horning</a><a class="headerlink" href="#external-shoe-horning" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id7">External Shoe-horning</a><a class="headerlink" href="#external-shoe-horning" title="Permalink to this headline">¶</a></h3>
 <p>Begs question:</p>
 <ol class="arabic simple">
 <li>how to force only my process takes control, and dont waste CPU on other processes ?<ul>
@@ -290,7 +267,7 @@ for it in all the Optical Photon creating processes</li>
 </div>
 </div>
 <div class="section" id="process-example-g4oprayleigh">
-<h2><a class="toc-backref" href="#id9">Process Example : G4OpRayleigh</a><a class="headerlink" href="#process-example-g4oprayleigh" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id8">Process Example : G4OpRayleigh</a><a class="headerlink" href="#process-example-g4oprayleigh" title="Permalink to this headline">¶</a></h2>
 <p><cite>geant4.10.00.p01/source/processes/optical/include/G4OpRayleigh.hh</cite>:</p>
 <div class="highlight-python"><pre>076 class G4OpRayleigh : public G4VDiscreteProcess
 077 {
@@ -322,7 +299,7 @@ for it in all the Optical Photon creating processes</li>
 126</pre>
 </div>
 <div class="section" id="where-are-the-canonical-calls-to-getmeanfreepath">
-<h3><a class="toc-backref" href="#id10">Where are the canonical calls to GetMeanFreePath</a><a class="headerlink" href="#where-are-the-canonical-calls-to-getmeanfreepath" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id9">Where are the canonical calls to GetMeanFreePath</a><a class="headerlink" href="#where-are-the-canonical-calls-to-getmeanfreepath" title="Permalink to this headline">¶</a></h3>
 <p>The ordering of MeanFreePath of applicable processes is used to decide which process
 to invoke.</p>
 <div class="highlight-python"><pre>delta:source blyth$ find . -name '*.cc' -exec grep -H \ GetMeanFreePath\( {} \;
@@ -369,7 +346,7 @@ delta:source blyth$</pre>
 </div>
 </div>
 <div class="section" id="g4processmanager">
-<h2><a class="toc-backref" href="#id11">G4ProcessManager</a><a class="headerlink" href="#g4processmanager" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id10">G4ProcessManager</a><a class="headerlink" href="#g4processmanager" title="Permalink to this headline">¶</a></h2>
 <p>canonical PostStepGetPhysicalInteractionLength call <cite>processes/management/include/G4ProcessManager.hh</cite>:</p>
 <div class="highlight-python"><pre>035 //   ----------------  G4ProcessManager  -----------------
 036 // Class Description
@@ -401,7 +378,7 @@ delta:source blyth$</pre>
 </div>
 </div>
 <div class="section" id="g4steppingmanager">
-<h2><a class="toc-backref" href="#id12">G4SteppingManager</a><a class="headerlink" href="#g4steppingmanager" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">G4SteppingManager</a><a class="headerlink" href="#g4steppingmanager" title="Permalink to this headline">¶</a></h2>
 <p>Collect process vectors for track particle type <cite>tracking/src/G4SteppingManager2.cc</cite>:</p>
 <div class="highlight-python"><pre>56 void G4SteppingManager::GetProcessNumber()
 57 /////////////////////////////////////////////////
@@ -567,7 +544,7 @@ optical processes to do their thing.</p>
 </div>
 </div>
 <div class="section" id="g4trackingmanager">
-<h2><a class="toc-backref" href="#id13">G4TrackingManager</a><a class="headerlink" href="#g4trackingmanager" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id12">G4TrackingManager</a><a class="headerlink" href="#g4trackingmanager" title="Permalink to this headline">¶</a></h2>
 <p><cite>tracking/src/G4TrackingManager.cc</cite>:</p>
 <div class="highlight-python"><pre>48 G4TrackingManager::G4TrackingManager()
 49 //////////////////////////////////////
@@ -641,7 +618,7 @@ optical processes to do their thing.</p>
 </div>
 </div>
 <div class="section" id="g4eventmanager">
-<h2><a class="toc-backref" href="#id14">G4EventManager</a><a class="headerlink" href="#g4eventmanager" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id13">G4EventManager</a><a class="headerlink" href="#g4eventmanager" title="Permalink to this headline">¶</a></h2>
 <p><cite>event/src/G4EventManager.cc</cite>:</p>
 <div class="highlight-python"><pre>099 void G4EventManager::DoProcessing(G4Event* anEvent)
 100 {
@@ -710,7 +687,7 @@ optical processes to do their thing.</p>
 </div>
 </div>
 <div class="section" id="modelling-processes">
-<h2><a class="toc-backref" href="#id15">Modelling Processes</a><a class="headerlink" href="#modelling-processes" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id14">Modelling Processes</a><a class="headerlink" href="#modelling-processes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html">http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html</a></li>
 </ul>
@@ -737,12 +714,12 @@ objects(see Particle Change).</dd>
 <cite>G4VContinuousDiscreteProcess</cite>, <cite>G4VRestDiscreteProcess</cite>, <cite>G4VRestContinuousProcess</cite>, <cite>G4VRestContinuousDiscreteProcess</cite></p>
 </div>
 <div class="section" id="tracking-of-photons-in-processes-optical">
-<h2><a class="toc-backref" href="#id16">Tracking of Photons in processes/optical</a><a class="headerlink" href="#tracking-of-photons-in-processes-optical" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id15">Tracking of Photons in processes/optical</a><a class="headerlink" href="#tracking-of-photons-in-processes-optical" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html">http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html</a></li>
 </ul>
 <div class="section" id="absorption">
-<h3><a class="toc-backref" href="#id17">Absorption</a><a class="headerlink" href="#absorption" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id16">Absorption</a><a class="headerlink" href="#absorption" title="Permalink to this headline">¶</a></h3>
 <p>The implementation of optical photon bulk absorption, <cite>G4OpAbsorption</cite>, is
 trivial in that the process merely kills the particle. The procedure requires
 the user to fill the relevant <cite>G4MaterialPropertiesTable</cite> with empirical data for
@@ -751,14 +728,14 @@ AddProperty. The absorption length is the average distance traveled by a photon
 before being absorpted by the medium; i.e. it is the mean free path returned by
 the <cite>GetMeanFreePath</cite> method.</p>
 <div class="section" id="abslength">
-<h4><a class="toc-backref" href="#id18">ABSLENGTH</a><a class="headerlink" href="#abslength" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id17">ABSLENGTH</a><a class="headerlink" href="#abslength" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-python"><pre>[blyth@cms01 source]$ find . -name '*.cc' -exec grep -H 'ABSLENGTH' {} \;
 ./processes/optical/src/G4OpWLS.cc:      GetProperty("WLSABSLENGTH");
 ./processes/optical/src/G4OpAbsorption.cc:                                                GetProperty("ABSLENGTH");</pre>
 </div>
 </div>
 <div class="section" id="g4opabsorption-poststepdoit">
-<h4><a class="toc-backref" href="#id19">G4OpAbsorption::PostStepDoIt</a><a class="headerlink" href="#g4opabsorption-poststepdoit" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id18">G4OpAbsorption::PostStepDoIt</a><a class="headerlink" href="#g4opabsorption-poststepdoit" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-python"><pre>101 G4VParticleChange*
 102 G4OpAbsorption::PostStepDoIt(const G4Track&amp; aTrack, const G4Step&amp; aStep)
 103 {
@@ -777,7 +754,7 @@ the <cite>GetMeanFreePath</cite> method.</p>
 </ol>
 </div>
 <div class="section" id="g4opabsorption-getmeanfreepath">
-<h4><a class="toc-backref" href="#id20">G4OpAbsorption::GetMeanFreePath</a><a class="headerlink" href="#g4opabsorption-getmeanfreepath" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id19">G4OpAbsorption::GetMeanFreePath</a><a class="headerlink" href="#g4opabsorption-getmeanfreepath" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-python"><pre>118 G4double G4OpAbsorption::GetMeanFreePath(const G4Track&amp; aTrack,
 119                          G4double ,
 120                          G4ForceCondition* )
@@ -803,7 +780,7 @@ the <cite>GetMeanFreePath</cite> method.</p>
 </div>
 </div>
 <div class="section" id="g4vdiscreteprocess-poststepgetphysicalinteractionlength">
-<h4><a class="toc-backref" href="#id21">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a><a class="headerlink" href="#g4vdiscreteprocess-poststepgetphysicalinteractionlength" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id20">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a><a class="headerlink" href="#g4vdiscreteprocess-poststepgetphysicalinteractionlength" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-python"><pre>(gdb) b 'G4VDiscreteProcess::PostStepGetPhysicalInteractionLength(G4Track const&amp;, double, G4ForceCondition*)'
 Breakpoint 1 at 0x68f34ed: file /data1/env/local/dyb/NuWa-trunk/../external/build/LCG/geant4.9.2.p01/source/processes/management/include/G4VDiscreteProcess.hh, line 137.
 
@@ -836,7 +813,7 @@ Breakpoint 1 at 0x68f34ed: file /data1/env/local/dyb/NuWa-trunk/../external/buil
 </div>
 </div>
 <div class="section" id="g4vprocess-poststepgpil">
-<h4><a class="toc-backref" href="#id22">G4VProcess::PostStepGPIL</a><a class="headerlink" href="#g4vprocess-poststepgpil" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id21">G4VProcess::PostStepGPIL</a><a class="headerlink" href="#g4vprocess-poststepgpil" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-python"><pre>(gdb) frame 1
 #1  0x07247e95 in G4VProcess::PostStepGPIL (this=0xd37b178, track=@0x10c8cd90, previousStepSize=0, condition=0xc481da0) at /data1/env/local/dyb/NuWa-trunk/../external/build/LCG/geant4.9.2.p01/source/processes/management/include/G4VProcess.hh:464
 464        =PostStepGetPhysicalInteractionLength(track, previousStepSize, condition);
@@ -852,7 +829,7 @@ Breakpoint 1 at 0x68f34ed: file /data1/env/local/dyb/NuWa-trunk/../external/buil
 </div>
 </div>
 <div class="section" id="id1">
-<h4><a class="toc-backref" href="#id23">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id22">G4VDiscreteProcess::PostStepGetPhysicalInteractionLength</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-python"><pre>131 inline G4double G4VDiscreteProcess::PostStepGetPhysicalInteractionLength(
 132                              const G4Track&amp; track,
 133                  G4double   previousStepSize,
@@ -896,7 +873,7 @@ Breakpoint 1 at 0x68f34ed: file /data1/env/local/dyb/NuWa-trunk/../external/buil
 </div>
 </div>
 <div class="section" id="processes-management-include-g4vprocess-hh">
-<h4><a class="toc-backref" href="#id24">processes/management/include/G4VProcess.hh</a><a class="headerlink" href="#processes-management-include-g4vprocess-hh" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id23">processes/management/include/G4VProcess.hh</a><a class="headerlink" href="#processes-management-include-g4vprocess-hh" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-python"><pre>076 class G4VProcess
 077 {
 078   //  A virtual class for physics process objects. It defines
@@ -982,7 +959,7 @@ Breakpoint 1 at 0x68f34ed: file /data1/env/local/dyb/NuWa-trunk/../external/buil
 </div>
 </div>
 <div class="section" id="rayleigh-scattering">
-<h3><a class="toc-backref" href="#id25">Rayleigh Scattering</a><a class="headerlink" href="#rayleigh-scattering" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id24">Rayleigh Scattering</a><a class="headerlink" href="#rayleigh-scattering" title="Permalink to this headline">¶</a></h3>
 <p>The differential cross section in Rayleigh scattering, <cite>sigma/omega</cite> , is proportional to
 <cite>cos2(theta)</cite>, where <cite>theta</cite> is the polar angle of the new polarization vector with respect to
 the old polarization vector. The <cite>G4OpRayleigh</cite> scattering process samples this
@@ -1014,7 +991,7 @@ which calculates it for 10 degrees Celsius liquid water.</p>
 </div>
 </div>
 <div class="section" id="g4steppingmanager-getprocessnumber">
-<h2><a class="toc-backref" href="#id26">G4SteppingManager::GetProcessNumber</a><a class="headerlink" href="#g4steppingmanager-getprocessnumber" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id25">G4SteppingManager::GetProcessNumber</a><a class="headerlink" href="#g4steppingmanager-getprocessnumber" title="Permalink to this headline">¶</a></h2>
 <p>Three categories of DoIt:</p>
 <dl class="docutils">
 <dt><cite>AtRestDoIt</cite></dt>
@@ -1079,7 +1056,7 @@ which calculates it for 10 degrees Celsius liquid water.</p>
 </div>
 </div>
 <div class="section" id="how-are-the-relevant-processes-determined">
-<h2><a class="toc-backref" href="#id27">How are the relevant processes determined ?</a><a class="headerlink" href="#how-are-the-relevant-processes-determined" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id26">How are the relevant processes determined ?</a><a class="headerlink" href="#how-are-the-relevant-processes-determined" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>[blyth@cms01 source]$ find . -name '*.cc' -exec grep -H fPostStepDoItVector {} \;
 ./tracking/src/G4SteppingManager2.cc:   fPostStepDoItVector = pm-&gt;GetPostStepProcessVector(typeDoIt);
 ./tracking/src/G4SteppingManager2.cc:         fCurrentProcess = (*fPostStepDoItVector)[np];
@@ -1090,9 +1067,9 @@ which calculates it for 10 degrees Celsius liquid water.</p>
 </div>
 </div>
 <div class="section" id="what-distribution-is-used-for-op-times-energy">
-<h2><a class="toc-backref" href="#id28">What distribution is used for OP times, energy</a><a class="headerlink" href="#what-distribution-is-used-for-op-times-energy" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id27">What distribution is used for OP times, energy</a><a class="headerlink" href="#what-distribution-is-used-for-op-times-energy" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="dspmtsensdet-processhits">
-<h3><a class="toc-backref" href="#id29">DsPmtSensDet::ProcessHits</a><a class="headerlink" href="#dspmtsensdet-processhits" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id28">DsPmtSensDet::ProcessHits</a><a class="headerlink" href="#dspmtsensdet-processhits" title="Permalink to this headline">¶</a></h3>
 <p>From the G4Step, energies and times feed into creating hits.</p>
 <p>For OP, wavelength is more relevant than energy.
 From <a class="reference external" href="http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html">http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html</a></p>
@@ -1148,7 +1125,7 @@ their energy must therefore not be tallied as part of the energy balance of an e
 </div>
 </div>
 <div class="section" id="where-do-the-times-come-from">
-<h3><a class="toc-backref" href="#id30">Where do the times come from ?</a><a class="headerlink" href="#where-do-the-times-come-from" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id29">Where do the times come from ?</a><a class="headerlink" href="#where-do-the-times-come-from" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><pre>[blyth@cms01 source]$ find . -name '*.cc' -exec grep -H SetGlobalTime {} \;
 ./track/src/G4ParticleChangeForDecay.cc:  pPostStepPoint-&gt;SetGlobalTime( theTimeChange  );
 ./track/src/G4ParticleChange.cc:  pPostStepPoint-&gt;SetGlobalTime( theTimeChange  );
@@ -1169,7 +1146,7 @@ their energy must therefore not be tallied as part of the energy balance of an e
 </div>
 </div>
 <div class="section" id="g4transportation-alongstepdoit">
-<h3><a class="toc-backref" href="#id31">G4Transportation::AlongStepDoIt</a><a class="headerlink" href="#g4transportation-alongstepdoit" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id30">G4Transportation::AlongStepDoIt</a><a class="headerlink" href="#g4transportation-alongstepdoit" title="Permalink to this headline">¶</a></h3>
 <p>For OP, what determines the GlobalTime is</p>
 <ul class="simple">
 <li><cite>startTime + (stepLength/finalVelocity)</cite></li>
@@ -1243,7 +1220,7 @@ is the dice rolled ?</p>
 </div>
 </div>
 <div class="section" id="g4steppingmanager-definephysicalsteplength">
-<h3><a class="toc-backref" href="#id32">G4SteppingManager::DefinePhysicalStepLength</a><a class="headerlink" href="#g4steppingmanager-definephysicalsteplength" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id31">G4SteppingManager::DefinePhysicalStepLength</a><a class="headerlink" href="#g4steppingmanager-definephysicalsteplength" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><pre>[blyth@cms01 source]$ find . -name '*.cc' -exec grep -H DefinePhysicalStepLength {} \;
 ./tracking/src/G4SteppingManager.cc:     DefinePhysicalStepLength();
 ./tracking/src/G4SteppingManager2.cc: void G4SteppingManager::DefinePhysicalStepLength()
@@ -1318,9 +1295,9 @@ is the dice rolled ?</p>
 </div>
 </div>
 <div class="section" id="id2">
-<h2><a class="toc-backref" href="#id33">G4SteppingManager::DefinePhysicalStepLength</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id32">G4SteppingManager::DefinePhysicalStepLength</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="only-6-processes">
-<h3><a class="toc-backref" href="#id34">Only 6 processes ?</a><a class="headerlink" href="#only-6-processes" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id33">Only 6 processes ?</a><a class="headerlink" href="#only-6-processes" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><pre>(gdb) p fCurrentProcess-&gt;GetProcessName()
 $9 = (const G4String &amp;) @0xc094a20: {&lt;std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;&gt; = {static npos = 4294967295, _M_dataplus = {&lt;std::allocator&lt;char&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;char&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;},
       _M_p = 0xc094c04 "Transportation"}}, &lt;No data fields&gt;}
@@ -1384,7 +1361,7 @@ Breakpoint 2, G4SteppingManager::DefinePhysicalStepLength (this=0xc481c98) at sr
 </div>
 </div>
 <div class="section" id="interaction-with-physics-processes">
-<h3><a class="toc-backref" href="#id35">2.4.4.  Interaction with Physics Processes</a><a class="headerlink" href="#interaction-with-physics-processes" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id34">2.4.4.  Interaction with Physics Processes</a><a class="headerlink" href="#interaction-with-physics-processes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><a class="reference external" href="http://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForToolkitDeveloper/html/ch02s04.html">http://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForToolkitDeveloper/html/ch02s04.html</a></li>
 </ul>
@@ -1426,7 +1403,7 @@ the process defining the step</dd>
 </div>
 </div>
 <div class="section" id="g4transportation">
-<h2><a class="toc-backref" href="#id36">G4Transportation</a><a class="headerlink" href="#g4transportation" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id35">G4Transportation</a><a class="headerlink" href="#g4transportation" title="Permalink to this headline">¶</a></h2>
 <p>Do nothing methods may be applicable <cite>processes/transportation/include/G4Transportation.hh</cite>:</p>
 <div class="highlight-python"><pre>058 class G4Transportation : public G4VProcess
 059 {
@@ -1459,7 +1436,7 @@ the process defining the step</dd>
 </div>
 </div>
 <div class="section" id="nuwa-hookup">
-<h2><a class="toc-backref" href="#id37">NuWa hookup</a><a class="headerlink" href="#nuwa-hookup" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id36">NuWa hookup</a><a class="headerlink" href="#nuwa-hookup" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Maybe split with <cite>DetSimChroma/src/DsPhysConsChromaOptical.cc</cite></li>
 </ol>
@@ -1521,7 +1498,7 @@ the process defining the step</dd>
 221 }</pre>
 </div>
 <div class="section" id="physicslist-setup">
-<h3><a class="toc-backref" href="#id38">PhysicsList setup</a><a class="headerlink" href="#physicslist-setup" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id37">PhysicsList setup</a><a class="headerlink" href="#physicslist-setup" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><a class="reference external" href="https://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForApplicationDeveloper/html/ch06.html">https://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForApplicationDeveloper/html/ch06.html</a></li>
 </ul>
@@ -1554,7 +1531,7 @@ DsPhysConsOptical.h:class DsPhysConsOptical : public GiGaPhysConstructorBase</pr
 </div>
 </div>
 <div class="section" id="impingement">
-<h3><a class="toc-backref" href="#id39">Impingement</a><a class="headerlink" href="#impingement" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id38">Impingement</a><a class="headerlink" href="#impingement" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><a class="reference external" href="http://www.dnp.fmph.uniba.sk/~zilka/work/g4course">http://www.dnp.fmph.uniba.sk/~zilka/work/g4course</a></li>
 <li>The G4ProcessManager has the possibility of switching on/off some processes
@@ -1566,7 +1543,7 @@ G4VUserPhysicsList and it must be called in ConstructPhysics()</li>
 </div>
 </div>
 <div class="section" id="wrapper-process">
-<h2><a class="toc-backref" href="#id40">Wrapper Process</a><a class="headerlink" href="#wrapper-process" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id39">Wrapper Process</a><a class="headerlink" href="#wrapper-process" title="Permalink to this headline">¶</a></h2>
 <p>Interesting for biasing, not canonically used  <cite>processes/management/src/G4WrapperProcess.cc</cite>:</p>
 <div class="highlight-python"><pre>82 G4double G4WrapperProcess::
 83 PostStepGetPhysicalInteractionLength( const G4Track&amp; track,
@@ -1579,7 +1556,7 @@ G4VUserPhysicsList and it must be called in ConstructPhysics()</li>
 90 }</pre>
 </div>
 <div class="section" id="g4wrapperprocess-usage-for-event-biasing">
-<h3><a class="toc-backref" href="#id41">G4WrapperProcess usage for event biasing</a><a class="headerlink" href="#g4wrapperprocess-usage-for-event-biasing" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id40">G4WrapperProcess usage for event biasing</a><a class="headerlink" href="#g4wrapperprocess-usage-for-event-biasing" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><a class="reference external" href="http://geant4.slac.stanford.edu/SLACTutorial14/EventBiasing.pdf">http://geant4.slac.stanford.edu/SLACTutorial14/EventBiasing.pdf</a></li>
 </ul>
@@ -1620,7 +1597,7 @@ G4VUserPhysicsList and it must be called in ConstructPhysics()</li>
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../../geant4_future_doe/" title="Geant4"
+          <a href="../geant4_external_propagation/" title="Geant4 External Propagation"
              >next</a> |</li>
         <li class="right" >
           <a href="../geant4_navigator/" title="Geant4 Navigator"
