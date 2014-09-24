@@ -395,6 +395,11 @@ ul.auto-toc {
              background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
              background-size: auto auto;
              background-position: 0px 0px;
+          }
+          div.slide#g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
           } 
 
        </style>
@@ -402,12 +407,18 @@ ul.auto-toc {
 <a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.txt">http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.txt</a></p>
 <div class="sidebar">
 <p class="first sidebar-title">Objective</p>
-<p class="last">Versatile geometry data access for visualization/computation</p>
+<p class="last">Ubiquitous geometry visualization and computation
+for all Geant4 users and beyond</p>
 </div>
+<ul class="simple">
+<li><span class="blue">Widely supported standard file format</span></li>
+<li><span class="blue">Viewers already installed on most users devices</span></li>
+<li><span class="red">Liberating geometry data allows innovative visualization/computation</span></li>
+</ul>
 
 </div>
-<div class="slide" id="https-bitbucket-org-simoncblyth-g4dae-exporter">
-<h1><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a> <span class="small">Exporter</span></h1>
+<div class="slide" id="https-bitbucket-org-simoncblyth-g4dae">
+<h1><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></h1>
 <p class="small">Exports Geant4 Geometry into COLLADA/DAE standard 3D files,
 XML includes:</p>
 <ul class="small simple">
@@ -415,32 +426,47 @@ XML includes:</p>
 <li>geometry: vertices, triangles+quads</li>
 <li>materials and surfaces with properties as function of wavelength</li>
 </ul>
-<img alt="images/bitbucket-g4dae.png" class="align-center" src="images/bitbucket-g4dae.png" style="width: 700px;" />
+<img alt="/env/geant4/geometry/collada/g4dae/g4dae_bitbucket.png" class="align-center" src="/env/geant4/geometry/collada/g4dae/g4dae_bitbucket.png" style="width: 700px;" />
 </div>
-<div class="slide" id="collada-standard-for-3d-digital-asset-exchange">
-<h1><span class="small">COLLADA : Standard for 3D Digital Asset Exchange</span></h1>
+<div class="slide" id="collada-standard-for-3d-digital-asset-exchange-dae">
+<h1><span class="small">COLLADA : Standard for 3D Digital Asset Exchange (DAE)</span></h1>
 <ul class="small simple">
 <li><a class="reference external" href="https://www.khronos.org/collada/">https://www.khronos.org/collada/</a></li>
 </ul>
 <img alt="/env/graphics/collada/collada_khronos.png" class="align-center" src="/env/graphics/collada/collada_khronos.png" style="width: 900px;" />
 </div>
-<div class="slide" id="g4dae-exporter-development">
-<h1><span class="small">G4DAE : Exporter Development</span></h1>
+<div class="slide" id="g4dae-exporter-details">
+<h1><span class="small">G4DAE : Exporter Details</span></h1>
 <ul class="small simple">
-<li>based on GDML persistency package</li>
-<li>XercesC dependency for XML DOM construction</li>
-<li>Triangulation using <tt class="docutils literal">G4Polyhedron</tt>, following VRML2</li>
-<li>COLLADA XML <tt class="docutils literal">extra</tt> elements for<ul>
-<li>material and surface properties</li>
+<li>based on <strong>GDML</strong> persistency package, same <strong>XercesC</strong> dependency for XML handling</li>
+<li>Triangulation from <tt class="docutils literal">G4Polyhedron</tt>, following <strong>VRML2</strong></li>
+<li>DAE <tt class="docutils literal">extra</tt> XML elements used for:<ul>
+<li>material/surface properties as function of wavelength</li>
 </ul>
 </li>
 </ul>
+<p class="small">Used like <strong>GDML</strong> export:</p>
+<pre class="small literal-block">
+#include &quot;G4DAEParser.hh&quot;
+
+void GiGaRunActionExport::WriteDAE(G4VPhysicalVolume* wpv, const G4String&amp; path, G4bool recreatePoly  )
+{
+    G4DAEParser parser ;
+    G4bool refs = true ;
+    G4int nodeIndex = -1 ;   // so World is volume 0
+    parser.Write(path, wpv, refs, recreatePoly, nodeIndex );
+}
+</pre>
+<p class="tiny"><tt class="docutils literal">G4DAEParser</tt> a misnomer from following <strong>GDML</strong>, as only writes, does not parse <strong>DAE</strong></p>
 </div>
-<div class="slide" id="g4dae-exports-compared-to-vrml2-wrl">
-<h1><span class="small">G4DAE : Exports Compared to VRML2(WRL)</span></h1>
+<div class="slide" id="compare-dae-exports-to-gdml-and-vrml2-wrl">
+<h1><span class="small">Compare DAE Exports to GDML and VRML2(WRL)</span></h1>
 <ul class="small simple">
 <li>Comparison of all vertices/faces reveals <span class="red">boolean solids are discrepant</span>.</li>
-<li>Perfect <a class="footnote-reference" href="#perfect" id="id1">[1]</a> agreement only achieved by <em>cheating</em> : <span class="blue">perform triangulation once and reuse</span>.</li>
+<li>Perfect <a class="footnote-reference" href="#perfect" id="id1">[1]</a> DAE WRL agreement achieved by <em>cheating</em> : <span class="blue">perform triangulation once and reuse</span>.</li>
+<li>Boolean solid triangulation sensitivity must be kept in mind as a potential systematic
+for computational uses</li>
+<li>DAE not much bigger than GDML, despite including all triangles/vertices <a class="footnote-reference" href="#not-repeating" id="id2">[2]</a></li>
 </ul>
 <table border="1" class="small docutils">
 <colgroup>
@@ -486,17 +512,47 @@ XML includes:</p>
 </tbody>
 </table>
 <p class="tiny"><tt class="docutils literal">VGDX_20140414</tt> counts using <tt class="docutils literal">g4daeview.py <span class="pre">-g</span> 0: <span class="pre">--with-chroma</span></tt>, Juno geometry truncated</p>
-<ul class="small simple">
-<li>Triangulation sensitivity impact <span class="red">needs checking</span></li>
-<li>DAE not much bigger than GDML, but includes all triangles/vertices</li>
-</ul>
 <table class="tiny docutils footnote" frame="void" id="perfect" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Maximum DAE WRL offset &lt; 0.13 mm, after patching VRML2 export precision bug.
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Maximum DAE WRL offset &lt; 0.13 mm, after patching VRML2 export precision bug (fixed in current G4).
 Details: <a class="reference external" href="http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/dae_cf_wrl/">http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/dae_cf_wrl/</a></td></tr>
 </tbody>
 </table>
+<table class="tiny docutils footnote" frame="void" id="not-repeating" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Geometry is not repeated, instead the COLLADA format uses geometry instancing and a tree of transforms,
+just like GDML</td></tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="applications-used-to-view-g4dae-exports">
+<h1><span class="small">Applications Used to View G4DAE exports</span></h1>
+<p class="small">Commercial:</p>
+<ul class="small simple">
+<li>Preview/Finder/Quicklook/Xcode (standard OSX 10.8+)<ul>
+<li><span class="red">Xcode.app</span>, usable material effect editing</li>
+</ul>
+</li>
+<li>Sketchup 8 free (OSX) [also Windows]</li>
+<li>ESKO Studio Viewer free (iOS on iPad)</li>
+</ul>
+<p class="small">Open source:</p>
+<ul class="small simple">
+<li>Meshlab (OSX/Linux), slow DAE loading, OK interface [also Windows]</li>
+<li>Blender (OSX), painful interface  [also Windows/Linux]</li>
+</ul>
+<p class="small">My desktop app based on pyopengl/glumpy/pycollada:</p>
+<ul class="small simple">
+<li><span class="red">g4daeview.py</span> (OSX/Linux), OK loading, <strong>good</strong> interface</li>
+</ul>
+<p class="small">My webapp based on threejs/WebGL (client) and pycollada/webpy (server):</p>
+<ul class="small simple">
+<li><span class="red">daeserver.py</span> (OSX/Linux), <strong>NO client installation</strong></li>
+</ul>
+<p class="small"><a class="reference external" href="http://meshlab.sourceforge.net">http://meshlab.sourceforge.net</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/meshlab">https://bitbucket.org/simoncblyth/meshlab</a></p>
 </div>
 <div class="slide" id="g4dae-osx-view-edit-in-xcode-app-1">
 <h1><span class="small">G4DAE : OSX view/edit in Xcode.app (1)</span></h1>
@@ -528,12 +584,12 @@ OSX 10.8+ -->
 <h1><span class="small">G4DAE : Safari WebGL Render using daeserver</span></h1>
 <img alt="/env/geant4/geometry/collada/webgl_safari_daeserver/webgl_safari_daeserver.png" class="align-center" src="/env/geant4/geometry/collada/webgl_safari_daeserver/webgl_safari_daeserver.png" style="width: 900px;" />
 </div>
-<div class="slide" id="g4dae-daeserver-py-view-in-browser">
-<h1><span class="small">G4DAE : daeserver.py : View in browser</span></h1>
+<div class="slide" id="daeserver-py-view-exported-geometry-in-web-browser">
+<h1><span class="small">daeserver.py : View exported geometry in web browser</span></h1>
 <ul class="small simple">
 <li><a class="reference external" href="http://belle7.nuu.edu.tw/dae/tree/0.html">http://belle7.nuu.edu.tw/dae/tree/0.html</a></li>
 </ul>
-<p class="small">Browser client, based on:</p>
+<p class="small">Client in browser based on:</p>
 <ul class="small simple">
 <li><strong>threejs</strong>, Javascript 3D library<ul>
 <li>reads geometry subtrees from server</li>
@@ -598,45 +654,45 @@ curl -O http://localhost/dae/tree/3155___2.dae
 <img alt="/env/chroma/chroma_camera/chroma_raycast_illustration.png" class="align-center" src="/env/chroma/chroma_camera/chroma_raycast_illustration.png" style="width: 600px;" />
 <ul class="small simple">
 <li>Shoot rays thru every pixel out into geometry, 1 CUDA thread for each, typically &gt;1M rays</li>
-<li>Find triangle intersections using BVH <a class="footnote-reference" href="#bvh" id="id2">[2]</a> acceleration structure</li>
+<li>Find triangle intersections using BVH <a class="footnote-reference" href="#bvh" id="id3">[3]</a> acceleration structure</li>
 <li>Determine color based on ray to triangle normal angle</li>
 <li>Alpha blend nearest 10 surfaces, providing transparency effect</li>
 </ul>
 <table class="tiny docutils footnote" frame="void" id="bvh" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Boundary Volume Heirarchy, a tree of bounding boxes with triangles inside leaf nodes</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Boundary Volume Heirarchy, a tree of bounding boxes with triangles inside leaf nodes</td></tr>
 </tbody>
 </table>
 </div>
 <div class="slide" id="chroma-stability-efficiency-improvements-made">
 <h1><span class="small">Chroma Stability/Efficiency Improvements Made</span></h1>
-<p class="small"><span class="green">Split work into multiple CUDA kernel launch, arranged in 2D pattern</span> <a class="footnote-reference" href="#cuda2d" id="id3">[3]</a></p>
+<p class="small"><span class="green">Split work into multiple CUDA kernel launch, arranged in 2D pattern</span> <a class="footnote-reference" href="#cuda2d" id="id4">[4]</a></p>
 <ul class="small simple">
 <li>avoids kernel launch times exceeding 5 seconds</li>
 <li>2D equalizes thread workload across CUDA warp(32 threads)</li>
 </ul>
 <p class="small"><span class="green">Reduced CPU load by reducing transfers</span></p>
 <ul class="small simple">
-<li>create pixels on GPU, share between OpenGL and CUDA/Chroma <a class="footnote-reference" href="#pbo" id="id4">[4]</a></li>
+<li>create pixels on GPU, share between OpenGL and CUDA/Chroma <a class="footnote-reference" href="#pbo" id="id5">[5]</a></li>
 <li>compute photon directions via 4x4 uniform matrix rather than passing arrays</li>
 <li>change matrix to navigate, rather than array manipulating kernel launches</li>
 </ul>
-<p class="small">These improvements were necessary as <em>Chroma Camera</em> <a class="footnote-reference" href="#presume" id="id5">[5]</a> with Dayabay geometry had</p>
+<p class="small">These improvements were necessary as <em>Chroma Camera</em> <a class="footnote-reference" href="#presume" id="id6">[6]</a> with Dayabay geometry had</p>
 <ul class="small simple">
-<li>very heavy CPU load <a class="footnote-reference" href="#burn" id="id6">[6]</a> and unusably laggy GUI</li>
+<li>very heavy CPU load <a class="footnote-reference" href="#burn" id="id7">[7]</a> and unusably laggy GUI</li>
 <li>frequent GPU panic, GUI freeze, hard system crash forcing reboot</li>
 </ul>
 <table class="tiny docutils footnote" frame="void" id="cuda2d" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/cuda/cuda_launch.py">https://bitbucket.org/simoncblyth/env/src/tip/cuda/cuda_launch.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/cuda/cuda_launch.py">https://bitbucket.org/simoncblyth/env/src/tip/cuda/cuda_launch.py</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="pbo" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Using OpenGL pixel buffer objects (PBO) and CUDA-OpenGL interoperability techniques,
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Using OpenGL pixel buffer objects (PBO) and CUDA-OpenGL interoperability techniques,
 <a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/pycuda/pycuda_pyopengl_interop/pixel_buffer.py">https://bitbucket.org/simoncblyth/env/src/tip/pycuda/pycuda_pyopengl_interop/pixel_buffer.py</a>
 <a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/chroma/chroma_camera/pbo_renderer.py">https://bitbucket.org/simoncblyth/env/src/tip/chroma/chroma_camera/pbo_renderer.py</a></td></tr>
 </tbody>
@@ -644,13 +700,13 @@ curl -O http://localhost/dae/tree/3155___2.dae
 <table class="tiny docutils footnote" frame="void" id="presume" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Presumably Chroma was developed using fast Linux desktop GPUs where the kernel time limit can be avoided.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td>Presumably Chroma was developed using fast Linux desktop GPUs where the kernel time limit can be avoided.</td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="burn" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td><span class="red">burning CPU errors</span> in system log</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td><span class="red">burning CPU errors</span> in system log</td></tr>
 </tbody>
 </table>
 </div>
@@ -670,9 +726,9 @@ curl -O http://localhost/dae/tree/3155___2.dae
 </div>
 <div class="slide" id="g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files">
 <h1><span class="small">g4daeview.py : Fast OpenGL 3D viewer for G4DAE files</span></h1>
-<p class="small">G4DAE visualization <a class="footnote-reference" href="#g4daeview-usage" id="id7">[7]</a> and &quot;backbone&quot; application for Chroma testing.</p>
+<p class="small">G4DAE visualization <a class="footnote-reference" href="#g4daeview-usage" id="id8">[8]</a> and &quot;backbone&quot; application for Chroma testing.</p>
 <ul class="small simple">
-<li>very fast/responsive 3D OpenGL visualization <a class="footnote-reference" href="#vbo" id="id8">[8]</a></li>
+<li>very fast/responsive 3D OpenGL visualization <a class="footnote-reference" href="#vbo" id="id9">[9]</a></li>
 <li>flexible tree/list based partial geometry loading</li>
 <li>intuitive virtual trackball translate/rotate</li>
 <li>parallel or perspective projections</li>
@@ -682,26 +738,26 @@ curl -O http://localhost/dae/tree/3155___2.dae
 <li>numerical control via UDP remote messaging</li>
 <li>Chroma interactive raycasting, including animated</li>
 <li>live Geant4 connection, photon visualization, single stepping</li>
-<li>easily extensible python implementation <a class="footnote-reference" href="#g4daeview-code" id="id9">[9]</a></li>
+<li>easily extensible python implementation <a class="footnote-reference" href="#g4daeview-code" id="id10">[10]</a></li>
 <li>Chroma propagation visualization, with time slider</li>
 <li>photon picking interface, with property inspection</li>
 </ul>
 <table class="tiny docutils footnote" frame="void" id="g4daeview-usage" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td><a class="reference external" href="http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/g4daeview/g4daeview_usage/">http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/g4daeview/g4daeview_usage/</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id8">[8]</a></td><td><a class="reference external" href="http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/g4daeview/g4daeview_usage/">http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/g4daeview/g4daeview_usage/</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="vbo" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id8">[8]</a></td><td>Implemented with single OpenGL Vertex Buffer Object (VBO) for entire geometry</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id9">[9]</a></td><td>Implemented with single OpenGL Vertex Buffer Object (VBO) for entire geometry</td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="g4daeview-code" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id9">[9]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id10">[10]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/</a></td></tr>
 </tbody>
 </table>
 </div>
@@ -713,7 +769,7 @@ Photon colors indicate reemission (green), absorption(red),
 specular reflection (magenta), scattering(blue), no history (white).</p>
 <img alt="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" style="height: 600px;" />
 </div>
-<div class="slide" id="id10">
+<div class="slide" id="id11">
 <h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation</span></h1>
 <p class="tiny">Chroma GPU photon propagation at 14 nanoseconds.
 The interface provides interactive control of the propagation time
@@ -771,50 +827,50 @@ crashes.</p>
 <h1><span class="small">g4daeview.py : Video Tour</span></h1>
 
         <div style="text-align: center;" >
-        <video id="s5video_1" src="https://www.dropbox.com/s/6jmcqxphnc8qhkg/g4daeview_001.m4v?dl=1" controls height="480" width="60%" poster="/env/geant4/geometry/collada/g4daeview/20140419-170713.png" >
+        <video id="s5video_1" src="http://dayabay.phys.ntu.edu.tw/env/g4daeview_Movie_ipad.m4v" controls height="480" width="60%" poster="/env/geant4/geometry/collada/g4daeview/20140419-170713.png" >
             <p> Your Browser does not support HTML5 Video </p>
         </video>
         </div>
     </div>
 <div class="slide" id="runtime-geant4-chroma-integration-with-zmqroot">
 <h1><span class="small">Runtime Geant4/Chroma integration with ZMQRoot</span></h1>
-<p class="small"><tt class="docutils literal">ZMQRoot</tt> <a class="footnote-reference" href="#zmqroot" id="id11">[10]</a> sends/receives <tt class="docutils literal">ChromaPhotonList</tt>, 3 node <a class="footnote-reference" href="#topology" id="id12">[11]</a></p>
+<p class="small"><tt class="docutils literal">ZMQRoot</tt> <a class="footnote-reference" href="#zmqroot" id="id12">[11]</a> sends/receives <tt class="docutils literal">ChromaPhotonList</tt>, 3 node <a class="footnote-reference" href="#topology" id="id13">[12]</a></p>
 <dl class="small docutils">
 <dt><strong>client</strong></dt>
-<dd><tt class="docutils literal">nuwa.py/Geant4</tt> <a class="footnote-reference" href="#client" id="id13">[12]</a> live collect/send/receive photons</dd>
+<dd><tt class="docutils literal">nuwa.py/Geant4</tt> <a class="footnote-reference" href="#client" id="id14">[13]</a> live collect/send/receive photons</dd>
 <dt><strong>broker</strong></dt>
-<dd><tt class="docutils literal">czmq_broker.sh</tt> <a class="footnote-reference" href="#broker" id="id14">[13]</a> routes requests, returns replies</dd>
+<dd><tt class="docutils literal">czmq_broker.sh</tt> <a class="footnote-reference" href="#broker" id="id15">[14]</a> routes requests, returns replies</dd>
 <dt><strong>worker</strong></dt>
-<dd><tt class="docutils literal">g4daeview.py/Chroma</tt> <a class="footnote-reference" href="#worker" id="id15">[14]</a> photon visualization/Chroma stepping</dd>
+<dd><tt class="docutils literal">g4daeview.py/Chroma</tt> <a class="footnote-reference" href="#worker" id="id16">[15]</a> photon visualization/Chroma stepping</dd>
 </dl>
 <table class="tiny docutils footnote" frame="void" id="zmqroot" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id11">[10]</a></td><td>ROOT+ZeroMQ messaging <a class="reference external" href="http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Utilities/ZMQRoot">http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Utilities/ZMQRoot</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id12">[11]</a></td><td>ROOT+ZeroMQ messaging <a class="reference external" href="http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Utilities/ZMQRoot">http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Utilities/ZMQRoot</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="topology" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id12">[11]</a></td><td>Workaround for a network blockage, server/client or threaded also possible</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id13">[12]</a></td><td>Workaround for a network blockage, server/client or threaded also possible</td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="client" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id13">[12]</a></td><td><a class="reference external" href="http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Simulation/DetSimChroma/src/DsChromaStackAction.cc">http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Simulation/DetSimChroma/src/DsChromaStackAction.cc</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id14">[13]</a></td><td><a class="reference external" href="http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Simulation/DetSimChroma/src/DsChromaStackAction.cc">http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Simulation/DetSimChroma/src/DsChromaStackAction.cc</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="broker" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id14">[13]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c">https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id15">[14]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c">https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c</a></td></tr>
 </tbody>
 </table>
 <table class="tiny docutils footnote" frame="void" id="worker" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id15">[14]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id16">[15]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py</a></td></tr>
 </tbody>
 </table>
 </div>
@@ -829,7 +885,7 @@ crashes.</p>
 <ul class="small simple">
 <li>material/surface properties, <span class="red">mapping choices validation</span>,</li>
 <li>Geant4/Chroma model mismatch causes all 8 bordersurfaces including ESR mirrors to be omitted
-<span class="red">add double sided surfaces to Chroma model</span> <a class="footnote-reference" href="#g4logicalbordersurface" id="id16">[15]</a></li>
+<span class="red">add double sided surfaces to Chroma model</span> <a class="footnote-reference" href="#g4logicalbordersurface" id="id17">[16]</a></li>
 <li><span class="red">remove GPU geometry duplication</span> between OpenGL and Chroma, mandatory
 for Juno (less so for Dayabay)</li>
 </ul>
@@ -843,7 +899,7 @@ of matching Geant4/Chroma models can be done</li>
 <table class="tiny docutils footnote" frame="void" id="g4logicalbordersurface" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id16">[15]</a></td><td>G4LogicalBorderSurface class comprises an <strong>ordered pair of volume references</strong> and surface properties</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id17">[16]</a></td><td>G4LogicalBorderSurface class comprises an <strong>ordered pair of volume references</strong> and surface properties</td></tr>
 </tbody>
 </table>
 </div>
