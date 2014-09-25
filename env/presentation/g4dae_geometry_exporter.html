@@ -367,6 +367,27 @@ ul.auto-toc {
 <div class="slide" id="slide0">
 <h1 class="title">G4DAE : Export Geant4 Geometry to COLLADA/DAE XML files</h1>
 
+<!-- comment
+
+TODO:
+* Need page regarding g4daeview.py implementation techniques
+* need cuts
+
+00: G4DAE : Export Geant4 Geometry to COLLADA/DAE XML files
+ 1: https://bitbucket.org/simoncblyth/g4dae
+ 2: COLLADA : Standard for 3D Digital Asset Exchange (DAE)
+ 3: Compare DAE Exports to GDML and VRML2(WRL)
+ 4: Tested G4DAE reading applications and frameworks
+ 5: G4DAE export view/edit with OSX Xcode.app (1)
+ 6: G4DAE export view/edit with OSX Xcode.app (2)
+ 7: G4DAE export in OSX Sketchup
+ 8: G4DAE export in OSX Finder, Interactive Quicklook (1)
+ 9: G4DAE export in OSX 10.8+ Finder, Rotate/Pan/Zoom
+10: G4DAE export in OSX 10.8+ Preview : Daya Bay Antineutrino Detector
+11: My Modules/Applications using G4DAE exports (OSX/Linux)
+12: g4daeserver.py : View exported geometry in web browser
+13: g4daeserver.py : View exported geometry in web browser, details
+14: G4DAE Exporter Status : almost feature complete -->
 <!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
 <!-- This data file has been placed in the public domain. -->
 <!-- Colours
@@ -404,27 +425,29 @@ ul.auto-toc {
 
        </style>
     <p class="small"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.html">http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.html</a>
-<a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.txt">http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.txt</a></p>
+<a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/gpu_optical_photon_simulation.html">http://simoncblyth.bitbucket.org/env/presentation/gpu_optical_photon_simulation.html</a></p>
 <div class="sidebar">
-<p class="first sidebar-title">Objective</p>
-<p class="last">Ubiquitous geometry visualization and computation
-for all Geant4 users and beyond</p>
+<p class="first sidebar-title">Why export into DAE ?</p>
+<p class="last">Ubiquitous geometry visualization
+for Geant4 users and outreach. Facilitate
+innovative use of geometry data.</p>
 </div>
 <ul class="simple">
-<li><span class="blue">Widely supported standard file format</span></li>
-<li><span class="blue">Viewers already installed on most users devices</span></li>
-<li><span class="red">Liberating geometry data allows innovative visualization/computation</span></li>
+<li><span class="blue">Widely supported standard 3D file format</span></li>
+<li><span class="blue">Most users can view without installation</span></li>
+<li><span class="red">Facilitate innovative visualization/computation</span></li>
 </ul>
 
 </div>
 <div class="slide" id="https-bitbucket-org-simoncblyth-g4dae">
 <h1><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></h1>
-<p class="small">Exports Geant4 Geometry into COLLADA/DAE standard 3D files,
-XML includes:</p>
+<p class="small">Exports <em>Geant4</em> Geometry into COLLADA/DAE standard 3D files,
+based on <em>GDML writer</em> code, same <em>XercesC</em> dependency for XML handling. Export includes:</p>
 <ul class="small simple">
-<li>volume tree: physical volume/logical volume heirarchy</li>
-<li>geometry: vertices, triangles+quads</li>
-<li>materials and surfaces with properties as function of wavelength</li>
+<li>volume tree: solid/physical volume/logical volume heirarchy</li>
+<li>geometry: vertices, triangles+quads   (triangulation from <em>G4Polyhedron</em>)</li>
+<li>materials and surfaces with properties as function of wavelength
+(using DAE <em>extra</em> XML elements)</li>
 </ul>
 <img alt="/env/geant4/geometry/collada/g4dae/g4dae_bitbucket.png" class="align-center" src="/env/geant4/geometry/collada/g4dae/g4dae_bitbucket.png" style="width: 700px;" />
 </div>
@@ -434,30 +457,6 @@ XML includes:</p>
 <li><a class="reference external" href="https://www.khronos.org/collada/">https://www.khronos.org/collada/</a></li>
 </ul>
 <img alt="/env/graphics/collada/collada_khronos.png" class="align-center" src="/env/graphics/collada/collada_khronos.png" style="width: 900px;" />
-</div>
-<div class="slide" id="g4dae-exporter-details">
-<h1><span class="small">G4DAE : Exporter Details</span></h1>
-<ul class="small simple">
-<li>based on <strong>GDML</strong> persistency package, same <strong>XercesC</strong> dependency for XML handling</li>
-<li>Triangulation from <tt class="docutils literal">G4Polyhedron</tt>, following <strong>VRML2</strong></li>
-<li>DAE <tt class="docutils literal">extra</tt> XML elements used for:<ul>
-<li>material/surface properties as function of wavelength</li>
-</ul>
-</li>
-</ul>
-<p class="small">Used like <strong>GDML</strong> write</p>
-<pre class="tiny literal-block">
-#include &quot;G4DAEParser.hh&quot;
-
-void GiGaRunActionExport::WriteDAE(G4VPhysicalVolume* wpv, const G4String&amp; path, G4bool recreatePoly  )
-{
-    G4DAEParser parser ;
-    G4bool refs = true ;
-    G4int nodeIndex = -1 ;   // so World is volume 0
-    parser.Write(path, wpv, refs, recreatePoly, nodeIndex );
-}
-</pre>
-<p class="tiny"><tt class="docutils literal">G4DAEParser</tt> a misnomer from following <strong>GDML</strong>, as only writes, does not parse <strong>DAE</strong></p>
 </div>
 <div class="slide" id="compare-dae-exports-to-gdml-and-vrml2-wrl">
 <h1><span class="small">Compare DAE Exports to GDML and VRML2(WRL)</span></h1>
@@ -527,138 +526,100 @@ just like GDML</td></tr>
 </tbody>
 </table>
 </div>
-<div class="slide" id="applications-used-to-view-g4dae-exports">
-<h1><span class="small">Applications Used to View G4DAE exports</span></h1>
+<div class="slide" id="tested-g4dae-reading-applications-and-frameworks">
+<h1><span class="small">Tested G4DAE reading applications and frameworks</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">G4DAE Usage</p>
+<p class="last">Many commercial, open source apps/libs
+can view/edit G4DAE files.</p>
+</div>
 <p class="small">Commercial:</p>
 <ul class="small simple">
-<li>Preview/Finder/Quicklook/Xcode (standard OSX 10.8+)<ul>
-<li><span class="red">Xcode.app</span>, usable material effect editing</li>
+<li><em>Finder/Quicklook/Preview/Xcode</em> (standard OSX 10.8+)<ul>
+<li><span class="blue">Xcode : useful effect tweaking interface</span></li>
+<li><span class="blue">Preview : set black background for visibility</span></li>
 </ul>
 </li>
-<li>Sketchup 8 free (OSX) [also Windows]</li>
-<li>ESKO Studio Viewer free (iOS on iPad)</li>
+<li><em>Sketchup 8</em> free (OSX) [also Windows]</li>
+<li><em>ESKO Studio Viewer</em> free (iOS on iPad)</li>
 </ul>
 <p class="small">Open source:</p>
 <ul class="small simple">
-<li>Meshlab (OSX/Linux), slow DAE loading, OK interface [also Windows]</li>
-<li>Blender (OSX), painful interface  [also Windows/Linux]</li>
+<li><em>Meshlab</em> (OSX/Linux), slow DAE loading, OK interface [also Windows]</li>
+<li><em>Blender</em> (OSX), painful GUI  [also Windows/Linux]</li>
 </ul>
-<p class="small">My desktop app based on pyopengl/glumpy/pycollada:</p>
+<p class="small">Frameworks:</p>
 <ul class="small simple">
-<li><span class="red">g4daeview.py</span> (OSX/Linux), OK loading, <strong>good</strong> interface</li>
+<li><em>pycollada</em>, Python COLLADA parsing/construction, <span class="red">lxml + numpy powered fast parsing</span></li>
+<li><em>threejs</em>, Javascript COLLADA loading, renders HTML canvas with WebGL</li>
+<li><em>SceneKit</em>, Objective C Framework used by OSX apps</li>
 </ul>
-<p class="small">My webapp based on threejs/WebGL (client) and pycollada/webpy (server):</p>
-<ul class="small simple">
-<li><span class="red">g4daeserver.py</span> (OSX/Linux), <strong>NO client installation</strong></li>
-</ul>
-<p class="small"><a class="reference external" href="http://meshlab.sourceforge.net">http://meshlab.sourceforge.net</a>
-<a class="reference external" href="https://bitbucket.org/simoncblyth/meshlab">https://bitbucket.org/simoncblyth/meshlab</a></p>
+<p class="small">Many more applications and frameworks listed <a class="reference external" href="http://en.wikipedia.org/wiki/COLLADA">http://en.wikipedia.org/wiki/COLLADA</a></p>
+<p class="tiny"><a class="reference external" href="http://meshlab.sourceforge.net">http://meshlab.sourceforge.net</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/meshlab">https://bitbucket.org/simoncblyth/meshlab</a> (fork improves COLLADA loading speed)</p>
+</div>
+<div class="slide" id="g4dae-export-in-osx-finder-interactive-quicklook-1">
+<h1><span class="small">G4DAE export in OSX Finder, Interactive Quicklook (1)</span></h1>
+<p class="small">Coverflow through geometries:</p>
+<img alt="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder.png" class="align-center" src="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder.png" style="width: 900px;" />
+</div>
+<div class="slide" id="g4dae-export-in-osx-10-8-finder-rotate-pan-zoom">
+<h1><span class="small">G4DAE export in OSX 10.8+ Finder, Rotate/Pan/Zoom</span></h1>
+<p class="small">Rotate/Pan/Zoom in the Finder:</p>
+<img alt="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder_2.png" class="align-center" src="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder_2.png" style="width: 900px;" />
 </div>
 <div class="slide" id="g4dae-export-view-edit-with-osx-xcode-app-1">
 <h1><span class="small">G4DAE export view/edit with OSX Xcode.app (1)</span></h1>
-<p class="small">Deep tree makes choice of default appearance problematic.</p>
+<p class="small">Deep tree makes choice of default appearance problematic. Useful editing.</p>
 <img alt="/env/geant4/geometry/collada/xcode/g4dae_xcode.png" class="align-center" src="/env/geant4/geometry/collada/xcode/g4dae_xcode.png" style="width: 900px;" />
-<p class="tiny">Blender also possible, but interface difficult.</p>
 </div>
 <div class="slide" id="g4dae-export-view-edit-with-osx-xcode-app-2">
 <h1><span class="small">G4DAE export view/edit with OSX Xcode.app (2)</span></h1>
 <p class="small">Bialkali PMT cathode highlighted by Xcode effect edit.</p>
 <img alt="/env/geant4/geometry/collada/xcode/g4dae_xcode_2.png" class="align-center" src="/env/geant4/geometry/collada/xcode/g4dae_xcode_2.png" style="width: 900px;" />
 </div>
+<div class="slide" id="g4dae-export-in-osx-10-8-preview-daya-bay-antineutrino-detector">
+<h1><span class="small">G4DAE export in OSX 10.8+ Preview : Daya Bay Antineutrino Detector</span></h1>
+<ul class="tiny simple">
+<li>Set black background for visibility  <tt class="docutils literal">Preview &gt; <span class="pre">Preferences...</span> &gt; General [Window Background]</tt></li>
+<li>Control with iOS-like gestures, pinch/rotate etc..</li>
+</ul>
+<img alt="/env/geant4/geometry/collada/osx_preview/g4dae_osx_preview.png" class="align-center" src="/env/geant4/geometry/collada/osx_preview/g4dae_osx_preview.png" style="width: 900px;" />
+</div>
 <div class="slide" id="g4dae-export-in-osx-sketchup">
 <h1><span class="small">G4DAE export in OSX Sketchup</span></h1>
+<p class="tiny">Available for Windows too.</p>
 <img alt="/env/geant4/geometry/collada/sketchup/g4dae_sketchup.png" class="align-center" src="/env/geant4/geometry/collada/sketchup/g4dae_sketchup.png" style="width: 900px;" />
 </div>
-<div class="slide" id="g4dae-export-in-osx-finder-interactive-quicklook-1">
-<h1><span class="small">G4DAE export in OSX Finder, Interactive Quicklook (1)</span></h1>
-<img alt="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder.png" class="align-center" src="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder.png" style="width: 900px;" />
-</div>
-<div class="slide" id="g4dae-export-in-osx-finder-rotate-pan-zoom">
-<h1><span class="small">G4DAE export in OSX Finder, Rotate/Pan/Zoom</span></h1>
-<img alt="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder_2.png" class="align-center" src="/env/geant4/geometry/collada/osx_finder/g4dae_osx_finder_2.png" style="width: 900px;" />
-<!-- class: tiny
-
-OSX 10.8+ -->
-</div>
-<div class="slide" id="g4daeserver-py-view-exported-geometry-in-web-browser">
-<h1><span class="small">g4daeserver.py : View exported geometry in web browser</span></h1>
-<img alt="/env/geant4/geometry/collada/webgl_safari_daeserver/webgl_safari_daeserver.png" class="align-center" src="/env/geant4/geometry/collada/webgl_safari_daeserver/webgl_safari_daeserver.png" style="width: 900px;" />
-</div>
-<div class="slide" id="g4daeserver-py-view-exported-geometry-in-web-browser-details">
-<h1><span class="small">g4daeserver.py : View exported geometry in web browser, details</span></h1>
+<div class="slide" id="my-modules-applications-using-g4dae-exports-osx-linux">
+<h1><span class="small">My Modules/Applications using G4DAE exports (OSX/Linux)</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Instant web access to any volume</p>
-<p class="last">Very useful for single volume debugging, did not pursue
-as prefer Python development over Javascript.</p>
+<p class="first sidebar-title">Custom Benefits</p>
+<p class="last">General purpose OS/app support useful, but custom development
+needed to really benefit. Availability of frameworks
+allows high level approach.</p>
 </div>
-<p class="small">Select volume subtree by name or index and recursion depth</p>
+<p class="small"><span class="red">g4daenode.py</span> <em>pycollada</em> based G4DAE parser</p>
 <ul class="small simple">
-<li><a class="reference external" href="http://belle7.nuu.edu.tw/g4dae/tree/3150___1.html">http://belle7.nuu.edu.tw/g4dae/tree/3150___1.html</a></li>
+<li>reconstructs Geant4 volume tree from raw tree</li>
+<li>parses <strong>extra</strong> material/surface properties</li>
+<li>provides partial geometry tree creation</li>
 </ul>
-<p class="small">Client in browser based on:</p>
+<p class="small"><span class="red">g4daeserver.py</span> <em>threejs/WebGL</em> (client) and <em>pycollada/webpy</em> (server) based webapp:</p>
 <ul class="small simple">
-<li><strong>threejs</strong>, Javascript 3D library<ul>
-<li>reads DAE geometry subtrees from server</li>
-<li>parses DAE and renders with <strong>WebGL</strong>  (<strong>OpenGL</strong> GPU accelerated)</li>
+<li>3D geometry viewer in the browser, <strong>NO client installation</strong></li>
+<li>useful for debugging single volumes</li>
+<li>did not pursue as python development more flexible than Javascript in browser</li>
 </ul>
-</li>
-</ul>
-<p class="small">Server:</p>
+<p class="small"><span class="red">g4daeview.py</span> <em>pyopengl/pycollada/numpy</em> based 3D viewer app</p>
 <ul class="small simple">
-<li><strong>g4daenode.py</strong>, reconstructs Geant4 tree from G4DAE export
-using <strong>pycollada</strong> parser</li>
-<li><strong>webpy</strong>, serve .html and .dae subtrees at each request,
-running under apache mod_fcgi</li>
+<li>many interactive features detailed later</li>
+<li>integrates with GPU/CUDA based <strong>Chroma</strong> project</li>
+<li>live link to Geant4 (via StackAction sending optical photons over <em>ZeroMQ</em> message queue)</li>
 </ul>
-<p class="small">Command line access to DAE subtrees:</p>
-<pre class="small literal-block">
-curl -O http://belle7.nuu.edu.tw/g4dae/tree/3155___2.dae
-</pre>
-<p class="tiny"><a class="reference external" href="http://threejs.org">http://threejs.org</a>
-<a class="reference external" href="http://pycollada.github.io">http://pycollada.github.io</a>
-<a class="reference external" href="http://webpy.org">http://webpy.org</a>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daenode.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daenode.py</a>
 <a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/g4daeserver/">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/g4daeserver/</a>
-<a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daenode.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daenode.py</a></p>
-</div>
-<div class="slide" id="g4dae-exporter-status-almost-feature-complete">
-<h1><span class="small">G4DAE Exporter Status : almost feature complete</span></h1>
-<p class="small">Development started with GDML from <strong>geant4.10.00.p01</strong></p>
-<ul class="small simple">
-<li>made minor backports to work with <strong>geant4.9.2.p01</strong></li>
-<li>patched old version to give access to material property tables</li>
-</ul>
-<p class="small"><strong>Remaining tasks:</strong></p>
-<ul class="small simple">
-<li>test with newer and latest versions of Geant4</li>
-</ul>
-<ul class="small simple">
-<li>implement parametrized/replica geometry handling, following GDML</li>
-<li>investigate suspected issue of missing <strong>G4LogicalBorderSurface</strong>
-(volume pairs) in an edge case where one volume is part of
-multiple pairs. This is inherited from GDML.</li>
-</ul>
-<ul class="small simple">
-<li>test on more geometries, currently mainly DayaBay and JUNO</li>
-</ul>
-<ul class="small simple">
-<li>export appearance adjustments<ul>
-<li>current uniform translucent white, renders all white in some viewers</li>
-<li>too many parameters, unclear what to use for defaults</li>
-<li>investigate propagating from <strong>G4VisAttributes</strong></li>
-</ul>
-</li>
-</ul>
-<ul class="small simple">
-<li>review code:<ul>
-<li>remove unused parsing inherited from GDML</li>
-<li>remove any remaining detector specifics,
-eg material id prefixes</li>
-</ul>
-</li>
-</ul>
-<ul class="small simple">
-<li>document the exporter</li>
-</ul>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/g4daeview.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/g4daeview.py</a></p>
 </div>
 <div class="slide" id="g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files">
 <h1><span class="small">g4daeview.py : Fast OpenGL 3D viewer for G4DAE files</span></h1>
@@ -702,83 +663,27 @@ eg material id prefixes</li>
 </tbody>
 </table>
 </div>
-<div class="slide" id="g4daeview-py-status-ongoing-active-development">
-<h1><span class="small">g4daeview.py Status : Ongoing active development</span></h1>
+<div class="slide" id="g4daeview-py-initial-photon-positions">
+<h1><span class="small">g4daeview.py : Initial Photon Positions</span></h1>
+<p class="tiny">Initial photon positions of a Geant4 simulated muon that crosses
+between the Dayabay Near hall ADs. Colors represent photon wavelengths.
+Optical photons: collected in G4 StackAction, serialized, sent over ZeroMQ, deserialized,
+presented using OpenGL GLSL shaders.</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/20140518-174941.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140518-174941.png" style="height: 650px;" />
+</div>
+<div class="slide" id="g4daeview-py-implementation-and-status">
+<h1><span class="small">g4daeview.py : Implementation and Status</span></h1>
 <ul class="small simple">
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/</a></li>
 </ul>
-<p class="small">Although not stabilised, intend to facilitate usage by others:</p>
+<p class="small">Intend to facilitate usage by others:</p>
 <ul class="small simple">
 <li>break out into separate bitbucket repository</li>
 <li>partition dependencies, to allow users without CUDA/PyCUDA/Chroma
 to still use geometry visualization and inspection features</li>
-<li>document usage</li>
+<li>document installation and usage</li>
 </ul>
 </div>
-<div class="slide" id="g4daeview-py-dayabay-chroma-photon-propagation">
-<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation</span></h1>
-<p class="tiny">Chroma GPU photon propagation at 12 nanoseconds.  The photons are generated by Geant4
-simulation of a 100 GeV muon travelling from right to left.
-Photon colors indicate reemission (green), absorption(red),
-specular reflection (magenta), scattering(blue), no history (white).</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" style="height: 600px;" />
-</div>
-<div class="slide" id="id6">
-<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation</span></h1>
-<p class="tiny">Chroma GPU photon propagation at 14 nanoseconds.
-The interface provides interactive control of the propagation time
-allowing any stage of the propagation to be viewed by
-scrubbing time backwards/forwards. The speed of this visualization
-is achieved by interoperation of CUDA kernels and OpenGL shaders accessing
-the same GPU resident photon propagation data.</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/20140716-163403.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-163403.png" style="height: 600px;" />
-</div>
-<div class="slide" id="g4daeview-py-photon-selection-interface">
-<h1><span class="small">g4daeview.py : Photon Selection Interface</span></h1>
-<p class="tiny">Propagation steps OR photons can be selected by materials, propagation history, or special selection by photon identifier.
-Photons can be selected by clicking their 3D representations allowing inspection of the
-propagation history of individual photons.</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/grab_glut_menu.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/grab_glut_menu.png" style="height: 650px;" />
-</div>
-<div class="slide" id="g4daeview-py-propagation-step-selection-interface">
-<h1><span class="small">g4daeview.py : Propagation Step Selection Interface</span></h1>
-<p class="tiny">Photon propagation steps with material pair GdDopedLS,Acrylic. The larger
-squares represent selected photons, providing access to numerical details of propagation history.</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/20140716-183318.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-183318.png" style="height: 650px;" />
-</div>
-<div class="slide" id="g4daeview-py-individual-photon-selection">
-<h1><span class="small">g4daeview.py : Individual Photon Selection</span></h1>
-<p class="tiny">Propagation steps of a single photon, the steps at either sides of the inner
-and outer acrylic vessels are visible. The line color represents the photon
-history starting white and turning magenta following a specular reflection.</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/20140716-184148.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-184148.png" style="height: 650px;" />
-</div>
-<div class="slide" id="g4daeview-py-initial-photon-positions">
-<h1><span class="small">g4daeview.py : Initial Photon Positions</span></h1>
-<p class="tiny">Initial photon positions of a Geant4 simulated muon that crosses
-between the Dayabay Near hall ADs. Colors represent photon wavelengths.</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/20140518-174941.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140518-174941.png" style="height: 650px;" />
-</div>
-<div class="slide" id="g4daeview-py-opengl-view-of-juno-geometry">
-<h1><span class="small">g4daeview.py : OpenGL view of Juno Geometry</span></h1>
-<p class="tiny">External view of Juno geometry with cutaway. The extreme size of the Juno geometry (50 million nodes in Chroma representation)
-provides a challenge for development on mobile GPUs.
-As my developments operate at the Geant4 level wherever possible it
-was relatively straightforward to apply the machinery developed for
-Dayabay to the Juno detector. In collaboration with
-Juno simulation experts the geometry was exported from
-Geant4 and GPU visualized in under a days work.</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/20140716-194144.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-194144.png" style="height: 650px;" />
-</div>
-<div class="slide" id="g4daeview-py-video-tour">
-<h1><span class="small">g4daeview.py : Video Tour</span></h1>
-
-        <div style="text-align: center;" >
-        <video id="s5video_1" src="http://dayabay.phys.ntu.edu.tw/env/g4daeview_Movie_ipad.m4v" controls height="480" width="60%" poster="/env/geant4/geometry/collada/g4daeview/20140419-170713.png" >
-            <p> Your Browser does not support HTML5 Video </p>
-        </video>
-        </div>
-    </div>
 <div class="slide" id="chroma-ultra-fast-photon-mc-developed-by-stan-seibert-university-of-pennsylvania">
 <h1><span class="small">Chroma : Ultra-fast Photon MC, Developed by Stan Seibert, University of Pennsylvania</span></h1>
 <ul class="small simple">
@@ -808,160 +713,164 @@ in a detector with 29k photomultiplier tubes. This is
 <img alt="/env/chroma/chroma_camera/chroma_raycast_illustration.png" class="align-center" src="/env/chroma/chroma_camera/chroma_raycast_illustration.png" style="width: 600px;" />
 <ul class="small simple">
 <li>Shoot rays thru every pixel out into geometry, 1 CUDA thread for each, typically &gt;1M rays</li>
-<li>Find triangle intersections using BVH <a class="footnote-reference" href="#bvh" id="id7">[6]</a> acceleration structure</li>
+<li>Find triangle intersections using BVH <a class="footnote-reference" href="#bvh" id="id6">[6]</a> acceleration structure</li>
 <li>Determine color based on ray to triangle normal angle</li>
 <li>Alpha blend nearest 10 surfaces, providing transparency effect</li>
 </ul>
 <table class="tiny docutils footnote" frame="void" id="bvh" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[6]</a></td><td>Boundary Volume Heirarchy, a tree of bounding boxes with triangles inside leaf nodes</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td>Boundary Volume Heirarchy, a tree of bounding boxes with triangles inside leaf nodes</td></tr>
 </tbody>
 </table>
 </div>
-<div class="slide" id="chroma-raycast-worst-case-entire-geometry-example">
-<h1><span class="small">Chroma Raycast Worst Case (~entire geometry) Example</span></h1>
-<p class="small">Render Split into 3x3 CUDA kernel launches, 1 thread per pixel, ~1.8s for 1.23M pixels, 2.4M tris.</p>
+<div class="slide" id="chroma-raycast-with-entire-geometry-in-view">
+<h1><span class="small">Chroma Raycast with entire geometry in view</span></h1>
+<p class="small">Render Split into 3x3 CUDA kernel launches, 1 thread per pixel, ~1.8s for 1.23M pixels, 2.4M tris (with <a class="footnote-reference" href="#hw" id="id7">[7]</a>)</p>
 <img alt="/env/chroma/chroma_camera/20140423-162109.png" class="align-center" src="/env/chroma/chroma_camera/20140423-162109.png" style="width: 800px;" />
-<p class="tiny">g4daeview.py --target=.. --eye=&quot;-0.3,-1.1,1.7&quot; --look=&quot;0.1,0.4,-0.6&quot; --up=&quot;1.2,2.0,1.6&quot; --size=1440,852 --near=30.00000 --far=10000.0 --yfov=50.0 --with-chroma</p>
-<!-- wrk (1440, 852) [1226880]  lch  [3, 3, 1] [9]  blk [16, 16, 1] [256]  0.03,0.26,0.12,0.15,0.79,0.20,0.06,0.20,0.04 TOT 1.84 -->
-<!-- http://dayabay.phys.ntu.edu.tw/env/geant4/geometry/export/DayaBay_VGDX_20140414-1300/ -->
-</div>
-<div class="slide" id="g4daeview-py-chroma-raycast-of-juno-geometry">
-<h1><span class="small">g4daeview.py : Chroma Raycast of Juno Geometry</span></h1>
-<p class="tiny">External view of Juno geometry. The extreme size of the  Juno geometry (50 million nodes in Chroma representation)
-provides a challenge for development on mobile GPUs. The black rectangle arises due to aborts to avoid GPU
-crashes.</p>
-<img alt="/env/geant4/geometry/collada/g4daeview/20140716-191232.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-191232.png" style="height: 650px;" />
-</div>
-<div class="slide" id="runtime-geant4-chroma-integration-with-zmqroot">
-<h1><span class="small">Runtime Geant4/Chroma integration with ZMQRoot</span></h1>
-<p class="small"><tt class="docutils literal">ZMQRoot</tt> <a class="footnote-reference" href="#zmqroot" id="id8">[7]</a> sends/receives <tt class="docutils literal">ChromaPhotonList</tt>, 3 node <a class="footnote-reference" href="#topology" id="id9">[8]</a></p>
-<dl class="small docutils">
-<dt><strong>client</strong></dt>
-<dd><tt class="docutils literal">nuwa.py/Geant4</tt> <a class="footnote-reference" href="#client" id="id10">[9]</a> live collect/send/receive photons</dd>
-<dt><strong>broker</strong></dt>
-<dd><tt class="docutils literal">czmq_broker.sh</tt> <a class="footnote-reference" href="#broker" id="id11">[10]</a> routes requests, returns replies</dd>
-<dt><strong>worker</strong></dt>
-<dd><tt class="docutils literal">g4daeview.py/Chroma</tt> <a class="footnote-reference" href="#worker" id="id12">[11]</a> photon visualization/Chroma stepping</dd>
-</dl>
-<table class="tiny docutils footnote" frame="void" id="zmqroot" rules="none">
+<table class="tiny docutils footnote" frame="void" id="hw" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id8">[7]</a></td><td>ROOT+ZeroMQ messaging <a class="reference external" href="http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Utilities/ZMQRoot">http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Utilities/ZMQRoot</a></td></tr>
-</tbody>
-</table>
-<table class="tiny docutils footnote" frame="void" id="topology" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id9">[8]</a></td><td>Workaround for a network blockage, server/client or threaded also possible</td></tr>
-</tbody>
-</table>
-<table class="tiny docutils footnote" frame="void" id="client" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id10">[9]</a></td><td><a class="reference external" href="http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Simulation/DetSimChroma/src/DsChromaStackAction.cc">http://dayabay.ihep.ac.cn/tracs/dybsvn/browser/dybgaudi/trunk/Simulation/DetSimChroma/src/DsChromaStackAction.cc</a></td></tr>
-</tbody>
-</table>
-<table class="tiny docutils footnote" frame="void" id="broker" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id11">[10]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c">https://bitbucket.org/simoncblyth/env/src/tip/zeromq/czmq/czmq_broker.c</a></td></tr>
-</tbody>
-</table>
-<table class="tiny docutils footnote" frame="void" id="worker" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id12">[11]</a></td><td><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/daeresponder.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>MacBook Pro (2013), NVIDIA GeForce GT 750M 2048 MB ;
+Workstation GPUs such as NVIDIA Kepler K20 expected at least ~3x faster</td></tr>
 </tbody>
 </table>
 </div>
-<div class="slide" id="status-issues-for-steps-1-2-3">
-<h1><span class="small">Status/Issues for Steps 1,2,3</span></h1>
-<p class="small"><span class="green">Export G4 Geometry as DAE</span></p>
-<ul class="small simple">
-<li>boolean solid triangulation sensitivity <span class="blue">a future systematic</span></li>
-<li>pointer addresses used in identifiers <span class="red">attempt to eliminate</span></li>
-</ul>
-<p class="small"><span class="green">DAE to Chroma</span></p>
-<ul class="small simple">
-<li>material/surface properties, <span class="red">mapping choices validation</span>,</li>
-<li>Geant4/Chroma model mismatch causes all 8 bordersurfaces including ESR mirrors to be omitted
-<span class="red">add double sided surfaces to Chroma model</span> <a class="footnote-reference" href="#g4logicalbordersurface" id="id13">[12]</a></li>
-<li><span class="red">remove GPU geometry duplication</span> between OpenGL and Chroma, mandatory
-for Juno (less so for Dayabay)</li>
-</ul>
-<p class="small"><span class="green">Chroma Validation</span></p>
-<ul class="small simple">
-<li>raycasting: <span class="green">stability issue resolved</span> using OpenGL/CUDA interop</li>
-<li><span class="green">propagation visualization</span> provides qualitative confidence</li>
-<li>also the visualization provides a working environment within which the details
-of matching Geant4/Chroma models can be done</li>
-</ul>
-<table class="tiny docutils footnote" frame="void" id="g4logicalbordersurface" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id13">[12]</a></td><td>G4LogicalBorderSurface class comprises an <strong>ordered pair of volume references</strong> and surface properties</td></tr>
-</tbody>
-</table>
+<div class="slide" id="g4daeview-py-dayabay-chroma-photon-propagation">
+<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation</span></h1>
+<p class="tiny">Chroma GPU photon propagation at 12 nanoseconds.  The photons are generated by Geant4
+simulation of a 100 GeV muon travelling from right to left.
+Photon colors indicate reemission (green), absorption(red),
+specular reflection (magenta), scattering(blue), no history (white).</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" style="height: 600px;" />
 </div>
-<div class="slide" id="status-issues-for-step-4-g4-chroma-runtime-integration">
-<h1><span class="small">Status/Issues for Step 4 : G4/Chroma Runtime Integration</span></h1>
-<p class="small"><span class="blue">Geant4 -&gt; Chroma</span> in development, 1/1000 photon scaledown</p>
+<div class="slide" id="id8">
+<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation</span></h1>
+<p class="tiny">Chroma GPU photon propagation at 14 nanoseconds.
+The interface provides interactive control of the propagation time
+allowing any stage of the propagation to be viewed by
+scrubbing time backwards/forwards. The speed of this visualization
+is achieved by interoperation of CUDA kernels and OpenGL shaders accessing
+the same GPU resident photon propagation data.</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/20140716-163403.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-163403.png" style="height: 600px;" />
+</div>
+<div class="slide" id="g4dae-exporter-status-almost-feature-complete">
+<h1><span class="small">G4DAE Exporter Status : almost feature complete</span></h1>
+<p class="small">Development started with GDML from <strong>geant4.10.00.p01</strong></p>
 <ul class="small simple">
-<li>messaging <span class="blue">operational</span></li>
-<li><span class="red">add compression</span></li>
-<li><span class="red">push to full photon operation</span></li>
+<li>made minor backports to work with <strong>geant4.9.2.p01</strong></li>
+<li>patched old version to give access to material property tables</li>
 </ul>
-<p class="small"><span class="red">Chroma -&gt; Geant4</span></p>
+<p class="small"><strong>Remaining tasks:</strong></p>
 <ul class="small simple">
-<li>photon information returned from Chroma to Geant4 is <span class="blue">technically operational</span></li>
-<li>various techniques of merging detected
-photon info back into Geant4/NuWa <span class="red">need to be investigated</span>.</li>
+<li>test with newer and latest versions of Geant4</li>
+</ul>
+<ul class="small simple">
+<li>implement parametrized/replica geometry handling, following GDML</li>
+<li>investigate suspected issue of missing <strong>G4LogicalBorderSurface</strong>
+(volume pairs) in an edge case where one volume is part of
+multiple pairs. This is inherited from GDML.</li>
+</ul>
+<ul class="small simple">
+<li>test on more geometries, currently mainly DayaBay and JUNO</li>
+</ul>
+<ul class="small simple">
+<li>export appearance adjustments<ul>
+<li>current uniform translucent white, invisible when white background</li>
+<li>too many parameters, unclear what to use for defaults</li>
+<li>investigate propagating from <strong>G4VisAttributes</strong></li>
+</ul>
+</li>
+</ul>
+<ul class="small simple">
+<li>review code:<ul>
+<li>remove unused parsing inherited from GDML</li>
+<li>remove any remaining detector specifics,
+eg material id prefixes</li>
+</ul>
+</li>
 </ul>
 </div>
-<div class="slide" id="g4dae-dayabay-near-site">
-<h1>G4DAE Dayabay Near Site</h1>
-<img alt="images/osx_preview/osx_preview_g4dae_dayabay.png" class="align-center" src="images/osx_preview/osx_preview_g4dae_dayabay.png" style="height: 700px;" />
-<p class="small">OSX Preview.app render</p>
+<div class="slide" id="g4dae-conclusion">
+<h1><span class="small">G4DAE : Conclusion</span></h1>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></li>
+</ul>
+<p>I propose to contribute the COLLADA/DAE geometry exporter
+to the Geant4 collaboration, as I believe this can be
+useful for facilitating:</p>
+<ul class="simple">
+<li>fast/flexible/ubiquitous visualization</li>
+<li>external computation using geometry data such as
+GPU raycasting and GPU optical photon simulation</li>
+</ul>
+<p class="small">Links for this presentation and another on GPU optical photon propagation:</p>
+<ul class="small simple">
+<li><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.html">http://simoncblyth.bitbucket.org/env/presentation/g4dae_geometry_exporter.html</a></li>
+<li><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/gpu_optical_photon_simulation.html">http://simoncblyth.bitbucket.org/env/presentation/gpu_optical_photon_simulation.html</a></li>
+</ul>
 </div>
-<div class="slide" id="g4dae-dayabay-ad">
-<h1>G4DAE Dayabay AD</h1>
-<img alt="images/osx_preview/osx_preview_g4dae_dayabay_ad.png" class="align-center" src="images/osx_preview/osx_preview_g4dae_dayabay_ad.png" style="width: 800px;" />
-<p class="small">OSX Preview.app render</p>
+<div class="slide" id="extra-slides">
+<h1><span class="small">Extra slides</span></h1>
+<ul class="small simple">
+<li>g4daeserver.py : View exported geometry in web browser</li>
+<li>g4daeserver.py : View exported geometry in web browser, details</li>
+<li>g4daeview.py : Photon Selection Interface</li>
+<li>g4daeview.py : Propagation Step Selection Interface</li>
+</ul>
 </div>
-<div class="slide" id="chroma-ray-tracing-dayabay-geometry-1">
-<h1>Chroma Ray Tracing Dayabay Geometry (1)</h1>
-<img alt="images/chroma/chroma_dayabay_pmt_peek.png" class="align-center" src="images/chroma/chroma_dayabay_pmt_peek.png" style="width: 800px;" />
+<div class="slide" id="g4daeserver-py-view-exported-geometry-in-web-browser">
+<h1><span class="small">g4daeserver.py : View exported geometry in web browser</span></h1>
+<img alt="/env/geant4/geometry/collada/webgl_safari_daeserver/webgl_safari_daeserver.png" class="align-center" src="/env/geant4/geometry/collada/webgl_safari_daeserver/webgl_safari_daeserver.png" style="width: 900px;" />
 </div>
-<div class="slide" id="chroma-ray-tracing-dayabay-geometry-2">
-<h1>Chroma Ray Tracing Dayabay Geometry (2)</h1>
-<img alt="images/chroma/chroma_dayabay_wall_pmts.png" class="align-center" src="images/chroma/chroma_dayabay_wall_pmts.png" style="width: 800px;" />
-</div>
-<div class="slide" id="chroma-ray-tracing-dayabay-geometry-3">
-<h1>Chroma Ray Tracing Dayabay Geometry (3)</h1>
-<img alt="images/chroma/chroma_dayabay_pool_pmts.png" class="align-center" src="images/chroma/chroma_dayabay_pool_pmts.png" style="width: 800px;" />
-</div>
-<div class="slide" id="chroma-ray-tracing-dayabay-geometry-4">
-<h1>Chroma Ray Tracing Dayabay Geometry (4)</h1>
-<img alt="images/chroma/chroma_dayabay_adlid.png" class="align-center" src="images/chroma/chroma_dayabay_adlid.png" style="width: 800px;" />
-</div>
-<div class="slide" id="g4dae-viewer-pool-bottom">
-<h1><tt class="docutils literal">G4DAE viewer : Pool Bottom</tt></h1>
-</div>
-<div class="slide" id="g4dae-viewer-pool-bottom-chroma-raycast">
-<h1><tt class="docutils literal">G4DAE viewer : Pool Bottom, Chroma Raycast</tt></h1>
-</div>
-<div class="slide" id="chroma-hardware-requirements">
-<h1><span class="small">Chroma : Hardware requirements</span></h1>
+<div class="slide" id="g4daeserver-py-view-exported-geometry-in-web-browser-details">
+<h1><span class="small">g4daeserver.py : View exported geometry in web browser, details</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Suitable GPUs only ~250-350 USD</p>
-<p class="last">eg NVIDIA GeForce GTX 680 (1536 CUDA cores, 2048 MB, Compute Capability 3.0) ~ 330 USD</p>
+<p class="first sidebar-title">Instant web access to any volume</p>
+<p class="last">Very useful for single volume debugging, did not pursue
+as prefer Python development over Javascript.</p>
 </div>
+<p class="small">Select volume subtree by name or index and recursion depth</p>
 <ul class="small simple">
-<li>NVIDIA GPU with CUDA Compute Capability (CCC) 2.0 at least</li>
-<li>1.5G of GPU memory (estimated minimum for Dayabay geometry)</li>
+<li><a class="reference external" href="http://belle7.nuu.edu.tw/g4dae/tree/3150___1.html">http://belle7.nuu.edu.tw/g4dae/tree/3150___1.html</a></li>
 </ul>
+<p class="small">Client in browser based on:</p>
+<ul class="small simple">
+<li><strong>threejs</strong>, Javascript 3D library<ul>
+<li>reads DAE geometry subtrees from server</li>
+<li>parses DAE and renders with <strong>WebGL</strong>  (<strong>OpenGL</strong> GPU accelerated)</li>
+</ul>
+</li>
+</ul>
+<p class="small">Server:</p>
+<ul class="small simple">
+<li><strong>g4daenode.py</strong>, reconstructs Geant4 tree from G4DAE export
+using <strong>pycollada</strong> parser</li>
+<li><strong>webpy</strong>, serve .html and .dae subtrees at each request,
+running under apache mod_fcgi</li>
+</ul>
+<p class="small">Command line access to DAE subtrees:</p>
+<pre class="small literal-block">
+curl -O http://belle7.nuu.edu.tw/g4dae/tree/3155___2.dae
+</pre>
+<p class="tiny"><a class="reference external" href="http://threejs.org">http://threejs.org</a>
+<a class="reference external" href="http://pycollada.github.io">http://pycollada.github.io</a>
+<a class="reference external" href="http://webpy.org">http://webpy.org</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/g4daeserver/">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/g4daeserver/</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daenode.py">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daenode.py</a></p>
+</div>
+<div class="slide" id="g4daeview-py-photon-selection-interface">
+<h1><span class="small">g4daeview.py : Photon Selection Interface</span></h1>
+<p class="tiny">Propagation steps OR photons can be selected by materials, propagation history, or special selection by photon identifier.
+Photons can be selected by clicking their 3D representations allowing inspection of the
+propagation history of individual photons.</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/grab_glut_menu.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/grab_glut_menu.png" style="height: 650px;" />
+</div>
+<div class="slide" id="g4daeview-py-propagation-step-selection-interface">
+<h1><span class="small">g4daeview.py : Propagation Step Selection Interface</span></h1>
+<p class="tiny">Photon propagation steps with material pair GdDopedLS,Acrylic. The larger
+squares represent selected photons, providing access to numerical details of propagation history.</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/20140716-183318.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-183318.png" style="height: 650px;" />
 </div>
 </div>
 </body>
