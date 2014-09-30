@@ -369,6 +369,19 @@ ul.auto-toc {
 
 <!-- comment
 
+Parallel session 2B : Latest developments on visualization drivers
+Tuesday 30/09 16:00-17:30
+(maximum of 20min, including 5 min discussion)
+
+- Joseph Perl: « Improving vis performances in MT »
+- Akinori Kimura: « Updates of the gMocren driver »
+- Simon Blyth (invited as a contributor for this session) : « Collada geometry exporter G4DAE»
+- Laurent Garnier: «  Updates on OpenGL (Qt and Wt) drivers »
+- space for discussion
+
+Laurent
+
+
 TODO:
 * Need page regarding g4daeview.py implementation techniques
 * need cuts
@@ -460,20 +473,23 @@ based on <em>GDML writer</em> code, same <em>XercesC</em> dependency for XML han
 </div>
 <div class="slide" id="compare-dae-exports-to-gdml-and-vrml2-wrl">
 <h1><span class="small">Compare DAE Exports to GDML and VRML2(WRL)</span></h1>
-<ul class="small simple">
+<p class="small">Export validation:</p>
+<blockquote class="small">
+<ul class="simple">
 <li>Comparison of all vertices/faces reveals <span class="red">boolean solids are discrepant</span>.</li>
 <li>Perfect <a class="footnote-reference" href="#perfect" id="id1">[1]</a> DAE WRL agreement achieved by <em>cheating</em> : <span class="blue">perform triangulation once and reuse</span>.</li>
 <li>Boolean solid triangulation sensitivity must be kept in mind as a potential systematic
 for computational uses</li>
-<li>DAE not much bigger than GDML, despite including all triangles/vertices <a class="footnote-reference" href="#not-repeating" id="id2">[2]</a></li>
+<li><strong>DAE not much bigger than GDML</strong>, despite including all triangles/vertices <a class="footnote-reference" href="#not-repeating" id="id2">[2]</a></li>
 </ul>
+</blockquote>
 <table border="1" class="small docutils">
 <colgroup>
-<col width="26%" />
-<col width="18%" />
-<col width="14%" />
-<col width="19%" />
-<col width="22%" />
+<col width="23%" />
+<col width="20%" />
+<col width="16%" />
+<col width="21%" />
+<col width="20%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">Qty</th>
@@ -503,10 +519,10 @@ for computational uses</li>
 <td>10,993,079</td>
 </tr>
 <tr><td>DAE/GDML/WRL (MB)</td>
-<td>6.9/4.0/98</td>
-<td>6.9/4.0/96</td>
-<td>8.6/6.0/167</td>
-<td>6.1M/-/-</td>
+<td><strong>6.9</strong>/4.0/98</td>
+<td><strong>6.9</strong>/4.0/96</td>
+<td><strong>8.6</strong>/6.0/167</td>
+<td><strong>6.1</strong>/-/-</td>
 </tr>
 </tbody>
 </table>
@@ -642,8 +658,6 @@ allows high level approach.</p>
 <li>interactive raycasting, including animated</li>
 <li>propagation visualization, with time slider</li>
 </ul>
-<p class="tiny"><a class="reference external" href="http://pyopengl.sourceforge.net">http://pyopengl.sourceforge.net</a>
-<a class="reference external" href="https://code.google.com/p/glumpy/">https://code.google.com/p/glumpy/</a></p>
 <table class="tiny docutils footnote" frame="void" id="g4daeview-usage" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -671,16 +685,105 @@ Optical photons: collected in G4 StackAction, serialized, sent over ZeroMQ, dese
 presented using OpenGL GLSL shaders.</p>
 <img alt="/env/geant4/geometry/collada/g4daeview/20140518-174941.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140518-174941.png" style="height: 650px;" />
 </div>
-<div class="slide" id="g4daeview-py-implementation-and-status">
-<h1><span class="small">g4daeview.py : Implementation and Status</span></h1>
+<div class="slide" id="g4daeview-py-implementation">
+<h1><span class="small">g4daeview.py : Implementation</span></h1>
+<!-- comment
+
+http://dayabay.phys.ntu.edu.tw/tracs/env/browser/trunk/geant4/geometry/collada/daeviewgl.py?rev=4344 -->
+<p class="small">Based on <em>glumpy</em> <a class="footnote-reference" href="#glumpy" id="id6">[6]</a> and <em>pyopengl</em> <a class="footnote-reference" href="#pyopengl" id="id7">[7]</a></p>
+<ul class="small">
+<li><p class="first">started from .obj viewer <a class="footnote-reference" href="#glumpy-obj-viewer" id="id8">[8]</a></p>
+</li>
+<li><p class="first">added vertices, triangles from <strong>G4DAE</strong> export</p>
+<blockquote>
+<ul class="simple">
+<li>entire geometry in <span class="red">single VBO</span></li>
+<li>only <strong>one</strong> OpenGL command needed to draw</li>
+</ul>
+</blockquote>
+</li>
+<li><p class="first">immediately (few hrs): <span class="red">shockingly fast graphics</span></p>
+<blockquote>
+<ul class="simple">
+<li>smoothly slinging around ~2.5M triangles, no stuttering</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<table class="tiny docutils footnote" frame="void" id="glumpy" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td><a class="reference external" href="https://code.google.com/p/glumpy/">https://code.google.com/p/glumpy/</a> many useful examples of pyopengl usage</td></tr>
+</tbody>
+</table>
+<table class="tiny docutils footnote" frame="void" id="pyopengl" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td><a class="reference external" href="http://pyopengl.sourceforge.net">http://pyopengl.sourceforge.net</a>  cross platform Python binding to OpenGL and related APIs</td></tr>
+</tbody>
+</table>
+<table class="tiny docutils footnote" frame="void" id="glumpy-obj-viewer" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[8]</a></td><td><a class="reference external" href="http://bitbucket.org/simoncblyth/env/src/tip/graphics/glumpy/glumpy_examples/obj-viewer-structured.py">http://bitbucket.org/simoncblyth/env/src/tip/graphics/glumpy/glumpy_examples/obj-viewer-structured.py</a></td></tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="g4daeview-py-optical-photon-op-data-handling">
+<h1><span class="small">g4daeview.py : Optical Photon (OP) Data Handling</span></h1>
+<p class="small">Photon data flow:</p>
 <ul class="small simple">
+<li>OP collected in <em>StackAction::ClassifyNewTrack</em> and killed <a class="footnote-reference" href="#alt" id="id9">[9]</a></li>
+<li><em>NewStage</em> send OP lists <a class="footnote-reference" href="#mqtransport" id="id10">[10]</a> to <em>CUDA/Chroma</em> process, propagated on GPU</li>
+<li>reply back to <em>NewStage</em> to form hits</li>
+</ul>
+<div class="sidebar">
+<p class="first sidebar-title">CUDA/OpenGL interop</p>
+<p class="last">Same GPU resident data structure
+accessible to computation and presentation</p>
+</div>
+<p class="small">When visualizing/debugging:</p>
+<ul class="small simple">
+<li>populate OpenGL VBO data structure</li>
+<li>on load, propagate saving steps into VBO slots</li>
+<li>presentation, every frame:<ul>
+<li>photon styles, GLSL shaders: spagetti, confetti, noodles, ...</li>
+<li>simple CUDA <em>presenter</em> kernel to interpolate between steps based on an input time</li>
+</ul>
+</li>
+</ul>
+<table class="tiny docutils footnote" frame="void" id="alt" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id9">[9]</a></td><td>Would be more efficient to collect OP inside Cerenkov and Scintillation processes,
+avoiding creating and stacking only to immediately kill.</td></tr>
+</tbody>
+</table>
+<table class="tiny docutils footnote" frame="void" id="mqtransport" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[10]</a></td><td>ROOT TObject (de)serialization, network message queue ZeroMQ</td></tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="g4daeview-py-status">
+<h1><span class="small">g4daeview.py : Status</span></h1>
+<p class="small">Not mature, but intend to facilitate usage anyhow.</p>
+<p class="small"><strong>Plan:</strong></p>
+<ul class="small simple">
+<li>break out into separate bitbucket repository<ul>
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/">https://bitbucket.org/simoncblyth/env/src/tip/geant4/geometry/collada/g4daeview/</a></li>
 </ul>
-<p class="small">Intend to facilitate usage by others:</p>
+</li>
+</ul>
 <ul class="small simple">
-<li>break out into separate bitbucket repository</li>
-<li>partition dependencies, to allow users without CUDA/PyCUDA/Chroma
-to still use geometry visualization and inspection features</li>
+<li>degrade to OpenGL only features, when CUDA not available<ul>
+<li><em>glumpy/pyopengl/numpy/pycollada</em> : visualization/navigation/bookmarks</li>
+<li><em>Chroma/PyCUDA/Chroma</em> : photon propagation, raycasting</li>
+</ul>
+</li>
+</ul>
+<ul class="small simple">
 <li>document installation and usage</li>
 </ul>
 </div>
@@ -713,39 +816,39 @@ in a detector with 29k photomultiplier tubes. This is
 <img alt="/env/chroma/chroma_camera/chroma_raycast_illustration.png" class="align-center" src="/env/chroma/chroma_camera/chroma_raycast_illustration.png" style="width: 600px;" />
 <ul class="small simple">
 <li>Shoot rays thru every pixel out into geometry, 1 CUDA thread for each, typically &gt;1M rays</li>
-<li>Find triangle intersections using BVH <a class="footnote-reference" href="#bvh" id="id6">[6]</a> acceleration structure</li>
+<li>Find triangle intersections using BVH <a class="footnote-reference" href="#bvh" id="id11">[11]</a> acceleration structure</li>
 <li>Determine color based on ray to triangle normal angle</li>
 <li>Alpha blend nearest 10 surfaces, providing transparency effect</li>
 </ul>
 <table class="tiny docutils footnote" frame="void" id="bvh" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td>Boundary Volume Heirarchy, a tree of bounding boxes with triangles inside leaf nodes</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id11">[11]</a></td><td>Boundary Volume Heirarchy, a tree of bounding boxes with triangles inside leaf nodes</td></tr>
 </tbody>
 </table>
 </div>
 <div class="slide" id="chroma-raycast-with-entire-geometry-in-view">
 <h1><span class="small">Chroma Raycast with entire geometry in view</span></h1>
-<p class="small">Render Split into 3x3 CUDA kernel launches, 1 thread per pixel, ~1.8s for 1.23M pixels, 2.4M tris (with <a class="footnote-reference" href="#hw" id="id7">[7]</a>)</p>
+<p class="small">Render Split into 3x3 CUDA kernel launches, 1 thread per pixel, ~1.8s for 1.23M pixels, 2.4M tris (with <a class="footnote-reference" href="#hw" id="id12">[12]</a>)</p>
 <img alt="/env/chroma/chroma_camera/20140423-162109.png" class="align-center" src="/env/chroma/chroma_camera/20140423-162109.png" style="width: 800px;" />
 <table class="tiny docutils footnote" frame="void" id="hw" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>MacBook Pro (2013), NVIDIA GeForce GT 750M 2048 MB ;
+<tr><td class="label"><a class="fn-backref" href="#id12">[12]</a></td><td>MacBook Pro (2013), NVIDIA GeForce GT 750M 2048 MB ;
 Workstation GPUs such as NVIDIA Kepler K20 expected at least ~3x faster</td></tr>
 </tbody>
 </table>
 </div>
-<div class="slide" id="g4daeview-py-dayabay-chroma-photon-propagation">
-<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation</span></h1>
+<div class="slide" id="g4daeview-py-dayabay-chroma-photon-propagation-1">
+<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation (1)</span></h1>
 <p class="tiny">Chroma GPU photon propagation at 12 nanoseconds.  The photons are generated by Geant4
 simulation of a 100 GeV muon travelling from right to left.
 Photon colors indicate reemission (green), absorption(red),
 specular reflection (magenta), scattering(blue), no history (white).</p>
 <img alt="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" style="height: 600px;" />
 </div>
-<div class="slide" id="id8">
-<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation</span></h1>
+<div class="slide" id="g4daeview-py-dayabay-chroma-photon-propagation-2">
+<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation (2)</span></h1>
 <p class="tiny">Chroma GPU photon propagation at 14 nanoseconds.
 The interface provides interactive control of the propagation time
 allowing any stage of the propagation to be viewed by
@@ -767,9 +870,9 @@ the same GPU resident photon propagation data.</p>
 </ul>
 <ul class="small simple">
 <li>implement parametrized/replica geometry handling, following GDML</li>
-<li>investigate suspected issue of missing <strong>G4LogicalBorderSurface</strong>
-(volume pairs) in an edge case where one volume is part of
-multiple pairs. This is inherited from GDML.</li>
+<li>confirm issue (inherited from GDML) of
+edge case skipped <strong>G4LogicalBorderSurface</strong>
+where a volume is shared between multiple volume pairs.</li>
 </ul>
 <ul class="small simple">
 <li>test on more geometries, currently mainly DayaBay and JUNO</li>
@@ -784,9 +887,7 @@ multiple pairs. This is inherited from GDML.</li>
 </ul>
 <ul class="small simple">
 <li>review code:<ul>
-<li>remove unused parsing inherited from GDML</li>
-<li>remove any remaining detector specifics,
-eg material id prefixes</li>
+<li>remove: unused parsing inherited from GDML</li>
 </ul>
 </li>
 </ul>
