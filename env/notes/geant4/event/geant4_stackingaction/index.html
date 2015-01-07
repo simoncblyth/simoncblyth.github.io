@@ -121,6 +121,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../nuwa/">nuwa</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../">Geant4 Event</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../geant4_future_doe/">Geant4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../geant4_multi_threading/">Geant4 Multi Threading</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../muon_simulation/">muon_simulation</a></li>
@@ -145,6 +146,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../osx/">osx</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../presentation/">Muon Simulation Presentation</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -195,6 +198,67 @@
 59 //
 60       virtual G4ClassificationOfNewTrack
 61         ClassifyNewTrack(const G4Track* aTrack);</pre>
+</div>
+</div>
+<div class="section" id="documentation-extracts">
+<h2>Documentation Extracts<a class="headerlink" href="#documentation-extracts" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/UserActions/OptionalActions.html">http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/UserActions/OptionalActions.html</a></li>
+</ul>
+<div class="section" id="classifynewtrack">
+<h3>ClassifyNewTrack<a class="headerlink" href="#classifynewtrack" title="Permalink to this headline">¶</a></h3>
+<p><cite>ClassifyNewTrack()</cite> is invoked by <cite>G4StackManager</cite> whenever a new <cite>G4Track</cite>
+object is &#8220;pushed&#8221; onto a stack by <cite>G4EventManager</cite>.  <cite>ClassifyNewTrack()</cite>
+returns an enumerator, <cite>G4ClassificationOfNewTrack</cite>, whose value indicates to
+which stack, if any, the track will be sent.  This value should be determined
+by the user. <cite>G4ClassificationOfNewTrack</cite> has four possible values:</p>
+<ol class="arabic simple">
+<li><cite>fUrgent</cite> - track is placed in the urgent stack</li>
+<li><cite>fWaiting</cite> - track is placed in the waiting stack, and will not be simulated until the urgent stack is empty</li>
+<li><cite>fPostpone</cite> - track is postponed to the next event</li>
+<li><cite>fKill</cite> - the track is deleted immediately and not stored in any stack.</li>
+</ol>
+<p>These assignments may be made based on the origin of the track which is obtained as follows:
+<cite>G4int parent_ID = aTrack-&gt;get_parentID();</cite>
+where</p>
+<ol class="arabic simple">
+<li><cite>parent_ID = 0</cite> indicates a primary particle</li>
+<li><cite>parent_ID &gt; 0</cite> indicates a secondary particle</li>
+<li><cite>parent_ID &lt; 0</cite> indicates postponed particle from previous event.</li>
+</ol>
+<ul class="simple">
+<li>always returning <cite>fUrgent</cite> would result in stepping proceeding
+for tracks as they arise, ie with OP mixed up with everything else</li>
+</ul>
+</div>
+<div class="section" id="newstage-deal-with-the-wait-stack">
+<h3>NewStage : deal with the wait stack<a class="headerlink" href="#newstage-deal-with-the-wait-stack" title="Permalink to this headline">¶</a></h3>
+<p><cite>NewStage()</cite> is invoked when the urgent stack is empty and the waiting stack
+contains at least one <cite>G4Track</cite> object.  Here the user may kill or re-assign to
+different stacks all the tracks in the waiting stack by calling the
+<cite>stackManager-&gt;ReClassify()</cite> method which, in turn, calls the
+<cite>ClassifyNewTrack()</cite> method.</p>
+<p>If no user action is taken, all tracks in the waiting stack are transferred to
+the urgent stack.</p>
+<ul class="simple">
+<li>HMM: so can see how long the Optical Photons are taking could first
+collect them into the wait stack and then &#8220;do nothing&#8221; at NewStage</li>
+</ul>
+<p>The user may also decide to abort the current event even though some tracks may
+remain in the waiting stack by calling <cite>stackManager-&gt;clear()</cite>.  This method is
+valid and safe only if it is called from the <cite>G4UserStackingAction</cite> class.</p>
+<p>A global method of event abortion is:</p>
+<div class="highlight-python"><pre>G4UImanager * UImanager = G4UImanager::GetUIpointer();
+UImanager-&gt;ApplyCommand("/event/abort");</pre>
+</div>
+</div>
+<div class="section" id="preparenewevent">
+<h3>PrepareNewEvent<a class="headerlink" href="#preparenewevent" title="Permalink to this headline">¶</a></h3>
+<p><cite>PrepareNewEvent()</cite> is invoked at the beginning of each event. At this point no
+primary particles have been converted to tracks, so the urgent and waiting
+stacks are empty. However, there may be tracks in the postponed-to-next-event
+stack; for each of these the <cite>ClassifyNewTrack()</cite> method is called and the track
+is assigned to the appropriate stack.</p>
 </div>
 </div>
 <div class="section" id="stackingaction-source">

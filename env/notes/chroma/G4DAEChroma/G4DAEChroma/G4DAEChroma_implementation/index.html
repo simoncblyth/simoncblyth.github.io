@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>G4DAEChroma Implementation Details &mdash; Env  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../../_static/highstock/highstock.js"></script>
+    <script type="text/javascript" src="../../../../_static/highstock/modules/exporting.js"></script>
+    <link rel="top" title="Env  documentation" href="../../../../" />
+    <link rel="up" title="G4DAEChroma" href="../../" />
+    <link rel="next" title="Chroma Issues" href="../../../chroma_issues/" />
+    <link rel="prev" title="G4DAEChroma" href="../" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../chroma_issues/" title="Chroma Issues"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../" title="G4DAEChroma"
+             accesskey="P">previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../" >chroma</a> &raquo;</li>
+          <li><a href="../../" accesskey="U">G4DAEChroma</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>Links</h3>
+<ul class="this-page-menu">
+	<li><a href="/tracs/env"> env </a>  <a href="/tracs/env/timeline"> tl </a> <a href="/repos/env/trunk"> repo </a> <a href="/e"> edocs </a> </li>
+	<li><a href="/tracs/heprez"> heprez </a>  <a href="/tracs/heprez/timeline"> tl </a> <a href="/repos/heprez/trunk"> repo</a> <a href="/h">hdocs</a>   </li>
+        <li><a href="/e/scm/monitor/" > backup status </a> </li>
+</ul>
+
+<h3>Content Skeleton</h3>
+
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/">Installing <strong>env</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../base/">Base Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../log/May2012/">LOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../TODO/">TODO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sysadmin/">Sys Admin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../plot/">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scm/">SCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../trac/">Trac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../root/">ROOT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sphinxext/">Sphinx Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../matplotlib/">Matplotlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nose/">nose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../svn/">SVN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../npy/">Numerical Python, numpy et al</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pypy/">PyPy : faster python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mysqlhotcopy/">MySQL hotcopy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mysql/">MySQL Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sqlite/">SQLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../db/">DB scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../qxml/">QXML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../fossil/">Fossil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../java/">Java Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pycuda/">pycuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../geant4/">geant4</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../muon_simulation/">muon_simulation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../">chroma</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../">G4DAEChroma</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_issues/">Chroma Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_intersection/">Chroma Intersection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma/">CHROMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../how_chroma_works/">How Chroma Works ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/">Chroma Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../refs/">Chroma Refs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_prerequisites/">Chroma Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_geant4_integration/">Chroma Geant4 Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_nuwa_geant4_integration/">Chroma/NuWa/Geant4 Integration with ZeroMQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_nuwa_integration/">Chroma NuWa Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_cuda_photon/">Chroma CUDA Photon handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_collada/">Chroma COLLADA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_pycuda/">Getting to know how Chroma uses PyCUDA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_pyublas/">Chroma Use of PyUblas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_geometry/">Chroma Geometry Source Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_materials/">Chroma Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_propagate/">Photon Propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_physics/">Chroma Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_detector/">Chroma Modeling of Sensitive Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_server/">Chroma Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_zeromq/">Chroma ZeroMQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_camera/">chroma_camera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_sim/">chroma_sim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_cuda_freeze/">Chroma CUDA Freeze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_cuda/">Chroma CUDA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_visualisation/">Chroma Visualisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../photon_mapping/">Photon Mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geant4_background/">Geant4 Background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cuda_background/">Cuda Threads and Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../bvh_background/">Bounding Volume Hierarchy (BVH)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../hardware/">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_install/">install issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_tests/">tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../ChromaZMQRootTest/">ChromaZMQRootTest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_curand/">Chroma Use Of CURand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../chroma_reemission/">Chroma Reemission</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../llvm/">llvm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graphics/">Graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cuda/">cuda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../opencl/">opencl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linux/">Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cloud/">Cloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../package_management/">Package Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ui/">ui</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../debugging/">debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mercurial/">mercurial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../javascript/">javascript</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nuwa/">nuwa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ccgpu/">ccgpu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pygame/">pygame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../zeromq/">zeromq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../doc/">doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../python/">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../osx/">osx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../hg/">hg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../presentation/">Muon Simulation Presentation</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/chroma/G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../"
+                        title="previous chapter">G4DAEChroma</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../../chroma_issues/"
+                        title="next chapter">Chroma Issues</a></p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="g4daechroma-implementation-details">
+<h1>G4DAEChroma Implementation Details<a class="headerlink" href="#g4daechroma-implementation-details" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#g4daechroma-dependencies" id="id1">G4DAEChroma Dependencies</a></li>
+<li><a class="reference internal" href="#high-level-api" id="id2">High Level API</a></li>
+<li><a class="reference internal" href="#collectable-transportable-object-definitions" id="id3">Collectable/Transportable Object Definitions</a></li>
+<li><a class="reference internal" href="#collectable-transportable-lists" id="id4">Collectable/Transportable Lists</a></li>
+<li><a class="reference internal" href="#manual-lists-to-be-migrated-to-common-machinery" id="id5">Manual Lists to be migrated to common machinery</a></li>
+<li><a class="reference internal" href="#transport-infrastructure" id="id6">Transport infrastructure</a></li>
+<li><a class="reference internal" href="#array-collection-and-transport" id="id7">Array Collection and Transport</a></li>
+<li><a class="reference internal" href="#config-and-control-infrastructure" id="id8">Config and control Infrastructure</a></li>
+<li><a class="reference internal" href="#utililites" id="id9">Utililites</a></li>
+<li><a class="reference internal" href="#geometry" id="id10">Geometry</a></li>
+<li><a class="reference internal" href="#geant4-hit-collection-integration" id="id11">Geant4 Hit Collection Integration</a></li>
+<li><a class="reference internal" href="#daya-bay-specializations-from-detsimchroma" id="id12">Daya Bay specializations from DetSimChroma</a></li>
+<li><a class="reference internal" href="#g4daechroma-config-and-initialization" id="id13">G4DAEChroma Config and Initialization</a></li>
+<li><a class="reference internal" href="#soon-to-be-removed" id="id14">Soon to be removed</a></li>
+</ul>
+</div>
+<div class="section" id="g4daechroma-dependencies">
+<h2><a class="toc-backref" href="#id1">G4DAEChroma Dependencies</a><a class="headerlink" href="#g4daechroma-dependencies" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Geant4</dt>
+<dd>Simulation Toolkit</dd>
+<dt>ZMQ</dt>
+<dd>ZeroMQ message queue transport</dd>
+<dt>cJSON</dt>
+<dd>JSON string serialization/deserialization</dd>
+<dt>numpy.hpp</dt>
+<dd>NumPy array serialization/deserialization</dd>
+<dt>RapSQLite</dt>
+<dd>Interface to SQLite3 database, for control/monitoring.</dd>
+<dt>CNPY</dt>
+<dd>NumPy array serialization/deserialization,
+(to be eliminated by migration to numpy.hpp)</dd>
+</dl>
+<p>Former dependency on ROOT for TObject serialization
+has been eliminated.</p>
+</div>
+<div class="section" id="high-level-api">
+<h2><a class="toc-backref" href="#id2">High Level API</a><a class="headerlink" href="#high-level-api" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAEChroma : G4DAEManager</cite></dt>
+<dd>high level API for collection of Geant4 data and external processing
+and integration back into propagation</dd>
+<dt><cite>G4DAEManager</cite></dt>
+<dd>task control and timing</dd>
+</dl>
+</div>
+<div class="section" id="collectable-transportable-object-definitions">
+<h2><a class="toc-backref" href="#id3">Collectable/Transportable Object Definitions</a><a class="headerlink" href="#collectable-transportable-object-definitions" title="Permalink to this headline">¶</a></h2>
+<p>Template type providing type specifics, describing
+shape and content of arrays and template envvars
+that standardize location of persisted lists.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G4DAEPhoton</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAECerenkovPhoton</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAECerenkovStep</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEScintillationStep</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEScintillationPhoton</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEPmtHit</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEProp</span><span class="o">.</span><span class="n">hh</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="collectable-transportable-lists">
+<h2><a class="toc-backref" href="#id4">Collectable/Transportable Lists</a><a class="headerlink" href="#collectable-transportable-lists" title="Permalink to this headline">¶</a></h2>
+<p>Template specializations of <cite>G4DAEList</cite> eg:</p>
+<div class="highlight-python"><pre>typedef G4DAEList&lt;G4DAEPhoton&gt; G4DAEPhotonList
+typedef G4DAEList&lt;G4DAECerenkovStep&gt; G4DAECerenkovStepList</pre>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G4DAEPhotonList</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAECerenkovPhotonList</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAECerenkovStepList</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEChromaPhotonList</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEScintillationStepList</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEScintillationPhotonList</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEPmtHitList</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEPropList</span><span class="o">.</span><span class="n">hh</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="manual-lists-to-be-migrated-to-common-machinery">
+<h2><a class="toc-backref" href="#id5">Manual Lists to be migrated to common machinery</a><a class="headerlink" href="#manual-lists-to-be-migrated-to-common-machinery" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAEHit</cite></dt>
+<dd>serializable single hit struct,
+initialized from indexed elements of <cite>G4DAEPhotons</cite>
+with local <cite>G4AffineTransform</cite> applied separately</dd>
+<dt><cite>G4DAEHitList : G4DAEArrayHolder</cite></dt>
+<dd>adding a <cite>G4DAEHit</cite> immediately serializes into constituent <cite>G4DAEArray</cite></dd>
+</dl>
+</div>
+<div class="section" id="transport-infrastructure">
+<h2><a class="toc-backref" href="#id6">Transport infrastructure</a><a class="headerlink" href="#transport-infrastructure" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAETransport</cite></dt>
+<dd>holder of various objects and socket for sending/receiving them</dd>
+<dt><cite>G4DAESocket&lt;T&gt; : G4DAESocketBase</cite></dt>
+<dd>Provides separate Send and Receive methods, using template type constructors</dd>
+<dt><cite>G4DAESocketBase</cite></dt>
+<dd><cite>G4DAESerializable* SendReceiveObject(G4DAESerializable* request) const</cite></dd>
+<dt><cite>G4DAESerializable</cite></dt>
+<dd>interface to allow instance transport via <cite>G4DAESocket</cite></dd>
+</dl>
+</div>
+<div class="section" id="array-collection-and-transport">
+<h2><a class="toc-backref" href="#id7">Array Collection and Transport</a><a class="headerlink" href="#array-collection-and-transport" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAEList&lt;T&gt; : G4DAEArrayHolder</cite></dt>
+<dd>implements <cite>G4DAESerializable</cite> using capabilities of constituent <cite>G4DAEArray</cite></dd>
+<dt><cite>G4DAEArrayHolder : G4DAESerializable</cite></dt>
+<dd>combination of a <cite>G4DAEArray</cite> and <cite>G4DAEMetadata</cite> constituents allowing
+arrays with metadata to be transported via <cite>G4DAESocket</cite></dd>
+<dt><cite>G4DAEArray : G4DAESerializable</cite></dt>
+<dd>NumPy (NPY) array serialization/deserialization using numpy.hpp.
+<strong>Effectively allows numpy arrays to be created from C++</strong></dd>
+<dt><cite>G4DAEMetadata : G4DAESerializable</cite></dt>
+<dd>Between process/language communication using JSON strings,
+python dicts accessible to C++ as <cite>map&lt;string,string&gt;</cite></dd>
+</dl>
+</div>
+<div class="section" id="config-and-control-infrastructure">
+<h2><a class="toc-backref" href="#id8">Config and control Infrastructure</a><a class="headerlink" href="#config-and-control-infrastructure" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAEDatabase</cite></dt>
+<dd>access for inserts and queries to sqlite3 database using <strong>RapSQLite</strong></dd>
+</dl>
+</div>
+<div class="section" id="utililites">
+<h2><a class="toc-backref" href="#id9">Utililites</a><a class="headerlink" href="#utililites" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAEBuffer</cite></dt>
+<dd>simple byte holder</dd>
+<dt><cite>G4DAECommon</cite></dt>
+<dd>utility functions for md5digest, zmq transport, buffer dumping</dd>
+<dt><cite>G4DAEMap</cite></dt>
+<dd><cite>map&lt;string,string&gt;</cite></dd>
+<dt><cite>G4DAETime</cite></dt>
+<dd>realtime measurement</dd>
+</dl>
+</div>
+<div class="section" id="geometry">
+<h2><a class="toc-backref" href="#id10">Geometry</a><a class="headerlink" href="#geometry" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAEGeometry</cite></dt>
+<dd>creates <cite>G4DAETransformCache</cite> instance by
+traversing Geant4 volume tree collecting
+positions (<cite>G4AffineTransform</cite>) and identifiers
+of sensitive detector volumes</dd>
+<dt><cite>G4DAETransformCache</cite></dt>
+<dd><p class="first">Map of SD identifiers to <cite>G4AffineTransform</cite>
+with serialization/deserialization functionality.
+Allows global hit coordinates to be transformed into local
+PMT coordinates.</p>
+<p class="last">TODO: move from cnpy to numpy.hpp</p>
+</dd>
+<dt><cite>G4DAEMaterialMap</cite></dt>
+<dd>Via mapping between material names and codes, provides
+lookup array to translate Geant4 material codes
+into Chroma material codes.</dd>
+</dl>
+</div>
+<div class="section" id="geant4-hit-collection-integration">
+<h2><a class="toc-backref" href="#id11">Geant4 Hit Collection Integration</a><a class="headerlink" href="#geant4-hit-collection-integration" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><cite>G4DAESensDet : G4VSensitiveDetector</cite></dt>
+<dd><p class="first">Funnels GPU formed hits into standard Geant4 hit collections.</p>
+<dl class="docutils">
+<dt>Normally hits are formed:</dt>
+<dd><cite>bool ProcessHits(G4Step*,G4TouchableHistory*)</cite></dd>
+<dt>Instead bulk hit collection is provided:</dt>
+<dd><cite>void CollectHits(G4DAEPhotons*,G4DAETransformCache*)</cite></dd>
+</dl>
+<p class="last">Operates via detector specialized constituent <cite>G4DAECollector</cite> subclass
+which steals pointers to preexisting hit collections
+(eg formed by DetDesc/Gaudi)</p>
+</dd>
+<dt><cite>G4DAECollector</cite></dt>
+<dd><p class="first">does the work of hit handling, directed by <cite>G4DAESensDet</cite></p>
+<p><cite>void CollectHits(G4DAEPhotons*, G4DAETransformCache*)</cite></p>
+<ul class="last simple">
+<li>forms <cite>G4DAEHit</cite> for each returned photon</li>
+<li>applies local transform for the PmtId obtained from G4DAETransformCache</li>
+<li>subclass implemented detector specific collection</li>
+</ul>
+</dd>
+<dt><cite>DemoG4DAECollector : G4DAECollector</cite></dt>
+<dd><blockquote class="first">
+<div>example of detector specialized hit collector implementing</div></blockquote>
+<p class="last"><cite>void Collect(const G4DAEHit&amp; hit)</cite></p>
+</dd>
+</dl>
+</div>
+<div class="section" id="daya-bay-specializations-from-detsimchroma">
+<h2><a class="toc-backref" href="#id12">Daya Bay specializations from DetSimChroma</a><a class="headerlink" href="#daya-bay-specializations-from-detsimchroma" title="Permalink to this headline">¶</a></h2>
+<p>From NuWa-trunk/dybgaudi/Simulation/DetSimChroma.</p>
+<dl class="docutils">
+<dt><cite>DybG4DAECollector :  G4DAECollector</cite></dt>
+<dd>subclass handling detector specific hit collection operations
+steals hit collection pointers and provides a backdoor to
+populate them</dd>
+<dt><cite>DybG4DAEGeometry : G4DAEGeometry</cite></dt>
+<dd><p class="first">specializing subclass providing sensor id
+for location in the geometry tree</p>
+<p class="last"><cite>size_t TouchableToIdentifier( const G4TouchableHistory&amp; hist )</cite></p>
+</dd>
+</dl>
+</div>
+<div class="section" id="g4daechroma-config-and-initialization">
+<h2><a class="toc-backref" href="#id13">G4DAEChroma Config and Initialization</a><a class="headerlink" href="#g4daechroma-config-and-initialization" title="Permalink to this headline">¶</a></h2>
+<p>Config and Initialization of G4DAEChroma example in <cite>DsChromaRunAction_BeginOfRunAction</cite>
+creates and configures constituent instances from envvar strings.</p>
+<dl class="docutils">
+<dt><cite>G4DAETransport</cite></dt>
+<dd>envvar configures network or inproc config for ZMQ communication</dd>
+<dt><cite>G4DAEDatabase</cite></dt>
+<dd>envvar configures path to sqlite3 database for performance monitoring</dd>
+<dt><cite>G4DAETransformCache</cite></dt>
+<dd>When run inside NuWa DybG4DAEGeometry used to create G4DAETransformCache,
+which is persisted to file. When run outside NuWa loads cache from file.
+This facilitates mocknuwa running, for fast development cycle.</dd>
+<dt><cite>G4DAESensDet</cite></dt>
+<dd>Trojan sensdet that targets victim by name (eg &#8220;DsPmtSensDet&#8221;).
+The hit collection pointers of the victim are stolen.
+SensDet registered with Geant4 to gain access to per event
+hit collections.</dd>
+<dt><cite>DybG4DAECollector</cite></dt>
+<dd>Provides detector specific hit collection handling, routing
+hits to the appropriate collections.</dd>
+</dl>
+</div>
+<div class="section" id="soon-to-be-removed">
+<h2><a class="toc-backref" href="#id14">Soon to be removed</a><a class="headerlink" href="#soon-to-be-removed" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G4DAETransportCPL</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEPhotonListOld</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">G4DAEPhotons</span><span class="o">.</span><span class="n">hh</span>
+</pre></div>
+</div>
+<div class="sidebar">
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../chroma_issues/" title="Chroma Issues"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../" title="G4DAEChroma"
+             >previous</a> |</li>
+    <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
+    
+        <li><a href="../../../../">Env  documentation</a> &raquo;</li>
+
+          <li><a href="../../../" >chroma</a> &raquo;</li>
+          <li><a href="../../" >G4DAEChroma</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

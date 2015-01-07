@@ -29,7 +29,7 @@
     <link rel="top" title="Env  documentation" href="../../" />
     <link rel="up" title="chroma" href="../" />
     <link rel="next" title="How Chroma Works ?" href="../how_chroma_works/" />
-    <link rel="prev" title="Chroma Issues" href="../chroma_issues/" /> 
+    <link rel="prev" title="Chroma Intersection" href="../chroma_intersection/" /> 
   </head>
   <body>
     <div class="related">
@@ -45,7 +45,7 @@
           <a href="../how_chroma_works/" title="How Chroma Works ?"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../chroma_issues/" title="Chroma Issues"
+          <a href="../chroma_intersection/" title="Chroma Intersection"
              accesskey="P">previous</a> |</li>
     <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
     
@@ -106,7 +106,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geant4/">geant4</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../muon_simulation/">muon_simulation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">chroma</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../G4DAEChroma/">G4DAEChroma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_issues/">Chroma Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chroma_intersection/">Chroma Intersection</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="">CHROMA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_chroma_works/">How Chroma Works ?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../development/">Chroma Development</a></li>
@@ -118,6 +120,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../chroma_cuda_photon/">Chroma CUDA Photon handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_collada/">Chroma COLLADA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_pycuda/">Getting to know how Chroma uses PyCUDA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chroma_pyublas/">Chroma Use of PyUblas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_geometry/">Chroma Geometry Source Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_materials/">Chroma Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_propagate/">Photon Propagation</a></li>
@@ -160,6 +163,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../presentation/">Muon Simulation Presentation</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -168,8 +172,8 @@
            rel="nofollow">Show Source</a></li>
   </ul>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../chroma_issues/"
-                        title="previous chapter">Chroma Issues</a></p>
+  <p class="topless"><a href="../chroma_intersection/"
+                        title="previous chapter">Chroma Intersection</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="../how_chroma_works/"
                         title="next chapter">How Chroma Works ?</a></p>
@@ -189,6 +193,188 @@
 <li><a class="reference external" href="http://chroma.bitbucket.org/install/overview.html#common-install">http://chroma.bitbucket.org/install/overview.html#common-install</a></li>
 <li><a class="reference external" href="https://bitbucket.org/chroma/chroma.bitbucket.org/src">https://bitbucket.org/chroma/chroma.bitbucket.org/src</a></li>
 </ul>
+<div class="section" id="installation-overview">
+<h2>Installation Overview<a class="headerlink" href="#installation-overview" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>contained within virtualenv folder chroma-dir
+eg /usr/local/env/chroma_env</li>
+</ul>
+<div class="section" id="dependencies-install-overview">
+<h3>Dependencies Install Overview<a class="headerlink" href="#dependencies-install-overview" title="Permalink to this headline">¶</a></h3>
+<p>After setup of ~/.aksetup-defaults.py described in <a class="reference external" href="http://chroma.bitbucket.org/install/overview.html">http://chroma.bitbucket.org/install/overview.html</a>:</p>
+<div class="highlight-python"><pre>#export PIP_EXTRA_INDEX_URL=http://mtrr.org/chroma_pkgs/
+#export PIP_EXTRA_INDEX_URL=http://localhost/chroma_pkgs/
+export PIP_EXTRA_INDEX_URL=file:///usr/local/env/chroma_pkgs/
+pip install chroma_deps</pre>
+</div>
+<p>Chroma dependencies installation uses homegrown <em>shrinkwrap</em>
+that makes non-python packages such as Geant4 and ROOT
+to be amenable to setup.py python package
+dependency machinery.</p>
+<p>Packages are pulled from server using PIP indexing
+mechanism. Recall needing to setup localhost index in order
+to conveniently make some patches.</p>
+</div>
+<div class="section" id="important">
+<h3>IMPORTANT<a class="headerlink" href="#important" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>pip logs to ~/.pip/pip.log</li>
+<li>overwritten at each call</li>
+</ul>
+</div>
+<div class="section" id="chroma-deps-server">
+<h3>chroma deps server<a class="headerlink" href="#chroma-deps-server" title="Permalink to this headline">¶</a></h3>
+<p>Bring up local nginx:</p>
+<div class="highlight-python"><pre>delta:~ blyth$ sudo apachectl stop
+delta:~ blyth$ nginx-start</pre>
+</div>
+<p>To provide the below via <a class="reference external" href="http://localhost/chroma_pkgs/">http://localhost/chroma_pkgs/</a>:</p>
+<div class="highlight-python"><pre>(chroma_env)delta:Documents blyth$ ll /usr/local/env/chroma_pkgs/
+ total 0
+ drwxr-xr-x   4 blyth  wheel  136 Jan 16  2014 g4py_chroma
+ drwxr-xr-x   8 blyth  wheel  272 Jan 16  2014 .
+ drwxr-xr-x   5 blyth  wheel  170 Jan 16  2014 cmake
+ drwxr-xr-x   5 blyth  wheel  170 Jan 16  2014 chroma_deps
+ drwxr-xr-x   4 blyth  wheel  136 Jan 16  2014 boost
+ drwxr-xr-x   7 blyth  wheel  238 Jan 16  2014 geant4
+ drwxr-xr-x   8 blyth  wheel  272 Jan 17  2014 root
+ drwxr-xr-x  23 blyth  staff  782 Sep 25 12:26 ..</pre>
+</div>
+</div>
+<div class="section" id="d-modify-chroma-geant4-build-to-add-gdml-persistency">
+<h3>D: modify chroma geant4 build to add GDML/persistency<a class="headerlink" href="#d-modify-chroma-geant4-build-to-add-gdml-persistency" title="Permalink to this headline">¶</a></h3>
+<p>Macports install of xercesc, see <em>xercesc-vi</em></p>
+<p>Want to add GDML to Chroma geant4 build, need to change cmake cmdline:</p>
+<div class="highlight-python"><pre>delta:geant4-4.9.5.p01 blyth$ pwd
+/usr/local/env/chroma_pkgs/geant4/geant4-4.9.5.p01
+
+delta:geant4-4.9.5.p01 blyth$ cat setup.py  | grep cmake
+    config_cmd = 'cmake -DCMAKE_INSTALL_PREFIX=%s -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_RAYTRACER_X11=ON %s' % (inst.virtualenv, g4src_dir)
+    shrinkwrap_requires=['cmake'],</pre>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="http://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/InstallationGuide/html/ch02.html">http://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/InstallationGuide/html/ch02.html</a></li>
+</ul>
+<div class="highlight-python"><pre>delta:geant4-4.9.5.p01 blyth$ diff setup.py ../geant4-4.9.5.post2/setup.py
+9,10c9,11
+&lt; version = '4.9.5.p01'
+&lt; source_url = 'http://geant4.cern.ch/support/source/geant%s.tar.gz' % version
+---
+&gt; version = '4.9.5.post2'
+&gt; real_version = '4.9.5.p01'
+&gt; source_url = 'http://geant4.cern.ch/support/source/geant%s.tar.gz' % real_version
+18c19
+&lt;     g4src_dir = os.path.realpath('geant' + version)
+---
+&gt;     g4src_dir = os.path.realpath('geant' + real_version)
+25,26c26
+&lt;     xopt = "-DGEANT4_USE_GDML=ON"
+&lt;     config_cmd = 'cmake -DCMAKE_INSTALL_PREFIX=%s -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_RAYTRACER_X11=ON %s %s' % (inst.virtualenv, xopt, g4src_dir)
+---
+&gt;     config_cmd = 'cmake -DCMAKE_INSTALL_PREFIX=%s -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_RAYTRACER_X11=ON %s' % (inst.virtualenv, g4src_dir)
+46c46
+&lt;     shrinkwrap_requires=['cmake'],
+---
+&gt;    # shrinkwrap_requires=['cmake'],
+delta:geant4-4.9.5.p01 blyth$</pre>
+</div>
+<p>Need to add:</p>
+<div class="highlight-python"><pre>(chroma_env)delta:geant4 blyth$ vi geant4-4.9.5.post2/setup.py   ## add -DGEANT_USE_GDML=ON
+(chroma_env)delta:geant4 blyth$ rm  geant4-4.9.5.post2.tar.gz
+(chroma_env)delta:geant4 blyth$ tar zcvf geant4-4.9.5.post2.tar.gz geant4-4.9.5.post2
+a geant4-4.9.5.post2
+a geant4-4.9.5.post2/geant4.egg-info
+a geant4-4.9.5.post2/PKG-INFO
+a geant4-4.9.5.post2/setup.cfg
+a geant4-4.9.5.post2/setup.py
+a geant4-4.9.5.post2/geant4.egg-info/dependency_links.txt
+a geant4-4.9.5.post2/geant4.egg-info/PKG-INFO
+a geant4-4.9.5.post2/geant4.egg-info/SOURCES.txt
+a geant4-4.9.5.post2/geant4.egg-info/top_level.txt</pre>
+</div>
+<p>the pip install sources geant4.sh:</p>
+<div class="highlight-python"><pre>delta:chroma_env blyth$ find . -name geant4.sh
+./bin/geant4.sh
+./env.d/geant4.sh
+./src/geant4.9.5.p01-build/InstallTreeFiles/geant4.sh
+
+delta:chroma_env blyth$ cat env.d/geant4.sh
+
+pushd .  &gt; /dev/null
+cd /usr/local/env/chroma_env/bin
+source geant4.sh
+popd  &gt; /dev/null</pre>
+</div>
+<p>Add tail:</p>
+<div class="highlight-python"><pre>delta:chroma_env blyth$ tail -10 bin/geant4.sh
+
+# SCB extra
+xercesc_library=/opt/local/lib/libxerces-c.dylib
+if [ -f "${xercesc_library}" ]; then
+   export XERCESC_INCLUDE_DIR=/opt/local/include
+   export XERCESC_LIBRARY=/opt/local/lib/libxerces-c.dylib
+   env | grep XERCESC
+fi</pre>
+</div>
+<p>Remove that tail, try with env setup in chroma-deps-env, then:</p>
+<div class="highlight-python"><pre>(chroma_env)delta:chroma_env blyth$ chroma-deps-rebuild geant4 -U -v</pre>
+</div>
+<div class="highlight-python"><pre>(chroma_env)delta:chroma_env blyth$ chroma-;chroma-deps-rebuild-geant4 -U -v --pre
+=== chroma-deps-env : writing /Users/blyth/.aksetup-defaults.py
+XERCESC_INCLUDE_DIR=/opt/local/include
+XERCESC_LIBRARY=/opt/local/lib/libxerces-c.dylib
+=== chroma-deps-rebuild : pip install -b /usr/local/env/chroma_env/build/build_geant4 -U -v --pre geant4
+Could not fetch URL https://pypi.python.org/simple/geant4/: HTTP Error 404: Not Found
+Will skip URL https://pypi.python.org/simple/geant4/ when looking for download links for geant4 in ./lib/python2.7/site-packages
+Could not fetch URL https://pypi.python.org/simple/geant4/: HTTP Error 404: Not Found
+Will skip URL https://pypi.python.org/simple/geant4/ when looking for download links for geant4 in ./lib/python2.7/site-packages
+Installed version (4.9.5.post2) is most up-to-date (past versions: 4.9.5.post2, 4.9.5.post1, 4.9.5.p01)
+Requirement already up-to-date: geant4 in ./lib/python2.7/site-packages
+Cleaning up...
+(chroma_env)delta:chroma_env blyth$</pre>
+</div>
+<p>marker directory in site-packages:</p>
+<div class="highlight-python"><pre>(chroma_env)delta:site-packages blyth$ l geant4-4.9.5.post2-py2.7.egg-info/
+total 40
+-rw-r--r--  1 blyth  staff  197 Jan 16  2014 PKG-INFO
+-rw-r--r--  1 blyth  staff  130 Jan 16  2014 SOURCES.txt
+-rw-r--r--  1 blyth  staff    1 Jan 16  2014 dependency_links.txt
+-rw-r--r--  1 blyth  staff   59 Jan 16  2014 installed-files.txt
+-rw-r--r--  1 blyth  staff    1 Jan 16  2014 top_level.txt
+(chroma_env)delta:site-packages blyth$</pre>
+</div>
+<p>Need to remove 3 dirs to succeeds to rebuild:</p>
+<div class="highlight-python"><pre>(chroma_env)delta:chroma_env blyth$ rm -r /usr/local/env/chroma_env/build/build_geant4
+(chroma_env)delta:chroma_env blyth$ rm -r lib/python2.7/site-packages/geant4-4.9.5.post2-py2.7.egg-info
+(chroma_env)delta:chroma_env blyth$ rm -rf /usr/local/env/chroma_env/src/geant4.9.5.p01
+    # otherwise get permission denied regarding examples/.../Doxyfile.svn-base
+
+(chroma_env)delta:chroma_env blyth$ chroma-;chroma-deps-rebuild-geant4 -U -v --pre</pre>
+</div>
+<p>But my change to geant4-4.9.5.post2/setup.py was ignored. Need to create tarball:</p>
+<div class="highlight-python"><pre>(chroma_env)delta:geant4 blyth$ pwd
+/usr/local/env/chroma_pkgs/geant4
+(chroma_env)delta:geant4 blyth$ rm geant4-4.9.5.post2.tar.gz
+(chroma_env)delta:geant4 blyth$ tar zcvf geant4-4.9.5.post2.tar.gz geant4-4.9.5.post2
+a geant4-4.9.5.post2
+a geant4-4.9.5.post2/geant4.egg-info
+a geant4-4.9.5.post2/PKG-INFO
+a geant4-4.9.5.post2/setup.cfg
+a geant4-4.9.5.post2/setup.py
+a geant4-4.9.5.post2/geant4.egg-info/dependency_links.txt
+a geant4-4.9.5.post2/geant4.egg-info/PKG-INFO
+a geant4-4.9.5.post2/geant4.egg-info/SOURCES.txt
+a geant4-4.9.5.post2/geant4.egg-info/top_level.txt
+(chroma_env)delta:geant4 blyth$</pre>
+</div>
+<p>After that succeed to rebuild but getting:</p>
+<div class="highlight-python"><pre>CMake Warning:
+   Manually-specified variables were not used by the project:
+
+     GEANT_USE_GDML</pre>
+</div>
+</div>
+</div>
 <div class="section" id="chroma-dependencies">
 <h2>Chroma Dependencies<a class="headerlink" href="#chroma-dependencies" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="osx-10-9-1-mavericks">
@@ -662,7 +848,7 @@ not a good place for development without a major re-write</li>
           <a href="../how_chroma_works/" title="How Chroma Works ?"
              >next</a> |</li>
         <li class="right" >
-          <a href="../chroma_issues/" title="Chroma Issues"
+          <a href="../chroma_intersection/" title="Chroma Intersection"
              >previous</a> |</li>
     <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
     

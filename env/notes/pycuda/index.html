@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../_static/highstock/modules/exporting.js"></script>
     <link rel="top" title="Env  documentation" href="../" />
     <link rel="next" title="PYCUDA" href="pycuda_bash/" />
-    <link rel="prev" title="CUDA Context Cleanup" href="../cuda/cuda_context_cleanup/" /> 
+    <link rel="prev" title="CUDA GPU Comparisons" href="../cuda/cuda_gpu_comparisons/" /> 
   </head>
   <body>
     <div class="related">
@@ -44,7 +44,7 @@
           <a href="pycuda_bash/" title="PYCUDA"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../cuda/cuda_context_cleanup/" title="CUDA Context Cleanup"
+          <a href="../cuda/cuda_gpu_comparisons/" title="CUDA GPU Comparisons"
              accesskey="P">previous</a> |</li>
     <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
     
@@ -106,6 +106,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pycuda_debugging/">PyCUDA Debugging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pycuda_error_handling/">PyCUDA Error Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pycuda_pyopengl_interop/">pycuda_pyopengl_interop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/">PyCUDA Memory</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../geant4/">geant4</a></li>
@@ -131,6 +132,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../osx/">osx</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../presentation/">Muon Simulation Presentation</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -139,8 +142,8 @@
            rel="nofollow">Show Source</a></li>
   </ul>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../cuda/cuda_context_cleanup/"
-                        title="previous chapter">CUDA Context Cleanup</a></p>
+  <p class="topless"><a href="../cuda/cuda_gpu_comparisons/"
+                        title="previous chapter">CUDA GPU Comparisons</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="pycuda_bash/"
                         title="next chapter">PYCUDA</a></p>
@@ -158,6 +161,17 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pycuda_bash/">PYCUDA</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#installs">Installs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#actual-source-used-by-chroma">Actual Source used by Chroma ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#multiple-gpus">Multiple GPUs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#debug-trace-switches">Debug/trace switches ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#syslog-messages">Syslog Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#profiling">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#interpreting-pycuda-errors">Interpreting PyCUDA errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#trace-pycuda-slowdown-via-looking-into-ptx">Trace pycuda slowdown via looking into ptx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#pycuda-interop-with-cython-c-code">PyCUDA Interop With Cython C code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#pycuda-interop-with-boost-python-code">PyCUDA Interop with Boost-Python code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#garbage-collection">Garbage Collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#passing-numpy-structured-array-to-pycuda">Passing Numpy Structured Array to PyCUDA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pycuda_bash/#sources">Sources</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="pycuda_bash/#tags">Tags</a></li>
 </ul>
@@ -205,6 +219,26 @@
 <li class="toctree-l2"><a class="reference internal" href="pycuda_pyopengl_interop/interop_nvidia_examples/">NVIDIA Interop Examples</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="pycuda_memory/">PyCUDA Memory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#observations">Observations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pycuda_memory/#gpu-memory-cleanup-issue">GPU Memory Cleanup Issue ?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#freeing-device-memory">Freeing Device Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#pagelocked-aka-pinned-memory-device-mapped-memory">Pagelocked (aka pinned) memory, Device mapped memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#pagelocked-or-pinned-host-memory">pagelocked or pinned host memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#cumemhostalloc-cuda-host-memory-allocation">cuMemHostAlloc : CUDA Host Memory Allocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#cuctxcreate">cuCtxCreate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#cu-ctx-map-host">CU_CTX_MAP_HOST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#chroma-context-creation">chroma context creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#g4daechroma-g4daeview-daechromacontext">g4daechroma/g4daeview DAEChromaContext</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#pycuda-context-creation">pycuda context creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#mapped-empty">mapped_empty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#memory-pools">Memory Pools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#ga-to-gpu">ga.to_gpu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pycuda_memory/#to-float3-to-uint3">to_float3 to_uint3</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="sidebar">
@@ -230,7 +264,7 @@
           <a href="pycuda_bash/" title="PYCUDA"
              >next</a> |</li>
         <li class="right" >
-          <a href="../cuda/cuda_context_cleanup/" title="CUDA Context Cleanup"
+          <a href="../cuda/cuda_gpu_comparisons/" title="CUDA GPU Comparisons"
              >previous</a> |</li>
     <li><a href="/tracs/env/timeline">env</a> &raquo;</li>
     

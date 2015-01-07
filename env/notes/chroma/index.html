@@ -27,7 +27,7 @@
     <script type="text/javascript" src="../_static/highstock/highstock.js"></script>
     <script type="text/javascript" src="../_static/highstock/modules/exporting.js"></script>
     <link rel="top" title="Env  documentation" href="../" />
-    <link rel="next" title="Chroma Issues" href="chroma_issues/" />
+    <link rel="next" title="G4DAEChroma" href="G4DAEChroma/" />
     <link rel="prev" title="stepping" href="../muon_simulation/profiling/base/stepping/" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
           <a href="../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="chroma_issues/" title="Chroma Issues"
+          <a href="G4DAEChroma/" title="G4DAEChroma"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../muon_simulation/profiling/base/stepping/" title="stepping"
@@ -104,7 +104,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../geant4/">geant4</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../muon_simulation/">muon_simulation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">chroma</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="G4DAEChroma/">G4DAEChroma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_issues/">Chroma Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_intersection/">Chroma Intersection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma/">CHROMA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_chroma_works/">How Chroma Works ?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="development/">Chroma Development</a></li>
@@ -129,6 +131,7 @@
 <li class="toctree-l2"><a class="reference internal" href="chroma_cuda_freeze/">Chroma CUDA Freeze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_cuda/">Chroma CUDA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_visualisation/">Chroma Visualisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="photon_mapping/">Photon Mapping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geant4_background/">Geant4 Background</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cuda_background/">Cuda Threads and Blocks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bvh_background/">Bounding Volume Hierarchy (BVH)</a></li>
@@ -136,6 +139,8 @@
 <li class="toctree-l2"><a class="reference internal" href="chroma_install/">install issues</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_tests/">tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ChromaZMQRootTest/">ChromaZMQRootTest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_curand/">Chroma Use Of CURand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_reemission/">Chroma Reemission</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../llvm/">llvm</a></li>
@@ -159,6 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../presentation/">Muon Simulation Presentation</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -170,8 +176,8 @@
   <p class="topless"><a href="../muon_simulation/profiling/base/stepping/"
                         title="previous chapter">stepping</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="chroma_issues/"
-                        title="next chapter">Chroma Issues</a></p>
+  <p class="topless"><a href="G4DAEChroma/"
+                        title="next chapter">G4DAEChroma</a></p>
         </div>
       </div>
 
@@ -184,6 +190,61 @@
 <h1>chroma<a class="headerlink" href="#chroma" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="G4DAEChroma/">G4DAEChroma</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/">G4DAEChroma</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#objective">Objective</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#recent-changes">Recent Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#todo-test-on-workstation-gpu">TODO : Test on Workstation GPU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#current-approach-aiming-at">Current Approach Aiming at</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#ultimate-photon-list-compression-approach">Ultimate photon list compression approach</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#transform-cache-problem">Transform cache problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#geometry-consistency-between-gpu-and-memory-trees">Geometry Consistency between GPU and MEMORY trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#appropriate-identifiers">Appropriate identifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#generalization-of-pmt-identifier-handling">Generalization of PMT Identifier handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#incorporate-idmap-handling-into-g4daechroma-g4daegeometry">Incorporate IDMAP Handling into G4DAEChroma/G4DAEGeometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#usage-stages">Usage Stages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#beginofrunaction">BeginOfRunAction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#stackaction-classifynewtrack-or-customized-processes">StackAction::ClassifyNewTrack OR customized Processes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#stackaction-newstage">StackAction::NewStage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#how-to-organize-code">How to organize code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#mocknuwa-code-development">MockNuWa code development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#real-nuwa-hookup-for-machinery-test">Real NuWa hookup for machinery test</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#csa-chromastackaction">csa : ChromaStackAction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#export">export-</a></li>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#gigarunactionbase">GiGaRunActionBase</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#gigarunactionexport">GiGaRunActionExport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#initialize-in-runaction">Initialize in RunAction?</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#looking-for-hooks">Looking for hooks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#issues">Issues</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#development-cycle-too-slow">Development Cycle too slow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#gpu-hit-handling-sensdet">GPU Hit handling : SensDet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#accessing-sd">Accessing SD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#detector-specific-code">Detector Specific Code</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/#trace-channel-id-pmtid-from-cuda-kernel-backwards">Trace channel_id/PmtId from CUDA kernel backwards</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/">G4DAEChroma Implementation Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#umbrella">Umbrella</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#photon-transport-infrastructure">Photon transport infrastructure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#photon-lists">Photon lists</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#config-and-control-infrastructure">Config and control Infrastructure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#geometry">Geometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#hits">Hits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#daya-bay-specializations-from-detsimchroma">Daya Bay specializations from DetSimChroma</a></li>
+<li class="toctree-l3"><a class="reference internal" href="G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/#g4daechroma-config-and-initialization">G4DAEChroma Config and Initialization</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="chroma_issues/">Chroma Issues</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="chroma_issues/#executive-summaries-only">EXECUTIVE SUMMARIES ONLY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_issues/#chroma-cuda-instability-gpu-panics">Chroma CUDA Instability, GPU Panics</a></li>
@@ -191,7 +252,20 @@
 <li class="toctree-l2"><a class="reference internal" href="chroma_issues/#chroma-surface-model-mismatch-g4logicalboundarysurface">Chroma Surface model mismatch G4LogicalBoundarySurface</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="chroma_intersection/">Chroma Intersection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chroma_intersection/#box-intersection-with-axis-aligned-photons">Box intersection with axis aligned photons</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_intersection/#cuda-float-operations-ieee-754">CUDA float operations IEEE 754</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_intersection/#intersect-mesh">intersect_mesh</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="chroma/">CHROMA</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chroma/#installation-overview">Installation Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="chroma/#dependencies-install-overview">Dependencies Install Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma/#important">IMPORTANT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma/#chroma-deps-server">chroma deps server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma/#d-modify-chroma-geant4-build-to-add-gdml-persistency">D: modify chroma geant4 build to add GDML/persistency</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="chroma/#chroma-dependencies">Chroma Dependencies</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="chroma/#osx-10-9-1-mavericks">OSX 10.9.1 Mavericks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="chroma/#common">Common</a></li>
@@ -326,6 +400,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="chroma_geometry/">Chroma Geometry Source Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chroma_geometry/#gpu-memory-usage-of-chroma-geometry">GPU memory usage of chroma geometry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_geometry/#where-is-geometry-populated">where is geometry populated</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_geometry/#chroma-cuda-geometry-types-h">chroma/cuda/geometry_types.h</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_geometry/#chroma-gpu-geometry-py">chroma/gpu/geometry.py</a><ul>
@@ -384,6 +459,26 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="chroma_detector/">Chroma Modeling of Sensitive Detectors</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="chroma_detector/#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_detector/#gpu-hit-formation">GPU hit formation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#cutdown-cpl-to-just-the-hits">cutdown CPL to just the hits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#chromamanager-singleton">ChromaManager singleton</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#g4vsensitivedetector">G4VSensitiveDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_detector/#correspondence-between-the-collada-boundgeom-matrix-and-g4-toptransform">correspondence between the COLLADA <cite>boundgeom.matrix</cite> and G4 TopTransform</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#volume-0">volume 0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#volume-1">volume 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#last-volume">last volume</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#all-volumes-compared">all volumes compared</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#geant4-transforms">geant4 transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#pycollada-boundgeom-nodes-matrix">pycollada boundgeom nodes matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#processhits-hit-formation">ProcessHits Hit formation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_detector/#adding-detection-surfaces">Adding Detection Surfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#using-a-surface-per-pmt-exceeds-a-limit">Using a surface per-PMT exceeds a limit</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_detector/#questions">Questions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_detector/#chroma-geometry-py">chroma/geometry.py</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="chroma_detector/#detector-material-not-used">detector_material not used ?</a></li>
@@ -396,7 +491,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_detector/#chroma-gpu-detector-py">chroma/gpu/detector.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chroma_detector/#chroma-gpu-daq-py">chroma/gpu/daq.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_detector/#chroma-gpu-daq-py">chroma/gpu/daq.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="chroma_detector/#run-daq">run_daq</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="chroma_detector/#surface-detect">SURFACE_DETECT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_detector/#chroma-cuda-photon-h">chroma/cuda/photon.h</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chroma_detector/#chroma-cuda-daq-cu">chroma/cuda/daq.cu</a></li>
 </ul>
@@ -509,6 +608,12 @@
 <li class="toctree-l3"><a class="reference internal" href="chroma_visualisation/#opencl-opengl-interop">OpenCL OpenGL Interop</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="photon_mapping/">Photon Mapping</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="photon_mapping/#accelerated-stochastic-progressive-photon-mapping-on-gpu">Accelerated Stochastic Progressive Photon Mapping On GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="photon_mapping/#opposite-renderer">Opposite Renderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="photon_mapping/#mnrt">MNRT</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="geant4_background/">Geant4 Background</a><ul>
@@ -664,6 +769,11 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="chroma_curand/">Chroma Use Of CURand</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chroma_curand/#init-rng">init_rng</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chroma_reemission/">Chroma Reemission</a></li>
 </ul>
 </div>
 <div class="sidebar">
@@ -686,7 +796,7 @@
           <a href="../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="chroma_issues/" title="Chroma Issues"
+          <a href="G4DAEChroma/" title="G4DAEChroma"
              >next</a> |</li>
         <li class="right" >
           <a href="../muon_simulation/profiling/base/stepping/" title="stepping"

@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../../_static/highstock/modules/exporting.js"></script>
     <link rel="top" title="Env  documentation" href="../../" />
     <link rel="up" title="nuwa" href="../" />
-    <link rel="next" title="DetSim GiGa Geant4 Handoff" href="detsim_giga_geant4_handoff/" />
+    <link rel="next" title="DetSimChroma" href="detsim_dschroma/" />
     <link rel="prev" title="NuWa on Mavericks" href="../dybinst_mavericks/" /> 
   </head>
   <body>
@@ -42,7 +42,7 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="detsim_giga_geant4_handoff/" title="DetSim GiGa Geant4 Handoff"
+          <a href="detsim_dschroma/" title="DetSimChroma"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../dybinst_mavericks/" title="NuWa on Mavericks"
@@ -120,6 +120,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../">nuwa</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../dybinst_mavericks/">NuWa on Mavericks</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="">detsim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eventdisplay/">eventdisplay</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../nuwa_cmt_debugging/">NuWa CMT Debugging</a></li>
 </ul>
 </li>
@@ -132,6 +133,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../presentation/">Muon Simulation Presentation</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -143,8 +145,8 @@
   <p class="topless"><a href="../dybinst_mavericks/"
                         title="previous chapter">NuWa on Mavericks</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="detsim_giga_geant4_handoff/"
-                        title="next chapter">DetSim GiGa Geant4 Handoff</a></p>
+  <p class="topless"><a href="detsim_dschroma/"
+                        title="next chapter">DetSimChroma</a></p>
         </div>
       </div>
 
@@ -157,6 +159,19 @@
 <h1>detsim<a class="headerlink" href="#detsim" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="detsim_dschroma/">DetSimChroma</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detsim_dschroma/#dschromarunaction">DsChromaRunAction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="detsim_dschroma/#dschromarunaction-properties">DsChromaRunAction properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_dschroma/#dschromarunaction-beginofrunaction">DsChromaRunAction::BeginOfRunAction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_dschroma/#dschromastackaction">DsChromaStackAction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detsim_monitoring/">DetSim Monitoring</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detsim_monitoring/#dschromaeventaction">DsChromaEventAction</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="detsim_giga_geant4_handoff/">DetSim GiGa Geant4 Handoff</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="detsim_giga_geant4_handoff/#identity-heist-approach-is-becoming-clearer">Identity Heist Approach is becoming clearer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="detsim_giga_geant4_handoff/#how-to-get-idmap-through-to-chroma">How to get IDMAP through to Chroma ?</a><ul>
@@ -188,6 +203,7 @@
 <li class="toctree-l3"><a class="reference internal" href="detsim_dspmtsensdet/#questions">Questions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="detsim_dspmtsensdet/#testing-gpu-hit-formation">Testing GPU Hit Formation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="detsim_dspmtsensdet/#first-try">First Try</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_dspmtsensdet/#factor-for-clarity">Factor for clarity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="detsim_dspmtsensdet/#where-does-g4-call-processhits">Where does G4 call ProcessHits ?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="detsim_dspmtsensdet/#g4vsensitivedetector">G4VSensitiveDetector</a></li>
 </ul>
@@ -325,6 +341,45 @@
 <li class="toctree-l2"><a class="reference internal" href="geant4_touchable/#g4touchablehistory-to-detectorelement">G4TouchableHistory to DetectorElement</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="detsim_check_hits/">DetSim Check Hits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detsim_check_hits/#where-do-the-hits-go-next">Where do the hits go next ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_check_hits/#dspullevent">DsPullEvent</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detsim_hits/">Detsim Hits Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/">DetSim Parallel Cerenkov and Scintillation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#cerenkov-refs">Cerenkov Refs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#rejection-sampling">Rejection Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#check-generation-consistency">Check Generation Consistency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#revisit-with-new-type-names">Revisit With New Type Names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#count-checking">Count Checking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#cerenkov">Cerenkov</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#tee-up-the-arrays">tee up the arrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#wavelength">wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#time">time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#xyz-pos-dir-pol">xyz pos,dir,pol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#investigate-cerenkov-wavelength">investigate cerenkov wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#cerenkov-review">cerenkov review</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#scintillation">Scintillation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#id1">tee up the arrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#id2">wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#closer-look-at-scintillation-wavelength">closer look at scintillation wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#investigate-g4-scintillation-wavelength">investigate G4 scintillation wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#compare-cdfs">compare cdfs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#test-with-energywise-cdf">test with energywise cdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#id3">time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#id4">xyz pos,dir,pol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#scintillation-review">scintillation review</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#properties">Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#lookups-for-cerenkov">Lookups for Cerenkov</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#material-properties-for-scintillation-cerenkov-gpu-generation">Material Properties for Scintillation/Cerenkov GPU generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detsim_parallel_cerenkov_scintillation/#wavelength-ranges-from-g4-to-chroma">Wavelength Ranges from G4 to Chroma</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="sidebar">
@@ -347,7 +402,7 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="detsim_giga_geant4_handoff/" title="DetSim GiGa Geant4 Handoff"
+          <a href="detsim_dschroma/" title="DetSimChroma"
              >next</a> |</li>
         <li class="right" >
           <a href="../dybinst_mavericks/" title="NuWa on Mavericks"

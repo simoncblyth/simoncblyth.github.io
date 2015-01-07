@@ -106,7 +106,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geant4/">geant4</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../muon_simulation/">muon_simulation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">chroma</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../G4DAEChroma/">G4DAEChroma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_issues/">Chroma Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chroma_intersection/">Chroma Intersection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma/">CHROMA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_chroma_works/">How Chroma Works ?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../development/">Chroma Development</a></li>
@@ -118,6 +120,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../chroma_cuda_photon/">Chroma CUDA Photon handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_collada/">Chroma COLLADA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_pycuda/">Getting to know how Chroma uses PyCUDA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chroma_pyublas/">Chroma Use of PyUblas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_geometry/">Chroma Geometry Source Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_materials/">Chroma Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../chroma_propagate/">Photon Propagation</a></li>
@@ -186,21 +189,45 @@
 <div class="contents local topic" id="contents">
 <ul class="simple">
 <li><a class="reference internal" href="#overview" id="id1">Overview</a></li>
-<li><a class="reference internal" href="#questions" id="id2">Questions</a></li>
-<li><a class="reference internal" href="#chroma-geometry-py" id="id3">chroma/geometry.py</a><ul>
-<li><a class="reference internal" href="#detector-material-not-used" id="id4">detector_material not used ?</a></li>
-<li><a class="reference internal" href="#detsim-does-efficiency-lookup-on-bialkali-materialof-the-cathode" id="id5">detsim does EFFICIENCY lookup on Bialkali materialof the cathode</a></li>
-<li><a class="reference internal" href="#cathode-example" id="id6">cathode example</a></li>
+<li><a class="reference internal" href="#gpu-hit-formation" id="id2">GPU hit formation</a><ul>
+<li><a class="reference internal" href="#cutdown-cpl-to-just-the-hits" id="id3">cutdown CPL to just the hits</a></li>
+<li><a class="reference internal" href="#chromamanager-singleton" id="id4">ChromaManager singleton</a></li>
+<li><a class="reference internal" href="#g4vsensitivedetector" id="id5">G4VSensitiveDetector</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#chroma-detector-py" id="id7">chroma/detector.py</a><ul>
-<li><a class="reference internal" href="#add-solid-add-pmt" id="id8">add_solid/add_pmt</a></li>
+<li><a class="reference internal" href="#correspondence-between-the-collada-boundgeom-matrix-and-g4-toptransform" id="id6">correspondence between the COLLADA <cite>boundgeom.matrix</cite> and G4 TopTransform</a><ul>
+<li><a class="reference internal" href="#volume-0" id="id7">volume 0</a></li>
+<li><a class="reference internal" href="#volume-1" id="id8">volume 1</a></li>
+<li><a class="reference internal" href="#last-volume" id="id9">last volume</a></li>
+<li><a class="reference internal" href="#all-volumes-compared" id="id10">all volumes compared</a></li>
+<li><a class="reference internal" href="#geant4-transforms" id="id11">geant4 transforms</a></li>
+<li><a class="reference internal" href="#pycollada-boundgeom-nodes-matrix" id="id12">pycollada boundgeom nodes matrix</a></li>
+<li><a class="reference internal" href="#processhits-hit-formation" id="id13">ProcessHits Hit formation</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#chroma-gpu-detector-py" id="id9">chroma/gpu/detector.py</a></li>
-<li><a class="reference internal" href="#chroma-gpu-daq-py" id="id10">chroma/gpu/daq.py</a></li>
-<li><a class="reference internal" href="#chroma-cuda-photon-h" id="id11">chroma/cuda/photon.h</a></li>
-<li><a class="reference internal" href="#chroma-cuda-daq-cu" id="id12">chroma/cuda/daq.cu</a></li>
+<li><a class="reference internal" href="#adding-detection-surfaces" id="id14">Adding Detection Surfaces</a><ul>
+<li><a class="reference internal" href="#using-a-surface-per-pmt-exceeds-a-limit" id="id15">Using a surface per-PMT exceeds a limit</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#questions" id="id16">Questions</a></li>
+<li><a class="reference internal" href="#chroma-geometry-py" id="id17">chroma/geometry.py</a><ul>
+<li><a class="reference internal" href="#detector-material-not-used" id="id18">detector_material not used ?</a></li>
+<li><a class="reference internal" href="#detsim-does-efficiency-lookup-on-bialkali-materialof-the-cathode" id="id19">detsim does EFFICIENCY lookup on Bialkali materialof the cathode</a></li>
+<li><a class="reference internal" href="#cathode-example" id="id20">cathode example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chroma-detector-py" id="id21">chroma/detector.py</a><ul>
+<li><a class="reference internal" href="#add-solid-add-pmt" id="id22">add_solid/add_pmt</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chroma-gpu-detector-py" id="id23">chroma/gpu/detector.py</a></li>
+<li><a class="reference internal" href="#chroma-gpu-daq-py" id="id24">chroma/gpu/daq.py</a><ul>
+<li><a class="reference internal" href="#run-daq" id="id25">run_daq</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#surface-detect" id="id26">SURFACE_DETECT</a></li>
+<li><a class="reference internal" href="#chroma-cuda-photon-h" id="id27">chroma/cuda/photon.h</a></li>
+<li><a class="reference internal" href="#chroma-cuda-daq-cu" id="id28">chroma/cuda/daq.cu</a></li>
 </ul>
 </div>
 <div class="section" id="overview">
@@ -211,16 +238,441 @@
 <li>Chroma, <strong>Surface.detect</strong> property</li>
 </ul>
 </li>
+<li>To raise SURFACE_DETECT in Chroma need to make PMT Cathods
+into surfaces with <strong>Surface.detect</strong> property corresponding to
+the QE (matching what ProcessHits does)</li>
 </ol>
 </div>
+<div class="section" id="gpu-hit-formation">
+<h2><a class="toc-backref" href="#id2">GPU hit formation</a><a class="headerlink" href="#gpu-hit-formation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cutdown-cpl-to-just-the-hits">
+<h3><a class="toc-backref" href="#id3">cutdown CPL to just the hits</a><a class="headerlink" href="#cutdown-cpl-to-just-the-hits" title="Permalink to this headline">¶</a></h3>
+<p>Non-trivial, with GPU processing to make such selections.
+Study chroma slicing.</p>
+</div>
+<div class="section" id="chromamanager-singleton">
+<h3><a class="toc-backref" href="#id4">ChromaManager singleton</a><a class="headerlink" href="#chromamanager-singleton" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>develop as part of pkg NuWa-trunk/dybgaudi/Utilities/Chroma
+(probably rename to G4DAEChroma)</li>
+<li>where to construct the transform cache ?  need access from within
+a StackAction (or other G4 level class) so a G4 singleton manager
+seems like the most natural</li>
+</ul>
+<p>Runtime interface to Chroma GPU propagation, send photons get hits in reply
+(or at least hit data with which to form them).</p>
+<p>Grab everything possible from the StackAction into <em>ChromaManager</em> to
+avoid duplication.
+Initially considered naming <em>G4DAEChroma</em>
+but that could be confusing as this will clearly
+never be able to be sent upstream like the <em>G4DAE</em> exporter.</p>
+<ul class="simple">
+<li>As considering to move photon collection into the processes, to avoid stack addition/deletion overhead.</li>
+<li>also it would be cleaner and more reusable to keep the <strong>simulation</strong> aspect
+distinct from <strong>analysis</strong> aspects</li>
+</ul>
+<p>Responsible for</p>
+<ul class="simple">
+<li>batching configuration</li>
+<li>photon collection,</li>
+<li>serialization, sending to GPU,</li>
+<li>getting reply, deserialization, forming hits</li>
+<li>holding the transform cache</li>
+</ul>
+<p>Holding transform cache avoids transporting
+both global and local coordinates for pos/pol/mon
+in the transport class for millions of photons (or thousands? of hits).</p>
+<ul class="simple">
+<li>will need a volume index, as well as channel_id</li>
+</ul>
+</div>
+<div class="section" id="g4vsensitivedetector">
+<h3><a class="toc-backref" href="#id5">G4VSensitiveDetector</a><a class="headerlink" href="#g4vsensitivedetector" title="Permalink to this headline">¶</a></h3>
+<p>I&#8217;m killing all generated OP from G4 point, does that allow
+me other optimizations.</p>
+<ul class="simple">
+<li>How can I hook into the standard hit collection machinery ? G4HCOfThisEvent</li>
+<li><a class="reference external" href="http://www-geant4.kek.jp/g4users/g4tut07/docs/SensitiveDetector.pdf">http://www-geant4.kek.jp/g4users/g4tut07/docs/SensitiveDetector.pdf</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="correspondence-between-the-collada-boundgeom-matrix-and-g4-toptransform">
+<h2><a class="toc-backref" href="#id6">correspondence between the COLLADA <cite>boundgeom.matrix</cite> and G4 TopTransform</a><a class="headerlink" href="#correspondence-between-the-collada-boundgeom-matrix-and-g4-toptransform" title="Permalink to this headline">¶</a></h2>
+<p>For forming Hits on GPU need to do local coordinate transform
+somewhere as ProcessHits provides the local coordinate of hits wrt to the
+sensitive volume (PMT Cathode).</p>
+<p>Added transform dumping to gausstools <cite>GiGaRunActionExport::WriteIdMap</cite>
+and compare with boundgeom matrices of nodes.</p>
+<div class="section" id="volume-0">
+<h3><a class="toc-backref" href="#id7">volume 0</a><a class="headerlink" href="#volume-0" title="Permalink to this headline">¶</a></h3>
+<p>/data1/env/local/env/geant4/geometry/export/DayaBay_MX_20141013-1542/g4_00.idmap:</p>
+<div class="highlight-python"><pre>.1 # GiGaRunActionExport::WriteIdMap fields: index,pmtid,pmtid(hex),pvname  npv:12230
+ 2 0 0 0  (0,0,0)
+ 3    [ (           1             0             0)
+ 4      (           0             1             0)
+ 5      (           0             0             1) ]
+ 6  Universe</pre>
+</div>
+</div>
+<div class="section" id="volume-1">
+<h3><a class="toc-backref" href="#id8">volume 1</a><a class="headerlink" href="#volume-1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>.7 1 0 0  (664494,-449556,2110)
+ 8    [ (   -0.543174      -0.83962             0)
+ 9      (     0.83962     -0.543174             0)
+10      (           0             0             1) ]
+11  /dd/Structure/Sites/db-rock</pre>
+</div>
+<div class="highlight-python"><pre>In [13]: np.set_printoptions(precision=5, suppress=True)
+
+In [27]: m1 = DAENode.get("1").boundgeom.matrix
+2014-10-13 16:11:40,609 env.geant4.geometry.collada.g4daenode:686 INFO     arg 1 =&gt; indices [1] =&gt; node   __dd__Structure__Sites__db-rock0xc15d358.0             __dd__Materials__Rock0xc0300c8
+
+In [35]: m1
+Out[35]:
+array([[     -0.54317,      -0.83962,       0.     ,  -16520.     ],
+       [      0.83962,      -0.54317,       0.     , -802110.     ],
+       [      0.     ,       0.     ,       1.     ,   -2110.     ],
+       [      0.     ,       0.     ,       0.     ,       1.     ]], dtype=float
+
+
+In [28]: invert_homogenous(m1)
+Out[28]:
+array([[     -0.54317,       0.83962,       0.     ,  664494.35857],
+       [     -0.83962,      -0.54317,       0.     , -449555.84222],
+       [      0.     ,       0.     ,       1.     ,    2110.     ],
+       [      0.     ,       0.     ,       0.     ,       1.     ]])</pre>
+</div>
+<ul class="simple">
+<li>some correspondence but there is a definition difference to clear up</li>
+</ul>
+</div>
+<div class="section" id="last-volume">
+<h3><a class="toc-backref" href="#id9">last volume</a><a class="headerlink" href="#last-volume" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>61147 12229 0 0  (664494,-449556,12410)
+61148    [ (   -0.543174      -0.83962             0)
+61149      (     0.83962     -0.543174             0)
+61150      (           0             0             1) ]
+61151  /dd/Geometry/Sites/lvNearHallBot#pvNearHallRadSlabs#pvNearHallRadSlab9
+
+
+In [16]: m = DAENode.get("12229").boundgeom.matrix
+2014-10-13 15:57:01,308 env.geant4.geometry.collada.g4daenode:686 INFO     arg 12229 =&gt; indices [12229] =&gt; node   __dd__Geometry__Sites__lvNearHallBot--pvNearHallRadSlabs--pvNearHallRadSlab90xc15cf08.0             __dd__Materials__RadRock0xcd2f508
+
+In [17]: m
+Out[17]:
+array([[     -0.54317,      -0.83962,       0.     ,  -16520.     ],
+       [      0.83962,      -0.54317,       0.     , -802110.     ],
+       [      0.     ,       0.     ,       1.     ,  -12410.     ],
+       [      0.     ,       0.     ,       0.     ,       1.     ]], dtype=float32)
+
+In [25]: from env.geant4.geometry.collada.g4daeview.daeutil import invert_homogenous
+
+In [26]: invert_homogenous( m )    # translation result matches, rotation is transposed
+Out[26]:
+array([[     -0.54317,       0.83962,       0.     ,  664494.35857],
+       [     -0.83962,      -0.54317,       0.     , -449555.84222],
+       [      0.     ,       0.     ,       1.     ,   12410.     ],
+       [      0.     ,       0.     ,       0.     ,       1.     ]])</pre>
+</div>
+</div>
+<div class="section" id="all-volumes-compared">
+<h3><a class="toc-backref" href="#id10">all volumes compared</a><a class="headerlink" href="#all-volumes-compared" title="Permalink to this headline">¶</a></h3>
+<p>Loosening tolerances succeeds to get all volumes to match.</p>
+<ul class="simple">
+<li><cite>env/geant4/geometry/collada/check_volume_transforms.py</cite></li>
+</ul>
+</div>
+<div class="section" id="geant4-transforms">
+<h3><a class="toc-backref" href="#id11">geant4 transforms</a><a class="headerlink" href="#geant4-transforms" title="Permalink to this headline">¶</a></h3>
+<p><cite>source/geometry/management/include/G4AffineTransform.hh</cite>:</p>
+<div class="highlight-python"><pre>.69 class G4AffineTransform
+ 70 {
+ 71
+ 72 public:
+ 73
+ 74   G4AffineTransform();
+ 75
+ 76 public: // with description
+ 77
+ 78   G4AffineTransform(const G4ThreeVector &amp;tlate);
+ 79     // Translation only: under t'form translate point at origin by tlate
+ 80
+ 81   G4AffineTransform(const G4RotationMatrix &amp;rot);
+ 82     // Rotation only: under t'form rotate by rot
+ 83
+ 84   G4AffineTransform(const G4RotationMatrix &amp;rot,
+ 85                     const G4ThreeVector &amp;tlate);
+ 86     // Under t'form: rotate by rot then translate by tlate
+ 87
+ 88   G4AffineTransform(const G4RotationMatrix *rot,
+ 89                     const G4ThreeVector &amp;tlate);
+ 90     // Optionally rotate by *rot then translate by tlate - rot may be null
+ ..
+113   G4ThreeVector TransformPoint(const G4ThreeVector &amp;vec) const;
+114     // Transform the specified point: returns vec*rot+tlate
+115
+116   G4ThreeVector TransformAxis(const G4ThreeVector &amp;axis) const;
+117     // Transform the specified axis: returns
+118
+119   void ApplyPointTransform(G4ThreeVector &amp;vec) const;
+120     // Transform the specified point (in place): sets vec=vec*rot+tlate
+121
+122   void ApplyAxisTransform(G4ThreeVector &amp;axis) const;
+123     // Transform the specified axis (in place): sets axis=axis*rot;</pre>
+</div>
+</div>
+<div class="section" id="pycollada-boundgeom-nodes-matrix">
+<h3><a class="toc-backref" href="#id12">pycollada boundgeom nodes matrix</a><a class="headerlink" href="#pycollada-boundgeom-nodes-matrix" title="Permalink to this headline">¶</a></h3>
+<p>Binding is done by <cite>g4daenode.py</cite> based on the <strong>full</strong> geometry of the COLLADA export.
+Partial exports at C++ level would result in binding (ie coordinate system)
+based on a different <strong>Universe</strong>.</p>
+<p>Every bound node has a 4x4 matrix associated:</p>
+<div class="highlight-python"><pre>delta:~ blyth$ g4daenode.sh -i
+2014-10-13 14:42:13,194 env.geant4.geometry.collada.g4daenode:2344 INFO     /Users/blyth/env/bin/g4daenode.py
+2014-10-13 14:42:13,194 env.geant4.geometry.collada.g4daenode:2289 INFO     Using pvar DAE_NAME_DYB to resolve path : /usr/local/env/geant4/geometry/export/DayaBay_VGDX_20140414-1300/g4_00.dae
+2014-10-13 14:42:13,261 env.geant4.geometry.collada.idmap:165 INFO     found 685 unique ids
+...
+
+In [1]: DAENode.get("0").boundgeom.matrix
+2014-10-13 14:42:28,560 env.geant4.geometry.collada.g4daenode:686 INFO     arg 0 =&gt; indices [0] =&gt; node   top.0             __dd__Materials__Vacuum0xbf9fcc0
+Out[1]:
+array([[ 1.,  0.,  0.,  0.],
+       [ 0.,  1.,  0.,  0.],
+       [ 0.,  0.,  1.,  0.],
+       [ 0.,  0.,  0.,  1.]], dtype=float32)
+
+
+In [3]: DAENode.get("1000").boundgeom.matrix
+2014-10-13 14:42:39,694 env.geant4.geometry.collada.g4daenode:686 INFO     arg 1000 =&gt; indices [1000] =&gt; node   __dd__Geometry__RPC__lvRPCGasgap23--pvStrip23Array--pvStrip23ArrayOne..6--pvStrip23Unit0xc128768.46             __dd__Materials__MixGas0xc21d930
+Out[3]:
+array([[ -5.39289117e-01,  -8.41108799e-01,  -4.12638858e-02,
+         -1.99534609e+04],
+       [  8.42120171e-01,  -5.38641453e-01,  -2.64251661e-02,
+         -7.99555000e+05],
+       [  0.00000000e+00,  -4.89999987e-02,   9.98799026e-01,
+         -1.36956641e+03],
+       [  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,
+          1.00000000e+00]], dtype=float32)</pre>
+</div>
+<p>Raw unbound COLLADA matrix elements are written by <cite>G4DAEWriteStructure::TraverseVolumeTree</cite>:</p>
+<div class="highlight-python"><pre>G4Transform3D daughterR;
+
+daughterR = TraverseVolumeTree(physvol-&gt;GetLogicalVolume(),depth+1);
+
+G4RotationMatrix rot, invrot;
+if (physvol-&gt;GetFrameRotation() != 0)
+{
+   rot = *(physvol-&gt;GetFrameRotation());
+   invrot = rot.inverse();
+}
+
+// G4Transform3D P(rot,physvol-&gt;GetObjectTranslation());  GDML does this : not inverting the rotation portion
+G4Transform3D P(invrot,physvol-&gt;GetObjectTranslation());
+
+PhysvolWrite(nodeElement,physvol,invR*P*daughterR,ModuleName);</pre>
+</div>
+<p>The unbound matrices just provide the position of volume relative to parent.  When
+binding is done by the <strong>objects</strong> call in  <cite>g4daenode.py</cite>:</p>
+<div class="highlight-python"><pre>564         dae = collada.Collada(path)
+565         log.debug("pycollada parse completed ")
+566         boundgeom = list(dae.scene.objects('geometry'))
+567         top = dae.scene.nodes[0]
+568         log.debug("pycollada binding completed, found %s  " % len(boundgeom))</pre>
+</div>
+<p>the node tree heirarchy of matrices are multiplied to arrive at the
+scene graph bound matrix.</p>
+</div>
+<div class="section" id="processhits-hit-formation">
+<h3><a class="toc-backref" href="#id13">ProcessHits Hit formation</a><a class="headerlink" href="#processhits-hit-formation" title="Permalink to this headline">¶</a></h3>
+<p><cite>NuWa-trunk/dybgaudi/Simulation/DetSim/src/DsPmtSensDet.cc</cite>:</p>
+<div class="highlight-python"><pre>333     const G4TouchableHistory* hist =
+334         dynamic_cast&lt;const G4TouchableHistory*&gt;(preStepPoint-&gt;GetTouchable());
+...
+340     const DetectorElement* de = this-&gt;SensDetElem(*hist);
+341     if (!de) return false;
+342
+343     // wangzhe QE calculation starts here.
+344     int pmtid = this-&gt;SensDetId(*de);
+...
+459     DayaBay::SimPmtHit* sphit = new DayaBay::SimPmtHit();
+460
+461     // base hit
+462
+463     // Time since event created
+464     sphit-&gt;setHitTime(preStepPoint-&gt;GetGlobalTime());
+465
+466     //#include "G4NavigationHistory.hh"
+467
+468     const G4AffineTransform&amp; trans = hist-&gt;GetHistory()-&gt;GetTopTransform();
+469     const G4ThreeVector&amp; global_pos = preStepPoint-&gt;GetPosition();
+470     G4ThreeVector pos = trans.TransformPoint(global_pos);
+471     sphit-&gt;setLocalPos(pos);
+472     sphit-&gt;setSensDetId(pmtid);
+473
+474     // pmt hit
+475     // sphit-&gt;setDir(...);       // for now
+476     G4ThreeVector pol = trans.TransformAxis(track-&gt;GetPolarization());
+477     pol = pol.unit();
+478     G4ThreeVector dir = trans.TransformAxis(track-&gt;GetMomentum());
+479     dir = dir.unit();
+480     sphit-&gt;setPol(pol);
+481     sphit-&gt;setDir(dir);
+482     sphit-&gt;setWavelength(wavelength);
+483     sphit-&gt;setType(0);
+484     // G4cerr&lt;&lt;"PMT: set hit weight "&lt;&lt;weight&lt;&lt;G4endl; //gonchar
+485     sphit-&gt;setWeight(weight);</pre>
+</div>
+<div class="highlight-python"><pre>delta:geant4.10.00.p01 blyth$ find source -name '*.hh'  -exec grep -H GetTopTransform {} \;
+source/geometry/volumes/include/G4NavigationHistory.hh:  inline const G4AffineTransform&amp; GetTopTransform() const;
+
+
+
+
+90   inline const G4AffineTransform&amp; GetTopTransform() const;
+91     // Returns topmost transform.
+
+145 #if defined(WIN32)
+146   std::vector&lt;G4NavigationLevel&gt; fNavHistory;
+147 #else
+148   std::vector&lt;G4NavigationLevel,
+149               G4EnhancedVecAllocator&lt;G4NavigationLevel&gt; &gt; fNavHistory;
+150     // The geometrical tree; uses specialized allocator to optimize memory
+151     // handling, reduce possible fragmentation and use of malloc in MT mode
+152 #endif
+153
+154   G4int fStackDepth;
+155     // Depth of stack: effectively depth in geometrical tree
+
+
+source/geometry/volumes/include/G4NavigationHistory.icc
+
+ 98 inline
+ 99 const G4AffineTransform&amp; G4NavigationHistory::GetTopTransform() const
+100 {
+101   return fNavHistory[fStackDepth].GetTransform();
+102 }
+
+
+ source/geometry/volumes/include/G4NavigationLevel.hh
+
+ 54 class G4NavigationLevel
+ 55 {
+ 56
+ 57  public:  // with description
+ 58
+ 59    G4NavigationLevel(G4VPhysicalVolume*       newPtrPhysVol,
+ 60                      const G4AffineTransform&amp; newT,
+ 61                      EVolume                  newVolTp,
+ 62                      G4int                    newRepNo= -1);
+ 63
+ 64    G4NavigationLevel(G4VPhysicalVolume*       newPtrPhysVol,
+ 65                      const G4AffineTransform&amp; levelAbove,
+ 66                      const G4AffineTransform&amp; relativeCurrent,
+ 67                      EVolume                  newVolTp,
+ 68                      G4int                    newRepNo= -1);
+ 69      // As the previous constructor, but instead of giving Transform, give
+ 70      // the AffineTransform to the level above and the current level's
+ 71      // Transform relative to that.
+ 72
+ 73    G4NavigationLevel();
+ 74    G4NavigationLevel( const G4NavigationLevel&amp; );
+ 75
+ 76    ~G4NavigationLevel();
+ 77
+ 78    G4NavigationLevel&amp; operator=(const G4NavigationLevel &amp;right);
+ 79
+ 80    inline G4VPhysicalVolume*       GetPhysicalVolume() const;
+ 81    inline const G4AffineTransform* GetTransformPtr() const ;  // New
+ 82    inline const G4AffineTransform&amp; GetTransform() const ;     // Old
+ 83
+
+ source/geometry/volumes/include/G4NavigationLevelRep.hh
+
+ 84    inline const G4AffineTransform&amp; GetTransform() const ;     // Old
+ 85
+ 86    inline EVolume            GetVolumeType() const ;
+ 87    inline G4int              GetReplicaNo() const ;
+ 88
+ ..
+ 98  private:
+ 99
+100    G4AffineTransform  sTransform;
+101      // Compounded global-&gt;local transformation (takes a point in the
+102      // global reference system to the system of the volume at this level)</pre>
+</div>
+</div>
+</div>
+<div class="section" id="adding-detection-surfaces">
+<h2><a class="toc-backref" href="#id14">Adding Detection Surfaces</a><a class="headerlink" href="#adding-detection-surfaces" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-a-surface-per-pmt-exceeds-a-limit">
+<h3><a class="toc-backref" href="#id15">Using a surface per-PMT exceeds a limit</a><a class="headerlink" href="#using-a-surface-per-pmt-exceeds-a-limit" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/env/geant4/geometry/collada/g4daeview/daedirectpropagator.py", line 133, in main
+    cpl_end = propagator.propagate(cpl_begin)
+  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/env/geant4/geometry/collada/g4daeview/daedirectpropagator.py", line 48, in propagate
+    max_steps=max_steps)
+  File "/usr/local/env/chroma_env/src/chroma/chroma/gpu/photon.py", line 145, in propagate
+    if ga.max(self.flags).get() &amp; (1 &lt;&lt; 31):
+  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/pycuda/gpuarray.py", line 1249, in f
+    krnl = get_minmax_kernel(what, a.dtype)
+  File "&lt;string&gt;", line 2, in get_minmax_kernel
+  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/pycuda/tools.py", line 404, in context_dependent_memoize
+    result = func(*args)
+  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/pycuda/reduction.py", line 393, in get_minmax_kernel
+    }, preamble="#define MY_INFINITY (1./0)")
+  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/pycuda/reduction.py", line 206, in __init__
+    preamble=preamble)
+  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/pycuda/reduction.py", line 184, in get_reduction_kernel_and_types
+    func = mod.get_function(name)
+  File "/usr/local/env/chroma_env/lib/python2.7/site-packages/pycuda/compiler.py", line 285, in get_function
+    return self.module.get_function(name)
+pycuda._driver.LaunchError: cuModuleGetFunction failed: launch failed
+PyCUDA WARNING: a clean-up operation failed (dead context maybe?)
+cuModuleUnload failed: launch failed
+PyCUDA WARNING: a clean-up operation failed (dead context maybe?)
+cuMemFree failed: launch failed
+PyCUDA WARNING: a clean-up operation failed (dead context maybe?)
+cuMemFree failed: launch failed</pre>
+</div>
+<div class="highlight-python"><pre>delta:chroma blyth$ collada_to_chroma.sh
+
+In [2]: len(cg.unique_surfaces)
+Out[2]: 714</pre>
+</div>
+<p>An obvious limitation is from chroma/gpu/geometry.py:</p>
+<div class="highlight-python"><pre>144
+145         material_codes = (((geometry.material1_index &amp; 0xff) &lt;&lt; 24) |
+146                           ((geometry.material2_index &amp; 0xff) &lt;&lt; 16) |
+147                           ((geometry.surface_index &amp; 0xff) &lt;&lt; 8)).astype(np.uint32)</pre>
+</div>
+<p>As unique identifiers are squeezed into one byte:</p>
+<div class="highlight-python"><pre>In [1]: 0xff
+Out[1]: 255</pre>
+</div>
+<div class="highlight-python"><pre>54 struct Geometry
+55 {
+56     float3 *vertices;
+57     uint3 *triangles;
+58     unsigned int *material_codes;
+59     unsigned int *colors;
+60     uint4 *primary_nodes;
+61     uint4 *extra_nodes;
+62     Material **materials;
+63     Surface **surfaces;
+64     float3 world_origin;
+65     float world_scale;
+66     int nprimary_nodes;
+67 };</pre>
+</div>
+</div>
+</div>
 <div class="section" id="questions">
-<h2><a class="toc-backref" href="#id2">Questions</a><a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id16">Questions</a><a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>How hits are handled in Chroma ?</li>
 </ol>
 </div>
 <div class="section" id="chroma-geometry-py">
-<h2><a class="toc-backref" href="#id3">chroma/geometry.py</a><a class="headerlink" href="#chroma-geometry-py" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id17">chroma/geometry.py</a><a class="headerlink" href="#chroma-geometry-py" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>103 class Solid(object):
 104     """Solid object attaches materials, surfaces, and colors to each triangle
 105     in a Mesh object."""
@@ -277,7 +729,7 @@
 264         return '&lt;Surface %s&gt;' % self.name</pre>
 </div>
 <div class="section" id="detector-material-not-used">
-<h3><a class="toc-backref" href="#id4">detector_material not used ?</a><a class="headerlink" href="#detector-material-not-used" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id18">detector_material not used ?</a><a class="headerlink" href="#detector-material-not-used" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><pre>(chroma_env)delta:chroma blyth$ find . -type f -exec grep -H detector_material {} \;
 ./chroma/detector.py:    def __init__(self, detector_material=None):
 ./chroma/detector.py:        Geometry.__init__(self, detector_material=detector_material)
@@ -291,7 +743,7 @@ as needed to get a SURFACE_DETECT ?</li>
 </ol>
 </div>
 <div class="section" id="detsim-does-efficiency-lookup-on-bialkali-materialof-the-cathode">
-<h3><a class="toc-backref" href="#id5">detsim does EFFICIENCY lookup on Bialkali materialof the cathode</a><a class="headerlink" href="#detsim-does-efficiency-lookup-on-bialkali-materialof-the-cathode" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id19">detsim does EFFICIENCY lookup on Bialkali materialof the cathode</a><a class="headerlink" href="#detsim-does-efficiency-lookup-on-bialkali-materialof-the-cathode" title="Permalink to this headline">¶</a></h3>
 <p><cite>NuWa-trunk/dybgaudi/Detector/XmlDetDesc/DDDB/PMT/hemi-pmt.xml</cite>:</p>
 <div class="highlight-python"><pre>118   &lt;!-- The Photo Cathode --&gt;
 119   &lt;!-- use if limit photocathode to a face on diameter gt 167mm. --&gt;
@@ -487,7 +939,7 @@ as needed to get a SURFACE_DETECT ?</li>
 </div>
 </div>
 <div class="section" id="cathode-example">
-<h3><a class="toc-backref" href="#id6">cathode example</a><a class="headerlink" href="#cathode-example" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id20">cathode example</a><a class="headerlink" href="#cathode-example" title="Permalink to this headline">¶</a></h3>
 <p><cite>chroma/demo/optics.py</cite>:</p>
 <div class="highlight-python"><pre>26 # r7081hqe photocathode material surface
 27 # source: hamamatsu supplied datasheet for r7081hqe pmt serial number zd0062
@@ -517,7 +969,7 @@ as needed to get a SURFACE_DETECT ?</li>
 </div>
 </div>
 <div class="section" id="chroma-detector-py">
-<h2><a class="toc-backref" href="#id7">chroma/detector.py</a><a class="headerlink" href="#chroma-detector-py" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id21">chroma/detector.py</a><a class="headerlink" href="#chroma-detector-py" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>05 class Detector(Geometry):
 06     '''A Detector is a subclass of Geometry that allows some Solids
 07     to be marked as photon detectors, which we will suggestively call
@@ -556,21 +1008,12 @@ as needed to get a SURFACE_DETECT ?</li>
 40         self.charge_cdf = (np.array([0.99, 1.00]), np.array([0.0, 1.0]))</pre>
 </div>
 <div class="section" id="add-solid-add-pmt">
-<h3><a class="toc-backref" href="#id8">add_solid/add_pmt</a><a class="headerlink" href="#add-solid-add-pmt" title="Permalink to this headline">¶</a></h3>
-<p>When have a <cite>channel_id</cite> associated to a volume can use <strong>add_pmt</strong>  instead of <strong>add_solid</strong></p>
-<div class="highlight-python"><pre>42     def add_solid(self, solid, rotation=None, displacement=None):
-43         """
-44         Add the solid `solid` to the geometry. When building the final triangle
-45         mesh, `solid` will be placed by rotating it with the rotation matrix
-46         `rotation` and displacing it by the vector `displacement`.
-47         """
-48         solid_id = Geometry.add_solid(self, solid=solid, rotation=rotation,
-49                                       displacement=displacement)
-50         self.solid_id_to_channel_index.resize(solid_id+1)
-51         self.solid_id_to_channel_index[solid_id] = -1 # solid maps to no channel
-52         return solid_id
-53
-54     def add_pmt(self, pmt, rotation=None, displacement=None, channel_id=None):
+<h3><a class="toc-backref" href="#id22">add_solid/add_pmt</a><a class="headerlink" href="#add-solid-add-pmt" title="Permalink to this headline">¶</a></h3>
+<p>When have a <cite>channel_id</cite> associated to a volume  <strong>add_pmt</strong>  is used instead of <strong>add_solid</strong>.
+The idmap adds <cite>channel_id</cite> attribute to some DAENode. Which
+in geometry conversion to chroma results in use of <em>add_pmt</em> rather than <em>add_solid</em></p>
+<p>chroma.detector.add_pmt:</p>
+<div class="highlight-python"><pre>54     def add_pmt(self, pmt, rotation=None, displacement=None, channel_id=None):
 55         """Add the PMT `pmt` to the geometry. When building the final triangle
 56         mesh, `solid` will be placed by rotating it with the rotation matrix
 57         `rotation` and displacing it by the vector `displacement`, just like
@@ -594,10 +1037,7 @@ as needed to get a SURFACE_DETECT ?</li>
 75                                   'channel_index' : channel_index,
 76                                   'channel_id' : channel_id }
 77         """
-78
-79         solid_id = self.add_solid(solid=pmt, rotation=rotation,
-80                                   displacement=displacement)
-81
+..
 82         channel_index = len(self.channel_index_to_solid_id)
 83         if channel_id is None:
 84             channel_id = channel_index
@@ -612,16 +1052,17 @@ as needed to get a SURFACE_DETECT ?</li>
 93         self.channel_index_to_channel_id[channel_index] = channel_id
 94
 95         # dictionary does not need resizing
-96         self.channel_id_to_channel_index[channel_id] = channel_index
-97
-98         return { 'solid_id' : solid_id,
-99                  'channel_index' : channel_index,
-00                  'channel_id' : channel_id }</pre>
+96         self.channel_id_to_channel_index[channel_id] = channel_index</pre>
+</div>
+<p>chroma.detector.add_solid:</p>
+<div class="highlight-python"><pre>50         self.solid_id_to_channel_index.resize(solid_id+1)
+51         self.solid_id_to_channel_index[solid_id] = -1 # solid maps to no channel</pre>
 </div>
 </div>
 </div>
 <div class="section" id="chroma-gpu-detector-py">
-<h2><a class="toc-backref" href="#id9">chroma/gpu/detector.py</a><a class="headerlink" href="#chroma-gpu-detector-py" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id23">chroma/gpu/detector.py</a><a class="headerlink" href="#chroma-gpu-detector-py" title="Permalink to this headline">¶</a></h2>
+<p>To get the mapping copied to GPU need to use GPUDetector rather than GPUGeometry:</p>
 <div class="highlight-python"><pre>14 class GPUDetector(GPUGeometry):
 15     def __init__(self, detector, wavelengths=None, print_usage=False):
 16         GPUGeometry.__init__(self, detector, wavelengths=wavelengths, print_usage=False)
@@ -666,7 +1107,7 @@ This distinquishes sensitive solids (PMTs).:</p>
 </div>
 </div>
 <div class="section" id="chroma-gpu-daq-py">
-<h2><a class="toc-backref" href="#id10">chroma/gpu/daq.py</a><a class="headerlink" href="#chroma-gpu-daq-py" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id24">chroma/gpu/daq.py</a><a class="headerlink" href="#chroma-gpu-daq-py" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>60     def acquire(self, gpuphotons, rng_states, nthreads_per_block=64, max_blocks=1024, start_photon=None, nphotons=None, weight=1.0):
 61         if start_photon is None:
 62             start_photon = 0
@@ -686,9 +1127,94 @@ This distinquishes sensitive solids (PMTs).:</p>
 76                                        np.float32(weight),
 77                                        block=(nthreads_per_block,1,1), grid=(blocks,1))</pre>
 </div>
+<div class="section" id="run-daq">
+<h3><a class="toc-backref" href="#id25">run_daq</a><a class="headerlink" href="#run-daq" title="Permalink to this headline">¶</a></h3>
+<p>Uses atomics to do histogramming, and find earliest time.</p>
+<p><cite>chroma/chroma/cuda/daq.cu</cite>:</p>
+<div class="highlight-python"><pre>35 __global__ void
+36 run_daq(curandState *s, unsigned int detection_state,
+37     int first_photon, int nphotons, float *photon_times,
+38     unsigned int *photon_histories, int *last_hit_triangles,
+39     float *weights,
+40     int *solid_map,
+41     Detector *detector,
+42     unsigned int *earliest_time_int,
+43     unsigned int *channel_q_int, unsigned int *channel_histories,
+44     float global_weight)
+45 {
+46
+47     int id = threadIdx.x + blockDim.x * blockIdx.x;
+48
+49     if (id &lt; nphotons) {
+50     curandState rng = s[id];
+51     int photon_id = id + first_photon;
+52     int triangle_id = last_hit_triangles[photon_id];
+53
+54     if (triangle_id &gt; -1) {
+55         int solid_id = solid_map[triangle_id];
+56         unsigned int history = photon_histories[photon_id];
+57         int channel_index = detector-&gt;solid_id_to_channel_index[solid_id];
+58
+59         if (channel_index &gt;= 0 &amp;&amp; (history &amp; detection_state)) {
+60
+61         float weight = weights[photon_id] * global_weight;
+62         if (curand_uniform(&amp;rng) &lt; weight) {
+63             float time = photon_times[photon_id] +
+64                       sample_cdf(&amp;rng, detector-&gt;time_cdf_len,
+65                                        detector-&gt;time_cdf_x, detector-&gt;time_cdf_y);
+//
+66             unsigned int time_int = float_to_sortable_int(time);
+67
+68             float charge = sample_cdf(&amp;rng, detector-&gt;charge_cdf_len,
+69                                             detector-&gt;charge_cdf_x,
+70                                             detector-&gt;charge_cdf_y);
+//
+71             unsigned int charge_int = roundf(charge / detector-&gt;charge_unit);
+72
+73             atomicMin(earliest_time_int + channel_index, time_int);
+74             atomicAdd(channel_q_int + channel_index, charge_int);
+75             atomicOr(channel_histories + channel_index, history);
+76         } // if weighted photon contributes
+77
+78         } // if photon detected by a channel
+79
+80     } // if photon terminated on surface
+81
+82     s[id] = rng;
+83
+84     }</pre>
+</div>
+<p>Hmm is the CDF sampling here equivalent to QE handling in ProcessHits ?</p>
+<ul class="simple">
+<li>no, seems not : the equivalent is done in ElecSim presumably</li>
+</ul>
+</div>
+</div>
+<div class="section" id="surface-detect">
+<h2><a class="toc-backref" href="#id26">SURFACE_DETECT</a><a class="headerlink" href="#surface-detect" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>18 struct Surface
+19 {
+20     float *detect;
+21     float *absorb;
+22     float *reemit;
+23     float *reflect_diffuse;
+24     float *reflect_specular;
+25     float *eta;
+26     float *k;
+27     float *reemission_cdf;
+28
+29     unsigned int model;
+30     unsigned int n;
+31     unsigned int transmissive;
+32     float step;
+33     float wavelength0;
+34     float thickness;
+35 };</pre>
+</div>
+<p>Looks like equivent of ProcessHits QE is to set, the surface detect property.</p>
 </div>
 <div class="section" id="chroma-cuda-photon-h">
-<h2><a class="toc-backref" href="#id11">chroma/cuda/photon.h</a><a class="headerlink" href="#chroma-cuda-photon-h" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id27">chroma/cuda/photon.h</a><a class="headerlink" href="#chroma-cuda-photon-h" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>47 enum
 48 {
 49     NO_HIT           = 0x1 &lt;&lt; 0,
@@ -709,9 +1235,12 @@ Out[16]: 4</pre>
 </div>
 </div>
 <div class="section" id="chroma-cuda-daq-cu">
-<h2><a class="toc-backref" href="#id12">chroma/cuda/daq.cu</a><a class="headerlink" href="#chroma-cuda-daq-cu" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id28">chroma/cuda/daq.cu</a><a class="headerlink" href="#chroma-cuda-daq-cu" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>how do the <em>sample_cdf</em> compare with those from Geant4 ?</li>
+<li>how do the <em>sample_cdf</em> compare with those from Geant4/DetSim ?<ul>
+<li>THINK there is no comparison, ElecSim code being complex moral equivalent</li>
+</ul>
+</li>
 </ul>
 <p>Sequence:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">photon_id</span> <span class="o">&gt;</span> <span class="n">triangle_id</span> <span class="o">&gt;</span> <span class="n">solid_id</span> <span class="o">&gt;</span> <span class="n">channel_index</span>

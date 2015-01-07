@@ -108,6 +108,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../pycuda_debugging/">PyCUDA Debugging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pycuda_error_handling/">PyCUDA Error Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pycuda_pyopengl_interop/">pycuda_pyopengl_interop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pycuda_memory/">PyCUDA Memory</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../geant4/">geant4</a></li>
@@ -133,6 +134,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../osx/">osx</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../presentation/">Muon Simulation Presentation</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -163,6 +166,126 @@
 <div class="section" id="installs">
 <h2>Installs<a class="headerlink" href="#installs" title="Permalink to this headline">¶</a></h2>
 <p>Installed on D as dependency of chroma, see <a class="reference internal" href="../../chroma/chroma/"><em>CHROMA</em></a></p>
+</div>
+<div class="section" id="actual-source-used-by-chroma">
+<h2>Actual Source used by Chroma ?<a class="headerlink" href="#actual-source-used-by-chroma" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>cd $VIRTUAL_ENV
+(chroma_env)delta:chroma_env blyth$ find . -name pycuda -type d
+./build/build_pycuda/pycuda
+./build/build_pycuda/pycuda/build/lib.macosx-10.9-x86_64-2.7/pycuda
+./build/build_pycuda/pycuda/pycuda
+./lib/python2.7/site-packages/pycuda</pre>
+</div>
+</div>
+<div class="section" id="multiple-gpus">
+<h2>Multiple GPUs<a class="headerlink" href="#multiple-gpus" title="Permalink to this headline">¶</a></h2>
+<p>I see there are complications
+to getting pycuda to work with multiple GPUs:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://wiki.tiker.net/PyCuda/FrequentlyAskedQuestions#How_about_multiple_GPUs.3F">http://wiki.tiker.net/PyCuda/FrequentlyAskedQuestions#How_about_multiple_GPUs.3F</a></li>
+<li><a class="reference external" href="http://wiki.tiker.net/PyCuda/FrequentlyAskedQuestions#threading">http://wiki.tiker.net/PyCuda/FrequentlyAskedQuestions#threading</a></li>
+</ul>
+<p>It may be more convenient to call the Chroma CUDA  C kernels
+directly in C/C++ rather than using it via PyCUDA ?</p>
+<p>I wonder will performance scale with GPUs ?</p>
+<p>4*5  ~ 20 in GFLOPS
+4*8 ~  32 in cores</p>
+</div>
+<div class="section" id="debug-trace-switches">
+<h2>Debug/trace switches ?<a class="headerlink" href="#debug-trace-switches" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://git.tiker.net/pycuda.git/blob_plain/HEAD:/pycuda/driver.py">http://git.tiker.net/pycuda.git/blob_plain/HEAD:/pycuda/driver.py</a></li>
+</ul>
+</div>
+<div class="section" id="syslog-messages">
+<h2>Syslog Messages<a class="headerlink" href="#syslog-messages" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2013-June/004357.html">http://lists.tiker.net/pipermail/pycuda/2013-June/004357.html</a></li>
+</ul>
+</div>
+<div class="section" id="profiling">
+<h2>Profiling<a class="headerlink" href="#profiling" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2012-November/004216.html">http://lists.tiker.net/pipermail/pycuda/2012-November/004216.html</a></li>
+</ul>
+</div>
+<div class="section" id="interpreting-pycuda-errors">
+<h2>Interpreting PyCUDA errors<a class="headerlink" href="#interpreting-pycuda-errors" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2014-July/004636.html">http://lists.tiker.net/pipermail/pycuda/2014-July/004636.html</a></li>
+</ul>
+<div class="highlight-python"><pre>&gt; pycuda._driver.LogicError: cuMemcpyDtoH failed: invalid/unknown error code
+&gt; PyCUDA WARNING: a clean-up operation failed (dead context maybe?)
+&gt; cuModuleUnload failed: invalid/unknown error code
+
+This means your context went away while PyCUDA was still talking to
+it. This will happen most often if you perform some invalid operation
+(such as access out-of-bounds memory in a kernel). In this case, the
+cuMemcpyDtoH operation could be at fault.</pre>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2012-September/004106.html">http://lists.tiker.net/pipermail/pycuda/2012-September/004106.html</a></li>
+</ul>
+<div class="highlight-python"><pre>&gt; pycuda._driver.LaunchError: cuMemcpyDtoH failed: launch failed
+&gt; PyCUDA WARNING: a clean-up operation failed (dead context maybe?)
+&gt; cuMemFree failed: launch failed
+&gt;
+&gt; what would be the reason ?
+
+It means that the operation before that (kernel execution) crashed and
+invalidated the context. Most probably, there was some read/write
+operation to the wrong memory address. You will have to look inside
+the kernel that gets executed inside gpu_devdeveigenvalues(), or
+contact its developer (do not forget to provide minimal working
+example that reproduces the bug).</pre>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2011-August/003335.html">http://lists.tiker.net/pipermail/pycuda/2011-August/003335.html</a></li>
+</ul>
+<div class="highlight-python"><pre>&gt; I'm getting an out-of-resources error when trying to launch a CUDA
+&gt; kernel (through PyCUDA), and I'm wondering if it's possible to get the
+&gt; system to tell me which resource it is that I'm short on. Obviously
+&gt; the system knows what resource has been exhausted, I just want to
+&gt; query that as well.
+
+What it likely means to say is that your kernel caused a segmentation
+fault. Check the output of 'dmesg'. If it says something like 'Nv Xid
+13' (from memory, may be wrong--the 13 is what says 'segfault', I
+think), then that's what it is. Have you tried chopping your kernel down
+to almost-nothing? Bisected?</pre>
+</div>
+</div>
+<div class="section" id="trace-pycuda-slowdown-via-looking-into-ptx">
+<h2>Trace pycuda slowdown via looking into ptx<a class="headerlink" href="#trace-pycuda-slowdown-via-looking-into-ptx" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2012-April/003755.html">http://lists.tiker.net/pipermail/pycuda/2012-April/003755.html</a></li>
+</ul>
+</div>
+<div class="section" id="pycuda-interop-with-cython-c-code">
+<h2>PyCUDA Interop With Cython C code<a class="headerlink" href="#pycuda-interop-with-cython-c-code" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2013-November/004465.html">http://lists.tiker.net/pipermail/pycuda/2013-November/004465.html</a></li>
+</ul>
+</div>
+<div class="section" id="pycuda-interop-with-boost-python-code">
+<h2>PyCUDA Interop with Boost-Python code<a class="headerlink" href="#pycuda-interop-with-boost-python-code" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2009-December/001993.html">http://lists.tiker.net/pipermail/pycuda/2009-December/001993.html</a></li>
+</ul>
+</div>
+<div class="section" id="garbage-collection">
+<h2>Garbage Collection<a class="headerlink" href="#garbage-collection" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2014-July/004627.html">http://lists.tiker.net/pipermail/pycuda/2014-July/004627.html</a></li>
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2011-October/003461.html">http://lists.tiker.net/pipermail/pycuda/2011-October/003461.html</a></li>
+</ul>
+</div>
+<div class="section" id="passing-numpy-structured-array-to-pycuda">
+<h2>Passing Numpy Structured Array to PyCUDA<a class="headerlink" href="#passing-numpy-structured-array-to-pycuda" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://lists.tiker.net/pipermail/pycuda/2011-July/003310.html">http://lists.tiker.net/pipermail/pycuda/2011-July/003310.html</a></li>
+<li><a class="reference external" href="https://gist.github.com/inducer/88ac86874112b0e126ce">https://gist.github.com/inducer/88ac86874112b0e126ce</a></li>
+</ul>
 </div>
 <div class="section" id="sources">
 <h2>Sources<a class="headerlink" href="#sources" title="Permalink to this headline">¶</a></h2>
