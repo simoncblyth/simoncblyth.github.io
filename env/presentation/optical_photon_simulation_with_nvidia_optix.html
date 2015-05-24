@@ -1,0 +1,990 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>Optical Photon Simulation with NVIDIA OptiX</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7614 2013-02-21 15:55:51Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<script src="ui/my-small-white/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/my-small-white/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/my-small-white/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/my-small-white/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/my-small-white/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1>Optical Photon Simulation with NVIDIA OptiX</h1>
+
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title">Optical Photon Simulation with NVIDIA OptiX</h1>
+
+<!-- comment -->
+<style type="text/css">
+    span.alarm { color: red; }
+    span.warn { color: orange; }
+    span.ok { color: green; }
+    span.i { display: none; }
+</style><!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+
+       <style type="text/css">
+
+          div.slide { 
+             background-clip: border-box;
+             background-repeat: no-repeat;
+             height: 100%;
+          }
+          div.slide#slide0{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#cerenkov-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115923.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#cerenkov-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115935.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#scintillation-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121444.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#scintillation-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121435.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#standard-geant4-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.001.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#external-photon-simulation-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.002.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-001.png);
+             background-size: 1047px 795px;
+             background-position: 0px 0px;
+          } 
+
+       </style>
+    <!-- comment
+
+GGeoView image is 2094x1590 1047x795
+
+Generated Scintillation Photons GPU cf Geant4
+/env/g4dae/generated_scintillation_time_wavelength.png
+
+G4/DetSim Generated Cerenkov Wavelength
+/env/g4dae/g4_cerenkov_wavelength.png -->
+<p class="small"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html">http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html</a> (May 2015)
+<a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/gpu_accelerated_geant4_simulation.html">http://simoncblyth.bitbucket.org/env/presentation/gpu_accelerated_geant4_simulation.html</a> (Jan 2015)</p>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX Ray Tracing</p>
+<p class="last">Extreme speed ~200M ray intersections/second/GPU, regular releases,
+performance scales with CUDA cores across multiple GPUs.</p>
+</div>
+<ul class="small simple">
+<li>Why not Chroma ?</li>
+<li>Introducing NVIDIA OptiX</li>
+<li>OptiX tests</li>
+<li>Chroma to OptiX migration</li>
+<li>Validating OptiX Generated Photons</li>
+<li>Next Steps</li>
+<li>Visualizations</li>
+</ul>
+<div class="small line-block">
+<div class="line">Simon C Blyth, National Taiwan University</div>
+<div class="line"><strong>May 2015</strong></div>
+</div>
+<!-- comment -->
+
+</div>
+<div class="slide" id="why-not-chroma">
+<h1><span class="small">Why not Chroma ?</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Lack of multi-GPU support</p>
+<p class="small last">Production running demands efficient use
+of multiple GPUs.  Lack of this difficult
+to implement feature is a <span class="red">show stopper for Chroma use in production</span>.</p>
+</div>
+<p class="small"><span class="green">Chroma Features</span></p>
+<ul class="small simple">
+<li>Python/PyCUDA/NumPy based infrastructure for geometry/photon loading, kernel launch</li>
+<li>accelerated geometry intersection using BVH structure</li>
+<li>optical photon simulation CUDA kernels</li>
+</ul>
+<p class="small"><span class="blue">My additions to Chroma</span></p>
+<ul class="small simple">
+<li>G4DAE Geometry import</li>
+<li>G4Step transport and Cerenkov/Scintillation photon generation on GPU</li>
+<li>OpenGL/CUDA interop visualisations</li>
+</ul>
+<p class="small"><span class="red">Missing Features</span></p>
+<ul class="small simple">
+<li>GPU workload scheduling</li>
+<li>Multi-GPU support</li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/chroma/chroma">https://bitbucket.org/chroma/chroma</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/chroma">https://bitbucket.org/simoncblyth/chroma</a>  (my fork)</p>
+</div>
+<div class="slide" id="introducing-nvidia-optix-ray-tracing-engine-c-c-cuda">
+<h1><span class="small">Introducing NVIDIA OptiX Ray Tracing Engine [C++/C/CUDA]</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX <em>Tutorial</em> Sample App</p>
+<p class="small">Image pixels calculated by recursively bouncing rays
+around geometry doing shadow, reflection, refraction calculations.
+Runs at interactive speeds with GeForce GT 750M.</p>
+<img alt="/env/optix/samples/optix-tutorial-10.png" class="last align-right" src="/env/optix/samples/optix-tutorial-10.png" style="width: 450px;" />
+</div>
+<ul class="small simple">
+<li>~200M ray/s/GPU geometry intersections</li>
+<li>very general ray tracing framework, <strong>no rendering assumptions</strong></li>
+<li>regular releases, improvements/tuning for new GPUs</li>
+</ul>
+<p class="small">Ray Trace optimized compiler generates kernel combining
+user programs: ray generation, object intersection, material shading, ..
+Incorporates NVIDIA expertise on efficient GPU/multi-GPU usage:</p>
+<ul class="small simple">
+<li>state machine continuations to implement GPU recursion</li>
+<li>persistent warps with just enough threads to fill machine</li>
+<li>load balancing between warps and between GPUs</li>
+</ul>
+<p class="small"><span class="red">Hugely advantageous to let OptiX handle:</span></p>
+<ul class="small simple">
+<li>acceleration of geometry intersection</li>
+<li>efficient GPU/multi-GPU usage</li>
+</ul>
+<p class="small">BUT: OptiX requires NVIDIA GPUs, AMD OpenCL <strong>ray trace renderer</strong> is not equivalent</p>
+<p class="tiny"><a class="reference external" href="https://developer.nvidia.com/optix">https://developer.nvidia.com/optix</a></p>
+<p class="tiny"><a class="reference external" href="https://research.nvidia.com/publication/optix-general-purpose-ray-tracing-engine">https://research.nvidia.com/publication/optix-general-purpose-ray-tracing-engine</a></p>
+</div>
+<div class="slide" id="ray-tracing-and-optical-photon-simulation-parallels">
+<h1><span class="small">Ray Tracing and Optical Photon Simulation Parallels</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX <em>Glass</em> Sample App</p>
+<img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
+<p class="tiny last"><a class="reference external" href="http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf">http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf</a></p>
+</div>
+<p class="small">Realistic image creation uses physically
+based techniques and material definitions. Obvious parallels:</p>
+<ul class="small simple">
+<li>ray traced rendering : image pixel calculation</li>
+<li>optical photon (OP) simulation : PMT hit calculation</li>
+</ul>
+<p class="small">Same rate determining step: <span class="red">geometry intersection</span></p>
+<p class="small"><strong>Applying</strong> techniques/hardware developed for fast ray tracing
+can be hugely beneficial to optical photon simulation.</p>
+<ul class="small simple">
+<li>expect OP simulation performance &gt;100x Geant4</li>
+<li>OP processing time becomes effectively zero compared to rest</li>
+</ul>
+</div>
+<div class="slide" id="chroma-raycast-with-entire-geometry-in-view">
+<h1><span class="small">Chroma Raycast with entire geometry in view</span></h1>
+<p class="small">Render Split into 3x3 CUDA kernel launches, 1 thread per pixel, ~1.8s for 1.23M pixels, 2.4M tris (with <a class="footnote-reference" href="#hw" id="id1">[1]</a>)</p>
+<img alt="/env/chroma/chroma_camera/20140423-162109.png" class="align-center" src="/env/chroma/chroma_camera/20140423-162109.png" style="width: 800px;" />
+<table class="tiny docutils footnote" frame="void" id="hw" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>MacBook Pro (2013), NVIDIA GeForce GT 750M 2048 MB ;
+Workstation GPUs such as NVIDIA Kepler K20 expected at least ~5x faster</td></tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="optix-raycast-performance">
+<h1><span class="small">OptiX raycast performance</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">GGeoview OptiX raycast</p>
+<img alt="/env/optix/raycast/optix-raycast-gui-001.png" class="align-right" src="/env/optix/raycast/optix-raycast-gui-001.png" style="width: 550px;" />
+<p class="tiny last"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/</a></p>
+</div>
+<p class="small">DBNS geometry raycast comparison using mobile GPU</p>
+<ul class="small simple">
+<li>OptiX : interactive ~30 fps raycasting</li>
+<li>Chroma : 1.8s per frame</li>
+</ul>
+<p class="small">OptiX sample rendering with 2 GPU IHEP workstation,</p>
+<ul class="small simple">
+<li>2 Tesla K20m (4992 cores) 28.0 ms/f</li>
+<li>1 Tesla K20m (2496 cores) 49.1 ms/f</li>
+<li>1 GeForce GT 750m (382 cores) 345.1 ms/f</li>
+</ul>
+<p class="small">Performance linear with GPU cores, workstation compared to laptop:</p>
+<ul class="small simple">
+<li>13x cores, 12x performance</li>
+</ul>
+<p class="small"><span class="red">Adoption of OptiX is compelling</span>:</p>
+<ul class="small simple">
+<li>extremely fast intersection performance</li>
+<li>scales with CUDA cores across multiple GPUs</li>
+<li>improves with each release, new GPU tuning</li>
+<li>defer management of acceleration to NVIDIA</li>
+</ul>
+</div>
+<div class="slide" id="status-of-chroma-to-optix-migration">
+<h1><span class="small">Status of Chroma to OptiX migration</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Python/NumPy/PyCUDA to C++/CUDA/???</p>
+<p class="small">OptiX provides C++/C/CUDA APIs.</p>
+<p class="small">Chroma Python infrastructure is great for learning and development
+but inconvenient in production when using multiple
+threads, the standard way to work with multiple GPUs.</p>
+<p class="small last"><span class="red">Reimplementation in C++ adopted as the simplest longterm approach</span></p>
+</div>
+<p class="small">Infrastructure for geometry/photon GPU loading, kernel launch</p>
+<ul class="small simple">
+<li><span class="green">C++ re-implementation, initial developments completed</span></li>
+<li><span class="red">need to add PMT identity information for hit formation</span></li>
+</ul>
+<p class="small">Geometry intersection acceleration</p>
+<ul class="small simple">
+<li><span class="green">no longer needed, handled by OptiX</span></li>
+</ul>
+<p class="small">Optical photon Cerenkov/Scintillation generation</p>
+<ul class="small simple">
+<li><span class="green">port completed and verified to match Geant4</span></li>
+</ul>
+<p class="small">Optical photon simulation CUDA kernels</p>
+<ul class="small simple">
+<li><span class="blue">port started</span></li>
+</ul>
+<p class="small">Visualization application to aid simulation development</p>
+<ul class="small simple">
+<li><span class="blue">development ongoing in tandem with simulation port needs</span></li>
+</ul>
+</div>
+<div class="slide" id="c-infrastructure-foundation-packages">
+<h1><span class="small">C++ Infrastructure : foundation packages</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Replacing Python, NumPy, PyZMQ</p>
+<p class="small">Boost Libraries (filesystem, thread, program_options, logging, regex, ptree, Asio)
+and Asio-ZMQ, ZMQ used to replace python packages.</p>
+<p class="small">NPY format convenient for C++/Python interop:</p>
+<pre class="tiny last literal-block">
+a = np.load(&quot;photons.npy&quot;)
+</pre>
+</div>
+<dl class="small docutils">
+<dt><em>NPY</em></dt>
+<dd><p class="first">Array persistency/manipulations inspired by NumPy,
+using NPY serialization format</p>
+<ul class="last simple">
+<li>11 classes: G4StepNPY, PhotonsNPY, ViewNPY, NPY, ...</li>
+</ul>
+</dd>
+<dt><em>NumpyServer</em></dt>
+<dd><p class="first">Asynchronous IO of Geant4 Steps, Photons, Hits.
+Communicates with remote <em>G4DAEOpticks</em> process, receiving
+steps and replying with hits.</p>
+<ul class="last simple">
+<li>7 classes : numpyserver, numpydelegate, udp_server, ...</li>
+</ul>
+</dd>
+<dt><em>CUDAWrap</em></dt>
+<dd><p class="first">cuRAND initialization and state persistency using pure CUDA</p>
+<ul class="last simple">
+<li>avoids large stack size requirement of cuRAND init within OptiX</li>
+<li>5 classes : cuRANDWrapper, LaunchSequence, LaunchCommon, ..</li>
+</ul>
+</dd>
+</dl>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/numerics/npy/">https://bitbucket.org/simoncblyth/env/src/tip/numerics/npy/</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/boost/basio/numpyserver/">https://bitbucket.org/simoncblyth/env/src/tip/boost/basio/numpyserver/</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/cuda/cudawrap/">https://bitbucket.org/simoncblyth/env/src/tip/cuda/cudawrap/</a></p>
+</div>
+<div class="slide" id="c-infrastructure-domain-packages">
+<h1><span class="small">C++ Infrastructure : domain packages</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Replacing Python packages</p>
+<p class="small">Many C++ classes required to replace:</p>
+<ul class="small simple">
+<li>PyCOLLADA</li>
+<li>PyOpenGL + glumpy + OpenGL 2.1 + GLUT</li>
+<li>daenode.py</li>
+<li>g4daeview.py</li>
+</ul>
+<p class="small">Migration allows use of modern OpenGL 4.1:</p>
+<ul class="small last simple">
+<li>better visualization performance</li>
+<li>retina resolution support</li>
+<li>many GUI packages to choose from, picked <a class="reference external" href="https://github.com/ocornut/imgui">https://github.com/ocornut/imgui</a></li>
+</ul>
+</div>
+<dl class="small docutils">
+<dt><em>GGeo</em></dt>
+<dd><p class="first">GPU Geometry representation, NPY persistency</p>
+<ul class="last simple">
+<li>22 classes: GNode, GMaterial, GSurface, GProperty, ...</li>
+</ul>
+</dd>
+<dt><em>AssimpWrap</em></dt>
+<dd><p class="first">Creates GGeo geometries from G4DAE exports using:</p>
+<ul class="last simple">
+<li><a class="reference external" href="https://github.com/simoncblyth/assimp">https://github.com/simoncblyth/assimp</a> (fork handles G4DAE material/surface properties)</li>
+<li>7 classes : AssimpGGeo, AssimpTree, ...</li>
+</ul>
+</dd>
+<dt><em>OptiXRap</em></dt>
+<dd><p class="first">Conversion of GGeo into OptiX geometries and OptiX launch control.</p>
+<ul class="last simple">
+<li>7 classes : OptiXEngine, OptixGeometry, ...</li>
+</ul>
+</dd>
+<dt><em>OGLRap</em></dt>
+<dd><p class="first">OpenGL shader based 3D visualization, using GLEW, GLFW</p>
+<ul class="last simple">
+<li>29 classes : Scene, View, Camera, Trackball, Renderer, Shdr, GUI, ...</li>
+</ul>
+</dd>
+</dl>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/optix/ggeo/">https://bitbucket.org/simoncblyth/env/src/tip/optix/ggeo/</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/assimpwrap/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/assimpwrap/</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/oglrap/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/oglrap/</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/optixrap/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/optixrap/</a></p>
+</div>
+<div class="slide" id="ggeoview-geometry-genstep-photon-visualization">
+<h1><span class="small">GGeoView : geometry, genstep, photon visualization</span></h1>
+<ul class="small simple">
+<li>very fast 3D OpenGL visualization</li>
+<li>intuitive GUI controls</li>
+<li>intuitive virtual trackball translate/rotate</li>
+<li>interactive fov and near/far plane clipping</li>
+<li>perspective projection <span class="red">to implement: parallel projection</span></li>
+<li>numerical control via UDP remote messaging</li>
+<li>persistent viewpoint bookmarks <span class="red">in development</span></li>
+<li>live Geant4 connection, photon, genstep visualization <span class="red">in development</span></li>
+</ul>
+<p class="small">Also used for testing GPU photon propagation with OptiX project</p>
+<ul class="small simple">
+<li>OpenGL/OptiX interop presentation of GPU resident photon/genstep data</li>
+<li>interactive OptiX raycasting</li>
+</ul>
+</div>
+<div class="slide" id="ggeoview">
+<h1><span class="i">GGeoView</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Simulation development</p>
+<p class="tiny last">Simulated Cerenkov photons from an 100 GeV muon travelling
+from right to left across Dayabay AD.
+Primaries are simulated by Geant4, Cerenkov &quot;steps&quot; of the primaries
+are transferred to the GPU.  The dots represent
+OptiX calculated first intersections of GPU generated photons with colors
+corresponding to material boundaries: <span class="red">(red) GdDopedLS:Acrylic</span>,
+<span class="green">(green) LiquidScintillator:Acrylic</span>, <span class="blue">(blue) Acrylic:LiquidScintillator</span>,
+(white) IwsWater:UnstStainlessSteel, (grey) others.
+The red lines represent the positions and directions of the &quot;steps&quot; with an
+arbitrary scaling for visibility.</p>
+</div>
+</div>
+<div class="slide" id="compare-dae-exports-to-gdml-and-vrml2-wrl">
+<h1><span class="small">Compare DAE Exports to GDML and VRML2(WRL)</span></h1>
+<p class="small">Export validation:</p>
+<blockquote class="small">
+<ul class="simple">
+<li>Comparison of all vertices/faces reveals <span class="red">boolean solids are discrepant</span>.</li>
+<li>Perfect <a class="footnote-reference" href="#perfect" id="id2">[2]</a> DAE WRL agreement achieved by <em>cheating</em> : <span class="blue">perform triangulation once and reuse</span>.</li>
+<li>Boolean solid triangulation sensitivity must be kept in mind as a potential systematic
+for computational uses</li>
+<li><strong>DAE not much bigger than GDML</strong>, despite including all triangles/vertices <a class="footnote-reference" href="#not-repeating" id="id3">[3]</a></li>
+</ul>
+</blockquote>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="23%" />
+<col width="20%" />
+<col width="16%" />
+<col width="21%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Qty</th>
+<th class="head">DayaBay</th>
+<th class="head">Lingao</th>
+<th class="head">Far</th>
+<th class="head">Juno x0.5</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Volumes</td>
+<td>12,229</td>
+<td>12,229</td>
+<td>18,903</td>
+<td>25,000</td>
+</tr>
+<tr><td>Triangles</td>
+<td>2,448,064</td>
+<td>2,448,064</td>
+<td>4,189,680</td>
+<td>21,886,158</td>
+</tr>
+<tr><td>Vertices</td>
+<td>1,245,996</td>
+<td>1,245,996</td>
+<td>2,128,208</td>
+<td>10,993,079</td>
+</tr>
+<tr><td>DAE/GDML/WRL (MB)</td>
+<td><strong>6.9</strong>/4.0/98</td>
+<td><strong>6.9</strong>/4.0/96</td>
+<td><strong>8.6</strong>/6.0/167</td>
+<td><strong>6.1</strong>/-/-</td>
+</tr>
+</tbody>
+</table>
+<p class="tiny"><tt class="docutils literal">VGDX_20140414</tt> counts using <tt class="docutils literal">g4daeview.py <span class="pre">-g</span> 0: <span class="pre">--with-chroma</span></tt>, Juno geometry truncated</p>
+<table class="tiny docutils footnote" frame="void" id="perfect" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Maximum DAE WRL offset &lt; 0.13 mm, after patching VRML2 export precision bug (fixed in current G4).
+Details: <a class="reference external" href="http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/dae_cf_wrl/">http://simoncblyth.bitbucket.org/env/notes/geant4/geometry/collada/dae_cf_wrl/</a></td></tr>
+</tbody>
+</table>
+<table class="tiny docutils footnote" frame="void" id="not-repeating" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Geometry is not repeated, instead the COLLADA format uses geometry instancing and a tree of transforms,
+just like GDML</td></tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="g4daechroma-bridging-from-geant4-to-chroma">
+<h1><span class="small">G4DAEChroma : Bridging from Geant4 to Chroma</span></h1>
+<p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/chroma/G4DAEChroma/G4DAEChroma/">https://bitbucket.org/simoncblyth/env/src/tip/chroma/G4DAEChroma/G4DAEChroma/</a></p>
+<div class="sidebar">
+<p class="first sidebar-title">Transport Infrastructure</p>
+<p class="small last">Collects generation steps from Geant4, sends to Chroma, receives
+hits in reply, integrates into G4 Hit Collections.
+<span class="red">Implemented with core of ~20 C++ classes</span></p>
+</div>
+<ul class="small simple">
+<li><span class="green">Two detector specific subclasses required eg</span> <em>DybG4DAECollector</em> <em>DybG4DAEGeometry</em></li>
+<li>NumPy array creation from C++, transport via ZeroMQ</li>
+<li>JSON metadata communication C++/Python, <em>map&lt;string,string&gt; &lt;-&gt; dict</em></li>
+<li>Geant4 hit integration using additional <em>G4VSensitiveDetector</em>
+that steals hit collection pointers from existing one</li>
+<li>Transform Cache to obtain PMT local coordinates from global hit coordinates</li>
+<li>SQLite DB integation for monitoring/control</li>
+</ul>
+<img alt="/env/chroma/G4DAEChroma/G4DAEChroma_bitbucket.png" class="align-center" src="/env/chroma/G4DAEChroma/G4DAEChroma_bitbucket.png" style="width: 700px;" />
+</div>
+<div class="slide" id="g4daechroma-for-implementation-details">
+<h1><span class="small">G4DAEChroma : For implementation details...</span></h1>
+<p class="small"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/notes/chroma/G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/">http://simoncblyth.bitbucket.org/env/notes/chroma/G4DAEChroma/G4DAEChroma/G4DAEChroma_implementation/</a></p>
+<img alt="/env/chroma/G4DAEChroma/G4DAEChroma_implementation.png" class="align-center" src="/env/chroma/G4DAEChroma/G4DAEChroma_implementation.png" style="width: 700px;" />
+</div>
+<div class="slide" id="https-bitbucket-org-simoncblyth-chroma-forked">
+<h1><a class="reference external" href="https://bitbucket.org/simoncblyth/chroma">https://bitbucket.org/simoncblyth/chroma</a> <span class="small">Forked:</span></h1>
+<p class="small">Changes in my fork of Chroma:</p>
+<ul class="small simple">
+<li>stability + efficiency improvements, enabling mobile development</li>
+<li>OpenGL/CUDA interoperation, using VBOs</li>
+<li>add recording of propagation steps into VBO datastructure</li>
+<li>more efficient Raycasting using 4x4 matrix uniforms and PBOs</li>
+<li>animated photon propagation visualization</li>
+<li>change serialization approach from ROOT/TObject to NumPy (NPY)</li>
+<li><span class="red">generation of Cerenkov and Scintillation Photons based
+on Geant4 Generation Step inputs</span></li>
+</ul>
+<img alt="/env/chroma/chroma_fork_jan2015.png" class="align-center" src="/env/chroma/chroma_fork_jan2015.png" style="width: 700px;" />
+</div>
+<div class="slide" id="chroma-generated-scintillation-photons-cf-geant4">
+<h1><span class="small">Chroma Generated Scintillation Photons cf Geant4</span></h1>
+<p class="small">Chroma interpolates all properties in 20nm bins, stair artifacts
+in wavelength distribution can be reduced by using eg 10nm property interpolation bins.</p>
+<img alt="/env/g4dae/generated_scintillation_time_wavelength.png" class="align-center" src="/env/g4dae/generated_scintillation_time_wavelength.png" style="width: 800px;" />
+</div>
+<div class="slide" id="chroma-generated-cerenkov-photons-cf-geant4">
+<h1><span class="small">Chroma Generated Cerenkov Photons cf Geant4</span></h1>
+<p class="small">Geant4/DetSim wavelength distribution has a blip at 200nm, corresponding to edge of water
+refractive index properties. (see the extra slides)</p>
+<img alt="/env/g4dae/generated_cerenkov_time_wavelength.png" class="align-center" src="/env/g4dae/generated_cerenkov_time_wavelength.png" style="width: 800px;" />
+</div>
+<div class="slide" id="next-steps">
+<h1>Next Steps</h1>
+<p class="small">G4DAE Geometry Exporter</p>
+<ul class="small simple">
+<li>implement parametrized/replica geometry handling, following GDML</li>
+<li>investigate issue inherited from GDML of a skipped
+edge case (when a volume is shared between multiple volume pairs)
+resulting in missing <em>G4LogicalBorderSurface</em></li>
+<li>investigate improving default export appearance in common viewers</li>
+<li>test with newer and latest versions of Geant4</li>
+<li>test on more detector geometries</li>
+<li>incorporate into Geant4 codebase</li>
+</ul>
+<p class="small">G4DAEChroma bridge</p>
+<ul class="small simple">
+<li>refactor to remove duplication in <em>G4DAEHit</em> <em>G4DAEHitList</em></li>
+<li>eliminate use of <em>cnpy</em> external in favor of <em>numpy.hpp</em></li>
+</ul>
+<p class="small">Chroma</p>
+<ul class="small simple">
+<li>Port Cerenkov <em>ApplyWaterQE</em> to Chroma (expect quick)</li>
+<li>Port <em>DsPmtSensDet::ProcessHits</em> QE gymnastics to Chroma</li>
+<li>Implement double sided surfaces, to match <em>G4LogicalBorderSurface</em></li>
+<li>Compare PMT Hit distributions between <em>NuWa/DetSimChroma</em> and <em>NuWa/DetSim</em><ul>
+<li><span class="red">iterate until match achieved or discrepancies explained</span></li>
+</ul>
+</li>
+<li>Find desktop GPU on which can test operation and performance</li>
+</ul>
+</div>
+<div class="slide" id="cerenkov-photons-simulation-side-view">
+<h1><span class="i">Cerenkov Photons Simulation - Side View</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Cerenkov Photons</p>
+<p class="tiny last">Simulated Cerenkov shock front from an 100 GeV muon travelling
+from right to left across Dayabay AD.
+Primaries are simulated by Geant4, Cerenkov &quot;steps&quot; of the primaries
+are transferred to the GPU where <strong>photons are generated, propagated and PMT hits formed</strong>.
+Photon colors indicate reemission (green), absorption(red), specular reflection (magenta), scattering(blue), no history (white).</p>
+</div>
+</div>
+<div class="slide" id="scintillation-photons-simulation-side-view">
+<h1><span class="i">Scintillation Photons Simulation - Side View</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Scintillation Photons</p>
+<p class="tiny last">Simulated Scintillation photons from an 100 GeV muon travelling
+from right to left across Dayabay AD.
+Primaries are simulated by Geant4, Scintillation &quot;steps&quot; of the primaries
+are transferred to the GPU where <strong>photons are generated, propagated and PMT hits formed</strong>.
+Photon colors indicate reemission (green), absorption(red), specular reflection (magenta), scattering(blue), no history (white).</p>
+</div>
+</div>
+<div class="slide" id="cerenkov-photons-simulation-top-view">
+<h1>Cerenkov Photons Simulation - Top View</h1>
+</div>
+<div class="slide" id="scintillation-photons-simulation-top-view">
+<h1>Scintillation Photons Simulation - Top View</h1>
+</div>
+<div class="slide" id="extra-slides">
+<h1>Extra Slides</h1>
+</div>
+<div class="slide" id="g4daeview-py-opengl-view-of-juno-geometry">
+<h1><span class="small">g4daeview.py : OpenGL view of Juno Geometry</span></h1>
+<p class="tiny">External view of Juno geometry with cutaway. The extreme size of the Juno geometry (50 million nodes in Chroma representation)
+provides a challenge for development on mobile GPUs.
+As my developments operate at the Geant4 level wherever possible it
+was relatively straightforward to apply the machinery developed for
+Dayabay to the Juno detector. In collaboration with
+Juno simulation experts the geometry was exported from
+Geant4 and GPU visualized in under a days work.</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/20140716-194144.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-194144.png" style="height: 650px;" />
+</div>
+<div class="slide" id="g4daeview-py-chroma-raycast-of-juno-geometry">
+<h1><span class="small">g4daeview.py : Chroma Raycast of Juno Geometry</span></h1>
+<p class="tiny">External view of Juno geometry. The extreme size of the  Juno geometry (50 million nodes in Chroma representation)
+provides a challenge for development on mobile GPUs. The black rectangle arises due to aborts to avoid GPU
+crashes.</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/20140716-191232.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-191232.png" style="height: 650px;" />
+</div>
+<div class="slide" id="g4-generated-cerenkov-wavelengths-in-material-categories">
+<h1><span class="small">G4 Generated Cerenkov Wavelengths in material categories</span></h1>
+<p class="small">Blip caused by 200nm edge in water refractive index</p>
+<img alt="/env/g4dae/g4_cerenkov_wavelength.png" class="align-center" src="/env/g4dae/g4_cerenkov_wavelength.png" style="width: 700px;" />
+</div>
+<div class="slide" id="refractive-index-interpolation-explains-jump-at-200nm">
+<h1><span class="small">Refractive Index Interpolation Explains Jump at 200nm</span></h1>
+<p class="small">DeadWater, IwsWater, OwsWater have same RINDEX starting from 200nm.
+Chroma interpolates properties onto a standard set of wavelengths,
+getting rid of the jump.</p>
+<img alt="/env/g4dae/plot_refractive_index_comparison.png" class="align-center" src="/env/g4dae/plot_refractive_index_comparison.png" style="width: 900px;" />
+</div>
+<div class="slide" id="comparison-of-generated-scintillation-photon-distributions">
+<h1><span class="small">Comparison of Generated Scintillation Photon Distributions</span></h1>
+<p class="small">Position, direction, polarization XYZ  + time, wavelength, weight</p>
+<img alt="/env/g4dae/generated_scintillation_3xyzw.png" class="align-center" src="/env/g4dae/generated_scintillation_3xyzw.png" style="width: 700px;" />
+</div>
+<div class="slide" id="comparison-of-generated-cerenokov-photon-distributions">
+<h1><span class="small">Comparison of Generated Cerenokov Photon Distributions</span></h1>
+<p class="small">Position, direction, polarization XYZ  + time, wavelength, weight</p>
+<img alt="/env/g4dae/generated_cerenkov_3xyzw.png" class="align-center" src="/env/g4dae/generated_cerenkov_3xyzw.png" style="width: 700px;" />
+</div>
+<div class="slide" id="g4daeview-py-dayabay-chroma-photon-propagation-1">
+<h1><span class="small">g4daeview.py : Dayabay Chroma Photon Propagation (1)</span></h1>
+<p class="tiny">Chroma GPU photon propagation at 12 nanoseconds.  The photons are generated by Geant4
+simulation of a 100 GeV muon travelling from right to left.
+Photon colors indicate reemission (green), absorption(red),
+specular reflection (magenta), scattering(blue), no history (white).</p>
+<img alt="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" class="align-center" src="/env/geant4/geometry/collada/g4daeview/20140716-161445.png" style="height: 600px;" />
+</div>
+</div>
+</body>
+</html>
