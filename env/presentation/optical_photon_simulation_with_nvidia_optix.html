@@ -709,7 +709,7 @@ rasterization pipeline.</p>
 <div class="sidebar">
 <p class="first sidebar-title">Defer to NVIDIA</p>
 <ul class="small last simple">
-<li>acceleration structures</li>
+<li>acceleration structure creation and fast traversal</li>
 <li><span class="red">efficient GPU/multi-GPU utilization</span></li>
 </ul>
 </div>
@@ -783,7 +783,7 @@ rasterization pipeline.</p>
 <p class="small">Some details of GPU developments described over the next pages</p>
 <p class="small"><strong>Optical Physics</strong></p>
 <ul class="small simple">
-<li>Porting Geant4/Chroma Optical Physics into OptiX Programs</li>
+<li>Porting Optical Physics from Geant4/Chroma into OptiX</li>
 <li>Optical Physics Implementation</li>
 </ul>
 <p class="small"><strong>Supplying the OptiX Programs</strong></p>
@@ -799,8 +799,8 @@ rasterization pipeline.</p>
 <li>Introducing CUDA Thrust</li>
 </ul>
 </div>
-<div class="slide" id="porting-optical-physics-from-geant4-chroma-to-optix">
-<h1><span class="small">Porting Optical Physics from Geant4/Chroma to OptiX</span></h1>
+<div class="slide" id="porting-optical-physics-from-geant4-chroma-into-optix">
+<h1><span class="small">Porting Optical Physics from Geant4/Chroma into OptiX</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">Synthesis of sources</p>
 <ul class="small simple">
@@ -849,7 +849,7 @@ while(bounce < bounce_max)  // PSEUDO-CODE
 <div class="sidebar">
 <p class="first sidebar-title">Approach</p>
 <ul class="small simple">
-<li>Nice Simple Structure from Chroma</li>
+<li>Overall Structure from Chroma</li>
 <li>Aiming for equivalence with Geant4</li>
 <li><span class="red">Optical Surface treatment in progress</span></li>
 </ul>
@@ -1051,32 +1051,32 @@ become effectively zero</li>
 </ul>
 </div>
  <pre class="mypre">
-  max_record:10
-  max_bounce:9
-                         Cerenkov   Ck*4.59  Scintillation
-               photons     0.61M      2.8M      2.8M
-  ---(bytes)-----------------------------------------------
-          genstep size      736K                1.3M
-          photons size       37M                172M
-          records size       97M                430M
-  ---(seconds)---------------------------------------------
-   createOpenGLContext     0.692         -     0.599
-          loadGeometry     1.570         -     1.302
-        interpGeometry     0.211         -     0.190
-             initOptiX     4.216         -     6.521
+ max_record:10
+ max_bounce:9
+                    Cerenkov   Ck*4.59 Scintillation
+           photons     0.61M      2.8M      2.8M
+ --(bytes)--------------------------------------
+      genstep size      736K                1.3M
+      photons size       37M                172M
+      records size       97M                430M
+ --(seconds)------------------------------------
+   createOpenGLCtx     0.692         -     0.599
+      loadGeometry     1.570         -     1.302
+    interpGeometry     0.211         -     0.190
+         initOptiX     4.216         -     6.521
 
-           loadGenstep     0.011         -     0.014
-     hostEvtAllocation **  3.540    16.275    16.179
-             uploadEvt     0.232     1.066     0.552
+       loadGenstep     0.011         -     0.014
+ hostEvtAllocation **  3.540    16.275    16.179
+         uploadEvt     0.232     1.066     0.552
 
-     generatePropagate ++  1.404     6.453     7.907 ++
+ generatePropagate ++  1.404     6.453     7.907
 
-           evtDownload **  0.348     1.602     1.780
-               evtSave **  0.437     2.008     2.006
+       evtDownload **  0.348     1.602     1.780
+           evtSave **  0.437     2.008     2.006
 
-         sequenceIndex     0.134     0.614     0.359
-  --------------------------------------------------------
-                       ** scales by photon count
+     sequenceIndex     0.134     0.614     0.359
+ -----------------------------------------------
+                   ** scales by photon count
 
 
 </pre></div>
@@ -1131,6 +1131,7 @@ resulting in missing <em>G4LogicalBorderSurface</em></li>
 <ul class="small simple">
 <li>GGeo/OptiX Generated Scintillation Photons cf Geant4</li>
 <li>GGeo/OptiX Generated Cerenkov Photons cf Geant4</li>
+<li>Cerenkov Photon Steps</li>
 <li>C++ Infrastructure : foundation packages</li>
 <li>C++ Infrastructure : domain packages</li>
 <li>propagate_to_boundary : ABSORB(REEMIT) / SCATTER / survive</li>
