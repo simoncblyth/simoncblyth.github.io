@@ -492,18 +492,24 @@ implemented optical physics in OptiX infrastructure
 squeeze photon record into 128 bit
 record viz
 photon history/material indexing -->
-<p class="small"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html">http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html</a> (July 2015)
+<p class="small"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_progress.html">http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_progress.html</a> (October 2015)
+<a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html">http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html</a> (July 2015)
 <a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/gpu_accelerated_geant4_simulation.html">http://simoncblyth.bitbucket.org/env/presentation/gpu_accelerated_geant4_simulation.html</a> (Jan 2015)</p>
-<div class="sidebar">
-<p class="first sidebar-title">OptiX Ray Tracing</p>
-<p class="last">Extreme speed ~200M ray intersections/second/GPU, regular releases,
-performance scales with CUDA cores across multiple GPUs.</p>
-</div>
+<p class="small"><strong>Executive Summary</strong></p>
+<ul class="small simple">
+<li>several large geometry issues solved</li>
+<li>extreme speed objective looks inevitable</li>
+<li>matching Geant4 : <span class="blue">still unclear how long to achieve</span></li>
+</ul>
+<p class="small"><strong>Contents</strong></p>
 <ul class="small simple">
 <li>Handling JUNO geometry</li>
-<li>Moving Photons GPU resident</li>
-<li>IAV, OAV: mesh fixing</li>
-<li>Analytic PMT geometry</li>
+<li>800x less memory with instancing</li>
+<li>Analytic PMT geometry : avoiding <em>disco ball</em></li>
+<li>IAV, OAV mesh fixing with OpenMesh surgery</li>
+<li>Photon Torpedo testing</li>
+<li>Optical Photons GPU resident</li>
+<li>Progress Overview</li>
 </ul>
 <div class="small line-block">
 <div class="line">Simon C Blyth, National Taiwan University</div>
@@ -525,7 +531,15 @@ Workstation GPU performance expected to scale by core count</td></tr>
 </div>
 <div class="slide" id="x-less-memory-due-to-instancing">
 <h1><span class="small">800x less memory due to instancing</span></h1>
-<p class="small">~90M triangles impossible to load, instancing cuts to 0.1M</p>
+<p class="small">~90M triangles, vertex data alone too big for GPU memory,
+mandatory instancing reduces to 0.1M</p>
+<p class="small"><em>GTreeCheck</em> algorithm finds repeated geometry, splitting into:</p>
+<ul class="small simple">
+<li>one non-instanced mesh</li>
+<li>4 instanced meshes corresponding
+to 20-inch and 3-inch PMTs and support geometry.</li>
+</ul>
+<p class="small">Vertex, face, solid (<em>transforms</em>) and instance counts (<em>itransforms</em>):</p>
 <pre class="mypre">
 
  mm  0 : vertices   47864 faces   95436 transforms  289733 itransforms       0
@@ -533,35 +547,68 @@ Workstation GPU performance expected to scale by core count</td></tr>
  mm  2 : vertices    1759 faces    3502 transforms       4 itransforms   19452
  mm  3 : vertices     914 faces    1856 transforms       1 itransforms     480
  mm  4 : vertices    4168 faces    6252 transforms     521 itransforms     124
+
    totVertices     54982  totFaces    107586
+
   vtotVertices  45349928 vtotFaces  89631348 (virtual: scaling by transforms)
+
   vfacVertices   824.814 vfacFaces   833.113 (virtual to total ratio)
 
 </pre></div>
 <div class="slide" id="analytic-pmt-geometry">
 <h1><span class="small">Analytic PMT geometry</span></h1>
-<p class="small">Parse detdesc and partition the 5 solids that make up PMT into chopped primitives.</p>
+<ul class="small simple">
+<li>triangulated PMT <em>disco ball</em> too unrealistic</li>
+<li>parse detdesc XML to give CSG tree of primitives (boolean intersections, unions)</li>
+<li>partition 5 CSG solids of PMT into 14 <strong>single primitive</strong> parts
+at the geometrical intersections
+(avoids implementing general CSG boolean handling on GPU)</li>
+</ul>
 <img alt="/env/nuwa/detdesc/pmt/hemi-pmt-solids.png" class="align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-solids.png" style="width: 900px;" />
-<p class="tiny">Replace thousands of triangles with just 14 primitives: chopped spheres, cylinders.
-Implemented OptiX intersection code with the sphere/cylinder parts. Judicious partitioning
-at geometrical intersections avoids implementing general CSG booleans code.</p>
+</div>
+<div class="slide" id="analytic-pmt-in-14-parts-instead-of-2928-triangles">
+<h1><span class="small">Analytic PMT in 14 parts instead of 2928 triangles</span></h1>
+<p class="small">Implemented OptiX PMT intersection based on sphere/cylinder part
+intersection: solve quadratic, handle cases</p>
+<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-parts.png" class="align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-parts.png" style="width: 900px;" />
+<p class="tiny">Sphere intersection only 2 cases, Cylinder 10 cases (axial, walls, endcap, outside/inside)</p>
 </div>
 <div class="slide" id="optix-ray-traced-analytic-pmt-geometry">
 <h1><span class="small">OptiX Ray Traced Analytic PMT geometry</span></h1>
 <p class="small">Analytic geometry: more realistic, faster, less memory, BUT a lot more effort than triangulated.</p>
-<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-analytic.png" class="align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-analytic.png" style="width: 900px;" />
+<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" class="align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" style="width: 900px;" />
+<p class="tiny">Near clipped, orthographic projection.</p>
 </div>
-<div class="slide" id="iav-oav-mesh-fixing">
-<h1><span class="small">IAV, OAV mesh fixing</span></h1>
-<img alt="/env/graphics/ggeoview/mesh-fix-iav-oav.png" class="small prior to fix all photons headed for top lid thought they were in acrylic-yellow and not gdls-red due bad mesh export align-center" src="/env/graphics/ggeoview/mesh-fix-iav-oav.png" style="width: 900px;" />
-<p class="tiny">About 25 out of 250 meshes have issues, fixed two critical ones: IAV, OAV.
-Issue causes flickering OpenGL render.</p>
+<div class="slide" id="analytic-pmts-together-with-triangulated-geometry">
+<h1><span class="small">Analytic PMTs together with triangulated geometry</span></h1>
+<p class="small">PMTs analytic, the rest triangulated</p>
+<img alt="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" class="align-center" src="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" style="width: 900px;" />
+</div>
+<div class="slide" id="iav-oav-mesh-fixing-with-openmesh-surgery">
+<h1><span class="small">IAV, OAV mesh fixing with OpenMesh surgery</span></h1>
+<p class="small">Photon material provided by intersection boundary, all top lid photons Acrylic(yellow), not GdLS(red)</p>
+<p class="small">Issue: some CSG unions split into multiple meshes with close parallel faces</p>
+<ul class="small simple">
+<li>~25 out of 250 meshes have issues eg Eulers Characteristic <tt class="docutils literal">V - E + F != 2</tt></li>
+<li>fixed two critical ones: IAV, OAV.</li>
+<li>close parallel faces causes flickering OpenGL render</li>
+</ul>
+<img alt="/env/graphics/ggeoview/mesh-fix-iav-oav.png" class="align-center" src="/env/graphics/ggeoview/mesh-fix-iav-oav.png" style="width: 900px;" />
 </div>
 <div class="slide" id="openmeshrap-package">
 <h1><span class="small">OpenMeshRap package</span></h1>
-<p class="small">OpenMeshRap integrates with OpenMesh to develop a fix. Extracts real topological meshes,
-finds close parallel faces between them, deletes the faces, stitches the split mesh together.</p>
-<img alt="/env/graphics/ggeoview/openmeshrap-fix.png" class="align-center" src="/env/graphics/ggeoview/openmeshrap-fix.png" style="width: 900px;" />
+<div class="sidebar">
+<p class="first sidebar-title">Exploded Z across the mend</p>
+<img alt="/env/graphics/ggeoview/openmeshrap-fix.png" class="last align-center" src="/env/graphics/ggeoview/openmeshrap-fix.png" style="width: 500px;" />
+</div>
+<p class="small">Created package <em>OpenMeshRap</em> to develop fix</p>
+<ul class="small simple">
+<li>based on open source project: <strong>OpenMesh</strong></li>
+<li>extracts real topological meshes</li>
+<li>finds close parallel faces between the meshes</li>
+<li>deletes the extra faces</li>
+<li>stitches the split mesh together with added triangles</li>
+</ul>
 </div>
 <div class="slide" id="photon-torpedo-0">
 <h1><span class="small">Photon Torpedo 0</span></h1>
@@ -580,701 +627,39 @@ ggv.sh --analyticmesh 1 \
 <p class="small">Select photons according to their history, here just detected ones.</p>
 <img alt="/env/graphics/ggeoview/photon-torpedo-3199-2.png" class="align-center" src="/env/graphics/ggeoview/photon-torpedo-3199-2.png" style="width: 900px;" />
 </div>
-<div class="slide" id="chroma-raycast-with-entire-geometry-in-view">
-<h1><span class="small">Chroma Raycast with entire geometry in view</span></h1>
-<p class="small">Render Split into 3x3 CUDA kernel launches, 1 thread per pixel, <span class="red">~1.8s for 1.23M pixels</span>, 2.4M tris (with <a href="#id4"><span class="problematic" id="id5"><span id="id1"></span>[#hw]_</span></a>)</p>
-<img alt="/env/chroma/chroma_camera/20140423-162109.png" class="align-center" src="/env/chroma/chroma_camera/20140423-162109.png" style="width: 800px;" />
-<table class="tiny docutils footnote" frame="void" id="id2" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[2]</td><td><div class="first system-message">
-<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">optical_photon_simulation_progress.txt</tt>, line 295); <em><a href="#id2">backlink</a></em></p>
-Duplicate explicit target name: &quot;hw&quot;.</div>
-<p class="last">MacBook Pro (2013), NVIDIA GeForce GT 750M 2048 MB (384 cores);
-Workstation GPU performance expected to scale by core count</p>
-</td></tr>
-</tbody>
-</table>
+<div class="slide" id="optical-photons-now-fully-gpu-resident">
+<h1><span class="small">Optical Photons now fully GPU resident</span></h1>
+<p class="small">All photon operations now done on GPU:</p>
+<ul class="small simple">
+<li>seeded (assigned gensteps)</li>
+<li>generated</li>
+<li>propagated</li>
+<li>indexing material/interaction histories</li>
+</ul>
+<p class="small">Only PMT hits are copied back to CPU</p>
+<p class="tiny">Thrust/CUDA/OptiX interop used to implement</p>
 </div>
-<div class="slide" id="optix-raycast-performance">
-<h1><span class="small">OptiX raycast performance</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">GGeoview OptiX raycast</p>
-<img alt="/env/optix/raycast/optix-raycast-gui-001.png" class="align-right" src="/env/optix/raycast/optix-raycast-gui-001.png" style="width: 550px;" />
-<p class="tiny last"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/</a></p>
-</div>
-<p class="small">DBNS geometry raycast comparison using mobile GPU</p>
+<div class="slide" id="progress-overview">
+<h1><span class="small">Progress Overview</span></h1>
+<p class="small"><strong>Resolved several large obvious geometry problems</strong></p>
 <ul class="small simple">
-<li>OptiX : <span class="red">interactive ~30 fps</span> raycasting</li>
-<li>Chroma : 1.8s per frame</li>
+<li>squeezing JUNO geometry onto GPU with instancing</li>
+<li>fixing bad triangulations using OpenMesh surgery</li>
+<li>replace triangulated PMTs with more realistic analytic ones</li>
 </ul>
-<p class="small">Performance improvement ~50x</p>
-</div>
-<div class="slide" id="optix-performance-scaling-with-gpu-cores">
-<h1><span class="small">OptiX Performance Scaling with GPU cores</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Performance Linearity with CUDA cores</p>
-<img alt="/env/g4dae/core_linearity.png" class="last align-right" src="/env/g4dae/core_linearity.png" style="width: 500px;" />
-</div>
-<p class="small">OptiX sample rendering with 2 GPU IHEP workstation,</p>
+<p class="small"><strong>Optical physics problems expected next</strong></p>
 <ul class="small simple">
-<li>2 Tesla K20m (4992 cores) 28.0 ms/f</li>
-<li>1 Tesla K20m (2496 cores) 49.1 ms/f</li>
-<li>1 GeForce GT 750m (384 cores) 345.1 ms/f</li>
+<li>need Geant4 comparison to find the next issue</li>
+<li>will start validations using simple test geometries</li>
 </ul>
-<p class="small"><span class="red">Performance linear with GPU cores</span>, compared to laptop:</p>
+<p class="small"><strong>Refactoring Material/Surface/Boundary code</strong></p>
 <ul class="small simple">
-<li>13x cores, 12x performance</li>
-</ul>
-<p class="small"><strong>Future scaling possibilities, with VCA</strong></p>
-<p class="small">OptiX apps can connect to remote Visual Computing Appliances</p>
-<ul class="small simple">
-<li>1 VCA : <strong>24,576</strong> cores (64x laptop GPU)</li>
-</ul>
-<p class="small">Clusters of ~10 VCAs are in use by design/advertising companies
-for interactive product rendering.</p>
-<p class="tiny"><a class="reference external" href="http://www.nvidia.com/object/visual-computing-appliance.html">http://www.nvidia.com/object/visual-computing-appliance.html</a> (8 Maxwell GPUs)</p>
-<p class="tiny"><a class="reference external" href="http://on-demand-gtc.gputechconf.com/gtc-quicklink/6bIayc">http://on-demand-gtc.gputechconf.com/gtc-quicklink/6bIayc</a></p>
-</div>
-<div class="slide" id="optix-programming-model">
-<h1><span class="small">OptiX Programming Model</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">OptiX Control Flow</p>
-<img alt="/env/optix/docs/optix-model.png" class="last align-right" src="/env/optix/docs/optix-model.png" style="width: 450px;" />
-</div>
-<p class="small">OptiX provides a <span class="red">ray tracing pipeline</span> analogous to OpenGL
-rasterization pipeline.</p>
-<ul class="small simple">
-<li>Blue: OptiX internals</li>
-<li>Yellow: User supplied CUDA <em>Programs</em></li>
-</ul>
-<p class="small">Higher level API than pure CUDA, eg:</p>
-<ul class="small simple">
-<li><span class="red">shared host/device context system</span></li>
-</ul>
-<p class="small"><strong>Optical Photon Simulation port currently using:</strong></p>
-<dl class="small docutils">
-<dt><em>Ray Generation</em></dt>
-<dd>entry/exit, Cerenkov/Scintillation generation</dd>
-<dt><em>Intersection</em></dt>
-<dd>Triangle mesh intersection, boundary index lookup</dd>
-<dt><em>Closest Hit</em></dt>
-<dd>determine ray to boundary orientation</dd>
-</dl>
-<p class="tiny"><a class="reference external" href="https://research.nvidia.com/sites/default/files/publications/Parker10Optix_1.pdf">https://research.nvidia.com/sites/default/files/publications/Parker10Optix_1.pdf</a></p>
-</div>
-<div class="slide" id="optix-adoption-costs">
-<h1><span class="small">OptiX Adoption Costs</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Defer to NVIDIA</p>
-<ul class="small last simple">
-<li>acceleration structure creation and fast traversal</li>
-<li><span class="red">efficient GPU/multi-GPU utilization</span></li>
-</ul>
-</div>
-<p class="small"><strong>Adoption of OptiX is compelling</strong></p>
-<ul class="small simple">
-<li>extremely fast intersection performance</li>
-<li>scales with CUDA cores across multiple GPUs</li>
-<li>improves with each release</li>
-<li>releases tune for new GPU architectures</li>
-</ul>
-<p class="small"><strong>Costs of adoption</strong></p>
-<ul class="small simple">
-<li><span class="green">learn new tools: OptiX, Thrust</span></li>
-<li><span class="green">develop C++ replacement for Chroma/G4DAE python</span></li>
-<li><span class="blue">port Chroma/G4 optical physics into new framework</span></li>
-<li><span class="red">validate against Geant4</span></li>
-<li><span class="red">develop memory efficient geometry representation</span></li>
-</ul>
-</div>
-<div class="slide" id="new-c-packages-replacing-chroma">
-<h1><span class="small">New C++ Packages Replacing Chroma</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">~10 Packages Developed</p>
-<p class="small">Organized by dependencies</p>
-<ul class="small simple">
-<li><span class="red">Recreates Geant4 context on GPU</span></li>
-<li><span class="blue">Optical simulation by OptiX programs</span></li>
-<li><span class="blue">Visualization by OpenGL GLSL Shaders</span></li>
-</ul>
-<p class="small">Interop between OpenGL/OptiX/Thrust/CUDA</p>
-<ul class="small simple">
-<li><span class="blue">shared GPU buffers, efficient visualization</span></li>
-</ul>
-<p class="small">Externals:</p>
-<ul class="small simple">
-<li>Boost libraries</li>
-<li>Boost-Asio, Asio-ZMQ, ZMQ</li>
-<li>CUDA 7.0, Thrust 1.8</li>
-<li>OptiX 3.8</li>
-<li>OpenGL 4.1 (GLEW, GLFW, GLM)</li>
-<li>ImGUI</li>
-</ul>
-<p class="small last">See <em>backup</em> for details, source links</p>
-</div>
-<p class="small"><strong>Basis packages</strong></p>
-<ul class="small simple">
-<li><em>NPY</em> : host array handling, persistency</li>
-<li><em>NumpyServer</em> : network IO of <em>NPY</em> arrays</li>
-<li><em>BCfg</em> <em>BRegex</em> : configuration</li>
-</ul>
-<p class="small"><strong>Geometry packages</strong></p>
-<ul class="small simple">
-<li><em>GGeo</em> : preparing geometry for GPU</li>
-<li><em>AssimpWrap</em> : G4DAE geometry loading using forked Assimp</li>
-</ul>
-<p class="small"><strong>GPU library interface packages</strong></p>
-<ul class="small simple">
-<li><em>CUDAWrap</em> : pseudo random numbers with cuRAND</li>
-<li><em>OptiXRap</em> : geometry loading, OptiX launch control</li>
-<li><em>OGLWrap</em> : OpenGL visualization</li>
-<li><em>ThrustRap</em> : photon indexing, using CUDA Thrust</li>
-</ul>
-<p class="small"><strong>Main package</strong></p>
-<ul class="small simple">
-<li><em>GGeoView</em> : optical physics OptiX programs, OpenGL shaders</li>
-</ul>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/</a></p>
-</div>
-<div class="slide" id="selection-of-gpu-development-details">
-<h1><span class="small">Selection of GPU development details</span></h1>
-<p class="small">Some details of GPU developments described over the next pages</p>
-<p class="small"><strong>Optical Physics</strong></p>
-<ul class="small simple">
-<li>Porting Optical Physics from Geant4/Chroma into OptiX</li>
-<li>Optical Physics Implementation</li>
-</ul>
-<p class="small"><strong>Supplying the OptiX Programs</strong></p>
-<ul class="small simple">
-<li>Random Number Generation in OptiX programs</li>
-<li>Fast material/surface property lookup from boundary texture</li>
-<li>Reemission wavelength lookup from Inverted CDF texture</li>
-</ul>
-<p class="small"><strong>Handling Outputs</strong></p>
-<ul class="small simple">
-<li>Recording the steps of millions photons</li>
-<li>Indexing photon flag/material sequences</li>
-<li>Introducing CUDA Thrust</li>
-</ul>
-</div>
-<div class="slide" id="porting-optical-physics-from-geant4-chroma-into-optix">
-<h1><span class="small">Porting Optical Physics from Geant4/Chroma into OptiX</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Synthesis of sources</p>
-<ul class="small simple">
-<li>Chroma: overall <span class="red">propagation loop</span> structure</li>
-<li>Geant4: simulation details</li>
-<li>Graphics: fast computation techniques</li>
-</ul>
-<p class="small"><strong>rtTrace</strong> OptiX fast geometry intersection</p>
-<dl class="small last docutils">
-<dt><strong>propagate_to_boundary</strong></dt>
-<dd>~G4OpAbsorption, ~G4OpRayleigh</dd>
-<dt><strong>propagate_at_surface/propagate_at_boundary</strong></dt>
-<dd>~G4OpBoundaryProcess</dd>
-</dl>
-</div>
-<pre class="mypre">
-Photon p ; State s ; PerRayData prd ;
-while(bounce < bounce_max)  // PSEUDO-CODE
-{
-  bounce++
-
-  ray = optix::make_Ray(p.pos, p.dir,...)
-  rtTrace(geom, ray, prd)
-  if(!prd.boundary) break  // MISS
-
-  cmd = propagate_to_boundary(p, s)
-  if(cmd == BREAK)    break     // ABSORB
-  if(cmd == CONTINUE) continue  // REEMIT, SCATTER
-  // survivors pass to boundary
-
-  if(s.surface_index)
-  {
-     cmd = propagate_at_surface(p, s, g)
-     if(cmd == BREAK) break         // SURFACE_ABSORB, SURFACE_DETECT
-     if(cmd == CONTINUE) continue   // REFLECT_DIFFUSE, REFLECT_SPECULAR
-  }
-  else
-  {
-     propagate_at_boundary(p, s)    // BOUNDARY_REFLECT BOUNDARY_TRANSMIT
-  }
-}
-</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/cu/generate.cu">https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/cu/generate.cu</a></p>
-</div>
-<div class="slide" id="optical-physics-implementation">
-<h1><span class="small">Optical Physics Implementation</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Approach</p>
-<ul class="small simple">
-<li>Overall Structure from Chroma</li>
-<li>Aiming for equivalence with Geant4</li>
-<li><span class="red">Optical Surface treatment in progress</span></li>
-</ul>
-<p class="small last"><span class="blue">Texture lookups of material/surface properties and reemission wavelengths keeps kernels simple</span></p>
-</div>
-<dl class="small docutils">
-<dt><strong>Rayleigh Scattering</strong></dt>
-<dd>Direct port of <em>G4OpRayleigh</em> (Xin Qian patch)</dd>
-<dt><strong>Reemission</strong></dt>
-<dd><ul class="first last simple">
-<li>Treated as subset of absorption, conferring rebirth</li>
-<li>wavelength from reemission texture lookup</li>
-</ul>
-</dd>
-<dt><strong>Boundary Reflect/Transmit</strong></dt>
-<dd><ul class="first last simple">
-<li>Snell's law rearranged to avoid transcendentals</li>
-<li>Russian Roulette treatment of S or P polarization (simpler than G4)</li>
-</ul>
-</dd>
-<dt><strong>propagate_at_surface: Absorb, Detect, Reflect Diffuse/Specular</strong></dt>
-<dd><ul class="first last simple">
-<li><span class="red">surface properties still being debugged</span></li>
-<li><span class="red">G4 Unified model (SPECULARLOBE/SPIKE etc..) not yet ported</span></li>
-</ul>
-</dd>
-</dl>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/cu/rayleigh.h">https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/cu/rayleigh.h</a></p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/cu/propagate.h">https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/cu/propagate.h</a></p>
-</div>
-<div class="slide" id="random-number-generation-in-optix-programs">
-<h1><span class="small">Random Number Generation in OptiX programs</span></h1>
-<p class="small"><strong>cuRAND library from CUDA toolkit features:</strong></p>
-<ul class="small simple">
-<li>concurrent generation of reproducible pseudorandom number sequences</li>
-<li>sub-sequences are assigned to each CUDA thread, which maintains position in sub-sequence</li>
-<li>per-thread state is initialized within CUDA kernel</li>
-</ul>
-<p class="small"><strong>cuRAND Initialization demands large stack size</strong></p>
-<p class="small">Stack sizes 10x typical for OptiX programs were needed,
-resulting in slow OptiX running.</p>
-<p class="small"><strong>Workaround:</strong></p>
-<ul class="small simple">
-<li>use separate pure CUDA launches to initialize cuRAND</li>
-<li>copy curandState back to host and persist to file</li>
-<li>prior to OptiX launch, copy persisted curandState to GPU</li>
-<li><span class="red">OptiX can then use cuRAND without having to initialize it</span></li>
-</ul>
-<p class="small">Packaged solution into <strong>CUDAWrap</strong></p>
-<ul class="small simple">
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/cuda/cudawrap/">https://bitbucket.org/simoncblyth/env/src/tip/cuda/cudawrap/</a></li>
-</ul>
-</div>
-<div class="slide" id="fast-material-surface-property-lookup-from-boundary-texture">
-<h1><span class="small">Fast material/surface property lookup from boundary texture</span></h1>
-<!-- comment
-
-Forked Assimp parses G4DAE **extra** XML elements, *AssimpWrap* creates *GGeo* geometry
-with standard properties interpolated onto :red:`common wavelength domain` -->
-<div class="sidebar">
-<p class="first sidebar-title">Fast GPU texture lookup</p>
-<p class="small last">GPUs contain hardware dedicated to fast texture lookup
-and interpolation.  Using texture lookup for all properties
-and reemission wavelengths keeps OptiX programs simple.</p>
-</div>
-<p class="small"><em>AssimpWrap</em> creates <em>GGeo</em> <span class="red">boundary instances</span> and labels
-triangles with <strong>boundary</strong> indices, boundaries contain:</p>
-<ul class="small simple">
-<li><strong>inner material</strong> : self</li>
-<li><strong>outer material</strong> : parent</li>
-<li><strong>inner surface</strong> : outwards going photons (self to parent)</li>
-<li><strong>outer surface</strong> : inwards going photons (parent to self)</li>
-</ul>
-<p class="small">Properties are interpolated onto a <span class="red">common wavelength domain</span></p>
-<ul class="small simple">
-<li><strong>material</strong> : refractive_index, absorption_length, scattering_length, reemission_prob (<em>float4</em>)</li>
-<li><strong>surface</strong> : detect, absorb, reflect_specular, reflect_diffuse (<em>float4</em>)</li>
-</ul>
-<p class="small">Interleaved properties used to create single <strong>boundary texture</strong> 2d (wavelength, qty line)
-containing ~50 boundaries, 4 <em>float4</em> each.  CUDA <strong>tex2d</strong> property lookup:</p>
-<pre class="small literal-block">
-float nmi = (nm - wavelength_domain.x)/wavelength_domain.z + 0.5f ;
-float4 material1 = tex2D(wavelength_texture, nmi, line + 0.5f );
-
-float refractive_index = material1.x ;
-float absorption_length = material1.y ;
-float scattering_length = material1.z ;
-</pre>
-<p class="tiny"><a class="reference external" href="https://github.com/simoncblyth/assimp">https://github.com/simoncblyth/assimp</a> (my fork of Assimp)</p>
-</div>
-<div class="slide" id="reemission-wavelength-lookup-from-inverted-cdf-texture">
-<h1><span class="small">Reemission wavelength lookup from Inverted CDF texture</span></h1>
-<p class="small">Inverting Reemission CDF allows using texture lookup to obtain
-reemission wavelength from uniform random throws.
-Using 4096 probability bins.</p>
-<img alt="/env/g4dae/reemission_src_cdf_icdf_smpl.png" class="align-center" src="/env/g4dae/reemission_src_cdf_icdf_smpl.png" style="width: 800px;" />
-</div>
-<div class="slide" id="recording-the-steps-of-3-million-photons">
-<h1><span class="small">Recording the steps of ~3 million photons</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">128 bit compressed record</p>
-<p class="small">Compression necessary to work with ~30M records
-(30M * 128bit = ~500 MB)</p>
-<p class="small last">GPU memory 2 GB</p>
-</div>
-<p class="small">Up to 10 steps of the photon propagation are recorded.</p>
-<p class="small"><strong>Photon buffer</strong> : 4 * <em>float4</em> = 512 bits/photon</p>
-<ul class="small simple">
-<li><em>float4</em>: position, time  [32 * 4 = 128 bits]</li>
-<li><em>float4</em>: direction, weight</li>
-<li><em>float4</em>: polarization, wavelength</li>
-<li><em>float4</em>: flags: material, boundary, history</li>
-</ul>
-<p class="small"><strong>Record buffer</strong> : 2 * <em>short4</em> = 2*16*4 = 128 bits/record</p>
-<ul class="small simple">
-<li><em>short4</em>: position, time (snorm compressed)  [4*16 = 64 bits]</li>
-<li><em>uchar4</em>: polarization, wavelength (uchar compressed) [4*8 = 32 bits]</li>
-<li><em>uchar4</em>: material, history flags [4*8 = 32 bits]</li>
-</ul>
-<p class="small">Compression uses known domains of position (geometry center, extent),
-time (0:200ns), wavelength, polarization.</p>
-<p class="tiny">Union trickery allows recording ints into floats</p>
-</div>
-<div class="slide" id="ggeoview-m1-points">
-<h1><span class="i">GGeoView M1 Points</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Scintillation Photons colored by material</p>
-<p class="tiny last">Visualization of 30M scintillation photon records from an 100 GeV muon crossing Dayabay AD.
-Primaries are simulated by Geant4, Scintillation &quot;steps&quot; of the primaries are transferred to the GPU,
-where photons are generated, propagated using NVIDIA OptiX and visualized using OpenGL.
-The dots represent propagation step positions with colors
-corresponding to materials.</p>
-</div>
-</div>
-<div class="slide" id="indexing-photon-flag-material-sequences">
-<h1><span class="small">Indexing photon flag/material sequences</span></h1>
-<div class="figure align-right">
-<img alt="/env/graphics/ggeoview/flagsequence.png" src="/env/graphics/ggeoview/flagsequence.png" style="width: 200px;" />
-</div>
-<p class="small">Selecting photons by flag/material sequences, requires indexing integer sequences.</p>
-<ul class="small simple">
-<li>CK : Cerenkov</li>
-<li>BT : Boundary Transmit</li>
-<li>BR : Boundary Reflect</li>
-<li>RE : Reemission</li>
-<li>AB : Absorb</li>
-<li>BS : Bulk Scatter</li>
-</ul>
-<p class="small">Indexing history/material sequences for 3M photons:</p>
-<ul class="small simple">
-<li>CPU STL map, sstream  ~40s</li>
-<li>CUDA Thrust sorted sparse histogram  &lt;0.4s</li>
-</ul>
-<p class="small">Packaged indexing into <strong>ThrustRap</strong> <em>ThrustIdx</em></p>
-<ul class="small simple">
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/numerics/thrustrap/">https://bitbucket.org/simoncblyth/env/src/tip/numerics/thrustrap/</a></li>
-</ul>
-</div>
-<div class="slide" id="ggeoview-flag-selection">
-<h1><span class="i">GGeoView Flag Selection</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Selection by flag sequence</p>
-<p class="tiny last">Selection of scintillation photons by flag sequence (all boundary transmit) from a 100 GeV muon crossing Dayabay AD.
-Primaries are simulated by Geant4, Scintillation &quot;steps&quot; of the primaries are transferred to the GPU.
-The dots represent OptiX calculated photon steps with colors
-corresponding to materials.</p>
-</div>
-</div>
-<div class="slide" id="introducing-cuda-thrust">
-<h1><span class="small">Introducing CUDA Thrust</span></h1>
-<img alt="/env/numerics/thrust/thrust.png" class="align-right" src="/env/numerics/thrust/thrust.png" style="width: 400px;" />
-<p class="small">Distributed with CUDA</p>
-<ul class="small simple">
-<li>C++ template library for CUDA based on STL</li>
-<li>higher level way to use CUDA</li>
-<li><a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a></li>
-</ul>
-<p class="small"><span class="red">GPU performance without developing CUDA kernels</span></p>
-</div>
-<div class="slide" id="mobile-gpu-timings-for-cerenkov-and-scintillation-photons">
-<h1><span class="small">Mobile GPU Timings for Cerenkov and Scintillation photons</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Avoid CPU for performance</p>
-<ul class="small simple">
-<li>allocation of ~700MB host memory dominates</li>
-<li>workstation GPU core counts =&gt; <em>generatePropagate</em> will
-become effectively zero</li>
-</ul>
-<p class="small">Once debugged can skip:</p>
-<ul class="small simple">
-<li>recording photon steps, indexing, OpenGL visualization</li>
-<li>most host allocations</li>
-</ul>
-<p class="small">Possible approach:</p>
-<ul class="small last simple">
-<li>allocate GPU only photon buffers using Thrust</li>
-<li>Thrust interop with OptiX to populate buffers</li>
-<li>copy back just the hits using thrust::copy_if</li>
-</ul>
-</div>
- <pre class="mypre">
- max_record:10
- max_bounce:9
-                    Cerenkov   Ck*4.59 Scintillation
-           photons     0.61M      2.8M      2.8M
- --(bytes)--------------------------------------
-      genstep size      736K                1.3M
-      photons size       37M                172M
-      records size       97M                430M
- --(seconds)------------------------------------
-   createOpenGLCtx     0.692         -     0.599
-      loadGeometry     1.570         -     1.302
-    interpGeometry     0.211         -     0.190
-         initOptiX     4.216         -     6.521
-
-       loadGenstep     0.011         -     0.014
- hostEvtAllocation **  3.540    16.275    16.179
-         uploadEvt     0.232     1.066     0.552
-
- generatePropagate ++  1.404     6.453     7.907
-
-       evtDownload **  0.348     1.602     1.780
-           evtSave **  0.437     2.008     2.006
-
-     sequenceIndex     0.134     0.614     0.359
- -----------------------------------------------
-                   ** scales by photon count
-
-
-</pre></div>
-<div class="slide" id="operation-with-juno-geometry">
-<h1><span class="small">Operation with JUNO Geometry ?</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">OptiX Julia Set Sample</p>
-<p class="small">Ray tracing with purely analytic geometry,
-ie <span class="red">no triangles</span>. Application to PMTs may
-allow drastic reduction in memory usage
-and access costs.</p>
-<img alt="/env/optix/raycast/julia.png" class="last align-right" src="/env/optix/raycast/julia.png" style="width: 463px;" />
-</div>
-<p class="small">The large number of PMTs may require a more memory
-efficient geometry representation using OptiX features:</p>
-<ul class="small simple">
-<li>parameterized geometry avoids tesselation, like <em>Geant4</em></li>
-<li>geometry instancing avoids duplication</li>
-</ul>
-<p class="small">Memory access (not calculation) typically limits GPU performance,
-improving memory efficiency expected to improve performance.</p>
-</div>
-<div class="slide" id="next-steps">
-<h1>Next Steps</h1>
-<p class="small"><strong>Test New Framework with IHEP 4-GPU workstation (together with Tao Lin)</strong></p>
-<ul class="small simple">
-<li>check performance scaling across 4-GPU cores</li>
-<li>attempt loading JUNO geometry</li>
-<li>investigate more memory efficient geometry techniques</li>
-</ul>
-<p class="small"><strong>Optical Photon Simulation</strong></p>
-<ul class="small simple">
-<li>Complete porting Optical Physics</li>
-<li>Instrument Geant4 optical photon propagation,
-by recording photon steps into NPY array to <span class="red">enable step-by-step comparison</span></li>
-<li>Debugging to <span class="red">achieve match between Geant4 and GPU</span> optical photon simulation,<ul>
-<li>QE details to port</li>
+<li>enable dynamic simple test geometries,<ul>
+<li>spheres of each material, surface</li>
+<li>PMT test black boxes</li>
 </ul>
 </li>
 </ul>
-<p class="small"><strong>G4DAE Geometry Exporter</strong></p>
-<ul class="small simple">
-<li>investigate issue inherited from GDML of a skipped
-edge case (when a volume is shared between multiple volume pairs)
-resulting in missing <em>G4LogicalBorderSurface</em></li>
-<li>incorporate into Geant4 codebase</li>
-</ul>
-</div>
-<div class="slide" id="backup-details-for-reference">
-<h1><span class="small">&quot;Backup&quot; : Details for Reference</span></h1>
-<p class="small">On the following pages:</p>
-<ul class="small simple">
-<li>GGeo/OptiX Generated Scintillation Photons cf Geant4</li>
-<li>GGeo/OptiX Generated Cerenkov Photons cf Geant4</li>
-<li>Cerenkov Photon Steps</li>
-<li>C++ Infrastructure : foundation packages</li>
-<li>C++ Infrastructure : domain packages</li>
-<li>propagate_to_boundary : ABSORB(REEMIT) / SCATTER / survive</li>
-<li>Comparison of GGeo/OptiX Generated Scintillation Photon Distributions</li>
-<li>Comparison of GGeo/OptiX Generated Cerenkov Photon Distributions</li>
-</ul>
-</div>
-<div class="slide" id="ggeo-optix-generated-scintillation-photons-cf-geant4">
-<h1><span class="small">GGeo/OptiX Generated Scintillation Photons cf Geant4</span></h1>
-<p class="small">GGeo/OptiX using inverted CDF reemission wavelength lookups (4096 bins)</p>
-<img alt="/env/g4dae/generated_oxscintillation_time_wavelength.png" class="align-center" src="/env/g4dae/generated_oxscintillation_time_wavelength.png" style="width: 800px;" />
-</div>
-<div class="slide" id="ggeo-optix-generated-cerenkov-photons-cf-geant4">
-<h1><span class="small">GGeo/OptiX Generated Cerenkov Photons cf Geant4</span></h1>
-<p class="small">Geant4/DetSim wavelength distribution has a blip at 200nm, corresponding to edge of water
-refractive index properties.</p>
-<img alt="/env/g4dae/generated_oxcerenkov_time_wavelength.png" class="align-center" src="/env/g4dae/generated_oxcerenkov_time_wavelength.png" style="width: 800px;" />
-</div>
-<div class="slide" id="ggeoview-cerenkov-geom-m1">
-<h1><span class="i">GGeoView Cerenkov Geom M1</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Cerenkov Photon Steps</p>
-<p class="tiny last">Cerenkov photons steps from a 100 GeV muon crossing Dayabay AD.
-Primaries are simulated by Geant4, Cerenkov  &quot;steps&quot; of the primaries are transferred to the GPU.
-The dots represent OptiX calculated photon steps with colors
-corresponding to materials.</p>
-</div>
-</div>
-<div class="slide" id="c-infrastructure-foundation-packages">
-<h1><span class="small">C++ Infrastructure : foundation packages</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Replacing Python, NumPy, PyZMQ</p>
-<p class="small">Boost Libraries (filesystem, thread, program_options, logging, regex, ptree, Asio)
-and Asio-ZMQ, ZMQ used to replace python packages.</p>
-<p class="small">NPY format convenient for C++/Python interop:</p>
-<pre class="tiny last literal-block">
-a = np.load(&quot;photons.npy&quot;)
-</pre>
-</div>
-<dl class="small docutils">
-<dt><em>NPY</em></dt>
-<dd><p class="first">Array persistency/manipulations inspired by NumPy,
-using NPY serialization format</p>
-<ul class="last simple">
-<li>11 classes: G4StepNPY, PhotonsNPY, NPY, ...</li>
-</ul>
-</dd>
-<dt><em>NumpyServer</em></dt>
-<dd><p class="first">Asynchronous IO of Geant4 Steps, Photons, Hits.
-Communicates with remote <em>G4DAEOpticks</em> process, receiving
-steps and replying with hits.</p>
-<ul class="last simple">
-<li>7 classes : numpydelegate, udp_server, ...</li>
-</ul>
-</dd>
-<dt><em>CUDAWrap</em></dt>
-<dd><p class="first">cuRAND init and persist curandState (pure CUDA)</p>
-<ul class="last simple">
-<li>avoids large stack size requirement of cuRAND init within OptiX</li>
-<li>5 classes : cuRANDWrapper, LaunchSequence, LaunchCommon, ..</li>
-</ul>
-</dd>
-</dl>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/numerics/npy/">https://bitbucket.org/simoncblyth/env/src/tip/numerics/npy/</a></p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/boost/basio/numpyserver/">https://bitbucket.org/simoncblyth/env/src/tip/boost/basio/numpyserver/</a></p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/cuda/cudawrap/">https://bitbucket.org/simoncblyth/env/src/tip/cuda/cudawrap/</a></p>
-</div>
-<div class="slide" id="c-infrastructure-domain-packages">
-<h1><span class="small">C++ Infrastructure : domain packages</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Replacing Python packages</p>
-<p class="small">Many C++ classes required to replace:</p>
-<ul class="small simple">
-<li>PyCOLLADA</li>
-<li>PyOpenGL + glumpy + GLUT</li>
-<li>daenode.py</li>
-<li>g4daeview.py</li>
-</ul>
-<p class="small">Migration allows use of modern OpenGL 4.1:</p>
-<ul class="small last simple">
-<li>better visualization performance</li>
-<li>retina resolution support</li>
-<li>many GUI packages to choose from, picked <a class="reference external" href="https://github.com/ocornut/imgui">https://github.com/ocornut/imgui</a></li>
-</ul>
-</div>
-<dl class="small docutils">
-<dt><em>GGeo</em></dt>
-<dd><p class="first">GPU Geometry representation, NPY persistency</p>
-<ul class="last simple">
-<li>22 classes: GNode, GMaterial, GProperty, ...</li>
-</ul>
-</dd>
-<dt><em>AssimpWrap</em></dt>
-<dd><p class="first">G4DAE -&gt; GGeo geometry</p>
-<ul class="last simple">
-<li>7 classes : AssimpGGeo, AssimpTree, ...</li>
-</ul>
-</dd>
-<dt><em>OptiXRap</em></dt>
-<dd><p class="first">GGeo -&gt; OptiX geometry, OptiX launch control</p>
-<ul class="last simple">
-<li>7 classes : OptiXEngine, OptixGeometry, ...</li>
-</ul>
-</dd>
-<dt><em>OGLRap</em></dt>
-<dd><p class="first">OpenGL shader based 3D visualization</p>
-<ul class="last simple">
-<li>29 classes : Scene, View, Camera, Rdr, Shdr, ...</li>
-</ul>
-</dd>
-</dl>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/optix/ggeo/">https://bitbucket.org/simoncblyth/env/src/tip/optix/ggeo/</a></p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/assimpwrap/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/assimpwrap/</a></p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/oglrap/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/oglrap/</a></p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/optixrap/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/optixrap/</a></p>
-</div>
-<div class="slide" id="propagate-to-boundary-absorb-reemit-scatter-survive">
-<h1><span class="small">propagate_to_boundary : ABSORB(REEMIT) / SCATTER / survive</span></h1>
-<pre class="mypre">
- __device__ int propagate_to_boundary( Photon& p, State& s, curandState &rng)
- {
-      float absorption_distance = -s.material1.y*logf(curand_uniform(&rng));   // .y:absorption_length
-      float scattering_distance = -s.material1.z*logf(curand_uniform(&rng));   // .z:scattering_length
-
-      if (absorption_distance <= scattering_distance)
-      {
-          if (absorption_distance <= s.distance_to_boundary)
-          {
-              p.time += absorption_distance/(SPEED_OF_LIGHT/s.material1.x);    // .x:refractive_index
-              p.position += absorption_distance*p.direction;
-
-              if (curand_uniform(&rng) < s.material1.w) // .w:reemission_prob
-              {
-                   // non-scintillators have zero reemission_prob
-                  p.wavelength = reemission_lookup(curand_uniform(&rng));
-                  p.direction = uniform_sphere(&rng);
-                  p.polarization = normalize(cross(uniform_sphere(&rng), p.direction));
-
-                  s.flag = BULK_REEMIT ;
-                  return CONTINUE;
-              }
-              else
-              {
-                  s.flag = BULK_ABSORB ;
-                  return BREAK;
-              }
-          }
-          //  otherwise sail to boundary
-     }
-     else
-     // scattering ..
-</pre></div>
-<div class="slide" id="comparison-of-ggeo-optix-generated-scintillation-photon-distributions">
-<h1><span class="small">Comparison of GGeo/OptiX Generated Scintillation Photon Distributions</span></h1>
-<p class="small">Position, direction, polarization XYZ  + time, wavelength, weight</p>
-<img alt="/env/g4dae/generated_oxscintillation_3xyzw.png" class="align-center" src="/env/g4dae/generated_oxscintillation_3xyzw.png" style="width: 700px;" />
-</div>
-<div class="slide" id="comparison-of-ggeo-optix-generated-cerenkov-photon-distributions">
-<h1><span class="small">Comparison of GGeo/OptiX Generated Cerenkov Photon Distributions</span></h1>
-<p class="small">Position, direction, polarization XYZ  + time, wavelength, weight</p>
-<img alt="/env/g4dae/generated_oxcerenkov_3xyzw.png" class="align-center" src="/env/g4dae/generated_oxcerenkov_3xyzw.png" style="width: 700px;" />
-</div>
-<div class="slide" id="ggeoview">
-<h1><span class="i">GGeoView</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">GGeoView</p>
-<p class="tiny last">Cerenkov photons from an 100 GeV muon travelling from right to left across Dayabay AD.
-Primaries are simulated by Geant4, Cerenkov &quot;steps&quot; of the primaries are transferred to the GPU.
-The dots represent OptiX calculated first intersections of GPU generated photons with colors
-corresponding to material boundaries: <span class="red">(red) GdDopedLS:Acrylic</span>,
-<span class="green">(green) LiquidScintillator:Acrylic</span>, <span class="blue">(blue) Acrylic:LiquidScintillator</span>,
-(white) IwsWater:UnstStainlessSteel, (grey) others.
-The red lines represent the positions and directions of the &quot;steps&quot; with an
-arbitrary scaling for visibility.</p>
-</div>
-</div>
-<div class="system-messages slide">
-<h1>Docutils System Messages</h1>
-<div class="system-message" id="id3">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">optical_photon_simulation_progress.txt</tt>, line 287)</p>
-Too many autonumbered footnote references: only 0 corresponding footnotes available.</div>
-<div class="system-message" id="id4">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">optical_photon_simulation_progress.txt</tt>, line 287); <em><a href="#id5">backlink</a></em></p>
-Duplicate target name, cannot be used as a unique reference: &quot;hw&quot;.</div>
 </div>
 </div>
 </body>
