@@ -150,15 +150,703 @@
 <h1>NVIDIA OptiX Ray Trace Toolkit<a class="headerlink" href="#nvidia-optix-ray-trace-toolkit" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="resources">
 <h2>Resources<a class="headerlink" href="#resources" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/board/90/optix/">https://devtalk.nvidia.com/default/board/90/optix/</a></li>
+<li><a class="reference external" href="http://docs.nvidia.com/gameworks/index.html#gameworkslibrary/optix/optix_programming_guide.htm">http://docs.nvidia.com/gameworks/index.html#gameworkslibrary/optix/optix_programming_guide.htm</a></li>
+</ul>
+</div>
+<div class="section" id="fora-posts">
+<h2>Fora Posts<a class="headerlink" href="#fora-posts" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/815975/optix/geometryinstances-toggling-objects-between-visible-invisible/">https://devtalk.nvidia.com/default/topic/815975/optix/geometryinstances-toggling-objects-between-visible-invisible/</a></li>
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/817572/optix/graph-nodes-in-optix/">https://devtalk.nvidia.com/default/topic/817572/optix/graph-nodes-in-optix/</a></li>
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/771998/optix/optix-acceleration-structure/">https://devtalk.nvidia.com/default/topic/771998/optix/optix-acceleration-structure/</a></li>
+</ul>
+</div>
+<div class="section" id="conference-talks">
+<h2>Conference Talks<a class="headerlink" href="#conference-talks" title="Permalink to this headline">¶</a></h2>
 <ul>
-<li><p class="first"><a class="reference external" href="https://devtalk.nvidia.com/default/board/90/optix/">https://devtalk.nvidia.com/default/board/90/optix/</a></p>
+<li><p class="first"><a class="reference external" href="http://www.nvidia.com/object/siggraph2015-best-gtc.html">http://www.nvidia.com/object/siggraph2015-best-gtc.html</a></p>
 </li>
 <li><p class="first"><a class="reference external" href="http://on-demand-gtc.gputechconf.com/gtcnew/on-demand-gtc.php?searchByKeyword=Optix&amp;searchItems=&amp;sessionTopic=&amp;sessionEvent=&amp;sessionYear=&amp;sessionFormat=&amp;submit=&amp;select=+">http://on-demand-gtc.gputechconf.com/gtcnew/on-demand-gtc.php?searchByKeyword=Optix&amp;searchItems=&amp;sessionTopic=&amp;sessionEvent=&amp;sessionYear=&amp;sessionFormat=&amp;submit=&amp;select=+</a></p>
 <p>Many presentations (videos and pdfs) on OptiX</p>
 </li>
-<li><p class="first"><a class="reference external" href="http://docs.nvidia.com/gameworks/index.html#gameworkslibrary/optix/optix_programming_guide.htm">http://docs.nvidia.com/gameworks/index.html#gameworkslibrary/optix/optix_programming_guide.htm</a></p>
+</ul>
+</div>
+<div class="section" id="optix-csg">
+<h2>OptiX CSG<a class="headerlink" href="#optix-csg" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://mediatech.aalto.fi/~jaakko/ME-C3100/S2013/12_RayTracing.pdf">https://mediatech.aalto.fi/~jaakko/ME-C3100/S2013/12_RayTracing.pdf</a></li>
+</ul>
+</div>
+<div class="section" id="samples">
+<h2>Samples<a class="headerlink" href="#samples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="julia-example-of-analytic-geometry">
+<h3>julia : example of analytic geometry<a class="headerlink" href="#julia-example-of-analytic-geometry" title="Permalink to this headline">¶</a></h3>
+<p>/usr/local/env/cuda/OptiX_380_sdk/julia/julia.cpp:</p>
+<div class="highlight-python"><pre>414 void JuliaScene::createGeometry()
+415 {
+416   // Julia object
+417   Geometry julia = m_context-&gt;createGeometry();
+418   julia-&gt;setPrimitiveCount( 1u );
+419   julia-&gt;setBoundingBoxProgram( m_context-&gt;createProgramFromPTXFile( ptxpath( "julia", "julia.cu" ), "bounds" ) );
+420   julia-&gt;setIntersectionProgram( m_context-&gt;createProgramFromPTXFile( ptxpath( "julia", "julia.cu" ), "intersect" ) );
+421</pre>
+</div>
+<div class="highlight-python"><pre>167 RT_PROGRAM void intersect(int primIdx)
+///
+///    primIdx not used
+///
+168 {
+169   float tmin, tmax;
+170   if( intersectBoundingSphere(ray.origin, ray.direction, tmin, tmax) )
+171   {
+172     JuliaSet distance( max_iterations );</pre>
+</div>
+</div>
+<div class="section" id="progressivephotonmap">
+<h3>progressivePhotonMap<a class="headerlink" href="#progressivephotonmap" title="Permalink to this headline">¶</a></h3>
+<p>Stages:</p>
+<ul>
+<li><p class="first">trace viewing rays from camera position thru pixels into scene
+collecting rtBuffer&lt;HitRecord,2&gt; rtpass_output_buffer
+which contain hit position, normal and a starting radius and
+initialize stats to zero for this &#8220;region&#8221;/pixel</p>
+<p>This initial stage only need to be repeated when camera position changes,
+it is identifying surfaces relevant to the current view.</p>
+</li>
+<li></li>
+</ul>
+<p>Note implicit &#8220;union&#8221; between PhotonRecord and PackedPhotonRecord</p>
+<p>/usr/local/env/cuda/OptiX_380_sdk/progressivePhotonMap/ppm.h:</p>
+<div class="highlight-python"><pre>089 struct PhotonRecord
+ 90 {
+ 91   optix::float3 position;
+ 92   optix::float3 normal;      // Pack this into 4 bytes
+ 93   optix::float3 ray_dir;
+ 94   optix::float3 energy;
+ 95   optix::uint   axis;
+ 96   optix::float3 pad;
+ 97 };
+ 98
+ 99
+100 struct PackedPhotonRecord
+101 {
+102   optix::float4 a;   // position.x, position.y, position.z, normal.x
+103   optix::float4 b;   // normal.y,   normal.z,   ray_dir.x,  ray_dir.y
+104   optix::float4 c;   // ray_dir.z,  energy.x,   energy.y,   energy.z
+105   optix::float4 d;   // axis,       padding,    padding,    padding
+106 };</pre>
+</div>
+<p>/usr/local/env/cuda/OptiX_380_sdk/progressivePhotonMap/ppm.cpp:</p>
+<div class="highlight-python"><pre>140   enum ProgramEnum {
+141     rtpass,
+142     ppass,
+143     gather,
+144     numPrograms
+145   };
+///
+/// 3 stage
+///
+572 void ProgressivePhotonScene::trace( const RayGenCameraData&amp; camera_data )
+580   if ( m_camera_changed ) {
+587      // Trace viewing rays
+592      m_context-&gt;launch( rtpass,
+593                       static_cast&lt;unsigned int&gt;(buffer_width),
+594                       static_cast&lt;unsigned int&gt;(buffer_height) );
+597     m_context["total_emitted"]-&gt;setFloat(  0.0f );
+598     m_iteration_count=1;
+599   }
+
+601   // Trace photons
+///      trace photons from lights, and collect non-specular non-direct records
+610   m_context-&gt;launch( ppass,
+611                     static_cast&lt;unsigned int&gt;(m_photon_launch_width),
+612                     static_cast&lt;unsigned int&gt;(m_photon_launch_height) );
+...
+621   // Build KD tree
+624   createPhotonMap();
+...
+628   // Shade view rays by gathering photons
+631   m_context-&gt;launch( gather,
+632                     static_cast&lt;unsigned int&gt;(buffer_width),
+633                     static_cast&lt;unsigned int&gt;(buffer_height) );</pre>
+</div>
+<p>ppm_rtpass.cu:</p>
+<div class="highlight-python"><pre>/// camera ray launch, collecting HitRecords for diffuse surface intersections
+
+039 rtBuffer&lt;HitRecord, 2&gt;           rtpass_output_buffer;
+...
+ 89 RT_PROGRAM void rtpass_closest_hit()
+ 90 {
+...
+104   float3 hit_point    = origin + t_hit*direction;
+105
+106   if( fmaxf( Kd ) &gt; 0.0f ) {
+107     // We hit a diffuse surface; record hit and return
+108     HitRecord rec;
+109     rec.position = hit_point;
+110     rec.normal = ffnormal;
+...
+125     rec.flags = PPM_HIT;
+127     rec.radius2 = rtpass_default_radius2;
+128     rec.photon_count = 0;
+129     rec.accum_atten = 0.0f;
+130     rec.flux = make_float3(0.0f, 0.0f, 0.0f);
+131
+132     rtpass_output_buffer[launch_index] = rec;
+133   } else {
+134     // Make reflection ray
+135     hit_prd.attenuation = hit_prd.attenuation * Ks;
+136     hit_prd.ray_depth++;
+137     float3 R = reflect( direction, ffnormal );
+138     optix::Ray refl_ray( hit_point, R, rtpass_ray_type, scene_epsilon );
+139     rtTrace( top_object, refl_ray, hit_prd );
+140   }</pre>
+</div>
+<p>ppm_ppass.cu:</p>
+<div class="highlight-python"><pre>040 rtBuffer&lt;PhotonRecord, 1&gt;        ppass_output_buffer;
+...
+ 94 RT_PROGRAM void ppass_camera()
+ 95 {
+ 96   size_t2 size     = photon_rnd_seeds.size();
+ 97   uint    pm_index = (launch_index.y * size.x + launch_index.x) * max_photon_count;
+ 98   uint2   seed     = photon_rnd_seeds[launch_index]; // No need to reset since we dont reuse this seed
+ 99
+100   float2 direction_sample = make_float2(
+101       ( static_cast&lt;float&gt;( launch_index.x ) + rnd( seed.x ) ) / static_cast&lt;float&gt;( size.x ),
+102       ( static_cast&lt;float&gt;( launch_index.y ) + rnd( seed.y ) ) / static_cast&lt;float&gt;( size.y ) );
+///
+///     divvy up 0. -&gt; 1. corresponding to the launch index with random offset within the divvied region
+///     and use that for sampling portions of the light
+///
+103   float3 ray_origin, ray_direction;
+104   if( light.is_area_light ) {
+105     generateAreaLightPhoton( light, direction_sample, ray_origin, ray_direction );
+106   } else {
+107     generateSpotLightPhoton( light, direction_sample, ray_origin, ray_direction );
+108   }
+    ...
+110   optix::Ray ray(ray_origin, ray_direction, ppass_and_gather_ray_type, scene_epsilon );
+111
+112   // Initialize our photons
+113   for(unsigned int i = 0; i &lt; max_photon_count; ++i) {
+114     ppass_output_buffer[i+pm_index].energy = make_float3(0.0f);
+115   }
+116
+117   PhotonPRD prd;
+118   //  rec.ray_dir = ray_direction; // set in ppass_closest_hit
+119   prd.energy = light.power;
+120   prd.sample = seed;
+121   prd.pm_index = pm_index;
+122   prd.num_deposits = 0;
+123   prd.ray_depth = 0;
+124   rtTrace( top_object, ray, prd );
+125 }
+
+
+
+
+139 RT_PROGRAM void ppass_closest_hit()
+///
+///    keep bouncing and recording diffuse intersection PhotonRec
+///    after 1st : max_photon_count is only 2
+///
+///
+140 {
+...
+146   float3 hit_point = ray.origin + t_hit*ray.direction;
+147   float3 new_ray_dir;
+148
+149   if( fmaxf( Kd ) &gt; 0.0f ) {
+150     // We hit a diffuse surface; record hit if it has bounced at least once
+151     if( hit_record.ray_depth &gt; 0 ) {
+152       PhotonRecord&amp; rec = ppass_output_buffer[hit_record.pm_index + hit_record.num_deposits];
+153       rec.position = hit_point;
+...
+157       hit_record.num_deposits++;
+158     }
+159
+160     hit_record.energy = Kd * hit_record.energy;
+...
+163     sampleUnitHemisphere(rnd_from_uint2(hit_record.sample), U, V, W, new_ray_dir);
+164
+165   } else {
+166     hit_record.energy = Ks * hit_record.energy;
+168     new_ray_dir = reflect( ray.direction, ffnormal );
+169   }
+///
+///    attenuate the energy (which starts as characteristic float3 light.power)
+///    at each bounce by the Kd or Ks characteristic of the surface
+///
+170
+171   hit_record.ray_depth++;
+172   if ( hit_record.num_deposits &gt;= max_photon_count || hit_record.ray_depth &gt;= max_depth)
+173     return;
+174
+175   optix::Ray new_ray( hit_point, new_ray_dir, ppass_and_gather_ray_type, scene_epsilon );
+176   rtTrace(top_object, new_ray, hit_record);
+177 }</pre>
+</div>
+<p>ppm.cpp:</p>
+<div class="highlight-python"><pre>219 void ProgressivePhotonScene::initScene( InitialCameraData&amp; camera_data )
+...
+302   // Photon pass
+303   m_photons = m_context-&gt;createBuffer( RT_BUFFER_OUTPUT );
+304   m_photons-&gt;setFormat( RT_FORMAT_USER );
+305   m_photons-&gt;setElementSize( sizeof( PhotonRecord ) );
+306   m_photons-&gt;setSize( m_num_photons );
+307   m_context["ppass_output_buffer"]-&gt;set( m_photons );
+...
+...
+525 void ProgressivePhotonScene::createPhotonMap()
+526 {
+527   PhotonRecord* photons_data    = reinterpret_cast&lt;PhotonRecord*&gt;( m_photons-&gt;map() );
+528   PhotonRecord* photon_map_data = reinterpret_cast&lt;PhotonRecord*&gt;( m_photon_map-&gt;map() );
+...
+534   // Push all valid photons to front of list
+535   unsigned int valid_photons = 0;
+536   PhotonRecord** temp_photons = new PhotonRecord*[m_num_photons];
+537   for( unsigned int i = 0; i &lt; m_num_photons; ++i ) {
+538     if( fmaxf( photons_data[i].energy ) &gt; 0.0f ) {
+539       temp_photons[valid_photons++] = &amp;photons_data[i];
+540     }
+541   }
+...
+548   // Make sure we aren't at most 1 less than power of 2
+549   valid_photons = valid_photons &gt;= m_photon_map_size ? m_photon_map_size : valid_photons;
+...
+564   // Now build KD tree
+///
+///        starts with all valid photons
+///        these are recursively spatially partitioned
+///
+565   buildKDTree( temp_photons, 0, valid_photons, 0, photon_map_data, 0, m_split_choice, bbmin, bbmax );
+566
+567   delete[] temp_photons;
+568   m_photon_map-&gt;unmap();
+569   m_photons-&gt;unmap();
+570 }
+...
+...
+412 void buildKDTree( PhotonRecord** photons, int start, int end, int depth, PhotonRecord* kd_tree, int current_root,
+413                   SplitChoice split_choice, float3 bbmin, float3 bbmax)
+414 {
+415   // If we have zero photons, this is a NULL node
+416   if( end - start == 0 ) {
+417     kd_tree[current_root].axis = PPM_NULL;
+418     kd_tree[current_root].energy = make_float3( 0.0f );
+419     return;
+420   }
+421
+422   // If we have a single photon
+423   if( end - start == 1 ) {
+424     photons[start]-&gt;axis = PPM_LEAF;
+425     kd_tree[current_root] = *(photons[start]);
+426     return;
+427   }
+428
+429   // Choose axis to split on
+430   int axis;
+...
+466   int median = (start+end) / 2;
+467   PhotonRecord** start_addr = &amp;(photons[start]);
+...
+484   switch( axis ) {
+485   case 0:
+486     select&lt;PhotonRecord*, 0&gt;( start_addr, 0, end-start-1, median-start );
+///
+///                                  list     left   right       k
+///
+///                        list[left]..list[k-1] &lt; list[k] &lt; list[k+1]..list[right]
+///
+///            picks axis and spatial split value for median photon
+///            partially orders photons PhotonRecord pointers
+///            such that they are above and below median value
+///
+///            does a recursive tree split about the median,
+///
+///
+///    select.h,
+///        similar to Select1 algorithm from: Computer Algorithms C++ by Horowitz,...  p164 p154
+///
+///
+487     photons[median]-&gt;axis = PPM_X;
+488     break;
+...
+519   kd_tree[current_root] = *(photons[median]);
+///
+///       write median PhotonRecord into kd_tree
+///
+520   buildKDTree( photons, start, median, depth+1, kd_tree, 2*current_root+1, split_choice, bbmin,  leftMax );
+521   buildKDTree( photons, median+1, end, depth+1, kd_tree, 2*current_root+2, split_choice, rightMin, bbmax );
+///
+///           recurse on down doing left/right splits covering fewer and fewer photons until down to 0 or 1
+///           as the tree is perfectly balanced do not need pointers for its structure just regular indices
+///
+///                   current_root                        0   1   2   3   4   ...
+///                            left: 2*current_root+1      1   3   5   7   9
+///                           right: 2*current_root+2      2   4   6   8  10
+///
+///
+
+522 }</pre>
+</div>
+<p>select.h:</p>
+<div class="highlight-python"><pre>127 /*
+128   returns the kth largest value in the list.  A side effect is that
+129   list[left]..list[k-1] &lt; list[k] &lt; list[k+1]..list[right].
+130 */
+131
+132 template&lt;class Elem, int axis&gt; Elem select(Elem* list, int left, int right, int k)
+133 {</pre>
+</div>
+<p>Using the map ppm_gather.cu:</p>
+<div class="highlight-python"><pre>083 #define MAX_DEPTH 20 // one MILLION photons
+ 84 RT_PROGRAM void gather()
+ 85 {
+ ..
+ 87   PackedHitRecord rec = rtpass_output_buffer[launch_index];
+ 88   float3 rec_position = make_float3( rec.a.x, rec.a.y, rec.a.z );
+ 89   float3 rec_normal   = make_float3( rec.a.w, rec.b.x, rec.b.y );
+ 90   float3 rec_atten_Kd = make_float3( rec.b.z, rec.b.w, rec.c.x );
+ 91   uint   rec_flags    = __float_as_int( rec.c.y );
+ 92   float  rec_radius2  = rec.c.z;
+ 93   float  rec_photon_count = rec.c.w;
+///
+///
+///    using photon map to find photons near to the rec
+///    without having to loop over all photons
+///
+///    starting at node 0, corresponding to median photon
+///
+...
+103   unsigned int stack[MAX_DEPTH];
+104   unsigned int stack_current = 0;
+105   unsigned int node = 0; // 0 is the start
+106
+107 #define push_node(N) stack[stack_current++] = (N)
+108 #define pop_node()   stack[--stack_current]
+109
+///   explicit stack recursion
+///
+110   push_node( 0 );
+...
+114   uint num_new_photons = 0u;
+115   float3 flux_M = make_float3( 0.0f, 0.0f, 0.0f );
+116   uint loop_iter = 0;
+117   do {
+118
+120     PackedPhotonRecord&amp; photon = photon_map[ node ];
+121
+122     uint axis = __float_as_int( photon.d.x );
+123     if( !( axis &amp; PPM_NULL ) ) {
+124
+125       float3 photon_position = make_float3( photon.a );
+126       float3 diff = rec_position - photon_position;
+127       float distance2 = dot(diff, diff);
+128
+129       if (distance2 &lt;= rec_radius2) {
+130         accumulatePhoton(photon, rec_normal, rec_atten_Kd, num_new_photons, flux_M);
+///
+///         only photons with dot(photon_normal, rec_normal) &gt; 0.01 are accumulated
+///         ie only photons incident on same side of surface are counted
+///         hmm do not need high precision photon_normal for this usage
+///
+///         photon map stores incoming flux
+///
+131       }
+132
+133       // Recurse
+134       if( !( axis &amp; PPM_LEAF ) ) {
+135         float d;
+136         if      ( axis &amp; PPM_X ) d = diff.x;
+137         else if ( axis &amp; PPM_Y ) d = diff.y;
+138         else                      d = diff.z;
+139
+140         // Calculate the next child selector. 0 is left, 1 is right.
+141         int selector = d &lt; 0.0f ? 0 : 1;
+///
+///                    selector   (1 + selector)   (2 - selector)
+///                        0         1                2
+///                        1         2                1
+///
+142         if( d*d &lt; rec_radius2 ) {
+144                push_node( (node&lt;&lt;1) + 2 - selector );
+///
+///               when in viscinity check both left and right sides
+///
+145         }
+146
+148         node = (node&lt;&lt;1) + 1 + selector;
+///
+///               continue left/right descent
+///
+149       } else {
+150         node = pop_node();
+151       }
+152     } else {
+153       node = pop_node();
+154     }
+155     loop_iter++;
+156   } while ( node );
+
+158   // Compute new N,R
+159   float R2 = rec_radius2;
+160   float N = rec_photon_count;
+161   float M = static_cast&lt;float&gt;( num_new_photons ) ;
+162   float new_N = N + alpha*M;
+163   rec.c.w = new_N;  // set rec.photon_count
+164
+165   float reduction_factor2 = 1.0f;
+166   float new_R2 = R2;
+167   if( M != 0 ) {
+168     reduction_factor2 = ( N + alpha*M ) / ( N + M );
+169     new_R2 = R2*( reduction_factor2 );
+170     rec.c.z = new_R2; // set rec.radius2
+171   }
+...
+220   rtpass_output_buffer[launch_index] = rec;
+///
+///   for progressive accumulation to converge on something
+///   sensible need to write out adjusted radius for the next accumulation
+///
+221   float3 final_color = direct_flux + indirect_flux + ambient_light*rec_atten_Kd;
+222   output_buffer[launch_index] = make_float4(final_color);</pre>
+</div>
+</div>
+</div>
+<div class="section" id="photonmap-kdtree-examples">
+<h2>PhotonMap/kdTree examples<a class="headerlink" href="#photonmap-kdtree-examples" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://www.google.com/search?q=Pedersen progressive photon map">google:Pedersen progressive photon map</a><ul>
+<li>see p20 of Pedersen Thesis for explanation of progressive photon mapping</li>
+</ul>
 </li>
 </ul>
+<div class="section" id="oppositerenderer-stian-pedersen-thesis">
+<h3>OppositeRenderer : Stian Pedersen Thesis<a class="headerlink" href="#oppositerenderer-stian-pedersen-thesis" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://www.diva-portal.org/smash/get/diva2:655629/FULLTEXT01.pdf">http://www.diva-portal.org/smash/get/diva2:655629/FULLTEXT01.pdf</a></li>
+<li><a class="reference external" href="http://apartridge.github.io/OppositeRenderer/master/masteroppgave.pdf">http://apartridge.github.io/OppositeRenderer/master/masteroppgave.pdf</a></li>
+<li><a class="reference external" href="http://apartridge.github.io/OppositeRenderer/">http://apartridge.github.io/OppositeRenderer/</a></li>
+</ul>
+</div>
+<div class="section" id="student-project-thrust-based-kdtree-construction">
+<h3>Student Project : Thrust based kdtree construction<a class="headerlink" href="#student-project-thrust-based-kdtree-construction" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://xingdugpu.blogspot.tw">http://xingdugpu.blogspot.tw</a></li>
+<li><a class="reference external" href="http://xingdu.blogspot.tw/2012/05/gpu-path-tracer.html">http://xingdu.blogspot.tw/2012/05/gpu-path-tracer.html</a></li>
+<li><a class="reference external" href="https://github.com/duxing/GPUFinal">https://github.com/duxing/GPUFinal</a></li>
+<li><a class="reference external" href="https://github.com/duxing/GPUFinal/blob/master/cuda_PhotonMapping/cuda_PhotonMapping/GPU_KDTree.h">https://github.com/duxing/GPUFinal/blob/master/cuda_PhotonMapping/cuda_PhotonMapping/GPU_KDTree.h</a></li>
+</ul>
+</div>
+<div class="section" id="cuda-thrust-kdtree-part-of-flann">
+<h3>CUDA/Thrust kdTree part of FLANN<a class="headerlink" href="#cuda-thrust-kdtree-part-of-flann" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/mariusmuja/flann/tree/master/src/cpp/flann/algorithms">https://github.com/mariusmuja/flann/tree/master/src/cpp/flann/algorithms</a></li>
+<li><a class="reference external" href="https://github.com/mariusmuja/flann/blob/master/src/cpp/flann/algorithms/kdtree_cuda_builder.h">https://github.com/mariusmuja/flann/blob/master/src/cpp/flann/algorithms/kdtree_cuda_builder.h</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="optix-opengl-compositing">
+<h2>OptiX OpenGL Compositing<a class="headerlink" href="#optix-opengl-compositing" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/nvpro-samples/gl_optix_composite">https://github.com/nvpro-samples/gl_optix_composite</a></li>
+</ul>
+</div>
+<div class="section" id="peek-at-optix-internals-via-stack-trace">
+<h2>Peek at OptiX internals via stack trace<a class="headerlink" href="#peek-at-optix-internals-via-stack-trace" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>OBuffer::mapGLToOptiX (createBufferFromGLBO) 1  size 30
+libc++abi.dylib: terminating with uncaught exception of type optix::Exception: Memory allocation failed (Details: Function "RTresult _rtContextLaunch2D(RTcontext, unsigned int, RTsize, RTsize)" caught exception: Encountered a CUDA error: driver().cuGraphicsGLRegisterBuffer(&amp;cudaResource, id, flags) returned (2): Out of memory, [3735964])
+Abort trap: 6</pre>
+</div>
+</div>
+<div class="section" id="optix-multi-gpu-debug">
+<h2>OptiX Multi-GPU debug<a class="headerlink" href="#optix-multi-gpu-debug" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/853345/?comment=4597946">https://devtalk.nvidia.com/default/topic/853345/?comment=4597946</a></li>
+</ul>
+</div>
+<div class="section" id="issue-reboot-required-to-recover-from-timeout-exceptions">
+<h2>Issue : reboot required to recover from timeout exceptions<a class="headerlink" href="#issue-reboot-required-to-recover-from-timeout-exceptions" title="Permalink to this headline">¶</a></h2>
+<p>When things go wrong in an OptiX program (eg an unintended infinite loop)
+the usual result is a Timeout exception.
+Unfortunately on Macbook Pro 2013 with Geforce 750M,
+with CUDA 7.0, OptiX 3.8 and driver ??? following the report of the exception
+the machine freezes requiring a hardware reboot to recover.</p>
+<p>Perhaps some cleanup code that runs when Timeout exceptions occur
+could prevent the need for rebooting ?</p>
+<p>Maybe try to capture what is going on the next time this happens using
+OPTIX_API_CAPTURE=1 and send trace to <a class="reference external" href="mailto:optix-help&#37;&#52;&#48;nvidia&#46;com">optix-help<span>&#64;</span>nvidia<span>&#46;</span>com</a>.
+For instructions regarding traces see:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/803116/optix/error-with-rtpmodelupdate/">https://devtalk.nvidia.com/default/topic/803116/optix/error-with-rtpmodelupdate/</a></li>
+</ul>
+<div class="section" id="todo">
+<h3>TODO<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h3>
+<p>Try catching the exception and exiting immediately ?</p>
+<ul class="simple">
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/734914/optix/optix-bug-crash-with-cuda-error-kernel-ret-700-when-not-rtprinting-anything-small-demo-code-/">https://devtalk.nvidia.com/default/topic/734914/optix/optix-bug-crash-with-cuda-error-kernel-ret-700-when-not-rtprinting-anything-small-demo-code-/</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="optix-versions">
+<h2>OptiX Versions<a class="headerlink" href="#optix-versions" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>3.5.1         02/21/2014 05:12:40
+3.6.0         06/11/2014 13:32:05
+3.6.3         09/27/2014 18:52:56    CUDA R331 driver or later
+3.7.0-beta2
+3.7.0-beta3   01/30/2015 17:35:59    CUDA R343 driver
+3.7.0         02/24/2015 22:53:11
+3.8.0-beta    03/14/2015 17:04:51
+3.8.0         06/01/2015 07:18:19    CUDA R346 driver or later, for Mac the driver extension module supplied with CUDA 7.0 will need to be installed.</pre>
+</div>
+</div>
+<div class="section" id="optix-download-and-unpack">
+<h2>OptiX Download and Unpack<a class="headerlink" href="#optix-download-and-unpack" title="Permalink to this headline">¶</a></h2>
+<p>Download and mount dmg:</p>
+<div class="highlight-python"><pre>optix-ftp    # web interface, click on .dmg
+
+mv ~/Downloads/NVIDIA-OptiX-SDK-3.8.0-mac64.dmg $(optix-download-dir)/
+
+open NVIDIA-OptiX-SDK-3.8.0-mac64.dmg   # mounts volume containing NVIDIA-OptiX-SDK-3.8.0-mac64.pkg</pre>
+</div>
+<p>Examine pkg contents using lsbom, verify that target is all beneath /Developer/OptiX:</p>
+<div class="highlight-python"><pre>simon:~ blyth$ lsbom /Volumes/NVIDIA-OptiX-SDK-3.8.0-mac64/NVIDIA-OptiX-SDK-3.8.0-mac64.pkg/Contents/Archive.bom
+.   40755   501/0
+./Developer 40755   501/0
+./Developer/OptiX   40755   0/80
+./Developer/OptiX/SDK   40755   0/80
+./Developer/OptiX/SDK/CMake 40755   0/80
+./Developer/OptiX/SDK/CMake/CompilerInfo.cmake  100644  0/80    3392    2636181668
+./Developer/OptiX/SDK/CMake/ConfigCompilerFlags.cmake   100644  0/80    15064   2806959999
+./Developer/OptiX/SDK/CMake/CopyDLL.cmake   100644  0/80    2850    1542474852
+./Developer/OptiX/SDK/CMake/FindCUDA    40755   0/80
+./Developer/OptiX/SDK/CMake/FindCUDA/make2cmake.cmake   100644  0/80    3532    494331911
+./Developer/OptiX/SDK/CMake/FindCUDA/parse_cubin.cmake  100644  0/80    3666    547407452
+./Developer/OptiX/SDK/CMake/FindCUDA/run_nvcc.cmake 100644  0/80    13360   3696680251
+./Developer/OptiX/SDK/CMake/FindCUDA.cmake  100644  0/80    74607   1732037123
+./Developer/OptiX/SDK/CMake/FindDX.cmake    100644  0/80    1414    2129523030
+./Developer/OptiX/SDK/CMake/FindOptiX.cmake 100644  0/80    6408    1762934238
+./Developer/OptiX/SDK/CMake/FindSUtilGLUT.cmake 100644  0/80    2747    312119594
+...</pre>
+</div>
+<p>Prior to unpacking delete my symbolic link:</p>
+<div class="highlight-python"><pre>simon:~ blyth$ l /Developer/
+total 8
+drwxr-xr-x  4 root  wheel  136 Jun 29 17:05 NVIDIA
+lrwxr-xr-x  1 root  wheel   11 Feb  2 12:53 OptiX -&gt; OptiX_370b2
+drwxr-xr-x  7 root  admin  238 Jan 22 16:17 OptiX_301
+drwxr-xr-x  7 root  admin  238 Dec 18  2014 OptiX_370b2
+
+simon:~ blyth$ sudo rm /Developer/OptiX</pre>
+</div>
+<p>Open .pkg from mounted .dmg, run the GUI installer,
+then rename and symbolicate:</p>
+<div class="highlight-python"><pre>simon:Developer blyth$ sudo mv OptiX OptiX_380
+simon:Developer blyth$ sudo ln -s OptiX_380 OptiX
+simon:Developer blyth$ l
+total 8
+lrwxr-xr-x  1 root  wheel    9 Jun 29 20:48 OptiX -&gt; OptiX_380
+drwxr-xr-x  4 root  wheel  136 Jun 29 17:05 NVIDIA
+drwxr-xr-x  7 root  admin  238 May 29 00:23 OptiX_380
+drwxr-xr-x  7 root  admin  238 Jan 22 16:17 OptiX_301
+drwxr-xr-x  7 root  admin  238 Dec 18  2014 OptiX_370b2</pre>
+</div>
+</div>
+<div class="section" id="try-precompiled-samples">
+<h2>Try Precompiled Samples<a class="headerlink" href="#try-precompiled-samples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>cd /Developer/OptiX/SDK-precompiled-samples
+
+simon:SDK-precompiled-samples blyth$ open sample1.app
+simon:SDK-precompiled-samples blyth$ open sample2.app
+simon:SDK-precompiled-samples blyth$ open cook.app
+simon:SDK-precompiled-samples blyth$ open path_tracer.app
+simon:SDK-precompiled-samples blyth$ open instancing.app
+simon:SDK-precompiled-samples blyth$ open tutorial.app
+simon:SDK-precompiled-samples blyth$ open sphereTessellate.app
+simon:SDK-precompiled-samples blyth$ open whitted.app</pre>
+</div>
+</div>
+<div class="section" id="test-can-compile-samples">
+<h2>Test can compile samples<a class="headerlink" href="#test-can-compile-samples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>simon:SDK-precompiled-samples blyth$ optix-samples-get-all
+optix-samples-get-all copy all samples to somewhere writable
+simon:SDK-precompiled-samples blyth$</pre>
+</div>
+</div>
+<div class="section" id="optix-3-8-05-30-2015">
+<h2>OptiX 3.8,  05/30/2015<a class="headerlink" href="#optix-3-8-05-30-2015" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://devtalk.nvidia.com/default/topic/836902/optix/optix-3-8-final-release-is-out-/">https://devtalk.nvidia.com/default/topic/836902/optix/optix-3-8-final-release-is-out-/</a></p>
+</div>
+<div class="section" id="what-is-this-mac-driver-extension-module">
+<h2>What is this Mac Driver Extension Module ?<a class="headerlink" href="#what-is-this-mac-driver-extension-module" title="Permalink to this headline">¶</a></h2>
+<p>Presumably CUDA.kext:</p>
+<div class="highlight-python"><pre>simon:cuda blyth$ file  /System/Library/Extensions/CUDA.kext/Contents/MacOS/CUDA
+/System/Library/Extensions/CUDA.kext/Contents/MacOS/CUDA: Mach-O universal binary with 1 architecture
+/System/Library/Extensions/CUDA.kext/Contents/MacOS/CUDA (for architecture x86_64): Mach-O 64-bit kext bundle x86_64</pre>
+</div>
+<p>The CUDA uninstalll does:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kextunload</span> <span class="o">/</span><span class="n">System</span><span class="o">/</span><span class="n">Library</span><span class="o">/</span><span class="n">Extensions</span><span class="o">/</span><span class="n">CUDA</span><span class="o">.</span><span class="n">kext</span>
+</pre></div>
+</div>
+<div class="highlight-python"><pre>simon:cuda blyth$ kextstat | head -1 &amp;&amp; kextstat | grep nvidia
+Index Refs Address            Size       Wired      Name (Version) &lt;Linked Against&gt;
+  107    2 0xffffff7f80c52000 0x274000   0x274000   com.apple.nvidia.driver.NVDAResman (8.2.6) &lt;83 74 71 11 5 4 3 1&gt;
+  108    0 0xffffff7f80ed1000 0x1ad000   0x1ad000   com.apple.nvidia.driver.NVDAGK100Hal (8.2.6) &lt;107 11 4 3&gt;
+  127    0 0xffffff7f81dbe000 0x2000     0x2000     com.nvidia.CUDA (1.1.0) &lt;4 1&gt;</pre>
+</div>
+</div>
+<div class="section" id="seems-no-mac-equivalent-of-the-r346-r355-r343">
+<h2>Seems no Mac equivalent of the R346 R355 R343 ...<a class="headerlink" href="#seems-no-mac-equivalent-of-the-r346-r355-r343" title="Permalink to this headline">¶</a></h2>
+<p>Kexts have version numbers (above 1.1.0),
+but they are not referred to, instead just get the text:</p>
+<div class="highlight-python"><pre>For the Mac, the driver extension module supplied with CUDA 7.0
+will need to be installed.</pre>
+</div>
+</div>
+<div class="section" id="release-notes-optix-3-8-0-may-2015">
+<h2>Release Notes OptiX 3.8.0 (May 2015)<a class="headerlink" href="#release-notes-optix-3-8-0-may-2015" title="Permalink to this headline">¶</a></h2>
+<p>The CUDA R346 or later driver is required. For the Mac,
+the driver extension module supplied with CUDA 7.0 will need to be installed.</p>
+<p>Driver R355 or newer is required for optimal performance on Maxwell GPUs.
+OptiX 3.8 supports Maxwell GPUs on earlier drivers, but at up to 20% lower performance.</p>
+<p>A CUDA compiler bug that causes timeouts or crashes on Maxwell cards has been
+worked around. Unfortunately, this bug fix causes a slowdown of up to 20% on
+Maxwell cards unless driver R355 or newer is used.</p>
+<p>CMake 2.8.12 <a class="reference external" href="http://www.cmake.org/cmake/resources/software.html">http://www.cmake.org/cmake/resources/software.html</a></p>
+</div>
+<div class="section" id="release-notes-optix-version-3-7-beta-3-january-2015">
+<h2>Release Notes OptiX Version 3.7 beta 3 (January 2015)<a class="headerlink" href="#release-notes-optix-version-3-7-beta-3-january-2015" title="Permalink to this headline">¶</a></h2>
+<p>The CUDA R343 or later driver is required. The latest available WHQL drivers
+are highly recommended. For the Mac, the driver extension module supplied with
+CUDA 5.0 or later will need to be installed. Note that the Linux and Mac
+drivers can only be obtained from the CUDA 6.5 download page at the moment.</p>
+<p>SLI is not required for OptiX to use multiple GPUs, and it interferes when
+OptiX uses either D3D or OpenGL interop. Disabling SLI will not degrade OptiX
+performance and will provide a more stable environment for OptiX applications
+to run. SLI is termed &#8220;Multi-GPU mode&#8221; in recent NVIDIA Control Panels, with
+the correct option being &#8220;Disable multi-GPU mode&#8221; to ensure OptiX is not
+encumbered by graphics overhead.</p>
+</div>
+<div class="section" id="release-notes-optix-version-3-6-3-september-2014">
+<h2>Release Notes OptiX Version 3.6.3 (September 2014)<a class="headerlink" href="#release-notes-optix-version-3-6-3-september-2014" title="Permalink to this headline">¶</a></h2>
+<p>The CUDA R331 or later driver is required. The latest available WHQL drivers
+are highly recommended (343 or later for Windows, 343 for Linux and the CUDA
+6.0 driver extension for Mac). For the Mac, the driver extension module
+supplied with CUDA 5.0 or later will need to be installed. Note that the Linux
+and Mac drivers can only be obtained from the CUDA 6.0 download page at the
+moment.</p>
+</div>
+<div class="section" id="release-notes-optix-version-3-5-january-2013">
+<h2>Release Notes OptiX Version 3.5 (January 2013)<a class="headerlink" href="#release-notes-optix-version-3-5-january-2013" title="Permalink to this headline">¶</a></h2>
+<p>The CUDA R319 or later driver is required. The latest available WHQL drivers
+are highly recommended (320.92 or later for Windows, 319.60 for Linux and the
+CUDA 5.5 driver extension for Mac). For the Mac, the driver extension module
+supplied with CUDA 5.0 or later will need to be installed. Note that the Linux
+and Mac drivers can only be obtained from the CUDA 5.5 download page at the
+moment.</p>
 </div>
 <div class="section" id="update-optix-version-and-build-samples">
 <h2>Update OptiX version and build samples<a class="headerlink" href="#update-optix-version-and-build-samples" title="Permalink to this headline">¶</a></h2>
@@ -192,37 +880,6 @@ NVRM version: NVIDIA UNIX x86_64 Kernel Module  340.65  Tue Dec  2 09:50:34 PST 
 GCC version:  gcc version 4.4.7 20120313 (Red Hat 4.4.7-4) (GCC)
 -bash-4.1$</pre>
 </div>
-</div>
-<div class="section" id="release-notes-optix-version-3-7-beta-3-january-2015">
-<h2>Release Notes OptiX Version 3.7 beta 3 (January 2015)<a class="headerlink" href="#release-notes-optix-version-3-7-beta-3-january-2015" title="Permalink to this headline">¶</a></h2>
-<p>The CUDA R343 or later driver is required. The latest available WHQL drivers
-are highly recommended. For the Mac, the driver extension module supplied with
-CUDA 5.0 or later will need to be installed. Note that the Linux and Mac
-drivers can only be obtained from the CUDA 6.5 download page at the moment.</p>
-<p>SLI is not required for OptiX to use multiple GPUs, and it interferes when
-OptiX uses either D3D or OpenGL interop. Disabling SLI will not degrade OptiX
-performance and will provide a more stable environment for OptiX applications
-to run. SLI is termed &#8220;Multi-GPU mode&#8221; in recent NVIDIA Control Panels, with
-the correct option being &#8220;Disable multi-GPU mode&#8221; to ensure OptiX is not
-encumbered by graphics overhead.</p>
-</div>
-<div class="section" id="release-notes-optix-version-3-6-3-september-2014">
-<h2>Release Notes OptiX Version 3.6.3 (September 2014)<a class="headerlink" href="#release-notes-optix-version-3-6-3-september-2014" title="Permalink to this headline">¶</a></h2>
-<p>The CUDA R331 or later driver is required. The latest available WHQL drivers
-are highly recommended (343 or later for Windows, 343 for Linux and the CUDA
-6.0 driver extension for Mac). For the Mac, the driver extension module
-supplied with CUDA 5.0 or later will need to be installed. Note that the Linux
-and Mac drivers can only be obtained from the CUDA 6.0 download page at the
-moment.</p>
-</div>
-<div class="section" id="release-notes-optix-version-3-5-january-2013">
-<h2>Release Notes OptiX Version 3.5 (January 2013)<a class="headerlink" href="#release-notes-optix-version-3-5-january-2013" title="Permalink to this headline">¶</a></h2>
-<p>The CUDA R319 or later driver is required. The latest available WHQL drivers
-are highly recommended (320.92 or later for Windows, 319.60 for Linux and the
-CUDA 5.5 driver extension for Mac). For the Mac, the driver extension module
-supplied with CUDA 5.0 or later will need to be installed. Note that the Linux
-and Mac drivers can only be obtained from the CUDA 5.5 download page at the
-moment.</p>
 </div>
 <div class="section" id="hgpu01-install">
 <h2>hgpu01 install<a class="headerlink" href="#hgpu01-install" title="Permalink to this headline">¶</a></h2>
@@ -289,6 +946,191 @@ OptiX Error: Invalid context (Details: Function "RTresult _rtContextCompile(RTco
 -bash-4.1$</pre>
 </div>
 </div>
+<div class="section" id="partial-override-warning">
+<h2>Partial override warning<a class="headerlink" href="#partial-override-warning" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>/Developer/OptiX/include/optixu/optixpp_namespace.h(588): warning: overloaded virtual function "optix::APIObj::checkError" is only partially overridden in class "optix::ContextObj"</pre>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="http://stackoverflow.com/questions/21462908/warning-overloaded-virtual-function-baseprocess-is-only-partially-overridde">http://stackoverflow.com/questions/21462908/warning-overloaded-virtual-function-baseprocess-is-only-partially-overridde</a></li>
+</ul>
+</div>
+<div class="section" id="optix-transform-programming-guide">
+<h2>OptiX Transform (Programming Guide)<a class="headerlink" href="#optix-transform-programming-guide" title="Permalink to this headline">¶</a></h2>
+<p>A transform node is used to represent a projective transformation of its
+underlying scene geometry. The transform must be assigned exactly one child of
+type rtGroup, rtGeometryGroup, rtTransform, or rtSelector, using
+rtTransformSetChild. That is, the nodes below a transform may simply be
+geometry in the form of a geometry group, or a whole new subgraph of the scene.</p>
+<p>The transformation itself is specified by passing a 4×4 floating point matrix
+(specified as a 16-element one-dimensional array) to rtTransformSetMatrix.
+Conceptually, it can be seen as if the matrix were applied to all the
+underlying geometry. However, the effect is instead achieved by transforming
+the rays themselves during traversal. This means that <strong>OptiX does not rebuild
+any acceleration structures when the transform changes</strong>.</p>
+<p>Note that the transform child node may be shared with other graph nodes. That
+is, a child node of a transform may be a child of another node at the same
+time. This is often useful for instancing geometry.</p>
+<div class="highlight-python"><pre>transform
+    geometry_group</pre>
+</div>
+<div class="highlight-python"><pre>delta:bin blyth$ optix-;optix-samples-cppfind Transform -l
+/usr/local/env/cuda/OptiX_380_sdk/glass/glass.cpp
+/usr/local/env/cuda/OptiX_380_sdk/hybridShadows/hybridShadows.cpp
+/usr/local/env/cuda/OptiX_380_sdk/instancing/instancing.cpp
+/usr/local/env/cuda/OptiX_380_sdk/isgReflections/isgReflections.cpp
+/usr/local/env/cuda/OptiX_380_sdk/isgShadows/isgShadows.cpp
+/usr/local/env/cuda/OptiX_380_sdk/primeInstancing/primeInstancing.cpp
+/usr/local/env/cuda/OptiX_380_sdk/sample7/sample7.cpp
+/usr/local/env/cuda/OptiX_380_sdk/sutil/OptiXMesh.cpp
+/usr/local/env/cuda/OptiX_380_sdk/sutil/OptiXMeshImpl.cpp
+/usr/local/env/cuda/OptiX_380_sdk/swimmingShark/fishMonger.cpp</pre>
+</div>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>wrapping moving pieces of geometry into Transforms allows position
+to be changed without rebuilding acceleration structures</li>
+</ul>
+</div>
+</div>
+<div class="section" id="thoughts-on-applying-transform-instancing-to-complex-large-geometries">
+<h2>Thoughts on applying <em>Transform</em> instancing to complex/large geometries<a class="headerlink" href="#thoughts-on-applying-transform-instancing-to-complex-large-geometries" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Current geocache machinery is flat using final transforms applied to every volume.
+This works fine when treating everything as triangles and yields a very simple
+<em>convertDrawable</em><ul>
+<li>optix::Geometry GMergedMeshOptiXGeometry::convertDrawable(GMergedMesh* mergedmesh)</li>
+</ul>
+</li>
+<li>Attempting to operate as if every solid making up the PMT is independant
+each with a global transform (as the flat geocache encourages)
+would yield an unnecessarily complicated OptiX geometry of overlapping transforms<ul>
+<li>this would likely not work and even if it did would be fragile and difficult to
+move, consider for example a analogous treatment of movable calibration sources</li>
+</ul>
+</li>
+<li>PMTs (and calibration sources) are not simple single volumes,
+they are a collection of volumes arranged via transforms wrt to each other
+with the assembly placed in the wider detector via a &#8220;placement&#8221; transform</li>
+<li>can sub-assemblies be auto-identified by finding repeated transform/meshIndex sub-trees ?<ul>
+<li>construct transform/meshIndex digests for the tree beneath every node</li>
+<li>look for repeated such digests and locate the parent placement transforms</li>
+</ul>
+</li>
+<li>need to create local assembly frame vertices</li>
+</ul>
+</div>
+<div class="section" id="instancing-example">
+<h2>Instancing Example<a class="headerlink" href="#instancing-example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>214   // Set up instances
+215   Group group = m_context-&gt;createGroup();
+216   group-&gt;setChildCount(m_num_instances);
+217   optix::Aabb aabb = loader.getSceneBBox();
+218
+219   unsigned int dimension = static_cast &lt;unsigned int&gt; ( ceilf( powf( static_cast &lt;float&gt; (m_num_instances), .3333333f )));
+220   unsigned int dimension2 = dimension*dimension;
+221   optix::Matrix4x4 m;
+222   for(unsigned int i = 0; i &lt; m_num_instances; ++i) {
+223     Transform xform = m_context-&gt;createTransform();
+224     xform-&gt;setChild(m_geometry_group);
+225     group-&gt;setChild(i, xform);
+226
+227     if (m_grid_mode) {
+228       float tx = static_cast &lt;float&gt;( (i%dimension));
+229       float ty = static_cast &lt;float&gt;( ((i%dimension2)/dimension));
+230       float tz = static_cast &lt;float&gt;( (i/dimension2) );
+231
+232       m = optix::Matrix4x4::translate(make_float3( tx, ty, tz ) * (- m_grid_distance));
+233     } else {
+234       float tx = 4 * aabb.extent(0) * (randFloat()*2.f-1.f);
+235       float ty = 4 * aabb.extent(1) * (randFloat()*2.f-1.f);
+236       float tz = 4 * aabb.extent(2) * (randFloat()*2.f-1.f);
+237       float3 randomish_dir = normalize( make_float3( randFloat()*2.f-1.f, randFloat()*2.f-1.f, randFloat()*2.f-1.f ) );
+238
+239       optix::Matrix4x4 trans = optix::Matrix4x4::translate(make_float3( tx, ty, tz ) );
+240       optix::Matrix4x4 rot   = optix::Matrix4x4::rotate(randFloat()*2.f*M_PIf, randomish_dir);
+241
+242       m = rot * trans;
+243     }
+244
+245     xform-&gt;setMatrix(false, m.getData(), 0);
+246   }
+///
+///
+///    instances "assembly" comprised of a
+///    group of N xform, each holding a single repeated m_geometry_group
+///
+///          group
+///             xform_0 &lt; m_geometry_group
+///             xform_1 &lt; m_geometry_group
+///             xform_2 &lt; m_geometry_group
+///             ...
+///             xform_N &lt; m_geometry_group
+///
+///
+///    hmm how about geometry instances and adding material ?
+///
+247
+248   Acceleration top_level_bvh = m_context-&gt;createAcceleration("Bvh", "Bvh");
+249   group-&gt;setAcceleration(top_level_bvh);
+250
+251   m_context[ "top_object" ]-&gt;set( group );
+252   m_context[ "top_shadower" ]-&gt;set( group );</pre>
+</div>
+</div>
+<div class="section" id="how-to-persist-tree-of-transforms-in-the-geocache">
+<h2>How to persist tree of transforms in the geocache ?<a class="headerlink" href="#how-to-persist-tree-of-transforms-in-the-geocache" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="optix-instancing-20k-teapots">
+<h2>OptiX Instancing : 20k teapots<a class="headerlink" href="#optix-instancing-20k-teapots" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>optix-;optix-samples-cd bin
+./instancing -i 20000 -n
+./instancing -i 20000 --grid=100x100x100</pre>
+</div>
+</div>
+<div class="section" id="optix-selector-programming-guide">
+<h2>OptiX Selector (Programming Guide)<a class="headerlink" href="#optix-selector-programming-guide" title="Permalink to this headline">¶</a></h2>
+<p>A selector is similar to a group in that it is a collection of higher level
+graph nodes. The number of nodes in the collection is set by
+rtSelectorSetChildCount, and the individual children are assigned with
+rtSelectorSetChild. Valid child types are rtGroup, rtGeometryGroup,
+rtTransform, and rtSelector.</p>
+<p>The main difference between selectors and groups is that selectors do not have
+an acceleration structure associated with them. Instead, a visit program is
+specified with rtSelectorSetVisitProgram. This program is executed every time a
+ray encounters the selector node during graph traversal. The program specifies
+which children the ray should continue traversal through by calling
+<em>rtIntersectChild</em>.</p>
+<p>A typical use case for a selector is dynamic (i.e. per-ray) level of detail: an
+object in the scene may be represented by a number of geometry nodes, each
+containing a different level of detail version of the object. The geometry
+groups containing these different representations can be assigned as children
+of a selector. The visit program can select which child to intersect using any
+criterion (e.g. based on the footprint or length of the current ray), and
+ignore the others.</p>
+<p>As for groups and other graph nodes, child nodes of a selector can be shared
+with other graph nodes to allow flexible instancing.</p>
+<div class="section" id="selector-examples">
+<h3>Selector Examples<a class="headerlink" href="#selector-examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>delta:ggeo blyth$ optix-;optix-samples-cufind IntersectChild
+/usr/local/env/cuda/OptiX_380_sdk/device_exceptions/device_exceptions.cu:    rtIntersectChild( 1 );
+/usr/local/env/cuda/OptiX_380_sdk/device_exceptions/device_exceptions.cu:    rtIntersectChild( 0 );
+/usr/local/env/cuda/OptiX_380_sdk/sample8/selector_example.cu:  rtIntersectChild( index );
+delta:ggeo blyth$
+
+optix-;optix-samples-cd bin
+
+delta:bin blyth$ ./sample8 -h</pre>
+</div>
+</div>
+</div>
+<div class="section" id="optix-glass">
+<h2>OptiX glass<a class="headerlink" href="#optix-glass" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/458979/?comment=3263252">https://devtalk.nvidia.com/default/topic/458979/?comment=3263252</a></li>
+</ul>
+<p>Overlapping geometry problem</p>
+</div>
 <div class="section" id="optix-3-6-3-problems">
 <h2>OptiX 3.6.3 problems<a class="headerlink" href="#optix-3-6-3-problems" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -348,6 +1190,29 @@ and then comment them out</li>
 <li><a class="reference external" href="https://developer.nvidia.com/content/transparency-or-translucency-rendering">https://developer.nvidia.com/content/transparency-or-translucency-rendering</a></li>
 <li><a class="reference external" href="http://casual-effects.blogspot.tw/2014/03/weighted-blended-order-independent.html">http://casual-effects.blogspot.tw/2014/03/weighted-blended-order-independent.html</a></li>
 </ul>
+</div>
+<div class="section" id="optix-rtdeclarevariable-attribute-variables">
+<h2>OptiX rtDeclareVariable attribute variables<a class="headerlink" href="#optix-rtdeclarevariable-attribute-variables" title="Permalink to this headline">¶</a></h2>
+<p>From optix-pdf section <em>4.1.4 Attribute Variables</em> p35</p>
+<p>Attribute variables provide a mechanism for communicating data between the
+intersection program and the shading programs (e.g., surface normal, texture
+coordinates). Attribute variables may only be written in an intersection
+program between calls to rtPotentialIntersection and rtReportIntersection.</p>
+</div>
+<div class="section" id="do-i-need-multiple-optix-materials">
+<h2>Do I need multiple OptiX materials ?<a class="headerlink" href="#do-i-need-multiple-optix-materials" title="Permalink to this headline">¶</a></h2>
+<p>Aiming for different materials to just corresponds to
+different substance indices used to lookup into a single texture,
+as such no need for separate OptiX materials ? So just need:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">rtReportIntersection</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Only Bialkali needs some different behaviour to do PMT id lookups,
+so that could benefit from being a different material.</p>
+<p>In mesh_intersect can communicate the primIdx via attribute
+in order to do the substance lookup in closestHit
+Remember mesh_intersect gets called the most, so avoid
+doing anything in there that can be done elsewhere.</p>
 </div>
 <div class="section" id="optix-and-atomics">
 <h2>OptiX and atomics<a class="headerlink" href="#optix-and-atomics" title="Permalink to this headline">¶</a></h2>
@@ -772,8 +1637,8 @@ lrwxr-xr-x   1 root  wheel     9 Jan 22 11:27 OptiX -&gt; OptiX_301
 drwxr-xr-x   6 root  wheel   204 Jan 22 11:27 .</pre>
 </div>
 </div>
-<div class="section" id="samples">
-<h2>Samples<a class="headerlink" href="#samples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h2>Samples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>open file:///Developer/OptiX/SDK/NVIDIA-OptiX-SDK-samples.html</pre>
 </div>
 <p>Above references a missing sample:</p>
