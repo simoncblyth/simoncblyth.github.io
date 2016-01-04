@@ -584,6 +584,15 @@ intersection: solve quadratic, handle cases</p>
 <p class="small">PMTs analytic, the rest triangulated</p>
 <img alt="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" class="align-center" src="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" style="width: 900px;" />
 </div>
+<div class="slide" id="simplified-analytic-pmt">
+<h1><span class="small">Simplified Analytic PMT</span></h1>
+<p class="small">Volume base geometry: Pyrex/Vacuum/Bialkali
+puts photocathode inside vacuum with coincident boundary.</p>
+<p class="small">Simplified surface translation removes coincidents by adjusting
+heirarchy to Pyrex/Bialkali/Vacuum.</p>
+<p class="small">Zoomed view of PMT edge (units mm): showing 3mm Pyrex,</p>
+<img alt="/env/nuwa/detdesc/pmt/analytic-pmt-detail.png" class="align-center" src="/env/nuwa/detdesc/pmt/analytic-pmt-detail.png" style="width: 900px;" />
+</div>
 <div class="slide" id="iav-oav-mesh-fixing-with-openmesh-surgery">
 <h1><span class="small">IAV, OAV mesh fixing with OpenMesh surgery</span></h1>
 <p class="small">Photon material provided by intersection boundary, all top lid photons Acrylic(yellow), not GdLS(red)</p>
@@ -644,6 +653,24 @@ ggv.sh --analyticmesh 1 \
 <p class="small">Only PMT hits are copied back to CPU</p>
 <p class="tiny">Thrust/CUDA/OptiX interop used to implement</p>
 </div>
+<div class="slide" id="dynamic-test-geometry">
+<h1><span class="small">Dynamic Test Geometry</span></h1>
+<p class="small">Following refactor of Material/Surface/Boundary handling
+can now dynamically add test geometry/materials/surfaces.</p>
+<p class="small">Each shape requires:</p>
+<ul class="small simple">
+<li>analytic intersection code for OptiX</li>
+<li>tesselation for OpenGL visualization</li>
+</ul>
+<p class="small">Have implemented:</p>
+<ul class="small simple">
+<li>box</li>
+<li>sphere (including partial)</li>
+<li>lens (intersection of two spheres)</li>
+<li>prism</li>
+</ul>
+<p class="small">Using to validate simulation results against analytic expectations.</p>
+</div>
 <div class="slide" id="prism-s-polarized">
 <h1><span class="small">Prism S-Polarized</span></h1>
 <p class="small">Quadrant of cylindrically directed S-polarized photons at 10 wavelengths (from 100 to 800 nm)
@@ -680,6 +707,26 @@ Color represents polarization direction.  2nd reflections
 are apparent.</p>
 <img alt="/env/graphics/ggeoview/lens-polcolor.png" class="align-center" src="/env/graphics/ggeoview/lens-polcolor.png" style="width: 900px;" />
 </div>
+<div class="slide" id="rainbow-deviation-angles">
+<h1><span class="small">Rainbow deviation angles</span></h1>
+<p class="tiny">Plot without selection of deviation angles of 3M photons. Photon wavelengths
+from Plankian 6500K blackbody spectrum (implemented with inverse CDF GPU texture lookup).
+Simulated &quot;images&quot; obtained from wavelength spectrum of each bin using CIEXYZ weighting functions
+converted into sRGB/D65 colorspace.
+The two images expose for luminance (CIE-Y) of max bin of 1st and 2nd bows.</p>
+<img alt="/env/numerics/npy/rainbow16_deviation_angle.png" class="align-center" src="/env/numerics/npy/rainbow16_deviation_angle.png" style="width: 900px;" />
+</div>
+<div class="slide" id="rainbow-spectrum-for-1st-six-bows">
+<h1><span class="small">Rainbow Spectrum for 1st six bows</span></h1>
+<p class="tiny">Spectra obtained by selecting photons by internal reflection counts.
+Colors obtained from spectra of each bin using CIEXYZ weighting functions
+converted into sRGB/D65 colorspace.
+Exposures by normalizing to bin with maximum luminance (CIE-Y) of each bow.
+White lines indicate geometric optics prediction of deviation angle ranges
+of the visible range 380-780nm. 180-360 degrees signifies exit on same
+side of droplet as incidence.</p>
+<img alt="/env/numerics/npy/rainbow6-spectrum.png" class="align-center" src="/env/numerics/npy/rainbow6-spectrum.png" style="width: 900px;" />
+</div>
 <div class="slide" id="progress-overview">
 <h1><span class="small">Progress Overview</span></h1>
 <p class="small"><strong>Resolved several large obvious geometry problems</strong></p>
@@ -688,19 +735,24 @@ are apparent.</p>
 <li>fixing bad triangulations using OpenMesh surgery</li>
 <li>replace triangulated PMTs with more realistic analytic ones</li>
 </ul>
-<p class="small"><strong>Optical physics problems expected next</strong></p>
+</div>
+<div class="slide" id="progress-overview-continued">
+<h1><span class="small">Progress Overview Continued</span></h1>
 <ul class="small simple">
-<li>need Geant4 comparison to find the next issue</li>
-<li>will start validations using simple test geometries</li>
+<li>simplified analytic PMT by removing coincident surfaces</li>
+<li>implemented dynamic test geometry: box, sphere, lens, prism</li>
+<li>reflection, refraction, dispersion tests so far matching,
+<span class="red">after fixing/avoiding several geometry issues</span></li>
 </ul>
-<p class="small"><strong>Refactoring Material/Surface/Boundary code</strong></p>
+<p class="small">Geometry Issues Fixed/Avoidable:</p>
 <ul class="small simple">
-<li>enable dynamic simple test geometries,<ul>
-<li>spheres of each material, surface</li>
-<li>PMT test black boxes</li>
+<li>triangulated geometry leaks when shoot millions of photons at cracks (1)</li>
+<li>bounding boxes that touch geometry cause leaks, slightly
+enlarging the boxes avoids leak (&lt;1 in 3M)</li>
 </ul>
-</li>
-</ul>
+<ol class="tiny arabic simple">
+<li>more of a problem for testing than actual usage</li>
+</ol>
 </div>
 </div>
 </body>
