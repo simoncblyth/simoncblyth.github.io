@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>Opticks : Optical Photon Simulation with NVIDIA OptiX</title>
+<title>Opticks : GPU Optical Photon Simulation</title>
 <style type="text/css">
 
 /*
@@ -359,13 +359,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1>Opticks : Optical Photon Simulation with NVIDIA OptiX</h1>
+<h1>Opticks : GPU Optical Photon Simulation</h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title">Opticks : Optical Photon Simulation with NVIDIA OptiX</h1>
+<h1 class="title">Opticks : GPU Optical Photon Simulation</h1>
 
 <!-- comment -->
 <style type="text/css">
@@ -486,35 +486,24 @@ G4/DetSim Generated Cerenkov Wavelength
 /env/g4dae/g4_cerenkov_wavelength.png -->
 <!-- comment
 
-Last 6 weeks
-
-implemented optical physics in OptiX infrastructure
-squeeze photon record into 128 bit
-record viz
-photon history/material indexing -->
-<p class="small"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_progress.html">http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_progress.html</a> (October 2015)
-<a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html">http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html</a> (July 2015)
-<a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/gpu_accelerated_geant4_simulation.html">http://simoncblyth.bitbucket.org/env/presentation/gpu_accelerated_geant4_simulation.html</a> (Jan 2015)</p>
+Placeholder -->
+<p class="small"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/opticks_gpu_optical_photon_simulation.html">http://simoncblyth.bitbucket.org/env/presentation/opticks_gpu_optical_photon_simulation.html</a> (Jan 2016)
+<a class="reference external" href="http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html">http://simoncblyth.bitbucket.org/env/presentation/optical_photon_simulation_with_nvidia_optix.html</a> (July 2015)</p>
 <p class="small"><strong>Executive Summary</strong></p>
 <ul class="small simple">
-<li>Transition to NVIDIA OptiX completed (Opticks)</li>
-<li>Validation comparisons with Geant4 started</li>
-<li>Performance factors &gt;&gt; 100x <strong>so large they become irrelevant</strong></li>
-<li>Geant4 match achieved with simple geometries</li>
-<li><span class="blue">uncertain how long to achieve full geometry match</span></li>
+<li>Validation comparisons with Geant4 started, rainbow geometry validated</li>
+<li>Performance factors <strong>so large they become irrelevant</strong> (&gt;&gt; 200x)</li>
 </ul>
 <p class="small"><strong>Contents</strong></p>
 <ul class="small simple">
 <li>Brief History of GPU Optical Photon Simulation Development</li>
 <li>Introducing Opticks</li>
-<li>Large Geometry/Event Techniques</li>
 <li>Handling JUNO geometry</li>
-<li>800x less memory with instancing</li>
-<li>Analytic PMT geometry : avoiding <em>disco ball</em></li>
-<li>IAV, OAV mesh fixing with OpenMesh surgery</li>
-<li>Photon Torpedo testing</li>
-<li>Optical Photons GPU resident</li>
-<li>Progress Overview</li>
+<li>Dayabay IAV, OAV mesh fixing with OpenMesh surgery</li>
+<li>Analytic PMT geometry description</li>
+<li>Opticks/Geant4 : Dynamic Test Geometry</li>
+<li>Rainbow Geometry Testing</li>
+<li>Summary</li>
 </ul>
 <div class="small line-block">
 <div class="line">Simon C Blyth, National Taiwan University</div>
@@ -541,7 +530,7 @@ isolated nature of photons in simulation chain.</p>
 <li>state-of-the-art GPU accelerated ray tracing</li>
 <li>performance scales across multiple GPUs, verified
 linearity with IHEP 4 GPU workstation</li>
-<li>regular releases: improvements, new GPU tuning</li>
+<li>regular releases: improvements, GPU tuning</li>
 </ul>
 </div>
 <p class="small"><strong>winter 2014</strong> (within <em>Chroma</em>)</p>
@@ -553,7 +542,7 @@ linearity with IHEP 4 GPU workstation</li>
 <ul class="small simple">
 <li><span class="red">realize lack of efficient multi-GPU is showstopper</span> for <em>Chroma</em></li>
 <li>discover <span class="blue">NVIDIA OptiX</span> ray tracing framework</li>
-<li>begin developing <em>Opticks</em> (based on OptiX) to replace <em>Chroma</em></li>
+<li>create <em>Opticks</em> (using OptiX) to replace <em>Chroma</em></li>
 </ul>
 <p class="small"><strong>summer/autumn 2015</strong> (<em>Opticks</em> transition completed)</p>
 <ul class="small simple">
@@ -562,9 +551,9 @@ linearity with IHEP 4 GPU workstation</li>
 </ul>
 <p class="small"><strong>autumn/winter 2015</strong></p>
 <ul class="small simple">
-<li>major geometry bug discovered, fix implemented using <em>OpenMesh</em></li>
+<li>major tesselation bug avoided with <em>OpenMesh</em></li>
 <li>develop analytic PMT description</li>
-<li>dynamic creation of simple test geometries in <em>Opticks</em>/<em>Geant4</em> allows validation comparisons to begin</li>
+<li>validation machinery created <em>CfG4</em></li>
 </ul>
 <p class="tiny">Newton published Opticks in 1704</p>
 </div>
@@ -588,9 +577,7 @@ linearity with IHEP 4 GPU workstation</li>
 <ul class="small last simple">
 <li>Boost + Asio-ZMQ, ZMQ</li>
 <li>CUDA 7.0, Thrust 1.8, OptiX 3.8, OpenGL 4.1</li>
-<li>OpenMesh 4.1</li>
-<li>ImGUI</li>
-<li>Geant4 10.2</li>
+<li>OpenMesh 4.1, ImGUI</li>
 </ul>
 </div>
 <p class="small"><strong>Basis packages</strong></p>
@@ -615,37 +602,41 @@ linearity with IHEP 4 GPU workstation</li>
 <p class="small"><strong>Main packages</strong></p>
 <ul class="small simple">
 <li><em>GGeoView</em> : visualization, Opticks main</li>
-<li><em>CFG4</em> : Geant4 comparison, CfG4 main</li>
+<li><em>CFG4</em> : Geant4 10.2 comparison, separate main</li>
 </ul>
 </div>
 <div class="slide" id="large-geometry-event-techniques">
 <h1><span class="small">Large Geometry/Event Techniques</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">JUNO Geometry</p>
-<p class="small">289733 volumes in <tt class="docutils literal">test3.dae</tt></p>
-<p class="small">Split into non-instanced (global) and instances</p>
+<p class="small">289733 volumes split into instanced:</p>
+<ul class="small simple">
+<li>PMT_3inch: 36572 (540)</li>
+<li>PMT_20inch: 19452 (3502)</li>
+<li>lFasteners: 480 (1856)</li>
+<li>lPlane: 124 (6252)</li>
+<li>name: count (faces)</li>
+</ul>
+<p class="small">And the rest:</p>
 <ul class="small last simple">
-<li>0 Global     95436 faces</li>
-<li>36572 PMT_3inch    540 faces</li>
-<li>19452 PMT_20inch  3502 faces</li>
-<li>480 lFasteners  1856 faces</li>
-<li>124 lPlane      6252 faces</li>
+<li>Global     (95436)</li>
 </ul>
 </div>
 <p class="small"><strong>Instancing implemented for OpenGL and OptiX</strong></p>
-<p class="small">Geometry analysed to find instances
-(repeated sub-trees with their transforms)</p>
+<p class="small">Geometry analysed to find instances</p>
 <ul class="small simple">
+<li>repeated sub-trees with transforms for each <strong>instance</strong></li>
 <li>JUNO: ~90M triangles, instancing reduces to 0.1M</li>
 </ul>
-<p class="small"><strong>Split Rendering</strong></p>
+<p class="small"><strong>Switchable Rendering</strong></p>
 <ul class="small simple">
 <li>Multiple renderers: global, full instances, bbox instances</li>
-<li>GUI control of which to use</li>
+<li>Rapid switching GUI control</li>
 </ul>
 <p class="small"><strong>Compute Mode</strong></p>
 <ul class="small simple">
-<li>Pure OptiX buffers are faster and use less GPU memory</li>
+<li>Pure OptiX buffers faster (~7X interop)</li>
+<li>Less GPU memory (1)</li>
 <li>Visualize with OpenGL separately by event loading</li>
 </ul>
 <p class="small"><strong>Ideas to investigate</strong></p>
@@ -653,7 +644,9 @@ linearity with IHEP 4 GPU workstation</li>
 <li>Analytic PMT definition expected to improve OptiX efficiency</li>
 <li>Culling non-visible geometry to improve OpenGL performance</li>
 </ul>
-<p class="tiny">Forced to duplicate data on GPU as OpenGL/OptiX geometry sharing not operational</p>
+<ol class="tiny arabic simple">
+<li>Interop forced to duplicate data as OpenGL/OptiX geometry sharing not operational</li>
+</ol>
 </div>
 <div class="slide" id="juno-geometry-instance-rendering-control">
 <h1><span class="small">JUNO Geometry Instance Rendering Control</span></h1>
@@ -662,6 +655,36 @@ linearity with IHEP 4 GPU workstation</li>
 <div class="slide" id="handling-juno-geometry">
 <h1><span class="small">Handling JUNO Geometry</span></h1>
 <img alt="/env/graphics/ggeoview/ggeoview-cerenkov-jpmt.png" class="align-center" src="/env/graphics/ggeoview/ggeoview-cerenkov-jpmt.png" style="width: 900px;" />
+</div>
+<div class="slide" id="dayabay-iav-oav-mesh-fixing-with-openmesh-surgery">
+<h1><span class="small">Dayabay IAV, OAV mesh fixing with OpenMesh surgery</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">After fix</p>
+<img alt="/env/graphics/ggeoview/mesh-fix-iav-oav.png" class="small align-center" src="/env/graphics/ggeoview/mesh-fix-iav-oav.png" style="width: 500px;" />
+<p class="small">Color indicates material assigned.
+Prior to fix, assignments incorrect for all photons
+heading towards top lid.</p>
+<p class="small">Topologically correct meshes, without holes, have:</p>
+<p class="small last"><tt class="docutils literal">V - E + F = 2</tt>  (Eulers Characteristic)</p>
+</div>
+<p class="small">Intersection boundaries determines photon material, bad
+meshes cause incorrect material assignments</p>
+<p class="small"><strong>G4Polyhedron Tesselation Bug</strong></p>
+<ul class="small simple">
+<li>Some union solids become cleaved meshes</li>
+<li><strong>close parallel faces</strong> cause flickering OpenGL render</li>
+<li>~25/250 Dayabay meshes have issues</li>
+<li>two critical ones fixed: IAV, OAV.</li>
+</ul>
+<p class="small"><strong>OpenMeshRap</strong> finds/fixes cleaved meshes</p>
+<ul class="small simple">
+<li>based on open source project: <strong>OpenMesh</strong></li>
+<li>extracts real topological meshes</li>
+<li>finds close parallel faces between the meshes</li>
+<li>deletes the extra faces</li>
+<li>stitches the split mesh together with added triangles</li>
+</ul>
+<p class="small"><span class="red">TODO: check/apply to JUNO geometry</span></p>
 </div>
 <div class="slide" id="analytic-pmt-geometry-more-realistic-faster-less-memory">
 <h1><span class="small">Analytic PMT geometry : more realistic, faster, less memory</span></h1>
@@ -674,97 +697,274 @@ linearity with IHEP 4 GPU workstation</li>
 </div>
 <div class="slide" id="analytic-pmt-in-12-parts-instead-of-2928-triangles">
 <h1><span class="small">Analytic PMT in 12 parts instead of 2928 triangles</span></h1>
-<p class="small">Implement OptiX geometry with ray intersection code:
-solves quadratic for sphere/cylinder, handles various cases</p>
-<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-parts.png" class="align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-parts.png" style="width: 700px;" />
+<div class="sidebar">
+<p class="first sidebar-title">Partitioned PMT</p>
+<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-parts.png" class="small last align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-parts.png" style="width: 500px;" />
+</div>
+<p class="small">Geometry provided to OptiX in form of ray intersection code</p>
+<p class="small">PMT intersection by comparison with part intersections:
+cylinder and partial sphere intersection from quadratic roots</p>
+<p class="small"><strong>Volume to Surface translation</strong></p>
+<p class="small">Volume heirarchy: Pyrex/Vacuum/Bialkali puts photocathode inside vacuum
+but as coincident boundaries it makes no difference for volume description.</p>
+<p class="small">Coincident boundaries do not work for surface description, must
+adopt correct heirarchy: Pyrex/Bialkali/Vacuum</p>
+<p class="small"><span class="red">TODO: single PMT testing vs G4 to check implications</span></p>
 <p class="tiny">Sphere intersection only 2 cases, Cylinder 10 cases (axial, walls, endcap, outside/inside)</p>
 </div>
 <div class="slide" id="optix-ray-traced-analytic-pmt-geometry">
 <h1><span class="small">OptiX Ray Traced Analytic PMT geometry</span></h1>
-<p class="small">Analytic geometry: more realistic, faster, less memory, BUT a lot more effort than triangulated.</p>
-<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" class="align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" style="width: 900px;" />
+<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" class="small align-center" src="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" style="width: 800px;" />
 <p class="tiny">Near clipped, orthographic projection.</p>
 </div>
 <div class="slide" id="analytic-pmts-together-with-triangulated-geometry">
 <h1><span class="small">Analytic PMTs together with triangulated geometry</span></h1>
-<p class="small">PMTs analytic, the rest triangulated</p>
-<img alt="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" class="align-center" src="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" style="width: 900px;" />
+<p class="small">Dayabay Ray Trace: PMTs analytic, the rest triangulated</p>
+<img alt="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" class="align-center" src="/env/nuwa/detdesc/pmt/analytic-pmt-optix-geometry.png" style="width: 800px;" />
 </div>
-<div class="slide" id="volume-to-surface-translation-details-need-validation">
-<h1><span class="small">Volume to Surface Translation details need validation</span></h1>
+<div class="slide" id="opticks-geant4-dynamic-test-geometry">
+<h1><span class="small">Opticks/Geant4 : Dynamic Test Geometry</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">PMT Edge Zoom</p>
-<p class="small">Zoomed view of PMT edge (mm): showing 3mm Pyrex,</p>
-<img alt="/env/nuwa/detdesc/pmt/analytic-pmt-detail.png" class="small align-center" src="/env/nuwa/detdesc/pmt/analytic-pmt-detail.png" style="width: 600px;" />
-<p class="small last"><strong>Volume based geometry can get away with coincident
-boundaries, Surface based geometry cannot</strong></p>
-</div>
-<p class="small"><strong>Volume Based Geometry</strong></p>
-<p class="small">Heirarchy: Pyrex/Vacuum/Bialkali</p>
-<ul class="small simple">
-<li>photocathode inside vacuum with coincident boundary</li>
-</ul>
-<p class="small"><strong>Surface Based Geometry</strong></p>
-<p class="small">Adjusted heirarchy: Pyrex/Bialkali/Vacuum</p>
-<ul class="small simple">
-<li><strong>avoids coincidence problem</strong></li>
+<p class="first sidebar-title"><em>CfG4</em> package</p>
+<ul class="small last simple">
+<li>G4 step recorder in Opticks event format</li>
+<li>load events into Opticks for visualization</li>
 </ul>
 </div>
-<div class="slide" id="dayabay-iav-oav-mesh-fixing-with-openmesh-surgery">
-<h1><span class="small">Dayabay IAV, OAV mesh fixing with OpenMesh surgery</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">After fix</p>
-<p class="small">Photon Color indicates material</p>
-<img alt="/env/graphics/ggeoview/mesh-fix-iav-oav.png" class="small last align-center" src="/env/graphics/ggeoview/mesh-fix-iav-oav.png" style="width: 500px;" />
-</div>
-<p class="small">Intersection boundary determines photon material,</p>
+<p class="small">Commandline arguments parsed into geometry/material/surface description. Each test shape requires:</p>
 <ul class="small simple">
-<li>top lid photons wrongly assigned Acrylic (not GdLS)</li>
+<li>OptiX: analytic intersection code</li>
+<li>OpenGL: tesselation for visualization</li>
+<li>Geant4: geometry construction code in <em>CfG4</em> package</li>
 </ul>
-<p class="small">G4Polyhedron tesselation bug:</p>
-<ul class="small simple">
-<li>splits some CSG unions into multiple meshes with <strong>close parallel faces</strong></li>
-<li>~25/250 Dayabay meshes have issues eg Eulers Characteristic <tt class="docutils literal">V - E + F != 2</tt></li>
-<li>two critical ones fixed: IAV, OAV.</li>
-<li>close parallel faces causes flickering OpenGL render</li>
-</ul>
-</div>
-<div class="slide" id="openmeshrap-package">
-<h1><span class="small">OpenMeshRap package</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Exploded Z across the mend</p>
-<img alt="/env/graphics/ggeoview/openmeshrap-fix.png" class="last align-center" src="/env/graphics/ggeoview/openmeshrap-fix.png" style="width: 500px;" />
-</div>
-<p class="small">Created package <em>OpenMeshRap</em> to develop fix</p>
-<ul class="small simple">
-<li>based on open source project: <strong>OpenMesh</strong></li>
-<li>extracts real topological meshes</li>
-<li>finds close parallel faces between the meshes</li>
-<li>deletes the extra faces</li>
-<li>stitches the split mesh together with added triangles</li>
-</ul>
-</div>
-<div class="slide" id="photon-torpedo-0">
-<h1><span class="small">Photon Torpedo 0</span></h1>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="45%" />
+<col width="18%" />
+<col width="18%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Shape</th>
+<th class="head">OptiX</th>
+<th class="head">OpenGL</th>
+<th class="head">Geant4</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>sphere</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr><td>box</td>
+<td>needs debug</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr><td>prism</td>
+<td>Y</td>
+<td>Y</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>convex lens</td>
+<td>Y</td>
+<td>Y</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p class="small">Compare Opticks/Geant4 propagations with simple test geometries with:</p>
 <pre class="mypre">
-ggv.sh --analyticmesh 1 \
-      --torchconfig "frame=3199;radius=150;zenith_azimuth=1,0,1,0;source=0,0,1000;target=0,0,0"
-</pre><img alt="/env/graphics/ggeoview/photon-torpedo-3199-0.png" class="align-center" src="/env/graphics/ggeoview/photon-torpedo-3199-0.png" style="width: 900px;" />
+     ggv.sh        --test --testconfig "..."  --torch --torchconfig "..."   # Opticks
+     ggv.sh --cfg4 --test --testconfig "..."  --torch --torchconfig "..."   # Geant4
+</pre></div>
+<div class="slide" id="opticks-absolute-reflection-compared-to-fresnel-expectation">
+<h1><span class="small">Opticks Absolute Reflection compared to Fresnel expectation</span></h1>
+<p class="tiny">Comparison of simulated absolute reflection of S and P polarized single events against
+expectation from Fresnel formula. Using uniform planar incident cyclindrically directed light.</p>
+<img alt="/env/numerics/npy/reflection.png" class="align-center" src="/env/numerics/npy/reflection.png" style="width: 700px;" />
 </div>
-<div class="slide" id="photon-torpedo-1">
-<h1><span class="small">Photon Torpedo 1</span></h1>
-<p class="small">Full geometry too complicated. Working on dynamic test box for checking PMTs and optical physics simulation.</p>
-<img alt="/env/graphics/ggeoview/photon-torpedo-3199-1.png" class="align-center" src="/env/graphics/ggeoview/photon-torpedo-3199-1.png" style="width: 900px;" />
+<div class="slide" id="multiple-rainbows-from-a-single-drop-of-water">
+<h1><span class="small">Multiple Rainbows from a Single Drop of Water</span></h1>
+<img alt="/env/presentation/rainbow-mechanism.png" class="align-center" src="/env/presentation/rainbow-mechanism.png" style="width: 900px;" />
+<p class="small">Caustic bunching at least deviation causes rainbow</p>
+<ol class="small loweralpha simple">
+<li>Primary bow, single reflection : ray f at bow angle</li>
+<li>Secondary bow, double reflection : ray g at bow angle</li>
+<li>Deviation angles 0:180 degrees hemisphere opposite to incident rays</li>
+</ol>
+<p class="tiny">Jearl D. Walker, 1975, Multiple rainbows from single drops of water and other liquids
+<a class="reference external" href="http://patarnott.com/atms749/pdf/MultipleRainbowsSingleDrops.pdf">http://patarnott.com/atms749/pdf/MultipleRainbowsSingleDrops.pdf</a></p>
 </div>
-<div class="slide" id="photon-torpedo-2">
-<h1><span class="small">Photon Torpedo 2</span></h1>
-<p class="small">Select photons according to their history, here just detected ones.</p>
-<img alt="/env/graphics/ggeoview/photon-torpedo-3199-2.png" class="align-center" src="/env/graphics/ggeoview/photon-torpedo-3199-2.png" style="width: 900px;" />
+<div class="slide" id="disc-beam-1m-photons-incident-on-water-sphere-s-pol">
+<h1><span class="small">Disc beam 1M Photons incident on Water Sphere (S-Pol)</span></h1>
+<p class="tiny">Photons shown by lines with color representing polarization direction. S-Polarized (perpendicular to plane of incidence)
+intersection by disc radially directed polarization. Geodesic icosahedron tesselation just for OpenGL visualization,
+actual OptiX geometry is perfect sphere.</p>
+<img alt="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" class="align-center" src="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" style="width: 900px;" />
 </div>
-<div class="slide" id="photon-torpedo-splashback">
-<h1><span class="small">Photon Torpedo Splashback</span></h1>
-<p class="small">Here with no geometry represented, just 0.5M <em>torch</em> photons</p>
-<img alt="/env/graphics/ggeoview/photon-torpedo-3199-splashback.png" class="align-center" src="/env/graphics/ggeoview/photon-torpedo-3199-splashback.png" style="width: 900px;" />
+<div class="slide" id="ns-later-several-bows-apparent">
+<h1><span class="small">2ns later, Several Bows Apparent</span></h1>
+<img alt="/env/graphics/ggeoview/rainbow-spol-disc-several-bows.png" class="align-center" src="/env/graphics/ggeoview/rainbow-spol-disc-several-bows.png" style="width: 900px;" />
+</div>
+<div class="slide" id="opticks-geant4-photon-step-sequence-comparison">
+<h1><span class="small">Opticks/Geant4 Photon Step Sequence Comparison</span></h1>
+<ul class="small simple">
+<li>BT/BR: boundary transmit/reflect</li>
+<li>TO/SC/SA: torch/scatter/surface absorb</li>
+</ul>
+<p class="small"><strong>1M flag sequences indexed using CUDA Thrust, 0.040 s</strong></p>
+<pre class="mypre">
+ 64-bit uint  Opticks    Geant4    chi2                                      (tag:5,-5)
+
+        8ccd   819160    819654    0.15  [4 ] TO BT BT SA                    (cross droplet)
+         8bd   102087    101615    1.09  [3 ] TO BR SA                       (external reflect)
+       8cbcd    61869     61890    0.00  [5 ] TO BT BR BT SA                 (bow 1)
+      8cbbcd     9618      9577    0.09  [6 ] TO BT BR BR BT SA              (bow 2)
+     8cbbbcd     2604      2687    1.30  [7 ] TO BT BR BR BR BT SA           (bow 3)
+    8cbbbbcd     1056      1030    0.32  [8 ] TO BT BR BR BR BR BT SA        (bow 4)
+       86ccd     1014      1000    0.10  [5 ] TO BT BT SC SA
+   8cbbbbbcd      472       516    1.96  [9 ] TO BT BR BR BR BR BR BT SA     (bow 5)
+         86d      498       473    0.64  [3 ] TO SC SA
+  bbbbbbbbcd      304       294    0.17  [10] TO BT BR BR BR BR BR BR BR BR  (bow 8+ truncated)
+  8cbbbbbbcd      272       247    1.20  [10] TO BT BR BR BR BR BR BR BT SA  (bow 6)
+  cbbbbbbbcd      183       161    1.41  [10] TO BT BR BR BR BR BR BR BR BT  (bow 7 truncated)
+         4cd      161       139    1.61  [3 ] TO BT AB
+       8c6cd      153       106    8.53  [5 ] TO BT SC BT SA
+        86bd      138       142    0.06  [4 ] TO BR SC SA
+        4ccd      100       117    1.33  [4 ] TO BT BT AB
+</pre></div>
+<div class="slide" id="rainbow-deviation-angles">
+<h1><span class="small">Rainbow deviation angles</span></h1>
+<p class="tiny">Deviation angle distribution of all 3M photons. Photon wavelengths
+from Plankian 6500K blackbody spectrum (implemented with inverse CDF GPU texture lookup).
+Simulated &quot;images&quot; obtained from wavelength spectrum of each bin using CIEXYZ weighting functions
+converted into sRGB/D65 colorspace.
+The two images exposed for luminance (CIE-Y) of max bin of 1st and 2nd bows.</p>
+<img alt="/env/numerics/npy/rainbow16_deviation_angle.png" class="align-center" src="/env/numerics/npy/rainbow16_deviation_angle.png" style="width: 900px;" />
+</div>
+<div class="slide" id="rainbow-spectrum-for-1st-six-bows">
+<h1><span class="small">Rainbow Spectrum for 1st six bows</span></h1>
+<p class="tiny">Spectra obtained by selecting photons by internal reflection counts.
+Colors obtained from spectra of each bin using CIEXYZ weighting functions
+converted into sRGB/D65 colorspace.
+Exposures by normalizing to bin with maximum luminance (CIE-Y) of each bow.
+White lines indicate geometric optics prediction of deviation angle ranges
+of the visible range 380-780nm. 180-360 degrees signifies exit on same
+side of droplet as incidence.</p>
+<img alt="/env/numerics/npy/rainbow6-spectrum.png" class="align-center" src="/env/numerics/npy/rainbow6-spectrum.png" style="width: 900px;" />
+</div>
+<div class="slide" id="m-rainbow-s-polarized-comparison-opticks-geant4">
+<h1><span class="small">1M Rainbow S-Polarized, Comparison Opticks/Geant4</span></h1>
+<p class="tiny">Deviation angle(degrees) of 1M parallel monochromatic photons in disc shaped beam incident on water sphere.
+Numbered bands are visible range expectations of first 11 rainbows.
+S-Polarized intersection (E field perpendicular to plane of incidence) arranged by directing polarization radially.</p>
+<img alt="/env/optix/cfg4/rainbow-cfg4-spol.png" class="align-center" src="/env/optix/cfg4/rainbow-cfg4-spol.png" style="width: 800px;" />
+</div>
+<div class="slide" id="m-rainbow-p-polarized-comparison-opticks-geant4">
+<h1><span class="small">1M Rainbow P-Polarized, Comparison Opticks/Geant4</span></h1>
+<p class="tiny">Deviation angle(degrees) of 1M parallel monochromatic photons in disc shaped beam incident on water sphere.
+Numbered bands are visible range expectations of first 11 rainbows.
+P-Polarized intersection (E field within plane of incidence) arranged by directing polarization tangentially.</p>
+<img alt="/env/optix/cfg4/rainbow-cfg4-ppol.png" class="align-center" src="/env/optix/cfg4/rainbow-cfg4-ppol.png" style="width: 800px;" />
+</div>
+<div class="slide" id="performance-comparison-opticks-geant4">
+<h1><span class="small">Performance Comparison Opticks/Geant4</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Rainbow 1M S-Pol</p>
+<img alt="/env/optix/cfg4/rainbow-cfg4-2.png" class="small last align-center" src="/env/optix/cfg4/rainbow-cfg4-2.png" style="width: 500px;" />
+</div>
+<p class="small"><strong>Average Propagate Time for 1M photons</strong></p>
+<p class="small">MacBook Pro 2013, NVIDIA GeForce GT 750M 2GB (384 cores)</p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="28%" />
+<col width="24%" />
+<col width="24%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Rainbow Test</th>
+<th class="head">Geant4 10.2</th>
+<th class="head">Opticks Interop</th>
+<th class="head">Opticks Compute</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>1M (S-Pol)</td>
+<td>56 s</td>
+<td>1.62 s</td>
+<td>0.28 s</td>
+</tr>
+<tr><td>1M (P-Pol)</td>
+<td>58 s</td>
+<td>1.71 s</td>
+<td>0.25 s</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><strong>Opticks ~200X Geant4</strong> with only 384 core mobile GPU</li>
+<li>multi-GPU workstation up to 20x more cores</li>
+<li><span class="red">photon propagation time will become effectively zero</span></li>
+</ul>
+<p class="small"><strong>Opticks Interop/Compute Modes</strong></p>
+<ul class="small simple">
+<li>perfectly identical results, monitored by digest</li>
+<li>Interop: uses OpenGL buffers allowing visualization</li>
+<li>Compute: uses OptiX buffers</li>
+<li>Compute (and G4) propagated events can be visualized
+by loading into interop mode viewer</li>
+</ul>
+</div>
+<div class="slide" id="summary">
+<h1><span class="small">Summary</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Opticks Performance</p>
+<ul class="small last simple">
+<li><strong>200x Geant4</strong> with mobile GPU</li>
+<li><strong>&gt;&gt; 200x</strong> expected with workstation GPUs</li>
+<li><span class="red">photon propagation time --&gt; zero</span></li>
+</ul>
+</div>
+<p class="small"><strong>Opticks Transition Complete</strong></p>
+<ul class="small simple">
+<li>squeezed JUNO geometry onto GPU with instancing</li>
+<li>devised mesh fixing workaround for G4Polyhedron bug</li>
+<li>developed analytic PMT representation</li>
+<li>photons fully GPU resident, only copy PMT hits to CPU</li>
+</ul>
+<p class="small"><strong>Opticks Validation</strong></p>
+<ul class="small simple">
+<li>developed validation machinery <em>CfG4</em></li>
+<li>simple rainbow geometry matches Geant4</li>
+</ul>
+<p class="small"><strong>Next Tests</strong></p>
+<ul class="small simple">
+<li>Prism, Lens, Fresnel Rhomb (2x TIR)</li>
+<li>Single Analytic PMT</li>
+<li>Full geometries</li>
+</ul>
+</div>
+<div class="slide" id="invisible-header-of-spacer-page">
+<h1><span class="i">Invisible Header of spacer page</span></h1>
+</div>
+<div class="slide" id="extras-details-and-tests-in-progress">
+<h1><span class="small">EXTRAS : Details and Tests in progress</span></h1>
+<p class="small"><strong>Details</strong></p>
+<ul class="small simple">
+<li>Optical Photons now fully GPU resident</li>
+<li>Volume to Surface Translation details need validation</li>
+<li>OptiX Geometry Experience</li>
+</ul>
+<p class="small"><strong>Tests requiring G4 comparison</strong></p>
+<ul class="small simple">
+<li>Prism S-Polarized</li>
+<li>Prism P-Polarized</li>
+<li>Prism Deviation vs Incident angles for 10 wavelengths</li>
+<li>Lens focussing</li>
+</ul>
 </div>
 <div class="slide" id="optical-photons-now-fully-gpu-resident">
 <h1><span class="small">Optical Photons now fully GPU resident</span></h1>
@@ -773,28 +973,29 @@ ggv.sh --analyticmesh 1 \
 <li>seeded (assigned gensteps)</li>
 <li>generated</li>
 <li>propagated</li>
-<li>indexing material/interaction histories</li>
+<li>indexed material/interaction histories</li>
 </ul>
-<p class="small">Only PMT hits are copied back to CPU</p>
+<p class="small">Only PMT hits need to be copied back to CPU</p>
 <p class="tiny">Thrust/CUDA/OptiX interop used to implement</p>
 </div>
-<div class="slide" id="dynamic-test-geometry">
-<h1><span class="small">Dynamic Test Geometry</span></h1>
-<p class="small">Following refactor of Material/Surface/Boundary handling
-can now dynamically add test geometry/materials/surfaces.</p>
-<p class="small">Each shape requires:</p>
+<div class="slide" id="volume-to-surface-translation-details-need-validation">
+<h1><span class="small">Volume to Surface Translation details need validation</span></h1>
+<p class="small">Zoomed view of PMT edge (mm): showing 3mm Pyrex,</p>
+<img alt="/env/nuwa/detdesc/pmt/analytic-pmt-detail.png" class="small align-center" src="/env/nuwa/detdesc/pmt/analytic-pmt-detail.png" style="width: 600px;" />
+<p class="small"><strong>Volume based geometry can get away with coincident
+boundaries, Surface based geometry cannot</strong></p>
+</div>
+<div class="slide" id="optix-geometry-experience">
+<h1><span class="small">OptiX Geometry Experience</span></h1>
+<p class="small"><strong>Geometry Issues Fixed/Avoidable</strong></p>
 <ul class="small simple">
-<li>analytic intersection code for OptiX</li>
-<li>tesselation for OpenGL visualization</li>
+<li>triangulated geometry leaks when shoot millions of photons at cracks (1)</li>
+<li>bounding boxes that touch geometry cause leaks, slightly
+enlarging the boxes avoids leak (&lt;1 in 3M)</li>
 </ul>
-<p class="small">Have implemented:</p>
-<ul class="small simple">
-<li>box</li>
-<li>sphere (including partial)</li>
-<li>lens (intersection of two spheres)</li>
-<li>prism</li>
-</ul>
-<p class="small">Using to validate simulation results against analytic expectations.</p>
+<ol class="tiny arabic simple">
+<li>more of a problem for testing than actual usage</li>
+</ol>
 </div>
 <div class="slide" id="prism-s-polarized">
 <h1><span class="small">Prism S-Polarized</span></h1>
@@ -809,12 +1010,6 @@ incident from left.</p>
 the P-polarized photons can only be transmitted.</p>
 <p class="tiny">P-polarization: not perpendicular to incident plane</p>
 <img alt="/env/numerics/npy/prism-ppol-ripple.png" class="align-center" src="/env/numerics/npy/prism-ppol-ripple.png" style="width: 900px;" />
-</div>
-<div class="slide" id="monochromatic-expected-vs-simulated-reflection">
-<h1><span class="small">Monochromatic : expected vs simulated reflection</span></h1>
-<p class="small">Comparison of simulated absolute reflection of S and P polarized single events against
-expectation from Fresnel formula. Using uniform planar incident cyclindrically directed light.</p>
-<img alt="/env/numerics/npy/reflection.png" class="align-center" src="/env/numerics/npy/reflection.png" style="width: 900px;" />
 </div>
 <div class="slide" id="prism-deviation-vs-incident-angles-for-10-wavelengths">
 <h1><span class="small">Prism Deviation vs Incident angles for 10 wavelengths</span></h1>
@@ -831,97 +1026,6 @@ Disc parallel beam incident from left.
 Color represents polarization direction.  2nd reflections
 are apparent.</p>
 <img alt="/env/graphics/ggeoview/lens-polcolor.png" class="align-center" src="/env/graphics/ggeoview/lens-polcolor.png" style="width: 900px;" />
-</div>
-<div class="slide" id="rainbow-deviation-angles">
-<h1><span class="small">Rainbow deviation angles</span></h1>
-<p class="tiny">Plot without selection of deviation angles of 3M photons. Photon wavelengths
-from Plankian 6500K blackbody spectrum (implemented with inverse CDF GPU texture lookup).
-Simulated &quot;images&quot; obtained from wavelength spectrum of each bin using CIEXYZ weighting functions
-converted into sRGB/D65 colorspace.
-The two images expose for luminance (CIE-Y) of max bin of 1st and 2nd bows.</p>
-<img alt="/env/numerics/npy/rainbow16_deviation_angle.png" class="align-center" src="/env/numerics/npy/rainbow16_deviation_angle.png" style="width: 900px;" />
-</div>
-<div class="slide" id="rainbow-spectrum-for-1st-six-bows">
-<h1><span class="small">Rainbow Spectrum for 1st six bows</span></h1>
-<p class="tiny">Spectra obtained by selecting photons by internal reflection counts.
-Colors obtained from spectra of each bin using CIEXYZ weighting functions
-converted into sRGB/D65 colorspace.
-Exposures by normalizing to bin with maximum luminance (CIE-Y) of each bow.
-White lines indicate geometric optics prediction of deviation angle ranges
-of the visible range 380-780nm. 180-360 degrees signifies exit on same
-side of droplet as incidence.</p>
-<img alt="/env/numerics/npy/rainbow6-spectrum.png" class="align-center" src="/env/numerics/npy/rainbow6-spectrum.png" style="width: 900px;" />
-</div>
-<div class="slide" id="performance-comparison-opticks-geant4">
-<h1><span class="small">Performance Comparison Opticks/Geant4</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">1M Photons Rainbow</p>
-<img alt="/env/optix/cfg4/rainbow-cfg4-2.png" class="small last align-center" src="/env/optix/cfg4/rainbow-cfg4-2.png" style="width: 500px;" />
-</div>
-<p class="small"><strong>Average Propagate Time for 1M photons</strong></p>
-<p class="small">MacBook Pro 2013, NVIDIA GeForce GT 750M 2GB (384 cores)</p>
-<table border="1" class="small docutils">
-<colgroup>
-<col width="28%" />
-<col width="24%" />
-<col width="24%" />
-<col width="25%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">Test</th>
-<th class="head">Geant4 10.2</th>
-<th class="head">Opticks Interop</th>
-<th class="head">Opticks Compute</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>Rainbow 1M</td>
-<td>56 s</td>
-<td>1.62 s</td>
-<td>0.28 s</td>
-</tr>
-</tbody>
-</table>
-<ul class="small simple">
-<li><strong>Opticks ~200X Geant4 with only 384 cores</strong></li>
-<li>multi-GPU workstation up to 20x the cores</li>
-<li><span class="red">photon propagation time will become effectively zero</span></li>
-</ul>
-<p class="small"><strong>Opticks Interop/Compute Modes</strong></p>
-<ul class="small simple">
-<li>bit perfect identical results, monitored by digest</li>
-<li>Interop: uses OpenGL buffers allowing visualization</li>
-<li>Compute: uses OptiX buffers</li>
-<li>Compute (and G4) propagated events can be visualized
-by loading into interop mode viewer</li>
-</ul>
-</div>
-<div class="slide" id="progress-overview">
-<h1><span class="small">Progress Overview</span></h1>
-<p class="small"><strong>Resolved several large obvious geometry problems</strong></p>
-<ul class="small simple">
-<li>squeezing JUNO geometry onto GPU with instancing</li>
-<li>fixing bad triangulations using OpenMesh surgery</li>
-<li>replace triangulated PMTs with more realistic analytic ones</li>
-</ul>
-</div>
-<div class="slide" id="progress-overview-continued">
-<h1><span class="small">Progress Overview Continued</span></h1>
-<ul class="small simple">
-<li>simplified analytic PMT by removing coincident surfaces</li>
-<li>implemented dynamic test geometry: box, sphere, lens, prism</li>
-<li>reflection, refraction, dispersion tests so far matching,
-<span class="red">after fixing/avoiding several geometry issues</span></li>
-</ul>
-<p class="small">Geometry Issues Fixed/Avoidable:</p>
-<ul class="small simple">
-<li>triangulated geometry leaks when shoot millions of photons at cracks (1)</li>
-<li>bounding boxes that touch geometry cause leaks, slightly
-enlarging the boxes avoids leak (&lt;1 in 3M)</li>
-</ul>
-<ol class="tiny arabic simple">
-<li>more of a problem for testing than actual usage</li>
-</ol>
 </div>
 </div>
 </body>
