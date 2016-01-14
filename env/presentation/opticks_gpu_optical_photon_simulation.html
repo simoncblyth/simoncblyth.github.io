@@ -468,7 +468,7 @@ ul.auto-toc {
           }
           div.slide#jpmt-inside-wide{
              background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_half.png);
-             background-size: 1408px 834px;
+             background-size: 1432px 844px;
              background-position: 0px 0px;
           }
           div.slide#jpmt-wide{
@@ -510,6 +510,11 @@ ul.auto-toc {
              background-image: url(/env/graphics/ggeoview/jpmt-inside-outside_half.png);
              background-size: 1401px 842px;
              background-position: 0px 0px;
+          }
+          div.slide#nvidia-optix-in-action{
+             background-image: url(/env/presentation/optix-in-action_half.png);
+             background-size: 966px 646px;
+             background-position: 100px 50px;
           } 
 
        </style>
@@ -553,7 +558,7 @@ jpmt-wide.png 2818px_1672px -->
 <li>Brief History of GPU Optical Photon Simulation Development</li>
 <li>Introducing Opticks</li>
 <li>Handling JUNO geometry</li>
-<li>Dayabay IAV, OAV mesh fixing with OpenMesh surgery</li>
+<li>Mesh Fixing with OpenMesh surgery</li>
 <li>Analytic PMT geometry description</li>
 <li>Opticks/Geant4 : Dynamic Test Geometry</li>
 <li>Rainbow Geometry Testing</li>
@@ -568,23 +573,16 @@ jpmt-wide.png 2818px_1672px -->
 <div class="slide" id="brief-history-of-gpu-optical-photon-simulation-development">
 <h1><span class="small">Brief History of GPU Optical Photon Simulation Development</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Transition to Opticks</p>
+<p class="first sidebar-title">G4+Opticks Simulation ?</p>
 <p class="small"><strong>Optical Photon Problem</strong></p>
-<p class="small"><em>Geant4</em> optical photon propagation dominates (~95%)
-simulation time.</p>
+<p class="small"><em>Geant4</em> optical photon propagation dominates
+simulation time ~95%</p>
 <p class="small"><strong>Optical Photon Solution</strong></p>
 <p class="small">External photon propagation made possible by
 isolated nature of photons in simulation chain.</p>
-<ul class="small simple">
+<ul class="small last simple">
 <li>produced only by Cerenkov/Scintillation</li>
 <li>yielding only PMT hits</li>
-</ul>
-<p class="small"><strong>NVIDIA OptiX Ray tracing framework</strong></p>
-<ul class="small last simple">
-<li>state-of-the-art GPU accelerated ray tracing</li>
-<li>performance scales across multiple GPUs, verified
-linearity with IHEP 4 GPU workstation</li>
-<li>regular releases: improvements, GPU tuning</li>
 </ul>
 </div>
 <p class="small"><strong>winter 2014</strong> (within <em>Chroma</em>)</p>
@@ -594,7 +592,7 @@ linearity with IHEP 4 GPU workstation</li>
 </ul>
 <p class="small"><strong>spring 2015</strong> (start transition to <em>Opticks</em>)</p>
 <ul class="small simple">
-<li><span class="red">realize lack of efficient multi-GPU is showstopper</span> for <em>Chroma</em></li>
+<li><span class="red">decide lack of multi-GPU is showstopper</span> for <em>Chroma</em></li>
 <li>discover <span class="blue">NVIDIA OptiX</span> ray tracing framework</li>
 <li>create <em>Opticks</em> (using OptiX) to replace <em>Chroma</em></li>
 </ul>
@@ -603,18 +601,48 @@ linearity with IHEP 4 GPU workstation</li>
 <li>infrastructure operational, G4 optical physics ported</li>
 <li>large geometry support added using instancing</li>
 </ul>
-<p class="small"><strong>autumn/winter 2015</strong></p>
+<p class="small"><strong>autumn/winter 2015</strong> (Validations begin)</p>
 <ul class="small simple">
 <li>major tesselation bug avoided with <em>OpenMesh</em></li>
 <li>develop analytic PMT description</li>
 <li>validation machinery created <em>CfG4</em></li>
 </ul>
-<p class="tiny">Newton published Opticks in 1704</p>
+<p class="tiny">Newton published <em>Opticks</em> in 1704</p>
 </div>
-<div class="slide" id="introducing-opticks">
-<h1><span class="small">Introducing Opticks</span></h1>
+<div class="slide" id="based-on-nvidia-optix-ray-tracing-engine-c-c-cuda">
+<h1><span class="small">Based on: NVIDIA OptiX Ray Tracing Engine [C++/C/CUDA]</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Opticks ~15 C++ Packages</p>
+<p class="first sidebar-title">OptiX <em>Tutorial</em> App</p>
+<p class="small">Image pixels calculated by recursively bouncing rays
+doing shadow, reflection, refraction calculations.
+Runs at interactive speeds with GeForce GT 750M.</p>
+<img alt="/env/optix/samples/optix-tutorial-10.png" class="last align-right" src="/env/optix/samples/optix-tutorial-10.png" style="width: 450px;" />
+</div>
+<p class="small">OptiX provides: <span class="blue">CUDA compiler optimized for Ray Tracing</span></p>
+<ul class="small simple">
+<li>ray tracing framework, <strong>no rendering assumptions</strong></li>
+<li>state-of-the-art GPU accelerated geometry intersection</li>
+<li>regular releases, improvements, tuning for new GPUs</li>
+<li>shared C++/CUDA context eases development</li>
+</ul>
+<p class="small"><span class="red">NVIDIA expertise on efficient GPU/multi-GPU usage</span></p>
+<ul class="small simple">
+<li>persistent warps sized to fill machine</li>
+<li>load balancing between warps, GPUs</li>
+</ul>
+<p class="small"><strong>IHEP Performance Check</strong></p>
+<p class="small">Used IHEP 4 GPU workstation to verify
+near linear performance scaling across multiple GPUs</p>
+<p class="tiny"><a class="reference external" href="https://developer.nvidia.com/optix">https://developer.nvidia.com/optix</a></p>
+<p class="tiny"><a class="reference external" href="https://research.nvidia.com/publication/optix-general-purpose-ray-tracing-engine">https://research.nvidia.com/publication/optix-general-purpose-ray-tracing-engine</a></p>
+</div>
+<div class="slide" id="nvidia-optix-in-action">
+<h1><span class="i">NVIDIA OptiX In Action</span></h1>
+</div>
+<div class="slide" id="introducing-opticks-recreating-g4-context-on-gpu">
+<h1><span class="small">Introducing Opticks : Recreating G4 Context on GPU</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Opticks ~15 C++ Pkgs</p>
 <p class="small">Organized by dependencies</p>
 <ul class="small simple">
 <li><span class="red">Recreates Geant4 context on GPU</span></li>
@@ -630,7 +658,8 @@ linearity with IHEP 4 GPU workstation</li>
 <p class="small">Externals:</p>
 <ul class="small last simple">
 <li>Boost + Asio-ZMQ, ZMQ</li>
-<li>CUDA 7.0, Thrust 1.8, OptiX 3.8, OpenGL 4.1</li>
+<li>CUDA 7.0, Thrust 1.8</li>
+<li>OptiX 3.8, OpenGL 4.1</li>
 <li>OpenMesh 4.1, ImGUI</li>
 </ul>
 </div>
@@ -642,15 +671,16 @@ linearity with IHEP 4 GPU workstation</li>
 </ul>
 <p class="small"><strong>Geometry packages</strong></p>
 <ul class="small simple">
-<li><em>AssimpWrap</em> : G4DAE geometry loading using forked Assimp</li>
+<li><em>AssimpWrap</em> : G4DAE geometry loading with Assimp fork</li>
 <li><em>GGeo</em> : preparing geometry for GPU</li>
 <li><em>OpenMeshRap</em> : mesh fixing</li>
 </ul>
 <p class="small"><strong>GPU library interface packages</strong></p>
 <ul class="small simple">
-<li><em>OpticksOp</em> : high level control of GPU libs</li>
+<li><em>OpticksOp</em> : high level GPU control</li>
 <li><em>OptiXRap</em> : OptiX control</li>
-<li><em>ThrustRap</em> <em>CUDAWrap</em> : photon indexing, cuRAND RNG</li>
+<li><em>ThrustRap</em> : photon indexing</li>
+<li><em>CUDAWrap</em> : persist cuRAND state</li>
 <li><em>OGLWrap</em> : OpenGL visualization</li>
 </ul>
 <p class="small"><strong>Main packages</strong></p>
@@ -665,11 +695,11 @@ linearity with IHEP 4 GPU workstation</li>
 <p class="first sidebar-title">JUNO Geometry</p>
 <p class="small">289733 volumes split into instanced:</p>
 <ul class="small simple">
+<li>name: count (faces)</li>
 <li>PMT_3inch: 36572 (540)</li>
 <li>PMT_20inch: 19452 (3502)</li>
 <li>lFasteners: 480 (1856)</li>
 <li>lPlane: 124 (6252)</li>
-<li>name: count (faces)</li>
 </ul>
 <p class="small">And the rest:</p>
 <ul class="small last simple">
@@ -691,7 +721,7 @@ linearity with IHEP 4 GPU workstation</li>
 <ul class="small simple">
 <li>Pure OptiX buffers faster (~7X interop)</li>
 <li>Less GPU memory (1)</li>
-<li>Visualize with OpenGL separately by event loading</li>
+<li>Visualize by separate event loading</li>
 </ul>
 <p class="small"><strong>Ideas to investigate</strong></p>
 <ul class="small simple">
@@ -707,19 +737,19 @@ linearity with IHEP 4 GPU workstation</li>
 <h1><span class="small">JUNO Geometry Instance Rendering Control</span></h1>
 <img alt="/env/graphics/ggeoview/ggv-juno-instancing.png" class="align-center" src="/env/graphics/ggeoview/ggv-juno-instancing.png" style="width: 900px;" />
 </div>
-<div class="slide" id="handling-juno-geometry">
-<h1><span class="small">Handling JUNO Geometry</span></h1>
-<img alt="/env/graphics/ggeoview/ggeoview-cerenkov-jpmt.png" class="align-center" src="/env/graphics/ggeoview/ggeoview-cerenkov-jpmt.png" style="width: 900px;" />
+<div class="slide" id="jpmt-inside-wide">
+<h1><span class="i">JPMT Inside Wide</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-wide_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-wide_half.png</a></p>
 </div>
-<div class="slide" id="dayabay-iav-oav-mesh-fixing-with-openmesh-surgery">
-<h1><span class="small">Dayabay IAV, OAV mesh fixing with OpenMesh surgery</span></h1>
+<div class="slide" id="mesh-fixing-with-openmesh-surgery">
+<h1><span class="small">Mesh Fixing with OpenMesh surgery</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">After fix</p>
 <img alt="/env/graphics/ggeoview/mesh-fix-iav-oav.png" class="small align-center" src="/env/graphics/ggeoview/mesh-fix-iav-oav.png" style="width: 500px;" />
 <p class="small">Color indicates material assigned.
 Prior to fix, assignments incorrect for all photons
-heading towards top lid.</p>
-<p class="small">Topologically correct meshes, without holes, have:</p>
+heading towards Dayabay AD top lid.</p>
+<p class="small">For topologically correct meshes, without holes:</p>
 <p class="small last"><tt class="docutils literal">V - E + F = 2</tt>  (Eulers Characteristic)</p>
 </div>
 <p class="small">Intersection boundaries determines photon material, bad
@@ -730,6 +760,7 @@ meshes cause incorrect material assignments</p>
 <li><strong>close parallel faces</strong> cause flickering OpenGL render</li>
 <li>~25/250 Dayabay meshes have issues</li>
 <li>two critical ones fixed: IAV, OAV.</li>
+<li><span class="red">TODO: check/apply to JUNO geometry</span></li>
 </ul>
 <p class="small"><strong>OpenMeshRap</strong> finds/fixes cleaved meshes</p>
 <ul class="small simple">
@@ -739,12 +770,11 @@ meshes cause incorrect material assignments</p>
 <li>deletes the extra faces</li>
 <li>stitches the split mesh together with added triangles</li>
 </ul>
-<p class="small"><span class="red">TODO: check/apply to JUNO geometry</span></p>
 </div>
 <div class="slide" id="analytic-pmt-geometry-more-realistic-faster-less-memory">
 <h1><span class="small">Analytic PMT geometry : more realistic, faster, less memory</span></h1>
 <ul class="small simple">
-<li>parse Dayabay detdesc XML to give CSG tree : solids with boolean intersections, unions</li>
+<li>parse geometry XML to give CSG tree : solids with boolean intersections, unions</li>
 <li>partition 5 solids into 12 <strong>single primitive</strong> parts</li>
 <li>splitting at geometrical intersections avoids implementing general CSG boolean handling</li>
 </ul>
@@ -1002,8 +1032,41 @@ by loading into interop mode viewer</li>
 <li>Full geometries</li>
 </ul>
 </div>
-<div class="slide" id="invisible-header-of-spacer-page">
-<h1><span class="i">Invisible Header of spacer page</span></h1>
+<div class="slide" id="jpmt-wide">
+<h1><span class="i">JPMT Wide</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-wide_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-wide_half.png</a></p>
+</div>
+<div class="slide" id="jpmt-before-contact">
+<h1><span class="i">JPMT Before Contact</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-before-contact_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-before-contact_half.png</a></p>
+</div>
+<div class="slide" id="jpmt-after-contact">
+<h1><span class="i">JPMT After Contact</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-after-contact_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-after-contact_half.png</a></p>
+</div>
+<div class="slide" id="jpmt-approach">
+<h1><span class="i">JPMT Approach</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-approach_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-approach_half.png</a></p>
+</div>
+<div class="slide" id="jpmt-arrival">
+<h1><span class="i">JPMT Arrival</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-arrival_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-arrival_half.png</a></p>
+</div>
+<div class="slide" id="jpmt-inside-outside">
+<h1><span class="i">JPMT Inside Outside</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-outside_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-outside_half.png</a></p>
+<div class="sidebar">
+<p class="first sidebar-title">Photon History Selection</p>
+<p class="last">Only <em>CK BT BT BT SA</em>, three boundary transmits before surface absorption</p>
+</div>
+</div>
+<div class="slide" id="jpmt-headview">
+<h1><span class="i">JPMT Headview</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-headview_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-headview_half.png</a></p>
+</div>
+<div class="slide" id="jpmt-backview">
+<h1><span class="i">JPMT Backview</span></h1>
+<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-backview_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-backview_half.png</a></p>
 </div>
 <div class="slide" id="extras-details-and-tests-in-progress">
 <h1><span class="small">EXTRAS : Details and Tests in progress</span></h1>
@@ -1081,42 +1144,6 @@ Disc parallel beam incident from left.
 Color represents polarization direction.  2nd reflections
 are apparent.</p>
 <img alt="/env/graphics/ggeoview/lens-polcolor.png" class="align-center" src="/env/graphics/ggeoview/lens-polcolor.png" style="width: 900px;" />
-</div>
-<div class="slide" id="jpmt-inside-wide">
-<h1><span class="i">JPMT Inside Wide</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-wide_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-wide_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-wide">
-<h1><span class="i">JPMT Wide</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-wide_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-wide_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-headview">
-<h1><span class="i">JPMT Headview</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-headview_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-headview_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-backview">
-<h1><span class="i">JPMT Backview</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-backview_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-backview_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-before-contact">
-<h1><span class="i">JPMT Before Contact</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-before-contact_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-before-contact_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-after-contact">
-<h1><span class="i">JPMT After Contact</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-after-contact_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-after-contact_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-approach">
-<h1><span class="i">JPMT Approach</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-approach_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-approach_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-arrival">
-<h1><span class="i">JPMT Arrival</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-arrival_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-arrival_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-inside-outside">
-<h1><span class="i">JPMT Inside Outside</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-outside_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-inside-outside_half.png</a></p>
 </div>
 </div>
 </body>
