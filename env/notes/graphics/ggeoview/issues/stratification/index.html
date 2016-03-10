@@ -172,16 +172,12 @@
             
   <div class="section" id="torch-stratification">
 <h1>Torch Stratification<a class="headerlink" href="#torch-stratification" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="refs">
-<h2>Refs<a class="headerlink" href="#refs" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference external" href="http://paulbourke.net/miscellaneous/aliasing/">http://paulbourke.net/miscellaneous/aliasing/</a></li>
-</ul>
-<div class="highlight-python"><pre>Since the resultant colour of each pixel is based upon one infinitely small
-sample taken within the centre of each pixel and because pixels occur at
-regular intervals frequency based aliasing problems often arise. Aliasing
-refers to the inclusion of characteristics or artifacts in an image that could
-have come from more than one scene description.</pre>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Confirmed to be due to time compression domain of 200ns being
+inappropriate for small scale testing.  Reducing time domain to 10ns
+eliminates visible stratification.</p>
+<div class="highlight-python"><pre>ggv-;ggv-pmt-test --timemax 10</pre>
 </div>
 </div>
 <div class="section" id="issue">
@@ -262,12 +258,112 @@ ggv-;ggv-pmt-test</pre>
 <p>See same stratification pattern with just the MO/Pyrex of very front face, just
 not quite as wide.</p>
 </div>
-<div class="section" id="visualization-artifact-only">
-<h2>Visualization Artifact Only ?<a class="headerlink" href="#visualization-artifact-only" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="visualization-artifact-only-no">
+<h2>Visualization Artifact Only ? NO<a class="headerlink" href="#visualization-artifact-only-no" title="Permalink to this headline">¶</a></h2>
 <p>Plotting the z position of the intersect shows no stair stepping.</p>
+<ul class="simple">
+<li>temporal compression is biting far more than spatial</li>
+</ul>
 </div>
-<div class="section" id="compression-artifact-dont-think-so">
-<h2>Compression Artifact ? Dont think so<a class="headerlink" href="#compression-artifact-dont-think-so" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="time-banding">
+<h2>Time Banding<a class="headerlink" href="#time-banding" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>In [2]: run stratification.py
+-rw-r--r--  1 blyth  staff  32000080 Nov 17 16:56 /usr/local/env/dayabay/oxtorch/1.npy
+-rw-r--r--  1 blyth  staff  80000080 Nov 17 16:56 /usr/local/env/dayabay/rxtorch/1.npy
+-rw-r--r--  1 blyth  staff  8000080 Nov 17 16:56 /usr/local/env/dayabay/phtorch/1.npy
+
+
+In [16]: cu = count_unique(t)   # 26
+Out[16]:
+array([[     0.928,   9470.   ],
+       [     0.934,  15620.   ],
+       [     0.94 ,  15575.   ],
+       [     0.946,  15433.   ],
+       [     0.952,  15309.   ],
+       [     0.958,  15100.   ],
+       [     0.964,  14928.   ],
+       [     0.97 ,  14858.   ],
+       [     0.977,  14547.   ],
+       [     0.983,  14366.   ],
+       [     0.989,  14178.   ],
+       [     0.995,  14093.   ],
+       [     1.001,  13906.   ],
+       [     1.007,  13886.   ],
+       [     1.013,  13681.   ],
+       [     1.019,  13598.   ],
+       [     1.025,  13292.   ],
+       [     1.032,  13172.   ],
+       [     1.038,  13150.   ],
+       [     1.044,  12745.   ],
+       [     1.05 ,  12687.   ],
+       [     1.056,  12576.   ],
+       [     1.062,  12264.   ],
+       [     1.068,  12346.   ],
+       [     1.074,  12073.   ],
+       [     1.08 ,   2510.   ]])</pre>
+</div>
+</div>
+<div class="section" id="time-compression-artifact-yep">
+<h2>Time Compression Artifact ? YEP<a class="headerlink" href="#time-compression-artifact-yep" title="Permalink to this headline">¶</a></h2>
+<p>Time not as easy as position to contain based on geometry as will
+want to use different time horizons depending on what looking at.</p>
+<ul class="simple">
+<li>Time domain extent <cite>&#8211;timemax</cite> default is 200ns, distinct from <cite>&#8211;animtimemax</cite></li>
+<li>Speed of light in vacuum :  299.792 mm/ns  ~300 mm/ns</li>
+<li>Domain of 200ns corresponds to time for light to travel 60m ( 200*300 = 60,000 mm )
+in order to contain large detector geometries</li>
+<li>Are compressing into 16 bit short int with (0x1 &lt;&lt; 15) - 1 = 32767 values,
+so the steps between possible times correspond to time light
+in vacuum would go 60000./32767 = 1.83 mm, so in MineralOil  1.83*1.482 = 2.712 mm</li>
+<li>Range of positions across frontface of PMT is 31mm (as shown below)
+31./2.712 = 11 (this suggests 11 steps, when see 26 distinct times)</li>
+<li>Factor of 2 somewhere ?</li>
+<li>There are actually two relevant compressed times at either ends of the step.</li>
+</ul>
+<p>Refractive indices at 380nm</p>
+<ul class="simple">
+<li><cite>ggv &#8211;mat Pyrex</cite>       1.458</li>
+<li><cite>ggv &#8211;mat MineralOil</cite>  1.48264</li>
+</ul>
+</div>
+<div class="section" id="improve-time-compression">
+<h2>Improve Time Compression ?<a class="headerlink" href="#improve-time-compression" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>shortnorm compression uses signed short for easy handling of position
+using geometry center offset and extent scaling, for time the
+center is taken as zero which wastes half the bits as never have negative times</li>
+</ul>
+<p>cu/photon.h:</p>
+<div class="highlight-python"><pre>102 __device__ short shortnorm( float v, float center, float extent )
+103 {
+104     // range of short is -32768 to 32767
+105     // Expect no positions out of range, as constrained by the geometry are bouncing on,
+106     // but getting times beyond the range eg 0.:100 ns is expected
+107     //
+108     int inorm = __float2int_rn(32767.0f * (v - center)/extent ) ;    // linear scaling into -1.f:1.f * float(SHRT_MAX)
+109     return fitsInShort(inorm) ? short(inorm) : SHRT_MIN  ;
+110 }</pre>
+</div>
+</div>
+<div class="section" id="changing-position-time-domain-used-for-record-compression">
+<h2>Changing Position/Time Domain used for record compression<a class="headerlink" href="#changing-position-time-domain-used-for-record-compression" title="Permalink to this headline">¶</a></h2>
+<p>App::registerGeometry:</p>
+<div class="highlight-python"><pre>m_composition-&gt;setTimeDomain( gfloat4(0.f, m_fcfg-&gt;getTimeMax(), m_fcfg-&gt;getAnimTimeMax(), 0.f) );
+
+m_parameters-&gt;add&lt;float&gt;("timeMax",m_composition-&gt;getTimeDomain().y  );
+
+gfloat4 ce0 = m_mesh0-&gt;getCenterExtent(0);  // 0 : all geometry of the mesh, &gt;0 : specific volumes
+
+m_composition-&gt;setDomainCenterExtent(ce0);  // define range in compressions etc..</pre>
+</div>
+<div class="highlight-python"><pre>ggv --help
+
+--timemax arg            Maximum time in nanoseconds. Default 200
+--animtimemax arg        Maximum animation time in nanoseconds. Default 50</pre>
+</div>
+</div>
+<div class="section" id="position-compression-artifact-dont-think-so">
+<h2>Position Compression Artifact ? Dont think so<a class="headerlink" href="#position-compression-artifact-dont-think-so" title="Permalink to this headline">¶</a></h2>
 <p>Where does the position come from:</p>
 <ul class="simple">
 <li>the intersection point with sphere is calculated and than a linear interpolation
@@ -367,6 +463,18 @@ Out[36]:
 (array([  52.,   76.,   84., ...,  113.,  122.,   84.]),
  array([ 100.07 ,  100.079,  100.088, ...,  130.979,  130.988,  130.998]),
  &lt;a list of 3379 Patch objects&gt;)</pre>
+</div>
+</div>
+<div class="section" id="refs">
+<h2>Refs<a class="headerlink" href="#refs" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://paulbourke.net/miscellaneous/aliasing/">http://paulbourke.net/miscellaneous/aliasing/</a></li>
+</ul>
+<div class="highlight-python"><pre>Since the resultant colour of each pixel is based upon one infinitely small
+sample taken within the centre of each pixel and because pixels occur at
+regular intervals frequency based aliasing problems often arise. Aliasing
+refers to the inclusion of characteristics or artifacts in an image that could
+have come from more than one scene description.</pre>
 </div>
 <div class="sidebar">
 </div>

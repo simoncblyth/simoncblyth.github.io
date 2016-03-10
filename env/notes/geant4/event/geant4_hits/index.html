@@ -121,6 +121,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../nuwa/">nuwa</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../">Geant4 Event</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../geant4_future_doe/">Geant4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../geant4_multi_threading/">Geant4 Multi Threading</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../muon_simulation/">muon_simulation</a></li>
@@ -146,6 +147,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../presentation/">Muon Simulation Presentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optix/">optix</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -336,6 +339,78 @@ A         DsChromaPmtSensDet.h</pre>
 86       G4HCtable* HCtable;
 87       G4SDmessenger* theMessenger;
 88</pre>
+</div>
+</div>
+<div class="section" id="g4opboundaryprocess">
+<h2>G4OpBoundaryProcess<a class="headerlink" href="#g4opboundaryprocess" title="Permalink to this headline">¶</a></h2>
+<p>To get hit from G4OpBoundaryProcess DoAbsorption needs
+to be called and the rm</p>
+<div class="highlight-python"><pre>0164
+ 165 G4VParticleChange*
+ 166 G4OpBoundaryProcess::PostStepDoIt(const G4Track&amp; aTrack, const G4Step&amp; aStep)
+ 167 {
+ ...
+ 540         if ( theStatus == Detection ) InvokeSD(pStep);
+ 541
+ 542         return G4VDiscreteProcess::PostStepDoIt(aTrack, aStep);
+ 543 }
+
+
+1344 G4bool G4OpBoundaryProcess::InvokeSD(const G4Step* pStep)
+1345 {
+1346   G4Step aStep = *pStep;
+1347
+1348   aStep.AddTotalEnergyDeposit(thePhotonMomentum);
+1349
+1350   G4VSensitiveDetector* sd = aStep.GetPostStepPoint()-&gt;GetSensitiveDetector();
+1351   if (sd) return sd-&gt;Hit(&amp;aStep);
+1352   else return false;
+1353 }
+
+
+306 inline
+307 void G4OpBoundaryProcess::DoAbsorption()
+308 {
+309               theStatus = Absorption;
+310
+311               if ( G4BooleanRand(theEfficiency) ) {
+///
+///                   need  u &lt; theEfficiency
+///
+312
+313                  // EnergyDeposited =/= 0 means: photon has been detected
+314                  theStatus = Detection;
+315                  aParticleChange.ProposeLocalEnergyDeposit(thePhotonMomentum);
+316               }
+317               else {
+318                  aParticleChange.ProposeLocalEnergyDeposit(0.0);
+319               }
+320
+321               NewMomentum = OldMomentum;
+322               NewPolarization = OldPolarization;
+323
+324 //              aParticleChange.ProposeEnergy(0.0);
+325               aParticleChange.ProposeTrackStatus(fStopAndKill);
+326 }</pre>
+</div>
+<p>Huh seems like DoAbsorption never getting called as theReflectivity is defaulting to 1.0 and theTransmittance to 0.0:</p>
+<div class="highlight-python"><pre>483         else if (type == dielectric_dielectric) {
+484
+485           if ( theFinish == polishedbackpainted ||
+486                theFinish == groundbackpainted ) {
+487              DielectricDielectric();
+488           }
+489           else {
+490              G4double rand = G4UniformRand();
+491              if ( rand &gt; theReflectivity ) {
+492                 if (rand &gt; theReflectivity + theTransmittance) {
+493                    DoAbsorption();
+494                 } else {
+495                    theStatus = Transmission;
+496                    NewMomentum = OldMomentum;
+497                    NewPolarization = OldPolarization;
+498                 }
+499              }</pre>
 </div>
 <div class="sidebar">
 </div>

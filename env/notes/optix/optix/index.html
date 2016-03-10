@@ -173,6 +173,26 @@
 </li>
 </ul>
 </div>
+<div class="section" id="approximate-global-illumination-using-voxel-cone-tracing-vxgi">
+<h2>Approximate Global Illumination using Voxel Cone Tracing, VXGI<a class="headerlink" href="#approximate-global-illumination-using-voxel-cone-tracing-vxgi" title="Permalink to this headline">¶</a></h2>
+<p>See vxgi-</p>
+</div>
+<div class="section" id="optix-release-notes-regards-multi-gpu-and-sli">
+<h2>OptiX Release Notes regards multi-GPU and SLI<a class="headerlink" href="#optix-release-notes-regards-multi-gpu-and-sli" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/Scalable_Link_Interface">https://en.wikipedia.org/wiki/Scalable_Link_Interface</a></li>
+</ul>
+<p>SLI is a multi-GPU technology developed by NVIDIA for linking two or more video
+cards together to produce a single output</p>
+<p>SLI is not required for OptiX to use multiple GPUs, and it interferes when
+OptiX uses either D3D or OpenGL interop. Disabling SLI will not degrade OptiX
+performance and will provide a more stable environment for OptiX applications
+to run. SLI is termed “Multi-GPU mode” in recent NVIDIA Control Panels, with
+the correct option being “Disable multi-GPU mode” to enable OptiX to freely use
+all system GPUs.</p>
+<div class="highlight-python"><pre>SLI looks to cause significant complications</pre>
+</div>
+</div>
 <div class="section" id="optix-csg">
 <h2>OptiX CSG<a class="headerlink" href="#optix-csg" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -653,7 +673,202 @@ it is identifying surfaces relevant to the current view.</p>
 <h2>OptiX OpenGL Compositing<a class="headerlink" href="#optix-opengl-compositing" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://github.com/nvpro-samples/gl_optix_composite">https://github.com/nvpro-samples/gl_optix_composite</a></li>
+<li><a class="reference external" href="http://rickarkin.blogspot.tw/2012/03/optix-is-ray-tracing-framework-it-can.html">http://rickarkin.blogspot.tw/2012/03/optix-is-ray-tracing-framework-it-can.html</a></li>
+<li>to allow depth correct 3D compositing must calulate the OptiX clipDepth.
+Raytracer alone does not need this, but to compostite with OpenGL lines etc.. it
+is necessary</li>
 </ul>
+<div class="highlight-python"><pre>// http://rickarkin.blogspot.tw/2012/03/optix-is-ray-tracing-framework-it-can.html
+// eyeDist:  distance from eye to the intersection point.
+// n:           near clipping plane
+// f:            far clipping plane
+__device__ float computeClipDepth( float eyeDist, float n, float f )
+{
+    float clipDepth = (f+n)/(f-n) - (1/eyeDist)*2.0f*f*n/(f-n);
+    clipDepth = clipDepth*0.5 + 0.5f;
+    return clipDepth;
+}</pre>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="http://www.songho.ca/opengl/gl_projectionmatrix.html">http://www.songho.ca/opengl/gl_projectionmatrix.html</a></li>
+<li><a class="reference external" href="https://open.gl/depthstencils">https://open.gl/depthstencils</a></li>
+</ul>
+<p>The default clear value for the depth is 1.0f, which is equal to the depth of
+your far clipping plane and thus the furthest depth that can be represented.
+All potentially visible fragments will be closer than that.</p>
+<ul class="simple">
+<li>depth buffer contains values between 0.f to 1.f, 0.f/1.f corresponds to the closest/furthest distance</li>
+</ul>
+<p>Perspective Projection Matrix:</p>
+<div class="highlight-python"><pre>|  n/r   0     0              0          |
+|   0    n/t   0              0          |
+|   0    0    -(f+n)/(f-n)   -2fn/(f-n)  |
+|   0    0    -1              0          |
+
+|  n/r   0     0              0          |
+|   0    n/t   0              0          |
+|   0    0     A              B          |
+|   0    0    -1              0          |
+
+
+[ 0,0, z, 1]   = [ 0, 0, Az+B, -z ]
+
+
+Perspective divide (division by w=-1) is done by the pipeline
+yielding Z value:
+
+
+Az + B
+-------  =  -A - B/z   = (f+n)/(f-n) + 2*fn/(f-n)/dist
+  -z
+
+                         (f+n) + 2*fn/dist
+                        ----------------------
+                             (f-n)
+
+               dist = -f
+
+                         f - n
+                        -------  = 1.
+                         f - n
+
+              dist = -n
+
+                         (f+n) - 2f
+                       ------------- = -1.
+                          f - n
+
+
+n and f are +ve and f &gt; n
+dist must be negative for proper NDC (ie in range -1:1)</pre>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="http://stackoverflow.com/questions/6652253/getting-the-true-z-value-from-the-depth-buffer">http://stackoverflow.com/questions/6652253/getting-the-true-z-value-from-the-depth-buffer</a></li>
+</ul>
+<div class="highlight-python"><pre>varying float depth; // Linear depth, in world units
+void main(void)
+{
+    float A = gl_ProjectionMatrix[2].z;
+    float B = gl_ProjectionMatrix[3].z;
+    gl_FragDepth  = 0.5*(-A*depth + B) / depth + 0.5;
+}</pre>
+</div>
+<p>The second problem is to use the generated depth buffer of Optix into OpenGL.
+Actually it is totally OpenGL operations. But maybe its not a daily used
+process like draw a triangle or shading a scene object, so there is little
+resource could be found on the web.  My realization of the depth value
+construction is  also attached as below, where depthImg contains per pixel
+depth value, coloredImg contains per pixel color value.</p>
+<p>Hmm this is old OpenGL:</p>
+<div class="highlight-python"><pre>// http://rickarkin.blogspot.tw/2012/03/optix-is-ray-tracing-framework-it-can.html
+
+glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+// these store the modes before dillying with them
+
+glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//
+// sets pixel storage modes that affect the operation of subsequent glReadPixels
+// as well as the unpacking of texture patterns (see glTexImage2D and glTexSubImage2D)
+//
+// GL_UNPACK_ALIGNMENT
+// Specifies the alignment requirements for the start of each pixel row in memory.
+// The allowable values are
+// 1 (byte-alignment),
+// 2 (rows aligned to even-numbered bytes),
+// 4 (word-alignment)
+// 8 (rows start on double-word boundaries).
+
+// draw coloredImg pixels, skipping the depth
+glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+glDepthMask(GL_FALSE);
+glWindowPos2i(0, 0);
+glDrawPixels(w, h, GL_RGBA , GL_FLOAT, coloredImg);
+
+// draw depthImg pixels, just the depth
+glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+glDepthMask(GL_TRUE);
+glDepthFunc(GL_ALWAYS);
+glWindowPos2i(0, 0);
+glDrawPixels(w, h, GL_DEPTH_COMPONENT , GL_FLOAT, depthImg);
+
+// regain original stored state
+glPopClientAttrib();
+glPopAttrib(); // GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT</pre>
+</div>
+<p>Whats the modern equivalent ?</p>
+<ul class="simple">
+<li><a class="reference external" href="https://open.gl/depthstencils">https://open.gl/depthstencils</a></li>
+</ul>
+</div>
+<div class="section" id="where-to-composite">
+<h2>Where to composite ?<a class="headerlink" href="#where-to-composite" title="Permalink to this headline">¶</a></h2>
+<p>When compositing a pixel level mixture OpenGL render and OptiX texture is needed with depth
+buffer control of which is frontmost.
+Currently either Scene::render or ORenderer::render get invoked.</p>
+<p>ggv-/main.cc:</p>
+<div class="highlight-python"><pre>1083 void App::render()
+1084 {
+1085     if(m_opticks-&gt;isCompute()) return ;
+1086
+1087     m_frame-&gt;viewport();
+1088     m_frame-&gt;clear();
+1089
+1090 #ifdef OPTIX
+1091     if(m_interactor-&gt;getOptiXMode()&gt;0 &amp;&amp; m_otracer &amp;&amp; m_orenderer)
+1092     {
+1093         unsigned int scale = m_interactor-&gt;getOptiXResolutionScale() ;
+1094         m_otracer-&gt;setResolutionScale(scale) ;
+1095         m_otracer-&gt;trace();
+1096         //LOG(debug) &lt;&lt; m_ogeo-&gt;description("App::render ogeo");
+1097
+1098         m_orenderer-&gt;render();
+1099     }
+1100     else
+1101 #endif
+1102     {
+1103         m_scene-&gt;render();
+1104     }</pre>
+</div>
+<div class="section" id="optix-geometry-rendering">
+<h3>OptiX geometry rendering<a class="headerlink" href="#optix-geometry-rendering" title="Permalink to this headline">¶</a></h3>
+<p>Simply presents the OptiX derived texture</p>
+<p>optixrap-/ORenderer::render invokes</p>
+<ul class="simple">
+<li>optixrap-/OFrame::push_PBO_to_Texture(m_texture_id)</li>
+<li>oglrap-/Renderer::render &#8220;tex&#8221; pipeline</li>
+<li>gl/tex/vert.glsl just gets called on the 4 corners of the quad texture</li>
+</ul>
+<p>gl/tex/frag.glsl just samples the texture:</p>
+<div class="highlight-python"><pre>04 in vec3 colour;
+ 5 in vec2 texcoord;
+ 6
+ 7 out vec4 frag_colour;
+ 8 uniform sampler2D texSampler;
+ 9
+10 void main ()
+11 {
+12    frag_colour = texture(texSampler, texcoord);</pre>
+</div>
+</div>
+<div class="section" id="opengl-scene-rendering">
+<h3>OpenGL scene rendering<a class="headerlink" href="#opengl-scene-rendering" title="Permalink to this headline">¶</a></h3>
+<p>Implemented in oglrap-/Scene.cc with multiple (order ~10) renderers
+for the constituents of the scene like</p>
+<ul class="simple">
+<li>nrm/nrmvec: global geometry (triangulated)</li>
+<li>inrm: instanced geometry (triangulated)</li>
+<li>axis: axis</li>
+<li>p2l: genstep</li>
+<li>pos: photons</li>
+<li>rec/altrec/devrec: records</li>
+</ul>
+</div>
+<div class="section" id="composited-rendering">
+<h3>Composited rendering<a class="headerlink" href="#composited-rendering" title="Permalink to this headline">¶</a></h3>
+<p>Makes most sense to add depth buffered OptiX geometry as another
+constituent of the OpenGL scene rendering, with one more renderer.</p>
+</div>
 </div>
 <div class="section" id="peek-at-optix-internals-via-stack-trace">
 <h2>Peek at OptiX internals via stack trace<a class="headerlink" href="#peek-at-optix-internals-via-stack-trace" title="Permalink to this headline">¶</a></h2>
