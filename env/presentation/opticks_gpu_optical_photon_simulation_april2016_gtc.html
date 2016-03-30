@@ -680,10 +680,19 @@ ul.auto-toc {
              background-image: url(/env/presentation/cherenkov.png);
              background-size: 316px 203px;
              background-position: 850px 400px;
+          }
+          div.slide#large-geometry-event-techniques{
+             background-image: url(/env/graphics/ggeoview/ggv-juno-instancing.png);
+             background-size: 852px 592px;
+             background-position: 450px 80px;
           } 
 
        </style>
     <!-- comment
+
+Large Geometry/Event Techniques
+/env/graphics/ggeoview/ggv-juno-instancing.png 2130px_1480px -> 1065px_740px
+
 
 GGeoView image is 2094x1590 1047x795
 
@@ -911,25 +920,29 @@ are isolated in simulation chain.</p>
 </ul>
 </div>
 </div>
-<div class="slide" id="parallels-ray-traced-image-synthesis-and-optical-photon-simulation">
-<h1><span class="small">Parallels : Ray Traced Image Synthesis and Optical Photon Simulation</span></h1>
+<div class="slide" id="ray-traced-realistic-image-synthesis-and-optical-photon-simulation">
+<h1><span class="small">Ray Traced Realistic Image Synthesis and Optical Photon Simulation</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">OptiX <em>Glass</em> Sample App</p>
 <img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
 <p class="tiny last"><a class="reference external" href="http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf">http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf</a></p>
 </div>
 <ul class="small simple">
-<li>performance of both limited by <span class="red">geometry intersection</span>.</li>
-<li>fast ray tracing tools can drastically improve optical photon simulation</li>
+<li>parallel problems, just different focus</li>
+<li>same limit : <span class="red">geometry intersection</span></li>
 </ul>
-<p class="small">NVIDIA OptiX Ray Tracing Engine, benefits:</p>
+<p class="small"><strong>Fast ray tracing can revolutionize optical photon simulation</strong></p>
+<p class="small">NVIDIA OptiX Ray Tracing Engine:</p>
 <ul class="small simple">
 <li>state-of-the-art GPU accelerated intersection</li>
 <li>regular releases: improvements, new GPU tuning</li>
 <li>shared C++/CUDA context eases development</li>
-<li><span class="red">NVIDIA expertise on efficient GPU/multi-GPU usage</span></li>
-<li>~linear performance scaling with cores across multiple GPUs</li>
+<li>NVIDIA expertise on efficient GPU/multi-GPU usage<ul>
+<li>~linear scaling with cores across multiple GPUs</li>
 </ul>
+</li>
+</ul>
+<p class="huge">NVIDIA OptiX makes massively parallel intersection accessible</p>
 </div>
 <div class="slide" id="brief-history-of-gpu-optical-photon-simulation-development">
 <h1><span class="small">Brief History of GPU Optical Photon Simulation Development</span></h1>
@@ -981,69 +994,54 @@ including all material and surface properties.</li>
 <dl class="small last docutils">
 <dt><strong>Boundary</strong></dt>
 <dd>material, surface properties vs wavelength</dd>
-<dt><strong>Reemission</strong></dt>
-<dd>generates wavelength according to measured input distribution
-from uniform random lookup</dd>
 <dt><strong>Black Body</strong></dt>
 <dd>generates wavelength according to Plankian distribution
 from uniform random lookup</dd>
+<dt><strong>Reemission</strong></dt>
+<dd>generates wavelength according to measured scintillator distribution
+from uniform random lookup</dd>
 </dl>
 </div>
-<p class="small">Translate Geant4 CSG tree into boundaries:</p>
+<p class="small">Translate <em>Geant4</em> CSG tree solids into <em>Opticks</em> boundaries:</p>
 <ul class="small simple">
 <li><strong>inner material</strong> : self</li>
 <li><strong>outer material</strong> : parent</li>
 <li><strong>inner surface</strong> : outwards going photons (self to parent)</li>
 <li><strong>outer surface</strong> : inwards going photons (parent to self)</li>
 </ul>
-<p class="small">Properties interpolated onto a common wavelength domain</p>
-<ul class="small simple">
-<li><strong>material</strong> : refractive_index, absorption_length, scattering_length, reemission_prob, group_velocity</li>
-<li><strong>surface</strong> : detect_prob, absorb_prob, reflect_specular, reflect_diffuse</li>
-</ul>
-<p class="small">~100 distinct boundaries in single texture</p>
+<p class="small">Properties as function of wavelength interleaved into <em>float4</em> texture.</p>
+<p class="huge">Texture lookup simplifies OptiX programs</p>
 <pre class="mypre">
 // material property lookup from OptiX programs
 float nmi = (nm - wavelength_domain.x)/wavelength_domain.z + 0.5f ;
-float4 material1 = tex2D(wavelength_texture, nmi, line + 0.5f );
+float4 material1 = tex2D(boundary_texture, nmi, line + 0.5f );
 
 float refractive_index = material1.x ;
 float absorption_length = material1.y ;
 float scattering_length = material1.z ;
+float reemission_probability = material1.w ;  // >0 for scintillators
 </pre></div>
 <div class="slide" id="large-geometry-event-techniques">
 <h1><span class="small">Large Geometry/Event Techniques</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">JUNO Geometry</p>
-<p class="small">289733 volumes split into instanced:</p>
+<p class="small"><strong>Geometry analysed to find instances</strong></p>
+<p class="small">JUNO: ~90M --&gt; 0.1M triangles</p>
 <ul class="small simple">
-<li>name: count (faces)</li>
-<li>PMT_3inch: 36572 (540)</li>
-<li>PMT_20inch: 19452 (3502)</li>
-<li>lFasteners: 480 (1856)</li>
-<li>lPlane: 124 (6252)</li>
+<li>19,000 20&quot; PMTs</li>
+<li>34,000 3&quot; PMTs</li>
 </ul>
-<p class="small">And the rest:</p>
+<p class="small">OpenGL/OptiX instancing</p>
+<p class="small"><strong>Multiple Renderers</strong></p>
 <ul class="small simple">
-<li>Global     (95436)</li>
+<li>global, full instances, bbox instances</li>
+<li>rapid switching controls</li>
 </ul>
-<p class="tiny last">MacBook Pro (2013), NVIDIA GeForce GT 750M, 2048 MB, 384 Cores</p>
-</div>
-<p class="small"><strong>Instancing implemented for OpenGL and OptiX</strong></p>
-<p class="small">Geometry analysed to find instances</p>
+<p class="small"><strong>Split simulation from visualization</strong></p>
 <ul class="small simple">
-<li>repeated sub-trees with transforms for each <strong>instance</strong></li>
-<li>JUNO: ~90M triangles, instancing reduces to 0.1M</li>
+<li>compute mode<ul>
+<li>pure OptiX buffers ~7X interop</li>
 </ul>
-<p class="small"><strong>Switchable Rendering</strong></p>
-<ul class="small simple">
-<li>Multiple renderers: global, full instances, bbox instances</li>
-<li>Rapid switching GUI control</li>
-</ul>
-<p class="small"><strong>Compute Mode : split simulation from visualization</strong></p>
-<ul class="small simple">
-<li>Pure OptiX buffers faster (~7X interop)</li>
-<li>Visualize by separate event loading</li>
+</li>
+<li>visualize by separate event loading</li>
 </ul>
 </div>
 <div class="slide" id="geometry-modelling-tesselated-vs-analytic-photomultiplier-tubes">
