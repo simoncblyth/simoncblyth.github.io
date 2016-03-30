@@ -1557,9 +1557,13 @@ thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
 <p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
 </blockquote>
 </div>
-<div class="slide" id="video">
-<h1><span class="i">Video</span></h1>
+<div class="slide" id="youtube-video">
+<h1><span class="i">YouTube Video</span></h1>
 <iframe width="1024" height="576" src="https://www.youtube.com/embed/QzH6y0pKXk4?rel=0" frameborder="0" allowfullscreen></iframe><p class="tiny"><a class="reference external" href="https://www.youtube.com/watch?v=QzH6y0pKXk4">https://www.youtube.com/watch?v=QzH6y0pKXk4</a></p>
+</div>
+<div class="slide" id="youku-video">
+<h1><span class="i">YouKu Video</span></h1>
+<iframe height=498 width=510 src="http://player.youku.com/embed/XMTUxNjM3MzA4OA==" frameborder=0 allowfullscreen></iframe><p class="tiny"><a class="reference external" href="http://v.youku.com/v_show/id_XMTUxNjM3MzA4OA==.html">http://v.youku.com/v_show/id_XMTUxNjM3MzA4OA==.html</a></p>
 </div>
 <div class="slide" id="jpmt-wide">
 <h1><span class="i">JPMT Wide</span></h1>
@@ -1598,6 +1602,9 @@ thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
 <li>bounding boxes that touch geometry cause leaks, slightly
 enlarging the boxes avoids leak (&lt;1 in 3M)</li>
 </ul>
+<p class="small"><strong>Use cuRAND in OptiX without large stack</strong></p>
+<p class="small">Init in separate CUDA launch, persist cuRAND state, subsequently
+load into OptiX context : <strong>avoids large stack performance hit</strong></p>
 <p class="small"><strong>Compositing OptiX Ray Trace and OpenGL Rasterized</strong></p>
 <ul class="small simple">
 <li>best of both worlds : rasterization speed, raytrace accuracy</li>
@@ -1605,20 +1612,15 @@ enlarging the boxes avoids leak (&lt;1 in 3M)</li>
 <li>OpenGL : fragment shader, set <tt class="docutils literal">gl_FragDepth</tt></li>
 </ul>
 <pre class="mypre">
-
-in vec2 texcoord;
 out vec4 frag_colour;
 uniform sampler2D ColorTex ;
-
 void main ()
 {
    frag_colour = texture(ColorTex, texcoord);
    float depth = frag_colour.w ;
    frag_colour.w = 1.0 ;
-
    gl_FragDepth = depth  ;
    ...
-
 </pre></div>
 </div>
 </body>
