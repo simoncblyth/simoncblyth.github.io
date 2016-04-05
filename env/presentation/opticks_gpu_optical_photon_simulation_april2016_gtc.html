@@ -367,7 +367,52 @@ ul.auto-toc {
 <div class="slide" id="slide0">
 <h1 class="title"><span class="i">Opticks : Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
 
-<!-- comment -->
+<!-- comment
+
+
+Brief intro, Opticks benefits
+
+    00 : Optical Photon Simulation for Particle Physics with NVIDIA OptiX
+    01 : opticks benefits
+
+
+Neutrino detection context
+
+    02    : Overview : Neutrino Detection via Optical Photons
+    03/04 : hamamatsu photomultiplier tubes (pmts) + photomultiplier tube operation
+
+Neutrino detection examples
+
+    05/06 : super-kamiokande pmts 1 + 2
+    07/08 : jiangmen underground neutrino observatory (juno) + goals
+
+09 : dayabay reactor neutrino expt, far site
+10 : daya bay far site 2
+11 : daya bay far site 3
+12 : daya bay pmt wall photo 1
+13 : "seeing" neutrinos via scintillation + cherenkov light
+
+14 : geant4 : monte carlo simulation toolkit
+15 : but, there is a problem...
+16 : jpmt before contact 2
+17 : ray traced realistic image synthesis and optical photon simulation
+18 : brief history of gpu optical photon simulation development
+19 : migrating geometry from geant4 to opticks
+20 : large geometry/event techniques
+21 : geometry modelling : tesselated vs analytic photomultiplier tubes
+22 : tesselated photomultiplier : unrealistic disco ball effect
+23 : analytic pmts together with triangulated geometry
+24 : visualizing an optical photon simulation
+25 : compare opticks/geant4 simulations with simple lights/geometries
+26 : opticks/geant4 rainbow step sequence comparison
+27 : rainbow spectrum for 1st six bows
+28 : 1m rainbow s-polarized, comparison opticks/geant4
+29 : pmtinbox after 1
+30 : pmtinbox after 2
+31 : pmt opticks/geant4 step distribution comparison to bt [sd]
+32 : pmt opticks/geant4 step distribution comparison : chi2/ndf
+33 : photon propagation times geant4 cf opticks
+34 : summary -->
 <style type="text/css">
     span.alarm { color: red; }
     span.warn { color: orange; }
@@ -442,6 +487,11 @@ ul.auto-toc {
              height: 100%;
           }
           div.slide#slide0{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-benefits{
              background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
@@ -631,17 +681,32 @@ ul.auto-toc {
              background-size: 1280px 720px;
              background-position: 0px 0px;
           }
-          div.slide#optical-photons{
+          div.slide#super-kamiokande-pmts-3{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#fast-optical-photon-simulation{
              background-image: url(/env/presentation/newtons-opticks.png);
              background-size: 374px 684px;
              background-position: 800px 0px;
           }
-          div.slide#hamamatsu-photomultiplier-tubes-pmts{
+          div.slide#photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#old-hamamatsu-photomultiplier-tubes-pmts{
              background-image: url(/env/presentation/hamamatsu-pmt.png);
              background-size: 1099px 734px;
              background-position: 0px 0px;
           }
-          div.slide#photomultiplier-tube-operation{
+          div.slide#old-photomultiplier-tube-operation{
              background-image: url(/env/presentation/hamamatsu-pmt.png);
              background-size: 1099px 734px;
              background-position: 0px 0px;
@@ -672,6 +737,11 @@ ul.auto-toc {
              background-position: 0px 0px;
           }
           div.slide#geant4-monte-carlo-simulation-toolkit{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit-generality{
              background-image: url(/env/presentation/g4-hep.png);
              background-size: 1025px 621px;
              background-position: 100px 100px;
@@ -720,50 +790,115 @@ jpmt-before-contact.png 2860px_1688px
 jpmt-headview.png 2616px_1566px
 jpmt-inside-outside.png 2802px_1684px
 jpmt-wide.png 2818px_1672px -->
+<!-- comment
+
+I will introduce Opticks,
+an optical photon simulation based on NVIDIA OptiX ray tracing
+enabling particle physics detector simulations
+to benefit from OptiX ray tracing.
+
+The image visualizes photons coming from a cosmic ray muon
+crossing a neutrino detector. -->
 <div class="mytitle">
 <h1 style="background-color:lightgrey"> <i>Opticks</i> : Optical Photon Simulation for Particle Physics with NVIDIA® OptiX™ </h1>
 </div>
 
 <div class="mycredit">
 <h2 style="background-color:lightgrey"> Simon C Blyth, National Taiwan University &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; GTC 2016 </h2>
-</div><!-- comment
-
-**1704**
-       Sir Isaac Newton published *Opticks*
-
-**2008**
-       NVIDIA® begins OptiX™ development
-
-**2015**
-       *Opticks* development based on OptiX™ begins -->
-
 </div>
-<div class="slide" id="optical-photons">
-<h1>Optical Photons</h1>
-<p>Optical Photons crucial to Particle Physics Experiments:</p>
-<ul class="simple">
-<li><strong>Neutrino detectors</strong></li>
-<li>Proton Decay Search</li>
-<li>Particle Identification</li>
+</div>
+<div class="slide" id="opticks-benefits">
+<h1><span class="i">Opticks Benefits</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Opticks Dramatic Benefits</p>
+<p class="small">NVIDIA OptiX applied to neutrino detector simulation :
+<strong>eliminates optical photon bottleneck</strong></p>
+<ul class="small simple">
+<li>optical photon simulation time --&gt; zero</li>
+<li>optical photon CPU memory --&gt; zero</li>
 </ul>
-<p>&quot;Seeing&quot; Neutrino interactions:</p>
-<ul class="simple">
-<li>large optically transparent target<ul>
-<li>eg water, ice, scintillators</li>
+<p class="small">zero: effectively, compared to rest of simulation</p>
+<p class="small last"><strong>Plus: much improved visualizations</strong></p>
+</div>
+<!-- comment
+
+Over the next few slides I will give some context
+of what neutrino detectors look like and how they work
+to understand why such benefits are possible,
+before getting on to how I applied OptiX to their
+simulation. -->
+</div>
+<div class="slide" id="outline">
+<h1>Outline</h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<!-- comment
+
+
+374*0.8 = 299
+684*0.8 = 547
+
+Neutrino detectors can benefit the most as their operation
+depends on production and propagation of sometimes many millions
+of optical photons.
+
+Neutrinos detectors need to be large, as neutrinos
+interact only weakly.
+
+Interesting that most of the optical
+photon physics would be very familiar to Newton
+who published his Opticks in 1704
+But it remains essential to neutrino experiments
+
+
+ **Indirectly Producing Light from Neutrinos**
+
+ * neutrinos interact only weakly : large target volumes
+ * transparent materials that yield light from interaction products
+
+   * water, ice, scintillator
+
+ * low radioactivity materials, located underground
+
+ **Measuring Light**
+
+ * photomultiplier tubes (PMTs) coupled with target
+
+   * sensitive to single photons
+
+
+ :blue:`Optical simulation vital for detector design, event reconstruction` -->
+<ul class="large simple">
+<li>Context<ul>
+<li>Photomultiplier tubes (PMTs)</li>
+<li>Neutrino detectors</li>
 </ul>
 </li>
-<li>detectors sensitive to single photons<ul>
-<li>Photomultiplier Tubes (PMTs)</li>
+<li>Current simulation approach, <em>Geant4</em></li>
+<li>How NVIDIA OptiX can help</li>
+<li><em>Opticks</em> : optical photon simulation with NVIDIA OptiX<ul>
+<li>geometry migration</li>
+<li>porting optical physics</li>
 </ul>
 </li>
+<li>Visualization</li>
+<li>Validation, performance comparisons</li>
+<li>Summary</li>
+<li>Short video</li>
 </ul>
-<p>Sir Isaac Newton published <em>Opticks</em> in 1704</p>
 </div>
-<div class="slide" id="hamamatsu-photomultiplier-tubes-pmts">
-<h1><tt class="docutils literal">Hamamatsu Photomultiplier Tubes (PMTs)</tt></h1>
+<div class="slide" id="photomultiplier-tubes-pmts">
+<h1><tt class="docutils literal">Photomultiplier Tubes (PMTs)</tt></h1>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 550px;" />
+<img alt="/env/presentation/hamamatsu.png" src="/env/presentation/hamamatsu.png" style="height: 50px;" />
 </div>
 <div class="slide" id="photomultiplier-tube-operation">
 <h1><tt class="docutils literal">Photomultiplier Tube Operation</tt></h1>
+<!-- comment
+
+Thin layer of material evaporated onto inside of glass
+has property of emitting photoelectrons in response to single photons.
+This single electron is exponentially amplified thru a series of
+dynodes to produce a measurable signal. -->
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="height: 150px;" />
 <div class="figure align-center">
 <img alt="/env/presentation/pmt-schematic.png" src="/env/presentation/pmt-schematic.png" style="width: 700px;" />
@@ -772,79 +907,126 @@ jpmt-wide.png 2818px_1672px -->
 </div>
 <div class="slide" id="super-kamiokande-pmts-1">
 <h1><span class="i">Super-Kamiokande PMTs 1</span></h1>
+<!-- comment
+
+In operation the cavern is filled with ultrapure water,
+13k 20 inch PMTs, surround the target, which is located
+1000 m underground in a mine in Japan -->
+<pre class="myfoot">
+© Kamioka Observatory, ICRR(Institute for Cosmic Ray Research), The University of Tokyo.
+</pre></div>
+<div class="slide" id="super-kamiokande-pmts-3">
+<h1><span class="i">Super-Kamiokande PMTs 3</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Super-Kamiokande Expt</p>
+<img alt="/env/presentation/nu-int.jpg" src="/env/presentation/nu-int.jpg" style="width: 454px; height: 422px;" />
+<ul class="small last simple">
+<li>Neutrino interaction produces charged particles
+travelling faster than c/n ~ 0.75c</li>
+<li>Cherenkov light cone seen as ring by PMTs</li>
+</ul>
+</div>
 <pre class="myfoot">
 © Kamioka Observatory, ICRR(Institute for Cosmic Ray Research), The University of Tokyo.
 </pre></div>
 <div class="slide" id="super-kamiokande-pmts-2">
 <h1><span class="i">Super-Kamiokande PMTs 2</span></h1>
+<!-- comment
+
+Neutrinos are probably in the top 2-3 of the most
+common particles in the universe, produced in
+the sun and nuclear reactors.
+
+The penetrating nature of neutrinos enables them
+to provide information about the reactions ocurring
+in the sun from solar neutrinos.
+
+Super Kamikande observed 11 neutrinos over rougly 11 seconds
+from a supernova collapse from a nearby galaxy in Large Magellanic Cloud
+some 160k light years away -->
 <pre class="myfoot">
 © Kamioka Observatory, ICRR(Institute for Cosmic Ray Research), The University of Tokyo.
 </pre><div class="sidebar">
-<p class="first sidebar-title">Super-Kamiokande Water Cerenkov Detector</p>
-<p>50,000 tons ultra pure water,
-13,000 Photomultiplier Tubes,
-1,000 meter underground.</p>
-<ul class="simple">
-<li>solar neutrinos, fusion</li>
-<li>atmospheric neutrinos, cosmics</li>
-<li>accelerator neutrinos, beams</li>
-<li>reactor neutrinos, fission</li>
-<li>supernova neutrinos (SN 1987A)</li>
+<p class="first sidebar-title">Super-K Physics</p>
+<ul class="small simple">
+<li><strong>First observation of neutrino oscillation</strong><ul>
+<li>upward going ~ 0.5 downward going</li>
+<li>-&gt; non-zero neutrino mass</li>
 </ul>
-<p class="tiny last"><a class="reference external" href="http://www-sk.icrr.u-tokyo.ac.jp/sk/index-e.html">http://www-sk.icrr.u-tokyo.ac.jp/sk/index-e.html</a></p>
+</li>
+</ul>
+<img alt="/env/presentation/sn1987a-aat-m.jpg" class="small" src="/env/presentation/sn1987a-aat-m.jpg" />
+<ul class="small last simple">
+<li><strong>Observed supernova 1987a burst neutrinos</strong><ul>
+<li>11 neutrinos over 10s</li>
+<li>from nearby galaxy (~160,000 light years)</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 <div class="slide" id="jiangmen-underground-neutrino-observatory-juno">
-<h1><span class="blue">Jiangmen Underground Neutrino Observatory (JUNO)</span></h1>
-</div>
-<div class="slide" id="jiangmen-underground-neutrino-observatory-goals">
-<h1><span class="blue">Jiangmen Underground Neutrino Observatory, Goals</span></h1>
+<h1><tt class="docutils literal">Jiangmen Underground Neutrino Observatory (JUNO)</tt></h1>
+<!-- comment
+
+The JUNO experiment is under construction in southern China,
+more that 35m diameter sphere of liquid scintillator
+contained by acrylic and surrounded by PMTs -->
 <div class="sidebar">
-<p class="first sidebar-title">Under Construction</p>
-<p class="small">20,000 ton liquid scintillator, 700 m underground,
-17,000 20&quot; PMTs, 34,000 3&quot; PMTs,
-unprecedented energy resolution: 3% (at 1 Mev). Goals:</p>
+<p class="first sidebar-title">Under construction</p>
 <ul class="small simple">
-<li><strong>Determine neutrino mass heirarchy</strong> from
-energy spectrum of reactor electron antineutrinos
-at ~53km from reactors.</li>
-<li>Measure oscillation parameters</li>
+<li><strong>neutrino mass heirarchy determination</strong><ul>
+<li>20 kTon liquid scintillator sphere</li>
+<li>53km from 2 nuclear power plants</li>
+<li>energy resolution: 3% (at 1 Mev)</li>
+<li>PMTs: 17k 20&quot;, 17-35k 3&quot;</li>
 </ul>
-<p class="small">Study:</p>
-<ul class="small simple">
-<li>atmospheric neutrinos</li>
-<li>solar neutrinos</li>
-<li>geo-neutrinos</li>
-<li>supernova neutrinos</li>
-<li>exotic searches</li>
+</li>
 </ul>
-<p class="tiny last"><a class="reference external" href="http://juno.ihep.ac.cn">http://juno.ihep.ac.cn</a></p>
+<img alt="/env/presentation/juno_anti_nu_e_spectrum.png" class="small" src="/env/presentation/juno_anti_nu_e_spectrum.png" style="width: 400px;" />
+<ul class="small last simple">
+<li>precise oscillation parameter measurement</li>
+<li>study neutrinos from many sources</li>
+</ul>
 </div>
 </div>
 <div class="slide" id="dayabay-reactor-neutrino-expt-far-site">
 <h1><tt class="docutils literal">Dayabay Reactor Neutrino Expt, Far Site</tt></h1>
+<!-- comment
+
+Daya Bay experiement is
+:width: 662px
+:height: 696px -->
 </div>
 <div class="slide" id="daya-bay-far-site-2">
 <h1><span class="i">Daya Bay Far Site 2</span></h1>
-<img alt="/env/presentation/ad3.png" src="/env/presentation/ad3.png" style="width: 662px; height: 696px;" />
+<div class="sidebar">
+<p class="first sidebar-title">Antineutrino Detection</p>
+<p class="small">Antineutrinos interact with proton of detector --&gt; positron(e+) and neutron (n).</p>
+<img alt="/env/presentation/ibd-diag.png" class="small" src="/env/presentation/ibd-diag.png" style="height: 200px;" />
+<ul class="small simple">
+<li>e+ annihilates, energy deposited in scintillator re-emitted as flash of light</li>
+<li>delayed 2nd flash when gadolinium captures neutron and gamma energy
+deposited in scintillator</li>
+</ul>
+<p class="small last"><strong>Distinctive double flash of light signature</strong></p>
+</div>
+<img alt="/env/presentation/ad3.png" src="/env/presentation/ad3.png" style="width: 400px;" />
 </div>
 <div class="slide" id="daya-bay-far-site-3">
 <h1><span class="i">Daya Bay Far Site 3</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Dayabay Reactor Neutrino Experiment</p>
-<p>Eight Antineutrino Detectors (AD) in 3 halls,
-within 1.9 km of six nuclear reactors, in southern China.
-Each AD:</p>
-<ul class="simple">
-<li>20 tons of liquid scintillator</li>
-<li>192 8 inch PMTs</li>
+<p class="first sidebar-title">Dayabay Physics</p>
+<img alt="/env/presentation/dyb-layout.png" src="/env/presentation/dyb-layout.png" style="width: 400px;" />
+<p class="small"><strong>Reactor antineutrino measurements</strong></p>
+<ul class="small last simple">
+<li><strong>Most precise oscillation parameter, theta_13</strong><ul>
+<li>Far site baseline ~ 1.9km</li>
+<li>Near/Far comparison : Antineutrino Disappearance</li>
 </ul>
-<p>Most precise measurements of:</p>
-<ul class="simple">
-<li>neutrino oscillation</li>
-<li>reactor antineutrino spectrum</li>
+</li>
+<li><strong>Most precise antineutrino spectrum</strong></li>
 </ul>
-<p class="tiny last"><a class="reference external" href="http://dayawane.ihep.ac.cn">http://dayawane.ihep.ac.cn</a></p>
 </div>
 </div>
 <div class="slide" id="daya-bay-pmt-wall-photo-1">
@@ -861,39 +1043,34 @@ Each AD:</p>
    :width: 632px
    :height: 406px -->
 </div>
-<div class="slide" id="seeing-neutrinos-via-scintillation-cherenkov-light">
-<h1>&quot;Seeing&quot; neutrinos via scintillation + Cherenkov light</h1>
-<p class="small">Antineutrinos react with protons in liquid scintillator yielding e+ and gammas.
-Particle energy absorbed by the scintillator is re-emitted as <strong>optical photons</strong>.
-Dayabay uses 0.1% Gadolinium doped liquid scintillator.</p>
-<img alt="/env/presentation/ibd-prompt-delayed.png" src="/env/presentation/ibd-prompt-delayed.png" style="height: 200px;" />
-<p class="small"><strong>Cherenkov light</strong></p>
-<ul class="small simple">
-<li>emitted by charged particles with velocity &gt; materials speed of light</li>
-<li>occurs in all transparent materials eg water, ice, scintillator</li>
-</ul>
-<p class="small"><strong>Optical Photon Propagation Model</strong></p>
-<p class="small">Detailed <strong>optical photon simulation</strong> critical to detector design, achieving goals.</p>
-</div>
 <div class="slide" id="geant4-monte-carlo-simulation-toolkit">
 <h1>Geant4 : Monte Carlo Simulation Toolkit</h1>
+</div>
+<div class="slide" id="geant4-monte-carlo-simulation-toolkit-generality">
+<h1>Geant4 : Monte Carlo Simulation Toolkit Generality</h1>
+<!-- comment
+
+Now you have some context of how neutrino detectors work,
+I can sketch how to simulate them
+
+The standard simulation tool in the particle physics is Geant4, -->
 <div class="sidebar">
 <p class="first sidebar-title">Leading in Particle Physics</p>
-<p class="small"><strong>Geant4</strong> simulates particles travelling through matter,
-with applications in high energy, nuclear and accelerator
-physics, medical imaging, radiotherapy and space science.
-20 year history, ubiquitous in physics experiments.</p>
-<p class="small"><strong>Simulation</strong> essential for:</p>
+<p class="small"><strong>Geant4</strong> simulates particles travelling through matter</p>
 <ul class="small simple">
-<li>detector design/optimization</li>
-<li>reconstruction algorithm development</li>
-<li>reconstruction efficiency estimates</li>
+<li>high energy, nuclear and accelerator physics</li>
+<li>medical imaging, radiotherapy</li>
+<li>space science</li>
 </ul>
-<p class="small"><strong>Geant4 Model</strong></p>
+<p class="small"><strong>Geant4 Approach</strong></p>
 <ul class="small simple">
 <li>geometry : <strong>CSG tree of solids</strong></li>
-<li>particles : tracks</li>
+<li>particles : track position and time etc..</li>
 <li>processes : nuclear, EM, weak, <strong>optical</strong></li>
+</ul>
+<p class="small"><strong>Very General and Capable Tool</strong></p>
+<ul class="small simple">
+<li><strong>mostly unused for optical photon propagation</strong></li>
 </ul>
 <p class="tiny last"><a class="reference external" href="https://geant4.web.cern.ch">https://geant4.web.cern.ch</a></p>
 </div>
@@ -922,6 +1099,26 @@ are isolated in simulation chain.</p>
 </div>
 <div class="slide" id="ray-traced-realistic-image-synthesis-and-optical-photon-simulation">
 <h1><span class="small">Ray Traced Realistic Image Synthesis and Optical Photon Simulation</span></h1>
+<!-- comment
+
+So how can OptiX help
+
+image synthesis and photon simulation are parallel problems
+just with a different focus: images synthesis focusses on the
+image plane (literally), whereas simulation focusses on wherever
+the photons go especially when they hit PMTs
+
+The great thing about OptiX is that it does just the difficult parts:
+
+* acceleration with performance scaling with cores
+  across multiple GPUs
+
+leaving everything else for you
+
+* including writing single ray geometry intersection
+
+This enables the optical simulation to be implemented
+as OptiX programs. -->
 <div class="sidebar">
 <p class="first sidebar-title">OptiX <em>Glass</em> Sample App</p>
 <img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
@@ -1159,10 +1356,9 @@ S-Polarized intersection (E field perpendicular to plane of incidence) arranged 
 <div class="slide" id="pmtinbox-after-2">
 <h1><span class="i">PmtInBox after 2</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">PmtInBox at 1.8ns</p>
-<p class="small">Interactive photon selection
-by history or material flag sequences, such as:</p>
-<dl class="small last docutils">
+<p class="first sidebar-title">Interactive selection</p>
+<p class="small">By history or material sequences, eg:</p>
+<dl class="small docutils">
 <dt>TO BT SA</dt>
 <dd>surface absorbed without detection</dd>
 <dt>TO BT SD</dt>
@@ -1175,9 +1371,9 @@ by history or material flag sequences, such as:</p>
 <dd>reflected from Pyrex</dd>
 <dt>TO BT BR BR BT SA</dt>
 <dd>double Pyrex reflections (inner ring)</dd>
-<dt>TO/AB/BT/BR</dt>
-<dd>torch/bulk absorb/boundary transmit/reflect</dd>
 </dl>
+<p class="small">BT:boundary transmit, BR:boundary reflect</p>
+<p class="small last"><strong>Implemented with Thrust indexing (sparse histogram sort)</strong></p>
 </div>
 </div>
 <div class="slide" id="pmt-opticks-geant4-step-distribution-comparison-to-bt-sd">
@@ -1566,10 +1762,6 @@ thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
 <div class="slide" id="jpmt-wide">
 <h1><span class="i">JPMT Wide</span></h1>
 <p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-wide_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-wide_half.png</a></p>
-</div>
-<div class="slide" id="jpmt-before-contact">
-<h1><span class="i">JPMT Before Contact</span></h1>
-<p class="tiny"><a class="reference external" href="http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-before-contact_half.png">http://simoncblyth.bitbucket.org/env/graphics/ggeoview/jpmt-before-contact_half.png</a></p>
 </div>
 <div class="slide" id="jpmt-after-contact">
 <h1><span class="i">JPMT After Contact</span></h1>
