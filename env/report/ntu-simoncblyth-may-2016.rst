@@ -290,7 +290,7 @@ was found.
 Validation of Test Geometries
 ----------------------------------
 
-.. figure:: env/numerics/npy/rainbow_cfg4_1_reduced.png
+.. figure:: env/numerics/npy/rainbow_cfg4_1_reduced_half.png
 
    Opticks/Geant4 comparison of the distribution of deviation angles(degrees) 
    of 1M parallel monochromatic photons incident on a spherical droplet of water.
@@ -326,7 +326,7 @@ agreement to be achieved between Opticks and Geant4 for the test geometry of a s
 tube within a box of mineral oil illuminated by a circular beam of parallel photons.
 
 
-.. figure:: env/numerics/npy/PmtInBox_TOBTSD_xyzt.png
+.. figure:: env/numerics/npy/PmtInBox_TOBTSD_xyzt_half.png
     
     Opticks/Geant4 comparison of photon position and time distributions for 
     single Daya Bay photomultiplier tube within a box of mineral oil geometry 
