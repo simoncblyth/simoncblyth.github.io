@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Nopstep failing to appear : viz debugg &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/ggeoview/issues/nopstep_vis_debug.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="nopstep-failing-to-appear-viz-debugg">
+<h1>Nopstep failing to appear : viz debugg<a class="headerlink" href="#nopstep-failing-to-appear-viz-debugg" title="Permalink to this headline">¶</a></h1>
+<p>As usual when adding a vizualization : nothing appears and no error messages.</p>
+<div class="highlight-python"><pre>ggv-;ggv-g4gun
+      # geant4 particle gun simulation within default DYB geometry, loaded from GDML
+
+ggv-;ggv-g4gun --load
+      # visualize the geant4 propagation, with GGeoView</pre>
+</div>
+<p>Gun particles start from mid GdLS (volume 3153):</p>
+<div class="highlight-python"><pre>0.543      0.840      0.000 -18079.453
+-0.840      0.543      0.000 -799699.438
+0.000      0.000      1.000  -6605.000
+0.000      0.000      0.000      1.000</pre>
+</div>
+<p>At save they look to be in the correct region:</p>
+<div class="highlight-python"><pre>[2016-May-25 16:41:06.388981]:info: NumpyEvt::save (nopstep) (144,4,4)
+
+(  0)  -18079.453  -799699.438   -6605.000       0.000
+(  0)       0.000       0.000       1.000       1.000
+(  0)       0.543      -0.840       0.000   10000.000
+(  0)       0.000       0.000       0.000       0.000
+(  1)  -18079.453  -799699.438   -6601.928       0.025
+(  1)      -0.007       0.073       0.997       1.000
+(  1)       0.543      -0.840       0.000    7611.374</pre>
+</div>
+<p>With a 10 MeV muon the range of the nopstep is very large due to some neutrinos that exit the world.:</p>
+<div class="highlight-python"><pre>Rdr::upload mvn name rpos type  numbytes 9216 stride 64 offset 0 count 144 extent 2400000.000000
+          m_low vec3  -735007.625 -799902.000 -2400000.000
+         m_high vec3  560972.188   548652.250  2400000.000
+   m_dimensions vec3  1295979.750 1348554.250  4800000.000
+       m_center vec3  -87017.719 -125624.875      0.000
+m_model_to_world mat4
+2400000.000      0.000      0.000 -87017.719
+     0.000 2400000.000      0.000 -125624.875
+     0.000      0.000 2400000.000      0.000
+     0.000      0.000      0.000      1.000
+
+In [19]: (a[:,0,0].min(),a[:,0,1].min(),a[:,0,2].min(),a[:,0,3].min())
+Out[19]: (-735007.62, -799902.0, -2400000.0, 0.0)
+
+In [20]: (a[:,0,0].max(),a[:,0,1].max(),a[:,0,2].max(),a[:,0,3].max())
+Out[20]: (560972.19, 548652.25, 2400000.0, 12151.727)</pre>
+</div>
+<p>Switch to 10 MeV e+ (later 100 MeV), much more compact:</p>
+<div class="highlight-python"><pre>Rdr::upload mvn name rpos type  numbytes 13568 stride 64 offset 0 count 212 extent 440.272217
+          m_low vec3  -18345.670 -799975.375  -7250.606
+         m_high vec3  -18067.615 -799503.625  -6370.062
+   m_dimensions vec3     278.055    471.750    880.544
+       m_center vec3  -18206.643 -799739.500  -6810.334</pre>
+</div>
+<p>Adding a simple &#8220;dbg&#8221; point shader succeeds to find the gross problems.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

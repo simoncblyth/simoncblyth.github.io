@@ -135,6 +135,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../hg/">hg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simoncblyth.bitbucket.org/">simoncblyth.bitbucket.org</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../numpy/">numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../presentation/">Muon Simulation Presentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optix/">optix</a></li>
 </ul>
 
   <h3>This Page</h3>
@@ -184,7 +186,7 @@ gpuarray_obj&#8221; will be enough. At least, it worked for me.</p>
 <div class="section" id="pagelocked-aka-pinned-memory-device-mapped-memory">
 <h2>Pagelocked (aka pinned) memory, Device mapped memory<a class="headerlink" href="#pagelocked-aka-pinned-memory-device-mapped-memory" title="Permalink to this headline">¶</a></h2>
 <p>Chroma GPUGeometry supposedly uses device mapped memory</p>
-<p><span class="incremental">chroma/chroma/gpu/geometry.py</span>:</p>
+<p><cite>chroma/chroma/gpu/geometry.py</cite>:</p>
 <div class="highlight-python"><pre>..1 import numpy as np
   2 import pycuda.driver as cuda
   3 from pycuda import gpuarray as ga
@@ -298,7 +300,7 @@ to allocate pinned host memory that is accessible to the GPU.</dd>
 </div>
 <div class="section" id="cu-ctx-map-host">
 <h2>CU_CTX_MAP_HOST<a class="headerlink" href="#cu-ctx-map-host" title="Permalink to this headline">¶</a></h2>
-<p><span class="incremental">/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/wrapper/wrap_cudadrv.cpp</span>:</p>
+<p><cite>/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/wrapper/wrap_cudadrv.cpp</cite>:</p>
 <div class="highlight-python"><pre>525
 526 #if CUDAPP_CUDA_VERSION &gt;= 2000
 527   py::enum_&lt;CUctx_flags&gt;("ctx_flags")
@@ -378,7 +380,7 @@ True</pre>
 </div>
 <div class="section" id="g4daechroma-g4daeview-daechromacontext">
 <h2>g4daechroma/g4daeview DAEChromaContext<a class="headerlink" href="#g4daechroma-g4daeview-daechromacontext" title="Permalink to this headline">¶</a></h2>
-<p><span class="incremental">env/geant4/geometry/collada/g4daeview/daechromacontext.py</span>:</p>
+<p><cite>env/geant4/geometry/collada/g4daeview/daechromacontext.py</cite>:</p>
 <div class="highlight-python"><pre>16 import numpy as np
 17 import pycuda.gl.autoinit  # after this can use pycuda.gl.BufferObject(unsigned int)
 18
@@ -412,7 +414,7 @@ atexit.register(context.pop)</pre>
 </div>
 <div class="section" id="pycuda-context-creation">
 <h2>pycuda context creation<a class="headerlink" href="#pycuda-context-creation" title="Permalink to this headline">¶</a></h2>
-<p><span class="incremental">/usr/local/env/chroma_env/build/build_pycuda/pycuda/pycuda/tools.py</span>:</p>
+<p><cite>/usr/local/env/chroma_env/build/build_pycuda/pycuda/pycuda/tools.py</cite>:</p>
 <div class="highlight-python"><pre>159 def make_default_context(ctx_maker=None):
 160     if ctx_maker is None:
 161         def ctx_maker(dev):
@@ -429,7 +431,7 @@ atexit.register(context.pop)</pre>
 200             except cuda.Error:
 201                 pass</pre>
 </div>
-<p><span class="incremental">/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/wrapper/wrap_cudadrv.cpp</span>:</p>
+<p><cite>/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/wrapper/wrap_cudadrv.cpp</cite>:</p>
 <div class="highlight-python"><pre>867   // {{{ device
 868   {
 869     typedef device cl;
@@ -458,7 +460,7 @@ atexit.register(context.pop)</pre>
 892       ;
 893   }</pre>
 </div>
-<p><span class="incremental">/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/cpp/cuda.hpp</span>:</p>
+<p><cite>/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/cpp/cuda.hpp</cite>:</p>
 <div class="highlight-python"><pre>766
 767   inline
 768   boost::shared_ptr&lt;context&gt; device::make_context(unsigned int flags)
@@ -484,7 +486,7 @@ all handled using <strong>mapped_empty</strong>. These use allocator
 <li>pycuda.driver.host_alloc_flags.DEVICEMAP (CU_MEMHOSTALLOC_DEVICEMAP)</li>
 <li>pycuda.driver.host_alloc_flags.WRITECOMBINED (CU_MEMHOSTALLOC_WRITECOMBINED)</li>
 </ul>
-<p><span class="incremental">chroma/chroma/gpu/tools.py</span>:</p>
+<p><cite>chroma/chroma/gpu/tools.py</cite>:</p>
 <div class="highlight-python"><pre>..8 import pycuda.driver as cuda
 ...
 247 def mapped_alloc(pagelocked_alloc_func, shape, dtype, write_combined):
@@ -501,7 +503,7 @@ all handled using <strong>mapped_empty</strong>. These use allocator
 258     '''See mapped_alloc()'''
 259     return mapped_alloc(cuda.pagelocked_empty, shape, dtype, write_combined)</pre>
 </div>
-<p><span class="incremental">/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/wrapper/wrap_cudadrv.cpp</span>:</p>
+<p><cite>/usr/local/env/chroma_env/build/build_pycuda/pycuda/src/wrapper/wrap_cudadrv.cpp</cite>:</p>
 <div class="highlight-python"><pre>..1 #include &lt;cuda.hpp&gt;
 ...
 .79   class host_alloc_flags { };
@@ -549,11 +551,11 @@ available memory.</p>
 <ul class="simple">
 <li>creates GPUArray instance which<ul>
 <li>allocates device memory</li>
-<li>copies htod with  <span class="incremental">drv.memcpy_htod(self.gpudata, ary)</span></li>
+<li>copies htod with  <cite>drv.memcpy_htod(self.gpudata, ary)</cite></li>
 </ul>
 </li>
 </ul>
-<p><span class="incremental">/usr/local/env/chroma_env/build/build_pycuda/pycuda/pycuda/gpuarray.py</span>:</p>
+<p><cite>/usr/local/env/chroma_env/build/build_pycuda/pycuda/pycuda/gpuarray.py</cite>:</p>
 <div class="highlight-python"><pre>861 # {{{ creation helpers
 862
 863 def to_gpu(ary, allocator=drv.mem_alloc):
@@ -614,7 +616,7 @@ available memory.</p>
 <li>subclasses to ga.vec.float3</li>
 <li>reshape to yield (N)</li>
 </ul>
-<p><span class="incremental">chroma/chroma/gpu/tools.py</span>:</p>
+<p><cite>chroma/chroma/gpu/tools.py</cite>:</p>
 <div class="highlight-python"><pre>137 def to_float3(arr):
 138     "Returns an pycuda.gpuarray.vec.float3 array from an (N,3) array."
 139     if not arr.flags['C_CONTIGUOUS']:
