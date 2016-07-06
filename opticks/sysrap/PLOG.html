@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PLOG : Logging Infrastructure &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="SysRap : Low Level System Wrapper" href="index.html" />
+    <link rel="next" title="GGeo : Preparing Detector Geometry for Uploading to the GPU" href="../ggeo/index.html" />
+    <link rel="prev" title="SysRap : Low Level System Wrapper" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../ggeo/index.html" title="GGeo : Preparing Detector Geometry for Uploading to the GPU"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SysRap : Low Level System Wrapper"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">SysRap : Low Level System Wrapper</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">SysRap : Low Level System Wrapper</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../ggeo/index.html"
+                        title="next chapter">GGeo : Preparing Detector Geometry for Uploading to the GPU</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/sysrap/PLOG.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="plog-logging-infrastructure">
+<h1>PLOG : Logging Infrastructure<a class="headerlink" href="#plog-logging-infrastructure" title="Permalink to this headline">¶</a></h1>
+<p>Opticks executables follow the following pattern.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &quot;SYSRAP_LOG.hh&quot;  </span><span class="c1">// headers for each projects logger</span>
+<span class="cp">#include &quot;BRAP_LOG.hh&quot;</span>
+<span class="cp">#include &quot;NPY_LOG.hh&quot;</span>
+<span class="cp">#include &quot;OKCORE_LOG.hh&quot;</span>
+
+<span class="cp">#include &quot;PLOG.hh&quot;        </span><span class="c1">// infrastructure header</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">PLOG_</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>  <span class="c1">// pass arguments to PLOG_ macro</span>
+
+    <span class="n">SYSRAP_LOG__</span> <span class="p">;</span>     <span class="c1">// setup loggers for all projects you want to see output from</span>
+    <span class="n">BRAP_LOG__</span> <span class="p">;</span>
+    <span class="n">NPY_LOG__</span> <span class="p">;</span>
+    <span class="n">OKCORE_LOG__</span> <span class="p">;</span>
+
+    <span class="n">Opticks</span> <span class="n">ok</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+
+    <span class="c1">//  ...  exercise Opticks  ...</span>
+
+    <span class="k">return</span> <span class="mi">0</span> <span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><em>PLOG</em> parses command line arguments and configures the
+logging level of each project, for example:</p>
+<div class="highlight-c"><pre>OpticksResourceTest --sysrap trace --npy info   # lower cased tags identify the projects
+GGeoViewTest --npy debug</pre>
+</div>
+<p>Available logging levels are:</p>
+<ul class="simple">
+<li><em>trace</em> :  most verbose level, providing a great deal of output</li>
+<li><em>debug</em></li>
+<li><em>info</em> : normal default logging level</li>
+<li><em>warning</em></li>
+<li><em>error</em></li>
+<li><em>fatal</em></li>
+</ul>
+<p>The tags for each project are listed below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="45%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Project Folder</th>
+<th class="head">Tag</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>sysrap</td>
+<td>SYSRAP</td>
+</tr>
+<tr class="row-odd"><td>boostrap</td>
+<td>BRAP</td>
+</tr>
+<tr class="row-even"><td>opticksnpy</td>
+<td>NPY</td>
+</tr>
+<tr class="row-odd"><td>optickscore</td>
+<td>OKCORE</td>
+</tr>
+<tr class="row-even"><td>ggeo</td>
+<td>GGEO</td>
+</tr>
+<tr class="row-odd"><td>assimprap</td>
+<td>ASIRAP</td>
+</tr>
+<tr class="row-even"><td>openmeshrap</td>
+<td>MESHRAP</td>
+</tr>
+<tr class="row-odd"><td>opticksgeo</td>
+<td>OKGEO</td>
+</tr>
+<tr class="row-even"><td>oglrap</td>
+<td>OGLRAP</td>
+</tr>
+<tr class="row-odd"><td>cudarap</td>
+<td>CUDARAP</td>
+</tr>
+<tr class="row-even"><td>thrustrap</td>
+<td>THRAP</td>
+</tr>
+<tr class="row-odd"><td>optixrap</td>
+<td>OXRAP</td>
+</tr>
+<tr class="row-even"><td>opticksop</td>
+<td>OKOP</td>
+</tr>
+<tr class="row-odd"><td>opticksgl</td>
+<td>OKGL</td>
+</tr>
+<tr class="row-even"><td>ggeoview</td>
+<td>GGV</td>
+</tr>
+<tr class="row-odd"><td>cfg4</td>
+<td>CFG4</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../ggeo/index.html" title="GGeo : Preparing Detector Geometry for Uploading to the GPU"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SysRap : Low Level System Wrapper"
+             >previous</a> |</li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >SysRap : Low Level System Wrapper</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
