@@ -63,7 +63,7 @@
 <li><a class="reference internal" href="#building-opticks">Building Opticks</a></li>
 <li><a class="reference internal" href="#testing-installation">Testing Installation</a></li>
 <li><a class="reference internal" href="#issues-with-tests">Issues With Tests</a></li>
-<li><a class="reference internal" href="#running-individual-tests">Running Individual Tests</a></li>
+<li><a class="reference internal" href="#running-opticks-scripts-and-executables">Running Opticks Scripts and Executables</a></li>
 </ul>
 </li>
 </ul>
@@ -416,11 +416,34 @@ opticks-ctest : use -V to show output</pre>
 </pre></div>
 </div>
 </div>
-<div class="section" id="running-individual-tests">
-<h2>Running Individual Tests<a class="headerlink" href="#running-individual-tests" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="running-opticks-scripts-and-executables">
+<h2>Running Opticks Scripts and Executables<a class="headerlink" href="#running-opticks-scripts-and-executables" title="Permalink to this headline">¶</a></h2>
 <p>All Opticks executables including the tests are installed
-into $LOCAL_BASE/opticks/lib/ set PATH in your .bash_profile to find then:</p>
-<div class="highlight-python"><pre>export PATH=$LOCAL_BASE/opticks/lib:$PATH</pre>
+into $LOCAL_BASE/opticks/lib/ an example <cite>.bash_profile</cite>
+to is provided below:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="c"># .bash_profile</span>
+
+<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span>; <span class="k">then</span>                 <span class="c">## typical setup</span>
+        . ~/.bashrc
+<span class="k">fi</span>
+
+<span class="nb">export </span><span class="nv">NODE_TAG_OVERRIDE</span><span class="o">=</span>X                <span class="c">## env hookup only needed by Opticks developers</span>
+<span class="nb">export </span><span class="nv">ENV_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/env
+env-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$ENV_HOME</span>/env.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$ENV_HOME</span>/env.bash <span class="o">&amp;&amp;</span> env-env <span class="nv">$*</span> ; <span class="o">}</span>
+env-
+
+<span class="nb">export </span><span class="nv">LOCAL_BASE</span><span class="o">=</span><span class="nv">$HOME</span>/local             <span class="c">## opticks hookup is needed by all Opticks users</span>
+<span class="nb">export </span><span class="nv">OPTICKS_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/opticks
+
+opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> ; <span class="o">}</span>
+opticks-                                  <span class="c">## defines several bash functions beginning opticks- eg opticks-info</span>
+
+o<span class="o">(){</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> ; hg st ; <span class="o">}</span>
+op<span class="o">(){</span> op.sh <span class="nv">$*</span> ; <span class="o">}</span>
+
+<span class="nv">PATH</span><span class="o">=</span><span class="nv">$OPTICKS_HOME</span>/bin:<span class="nv">$LOCAL_BASE</span>/opticks/lib:<span class="nv">$PATH</span>  <span class="c">## easy access to scripts and executables</span>
+<span class="nb">export </span>PATH
+</pre></div>
 </div>
 </div>
 </div>
