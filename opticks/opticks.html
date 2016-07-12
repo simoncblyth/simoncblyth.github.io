@@ -48,6 +48,7 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Opticks Install Instructions</a><ul>
+<li><a class="reference internal" href="#using-a-shared-opticks-installation">Using a Shared Opticks Installation</a></li>
 <li><a class="reference internal" href="#get-opticks">Get Opticks</a></li>
 <li><a class="reference internal" href="#build-tools">Build Tools</a></li>
 <li><a class="reference internal" href="#cmake">CMake</a></li>
@@ -102,6 +103,54 @@
             
   <div class="section" id="opticks-install-instructions">
 <h1>Opticks Install Instructions<a class="headerlink" href="#opticks-install-instructions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="using-a-shared-opticks-installation">
+<h2>Using a Shared Opticks Installation<a class="headerlink" href="#using-a-shared-opticks-installation" title="Permalink to this headline">¶</a></h2>
+<p>If someone has installed Opticks for you already
+you just need to set the PATH variable in your .bash_profile
+to easily find the Opticks executables and scripts.</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="c"># .bash_profile</span>
+
+<span class="c"># Get the aliases and functions</span>
+<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span>; <span class="k">then</span>
+    . ~/.bashrc
+<span class="k">fi</span>
+
+<span class="c"># User specific environment and startup programs</span>
+
+<span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HOME</span>/.local/bin:<span class="nv">$HOME</span>/bin
+ini<span class="o">(){</span> . ~/.bash_profile ; <span class="o">}</span>
+
+ok-local<span class="o">(){</span>    <span class="nb">echo</span> /home/simonblyth/local ; <span class="o">}</span>
+ok-opticks<span class="o">(){</span>  <span class="nb">echo</span> /home/simonblyth/opticks ; <span class="o">}</span>
+ok-ctest<span class="o">(){</span>    <span class="o">(</span> <span class="nb">cd</span> <span class="k">$(</span>ok-local<span class="k">)</span>/opticks/build ; ctest3 <span class="nv">$*</span> ; <span class="o">)</span> <span class="o">}</span>
+
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="k">$(</span>ok-opticks<span class="k">)</span>/bin:<span class="k">$(</span>ok-local<span class="k">)</span>/opticks/lib:<span class="nv">$PATH</span>
+</pre></div>
+</div>
+<p>You can test the installation using the <cite>ok-ctest</cite> function defined in
+the .bash_profile. The output shoule look like the below.
+The permission denied error is not a problem.</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>blyth@optix ~<span class="o">]</span><span class="nv">$ </span>ok-ctest
+Test project /home/simonblyth/local/opticks/build
+CMake Error: Cannot open file <span class="k">for </span>write: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log.tmp
+CMake Error: : System Error: Permission denied
+Problem opening file: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log
+Cannot create log file: LastTest.log
+        Start   1: SysRapTest.SEnvTest
+  1/155 Test   <span class="c">#1: SysRapTest.SEnvTest ........................   Passed    0.00 sec</span>
+        Start   2: SysRapTest.SSysTest
+...
+...
+154/155 Test <span class="c">#154: cfg4Test.G4StringTest ......................   Passed    0.06 sec</span>
+        Start 155: cfg4Test.G4BoxTest
+155/155 Test <span class="c">#155: cfg4Test.G4BoxTest .........................   Passed    0.05 sec</span>
+
+100% tests passed, 0 tests failed out of 155
+
+Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  48.30 sec
+</pre></div>
+</div>
+</div>
 <div class="section" id="get-opticks">
 <h2>Get Opticks<a class="headerlink" href="#get-opticks" title="Permalink to this headline">¶</a></h2>
 <p>Clone the repository from bitbucket:</p>
@@ -317,12 +366,54 @@ If a local Boost was required then:</p>
 <p>For a full build with CUDA and OptiX configure with:</p>
 <div class="highlight-python"><pre>opticks-configure -DCUDA_TOOLKIT_ROOT_DIR=/Developer/NVIDIA/CUDA-7.0 \
                   -DOptiX_INSTALL_DIR=/Developer/OptiX \
+                  -DCOMPUTE_CAPABILITY=52 \
                   -DBOOST_ROOT=$(boost-prefix)</pre>
 </div>
-<p>CMake will detect NVIDIA GPU automatically. However, if you want to build the software without GPU:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">opticks</span><span class="o">-</span><span class="n">configure</span> <span class="o">-</span><span class="n">DGPU</span><span class="o">=</span><span class="n">OFF</span>
-</pre></div>
-</div>
+<p>The argument <cite>-DCOMPUTE_CAPABILITY=52</cite> specifies to compile for compute capability 5.2 architectures
+corresponding to Maxwell 2nd generation GPUs.
+Lookup the appropriate capability for your GPU in the below short table.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="34%" />
+<col width="38%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Compute Capability</th>
+<th class="head">Architecture</th>
+<th class="head">GPU Examples</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>2.1</td>
+<td>Fermi</td>
+<td><strong>NOT SUPPORTED BY OPTICKS</strong></td>
+</tr>
+<tr class="row-odd"><td>3.0</td>
+<td>Kepler</td>
+<td>GeForce GT 750M</td>
+</tr>
+<tr class="row-even"><td>5.0</td>
+<td>Maxwell 1st generation</td>
+<td>Quadro M2000M</td>
+</tr>
+<tr class="row-odd"><td>5.2</td>
+<td>Maxwell 2nd generation</td>
+<td>Quadro M5000</td>
+</tr>
+<tr class="row-even"><td>6.1</td>
+<td>Pascal</td>
+<td>GeForce GTX 1080</td>
+</tr>
+</tbody>
+</table>
+<p>For more complete tables see</p>
+<ul class="simple">
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/CUDA">https://en.wikipedia.org/wiki/CUDA</a></li>
+<li><a class="reference external" href="https://developer.nvidia.com/cuda-gpus">https://developer.nvidia.com/cuda-gpus</a>.</li>
+</ul>
+<p>Opticks requires a compute capability of at least 3.0, if you have no suitable GPU
+or would like to test without GPU acceleration use <cite>-DCOMPUTE_CAPABILITY=0</cite>.</p>
 <p>These configuration values are cached in the CMakeCache.txt file
 in the build directory. These values are not overridden by rebuilding
 with the <em>opticks&#8211;</em> bash function.
