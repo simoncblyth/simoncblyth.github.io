@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pmt_skimmer.py Debugging &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pmt_skimmer.py Debugging</a><ul>
+<li><a class="reference internal" href="#issues">Issues</a><ul>
+<li><a class="reference internal" href="#fixed-timing-off">[FIXED] Timing Off</a></li>
+<li><a class="reference internal" href="#fixed-getting-bt-when-looks-like-need-br-at-very-tangential-reflection">[FIXED] getting BT when looks like need BR at very tangential reflection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ana/pmt_skimmer_debug.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pmt-skimmer-py-debugging">
+<h1>pmt_skimmer.py Debugging<a class="headerlink" href="#pmt-skimmer-py-debugging" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="issues">
+<h2>Issues<a class="headerlink" href="#issues" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fixed-timing-off">
+<h3>[FIXED] Timing Off<a class="headerlink" href="#fixed-timing-off" title="Permalink to this headline">¶</a></h3>
+<p>Refractive index of MO different ? Nope, checked that.</p>
+<p>G4 impinges magical GROUPVEL that changes light velocity.  Regained match via CPropLib::m_groupvel_kludge
+to set he groupvel property to the phase velocity.</p>
+<div class="highlight-python"><pre>A(Op)
+  0 z    300.000    300.000    300.000 r     98.999     98.999     98.999  t      0.098      0.098      0.098    smry m1/m2   4/ 14 MO/Py  -28 ( 27)  13:TO
+  1 z     67.559     67.559     67.559 r     98.999     98.999     98.999  t      1.251      1.251      1.251    smry m1/m2  14/  4 Py/MO   28 ( 27)  12:BT
+  2 z     50.832     50.832     50.832 r    100.372    100.372    100.372  t      1.331      1.331      1.331    smry m1/m2  14/ 11 Py/OV -125 (124)  11:BR
+  3 z     35.551     35.551     35.551 r     93.176     93.176     93.176  t      1.416      1.416      1.416    smry m1/m2  14/  4 Py/MO   28 ( 27)  12:BT
+  4 z      2.005      2.005      2.005 r     81.137     81.137     81.137  t      1.532      1.532      1.532    smry m1/m2   4/ 14 MO/Py  -28 ( 27)  12:BT
+  5 z   -114.115   -114.115   -114.115 r     42.253     42.253     42.253  t      1.953      1.953      1.953    smry m1/m2  14/ 13 Py/Vm  -29 ( 28)  12:BT
+  6 z   -123.875   -123.875   -123.875 r     39.250     39.250     39.250  t      1.990      1.990      1.990    smry m1/m2  14/ 13 Py/Vm  -29 ( 28)  12:BT
+  7 z   -150.810   -150.810   -150.810 r     39.250     39.250     39.250  t      2.051      2.051      2.051    smry m1/m2   4/ 14 MO/Py  -28 ( 27)  12:BT
+  8 z   -169.002   -169.002   -169.002 r     39.250     39.250     39.250  t      2.081      2.081      2.081    smry m1/m2   4/ 12 MO/Rk  124 (123)  12:BT
+  9 z   -300.000   -300.000   -300.000 r     39.250     39.250     39.250  t      2.301      2.301      2.301    smry m1/m2   4/ 12 MO/Rk  124 (123)   8:SA
+B(G4)
+  0 z    300.000    300.000    300.000 r     98.999     98.999     98.999  t      0.098      0.098      0.098    smry m1/m2   4/  0 MO/?0?    0 ( -1)  13:TO
+  1 z     67.559     67.559     67.559 r     98.999     98.999     98.999  t      1.325      1.325      1.325    smry m1/m2  14/  0 Py/?0?    0 ( -1)  12:BT
+  2 z     50.832     50.832     50.832 r    100.372    100.372    100.372  t      1.410      1.410      1.410    smry m1/m2  14/  0 Py/?0?    0 ( -1)  11:BR
+  3 z     35.551     35.551     35.551 r     93.176     93.176     93.176  t      1.489      1.489      1.489    smry m1/m2  14/  0 Py/?0?    0 ( -1)  11:BR
+  4 z     19.181     19.181     19.181 r     89.001     89.001     89.001  t      1.575      1.575      1.575    smry m1/m2   4/  0 MO/?0?    0 ( -1)  12:BT
+  5 z   -300.000   -300.000   -300.000 r     26.569     26.569     26.569  t      3.290      3.290      3.290    smry m1/m2   4/  0 MO/?0?    0 ( -1)   8:SA</pre>
+</div>
+</div>
+<div class="section" id="fixed-getting-bt-when-looks-like-need-br-at-very-tangential-reflection">
+<h3>[FIXED] getting BT when looks like need BR at very tangential reflection<a class="headerlink" href="#fixed-getting-bt-when-looks-like-need-br-at-very-tangential-reflection" title="Permalink to this headline">¶</a></h3>
+<p>Fixed Opticks TIR bug:</p>
+<div class="highlight-python"><pre>optixrap-/propagate.h
+
+
+241 __device__ void propagate_at_boundary_geant4_style( Photon&amp; p, State&amp; s, curandState &amp;rng)
+242 {
+243     // see g4op-/G4OpBoundaryProcess.cc annotations to follow this
+...
+291     const float TransCoeff =  tir ? 0.0f : n2c2*E2_total_t/n1c1 ;
+292     //  above 0.0f was until 2016/3/4 incorrectly a 1.0f
+293     //  resulting in TIR yielding BT where BR is expected
+294
+295     bool reflect = curand_uniform(&amp;rng) &gt; TransCoeff  ;
+296
+297     p.direction = reflect
+298                     ?
+299                        p.direction + 2.0f*c1*s.surface_normal
+300                     :
+301                        eta*p.direction + (eta_c1 - c2)*s.surface_normal
+302                     ;</pre>
+</div>
+<p>After fix  (with the GROUPVEL phase velocity kludge in CPropLib) and fixpol override:</p>
+<div class="highlight-python"><pre>A(Op) PmtInBox/torch/5 : TO BT BR BR BT SA
+  0 z:    300.000    300.000    300.000   r:     98.999     98.999     98.999   t:      0.098      0.098      0.098   smry m1/m2   4/ 14 MO/Py  -28 ( 27)  13:TO
+  1 z:     67.559     67.559     67.559   r:     98.999     98.999     98.999   t:      1.251      1.251      1.251   smry m1/m2  14/  4 Py/MO   28 ( 27)  12:BT
+  2 z:     50.832     50.832     50.832   r:    100.372    100.372    100.372   t:      1.331      1.331      1.331   smry m1/m2  14/ 11 Py/OV -125 (124)  11:BR
+  3 z:     35.551     35.551     35.551   r:     93.176     93.176     93.176   t:      1.416      1.416      1.416   smry m1/m2  14/  4 Py/MO   28 ( 27)  11:BR
+  4 z:     19.181     19.181     19.181   r:     89.001     89.001     89.001   t:      1.495      1.495      1.495   smry m1/m2   4/ 12 MO/Rk  124 (123)  12:BT
+  5 z:   -300.000   -300.000   -300.000   r:     26.569     26.569     26.569   t:      3.107      3.107      3.107   smry m1/m2   4/ 12 MO/Rk  124 (123)   8:SA
+B(G4) PmtInBox/torch/-5 : TO BT BR BR BT SA
+  0 z:    300.000    300.000    300.000   r:     98.999     98.999     98.999   t:      0.098      0.098      0.098   smry m1/m2   4/  0 MO/?0?    0 ( -1)  13:TO
+  1 z:     67.559     67.559     67.559   r:     98.999     98.999     98.999   t:      1.251      1.251      1.251   smry m1/m2  14/  0 Py/?0?    0 ( -1)  12:BT
+  2 z:     50.832     50.832     50.832   r:    100.372    100.372    100.372   t:      1.331      1.331      1.331   smry m1/m2  14/  0 Py/?0?    0 ( -1)  11:BR
+  3 z:     35.551     35.551     35.551   r:     93.176     93.176     93.176   t:      1.416      1.416      1.416   smry m1/m2  14/  0 Py/?0?    0 ( -1)  11:BR
+  4 z:     19.181     19.181     19.181   r:     89.001     89.001     89.001   t:      1.495      1.495      1.495   smry m1/m2   4/  0 MO/?0?    0 ( -1)  12:BT
+  5 z:   -300.000   -300.000   -300.000   r:     26.569     26.569     26.569   t:      3.107      3.107      3.107   smry m1/m2   4/  0 MO/?0?    0 ( -1)   8:SA</pre>
+</div>
+<div class="highlight-python"><pre>ggv --bnd
+
+( 27) om:               MineralOil os:                          is:                          im:                    Pyrex
+( 28) om:                    Pyrex os:                          is:                          im:                   Vacuum
+...
+(122) om:                     Rock os:                          is:                          im:                  RadRock</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

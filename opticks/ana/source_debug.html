@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Opticks Launch Scripts &mdash; Opticks 0.0.1 documentation</title>
+    <title>Wavelength Distribution Debugging &mdash; Opticks 0.0.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -23,9 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" />
-    <link rel="next" title="op.sh : Opticks Launching Script" href="op.html" />
-    <link rel="prev" title="tlens- : Integration Tests Template" href="../tests/tlens.html" /> 
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,26 +32,23 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="op.html" title="op.sh : Opticks Launching Script"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="../tests/tlens.html" title="tlens- : Integration Tests Template"
-             accesskey="P">previous</a> |</li>
         <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../tests/tlens.html"
-                        title="previous chapter">tlens- : Integration Tests Template</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="op.html"
-                        title="next chapter">op.sh : Opticks Launching Script</a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Wavelength Distribution Debugging</a><ul>
+<li><a class="reference internal" href="#issue-wp-last-bin-elevated">[ISSUE] wp last bin elevated</a></li>
+<li><a class="reference internal" href="#fixed-bug-with-w0-sel-recwavelength-0">[FIXED] Bug with w0 sel.recwavelength(0)</a></li>
+</ul>
+</li>
+</ul>
+
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="../_sources/bin/index.txt"
+    <li><a href="../_sources/ana/source_debug.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -77,18 +72,41 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="opticks-launch-scripts">
-<h1>Opticks Launch Scripts<a class="headerlink" href="#opticks-launch-scripts" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="op.html">op.sh : Opticks Launching Script</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="op.html#profile-setup">Profile Setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="op.html#visualizing-geometry">Visualizing Geometry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="op.html#setting-idpath">Setting IDPATH</a></li>
-<li class="toctree-l2"><a class="reference internal" href="op.html#structure-of-the-geocache">Structure of the geocache</a></li>
+  <div class="section" id="wavelength-distribution-debugging">
+<h1>Wavelength Distribution Debugging<a class="headerlink" href="#wavelength-distribution-debugging" title="Permalink to this headline">¶</a></h1>
+<p>Compares simulated photon wavelengths against blackbody expectation.</p>
+<ul class="simple">
+<li>still a hint of &#8220;ringing steps&#8221; from 200:400nm, but seems acceptable
+(TODO: try increasing icdf bins from 1024 to identify)</li>
 </ul>
+<div class="section" id="issue-wp-last-bin-elevated">
+<h2>[ISSUE] wp last bin elevated<a class="headerlink" href="#issue-wp-last-bin-elevated" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>In [69]: plt.close();plt.hist(wp, bins=200)
+
+,  2215.,  2158.,  2046.,  2017.,  2052.,  2111.,  2565.]),</pre>
+</div>
+</div>
+<div class="section" id="fixed-bug-with-w0-sel-recwavelength-0">
+<h2>[FIXED] Bug with w0 sel.recwavelength(0)<a class="headerlink" href="#fixed-bug-with-w0-sel-recwavelength-0" title="Permalink to this headline">¶</a></h2>
+<p>Without selection sel.recwavelength(0) from ggv-newton:</p>
+<ul>
+<li><p class="first">length of 500000</p>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ggv.html">GGV : Opticks Simulation Launch Bash Functions</a></li>
+<li><p class="first">three bin spike at lower bound around 60nm, comprising about 7000 photons
+(not present in the uncompressed wp)</p>
+<p><strong>FIXED WHEN AVOID WAVELENGTH DOMAIN DISCREPANCY BETWEEN SOURCES AND COMPRESSION</strong></p>
+</li>
+<li><p class="first">plateau from 60~190 nm</p>
+<p><strong>MADE MUCH LESS OBJECTIONABLE BY INCREASING ICDF BINS FROM 256 TO 1024</strong></p>
+</li>
+<li><p class="first">normal service resumes above 190nm with good
+match to Planck black body curve</p>
+</li>
+<li><p class="first">256 unique linspaced values, a result of the compression:</p>
+<div class="highlight-python"><pre>In [36]: np.allclose(np.linspace(60,820,256),np.unique(w))  # upper changed 810 to 820 by the fix
+Out[36]: True</pre>
+</div>
+</li>
 </ul>
 </div>
 </div>
@@ -105,12 +123,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="op.html" title="op.sh : Opticks Launching Script"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="../tests/tlens.html" title="tlens- : Integration Tests Template"
-             >previous</a> |</li>
         <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>

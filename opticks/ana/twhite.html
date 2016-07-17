@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>twhite.py: Wavelength Distribution Check &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">twhite.py: Wavelength Distribution Check</a><ul>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ana/twhite.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="twhite-py-wavelength-distribution-check">
+<h1>twhite.py: Wavelength Distribution Check<a class="headerlink" href="#twhite-py-wavelength-distribution-check" title="Permalink to this headline">¶</a></h1>
+<p>Creates plot comparing simulated photon wavelength spectrum
+from <a class="reference internal" href="../tests/twhite.html"><em>twhite- : Pencil beam of white light incident on Glass prism</em></a> against blackbody expectation.</p>
+<p>This is checking the <em>source_lookup</em> implementation and
+the inverse CDF <em>source_texture</em> that it uses.</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="cp">## optixrap/cu/wavelength_lookup.h</span>
+
+<span class="mo">014</span> <span class="n">rtTextureSampler</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span> <span class="mi">2</span><span class="o">&gt;</span>  <span class="n">source_texture</span> <span class="p">;</span>
+ <span class="mi">15</span> <span class="nf">rtDeclareVariable</span><span class="p">(</span><span class="n">float4</span><span class="p">,</span> <span class="n">source_domain</span><span class="p">,</span> <span class="p">,</span> <span class="p">);</span>
+ <span class="p">..</span>
+ <span class="mi">41</span> <span class="k">static</span> <span class="n">__device__</span> <span class="n">__inline__</span> <span class="kt">float</span> <span class="n">source_lookup</span><span class="p">(</span><span class="kt">float</span> <span class="n">u</span><span class="p">)</span>
+ <span class="mi">42</span> <span class="p">{</span>
+ <span class="mi">43</span>     <span class="kt">float</span> <span class="n">ui</span> <span class="o">=</span> <span class="n">u</span><span class="o">/</span><span class="n">source_domain</span><span class="p">.</span><span class="n">z</span> <span class="o">+</span> <span class="mf">0.5f</span> <span class="p">;</span>
+ <span class="mi">44</span>     <span class="k">return</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">source_texture</span><span class="p">,</span> <span class="n">ui</span><span class="p">,</span> <span class="mf">0.5f</span> <span class="p">);</span>  <span class="c1">// line 0</span>
+ <span class="mi">45</span> <span class="p">}</span>
+ <span class="mi">46</span>
+ <span class="mi">47</span> <span class="k">static</span> <span class="n">__device__</span> <span class="n">__inline__</span> <span class="kt">void</span> <span class="n">source_check</span><span class="p">()</span>
+ <span class="mi">48</span> <span class="p">{</span>
+ <span class="mi">49</span>     <span class="kt">float</span> <span class="n">nm_a</span> <span class="o">=</span> <span class="n">source_lookup</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">);</span>
+ <span class="mi">50</span>     <span class="kt">float</span> <span class="n">nm_b</span> <span class="o">=</span> <span class="n">source_lookup</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">);</span>
+ <span class="mi">51</span>     <span class="kt">float</span> <span class="n">nm_c</span> <span class="o">=</span> <span class="n">source_lookup</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">);</span>
+ <span class="mi">52</span>     <span class="nf">rtPrintf</span><span class="p">(</span><span class="s">&quot;source_check nm_a %10.3f %10.3f %10.3f  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>  <span class="n">nm_a</span><span class="p">,</span> <span class="n">nm_b</span><span class="p">,</span> <span class="n">nm_c</span> <span class="p">);</span>
+ <span class="mi">53</span> <span class="p">}</span>
+
+<span class="cp">## optixrap/cu/torchstep.h</span>
+
+<span class="mi">241</span> <span class="n">__device__</span> <span class="kt">void</span>
+<span class="mi">242</span> <span class="n">generate_torch_photon</span><span class="p">(</span><span class="n">Photon</span><span class="o">&amp;</span> <span class="n">p</span><span class="p">,</span> <span class="n">TorchStep</span><span class="o">&amp;</span> <span class="n">ts</span><span class="p">,</span> <span class="n">curandState</span> <span class="o">&amp;</span><span class="n">rng</span><span class="p">)</span>
+<span class="mi">243</span> <span class="p">{</span>
+<span class="mi">244</span>       <span class="n">p</span><span class="p">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">ts</span><span class="p">.</span><span class="n">wavelength</span> <span class="o">&gt;</span> <span class="mf">50.f</span> <span class="o">?</span> <span class="n">ts</span><span class="p">.</span><span class="n">wavelength</span> <span class="o">:</span> <span class="n">source_lookup</span><span class="p">(</span><span class="n">curand_uniform</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rng</span><span class="p">));</span>  <span class="c1">// Planck black body source 6500K standard illuminant</span>
+<span class="mi">245</span>
+</pre></div>
+</div>
+<div class="section" id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="source_debug.html"><em>Wavelength Distribution Debugging</em></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

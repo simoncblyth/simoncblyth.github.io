@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tprism.py : Comparison of simulation with analytic expectation &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">tprism.py : Comparison of simulation with analytic expectation</a><ul>
+<li><a class="reference internal" href="#prism-deviation-angle-calculation">Prism Deviation Angle Calculation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ana/tprism.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tprism-py-comparison-of-simulation-with-analytic-expectation">
+<h1>tprism.py : Comparison of simulation with analytic expectation<a class="headerlink" href="#tprism-py-comparison-of-simulation-with-analytic-expectation" title="Permalink to this headline">¶</a></h1>
+<p>Analysis of &#8220;prism&#8221; and &#8220;newton&#8221; event categories</p>
+<ul class="simple">
+<li>&#8220;prism&#8221; uses all incident angles, see <cite>tprism-</cite></li>
+<li>&#8220;newton&#8221; uses one incident angle, see <cite>tnewton-</cite></li>
+</ul>
+<p>TODO:</p>
+<ul class="simple">
+<li>handle multiple wavelengths</li>
+<li>make comparison after histogramming, like reflection.py does</li>
+<li>but here have incident angle as well as the deviation, so need 2d</li>
+<li><a class="reference external" href="http://docs.scipy.org/doc/numpy-1.10.1/reference/generated/numpy.histogram2d.html">http://docs.scipy.org/doc/numpy-1.10.1/reference/generated/numpy.histogram2d.html</a></li>
+</ul>
+<div class="section" id="prism-deviation-angle-calculation">
+<h2>Prism Deviation Angle Calculation<a class="headerlink" href="#prism-deviation-angle-calculation" title="Permalink to this headline">¶</a></h2>
+<p>Hecht p163, two refractions thru a prism, CB and CD are normal to surface planes:</p>
+<div class="highlight-python"><pre>.
+
+                 A
+                / \
+               /   \
+              /     \
+             /       \
+            /         \
+           /           \
+          /             \
+         B. . . . . . . .D
+    .   /                 \
+       /          C        \
+      /                     \
+     /                       \
+    --------------------------</pre>
+</div>
+<p>Polygon ABCD</p>
+<blockquote>
+<div>BAD : alpha   (apex angle)
+CBA : 90 degrees
+CDA : 90 degrees
+BCD : 180 - alpha</div></blockquote>
+<p>Triangle BCD has angles:</p>
+<blockquote>
+<div><blockquote>
+<div>CBD: t1
+CDB: i2
+BCD: 180 - alpha</div></blockquote>
+<p>==&gt;  alpha = t1 + i2</p>
+</div></blockquote>
+<p>Ray path thru prism, BD</p>
+<p>Deviation at B:   (i1 - t1)
+Deviation at D:   (t2 - i2)
+Total</p>
+<blockquote>
+<div><p>delta:   (i1 - t1) + (t2 - i2)</p>
+<p>delta = i1 + t2 - alpha</p>
+</div></blockquote>
+<p>Aiming for expression providing delta as function of theta_i1,
+apex angle alpha and refractive index n</p>
+<p>Snells law at 2nd interface, prism refractive index n in air</p>
+<blockquote>
+<div><p>sin(t2) = n sin(i2)</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="docutils">
+<dt>t2  = arcsin( n sin(i2) )</dt>
+<dd>= arcsin( n sin(alpha - t1) )
+= arcsin( sin(alpha) n cos(t1) - cos(alpha) n sin(t1) )</dd>
+</dl>
+</div></blockquote>
+<p>[ n cos(t1) ]^2  = (n^2 - n^2 sin(t1)^2 )</p>
+<blockquote>
+<div><blockquote>
+<div>=  (n^2 - sin(i1)^2 )           n sin(t1) = sin(i1)</div></blockquote>
+<p>t2 = arcsin(  sin(alpha) sqrt(n^2 - sin^2(i1)) - sin(i1) cos(alpha) )</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p>2nd refraction has a critical angle where t2 = pi above which TIR will occur</p>
+<blockquote>
+<div><p>n sin(i2) = 1*sin(t2) =  1</p>
+<blockquote>
+<div>i2c = arcsin( 1./n )</div></blockquote>
+</div></blockquote>
+<p>Propagate that back to 1st refraction</p>
+<blockquote>
+<div><p>sin(i1) = n sin(t1) = n sin(alpha - i2)</p>
+<blockquote>
+<div>i1  = arcsin( n sin(alpha - arcsin(1/n) ) )</div></blockquote>
+</div></blockquote>
+<p>But there is another constraint in there with edge</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>n sin(alpha - arcsin(1/n)) = 1</dt>
+<dd><p class="first">alpha - arcsin(1/n) = arcsin(1/n)</p>
+<blockquote class="last">
+<div><p>alpha/2 = arcsin(1/n) = i2c</p>
+<p>alpha = 2*i2c      (i2_c  43.304 n = 1.458)</p>
+</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+<p>This indicates that a 90 degree apex angle is not a good choice
+for dispersing prism, use 60 degree instead.</p>
+<p>At minimum deviation delta, ray are parallel to base and have symmetric ray</p>
+<blockquote>
+<div><p>i1 = t2
+t1 = i2</p>
+<p>alpha = t1 + i2         ==&gt;  t1 = i2 = alpha/2</p>
+<p>delta = i1 + t2 - alpha</p>
+<p>sin(delta + alpha) = sin( i1 + t2 )</p>
+<p>sin(i1) = n sin(t1)</p>
+<blockquote>
+<div>i1 = arcsin( n sin(alpha/2) )</div></blockquote>
+</div></blockquote>
+<p>Where to shoot from to get minimum deviation ?</p>
+<ul class="simple">
+<li>Use intersect frame coordinate with the transform explicitly specifified</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
