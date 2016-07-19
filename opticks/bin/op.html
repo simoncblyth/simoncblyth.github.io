@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" />
     <link rel="up" title="Opticks Launch Scripts" href="index.html" />
-    <link rel="next" title="GGV : Opticks Simulation Launch Bash Functions" href="ggv.html" />
+    <link rel="next" title="Visualization of Geometry and Event data" href="../docs/visualization.html" />
     <link rel="prev" title="Opticks Launch Scripts" href="index.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="ggv.html" title="GGV : Opticks Simulation Launch Bash Functions"
+          <a href="../docs/visualization.html" title="Visualization of Geometry and Event data"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Opticks Launch Scripts"
@@ -51,9 +51,6 @@
   <ul>
 <li><a class="reference internal" href="#">op.sh : Opticks Launching Script</a><ul>
 <li><a class="reference internal" href="#profile-setup">Profile Setup</a></li>
-<li><a class="reference internal" href="#visualizing-geometry">Visualizing Geometry</a></li>
-<li><a class="reference internal" href="#setting-idpath">Setting IDPATH</a></li>
-<li><a class="reference internal" href="#structure-of-the-geocache">Structure of the geocache</a></li>
 </ul>
 </li>
 </ul>
@@ -62,8 +59,8 @@
   <p class="topless"><a href="index.html"
                         title="previous chapter">Opticks Launch Scripts</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="ggv.html"
-                        title="next chapter">GGV : Opticks Simulation Launch Bash Functions</a></p>
+  <p class="topless"><a href="../docs/visualization.html"
+                        title="next chapter">Visualization of Geometry and Event data</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../_sources/bin/op.txt"
@@ -106,129 +103,6 @@ that provides this text.</p>
 <div class="highlight-python"><pre>op(){ op.sh $* ; }</pre>
 </div>
 </div>
-<div class="section" id="visualizing-geometry">
-<h2>Visualizing Geometry<a class="headerlink" href="#visualizing-geometry" title="Permalink to this headline">¶</a></h2>
-<p>When visualizing geometry that is new to you it is
-best to start with &#8220;&#8211;tracer&#8221; mode as it is the fastest:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">op</span> <span class="o">--</span><span class="n">dpib</span> <span class="o">--</span><span class="n">tracer</span>
-<span class="n">op</span> <span class="o">--</span><span class="n">dyb</span>  <span class="o">--</span><span class="n">tracer</span>
-<span class="n">op</span> <span class="o">--</span><span class="n">dfar</span> <span class="o">--</span><span class="n">tracer</span>
-<span class="n">op</span> <span class="o">--</span><span class="n">dlin</span> <span class="o">--</span><span class="n">tracer</span>
-<span class="n">op</span> <span class="o">--</span><span class="n">jpmt</span> <span class="o">--</span><span class="n">tracer</span>
-<span class="n">op</span> <span class="o">--</span><span class="n">lxe</span> <span class="o">--</span><span class="n">tracer</span>
-</pre></div>
-</div>
-<p>Sometimes this will result in a black screen, for example
-when the viewpoint is within a volume and the &#8220;light&#8221; is outside
-that volume.  Use the below key controls to make the geometry visible.</p>
-<div class="highlight-python"><pre>V: View::nextMode                  rotate view, with shift modifier rotates in opposite direction
-L: Composition::nextNormalStyle    flip normal in shaders
-B: Scene::nextGeometryStyle        bbox/norm/wire
-C: Clipper::next                   toggle geometry clipping
-E: Composition::nextGeometryStyle  lightshader/normalshader/flatvertex/facecolor
-D: Camera::nextStyle               perspective/orthographic
-O: OptiX render mode               raytrace/hybrid/OpenGL
-R: rotate mode                     drag around rotate around viewpoint
-Y: yfov mode                       drag up/down to change field of view
-G: gui mode                        toggle GUI</pre>
-</div>
-<p>Particularly useful commands for making geometry visible are:</p>
-<dl class="docutils">
-<dt><strong>L</strong></dt>
-<dd>flips normals so light from outside a volume can light inside it</dd>
-<dt><strong>E</strong></dt>
-<dd>changes the coloring style</dd>
-</dl>
-<p>For a full list of keys:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">op</span> <span class="o">--</span><span class="n">keys</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="setting-idpath">
-<h2>Setting IDPATH<a class="headerlink" href="#setting-idpath" title="Permalink to this headline">¶</a></h2>
-<p>Opticks launches end by outputting messages like the below:</p>
-<div class="highlight-python"><pre># geocache directory corresponding to OPTICKS_ARGS --dpib --tracer
-export IDPATH=/usr/local/opticks/opticksdata/export/dpib/cfg4.d41d8cd98f00b204e9800998ecf8427e.dae
-
-# geocache directory corresponding to OPTICKS_ARGS --jpmt --tracer
-export IDPATH=/usr/local/opticks/opticksdata/export/juno/test3.fcc8b4dc9474af8826b29bf172452160.dae
-
-# geocache directory corresponding to OPTICKS_ARGS --dyb --tracer
-export IDPATH=/usr/local/opticks/opticksdata/export/DayaBay_VGDX_20140414-1300/g4_00.96ff965744a2f6b78c24e33c80d3a4cd.dae</pre>
-</div>
-<p>The IDPATH identifies the geocache directory corresponding to the geometry selected by the
-arguments. Opticks python analysis scripts require the IDPATH to be set in order
-to access geometry data.</p>
-<p>Copy/paste the export lines into your .bash_profile prior to using python
-analysis scripts.</p>
-<p><tt class="xref doc docutils literal"><span class="pre">../ana/PropLib</span></tt> is a simple example of a python script accessing the geocache.</p>
-</div>
-<div class="section" id="structure-of-the-geocache">
-<h2>Structure of the geocache<a class="headerlink" href="#structure-of-the-geocache" title="Permalink to this headline">¶</a></h2>
-<p>All geometry data is serialized in the geocache:</p>
-<div class="highlight-python"><pre>simon:~ blyth$ cd /usr/local/opticks/opticksdata/export/juno/test3.fcc8b4dc9474af8826b29bf172452160.dae
-simon:test3.fcc8b4dc9474af8826b29bf172452160.dae blyth$ find .
-./GBndLib
-./GBndLib/GBndLibIndex.npy
-./GItemList
-./GItemList/GMaterialLib.txt
-./GItemList/GScintillatorLib.txt
-./GItemList/GSourceLib.txt
-./GItemList/GSurfaceLib.txt
-./GMaterialLib
-./GMaterialLib/GMaterialLib.npy
-./GMergedMesh
-./GMergedMesh/0
-./GMergedMesh/0/aiidentity.npy
-./GMergedMesh/0/bbox.npy
-./GMergedMesh/0/boundaries.npy
-./GMergedMesh/0/center_extent.npy
-./GMergedMesh/0/colors.npy
-./GMergedMesh/0/identity.npy
-./GMergedMesh/0/iidentity.npy
-./GMergedMesh/0/indices.npy
-./GMergedMesh/0/itransforms.npy
-./GMergedMesh/0/meshes.npy
-./GMergedMesh/0/nodeinfo.npy
-./GMergedMesh/0/nodes.npy
-./GMergedMesh/0/normals.npy
-./GMergedMesh/0/sensors.npy
-./GMergedMesh/0/transforms.npy
-./GMergedMesh/0/vertices.npy
-...
-./GScintillatorLib
-./GScintillatorLib/GScintillatorLib.npy
-./GScintillatorLib/LS
-./GScintillatorLib/LS/ABSLENGTH.npy
-./GScintillatorLib/LS/AlphaFASTTIMECONSTANT.npy
-./GScintillatorLib/LS/AlphaSLOWTIMECONSTANT.npy
-./GScintillatorLib/LS/AlphaYIELDRATIO.npy
-./GScintillatorLib/LS/FASTCOMPONENT.npy
-./GScintillatorLib/LS/GammaFASTTIMECONSTANT.npy
-./GScintillatorLib/LS/GammaSLOWTIMECONSTANT.npy
-./GScintillatorLib/LS/GammaYIELDRATIO.npy
-./GScintillatorLib/LS/NeutronFASTTIMECONSTANT.npy
-./GScintillatorLib/LS/NeutronSLOWTIMECONSTANT.npy
-./GScintillatorLib/LS/NeutronYIELDRATIO.npy
-./GScintillatorLib/LS/RAYLEIGH.npy
-./GScintillatorLib/LS/ReemissionFASTTIMECONSTANT.npy
-./GScintillatorLib/LS/REEMISSIONPROB.npy
-./GScintillatorLib/LS/ReemissionSLOWTIMECONSTANT.npy
-./GScintillatorLib/LS/ReemissionYIELDRATIO.npy
-./GScintillatorLib/LS/RESOLUTIONSCALE.npy
-./GScintillatorLib/LS/RINDEX.npy
-./GScintillatorLib/LS/SCINTILLATIONYIELD.npy
-./GScintillatorLib/LS/SLOWCOMPONENT.npy
-./GSourceLib
-./GSourceLib/GSourceLib.npy
-./GSurfaceLib
-./GSurfaceLib/GSurfaceLib.npy
-./GSurfaceLib/GSurfaceLibOptical.npy
-./GTreePresent.txt
-./MeshIndexLocal.json
-./MeshIndexSource.json</pre>
-</div>
-</div>
 </div>
 
 
@@ -244,7 +118,7 @@ simon:test3.fcc8b4dc9474af8826b29bf172452160.dae blyth$ find .
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="ggv.html" title="GGV : Opticks Simulation Launch Bash Functions"
+          <a href="../docs/visualization.html" title="Visualization of Geometry and Event data"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Opticks Launch Scripts"
