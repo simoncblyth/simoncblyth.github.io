@@ -49,9 +49,10 @@
   <ul>
 <li><a class="reference internal" href="#">Visualization of Geometry and Event data</a><ul>
 <li><a class="reference internal" href="#geometry-tracer-mode">Geometry Tracer Mode</a></li>
+<li><a class="reference internal" href="#gui-control">GUI control</a></li>
 <li><a class="reference internal" href="#navigating-in-a-geometry">Navigating in a Geometry</a></li>
 <li><a class="reference internal" href="#bookmarks-and-making-interpolated-view-animation">Bookmarks and Making Interpolated View Animation</a></li>
-<li><a class="reference internal" href="#controlling-animations">Controlling Animations</a></li>
+<li><a class="reference internal" href="#controlling-animations-and-photon-presentation">Controlling Animations and Photon Presentation</a></li>
 </ul>
 </li>
 </ul>
@@ -118,7 +119,7 @@ G: gui mode                        toggle GUI</pre>
 <p>Particularly useful commands for making geometry visible are:</p>
 <dl class="docutils">
 <dt><strong>L</strong></dt>
-<dd>flips normals so light from outside a volume can light inside it</dd>
+<dd>flips normals so light from outside a volume can still light inside the volume</dd>
 <dt><strong>E</strong></dt>
 <dd>changes the coloring style</dd>
 </dl>
@@ -126,6 +127,71 @@ G: gui mode                        toggle GUI</pre>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">op</span> <span class="o">--</span><span class="n">keys</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="gui-control">
+<h2>GUI control<a class="headerlink" href="#gui-control" title="Permalink to this headline">¶</a></h2>
+<p>Toggle between GUI modes with the <strong>G</strong> key, the modes are:</p>
+<ul class="simple">
+<li>no-GUI</li>
+<li>animation control and time scrubber</li>
+<li>full GUI menu</li>
+</ul>
+<p>Sections of the GUI menu:</p>
+<dl class="docutils">
+<dt><strong>Help</strong></dt>
+<dd><strong>Needs Updating</strong></dd>
+<dt><strong>Params</strong></dt>
+<dd>Information about the loaded event</dd>
+<dt><strong>Stats</strong></dt>
+<dd><strong>Needs Updating</strong> Can be configured to contain processing timings</dd>
+<dt><strong>Interactor</strong></dt>
+<dd>List of the interactive key shortcuts, the same list
+can be obtained from commandline with <cite>op.sh &#8211;keys</cite></dd>
+<dt><strong>Scene</strong></dt>
+<dd>Checkboxes to select what is displayed, <strong>bb</strong> stands for bounding box,
+<strong>in</strong> stands for instance (ie the PMTs)</dd>
+<dt><strong>Composition</strong></dt>
+<dd>Parameters controlling the view, mostly for developer usage.</dd>
+<dt><strong>View</strong></dt>
+<dd>Sliders to control positions of: <strong>eye</strong>, <strong>look</strong> and <strong>up</strong></dd>
+<dt><strong>Camera</strong></dt>
+<dd>Sliders controlling <strong>near</strong>, <strong>far</strong>, <strong>zoom</strong> and <strong>scale</strong> of the
+camera and a toggle inbetween perspective and orthographic projection
+(note the D key also toggles between these projections)</dd>
+<dt><strong>Clipper</strong></dt>
+<dd>Sliders controlling a clipping plane that clips away some of the geometry
+in clipping mode, which is toggled by pressing the <strong>C</strong> key.</dd>
+<dt><strong>Trackball</strong></dt>
+<dd>Sliders controlling the virtual trackball available to control the viewpoint in
+modes such as the Rotate mode, which is toggled by pressing the <strong>R</strong> key.</dd>
+<dt><strong>Bookmarks</strong></dt>
+<dd><strong>Under Development</strong></dd>
+<dt><strong>State</strong></dt>
+<dd><strong>Under Development</strong></dd>
+<dt><strong>Photon Flag Selection</strong></dt>
+<dd>Can be used to select photons based on final flags.
+NB this is different from the photon record history flag selection.</dd>
+<dt><strong>GMaterialLib</strong></dt>
+<dd>Lists the materials of the geometry, together with their code numbers and colors</dd>
+<dt><strong>GSurfaceLib</strong></dt>
+<dd>Lists the surfaces of the geometry, together with their code numbers and colors</dd>
+<dt><strong>GFlags</strong></dt>
+<dd>Lists the history flags of the propagation, such as <strong>BOUNDARY_TRANSMIT</strong> together
+with code numbers and colors</dd>
+<dt><strong>Dev</strong></dt>
+<dd>Used for GUI development</dd>
+</dl>
+<p>Some menu sections only appear when propagating photons or with a propagation loaded. Namely:</p>
+<dl class="docutils">
+<dt><strong>Photon Termination Boundaries Selection</strong></dt>
+<dd><strong>Under development</strong></dd>
+<dt><strong>Photon Flag Sequence Selection</strong></dt>
+<dd>Checkbox list of photon history sequences, allowing all photons of particular histories to
+be visualized.</dd>
+<dt><strong>Photon Material Sequence Selection</strong></dt>
+<dd>Checkbox list of photon material sequences, allowing all photons of particular material histories to
+be visualized.</dd>
+</dl>
 </div>
 <div class="section" id="navigating-in-a-geometry">
 <h2>Navigating in a Geometry<a class="headerlink" href="#navigating-in-a-geometry" title="Permalink to this headline">¶</a></h2>
@@ -152,9 +218,13 @@ SPACE: update the current bookmark, commiting trackballing into the view and per
 from bookmark to bookmark.  Bookmarks are persisted between invokations.
 Bookmarks are an area that needs some debugging.</p>
 </div>
-<div class="section" id="controlling-animations">
-<h2>Controlling Animations<a class="headerlink" href="#controlling-animations" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>Animator modes are changed by pressing keys A,V,T
+<div class="section" id="controlling-animations-and-photon-presentation">
+<h2>Controlling Animations and Photon Presentation<a class="headerlink" href="#controlling-animations-and-photon-presentation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>M: Composition::nextColorStyle      m1/m2/f1/f2/p1/p2
+P: Scene::nextPhotonStyle       dot/longline/shortline
+G: gui mode                        toggle GUI
+
+Animator modes are changed by pressing keys A,V,T
 
 A: event propagation
 V: geometry rotation
@@ -164,6 +234,21 @@ Holding SHIFT with A,V,T reverses animation time direction
 Holding OPTION with A,V,T changes to previous animation mode, instead of next
 Holding CONTROL with A,V,T sets animation mode to OFF</pre>
 </div>
+<dl class="docutils">
+<dt><strong>A</strong></dt>
+<dd>starts an event propagation animation</dd>
+<dt><strong>G</strong></dt>
+<dd>switches between GUI modes: no-gui/time-scrubber/full-gui-menu</dd>
+<dt><strong>M</strong></dt>
+<dd>controls color of photon representation, based on materials m1/m2 or
+flags f1/f2 or the polarization of the photon p1/p2</dd>
+<dt><strong>P</strong></dt>
+<dd>controls the representation of the photon, either a point, a long line
+over the full path of the photon or a shortline indicating the direction
+of the photon.
+In <strong>Composition</strong> GUI section there is a <strong>pick.x</strong> selection that modulo
+selects the photons to display.</dd>
+</dl>
 </div>
 </div>
 
