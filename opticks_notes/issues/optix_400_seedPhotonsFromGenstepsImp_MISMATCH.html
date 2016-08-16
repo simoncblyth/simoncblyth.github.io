@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" />
     <link rel="up" title="OptiX 400 Shakedown" href="optix_400_shakedown.html" />
-    <link rel="next" title="Geocache Versioning ?" href="geocache_versioning.html" />
+    <link rel="next" title="OptiX 400 : Interop Wierdness" href="optix_400_interop_wierdness.html" />
     <link rel="prev" title="OptiX 400 Shakedown" href="optix_400_shakedown.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="geocache_versioning.html" title="Geocache Versioning ?"
+          <a href="optix_400_interop_wierdness.html" title="OptiX 400 : Interop Wierdness"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="optix_400_shakedown.html" title="OptiX 400 Shakedown"
@@ -48,12 +48,21 @@
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">optix 400 : seedPhotonsFromGenstepsImp FATAL : mismatch between CPU and GPU photon counts</a><ul>
+<li><a class="reference internal" href="#focussed-workaround-on-gensteps-using-opticksbuffercontrol">Focussed workaround on gensteps using OpticksBufferControl</a></li>
+<li><a class="reference internal" href="#issue">Issue</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="optix_400_shakedown.html"
                         title="previous chapter">OptiX 400 Shakedown</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="geocache_versioning.html"
-                        title="next chapter">Geocache Versioning ?</a></p>
+  <p class="topless"><a href="optix_400_interop_wierdness.html"
+                        title="next chapter">OptiX 400 : Interop Wierdness</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../_sources/issues/optix_400_seedPhotonsFromGenstepsImp_MISMATCH.txt"
@@ -82,6 +91,45 @@
             
   <div class="section" id="optix-400-seedphotonsfromgenstepsimp-fatal-mismatch-between-cpu-and-gpu-photon-counts">
 <h1>optix 400 : seedPhotonsFromGenstepsImp FATAL : mismatch between CPU and GPU photon counts<a class="headerlink" href="#optix-400-seedphotonsfromgenstepsimp-fatal-mismatch-between-cpu-and-gpu-photon-counts" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="focussed-workaround-on-gensteps-using-opticksbuffercontrol">
+<h2>Focussed workaround on gensteps using OpticksBufferControl<a class="headerlink" href="#focussed-workaround-on-gensteps-using-opticksbuffercontrol" title="Permalink to this headline">¶</a></h2>
+<p>BufferControl sets tags associated with the buffer, stored in NPY
+that are acted upon wherever buffer operations happen.</p>
+<div class="highlight-python"><pre>537 void OpticksEvent::createSpec()
+538 {
+...
+547     m_genstep_spec = new NPYSpec(genstep_   ,  0,6,4,0,      NPYBase::FLOAT     , "OPTIX_SETSIZE,OPTIX_INPUT_ONLY,UPLOAD_WITH_CUDA,BUFFER_COPY_ON_DIRTY")  ;
+548</pre>
+</div>
+<div class="highlight-python"><pre>282 template &lt;typename T&gt;
+283 void OContext::upload(optix::Buffer&amp; buffer, NPY&lt;T&gt;* npy)
+284 {
+285     unsigned int numBytes = npy-&gt;getNumBytes(0) ;
+286
+287     OpticksBufferControl ctrl(npy-&gt;getBufferControl());
+288
+289     LOG(info)&lt;&lt;"OContext::upload"
+290              &lt;&lt; " numBytes " &lt;&lt; numBytes
+291              &lt;&lt; npy-&gt;description("upload")
+292              ;
+293
+294     if(ctrl.isSet("UPLOAD_WITH_CUDA"))
+295     {
+296         void* d_ptr = NULL;
+297         rtBufferGetDevicePointer(buffer-&gt;get(), 0, &amp;d_ptr);
+298         cudaMemcpy(d_ptr, npy-&gt;getBytes(), numBytes, cudaMemcpyHostToDevice);
+299         buffer-&gt;markDirty();
+300     }
+301     else
+302     {
+303         memcpy( buffer-&gt;map(), npy-&gt;getBytes(), numBytes );
+304         buffer-&gt;unmap();
+305     }
+306 }</pre>
+</div>
+</div>
+<div class="section" id="issue">
+<h2>Issue<a class="headerlink" href="#issue" title="Permalink to this headline">¶</a></h2>
 <p>Tao encountered crazy photon counts from the Thrust reduction of the gensteps:</p>
 <div class="highlight-python"><pre>OpSeeder::seedPhotonsFromGenstepsViaOptiX (CBufSpec)s_ox : dev_ptr 0x700ca0000 size 400000 num_bytes 6400000 hexdump 0
 OpSeeder::seedPhotonsFromGenstepsImp (CBufSpec)s_gs : dev_ptr 0x700ba0000 size 6 num_bytes 96 hexdump 0
@@ -140,6 +188,7 @@ Abort trap: 6</pre>
 buffer = m_context-&gt;createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_COPY_ON_DIRTY);</pre>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -154,7 +203,7 @@ buffer = m_context-&gt;createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_COPY_ON_D
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="geocache_versioning.html" title="Geocache Versioning ?"
+          <a href="optix_400_interop_wierdness.html" title="OptiX 400 : Interop Wierdness"
              >next</a> |</li>
         <li class="right" >
           <a href="optix_400_shakedown.html" title="OptiX 400 Shakedown"
