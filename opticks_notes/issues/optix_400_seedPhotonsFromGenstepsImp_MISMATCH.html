@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>optix 400 : seedPhotonsFromGenstepsImp FATAL : mismatch between CPU and GPU photon counts &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="OptiX 400 Shakedown" href="optix_400_shakedown.html" />
+    <link rel="next" title="Geocache Versioning ?" href="geocache_versioning.html" />
+    <link rel="prev" title="OptiX 400 Shakedown" href="optix_400_shakedown.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="geocache_versioning.html" title="Geocache Versioning ?"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="optix_400_shakedown.html" title="OptiX 400 Shakedown"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >issues</a> &raquo;</li>
+          <li><a href="optix_400_shakedown.html" accesskey="U">OptiX 400 Shakedown</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="optix_400_shakedown.html"
+                        title="previous chapter">OptiX 400 Shakedown</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="geocache_versioning.html"
+                        title="next chapter">Geocache Versioning ?</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/optix_400_seedPhotonsFromGenstepsImp_MISMATCH.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="optix-400-seedphotonsfromgenstepsimp-fatal-mismatch-between-cpu-and-gpu-photon-counts">
+<h1>optix 400 : seedPhotonsFromGenstepsImp FATAL : mismatch between CPU and GPU photon counts<a class="headerlink" href="#optix-400-seedphotonsfromgenstepsimp-fatal-mismatch-between-cpu-and-gpu-photon-counts" title="Permalink to this headline">¶</a></h1>
+<p>Tao encountered crazy photon counts from the Thrust reduction of the gensteps:</p>
+<div class="highlight-python"><pre>OpSeeder::seedPhotonsFromGenstepsViaOptiX (CBufSpec)s_ox : dev_ptr 0x700ca0000 size 400000 num_bytes 6400000 hexdump 0
+OpSeeder::seedPhotonsFromGenstepsImp (CBufSpec)s_gs : dev_ptr 0x700ba0000 size 6 num_bytes 96 hexdump 0
+OpSeeder::seedPhotonsFromGenstepsImp (CBufSpec)s_ox : dev_ptr 0x700ca0000 size 400000 num_bytes 6400000 hexdump 0
+2016-08-16 14:19:34.869 INFO  [3271157] [OpSeeder::seedPhotonsFromGenstepsImp@146] OpSeeder::seedPhotonsFromGenstepsImp gensteps 1,6,4 num_genstep_values 24
+2016-08-16 14:19:34.875 FATAL [3271157] [OpSeeder::seedPhotonsFromGenstepsImp@156] OpSeeder::seedPhotonsFromGenstepsImp num_photons 4294967295 x_num_photons 100000
+Assertion failed: (num_photons == x_num_photons &amp;&amp; "FATAL : mismatch between CPU and GPU photon counts from the gensteps"), function seedPhotonsFromGenstepsImp, file /Users/blyth/opticks/opticksop/OpSeeder.cc, line 162.
+Abort trap: 6</pre>
+</div>
+<p>Suggests the gensteps failed to be properly uploaded:</p>
+<div class="highlight-python"><pre>132 void OpSeeder::seedPhotonsFromGenstepsImp(const CBufSpec&amp; s_gs, const CBufSpec&amp; s_ox)
+133 {
+134     s_gs.Summary("OpSeeder::seedPhotonsFromGenstepsImp (CBufSpec)s_gs");
+135     s_ox.Summary("OpSeeder::seedPhotonsFromGenstepsImp (CBufSpec)s_ox");
+136
+137     TBuf tgs("tgs", s_gs );
+138     TBuf tox("tox", s_ox );
+139
+140     //tgs.dump&lt;unsigned int&gt;("App::seedPhotonsFromGenstepsImp tgs", 6*4, 3, nv0 ); // stride, begin, end
+141
+142     NPY&lt;float&gt;* gensteps =  m_evt-&gt;getGenstepData() ;
+143
+144     unsigned int num_genstep_values = gensteps-&gt;getNumValues(0) ;
+145
+146     LOG(info) &lt;&lt; "OpSeeder::seedPhotonsFromGenstepsImp"
+147                &lt;&lt; " gensteps " &lt;&lt; gensteps-&gt;getShapeString()
+148                &lt;&lt; " num_genstep_values " &lt;&lt; num_genstep_values
+149                ;
+150
+151     unsigned int num_photons = tgs.reduce&lt;unsigned int&gt;(6*4, 3, num_genstep_values );  // adding photon counts for each genstep
+152
+153     unsigned int x_num_photons = m_evt-&gt;getNumPhotons() ;
+154
+155     if(num_photons != x_num_photons)
+156           LOG(fatal)
+157           &lt;&lt; "OpSeeder::seedPhotonsFromGenstepsImp"
+158           &lt;&lt; " num_photons " &lt;&lt; num_photons
+159           &lt;&lt; " x_num_photons " &lt;&lt; x_num_photons
+160           ;
+161
+162     assert(num_photons == x_num_photons &amp;&amp; "FATAL : mismatch between CPU and GPU photon counts from the gensteps") ;</pre>
+</div>
+<p>Taos fix for the compute mode issue</p>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/commits/2fd2a8fb3b2615a85d7bf0126d2ffe999ab7b609">https://bitbucket.org/simoncblyth/opticks/commits/2fd2a8fb3b2615a85d7bf0126d2ffe999ab7b609</a></li>
+<li>use RT_BUFFER_COPY_ON_DIRTY for OptiX buffers in compute mode</li>
+<li>use CUDA and not OptiX to do the gensteps upload</li>
+</ul>
+<div class="highlight-python"><pre>+    // memcpy( buffer-&gt;map(), npy-&gt;getBytes(), numBytes );
++    // buffer-&gt;unmap();
++    void* d_ptr = NULL;
++    rtBufferGetDevicePointer(buffer-&gt;get(), 0, &amp;d_ptr);
++    cudaMemcpy(d_ptr, npy-&gt;getBytes(), numBytes, cudaMemcpyHostToDevice);
++    buffer-&gt;markDirty();
+
+buffer = m_context-&gt;createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_COPY_ON_DIRTY);</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="geocache_versioning.html" title="Geocache Versioning ?"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="optix_400_shakedown.html" title="OptiX 400 Shakedown"
+             >previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >issues</a> &raquo;</li>
+          <li><a href="optix_400_shakedown.html" >OptiX 400 Shakedown</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

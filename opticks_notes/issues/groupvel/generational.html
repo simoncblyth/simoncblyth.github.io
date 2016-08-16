@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Groupvel Kludge Unintended Consequences &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Groupvel Related issues" href="index.html" />
+    <link rel="next" title="Nopstep failing to appear : viz debugg" href="../nopstep_vis_debug.html" />
+    <link rel="prev" title="Optical Photon Propagation Times need to use GROUPVEL" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../nopstep_vis_debug.html" title="Nopstep failing to appear : viz debugg"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Optical Photon Propagation Times need to use GROUPVEL"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Groupvel Related issues</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">Optical Photon Propagation Times need to use GROUPVEL</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../nopstep_vis_debug.html"
+                        title="next chapter">Nopstep failing to appear : viz debugg</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/groupvel/generational.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="groupvel-kludge-unintended-consequences">
+<h1>Groupvel Kludge Unintended Consequences<a class="headerlink" href="#groupvel-kludge-unintended-consequences" title="Permalink to this headline">¶</a></h1>
+<p>See <em>ggv-pmt-test-notes</em>.</p>
+<p>Following the g4gun generalizations viz shows very different behaviour.
+Very slow moving photons...</p>
+<ul>
+<li><p class="first">switching back to old PhysicsList shows same mis-behaviour</p>
+</li>
+<li><p class="first">pmt_test.py indicate material/flag sequence histories are matching... points
+to problem with time</p>
+</li>
+<li><p class="first">running with &#8211;steppingdbg shows the photons are moving very slowly
+taking 200ns to get to the PMT.  What was that groupvel kludge ?</p>
+</li>
+<li><p class="first">pmt_test_distrib.py shows problem is with G4 times, looks like always getting smth close to -10 for other than 1st:</p>
+<div class="highlight-python"><pre>===================================== ===== ===== ===== ======== ===== ===== ===== =====
+4/PmtInBox/torch : 107598/107251  :   X     Y     Z     T        A     B     C     R
+===================================== ===== ===== ===== ======== ===== ===== ===== =====
+[TO] BT SD                             0.91  0.73  0.56  0.56     0.98  1.09  0.56  0.94
+TO [BT] SD                             0.91  0.73  0.81 11936.06  0.98  1.09  0.56  0.94
+TO BT [SD]                             1.00  0.83  0.97 9341.26   0.98  1.09  0.56  0.93
+===================================== ===== ===== ===== ======== ===== ===== ===== =====</pre>
+</div>
+</li>
+</ul>
+<div class="highlight-python"><pre>(lldb) b "G4OpBoundaryProcess::PostStepDoIt(G4Track const&amp;, G4Step const&amp;)"
+
+(lldb) b 537
+Breakpoint 2: where = libG4processes.dylib`G4OpBoundaryProcess::PostStepDoIt(G4Track const&amp;, G4Step const&amp;) + 8675 at G4OpBoundaryProcess.cc:537, address = 0x00000001042b7123
+(lldb) c
+   ...
+   534             G4MaterialPropertyVector* groupvel =
+   535             Material2-&gt;GetMaterialPropertiesTable()-&gt;GetProperty("GROUPVEL");
+   536             G4double finalVelocity = groupvel-&gt;Value(thePhotonMomentum);
+-&gt; 537             aParticleChange.ProposeVelocity(finalVelocity);
+   538          }
+   539
+(lldb) p finalVelocity
+(G4double) $0 = 0.99930819333333331
+
+## huh : speed of light should be ~300 mm/ns
+
+(lldb) p groupvel
+(G4MaterialPropertyVector *) $1 = 0x00000001091d3bc0
+(lldb) p *groupvel
+(G4MaterialPropertyVector) $2 = {
+  G4PhysicsVector = {
+    type = T_G4PhysicsOrderedFreeVector
+    edgeMin = 0.0000015120022870975581
+    edgeMax = 0.000020664031256999959
+    numberOfNodes = 39
+    dataVector = size=39 {
+      [0] = 0.99930819333333331
+      [1] = 0.99930819333333331
+      [2] = 0.99930819333333331
+      [3] = 0.99930819333333331
+      [4] = 0.99930819333333331
+      [5] = 0.99930819333333331
+      [6] = 0.99930819333333331
+      [7] = 0.99930819333333331
+      [8] = 0.99930819333333331</pre>
+</div>
+<p>Disabling the groupvel kludge via testconfig leads to G4ParticleChange not OK for velocity
+and loadsa output. This suggests RINDEX is messed up ?</p>
+<ul class="simple">
+<li>the disabling failed to do so, as the former kludged GROUPVEL was
+living as ggeo &#8220;groupvel&#8221; properties in the geocache and got sprung into
+G4 materials by CPropLib</li>
+<li>also somehow (maybe related to no-name extra props) RINDEX was stomped on
+and got crazy low GROUPVEL of 0.999308193333</li>
+</ul>
+<p>Check the GROUPVEL calc:</p>
+<div class="highlight-python"><pre>(lldb) b "G4Track::CalculateVelocityForOpticalPhoton() const"</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../nopstep_vis_debug.html" title="Nopstep failing to appear : viz debugg"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Optical Photon Propagation Times need to use GROUPVEL"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" >Groupvel Related issues</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

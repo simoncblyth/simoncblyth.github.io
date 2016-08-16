@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Box Asymmetry &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="issues" href="index.html" />
+    <link rel="next" title="JPMT Scint not working" href="jpmt_scint.html" />
+    <link rel="prev" title="Union Splitting" href="union_splitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="jpmt_scint.html" title="JPMT Scint not working"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="union_splitting.html" title="Union Splitting"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">issues</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="union_splitting.html"
+                        title="previous chapter">Union Splitting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="jpmt_scint.html"
+                        title="next chapter">JPMT Scint not working</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/box_asymmetry.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="box-asymmetry">
+<h1>Box Asymmetry<a class="headerlink" href="#box-asymmetry" title="Permalink to this headline">¶</a></h1>
+<p>PmtInBox shows almost no scatters in two directions, whereas expecting symmetry:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ggv</span><span class="o">-</span><span class="n">pmt</span><span class="o">-</span><span class="n">test</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Switching from analytic box to analytic sphere shows no asymmetry</li>
+<li>Switching off analytic also shows no asymmetry, but currently the
+analytic applies to the PMT too (which is too unrealistic to pursue)</li>
+</ul>
+<p>Retreat to single box, can see the scatter asymmetry by flipping the
+analytic switch:</p>
+<div class="highlight-python"><pre>ggv-box-test(){
+   type $FUNCNAME
+
+   local torch_config=(
+                 type=disclin
+                 photons=500000
+                 wavelength=380
+                 frame=1
+                 source=0,0,300
+                 target=0,0,0
+                 radius=100
+                 zenithazimuth=0,1,0,1
+                 material=Vacuum
+               )
+
+   local test_config=(
+                 mode=BoxInBox
+                 shape=box
+                 analytic=1
+                 boundary=Rock//perfectAbsorbSurface/MineralOil
+                 parameters=0,0,0,300
+                   )
+
+   ggv \
+       --test --testconfig "$(join _ ${test_config[@]})" \
+       --torch --torchconfig "$(join _ ${torch_config[@]})" \
+       --animtimemax 10 \
+       --cat BoxInBox \
+       --eye 0.5,0.5,0.0 \
+       $*
+
+}</pre>
+</div>
+<p>Issue apparent for &#8220;TO SC SA&#8221; but thats probably coincidental and its just a geometry issue ?</p>
+<p>Fixed issue with <em>intersect_box</em> was wrongly to conflating the slightly enlarged aabb
+with the contained box.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="jpmt_scint.html" title="JPMT Scint not working"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="union_splitting.html" title="Union Splitting"
+             >previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >issues</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
