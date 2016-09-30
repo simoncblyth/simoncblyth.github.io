@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Material Code Mapping Generalization &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Material Code Mapping Generalization</a><ul>
+<li><a class="reference internal" href="#legacy-approach">Legacy Approach</a><ul>
+<li><a class="reference internal" href="#translate-on-load">Translate on load</a></li>
+<li><a class="reference internal" href="#lookups">Lookups</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/material_code_mapping_generalization.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="material-code-mapping-generalization">
+<h1>Material Code Mapping Generalization<a class="headerlink" href="#material-code-mapping-generalization" title="Permalink to this headline">¶</a></h1>
+<p>Persisted gensteps contain material indices, in order to
+map these to actual materials it is necessary to have
+a code to material name mapping.</p>
+<div class="section" id="legacy-approach">
+<h2>Legacy Approach<a class="headerlink" href="#legacy-approach" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="translate-on-load">
+<h3>Translate on load<a class="headerlink" href="#translate-on-load" title="Permalink to this headline">¶</a></h3>
+<p>Genstep material indices are translated into GPU material lines on loading the file,
+to keep things simple GPU side.</p>
+<p><cite>NPY&lt;float&gt;* OpticksHub::loadGenstepFile()</cite>:</p>
+<div class="highlight-python"><pre>389     G4StepNPY* g4step = new G4StepNPY(gs);
+390     g4step-&gt;relabel(CERENKOV, SCINTILLATION);
+391     // which code is used depends in the sign of the pre-label
+392     // becomes the ghead.i.x used in cu/generate.cu
+393
+394     if(m_opticks-&gt;isDayabay())
+395     {
+396         // within GGeo this depends on GBndLib
+397         NLookup* lookup = m_ggeo ? m_ggeo-&gt;getLookup() : NULL ;
+398         if(lookup)
+399         {
+400             g4step-&gt;setLookup(lookup);
+401             g4step-&gt;applyLookup(0, 2);  // jj, kk [1st quad, third value] is materialIndex
+402             //
+403             // replaces original material indices with material lines
+404             // for easy access to properties using boundary_lookup GPU side
+405             //
+406         }
+407         else
+408         {
+409             LOG(warning) &lt;&lt; "OpticksHub::loadGenstepFile not applying lookup" ;
+410         }
+411     }
+412     return gs ;</pre>
+</div>
+<ul class="simple">
+<li>with in memory gensteps direct from G4, need to do the
+same thing but with the lookup will need to be different</li>
+</ul>
+</div>
+<div class="section" id="lookups">
+<h3>Lookups<a class="headerlink" href="#lookups" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>npy-/NLookup does the mapping</li>
+</ul>
+<div class="highlight-python"><pre>/// setupLookup is invoked by GGeo::loadGeometry
+
+620 void GGeo::setupLookup()
+621 {
+622     //  maybe this belongs in GBndLib ?
+623     //
+624     m_lookup = new NLookup() ;
+625
+626     const char* cmmd = m_opticks-&gt;getDetectorBase() ;
+627
+628     m_lookup-&gt;loadA( cmmd, "ChromaMaterialMap.json", "/dd/Materials/") ;
+629
+630     std::map&lt;std::string, unsigned int&gt;&amp; msu  = m_lookup-&gt;getB() ;
+631
+632     m_bndlib-&gt;fillMaterialLineMap( msu ) ;
+633
+634     m_lookup-&gt;crossReference();
+635
+636     //m_lookup-&gt;dump("GGeo::setupLookup");
+637 }</pre>
+</div>
+<p>ggeo-/tests/NLookupTest.cc:</p>
+<div class="highlight-python"><pre>GBndLib* blib = GBndLib::load(m_opticks, true );
+
+NLookup* m_lookup = new NLookup();
+
+const char* cmmd = m_opticks-&gt;getDetectorBase() ;
+
+m_lookup-&gt;loadA( cmmd , "ChromaMaterialMap.json", "/dd/Materials/") ;
+
+std::map&lt;std::string, unsigned int&gt;&amp; msu = m_lookup-&gt;getB() ;
+
+blib-&gt;fillMaterialLineMap( msu ) ;     // shortname eg "GdDopedLS" to material line mapping
+
+m_lookup-&gt;crossReference();
+
+m_lookup-&gt;dump("ggeo-/NLookupTest");</pre>
+</div>
+<p>ChromaMaterialMap.json contains name to code mappings used
+for a some very old gensteps that were produced by G4DAEChroma
+and which are still in use.
+As the assumption of all gensteps being produced the same
+way and with the same material mappings will soon become
+incorrect, need a more flexible way.</p>
+<p>Perhaps a sidecar file to the gensteps .npy should
+contain material mappings, and if it doesnt exist then
+defaults are used ?</p>
+<div class="highlight-python"><pre>simon:DayaBay blyth$ cat ChromaMaterialMap.json | tr "," "\n"
+{"/dd/Materials/OpaqueVacuum": 18
+ "/dd/Materials/Pyrex": 21
+ "/dd/Materials/PVC": 20
+ "/dd/Materials/NitrogenGas": 16
+ "/dd/Materials/Teflon": 24
+ "/dd/Materials/ESR": 9
+ "/dd/Materials/MineralOil": 14</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

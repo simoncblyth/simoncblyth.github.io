@@ -1,0 +1,366 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Materials &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Materials</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#attenuation-length-of-water">Attenuation Length of Water</a></li>
+<li><a class="reference internal" href="#rayleigh-scattering">Rayleigh Scattering</a></li>
+<li><a class="reference internal" href="#color-of-water">Color of Water</a></li>
+<li><a class="reference internal" href="#rayleigh-scattering-accounting-for-polarization">Rayleigh Scattering Accounting for Polarization</a></li>
+<li><a class="reference internal" href="#property-domain-sanity-check">Property Domain Sanity Check</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/materials.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="materials">
+<h1>Materials<a class="headerlink" href="#materials" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p>Optical Scattering Lengths in Large Liquid-Scintillator Neutrino Detectors, M.Wurm et.al.</p>
+<ul class="simple">
+<li><a class="reference external" href="http://arxiv.org/pdf/1004.0811.pdf">http://arxiv.org/pdf/1004.0811.pdf</a></li>
+</ul>
+<p>Neutrino Physics With JUNO p19</p>
+<p>Require: Attenuation Length of LS greater than 20m at 430 nm, which corresponds to an
+absorption length of 60m with a Rayleigh scattering length of 30m.
+Rayleigh scattering length of LAB measured 28.2+-1.0 m at 430nm (Liu Q, NIM)</p>
+<div class="highlight-python"><pre>1/60 + 1/30 = 3/60 = 1/20
+
+                    @ 430 nm
+
+Attenuation Length ~ 20m
+
+Scattering Length  ~ 30m    &lt;&lt; scattering dominant over absorption in scintillator
+Absorption Length  ~ 60m</pre>
+</div>
+<p>Absorption length is difficult to measure, instead the overall attenuation length
+and Rayleigh scattering length are measured and the absorption length
+inferred from those.</p>
+<p>Rayleigh scattering and depolarization ratio in linear alkylbenzene</p>
+<ul class="simple">
+<li><a class="reference external" href="http://arxiv.org/abs/1504.01001">http://arxiv.org/abs/1504.01001</a></li>
+<li><a class="reference external" href="http://arxiv.org/pdf/1504.01001v2.pdf">http://arxiv.org/pdf/1504.01001v2.pdf</a></li>
+</ul>
+</div>
+<div class="section" id="attenuation-length-of-water">
+<h2>Attenuation Length of Water<a class="headerlink" href="#attenuation-length-of-water" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://www.inp.demokritos.gr/nestor/2nd/files/247_252_bradner.pdf">http://www.inp.demokritos.gr/nestor/2nd/files/247_252_bradner.pdf</a></li>
+</ul>
+<p>Clear water has a sharp optical transparency window in the blue-green,
+ie attenuation rapidly increases (attenuation length decreases)
+outside wavelength range 400-570nm (3-2.2 eV)</p>
+<p>...it is common to assume that the scattering
+contributes about 20% to the total attenuation coefficient in clear ocean water.</p>
+<p>Absorption dominates over scattering in water</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">1</span><span class="o">/</span><span class="n">At</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Sc</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="n">Ab</span>
+</pre></div>
+</div>
+<div class="highlight-python"><pre>In [6]: w = np.linspace(60, 820, 20)
+
+In [7]: e = 1240./w   ##   hc ~ 1240 nm.eV
+
+In [8]: np.dstack([w, e])
+Out[8]:
+array([[[  60.        ,   20.66666667],
+        [ 100.        ,   12.4       ],
+        [ 140.        ,    8.85714286],
+        [ 180.        ,    6.88888889],
+        [ 220.        ,    5.63636364],
+        [ 260.        ,    4.76923077],
+        [ 300.        ,    4.13333333],
+        [ 340.        ,    3.64705882],
+        [ 380.        ,    3.26315789],
+        [ 420.        ,    2.95238095],
+        [ 460.        ,    2.69565217],
+        [ 500.        ,    2.48      ],
+        [ 540.        ,    2.2962963 ],
+        [ 580.        ,    2.13793103],
+        [ 620.        ,    2.        ],
+        [ 660.        ,    1.87878788],
+        [ 700.        ,    1.77142857],
+        [ 740.        ,    1.67567568],
+        [ 780.        ,    1.58974359],
+        [ 820.        ,    1.51219512]]])</pre>
+</div>
+</div>
+<div class="section" id="rayleigh-scattering">
+<h2>Rayleigh Scattering<a class="headerlink" href="#rayleigh-scattering" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>intensity ~ wavelength^-4
+
+# blue(400nm) scatters ~10 times more than red(700nm) -&gt; color of sky</pre>
+</div>
+<div class="highlight-python"><pre>In [13]: np.power([400.,500.,600.,700.,800.], -4)*1e12
+Out[13]: array([ 39.0625,  16.    ,   7.716 ,   4.1649,   2.4414])
+
+In [14]: np.power([400.,500.,600.,700.,800.], -4)*1e12/2.4414
+Out[14]: array([ 16.    ,   6.5536,   3.1605,   1.706 ,   1.    ])
+
+In [15]: np.power([400.,500.,600.,700.,800.], -4)*1e12/39.0625
+Out[15]: array([ 1.    ,  0.4096,  0.1975,  0.1066,  0.0625])</pre>
+</div>
+<ul class="simple">
+<li>so scattering length greater at higher wavelengths, as less scattering</li>
+</ul>
+</div>
+<div class="section" id="color-of-water">
+<h2>Color of Water<a class="headerlink" href="#color-of-water" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/Color_of_water">https://en.wikipedia.org/wiki/Color_of_water</a></li>
+</ul>
+<p>While relatively small quantities of water appear to be colorless, water&#8217;s tint
+becomes a deeper blue as the thickness of the observed sample increases. The
+blue hue of water is an intrinsic property and is caused by the selective
+absorption and scattering of white light. Impurities dissolved or suspended in
+water may give water different colored appearances.</p>
+<div class="highlight-python"><pre>In [1]: np.dstack([w, a[0,:,0], a[0,:,1],a[0,:,2],a[0,:,3],a[1,:,0]])   # Water
+Out[1]:
+                                     // absorption     scattering
+                                     // length         length
+                                     // (mm)           (mm)
+
+array([[[      60.    ,        1.39  ,      273.208 ,  1000000.    ,        0.    ,      300.    ],
+        [      80.    ,        1.39  ,      273.208 ,  1000000.    ,        0.    ,      300.    ],
+        [     100.    ,        1.39  ,      273.208 ,  1000000.    ,        0.    ,      300.    ],
+        [     120.    ,        1.39  ,      273.208 ,  1000000.    ,        0.    ,      300.    ],
+        [     140.    ,        1.39  ,      273.208 ,  1000000.    ,        0.    ,      300.    ],
+        [     160.    ,        1.39  ,      273.208 ,  1000000.    ,        0.    ,      300.    ],
+        [     180.    ,        1.39  ,      273.208 ,  1000000.    ,        0.    ,      300.    ],
+        [     200.    ,        1.39  ,      691.5562,  1000000.    ,        0.    ,      300.    ],
+        [     220.    ,        1.3841,     1507.1183,  1000000.    ,        0.    ,      300.    ],
+        [     240.    ,        1.3783,     2228.2798,  1000000.    ,        0.    ,      300.    ],
+        [     260.    ,        1.3724,     3164.6375,  1000000.    ,        0.    ,      300.    ],
+        [     280.    ,        1.3666,     4286.0454,  1000000.    ,        0.    ,      300.    ],
+        [     300.    ,        1.3608,     5992.6128,  1000000.    ,        0.    ,      300.    ],
+        [     320.    ,        1.3595,     7703.5034,  1000000.    ,        0.    ,      300.    ],
+        [     340.    ,        1.3585,    10257.2852,  1000000.    ,        0.    ,      300.    ],
+        [     360.    ,        1.3572,    12811.0684,  1000000.    ,        0.    ,      300.    ],
+        //
+        //  blue : larger absorption length, less absorption -&gt; water looks blue
+        //
+        [     380.    ,        1.356 ,    15364.8496,  1000000.    ,        0.    ,      300.    ],
+        [     400.    ,        1.355 ,    19848.9316,  1000000.    ,        0.    ,      300.    ],
+        [     420.    ,        1.354 ,    24670.9512,  1000000.    ,        0.    ,      300.    ],
+        [     440.    ,        1.353 ,    27599.9746,  1000000.    ,        0.    ,      300.    ],
+        [     460.    ,        1.3518,    28732.2051,  1000000.    ,        0.    ,      300.    ],
+        [     480.    ,        1.3505,    29587.0527,  1000000.    ,        0.    ,      300.    ],
+        [     500.    ,        1.3492,    26096.2637,  1000000.    ,        0.    ,      300.    ],
+        [     520.    ,        1.348 ,    17787.9492,  1000000.    ,        0.    ,      300.    ],
+        [     540.    ,        1.347 ,    16509.3672,  1000000.    ,        0.    ,      300.    ],
+        [     560.    ,        1.346 ,    13644.791 ,  1000000.    ,        0.    ,      300.    ],
+        [     580.    ,        1.345 ,    10050.459 ,  1000000.    ,        0.    ,      300.    ],
+        [     600.    ,        1.344 ,     4328.5166,  1000000.    ,        0.    ,      300.    ],
+        [     620.    ,        1.3429,     3532.6135,  1000000.    ,        0.    ,      300.    ],
+        [     640.    ,        1.3419,     3149.8655,  1000000.    ,        0.    ,      300.    ],
+        [     660.    ,        1.3408,     2404.4004,  1000000.    ,        0.    ,      300.    ],
+        [     680.    ,        1.3397,     2126.562 ,  1000000.    ,        0.    ,      300.    ],
+        //
+        //  red :  smaller absorption length, ie more absorption
+        //
+        [     700.    ,        1.3387,     1590.72  ,  1000000.    ,        0.    ,      300.    ],
+        [     720.    ,        1.3376,      809.6543,  1000000.    ,        0.    ,      300.    ],
+        [     740.    ,        1.3365,      370.1322,  1000000.    ,        0.    ,      300.    ],
+        [     760.    ,        1.3354,      371.9737,  1000000.    ,        0.    ,      300.    ],
+        [     780.    ,        1.3344,      425.7059,  1000000.    ,        0.    ,      300.    ],
+        [     800.    ,        1.3333,      486.681 ,  1000000.    ,        0.    ,      300.    ],
+        [     820.    ,        1.3333,      486.681 ,  1000000.    ,        0.    ,      300.    ]]])</pre>
+</div>
+</div>
+<div class="section" id="rayleigh-scattering-accounting-for-polarization">
+<h2>Rayleigh Scattering Accounting for Polarization<a class="headerlink" href="#rayleigh-scattering-accounting-for-polarization" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://www.philiplaven.com/p8b.html">http://www.philiplaven.com/p8b.html</a></li>
+</ul>
+</div>
+<div class="section" id="property-domain-sanity-check">
+<h2>Property Domain Sanity Check<a class="headerlink" href="#property-domain-sanity-check" title="Permalink to this headline">¶</a></h2>
+<p>Material properties are written by G4DAE into extra elements
+of the COLLADA export. Below shows the domain is written in Geant4
+native energy and property values.
+Assuming Geant4/CLHEP native units (to be confirmed):</p>
+<ul class="simple">
+<li>energy in units of keV ?</li>
+<li>scattering/absorption lengths in mm ?</li>
+</ul>
+<p>G4DAEWrite.cc:</p>
+<div class="highlight-python"><pre>407 void G4DAEWrite::PropertyVectorWrite(const G4String&amp; key,
+408                            const G4MaterialPropertyVector* const pvec,
+409                             xercesc::DOMElement* extraElement)
+410 {
+411
+412    std::ostringstream pvalues;
+413
+414 #ifdef _GEANT4_TMP_GEANT94_
+415    for (G4int i=0; i&lt;pvec-&gt;Entries(); i++)
+416    {
+417      G4MPVEntry cval = pvec-&gt;GetEntry(i);
+418      if (i!=0)  { pvalues &lt;&lt; " "; }
+419      pvalues &lt;&lt; cval.GetPhotonEnergy() &lt;&lt; " " &lt;&lt; cval.GetProperty();
+420    }
+421 #else
+422    for (size_t i=0; i&lt;pvec-&gt;GetVectorLength(); i++)
+423    {
+424        if (i!=0)  { pvalues &lt;&lt; " "; }
+425        pvalues &lt;&lt; pvec-&gt;Energy(i) &lt;&lt; " " &lt;&lt; (*pvec)[i];
+426    }
+427 #endif
+428</pre>
+</div>
+<p>AssimpGGeo.cc:</p>
+<div class="highlight-python"><pre>466
+467             //printf("AssimpGGeo::convertMaterials aiScene materialIndex %u (GMaterial) name %s \n", i, name);
+468             GMaterial* gmat = new GMaterial(name, index);
+469             gmat-&gt;setStandardDomain(standard_domain);
+470             addProperties(gmat, mat );
+471             gg-&gt;add(gmat);
+472
+473             {
+474                 // without standard domain applied
+475                 GMaterial* gmat_raw = new GMaterial(name, index);
+476                 addProperties(gmat_raw, mat );
+477                 gg-&gt;addRaw(gmat_raw);
+478             }</pre>
+</div>
+<p>Domain scaling and taking reciprocal is done in the construction of opticks GMaterial
+done in AssimpGGeo::addPropertyVector converting into nanometer.
+Also for non-raw materials a domain standardization is applied, such that
+all values are available at specific wavelengths:</p>
+<div class="highlight-python"><pre>189     // dont scale placeholder -1 : 1 domain ranges
+190     double dscale = data[0] &gt; 0 &amp;&amp; data[npair-1] &gt; 0 ? m_domain_scale : 1.f ;
+191     double vscale = m_values_scale ;
+192
+...
+214     std::vector&lt;float&gt; vals ;
+215     std::vector&lt;float&gt; domain  ;
+216
+217     for( unsigned int i = 0 ; i &lt; npair ; i++ )
+218     {
+219         double d0 = data[2*i] ;
+220         double d = m_domain_reciprocal ? dscale/d0 : dscale*d0 ;
+221         double v = data[2*i+1]*vscale  ;
+222
+223         double dd = noscale ? d0 : d ;
+224
+225         domain.push_back( static_cast&lt;float&gt;(dd) );
+226         vals.push_back( static_cast&lt;float&gt;(v) );
+227
+228         //if( noscale &amp;&amp; ( i &lt; 5 || i &gt; npair - 5) )
+229         //printf("%4d %10.3e %10.3e \n", i, domain.back(), vals.back() );
+230     }
+
+068 AssimpGGeo::AssimpGGeo(GGeo* ggeo, AssimpTree* tree, AssimpSelection* selection)
+ 69    :
+ 70    m_ggeo(ggeo),
+ 71    m_tree(tree),
+ 72    m_selection(selection),
+ 73    m_domain_scale(1.f),
+ 74    m_values_scale(1.f),
+ 75    m_domain_reciprocal(true),
+ 76    m_skin_surface(0),
+...
+
+100 void AssimpGGeo::init()
+101 {
+102     // TODO: consolidate constant handling into okc-
+103     //       see also ggeo-/GConstant and probably elsewhere
+104     //
+105     // see g4daenode.py as_optical_property_vector
+106
+107     double hc_over_GeV = 1.2398424468024265e-06 ;  // h_Planck * c_light / GeV / nanometer #  (approx, hc = 1240 eV.nm )
+108     double hc_over_MeV = hc_over_GeV*1000. ;
+109     //float hc_over_eV  = hc_over_GeV*1.e9 ;
+110
+111     m_domain_scale = static_cast&lt;float&gt;(hc_over_MeV) ;
+112     m_values_scale = 1.0f ;
+113
+114     m_volnames = m_ggeo-&gt;isVolnames();
+115 }</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

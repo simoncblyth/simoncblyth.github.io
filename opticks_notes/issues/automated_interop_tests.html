@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FIXED : Automated Interop Tests &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="issues" href="index.html" />
+    <link rel="next" title="Event Layout Awkward" href="evt_layout_awkward.html" />
+    <link rel="prev" title="FIXED : Invisible Propagation" href="invisible_propagation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="evt_layout_awkward.html" title="Event Layout Awkward"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="invisible_propagation.html" title="FIXED : Invisible Propagation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">issues</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FIXED : Automated Interop Tests</a><ul>
+<li><a class="reference internal" href="#former-issue">Former Issue</a></li>
+<li><a class="reference internal" href="#how-fixed">How Fixed</a></li>
+<li><a class="reference internal" href="#actually-already-have-noviz-v-option">Actually already have <em>&#8211;noviz/-V*</em> option</a></li>
+<li><a class="reference internal" href="#detecting-ctest-running">Detecting CTest Running ?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="invisible_propagation.html"
+                        title="previous chapter">FIXED : Invisible Propagation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="evt_layout_awkward.html"
+                        title="next chapter">Event Layout Awkward</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/automated_interop_tests.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fixed-automated-interop-tests">
+<h1>FIXED : Automated Interop Tests<a class="headerlink" href="#fixed-automated-interop-tests" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="former-issue">
+<h2>Former Issue<a class="headerlink" href="#former-issue" title="Permalink to this headline">¶</a></h2>
+<p>Testing of interop running currently requires
+user interaction to dismiss OpenGL windows
+that pop up.</p>
+<p>Workout a way to automatically do this, or
+even better avoid popping up a window and
+instead use some non-visible framebuffer.</p>
+<p>This would then allow to implement tests that
+compare digests of interop and compute simulations.</p>
+</div>
+<div class="section" id="how-fixed">
+<h2>How Fixed<a class="headerlink" href="#how-fixed" title="Permalink to this headline">¶</a></h2>
+<p>Bash functions <em>opticks-t</em> and <em>opticks-ti</em> set an
+option that ctest interprets and as a result sets
+envvar <em>CTEST_INTERACTIVE_DEBUG_MODE</em> in the
+interactive case.
+This is detected in <cite>SSys::IsCTestInteractiveDebugMode()</cite>
+and honoured in <em>ggeoview/App.cc</em> by exiting
+prior to the render loop.</p>
+<div class="highlight-python"><pre>--interactive-debug-mode 0   ## no interactivity
+--interactive-debug-mode 1   ## interactive GUI windows OK</pre>
+</div>
+</div>
+<div class="section" id="actually-already-have-noviz-v-option">
+<h2>Actually already have <em>&#8211;noviz/-V*</em> option<a class="headerlink" href="#actually-already-have-noviz-v-option" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">GGeoViewTest</span> <span class="o">-</span><span class="n">V</span> <span class="o">--</span><span class="n">save</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="detecting-ctest-running">
+<h2>Detecting CTest Running ?<a class="headerlink" href="#detecting-ctest-running" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>simon:tests blyth$ sysrap-t -R SysRapTest.SEnvTest -V
+
+1: SSH_INFOFILE=/Users/blyth/.ssh-agent-info
+1: _=/opt/local/bin/ctest
+1: CTEST_INTERACTIVE_DEBUG_MODE=1</pre>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="https://cmake.org/Wiki/CTest_2.4.4_Docs">https://cmake.org/Wiki/CTest_2.4.4_Docs</a></li>
+</ul>
+<div class="highlight-python"><pre>--interactive-debug-mode [0|1]
+  Set the interactive mode to 0 or 1.
+
+  This option causes ctest to run tests in either an interactive mode or
+  a non-interactive mode.  On Windows this means that in non-interactive
+  mode, all system debug pop up windows are blocked.  In dashboard mode
+  (Experimental, Nightly, Continuous), the default is non-interactive.
+  When just running tests not for a dashboard the default is to allow
+  popups and interactive debugging.</pre>
+</div>
+<div class="highlight-python"><pre>sysrap-t --interactive-debug-mode 0 -R SysRapTest.SEnvTest -V  ## no envvar CTEST_INTERACTIVE_DEBUG_MODE in non-interactive mode
+
+1: DART_TEST_FROM_DART=1
+1: DASHBOARD_TEST_FROM_CTEST=3.4.1
+
+sysrap-t --interactive-debug-mode 1 -R SysRapTest.SEnvTest -V    ## this is the default
+
+1: _=/opt/local/bin/ctest
+1: CTEST_INTERACTIVE_DEBUG_MODE=1</pre>
+</div>
+<p>Currently the windows popup whilst testing:</p>
+<div class="highlight-python"><pre>simon:issues blyth$ ggeoview-t --interactive-debug-mode 0
+Test project /usr/local/opticks/build/ggeoview
+    Start 1: GGeoViewTest.flagsTest
+1/5 Test #1: GGeoViewTest.flagsTest ...........   Passed    0.02 sec
+    Start 2: GGeoViewTest.OTracerTest
+2/5 Test #2: GGeoViewTest.OTracerTest .........   Passed    5.39 sec
+    Start 3: GGeoViewTest.GGeoViewTest
+3/5 Test #3: GGeoViewTest.GGeoViewTest ........   Passed   15.31 sec
+    Start 4: GGeoViewTest.LogTest
+4/5 Test #4: GGeoViewTest.LogTest .............   Passed    0.02 sec
+    Start 5: GGeoViewTest.OpEngineTest
+5/5 Test #5: GGeoViewTest.OpEngineTest ........   Passed    1.09 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  21.83 sec
+opticks-t : use -V to show output
+simon:issues blyth$</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="evt_layout_awkward.html" title="Event Layout Awkward"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="invisible_propagation.html" title="FIXED : Invisible Propagation"
+             >previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >issues</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

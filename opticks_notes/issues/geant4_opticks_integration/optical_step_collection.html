@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>NEXT : G4 Optical Step Collection &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">NEXT : G4 Optical Step Collection</a><ul>
+<li><a class="reference internal" href="#objective">Objective</a></li>
+<li><a class="reference internal" href="#stages">Stages</a></li>
+<li><a class="reference internal" href="#review-old-collection-with-g4daechroma">Review old collection with G4DAEChroma</a><ul>
+<li><a class="reference internal" href="#g4daechroma-observations">G4DAEChroma Observations</a></li>
+<li><a class="reference internal" href="#csa-originally-named-after-chromastackaction-but-now-handles-detsimchroma"><em>csa-</em> originally named after ChromaStackAction,  but now handles DetSimChroma</a></li>
+<li><a class="reference internal" href="#g4daechroma-things-to-plunder-looks-like-very-little-npy-handles-most-of-it">G4DAEChroma Things to plunder : looks like very little, NPY handles most of it</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#approach-to-reviving-optical-step-collection">Approach to reviving optical step collection</a></li>
+<li><a class="reference internal" href="#done-near-standard-g4-scintillation-cerenkov-step-collection">DONE : Near Standard G4 Scintillation/Cerenkov Step Collection</a></li>
+<li><a class="reference internal" href="#todo-details-of-scintillation-generation-compare-opticks-vs-g4-generated-distrib">TODO: details of scintillation generation, compare Opticks vs G4 generated distrib</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/optical_step_collection.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="next-g4-optical-step-collection">
+<h1>NEXT : G4 Optical Step Collection<a class="headerlink" href="#next-g4-optical-step-collection" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="objective">
+<h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
+<p>CG4 steered simulation running from GDML geometry with natural
+optical steps propagated with Opticks (using OpticksMgr) and hits
+passed back to CG4</p>
+</div>
+<div class="section" id="stages">
+<h2>Stages<a class="headerlink" href="#stages" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Revisit optical step collection within cfg4-, add natural collection
+of both Cerenkov and Scintillation process steps into one buffer</li>
+<li>The OpticksMgr integration  will need to happen in new package <strong>okg4-</strong>
+but the G4 level step collection can be developed first with cfg4- and
+tested on genstep file basis with OpticksMgrTest</li>
+<li>generalize genstep material code mapping/lookup</li>
+</ul>
+</div>
+<div class="section" id="review-old-collection-with-g4daechroma">
+<h2>Review old collection with G4DAEChroma<a class="headerlink" href="#review-old-collection-with-g4daechroma" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://simoncblyth.bitbucket.org/env/notes/chroma/G4DAEChroma/">http://simoncblyth.bitbucket.org/env/notes/chroma/G4DAEChroma/</a></li>
+<li><em>gdc-</em> developed in ~/env/chroma/G4DAEChroma</li>
+<li>some version was copied into Dayabay NuWa svn Utilities</li>
+<li>Tao also integrated some version into JUNO  ~/offline/Simulation/DetSimV2/G4DAEChroma</li>
+<li>expect should be straightforward enough to incorporate into Opticks cfg4- ?</li>
+</ul>
+<div class="section" id="g4daechroma-observations">
+<h3>G4DAEChroma Observations<a class="headerlink" href="#g4daechroma-observations" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>was developed in an earlier (more complicated) era when was using python Chroma,
+so had to handle distributed operation over ZMQ, metadata, database !</li>
+<li>had not settled on step transport</li>
+<li>much of gdc- array handling, serialization is obsolete,
+now that have opticks npy-/NPY and lots of experience using it</li>
+<li>yuck : even some ROOT TObject serialization stuff in G4DAEChromaPhotonList
+which is totally obsolete</li>
+<li><em>gdc-</em> is half the story, see also <em>csa-</em></li>
+</ul>
+</div>
+<div class="section" id="csa-originally-named-after-chromastackaction-but-now-handles-detsimchroma">
+<h3><em>csa-</em> originally named after ChromaStackAction,  but now handles DetSimChroma<a class="headerlink" href="#csa-originally-named-after-chromastackaction-but-now-handles-detsimchroma" title="Permalink to this headline">¶</a></h3>
+<p>Was intended to be renamed <em>dsc-</em> for DetSimChroma but that never happened.</p>
+<ul class="simple">
+<li>sources in ~/env/nuwa/detsim/src</li>
+<li>DsChromaG4Scintillation.cc</li>
+</ul>
+</div>
+<div class="section" id="g4daechroma-things-to-plunder-looks-like-very-little-npy-handles-most-of-it">
+<h3>G4DAEChroma Things to plunder : looks like very little, NPY handles most of it<a class="headerlink" href="#g4daechroma-things-to-plunder-looks-like-very-little-npy-handles-most-of-it" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>G4 workflow : G4DAEChroma::BeginOfRun EndOfRun BeginOfEvent ...</li>
+<li>G4DAESensDet::MakeTrojanSensDet G4 trojan SD to sneak hits into G4 hit collections en-masse</li>
+</ul>
+</div>
+</div>
+<div class="section" id="approach-to-reviving-optical-step-collection">
+<h2>Approach to reviving optical step collection<a class="headerlink" href="#approach-to-reviving-optical-step-collection" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>raid G4DAEChroma for the minimum necessary amount of code to
+do optical step collection within a new class for this <strong>OpticksG4Collector</strong> in opticks cfg4-<ul>
+<li>initially avoid all the bells and whistles, no ZMQ, no metadata, no database, ...
+that complexity can hopefully be totally avoided with the C++ opticks</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="done-near-standard-g4-scintillation-cerenkov-step-collection">
+<h2>DONE : Near Standard G4 Scintillation/Cerenkov Step Collection<a class="headerlink" href="#done-near-standard-g4-scintillation-cerenkov-step-collection" title="Permalink to this headline">¶</a></h2>
+<p>Test with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">op</span> <span class="o">--</span><span class="n">tcfg4</span> <span class="o">--</span><span class="n">g4gun</span>
+<span class="n">CG4Test</span> <span class="o">--</span><span class="n">g4gun</span>       <span class="c">## same as above</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="todo-details-of-scintillation-generation-compare-opticks-vs-g4-generated-distrib">
+<h2>TODO: details of scintillation generation, compare Opticks vs G4 generated distrib<a class="headerlink" href="#todo-details-of-scintillation-generation-compare-opticks-vs-g4-generated-distrib" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

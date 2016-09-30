@@ -1,0 +1,1645 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7614 2013-02-21 15:55:51Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<script src="ui/my-small-white/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/my-small-white/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/my-small-white/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/my-small-white/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/my-small-white/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title"><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+<!-- comment
+
+00 : <inline classes="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</inline>
+01 : opticks benefits
+02 : outline
+
+    Highlights teaser statement and outline
+
+03 : optical photon simulation problem...
+04 : jpmt before contact 2
+
+    Statement of problem
+
+05 : ray traced realistic image synthesis - -> optical photon simulation
+
+    Ray trace connection to simulation
+
+06 : nvidia optix 1
+07 : nvidia optix 2
+
+    OptiX intro are refs
+
+08 : opticks geometry workflow : geocache
+09 : large geometry techniques : instancing mandatory
+10 : opticks geometry workflow : gpu textures
+
+
+
+11 : hybrid geant4/opticks event workflow
+12 : opticks interoperation : optix/cuda/thrust/opengl
+
+
+ABSTRACT
+
+Opticks is an open source project that integrates the NVIDIA OptiX
+GPU ray tracing engine with Geant4 toolkit based simulations.
+Massive parallelism brings drastic performance improvements with
+optical photon simulation speedup expected to exceed 1000 times Geant4
+when using workstation GPUs. Optical photon simulation time becomes
+effectively zero compared to the rest of the simulation.
+
+Optical photons from scintillation and Cherenkov processes
+are allocated, generated and propagated entirely on the GPU, minimizing
+transfer overheads and allowing CPU memory usage to be restricted to
+optical photons that hit photomultiplier tubes or other photon detectors.
+Collecting hits into standard Geant4 hit collections then allows the
+rest of the simulation chain to proceed unmodified.
+
+Optical physics processes of scattering, absorption, reemission and
+boundary processes are implemented as CUDA OptiX programs based on the Geant4
+implementations. Wavelength dependent material and surface properties as well as
+inverse cumulative distribution functions for reemission are interleaved into
+GPU textures providing fast interpolated property lookup or wavelength generation.
+
+Geometry is provided to OptiX in the form of CUDA programs that return bounding boxes
+for each primitive and single ray geometry intersection results. Some critical parts
+of the geometry such as photomultiplier tubes have been implemented analytically
+with the remainder being tesselated.
+OptiX handles the creation and application of a choice of acceleration structures
+such as boundary volume heirarchies and the transparent use of multiple GPUs.
+
+OptiX interoperation with OpenGL and CUDA Thrust has enabled
+unprecedented visualisations of photon propagations to be developed
+using OpenGL geometry shaders to provide interactive time scrubbing and
+CUDA Thrust photon indexing to provide interactive history selection.
+
+Validation and performance results are shown for the photomultiplier based
+Daya Bay and JUNO Neutrino detectors. -->
+<style type="text/css">
+    span.alarm { color: red; }
+    span.warn { color: orange; }
+    span.ok { color: green; }
+    span.i { display: none; }
+    pre.sliteral { class:"literal-block small"; }
+    pre.mypre {
+         display: block;
+         font-family: monospace;
+         font-size: 20px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+    pre.myfoot {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: white;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+    a.mylink {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: black;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+
+    div.mytitle {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:0%; left:5%; width:90%; height:10% ;
+    }
+
+    div.mycredit {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:90%; left:5%; width:80%; height:10% ;
+    }
+
+
+
+
+
+</style><!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+
+       <style type="text/css">
+
+          div.slide { 
+             background-clip: border-box;
+             background-repeat: no-repeat;
+             height: 100%;
+          }
+          div.slide#slide0{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-benefits{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#visualizing-an-optical-photon-simulation{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 640px 360px;
+             background-position: 600px 100px;
+          }
+          div.slide#overview{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#cerenkov-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115923.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#cerenkov-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115935.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#scintillation-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121444.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#scintillation-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121435.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#standard-geant4-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.001.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#external-photon-simulation-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.002.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-001.png);
+             background-size: 1047px 795px;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview-m1-points{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-points-mat1.png);
+             background-size: 1435px 848px;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview-flag-selection{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-flag-seq-select.png);
+             background-size: 1436px 842px;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview-cerenkov-geom-m1{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-m1-geom.png);
+             background-size: 1416px 845px;
+             background-position: 0px 0px;
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-1{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-2{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-inside-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_half.png);
+             background-size: 1432px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-wide_half.png);
+             background-size: 1409px 836px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-headview{
+             background-image: url(/env/graphics/ggeoview/jpmt-headview_half.png);
+             background-size: 1308px 783px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-backview{
+             background-image: url(/env/graphics/ggeoview/jpmt-backview_half.png);
+             background-size: 1149px 794px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-approach{
+             background-image: url(/env/graphics/ggeoview/jpmt-approach_half.png);
+             background-size: 1431px 839px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-arrival{
+             background-image: url(/env/graphics/ggeoview/jpmt-arrival_half.png);
+             background-size: 1427px 841px;
+             background-position: 0px 0px;
+          }
+          div.slide#optical-photon-simulation-problem{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-before-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-before-contact-2{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-before-contact-3{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-after-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-after-contact_half.png);
+             background-size: 1425px 840px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-inside-outside{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-outside_half.png);
+             background-size: 1401px 842px;
+             background-position: 0px 0px;
+          }
+          div.slide#nvidia-optix-in-action{
+             background-image: url(/env/presentation/optix-in-action_half.png);
+             background-size: 966px 646px;
+             background-position: 100px 50px;
+          }
+          div.slide#pmtinbox-approach-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+          }
+          div.slide#pmtinbox-approach-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+          }
+          div.slide#pmtinbox-after-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+          }
+          div.slide#pmtinbox-after-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-pmt-wall-photo-1{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-pmt-wall-photo-2{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-not-16-9{
+             background-image: url(/env/presentation/gtc2016/sk-PH20-water-withboat-apr23-wm.png);
+             background-size: 1181px 771px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-1{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-2{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-3{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-4{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#kamiokande-ii-1{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#kamiokande-ii-2{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#kamiokande-ii-3{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#fast-optical-photon-simulation{
+             background-image: url(/env/presentation/newtons-opticks.png);
+             background-size: 374px 684px;
+             background-position: 800px 0px;
+          }
+          div.slide#photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#old-hamamatsu-photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#old-photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-juno{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-goals{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#dayabay-reactor-neutrino-expt-far-site{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-far-site-2{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-far-site-3{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit-generality{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+          }
+          div.slide#seeing-neutrinos-via-scintillation-cherenkov-light{
+             background-image: url(/env/presentation/cherenkov.png);
+             background-size: 316px 203px;
+             background-position: 850px 400px;
+          }
+          div.slide#large-geometry-techniques-instancing-mandatory{
+             background-image: url(/env/graphics/ggeoview/ggv-juno-instancing.png);
+             background-size: 852px 592px;
+             background-position: 450px 80px;
+          }
+          div.slide#nvidia-optix-1{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+          }
+          div.slide#nvidia-optix-2{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticksdocs{
+             background-image: url(/env/presentation/OpticksDocs);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-1{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-2{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-1{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-2{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-1{
+             background-image: url(/env/presentation/EnergyResponseModel.png);
+             background-size: 693px 504px;
+             background-position: 0px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-2{
+             background-image: url(/env/presentation/ConstrainingNonLinearity.png);
+             background-size: 761px 553px;
+             background-position: 0px 80px;
+          }
+          div.slide#daya-bay-ngd-analysis-most-precise-theta13{
+             background-image: url(/env/presentation/DYBZheTaup2015Theta13OscillationAnalysis.png);
+             background-size: 1057px 625px;
+             background-position: 100px 60px;
+          } 
+
+       </style>
+    <!-- comment
+
+Large Geometry/Event Techniques
+/env/graphics/ggeoview/ggv-juno-instancing.png 2130px_1480px -> 1065px_740px
+
+
+GGeoView image is 2094x1590 1047x795
+
+GGeoView M1 Points is 2870x1696  1435x848
+
+GGeoView Flag Selection 2872x1684 1436x842
+
+GGeoView Cerenkov Geom M1 2832x1690 1416x845
+
+
+Generated Scintillation Photons GPU cf Geant4
+/env/g4dae/generated_scintillation_time_wavelength.png
+
+G4/DetSim Generated Cerenkov Wavelength
+/env/g4dae/g4_cerenkov_wavelength.png -->
+<!-- comment
+
+Placeholder
+
+jpmt-after-contact.png 2850px_1680px
+jpmt-approach.png 2862px_1678px
+jpmt-arrival.png 2854px_1682px
+jpmt-backview.png 2298px_1588px
+jpmt-before-contact.png 2860px_1688px
+jpmt-headview.png 2616px_1566px
+jpmt-inside-outside.png 2802px_1684px
+jpmt-wide.png 2818px_1672px -->
+<!-- comment
+
+I will introduce Opticks,
+an optical photon simulation based on NVIDIA OptiX ray tracing
+enabling particle physics detector simulations
+to benefit from OptiX ray tracing.
+
+The image visualizes photons coming from a cosmic ray muon
+crossing a neutrino detector. -->
+<div class="mytitle">
+<h1 style="background-color:lightgrey"> <i>Opticks</i> : GPU Optical Photon Simulation for Particle Physics with NVIDIA® OptiX™ </h1>
+</div>
+
+<div class="mycredit">
+<h2 style="background-color:lightgrey"> Simon C Blyth, National Taiwan University &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; Oct 2016, CHEP </h2>
+</div>
+</div>
+<div class="slide" id="opticks-benefits">
+<h1><span class="i">Opticks Benefits</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Opticks &gt; 1000x Geant4 (*)</p>
+<p class="small">GPU massive parallelism <strong>eliminates bottleneck</strong>.</p>
+<ul class="small simple">
+<li>optical photon simulation time --&gt; zero</li>
+<li>optical photon CPU memory --&gt; zero</li>
+</ul>
+<p class="small">[zero: effectively, compared to rest of simulation]</p>
+<p class="small"><strong>More Photons -&gt; More Benefit</strong></p>
+<ul class="small simple">
+<li>Neutrino detectors can benefit the most, eg
+JUNO and Dayabay</li>
+</ul>
+<p class="small"><a class="reference external" href="http://bitbucket.org/simoncblyth/opticks">http://bitbucket.org/simoncblyth/opticks</a></p>
+<p class="small last">(*) core extrapolated from mobile GPU speed</p>
+</div>
+<!-- comment
+
+Neutrino detectors can benefit the most as their operation
+depends on production and propagation of sometimes many millions
+of optical photons.
+
+Neutrinos detectors need to be large, as neutrinos
+interact only weakly.
+
+**Radical simulation speedup -> short development cycle -> improved understanding** -->
+</div>
+<div class="slide" id="outline">
+<h1>Outline</h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<ul class="large simple">
+<li>Short video</li>
+<li>Problem and approach to solving<ul>
+<li>Optical Photon Simulation problem</li>
+<li>Hybrid solution : Geant4 + Opticks</li>
+<li>NVIDIA OptiX Ray Tracing Engine</li>
+</ul>
+</li>
+<li><em>Opticks</em> : optical photon simulation with NVIDIA OptiX<ul>
+<li>geometry workflow : geocache, GPU textures</li>
+<li>large geometry techniques, geometry modelling</li>
+<li>Geant4/Opticks event workflow</li>
+</ul>
+</li>
+<li>Validation, performance comparisons</li>
+<li>Summary</li>
+</ul>
+</div>
+<div class="slide" id="optical-photon-simulation-problem">
+<h1><tt class="docutils literal">Optical Photon Simulation <span class="pre">Problem...</span></tt></h1>
+</div>
+<div class="slide" id="jpmt-before-contact-2">
+<h1><span class="i">JPMT Before Contact 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Optical Photon Problem</p>
+<dl class="small docutils">
+<dt><strong>Cosmic muon backgrounds</strong></dt>
+<dd>many millions of optical photons in Daya Bay (more in JUNO)</dd>
+</dl>
+<ul class="small simple">
+<li>optical propagation dominates <em>Geant4</em> CPU time, ~95% for Daya Bay, more for JUNO</li>
+<li>severe CPU memory constraint</li>
+</ul>
+<p class="small">Optical photons:</p>
+<ul class="small simple">
+<li>produced by Cerenkov+Scintillation processes</li>
+<li>yield only Photomultiplier PMT hits</li>
+</ul>
+<p class="small">Isolated nature -&gt; <strong>easily separated propagation</strong></p>
+<p class="small last"><strong>Hybrid Solution Possible : Geant4 + Opticks</strong></p>
+</div>
+</div>
+<div class="slide" id="ray-traced-image-synthesis-optical-photon-simulation">
+<h1><span class="small">Ray Traced Image Synthesis ≈ Optical Photon Simulation</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX Pixel Calculation</p>
+<img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
+<p class="tiny last"><a class="reference external" href="http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf">http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf</a></p>
+<!-- comment
+
+Not a photo -->
+</div>
+<dl class="small docutils">
+<dt>Geometry, light sources, optical physics -&gt;</dt>
+<dd><ul class="first last simple">
+<li>pixel values at image plane</li>
+<li>photon parameters at detectors (eg PMTs)</li>
+</ul>
+</dd>
+<dt><strong>Ray tracing has many applications</strong> :</dt>
+<dd><ul class="first last simple">
+<li>advertising, design, entertainment, games,...</li>
+<li>BUT : most ray tracers just render images</li>
+</ul>
+</dd>
+<dt><strong>NVIDIA OptiX</strong> had foresight to be less specific:</dt>
+<dd><ul class="first last simple">
+<li>general geometry intersection API</li>
+<li><span class="red">OptiX is to ray tracing what OpenGL is to rasterization</span></li>
+</ul>
+</dd>
+</dl>
+<pre class="mypre">
+
+
+</pre><dl class="small docutils">
+<dt><strong>rasterization</strong></dt>
+<dd>project 3D primitives onto 2D image plane, combine fragments into pixel values</dd>
+<dt><strong>ray tracing</strong></dt>
+<dd>cast rays thru image pixels into scene, recursively reflect/refract with
+geometry intersected, combine returns into pixel values</dd>
+</dl>
+</div>
+<div class="slide" id="nvidia-optix-1">
+<h1><span class="i">NVIDIA OptiX 1</span></h1>
+</div>
+<div class="slide" id="nvidia-optix-2">
+<h1><span class="i">NVIDIA OptiX 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">NVIDIA® OptiX™</p>
+<p class="small"><a class="reference external" href="http://developer.nvidia.com/optix">http://developer.nvidia.com/optix</a></p>
+<ul class="small last simple">
+<li>no rendering assumptions</li>
+<li><strong>just accelerates ray-geometry intersections</strong></li>
+<li><span class="red">compiler optimized for GPU ray tracing</span></li>
+<li>regular improvements, new GPU tuning</li>
+<li>NVIDIA expertise on GPU/multi-GPU usage<ul>
+<li>~linear scaling with cores across GPUs</li>
+</ul>
+</li>
+<li>free to acquire, use, distribute non-commercially</li>
+<li><span class="blue">simple : single-ray programming model</span></li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" class="align-center" src="/env/presentation/1px.png" style="width: 1px; height: 100px;" />
+<p class="tiny"><tt class="docutils literal"><span class="pre">https://research.nvidia.com/publication/optix-general-purpose-ray-tracing-engine</span></tt></p>
+</div>
+<div class="slide" id="opticks-geometry-recreate-geant4-context-on-gpu">
+<h1><span class="small">Opticks Geometry : Recreate Geant4 &quot;Context&quot; on GPU</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Volumes -&gt; Boundaries</p>
+<dl class="small docutils">
+<dt><strong>CSG -&gt; BREP</strong></dt>
+<dd>boundaries simpler than volumes on GPU</dd>
+</dl>
+<p class="small">Material/surface boundary representation (4 indices)</p>
+<ul class="small simple">
+<li>outer material (parent)</li>
+<li>outer surface (inward photons, parent -&gt; self)</li>
+<li>inner surface (outward photons, self -&gt; parent)</li>
+<li>inner material (self)</li>
+</ul>
+<p class="small">Primitives labelled with unique boundary index</p>
+<ul class="small simple">
+<li>ray primitive intersection -&gt; boundary index</li>
+<li>texture lookup -&gt; material/surface properties</li>
+</ul>
+<p class="small">GPU textures also used for:</p>
+<ul class="small last simple">
+<li>scintillator reemission wavelength generation</li>
+<li>standard illuminant Plankian wavelength gen</li>
+</ul>
+</div>
+<dl class="small docutils">
+<dt><strong>Export Tesselated Geometry</strong></dt>
+<dd><ul class="first last simple">
+<li>Geant4 -&gt; G4DAE XML <a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></li>
+</ul>
+</dd>
+<dt><strong>Load G4DAE XML</strong></dt>
+<dd><ul class="first last simple">
+<li>label primitives with <span class="red">boundary indices</span></li>
+<li>find repeated geometry &quot;instances&quot;</li>
+<li>write NumPy serialization <tt class="docutils literal">.npy</tt> geocache</li>
+</ul>
+</dd>
+</dl>
+<pre class="mypre">
+
+</pre><p class="small">Geocache -&gt; <span class="red">few seconds startup, instead of few minutes</span></p>
+<dl class="small docutils">
+<dt><strong>Load/upload geocache</strong></dt>
+<dd><ul class="first last simple">
+<li>load geocache from file</li>
+<li>upload OptiX textures to GPU</li>
+<li>upload geometry buffers to GPU</li>
+</ul>
+</dd>
+<dt>GPU geometry buffers read by:</dt>
+<dd><ul class="first last simple">
+<li>OptiX bounding box and intersection programs</li>
+<li>OpenGL GLSL shaders for visualization</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="slide" id="large-geometry-techniques-instancing-mandatory">
+<h1><span class="small">Large Geometry Techniques : Instancing Mandatory</span></h1>
+<p class="small"><strong>Geometry analysed to find instances</strong></p>
+<p class="small">JUNO: ~90M --&gt; 0.1M triangles</p>
+<ul class="small simple">
+<li>19,000 20&quot; PMTs</li>
+<li>34,000 3&quot; PMTs</li>
+</ul>
+<p class="small">OpenGL/OptiX instancing</p>
+<p class="small"><strong>Multiple Renderers</strong></p>
+<ul class="small simple">
+<li>global, full instances, bbox instances</li>
+<li>rapid switching controls</li>
+</ul>
+</div>
+<div class="slide" id="geometry-modelling-tesselated-vs-analytic-photomultiplier-tubes">
+<h1><span class="small">Geometry Modelling : Tesselated vs Analytic Photomultiplier Tubes</span></h1>
+<img alt="/env/graphics/ggeoview/dpib-triangulated-pmt.png" class="align-left" src="/env/graphics/ggeoview/dpib-triangulated-pmt.png" style="width: 550px;" />
+<img alt="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" class="align-right" src="/env/nuwa/detdesc/pmt/hemi-pmt-analytic-near-clipped.png" style="width: 550px;" />
+<img alt="/env/presentation/1px.png" class="align-center" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
+<p class="small">Analytic : more realistic, faster, less memory, <strong>much more effort</strong></p>
+<p class="small">For Dayabay PMT:</p>
+<ul class="small simple">
+<li>partition CSG solids into 12 <strong>single primitive</strong> parts (instead of 2928 triangles)</li>
+<li>splitting at geometrical intersections avoids implementing general CSG boolean handling</li>
+<li>geometry provided to OptiX in form of ray intersection and bounding box code</li>
+</ul>
+<p class="small"><strong>Aim : analytic description of geometry on critical optical path, remainder tesselated</strong></p>
+</div>
+<div class="slide" id="hybrid-geant4-opticks-event-workflow">
+<h1><span class="small">Hybrid Geant4/Opticks Event Workflow</span></h1>
+<!-- comment
+
+* interop between OpenGL/OptiX/Thrust/CUDA
+
+**Side Benefit : Performant Visualization**
+
+Migrating Geant4 C++ CSG tree geometry to the GPU
+enables unprecedented visualizations. -->
+<div class="sidebar">
+<p class="first sidebar-title">GPU Resident Photons</p>
+<dl class="small docutils">
+<dt><strong>Seeded on GPU</strong></dt>
+<dd>associate photons -&gt; gensteps (via seed buffer)</dd>
+<dt><strong>Generated on GPU, using gensteps:</strong></dt>
+<dd><p class="first"><em>~Stacks</em> collected before photon generation:</p>
+<ul class="last simple">
+<li>number of photons to generate</li>
+<li>start/end position of step</li>
+<li>other quantities needed for GPU generation</li>
+</ul>
+</dd>
+<dt><strong>Propagated on GPU</strong></dt>
+<dd><span class="red">Only photons hitting PMTs copied to CPU</span></dd>
+</dl>
+<p class="small">Thrust: <strong>high level C++ access to CUDA</strong></p>
+<div class="small figure align-right">
+<img alt="/env/numerics/thrust/thrust.png" src="/env/numerics/thrust/thrust.png" style="width: 300px;" />
+</div>
+<ul class="small last simple">
+<li><a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a></li>
+</ul>
+</div>
+<p class="small"><strong>Geant4/Detector Simulation</strong></p>
+<ul class="small simple">
+<li>modified Scintillation, Cerenkov processes<ul>
+<li>collect <em>genstep</em></li>
+<li>skip optical photon generation</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Opticks (OptiX/Thrust GPU interoperation)</strong></p>
+<ul class="small simple">
+<li><strong>OptiX</strong> : upload gensteps</li>
+<li><strong>Thrust</strong> : seeding, distribute genstep indices to photons</li>
+<li><strong>OptiX</strong> : launch photon generation and propagation</li>
+<li><strong>Thrust</strong> : pullback photons that hit PMTs</li>
+<li><strong>Thrust</strong> : index photon step sequences (optional)</li>
+</ul>
+<p class="small"><strong>Geant4/Detector Simulation</strong></p>
+<ul class="small simple">
+<li>populate standard hit collections</li>
+<li>subsequent electronics simulation proceeds unaltered</li>
+</ul>
+<p class="small"><strong>Multi-event handling</strong></p>
+<ul class="small simple">
+<li>reuse/resize OptiX buffers for each event</li>
+</ul>
+</div>
+<div class="slide" id="compare-opticks-geant4-simulations-with-simple-lights-geometries">
+<h1><span class="small">Compare Opticks/Geant4 Simulations with Simple Lights/Geometries</span></h1>
+<div class="figure align-left">
+<img alt="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" src="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" style="width: 550px;" />
+<p class="caption">1M Photons -&gt; Water Sphere (S-Polarized)</p>
+</div>
+<div class="figure align-right">
+<img alt="/env/graphics/ggeoview/PmtInBox-approach.png" src="/env/graphics/ggeoview/PmtInBox-approach.png" style="width: 450px;" />
+<p class="caption">0.5M Photons -&gt; Dayabay PMT</p>
+</div>
+<img alt="/env/presentation/1px.png" class="align-center" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
+<dl class="small docutils">
+<dt><strong>Photon step records</strong></dt>
+<dd>128 bit per step : highly compressed position, time, wavelength, polarization vector, material/history codes</dd>
+<dt><strong>Photon flag sequence</strong></dt>
+<dd>16x 4-bit step flags recorded in uint64 sequence, indexed using Thrust GPU sort (1M indexed ~0.040s)</dd>
+</dl>
+<p class="small"><strong>Sequence index</strong> -&gt; interactive OpenGL selection of photons by flag sequence</p>
+</div>
+<div class="slide" id="opticks-geant4-rainbow-step-sequence-comparison">
+<h1><span class="small">Opticks/Geant4 Rainbow Step Sequence Comparison</span></h1>
+<dl class="small docutils">
+<dt><strong>Flags:</strong></dt>
+<dd><ul class="first last simple">
+<li>BT/BR: boundary transmit/reflect</li>
+<li>TO/SC/SA: torch/scatter/surface absorb</li>
+</ul>
+</dd>
+</dl>
+<p class="small"><strong>Statistically consistent photon histories in the two simulations : Multiple orders of rainbow apparent</strong></p>
+<pre class="mypre">
+ 64-bit uint  Opticks    Geant4    chi2                                      (tag:5,-5)
+
+        8ccd   819160    819654    0.15  [4 ] TO BT BT SA                    (cross droplet)
+         8bd   102087    101615    1.09  [3 ] TO BR SA                       (external reflect)
+       8cbcd    61869     61890    0.00  [5 ] TO BT BR BT SA                 (bow 1)
+      8cbbcd     9618      9577    0.09  [6 ] TO BT BR BR BT SA              (bow 2)
+     8cbbbcd     2604      2687    1.30  [7 ] TO BT BR BR BR BT SA           (bow 3)
+    8cbbbbcd     1056      1030    0.32  [8 ] TO BT BR BR BR BR BT SA        (bow 4)
+       86ccd     1014      1000    0.10  [5 ] TO BT BT SC SA
+   8cbbbbbcd      472       516    1.96  [9 ] TO BT BR BR BR BR BR BT SA     (bow 5)
+         86d      498       473    0.64  [3 ] TO SC SA
+  bbbbbbbbcd      304       294    0.17  [10] TO BT BR BR BR BR BR BR BR BR  (bow 8+ truncated)
+  8cbbbbbbcd      272       247    1.20  [10] TO BT BR BR BR BR BR BR BT SA  (bow 6)
+  cbbbbbbbcd      183       161    1.41  [10] TO BT BR BR BR BR BR BR BR BT  (bow 7 truncated)
+</pre></div>
+<div class="slide" id="m-rainbow-s-polarized-comparison-opticks-geant4">
+<h1><span class="small">1M Rainbow S-Polarized, Comparison Opticks/Geant4</span></h1>
+<p class="tiny">Deviation angle(degrees) of 1M parallel monochromatic photons in disc shaped beam incident on water sphere.
+Numbered bands are visible range expectations of first 11 rainbows.
+S-Polarized intersection (E field perpendicular to plane of incidence) arranged by directing polarization radially.</p>
+<img alt="/env/optix/cfg4/rainbow-cfg4-spol.png" class="align-center" src="/env/optix/cfg4/rainbow-cfg4-spol.png" style="width: 800px;" />
+</div>
+<div class="slide" id="pmt-opticks-geant4-step-distribution-comparison-to-bt-sd">
+<h1><span class="small">PMT Opticks/Geant4 step distribution comparison TO BT [SD]</span></h1>
+<p class="small"><strong>Good agreement reached</strong>, after several fixes: geometry, total internal reflection, group velocity</p>
+<div class="figure align-left">
+<img alt="/env/numerics/npy/PmtInBox_TOBTSD_xyzt.png" src="/env/numerics/npy/PmtInBox_TOBTSD_xyzt.png" style="width: 500px;" />
+<p class="caption">position(xyz), time(t)</p>
+</div>
+<div class="figure align-right">
+<img alt="/env/numerics/npy/PmtInBox_TOBTSD_abcr.png" src="/env/numerics/npy/PmtInBox_TOBTSD_abcr.png" style="width: 500px;" />
+<p class="caption">polarization(abc), radius(r)</p>
+</div>
+</div>
+<div class="slide" id="pmt-opticks-geant4-step-distribution-comparison-chi2-ndf">
+<h1><span class="small">PMT Opticks/Geant4 step distribution comparison : chi2/ndf</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Consistent : chi2/ndf ~ 1</p>
+<p class="small">Very good Opticks/Geant4 agreement</p>
+<ul class="small simple">
+<li>identical geometries</li>
+<li>identical optical physics</li>
+</ul>
+<p class="small last">XYTZ: position, time
+ABCR: polarization, radius</p>
+</div>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="43%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">4/PMT In Box/torch :</th>
+<th class="head">X</th>
+<th class="head">Y</th>
+<th class="head">Z</th>
+<th class="head">T</th>
+<th class="head">A</th>
+<th class="head">B</th>
+<th class="head">C</th>
+<th class="head">R</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>340271/340273  :  [TO] BT SA</td>
+<td>1.15</td>
+<td>1.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.06</td>
+<td>1.03</td>
+<td>0.00</td>
+<td>1.21</td>
+</tr>
+<tr><td>340271/340273  :  TO [BT] SA</td>
+<td>1.15</td>
+<td>1.00</td>
+<td>1.06</td>
+<td>0.91</td>
+<td>1.06</td>
+<td>1.03</td>
+<td>0.00</td>
+<td>1.21</td>
+</tr>
+<tr><td>340271/340273  :  TO BT [SA]</td>
+<td>0.97</td>
+<td>1.02</td>
+<td>1.05</td>
+<td>0.99</td>
+<td>1.06</td>
+<td>1.03</td>
+<td>0.00</td>
+<td>1.29</td>
+</tr>
+<tr><td>107598/107251  :  [TO] BT SD</td>
+<td>0.91</td>
+<td>0.73</td>
+<td>0.56</td>
+<td>0.56</td>
+<td>0.98</td>
+<td>1.09</td>
+<td>0.56</td>
+<td>0.94</td>
+</tr>
+<tr><td>107598/107251  :  TO [BT] SD</td>
+<td>0.91</td>
+<td>0.73</td>
+<td>0.81</td>
+<td>0.93</td>
+<td>0.98</td>
+<td>1.09</td>
+<td>0.56</td>
+<td>0.94</td>
+</tr>
+<tr><td>107598/107251  :  TO BT [SD]</td>
+<td>0.99</td>
+<td>0.83</td>
+<td>0.97</td>
+<td>0.99</td>
+<td>0.98</td>
+<td>1.09</td>
+<td>0.56</td>
+<td>0.93</td>
+</tr>
+<tr><td>23217/23260  :  [TO] BT BT SA</td>
+<td>0.94</td>
+<td>0.82</td>
+<td>0.04</td>
+<td>0.04</td>
+<td>0.97</td>
+<td>0.89</td>
+<td>0.04</td>
+<td>0.57</td>
+</tr>
+<tr><td>23217/23260  :  TO [BT] BT SA</td>
+<td>0.94</td>
+<td>0.82</td>
+<td>0.70</td>
+<td>0.50</td>
+<td>0.97</td>
+<td>0.89</td>
+<td>0.04</td>
+<td>0.57</td>
+</tr>
+<tr><td>23217/23260  :  TO BT [BT] SA</td>
+<td>0.91</td>
+<td>0.94</td>
+<td>0.43</td>
+<td>0.60</td>
+<td>0.97</td>
+<td>0.89</td>
+<td>0.04</td>
+<td>0.05</td>
+</tr>
+<tr><td>23217/23260  :  TO BT BT [SA]</td>
+<td>0.94</td>
+<td>0.88</td>
+<td>0.04</td>
+<td>0.35</td>
+<td>0.97</td>
+<td>0.89</td>
+<td>0.04</td>
+<td>0.72</td>
+</tr>
+<tr><td>18866/19048  :  [TO] AB</td>
+<td>0.99</td>
+<td>1.10</td>
+<td>0.87</td>
+<td>0.87</td>
+<td>0.85</td>
+<td>0.84</td>
+<td>0.87</td>
+<td>1.00</td>
+</tr>
+<tr><td>18866/19048  :  TO [AB]</td>
+<td>0.99</td>
+<td>1.10</td>
+<td>0.93</td>
+<td>0.92</td>
+<td>0.85</td>
+<td>0.84</td>
+<td>0.87</td>
+<td>1.00</td>
+</tr>
+<tr><td>3179/3133  :  [TO] SC SA</td>
+<td>1.07</td>
+<td>0.83</td>
+<td>0.34</td>
+<td>0.34</td>
+<td>0.86</td>
+<td>0.96</td>
+<td>0.34</td>
+<td>0.73</td>
+</tr>
+<tr><td>3179/3133  :  TO [SC] SA</td>
+<td>1.07</td>
+<td>0.83</td>
+<td>0.98</td>
+<td>1.05</td>
+<td>0.98</td>
+<td>1.06</td>
+<td>0.98</td>
+<td>0.73</td>
+</tr>
+<tr><td>3179/3133  :  TO SC [SA]</td>
+<td>0.96</td>
+<td>1.04</td>
+<td>0.93</td>
+<td>0.97</td>
+<td>0.98</td>
+<td>1.06</td>
+<td>0.98</td>
+<td>1.10</td>
+</tr>
+<tr><td>2204/2249  :  [TO] BT AB</td>
+<td>0.85</td>
+<td>1.04</td>
+<td>0.45</td>
+<td>0.45</td>
+<td>0.99</td>
+<td>0.92</td>
+<td>0.45</td>
+<td>1.06</td>
+</tr>
+<tr><td>2204/2249  :  TO [BT] AB</td>
+<td>0.85</td>
+<td>1.04</td>
+<td>0.95</td>
+<td>0.88</td>
+<td>0.99</td>
+<td>0.92</td>
+<td>0.45</td>
+<td>1.06</td>
+</tr>
+<tr><td>2204/2249  :  TO BT [AB]</td>
+<td>0.98</td>
+<td>0.94</td>
+<td>1.01</td>
+<td>1.00</td>
+<td>0.99</td>
+<td>0.92</td>
+<td>0.45</td>
+<td>0.90</td>
+</tr>
+<tr><td>1696/1732  :  [TO] BT BT AB</td>
+<td>1.05</td>
+<td>0.85</td>
+<td>0.38</td>
+<td>0.38</td>
+<td>0.86</td>
+<td>1.09</td>
+<td>0.38</td>
+<td>0.26</td>
+</tr>
+<tr><td>1696/1732  :  TO [BT] BT AB</td>
+<td>1.05</td>
+<td>0.85</td>
+<td>1.48</td>
+<td>1.28</td>
+<td>0.86</td>
+<td>1.09</td>
+<td>0.38</td>
+<td>0.26</td>
+</tr>
+<tr><td>1696/1732  :  TO BT [BT] AB</td>
+<td>0.99</td>
+<td>0.86</td>
+<td>1.17</td>
+<td>1.40</td>
+<td>0.86</td>
+<td>1.09</td>
+<td>0.38</td>
+<td>0.86</td>
+</tr>
+<tr><td>1696/1732  :  TO BT BT [AB]</td>
+<td>1.15</td>
+<td>0.88</td>
+<td>1.08</td>
+<td>1.06</td>
+<td>0.86</td>
+<td>1.09</td>
+<td>0.38</td>
+<td>0.79</td>
+</tr>
+<tr><td>1446/1455  :  [TO] BR SA</td>
+<td>1.21</td>
+<td>0.94</td>
+<td>0.03</td>
+<td>0.03</td>
+<td>0.90</td>
+<td>0.87</td>
+<td>0.03</td>
+<td>1.09</td>
+</tr>
+<tr><td>1446/1455  :  TO [BR] SA</td>
+<td>1.21</td>
+<td>0.94</td>
+<td>1.02</td>
+<td>1.01</td>
+<td>0.90</td>
+<td>0.87</td>
+<td>0.03</td>
+<td>1.09</td>
+</tr>
+<tr><td>1446/1455  :  TO BR [SA]</td>
+<td>1.00</td>
+<td>0.93</td>
+<td>0.97</td>
+<td>0.99</td>
+<td>0.90</td>
+<td>0.87</td>
+<td>0.03</td>
+<td>1.04</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="photon-propagation-times-geant4-cf-opticks">
+<h1><span class="small">Photon Propagation Times Geant4 cf Opticks</span></h1>
+<img alt="/env/optix/cfg4/PmtInBox-cfg4-2.png" class="align-center" src="/env/optix/cfg4/PmtInBox-cfg4-2.png" style="width: 800px;" />
+<table border="1" class="small docutils">
+<colgroup>
+<col width="28%" />
+<col width="24%" />
+<col width="24%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Test</th>
+<th class="head">Geant4 10.2</th>
+<th class="head">Opticks Interop</th>
+<th class="head">Opticks Compute</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Rainbow 1M(S)</td>
+<td>56 s</td>
+<td>1.62 s</td>
+<td>0.28 s</td>
+</tr>
+<tr><td>Rainbow 1M(P)</td>
+<td>58 s</td>
+<td>1.71 s</td>
+<td>0.25 s</td>
+</tr>
+<tr><td><strong>PmtInBox 0.5M</strong></td>
+<td><strong>41 s</strong></td>
+<td>0.81 s</td>
+<td><strong>0.15 s</strong></td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><strong>Opticks &gt; 200X Geant4</strong> with only 384 core mobile GPU[1] (multi-GPU workstation up to 20x more cores)</li>
+</ul>
+<ul class="small simple">
+<li><strong>Interop</strong> uses OpenGL buffers allowing visualization, <strong>Compute</strong> uses OptiX buffers</li>
+<li><strong>Interop/Compute</strong> : perfectly identical results, monitored by digest</li>
+</ul>
+<p class="tiny">[1] MacBook Pro (2013), NVIDIA GeForce GT 750M, 2048 MB, 384 cores</p>
+</div>
+<div class="slide" id="opticksdocs">
+<h1><span class="i">OpticksDocs</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Open Source Opticks</p>
+<ul class="small simple">
+<li><a class="reference external" href="http://simoncblyth.bitbucket.org/opticks/">http://simoncblyth.bitbucket.org/opticks/</a></li>
+<li><a class="reference external" href="http://bitbucket.org/simoncblyth/opticks/">http://bitbucket.org/simoncblyth/opticks/</a></li>
+</ul>
+<p class="small">Documentation, install instructions. Repository.</p>
+<ul class="small simple">
+<li>Mac, Linux, Windows (*)</li>
+<li>16 C++ projects, ordered by dependency</li>
+<li>~200 &quot;Unit&quot; Tests (CMake/CTest)</li>
+<li>12 integration tests: tpmt, trainbow, tprism, treflect, tlens, tnewton, tg4gun, ...</li>
+<li>NumPy/Python analysis/debugging scripts</li>
+</ul>
+<p class="small">Geometry/event data use NumPy serialization:</p>
+<pre class="small literal-block">
+import numpy as np
+a = np.load(&quot;photons.npy&quot;)
+</pre>
+<p class="tiny last">(*) Windows VS2015, non-CUDA only so far</p>
+</div>
+</div>
+<div class="slide" id="summary">
+<h1><span class="small">Summary</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Overview</p>
+<ul class="small last simple">
+<li><strong>Opticks 200x Geant4</strong> with mobile GPU</li>
+<li>Expect: <strong>Opticks &gt; 1000x Geant4</strong> (with workstation GPUs)</li>
+<li><span class="red">photon propagation time --&gt; zero</span></li>
+<li><span class="blue">analytic geometry --&gt; precise Geant4 match</span></li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> enables <em>Geant4</em> based simulations to benefit from optical photon simulation
+<strong>taking effectively zero time and zero CPU memory</strong>,
+thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 20px;" />
+<ul class="simple">
+<li>The more photons the bigger the overall speedup (99% -&gt; 100x)</li>
+<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision</li>
+<li>Large PMT based neutrino experiments, such as JUNO, can benefit the most</li>
+</ul>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 20px;" />
+<p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
+</blockquote>
+</div>
+<div class="slide" id="youtube-video">
+<h1><span class="i">YouTube Video</span></h1>
+<iframe width="1024" height="576" src="https://www.youtube.com/embed/CBpOha4RzIs?rel=0" frameborder="0" allowfullscreen></iframe><p class="tiny"><a class="reference external" href="https://www.youtube.com/watch?v=CBpOha4RzIs">https://www.youtube.com/watch?v=CBpOha4RzIs</a></p>
+</div>
+</div>
+</body>
+</html>
