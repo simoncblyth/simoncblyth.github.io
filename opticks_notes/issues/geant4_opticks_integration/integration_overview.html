@@ -52,8 +52,20 @@
   <ul>
 <li><a class="reference internal" href="#">G4/Op Integration Overview</a><ul>
 <li><a class="reference internal" href="#objectives">Objectives</a></li>
-<li><a class="reference internal" href="#see-also">See Also</a></li>
-<li><a class="reference internal" href="#approach">Approach</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a><ul>
+<li><a class="reference internal" href="#done-high-level-cleanup-refactor">DONE : High Level Cleanup/Refactor</a></li>
+<li><a class="reference internal" href="#todo-testing-untested-aspects-of-cleanup">TODO : Testing untested aspects of cleanup</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#wip-optical-step-collection">WIP : Optical Step Collection</a></li>
+<li><a class="reference internal" href="#wip-material-code-mapping-generalization">WIP : Material Code Mapping Generalization</a></li>
+<li><a class="reference internal" href="#approach">Approach</a><ul>
+<li><a class="reference internal" href="#ggeoview-app">ggeoview-/App</a></li>
+<li><a class="reference internal" href="#opticksengine-base-class">OpticksEngine base class</a></li>
+<li><a class="reference internal" href="#opticksapp">OpticksApp</a></li>
+<li><a class="reference internal" href="#how-does-opticks-and-g4-need-to-interface">How does Opticks and G4 need to interface ?</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#done">DONE</a></li>
 <li><a class="reference internal" href="#debugging">DEBUGGING</a></li>
 <li><a class="reference internal" href="#todo">TODO</a></li>
@@ -111,6 +123,37 @@
 <li>cfg4- partial integration for small test geometries only</li>
 <li>export- geometry exporter</li>
 </ul>
+<div class="section" id="done-high-level-cleanup-refactor">
+<h3>DONE : High Level Cleanup/Refactor<a class="headerlink" href="#done-high-level-cleanup-refactor" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>main: migrate from App to ggeoview-/OpticksMgr</li>
+<li>config/control/event: handling into okg-/OpticksHub</li>
+<li>visualization: into oglrap-/OpticksViz</li>
+</ul>
+</div>
+<div class="section" id="todo-testing-untested-aspects-of-cleanup">
+<h3>TODO : Testing untested aspects of cleanup<a class="headerlink" href="#todo-testing-untested-aspects-of-cleanup" title="Permalink to this headline">¶</a></h3>
+<p>Aspects included in cleanup, but as yet un-tested</p>
+<ul class="simple">
+<li>clearer distinction between once-only geometry initialization
+within OptiX and otherwise per-event actions (in response to input gensteps)</li>
+<li>multi-event handling ... gensteps (eg G4gun derived or from multi-event file or over network ZMQ)
+need to be repeatedly passed to OpEngine and the OpticksHub,
+OpticksViz etc..</li>
+</ul>
+</div>
+</div>
+<div class="section" id="wip-optical-step-collection">
+<h2>WIP : Optical Step Collection<a class="headerlink" href="#wip-optical-step-collection" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="optical_step_collection.html"><em>NEXT : G4 Optical Step Collection</em></a></li>
+</ul>
+</div>
+<div class="section" id="wip-material-code-mapping-generalization">
+<h2>WIP : Material Code Mapping Generalization<a class="headerlink" href="#wip-material-code-mapping-generalization" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="material_code_mapping_generalization.html"><em>Material Code Mapping Generalization</em></a></li>
+</ul>
 </div>
 <div class="section" id="approach">
 <h2>Approach<a class="headerlink" href="#approach" title="Permalink to this headline">¶</a></h2>
@@ -123,6 +166,50 @@
 and .dae when they have a &#8220;G&#8221; and &#8220;D&#8221; in the path like the
 current standard:</p>
 <div class="highlight-python"><pre>/usr/local/env/geant4/geometry/export/DayaBay_VGDX_20140414-1300/</pre>
+</div>
+<div class="section" id="ggeoview-app">
+<h3>ggeoview-/App<a class="headerlink" href="#ggeoview-app" title="Permalink to this headline">¶</a></h3>
+<p>Far to much stuff in &#8220;global&#8221; app scope.  Need to partition
+off functionality into other classes, with eye to G4 integration.</p>
+</div>
+<div class="section" id="opticksengine-base-class">
+<h3>OpticksEngine base class<a class="headerlink" href="#opticksengine-base-class" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>class CFG4_API CG4 : public OpticksEngine</pre>
+</div>
+<p>Currently <em>OpticksEngine</em> is a rather minimal base class of <em>CG4</em>
+but its intended to mop up common aspects between Opticks and Geant4
+simulators.  Stuff in ggeoview-/App that is common ?</p>
+<div class="highlight-python"><pre>simon:opticks blyth$ opticks-lfind OpticksEngine
+./cfg4/CG4.cc
+./cfg4/CG4.hh
+./optickscore/OpticksEngine.cc
+./optickscore/OpticksEngine.hh</pre>
+</div>
+<ul class="simple">
+<li>cfg4-/tests/CG4Test.cc is very simple (high level steering only)</li>
+<li>ggv-/tests/GGeoViewTest.cc can that be similarly simplified ?</li>
+<li>Op and G4 are not really peers, Op can only do a subset of what G4 does</li>
+</ul>
+</div>
+<div class="section" id="opticksapp">
+<h3>OpticksApp<a class="headerlink" href="#opticksapp" title="Permalink to this headline">¶</a></h3>
+<p>Bad name, too generic.</p>
+<ul class="simple">
+<li>OpticksCtx ?</li>
+<li>OpticksSim ?</li>
+<li>OpticksGUI/Viz ?  manage frame, window etc..</li>
+<li>What are the responsibilities of an OpticksApp ?</li>
+<li>How does that fit in with CG4, OpticksEngine, OpEngine ?</li>
+<li>where does it belong ? OpenGL dependencies ? Or keep it abstract ?</li>
+</ul>
+</div>
+<div class="section" id="how-does-opticks-and-g4-need-to-interface">
+<h3>How does Opticks and G4 need to interface ?<a class="headerlink" href="#how-does-opticks-and-g4-need-to-interface" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>G4 geometry needs to be used by Op</li>
+<li>G4 produced gensteps need to be provided to Op</li>
+<li>Op produced hits need to be given back for G4 collection</li>
+</ul>
 </div>
 </div>
 <div class="section" id="done">
