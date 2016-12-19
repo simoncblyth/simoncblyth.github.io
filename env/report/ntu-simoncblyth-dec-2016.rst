@@ -105,7 +105,7 @@ can be made to ease the integration.
 Visualization Rollout
 -----------------------
 
-.. figure:: env/graphics/ggeoview/jpmt-inside-wide_crop_half.png 
+.. figure:: env/graphics/ggeoview/jpmt-inside-wide_crop_half_half.png 
 
    Simulated Cerenkov and scintillations photons from a 100 GeV muon travelling 
    across the JUNO antineutrino detector viewed from inside the spherical scintillator.
