@@ -7,7 +7,7 @@
                 <paragraph>
                     Optical Photon Simulation on GPUs
         <date>
-            May 1, 2017
+            May 8, 2017
     <section ids="simon-c-blyth" names="simon\ c\ blyth">
         <title>
             Simon C Blyth
@@ -194,6 +194,16 @@
             <section ids="implementation-of-csg-ray-tracing-within-opticks" names="implementation\ of\ csg\ ray\ tracing\ within\ opticks">
                 <title>
                     Implementation of CSG ray tracing within Opticks
+                <figure>
+                    <image uri="env/ok/oav_gdml_analytic_half_half.png">
+                    <caption>
+                        Orthographic projection cutaway view of the Daya Bay Outer and Inner Acrylic Vessels,
+                        obtained from a GPU ray trace with the interactive Opticks application.
+                        The geometry from a Geant4 standard GDML file representation is automatically translated
+                        by Opticks into a form suitable for GPU ray tracing, comprising in this image a total
+                        of 44 complete binary CSG node trees for each solid describing combinations of primitives such as
+                        cylinders, truncated cones and convex polyhedra. The Opticks GPU CSG ray tracing implementation
+                        picks the appropriate primitive intersections for the solids.
                 <paragraph>
                     Although NVIDIA OptiX supports recursive ray tracing, it does not support recursion
                     within geometry intersection. Recursion is typically the simplest way to handle
@@ -225,9 +235,11 @@
                 <title>
                     Opticks CSG Primitives
                 <paragraph>
-                    Opticks currently supports a small number of solid primitives: sphere, box, cylinder
-                    and z-sliced sphere. The z-sliced sphere and cylinder have endcap implementations, as
-                    CSG constituents are required to be closed solids. Each primitive requires:
+                    Opticks currently implements the primitives required for translation of the full Daya Bay geometry:
+                    sphere, box, cylinder, truncated sphere, truncated cone and convex polyhedron.
+                    The truncated primitives and cylinder have endcaps, as CSG constituents are required to be closed solids.
+                <paragraph>
+                    Each primitive requires:
                 <bullet_list bullet="*">
                     <list_item>
                         <paragraph>
@@ -244,6 +256,31 @@
                     to any node of the CSG tree, providing hierarchical geometry transformations.
                     Support for non-uniform scaling allows ellipsoidal shapes to be represented by
                     scaling of the sphere primitive, avoiding the need to implement an ellipsoid primitive.
+                    General convex polyhedra are represented using a set of planes defining half spaces, which
+                    are referenced from the primitives.
+                    A compound cone with varying radius at multiple z planes, known as a polycone,
+                    has been implemented with a CSG union of cylinders and truncated cones.
+            <section ids="full-detector-geometry-translation-achievements" names="full\ detector\ geometry\ translation\ achievements">
+                <title>
+                    Full Detector Geometry Translation Achievements
+                <paragraph>
+                    The implementation of general CSG ray tracing on the GPU now makes it possible to
+                    develop a fully automated translation of Geant4 detector geometries
+                    into an exact equivalent form that is appropriate for massively parallel
+                    usage on the GPU. The translation is being developed using the
+                    Daya Bay near site as test geometry, which comprises 249 distinct solids
+                    that are converted into corresponding CSG node trees. Some 10 percent are found to have issues
+                    such as having coincident surfaces or being highly unbalanced with depths of up to 12 levels.
+                    Deep binary trees lead to highly inefficient handling, and coincident surfaces
+                    lead to unpredictable intersections. Volumes with issues include the reflectors
+                    at the top and bottom of the Antineutrino Detector (AD), the radial shield that surrounds
+                    the Outer Acrylic Vessel (OAV) and the water shield pool covers.
+                <paragraph>
+                    The deep CSG expressions mainly arise from recursive CSG subtractions.
+                    An automated way to convert these expressions into an equivalent more balanced form is required.
+                    Tree balancing algorithms typically first convert to a positive form with only the commutative intersect and union operators
+                    and some complemented primitives, by application of De Morgan's laws including difference(A,B) = intersect(A,complement(B)).
+                    In order to allow tree balancing in Opticks, support for complemented primitives has been implemented.
             <section ids="signed-distance-functions-sdf-and-r-function-composition" names="signed\ distance\ functions\ (sdf)\ and\ r-function\ composition">
                 <title>
                     Signed Distance Functions (SDF) and R-function composition
@@ -295,21 +332,13 @@
                     implicitly defined CSG solids using only the R-function recursively combined
                     signed distance functions.
                     Several open source polygonization implementations have been
-                    integrated with Opticks either as optional externals or internally.
-                <bullet_list bullet="*">
-                    <list_item>
-                        <paragraph>
-                            PyMCubes : fixed resolution marching cubes implementation
-                    <list_item>
-                        <paragraph>
-                            Dual Contouring : adaptive multi-resolution Octree approach
-                    <list_item>
-                        <paragraph>
-                            Implicit Mesher : fast surface following approach
+                    integrated with Opticks either as optional externals or internally, including
+                    an adaptive multi-resolution Octree approach (Dual Contouring) and
+                    a fast surface following approach (Implicit Mesher).
                 <paragraph>
                     Unfortunately all these polygonization techniques are found to perform badly with
                     very thin solids such as cathode of the Daya Bay photomultiplier tube, which is
-                    modelled using the CSG difference of two z-sliced sphere primitives of almost equal radius.
+                    modelled using the CSG difference of two truncated sphere primitives of almost equal radius.
                     It is expected that a hybrid parametric and implicit polygonization approach
                     can be devised to solve the thin solid problem.
         <section ids="opticks-validation" names="opticks\ validation">
@@ -334,23 +363,8 @@
                     an Opticks event format that includes highly compressed information
                     for the first 16 photon propagation points.
                     These events are compared by forming chi-squared distances for:
-                <bullet_list bullet="*">
-                    <list_item>
-                        <paragraph>
-                            photon history counts : within the 100 most frequent categories
-                    <list_item>
-                        <paragraph>
-                            photon step-by-step distributions : 8 quantities, position, time, polarization and wavelength
-                <figure>
-                    <image uri="env/presentation/tconcentric-8cccccccc9ccccd_half.png">
-                    <caption>
-                        Simplified three liquid detector geometry arranged in concentric spheres separated by acrylic.
-                        Photons from history category "TO BT BT BT BT DR BT BT BT BT BT BT BT BT SA" are shown,
-                        where the abbreviations are, TO:Torch, BT:Boundary Transmit, DR:Diffuse Reflect, SA:Surface Absorb
-                        and the initial photons all travel along the X axis indicated by the red line.  The line colors
-                        represent the material the photon is traversing, red:Gadolinium doped liquid scintillator, cyan: liquid scintillator and
-                        green: mineral oil.  The simplicity of this test geometry was adopted in order to debug an issue of Geant4 using
-                        the group velocity from the wrong material after refraction.
+                    photon history counts (within the 100 most frequent categories) and
+                    photon step-by-step distributions (position, time, polarization and wavelength).
                 <raw format="latex" xml:space="preserve">
                     {\small\begin{verbatim}
                     .       1000000   1000000       373.13/356 =  1.05  (pval 0.256 prob 0.744)
@@ -507,25 +521,16 @@
         <section ids="future-plans" names="future\ plans">
             <title>
                 Future Plans
-            <section ids="exact-full-detector-geometry-translation" names="exact\ full\ detector\ geometry\ translation">
+            <section ids="full-detector-geometry-translation" names="full\ detector\ geometry\ translation">
                 <title>
-                    Exact Full Detector Geometry Translation
+                    Full Detector Geometry Translation
                 <paragraph>
-                    General CSG ray tracing on the GPU now makes it possible to
-                    develop a fully automated conversion of Geant4 detector geometries
-                    into an exact equivalent form that is appropriate for massively parallel
-                    usage on the GPU.
-                <paragraph>
-                    Currently the translation is operational with small geometry subtrees
-                    such as the handful of solids that describe a single photomultiplier tube.
-                    In order to still benefit from OptiX acceleration structures
-                    and OptiX and OpenGL instancing the translation is intended to be done
-                    solid by solid. Some experimentation is required to determine the
-                    granularity at which to split up the full geometry trees into
-                    repeated subtree instances.
-                <paragraph>
-                    Full translation of Daya Bay geometry requires implementations of a few more primitives: trapezoid, cone
-                    and compound cone with varying radius at multiple z planes.
+                    Beyond the issues with individual solids that are currently being investigated, described previously,
+                    it is also necessary to develop a full geometry scene description that
+                    avoids repetition of information and makes best use of OptiX geometry and acceleration structure instancing
+                    for ray tracing and OpenGL instancing for visualization of the polygonizations.
+                    Some experimentation is required to determine an appropriate granularity at which to split
+                    up the full geometry hierarachy into repeated instances together with their transforms.
             <section ids="full-detector-validation" names="full\ detector\ validation">
                 <title>
                     Full Detector Validation
