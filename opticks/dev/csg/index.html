@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CSG Algorithm Prototyping &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">CSG Algorithm Prototyping</a><ul>
+<li><a class="reference internal" href="#production-code">&#8220;Production&#8221; code</a></li>
+<li><a class="reference internal" href="#development-exploration-code">Development Exploration code</a><ul>
+<li><a class="reference internal" href="#ulyanov-excursion-into-heart-of-darkness">Ulyanov Excursion into Heart of Darkness</a></li>
+<li><a class="reference internal" href="#potentially-useful-machinery-developed-whilst-debugging-in-the-heart-of-darkness">Potentially Useful machinery developed whilst debugging in the Heart of Darkness</a></li>
+<li><a class="reference internal" href="#learning-binary-tree-gymnastics">Learning : binary tree gymnastics</a></li>
+<li><a class="reference internal" href="#learning-morton-magic-bit-twiddling">Learning : Morton magic bit twiddling</a></li>
+<li><a class="reference internal" href="#learning-converting-recursive-to-iterative">Learning : Converting Recursive to Iterative</a></li>
+<li><a class="reference internal" href="#gpu-csg-design">GPU CSG Design</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/dev/csg/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="csg-algorithm-prototyping">
+<h1>CSG Algorithm Prototyping<a class="headerlink" href="#csg-algorithm-prototyping" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="production-code">
+<h2>&#8220;Production&#8221; code<a class="headerlink" href="#production-code" title="Permalink to this headline">¶</a></h2>
+<p>Production code meaning that it is used from elsewhere, and
+thus cannot be changed without regard to its users.</p>
+<dl class="docutils">
+<dt>csg.py</dt>
+<dd>python CSG description, with serialization that is deserialized by npy/NCSG,
+used by tboolean-</dd>
+<dt>glm.py</dt>
+<dd>translation into python of some GLM matrix transform manipulations</dd>
+<dt>GParts.py</dt>
+<dd>indexed access to the partlist of a primitive for oldstyle CGS_FLAGPARTLIST</dd>
+</dl>
+</div>
+<div class="section" id="development-exploration-code">
+<h2>Development Exploration code<a class="headerlink" href="#development-exploration-code" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ulyanov-excursion-into-heart-of-darkness">
+<h3>Ulyanov Excursion into Heart of Darkness<a class="headerlink" href="#ulyanov-excursion-into-heart-of-darkness" title="Permalink to this headline">¶</a></h3>
+<p>Failed attempt to implement pseudocode from
+a computer science paper that purported to implement iterative CSG.</p>
+<dl class="docutils">
+<dt>boolean.py</dt>
+<dd>bugged boolean tables</dd>
+<dt>csgtree.py</dt>
+<dd>heart of darkness</dd>
+</dl>
+</div>
+<div class="section" id="potentially-useful-machinery-developed-whilst-debugging-in-the-heart-of-darkness">
+<h3>Potentially Useful machinery developed whilst debugging in the Heart of Darkness<a class="headerlink" href="#potentially-useful-machinery-developed-whilst-debugging-in-the-heart-of-darkness" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>intersect.py</dt>
+<dd>numpy based CPU side handling of lots of intersects, some
+potentially useful techniques that came out of the Heart of Darkness</dd>
+<dt>intersectTest.py</dt>
+<dd>2d matplotlib plotting of intersects</dd>
+<dt>ray.py</dt>
+<dd>numpy based collections of rays, used for CPU side debugging
+of CSG algorithms (2d intersections used with matplotlib plotting of intersects)</dd>
+<dt>nodeRenderer.py</dt>
+<dd>matplotlib based rendering of geometry in 2d, used for intersect debugging</dd>
+</dl>
+</div>
+<div class="section" id="learning-binary-tree-gymnastics">
+<h3>Learning : binary tree gymnastics<a class="headerlink" href="#learning-binary-tree-gymnastics" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>stacktrav.py</dt>
+<dd>basics of binary tree traversal in preorder/postorder/inorder/levelorder</dd>
+<dt>bintree.py</dt>
+<dd>roundtrip binary tree serialization/deserialization testing, and
+multi binary tree concatenation/de-concatentation testing</dd>
+<dt>node.py</dt>
+<dd>binary tree gymnastics and serialization dev</dd>
+<dt>postOrderIterative.py</dt>
+<dd>alt iterative approach</dd>
+<dt>postOrderTraversalWithoutRecursion.py</dt>
+<dd>exploring how to traverse binary trees without using recursion</dd>
+</dl>
+</div>
+<div class="section" id="learning-morton-magic-bit-twiddling">
+<h3>Learning : Morton magic bit twiddling<a class="headerlink" href="#learning-morton-magic-bit-twiddling" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>morton.py</dt>
+<dd>playing with morton 2d codes</dd>
+<dt>zorder.py</dt>
+<dd>quadtree exploration, 2d morton codes, multires z-order curve plotting</dd>
+</dl>
+</div>
+<div class="section" id="learning-converting-recursive-to-iterative">
+<h3>Learning : Converting Recursive to Iterative<a class="headerlink" href="#learning-converting-recursive-to-iterative" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>factorial.py</dt>
+<dd>very simple example of converting recursive into iterative</dd>
+<dt>hilbert.py</dt>
+<dd>more realistic example of converting recursive into iterative,
+with Hilbert curve plotting with matplotlib</dd>
+</dl>
+</div>
+<div class="section" id="gpu-csg-design">
+<h3>GPU CSG Design<a class="headerlink" href="#gpu-csg-design" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>iterativeExpression.py</dt>
+<dd>Provided the seed for GPU CSG implementation, with the realization that
+externalizing the postorder traversal makes binary tree evaluation very simple
+and tractable without recursion.  Also the direct parallels between
+CSG node tree evaluation to binary expression evaluation was realized.</dd>
+<dt>iterativeTreeEvaluation.py</dt>
+<dd>starting point for the design of GPU CSG, handling the node traversal
+and reiteration techniques, lots of design notes : Heart of Design</dd>
+<dt>ctrl.py</dt>
+<dd>enum used by iterativeTreeEvaluation*</dd>
+<dt>iterativeTreeEvaluationFake.py</dt>
+<dd>comparing iterative and recursive imps</dd>
+<dt>iterativeTreeEvaluationCSG.py</dt>
+<dd>applying the nascent algorithm</dd>
+<dt>postorder.py</dt>
+<dd><p class="first">devise bit twiddling postorder for binary trees, inspired by 1d Morton codes,
+postorder_next allows doing bare naked postorder traverses of
+serialized binary trees</p>
+<ul class="last simple">
+<li>without reconstructing the node tree</li>
+<li>without using recursion</li>
+<li>without storing postorder sequence indices</li>
+</ul>
+</dd>
+<dt>slavish.py</dt>
+<dd>slavish translation of CUDA CSG ray trace back to python, used for debugging</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Instance Identity &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/ok/enhancement/instance_identity.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="instance-identity">
+<h1>Instance Identity<a class="headerlink" href="#instance-identity" title="Permalink to this headline">¶</a></h1>
+<p>OptiX geometry instances (each with a different transform associated)
+need to have separate identity, so can know which PMT gets hit for example.</p>
+<p>DYB GMergedMesh/1, the 5 solids of the PMT:</p>
+<div class="highlight-python"><pre>In [1]: s = np.load("sensors.npy")
+
+In [3]: s.shape
+Out[3]: (2928, 1)
+
+In [3]: s.shape
+Out[3]: (2928, 1)
+
+In [4]: s[:,0]
+Out[4]: array([1, 1, 1, ..., 5, 5, 5], dtype=int32)
+
+In [5]: count_unique(s[:,0])
+Out[5]:
+array([[  1, 720],
+       [  2, 672],
+       [  3, 960],
+       [  4, 480],
+       [  5,  96]])</pre>
+</div>
+<div class="highlight-python"><pre>In [7]: n = np.load("nodeinfo.npy")
+
+In [8]: n
+Out[8]:
+array([[ 720,  362, 3199, 3155],
+       [ 672,  338, 3200, 3199],
+       [ 960,  482, 3201, 3200],
+       [ 480,  242, 3202, 3200],
+       [  96,   50, 3203, 3200]], dtype=uint32)</pre>
+</div>
+<p>Observations:</p>
+<ul class="simple">
+<li>nodeinfo just covers the 1st instance.</li>
+<li>only the 3rd solid, the cathode, is really a sensor</li>
+</ul>
+<p>Using the instance identity buffer to handle this:</p>
+<div class="highlight-python"><pre>In [1]: ii = np.load("iidentity.npy")
+
+In [2]: ii.shape
+Out[2]: (3360, 4)
+
+In [3]: ii.reshape(-1,5,4).shape
+Out[3]: (672, 5, 4)
+
+In [4]: ii.reshape(-1,5,4)
+Out[4]:
+array([[[ 3199,    47,    19,     0],
+        [ 3200,    46,    20,     0],
+        [ 3201,    43,    21,     3],
+        [ 3202,    44,     1,     0],
+        [ 3203,    45,     1,     0]],
+
+       [[ 3205,    47,    19,     0],
+        [ 3206,    46,    20,     0],
+        [ 3207,    43,    21,     8],
+        [ 3208,    44,     1,     0],
+        [ 3209,    45,     1,     0]],
+
+       [[ 3211,    47,    19,     0],
+        [ 3212,    46,    20,     0],
+        [ 3213,    43,    21,    13],
+        [ 3214,    44,     1,     0],
+        [ 3215,    45,     1,     0]],
+
+       ...,</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
