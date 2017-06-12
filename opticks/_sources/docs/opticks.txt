@@ -1,110 +1,6 @@
 Opticks Install Instructions
 ==================================
 
-Using a Shared Opticks Installation
--------------------------------------
-
-If someone has installed Opticks for you already 
-you just need to set the PATH variable in your .bash_profile 
-to easily find the Opticks executables and scripts. 
-
-.. code-block:: sh
-
-    # .bash_profile
-
-    # Get the aliases and functions
-    if [ -f ~/.bashrc ]; then
-        . ~/.bashrc
-    fi
-
-    # User specific environment and startup programs
-
-    PATH=$PATH:$HOME/.local/bin:$HOME/bin
-    ini(){ . ~/.bash_profile ; }
-
-    ok-local(){    echo /home/simonblyth/local ; }
-    ok-opticks(){  echo /home/simonblyth/opticks ; }
-    ok-ctest(){    ( cd $(ok-local)/opticks/build ; ctest3 $* ; ) }
-
-    export PATH=$(ok-opticks)/ana:$(ok-opticks)/bin:$(ok-local)/opticks/lib:$PATH
-
-
-You can test the installation using the `ok-ctest` function defined in 
-the .bash_profile. The output shoule look like the below. 
-The permission denied error is not a problem.
-
-.. code-block:: sh
-
-    [blyth@optix ~]$ ok-ctest
-    Test project /home/simonblyth/local/opticks/build
-    CMake Error: Cannot open file for write: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log.tmp
-    CMake Error: : System Error: Permission denied
-    Problem opening file: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log
-    Cannot create log file: LastTest.log
-            Start   1: SysRapTest.SEnvTest
-      1/155 Test   #1: SysRapTest.SEnvTest ........................   Passed    0.00 sec
-            Start   2: SysRapTest.SSysTest
-    ...
-    ...
-    154/155 Test #154: cfg4Test.G4StringTest ......................   Passed    0.06 sec
-            Start 155: cfg4Test.G4BoxTest
-    155/155 Test #155: cfg4Test.G4BoxTest .........................   Passed    0.05 sec
-
-    100% tests passed, 0 tests failed out of 155
-
-    Total Test time (real) =  48.30 sec
-
-
-
-Opticks Installation Requirements
-----------------------------------
-
-Much of Opticks functionality can still be used on machines
-without an NVIDIA GPU by using Geant4 for simulation
-and OpenGL for visualization.
-
-However to benefit from huge speedup factors 
-requires an NVIDIA GPU with compute capability of 3.0 or better
-(Kepler, Maxwell or Pascal architectures).
-
-macOS : Xcode/clang toolchain
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Primary development platfom : Mavericks 10.9.4 
-* NVIDIA Geforce GT 750M (mobile GPU) 
-
-Linux : GCC toolchain
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Opticks has been ported to a DELL Precision Workstation, running Ubuntu 
-* NVIDIA Quadro M5000 
-
-Windows : Microsoft Visual Studio 2015, Community edition
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Ported to Windows 7 SP1 machine 
-* non-CUDA capable GPU
-
-Opticks installation uses the bash shell. 
-The Windows bash shell that comes with 
-the git-for-windows project was used for this purpose
-
-* https://github.com/git-for-windows
- 
-Despite lack of an CUDA capable GPU, the OpenGL Opticks
-visualization was found to operate successfully.
-
-OpenGL Version Requirements
-------------------------------
-
-Opticks uses GLSL shaders with version 400, 
-corresponding to at least OpenGL 4.0
-
-OpenGL versions supported by various systems are listed at the below links.
-
-* macOS : https://support.apple.com/en-us/HT202823  (approx all macOS systems from 2010 onwards)
-
-
 Get Opticks 
 ------------
 
@@ -123,35 +19,29 @@ as running it will define other functions all starting with *opticks-* such as *
 and *opticks-usage*.
 
 
-
 Opticks Installation Overview
 --------------------------------
 
 Opticks installation requires:
 
 * bash shell and build tools such as mercurial, git, curl, etc.. 
-* a recent cmake 2.8.9+
-* several of the Boost C++ libraries 1.59+ 
+* recent cmake 2.8.9+
+* Boost C++ libraries 1.59+ 
 
 * installations of pre-requisites packages
 
   * NVIDIA OptiX 3.80
   * NVIDIA CUDA 7.0 
 
-
 I advise those precise versions of OptiX and CUDA, if you use other versions 
 you become a developer rather than a user, please report your findings.
-
-  
-If it is necessary to install or update build tools or Boost it is 
-best to do so via your system package manager. 
-
-The pre-requisite packages from NVIDIA need to be installed by
+The pre-requisite packages from NVIDIA need to be installed 
 following the instructions from NVIDIA. You will also need to 
 register as an NVIDIA developer.
 
-After you have the pre-requisites you can install Opticks and its
+After meeting these requirements you can install Opticks and its
 external packages using a single command: *opticks-full* 
+
 
 Build Tools
 ------------
@@ -372,22 +262,25 @@ locate the CUDA and OptiX::
 Opticks Without NVIDIA OptiX and CUDA ?
 ------------------------------------------
 
-Full Opticks functionality with GPU simulation of optical photons requires CUDA and OptiX, 
-however if your GPU is not able to run OptiX/CUDA it is still possible to make a 
-partial build of Opticks using cmake switch WITH_OPTIX=OFF. 
+High performance optical photon simulation requires an NVIDIA GPU 
+with compute capability of 3.0 or better (Kepler, Maxwell or Pascal architectures).
+However if your GPU is not able to run OptiX/CUDA but is able to run OpenGL 4.0
+(eg if you have an AMD GPU or an integrated Intel GPU) 
+it is still possible to make a partial build of Opticks 
+using cmake switch WITH_OPTIX=OFF. 
+
 The partial mode provides OpenGL visualizations of geometry and  
 photon propagations loaded from file.  
-
 This mode is not tested often, so provide copy/paste errors if it fails for you.
 
 
 Testing Installation
 ----------------------
 
-The *opticks-ctest* functions runs ctests for all the opticks projects::
+The *opticks-t* functions runs ctests for all the opticks projects::
 
     simon:opticks blyth$ opticks-
-    simon:opticks blyth$ opticks-ctest
+    simon:opticks blyth$ opticks-t
     Test project /usr/local/opticks/build
           Start  1: SysRapTest.SEnvTest
      1/65 Test  #1: SysRapTest.SEnvTest ........................   Passed    0.00 sec
@@ -453,5 +346,106 @@ to is provided below:
 
     PATH=$OPTICKS_HOME/bin:$LOCAL_BASE/opticks/lib:$PATH  ## easy access to scripts and executables
     export PATH
+
+
+
+
+
+Systems where Opticks has been Installed
+------------------------------------------
+
+macOS : Xcode/clang toolchain
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Primary development platfom : Mavericks 10.9.4 
+* NVIDIA Geforce GT 750M (mobile GPU) 
+
+Linux : GCC toolchain
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Opticks has been ported to a DELL Precision Workstation, running Ubuntu 
+* NVIDIA Quadro M5000 
+
+Windows : Microsoft Visual Studio 2015, Community edition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Ported to Windows 7 SP1 machine 
+* non-CUDA capable GPU
+
+Opticks installation uses the bash shell. 
+The Windows bash shell that comes with 
+the git-for-windows project was used for this purpose
+
+* https://github.com/git-for-windows
+ 
+Despite lack of an CUDA capable GPU, the OpenGL Opticks
+visualization was found to operate successfully.
+
+OpenGL Version Requirements
+------------------------------
+
+Opticks uses GLSL shaders with version 400, 
+corresponding to at least OpenGL 4.0
+
+OpenGL versions supported by various systems are listed at the below links.
+
+* macOS : https://support.apple.com/en-us/HT202823  (approx all macOS systems from 2010 onwards)
+
+
+
+
+Using a Shared Opticks Installation
+-------------------------------------
+
+If someone has installed Opticks for you already 
+you just need to set the PATH variable in your .bash_profile 
+to easily find the Opticks executables and scripts. 
+
+.. code-block:: sh
+
+    # .bash_profile
+
+    # Get the aliases and functions
+    if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+    fi
+
+    # User specific environment and startup programs
+
+    PATH=$PATH:$HOME/.local/bin:$HOME/bin
+    ini(){ . ~/.bash_profile ; }
+
+    ok-local(){    echo /home/simonblyth/local ; }
+    ok-opticks(){  echo /home/simonblyth/opticks ; }
+    ok-ctest(){    ( cd $(ok-local)/opticks/build ; ctest3 $* ; ) }
+
+    export PATH=$(ok-opticks)/ana:$(ok-opticks)/bin:$(ok-local)/opticks/lib:$PATH
+
+
+You can test the installation using the `ok-ctest` function defined in 
+the .bash_profile. The output shoule look like the below. 
+The permission denied error is not a problem.
+
+.. code-block:: sh
+
+    [blyth@optix ~]$ ok-ctest
+    Test project /home/simonblyth/local/opticks/build
+    CMake Error: Cannot open file for write: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log.tmp
+    CMake Error: : System Error: Permission denied
+    Problem opening file: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log
+    Cannot create log file: LastTest.log
+            Start   1: SysRapTest.SEnvTest
+      1/155 Test   #1: SysRapTest.SEnvTest ........................   Passed    0.00 sec
+            Start   2: SysRapTest.SSysTest
+    ...
+    ...
+    154/155 Test #154: cfg4Test.G4StringTest ......................   Passed    0.06 sec
+            Start 155: cfg4Test.G4BoxTest
+    155/155 Test #155: cfg4Test.G4BoxTest .........................   Passed    0.05 sec
+
+    100% tests passed, 0 tests failed out of 155
+
+    Total Test time (real) =  48.30 sec
+
 
 

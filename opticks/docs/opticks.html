@@ -48,14 +48,6 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Opticks Install Instructions</a><ul>
-<li><a class="reference internal" href="#using-a-shared-opticks-installation">Using a Shared Opticks Installation</a></li>
-<li><a class="reference internal" href="#opticks-installation-requirements">Opticks Installation Requirements</a><ul>
-<li><a class="reference internal" href="#macos-xcode-clang-toolchain">macOS : Xcode/clang toolchain</a></li>
-<li><a class="reference internal" href="#linux-gcc-toolchain">Linux : GCC toolchain</a></li>
-<li><a class="reference internal" href="#windows-microsoft-visual-studio-2015-community-edition">Windows : Microsoft Visual Studio 2015, Community edition</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#opengl-version-requirements">OpenGL Version Requirements</a></li>
 <li><a class="reference internal" href="#get-opticks">Get Opticks</a></li>
 <li><a class="reference internal" href="#opticks-installation-overview">Opticks Installation Overview</a></li>
 <li><a class="reference internal" href="#build-tools">Build Tools</a></li>
@@ -75,6 +67,14 @@
 <li><a class="reference internal" href="#testing-installation">Testing Installation</a></li>
 <li><a class="reference internal" href="#issues-with-tests">Issues With Tests</a></li>
 <li><a class="reference internal" href="#running-opticks-scripts-and-executables">Running Opticks Scripts and Executables</a></li>
+<li><a class="reference internal" href="#systems-where-opticks-has-been-installed">Systems where Opticks has been Installed</a><ul>
+<li><a class="reference internal" href="#macos-xcode-clang-toolchain">macOS : Xcode/clang toolchain</a></li>
+<li><a class="reference internal" href="#linux-gcc-toolchain">Linux : GCC toolchain</a></li>
+<li><a class="reference internal" href="#windows-microsoft-visual-studio-2015-community-edition">Windows : Microsoft Visual Studio 2015, Community edition</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#opengl-version-requirements">OpenGL Version Requirements</a></li>
+<li><a class="reference internal" href="#using-a-shared-opticks-installation">Using a Shared Opticks Installation</a></li>
 </ul>
 </li>
 </ul>
@@ -113,101 +113,6 @@
             
   <div class="section" id="opticks-install-instructions">
 <h1>Opticks Install Instructions<a class="headerlink" href="#opticks-install-instructions" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="using-a-shared-opticks-installation">
-<h2>Using a Shared Opticks Installation<a class="headerlink" href="#using-a-shared-opticks-installation" title="Permalink to this headline">¶</a></h2>
-<p>If someone has installed Opticks for you already
-you just need to set the PATH variable in your .bash_profile
-to easily find the Opticks executables and scripts.</p>
-<div class="highlight-sh"><div class="highlight"><pre><span class="c"># .bash_profile</span>
-
-<span class="c"># Get the aliases and functions</span>
-<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span>; <span class="k">then</span>
-    . ~/.bashrc
-<span class="k">fi</span>
-
-<span class="c"># User specific environment and startup programs</span>
-
-<span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HOME</span>/.local/bin:<span class="nv">$HOME</span>/bin
-ini<span class="o">(){</span> . ~/.bash_profile ; <span class="o">}</span>
-
-ok-local<span class="o">(){</span>    <span class="nb">echo</span> /home/simonblyth/local ; <span class="o">}</span>
-ok-opticks<span class="o">(){</span>  <span class="nb">echo</span> /home/simonblyth/opticks ; <span class="o">}</span>
-ok-ctest<span class="o">(){</span>    <span class="o">(</span> <span class="nb">cd</span> <span class="k">$(</span>ok-local<span class="k">)</span>/opticks/build ; ctest3 <span class="nv">$*</span> ; <span class="o">)</span> <span class="o">}</span>
-
-<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="k">$(</span>ok-opticks<span class="k">)</span>/ana:<span class="k">$(</span>ok-opticks<span class="k">)</span>/bin:<span class="k">$(</span>ok-local<span class="k">)</span>/opticks/lib:<span class="nv">$PATH</span>
-</pre></div>
-</div>
-<p>You can test the installation using the <cite>ok-ctest</cite> function defined in
-the .bash_profile. The output shoule look like the below.
-The permission denied error is not a problem.</p>
-<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>blyth@optix ~<span class="o">]</span><span class="nv">$ </span>ok-ctest
-Test project /home/simonblyth/local/opticks/build
-CMake Error: Cannot open file <span class="k">for </span>write: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log.tmp
-CMake Error: : System Error: Permission denied
-Problem opening file: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log
-Cannot create log file: LastTest.log
-        Start   1: SysRapTest.SEnvTest
-  1/155 Test   <span class="c">#1: SysRapTest.SEnvTest ........................   Passed    0.00 sec</span>
-        Start   2: SysRapTest.SSysTest
-...
-...
-154/155 Test <span class="c">#154: cfg4Test.G4StringTest ......................   Passed    0.06 sec</span>
-        Start 155: cfg4Test.G4BoxTest
-155/155 Test <span class="c">#155: cfg4Test.G4BoxTest .........................   Passed    0.05 sec</span>
-
-100% tests passed, 0 tests failed out of 155
-
-Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  48.30 sec
-</pre></div>
-</div>
-</div>
-<div class="section" id="opticks-installation-requirements">
-<h2>Opticks Installation Requirements<a class="headerlink" href="#opticks-installation-requirements" title="Permalink to this headline">¶</a></h2>
-<p>Much of Opticks functionality can still be used on machines
-without an NVIDIA GPU by using Geant4 for simulation
-and OpenGL for visualization.</p>
-<p>However to benefit from huge speedup factors
-requires an NVIDIA GPU with compute capability of 3.0 or better
-(Kepler, Maxwell or Pascal architectures).</p>
-<div class="section" id="macos-xcode-clang-toolchain">
-<h3>macOS : Xcode/clang toolchain<a class="headerlink" href="#macos-xcode-clang-toolchain" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Primary development platfom : Mavericks 10.9.4</li>
-<li>NVIDIA Geforce GT 750M (mobile GPU)</li>
-</ul>
-</div>
-<div class="section" id="linux-gcc-toolchain">
-<h3>Linux : GCC toolchain<a class="headerlink" href="#linux-gcc-toolchain" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Opticks has been ported to a DELL Precision Workstation, running Ubuntu</li>
-<li>NVIDIA Quadro M5000</li>
-</ul>
-</div>
-<div class="section" id="windows-microsoft-visual-studio-2015-community-edition">
-<h3>Windows : Microsoft Visual Studio 2015, Community edition<a class="headerlink" href="#windows-microsoft-visual-studio-2015-community-edition" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Ported to Windows 7 SP1 machine</li>
-<li>non-CUDA capable GPU</li>
-</ul>
-<p>Opticks installation uses the bash shell.
-The Windows bash shell that comes with
-the git-for-windows project was used for this purpose</p>
-<ul class="simple">
-<li><a class="reference external" href="https://github.com/git-for-windows">https://github.com/git-for-windows</a></li>
-</ul>
-<p>Despite lack of an CUDA capable GPU, the OpenGL Opticks
-visualization was found to operate successfully.</p>
-</div>
-</div>
-<div class="section" id="opengl-version-requirements">
-<h2>OpenGL Version Requirements<a class="headerlink" href="#opengl-version-requirements" title="Permalink to this headline">¶</a></h2>
-<p>Opticks uses GLSL shaders with version 400,
-corresponding to at least OpenGL 4.0</p>
-<p>OpenGL versions supported by various systems are listed at the below links.</p>
-<ul class="simple">
-<li>macOS : <a class="reference external" href="https://support.apple.com/en-us/HT202823">https://support.apple.com/en-us/HT202823</a>  (approx all macOS systems from 2010 onwards)</li>
-</ul>
-</div>
 <div class="section" id="get-opticks">
 <h2>Get Opticks<a class="headerlink" href="#get-opticks" title="Permalink to this headline">¶</a></h2>
 <p>Clone the repository from bitbucket:</p>
@@ -227,8 +132,8 @@ and <em>opticks-usage</em>.</p>
 <p>Opticks installation requires:</p>
 <ul class="simple">
 <li>bash shell and build tools such as mercurial, git, curl, etc..</li>
-<li>a recent cmake 2.8.9+</li>
-<li>several of the Boost C++ libraries 1.59+</li>
+<li>recent cmake 2.8.9+</li>
+<li>Boost C++ libraries 1.59+</li>
 <li>installations of pre-requisites packages<ul>
 <li>NVIDIA OptiX 3.80</li>
 <li>NVIDIA CUDA 7.0</li>
@@ -236,13 +141,11 @@ and <em>opticks-usage</em>.</p>
 </li>
 </ul>
 <p>I advise those precise versions of OptiX and CUDA, if you use other versions
-you become a developer rather than a user, please report your findings.</p>
-<p>If it is necessary to install or update build tools or Boost it is
-best to do so via your system package manager.</p>
-<p>The pre-requisite packages from NVIDIA need to be installed by
+you become a developer rather than a user, please report your findings.
+The pre-requisite packages from NVIDIA need to be installed
 following the instructions from NVIDIA. You will also need to
 register as an NVIDIA developer.</p>
-<p>After you have the pre-requisites you can install Opticks and its
+<p>After meeting these requirements you can install Opticks and its
 external packages using a single command: <em>opticks-full</em></p>
 </div>
 <div class="section" id="build-tools">
@@ -528,18 +431,21 @@ find_package(OptiX ${OPTICKS_OPTIX_VERSION})</pre>
 </div>
 <div class="section" id="opticks-without-nvidia-optix-and-cuda">
 <h2>Opticks Without NVIDIA OptiX and CUDA ?<a class="headerlink" href="#opticks-without-nvidia-optix-and-cuda" title="Permalink to this headline">¶</a></h2>
-<p>Full Opticks functionality with GPU simulation of optical photons requires CUDA and OptiX,
-however if your GPU is not able to run OptiX/CUDA it is still possible to make a
-partial build of Opticks using cmake switch WITH_OPTIX=OFF.
-The partial mode provides OpenGL visualizations of geometry and
-photon propagations loaded from file.</p>
-<p>This mode is not tested often, so provide copy/paste errors if it fails for you.</p>
+<p>High performance optical photon simulation requires an NVIDIA GPU
+with compute capability of 3.0 or better (Kepler, Maxwell or Pascal architectures).
+However if your GPU is not able to run OptiX/CUDA but is able to run OpenGL 4.0
+(eg if you have an AMD GPU or an integrated Intel GPU)
+it is still possible to make a partial build of Opticks
+using cmake switch WITH_OPTIX=OFF.</p>
+<p>The partial mode provides OpenGL visualizations of geometry and
+photon propagations loaded from file.
+This mode is not tested often, so provide copy/paste errors if it fails for you.</p>
 </div>
 <div class="section" id="testing-installation">
 <h2>Testing Installation<a class="headerlink" href="#testing-installation" title="Permalink to this headline">¶</a></h2>
-<p>The <em>opticks-ctest</em> functions runs ctests for all the opticks projects:</p>
+<p>The <em>opticks-t</em> functions runs ctests for all the opticks projects:</p>
 <div class="highlight-python"><pre>simon:opticks blyth$ opticks-
-simon:opticks blyth$ opticks-ctest
+simon:opticks blyth$ opticks-t
 Test project /usr/local/opticks/build
       Start  1: SysRapTest.SEnvTest
  1/65 Test  #1: SysRapTest.SEnvTest ........................   Passed    0.00 sec
@@ -599,6 +505,95 @@ op<span class="o">(){</span> op.sh <span class="nv">$*</span> ; <span class="o">
 
 <span class="nv">PATH</span><span class="o">=</span><span class="nv">$OPTICKS_HOME</span>/bin:<span class="nv">$LOCAL_BASE</span>/opticks/lib:<span class="nv">$PATH</span>  <span class="c">## easy access to scripts and executables</span>
 <span class="nb">export </span>PATH
+</pre></div>
+</div>
+</div>
+<div class="section" id="systems-where-opticks-has-been-installed">
+<h2>Systems where Opticks has been Installed<a class="headerlink" href="#systems-where-opticks-has-been-installed" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="macos-xcode-clang-toolchain">
+<h3>macOS : Xcode/clang toolchain<a class="headerlink" href="#macos-xcode-clang-toolchain" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Primary development platfom : Mavericks 10.9.4</li>
+<li>NVIDIA Geforce GT 750M (mobile GPU)</li>
+</ul>
+</div>
+<div class="section" id="linux-gcc-toolchain">
+<h3>Linux : GCC toolchain<a class="headerlink" href="#linux-gcc-toolchain" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Opticks has been ported to a DELL Precision Workstation, running Ubuntu</li>
+<li>NVIDIA Quadro M5000</li>
+</ul>
+</div>
+<div class="section" id="windows-microsoft-visual-studio-2015-community-edition">
+<h3>Windows : Microsoft Visual Studio 2015, Community edition<a class="headerlink" href="#windows-microsoft-visual-studio-2015-community-edition" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Ported to Windows 7 SP1 machine</li>
+<li>non-CUDA capable GPU</li>
+</ul>
+<p>Opticks installation uses the bash shell.
+The Windows bash shell that comes with
+the git-for-windows project was used for this purpose</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/git-for-windows">https://github.com/git-for-windows</a></li>
+</ul>
+<p>Despite lack of an CUDA capable GPU, the OpenGL Opticks
+visualization was found to operate successfully.</p>
+</div>
+</div>
+<div class="section" id="opengl-version-requirements">
+<h2>OpenGL Version Requirements<a class="headerlink" href="#opengl-version-requirements" title="Permalink to this headline">¶</a></h2>
+<p>Opticks uses GLSL shaders with version 400,
+corresponding to at least OpenGL 4.0</p>
+<p>OpenGL versions supported by various systems are listed at the below links.</p>
+<ul class="simple">
+<li>macOS : <a class="reference external" href="https://support.apple.com/en-us/HT202823">https://support.apple.com/en-us/HT202823</a>  (approx all macOS systems from 2010 onwards)</li>
+</ul>
+</div>
+<div class="section" id="using-a-shared-opticks-installation">
+<h2>Using a Shared Opticks Installation<a class="headerlink" href="#using-a-shared-opticks-installation" title="Permalink to this headline">¶</a></h2>
+<p>If someone has installed Opticks for you already
+you just need to set the PATH variable in your .bash_profile
+to easily find the Opticks executables and scripts.</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="c"># .bash_profile</span>
+
+<span class="c"># Get the aliases and functions</span>
+<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span>; <span class="k">then</span>
+    . ~/.bashrc
+<span class="k">fi</span>
+
+<span class="c"># User specific environment and startup programs</span>
+
+<span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HOME</span>/.local/bin:<span class="nv">$HOME</span>/bin
+ini<span class="o">(){</span> . ~/.bash_profile ; <span class="o">}</span>
+
+ok-local<span class="o">(){</span>    <span class="nb">echo</span> /home/simonblyth/local ; <span class="o">}</span>
+ok-opticks<span class="o">(){</span>  <span class="nb">echo</span> /home/simonblyth/opticks ; <span class="o">}</span>
+ok-ctest<span class="o">(){</span>    <span class="o">(</span> <span class="nb">cd</span> <span class="k">$(</span>ok-local<span class="k">)</span>/opticks/build ; ctest3 <span class="nv">$*</span> ; <span class="o">)</span> <span class="o">}</span>
+
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="k">$(</span>ok-opticks<span class="k">)</span>/ana:<span class="k">$(</span>ok-opticks<span class="k">)</span>/bin:<span class="k">$(</span>ok-local<span class="k">)</span>/opticks/lib:<span class="nv">$PATH</span>
+</pre></div>
+</div>
+<p>You can test the installation using the <cite>ok-ctest</cite> function defined in
+the .bash_profile. The output shoule look like the below.
+The permission denied error is not a problem.</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>blyth@optix ~<span class="o">]</span><span class="nv">$ </span>ok-ctest
+Test project /home/simonblyth/local/opticks/build
+CMake Error: Cannot open file <span class="k">for </span>write: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log.tmp
+CMake Error: : System Error: Permission denied
+Problem opening file: /home/simonblyth/local/opticks/build/Testing/Temporary/LastTest.log
+Cannot create log file: LastTest.log
+        Start   1: SysRapTest.SEnvTest
+  1/155 Test   <span class="c">#1: SysRapTest.SEnvTest ........................   Passed    0.00 sec</span>
+        Start   2: SysRapTest.SSysTest
+...
+...
+154/155 Test <span class="c">#154: cfg4Test.G4StringTest ......................   Passed    0.06 sec</span>
+        Start 155: cfg4Test.G4BoxTest
+155/155 Test <span class="c">#155: cfg4Test.G4BoxTest .........................   Passed    0.05 sec</span>
+
+100% tests passed, 0 tests failed out of 155
+
+Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  48.30 sec
 </pre></div>
 </div>
 </div>
