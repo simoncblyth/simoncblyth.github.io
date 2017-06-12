@@ -57,17 +57,19 @@
 </li>
 <li><a class="reference internal" href="#opengl-version-requirements">OpenGL Version Requirements</a></li>
 <li><a class="reference internal" href="#get-opticks">Get Opticks</a></li>
+<li><a class="reference internal" href="#opticks-installation-overview">Opticks Installation Overview</a></li>
 <li><a class="reference internal" href="#build-tools">Build Tools</a></li>
 <li><a class="reference internal" href="#cmake">CMake</a></li>
-<li><a class="reference internal" href="#opticks-pre-requisites">Opticks Pre-requisites</a><ul>
-<li><a class="reference internal" href="#boost-infrastructure-libraries">Boost Infrastructure Libraries</a></li>
+<li><a class="reference internal" href="#boost-c-libraries">Boost C++ Libraries</a><ul>
 <li><a class="reference internal" href="#updating-boost">Updating Boost</a></li>
-<li><a class="reference internal" href="#nvidia-optix-and-nvidia-cuda">NVIDIA OptiX and NVIDIA CUDA</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#building-opticks">Building Opticks</a></li>
+<li><a class="reference internal" href="#opticks-pre-requisites-nvidia-optix-and-nvidia-cuda">Opticks Pre-requisites : NVIDIA OptiX and NVIDIA CUDA</a></li>
+<li><a class="reference internal" href="#building-opticks">Building Opticks</a><ul>
 <li><a class="reference internal" href="#externals">Externals</a></li>
-<li><a class="reference internal" href="#configuring-and-building-opticks">Configuring and Building Opticks</a></li>
+<li><a class="reference internal" href="#manually-configuring-opticks">Manually Configuring Opticks</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#configuration-machinery">Configuration Machinery</a></li>
 <li><a class="reference internal" href="#opticks-without-nvidia-optix-and-cuda">Opticks Without NVIDIA OptiX and CUDA ?</a></li>
 <li><a class="reference internal" href="#testing-installation">Testing Installation</a></li>
@@ -220,6 +222,29 @@ export LOCAL_BASE=/usr/local</pre>
 as running it will define other functions all starting with <em>opticks-</em> such as <em>opticks-vi</em>
 and <em>opticks-usage</em>.</p>
 </div>
+<div class="section" id="opticks-installation-overview">
+<h2>Opticks Installation Overview<a class="headerlink" href="#opticks-installation-overview" title="Permalink to this headline">¶</a></h2>
+<p>Opticks installation requires:</p>
+<ul class="simple">
+<li>bash shell and build tools such as mercurial, git, curl, etc..</li>
+<li>a recent cmake 2.8.9+</li>
+<li>several of the Boost C++ libraries 1.59+</li>
+<li>installations of pre-requisites packages<ul>
+<li>NVIDIA OptiX 3.80</li>
+<li>NVIDIA CUDA 7.0</li>
+</ul>
+</li>
+</ul>
+<p>I advise those precise versions of OptiX and CUDA, if you use other versions
+you become a developer rather than a user, please report your findings.</p>
+<p>If it is necessary to install or update build tools or Boost it is
+best to do so via your system package manager.</p>
+<p>The pre-requisite packages from NVIDIA need to be installed by
+following the instructions from NVIDIA. You will also need to
+register as an NVIDIA developer.</p>
+<p>After you have the pre-requisites you can install Opticks and its
+external packages using a single command: <em>opticks-full</em></p>
+</div>
 <div class="section" id="build-tools">
 <h2>Build Tools<a class="headerlink" href="#build-tools" title="Permalink to this headline">¶</a></h2>
 <p>Getting, configuring, unpacking, building and installing Opticks and
@@ -251,25 +276,11 @@ login shell PATH modified to use the updated tool. The Opticks repository
 includes bash functions for local installs of cmake with
 precursor function <em>cmake-</em>.</p>
 </div>
-<div class="section" id="opticks-pre-requisites">
-<h2>Opticks Pre-requisites<a class="headerlink" href="#opticks-pre-requisites" title="Permalink to this headline">¶</a></h2>
-<p>In brief:</p>
-<ul class="simple">
-<li>NVIDIA CUDA 7.0 (including Thrust)</li>
-<li>NVIDIA OptiX  3.80</li>
-<li>Boost 1.59+ (from system package manager)</li>
-</ul>
-<div class="section" id="boost-infrastructure-libraries">
-<h3>Boost Infrastructure Libraries<a class="headerlink" href="#boost-infrastructure-libraries" title="Permalink to this headline">¶</a></h3>
-<p>The pre-requisite Boost components listed in the table need to be installed.
+<div class="section" id="boost-c-libraries">
+<h2>Boost C++ Libraries<a class="headerlink" href="#boost-c-libraries" title="Permalink to this headline">¶</a></h2>
+<p>The Boost components listed in the table need to be installed.
 These are widely available via package managers. Use the standard one for
-your system (</p>
-<ul class="simple">
-<li>yum on Redhat</li>
-<li>macports on Mac</li>
-<li>nsys2 on Windows.</li>
-</ul>
-<p>The FindBoost.cmake provided with cmake is used to locate the installation.</p>
+your system. The FindBoost.cmake provided with cmake is used to locate the installation.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="17%" />
@@ -292,7 +303,6 @@ your system (</p>
 </tr>
 </tbody>
 </table>
-</div>
 <div class="section" id="updating-boost">
 <h3>Updating Boost<a class="headerlink" href="#updating-boost" title="Permalink to this headline">¶</a></h3>
 <p>If your version of Boost is not recent enough the cmake configuring
@@ -310,8 +320,9 @@ boost-
 opticks-configure -DBOOST_ROOT=$(boost-prefix)</pre>
 </div>
 </div>
-<div class="section" id="nvidia-optix-and-nvidia-cuda">
-<h3>NVIDIA OptiX and NVIDIA CUDA<a class="headerlink" href="#nvidia-optix-and-nvidia-cuda" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="opticks-pre-requisites-nvidia-optix-and-nvidia-cuda">
+<h2>Opticks Pre-requisites : NVIDIA OptiX and NVIDIA CUDA<a class="headerlink" href="#opticks-pre-requisites-nvidia-optix-and-nvidia-cuda" title="Permalink to this headline">¶</a></h2>
 <p>OptiX requires your system to have a fairly recent NVIDIA GPU of CUDA compute capability 3.0 at least.
 However without such a GPU the OpenGL visualization should still work, using saved propagations.</p>
 <p>To download OptiX you need to join the NVIDIA Developer Program.
@@ -346,7 +357,6 @@ Thrust is installed together with CUDA.</p>
 </tbody>
 </table>
 </div>
-</div>
 <div class="section" id="building-opticks">
 <h2>Building Opticks<a class="headerlink" href="#building-opticks" title="Permalink to this headline">¶</a></h2>
 <p>Once you have the necessary build tools and the pre-requisites you
@@ -359,11 +369,10 @@ and run again from scratch.</p>
 <p>After the first full build, much faster update builds can be done with:</p>
 <div class="highlight-python"><pre>opticks--</pre>
 </div>
-</div>
 <div class="section" id="externals">
-<h2>Externals<a class="headerlink" href="#externals" title="Permalink to this headline">¶</a></h2>
+<h3>Externals<a class="headerlink" href="#externals" title="Permalink to this headline">¶</a></h3>
 <p>The <em>opticks-full</em> command automatically downloads and installs the below external packages
-in the places required by Opticks.</p>
+into the places required by Opticks.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="13%" />
@@ -419,8 +428,8 @@ in the places required by Opticks.</p>
 </tbody>
 </table>
 </div>
-<div class="section" id="configuring-and-building-opticks">
-<h2>Configuring and Building Opticks<a class="headerlink" href="#configuring-and-building-opticks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="manually-configuring-opticks">
+<h3>Manually Configuring Opticks<a class="headerlink" href="#manually-configuring-opticks" title="Permalink to this headline">¶</a></h3>
 <p>If the automated configuring done by <em>opticks-full</em> failed to find the
 pre-requisites you may need to specify some options to <em>opticks-configure</em>
 to help the build scripts.</p>
@@ -490,6 +499,7 @@ allowing new values to be set.</p>
 <dt>To build::</dt>
 <dd>opticks&#8211;</dd>
 </dl>
+</div>
 </div>
 <div class="section" id="configuration-machinery">
 <h2>Configuration Machinery<a class="headerlink" href="#configuration-machinery" title="Permalink to this headline">¶</a></h2>
