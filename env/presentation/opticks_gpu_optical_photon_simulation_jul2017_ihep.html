@@ -449,6 +449,14 @@ Daya Bay and JUNO Neutrino detectors. -->
          margin: 1em 0;
     }
 
+    pre.mypretiny {
+         display: block;
+         font-family: monospace;
+         font-size: 15px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
     pre.myfoot {
          display: block;
          font-family: monospace;
@@ -1035,7 +1043,219 @@ thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
 <li>low register usage -&gt; keep it simple</li>
 <li>small stack size -&gt; avoid recursion</li>
 </ul>
-<p class="large"><span class="red">Classical approach not appropriate for GPU</span></p>
+<p class="large"><span class="red">Classical approach not appropriate on GPU</span></p>
+</div>
+<div class="slide" id="ray-tracing-csg-objects-using-single-hit-intersections-a-kensler">
+<h1><span class="small">Ray Tracing CSG Objects Using Single Hit Intersections (A. Kensler) [*]</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Outside/Inside Unions</p>
+<p class="small">normal.rayDir -&gt; Enter/Exit</p>
+<img alt="/env/presentation/kensler_union_of_two_spheres_from_outside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_outside.png" style="width: 300px;" />
+<img alt="/env/presentation/kensler_union_of_two_spheres_from_inside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_inside.png" style="width: 300px;" />
+<ul class="small last simple">
+<li><strong>A + B</strong> boundary not inside other</li>
+<li><strong>A * B</strong> boundary inside other</li>
+</ul>
+</div>
+<ul class="small simple">
+<li>Classify A,B intersects, Enter/Exit/Miss</li>
+<li>state(A,B) -&gt; action</li>
+<li>LoopA : tMinA-&gt;tA, re-intersectA, re-classifyA (ditto LoopB)</li>
+</ul>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="29%" />
+<col width="21%" />
+<col width="23%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Union, tA &lt; tB</th>
+<th class="head">Enter B</th>
+<th class="head">Exit B</th>
+<th class="head">Miss B</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><strong>Enter A</strong></td>
+<td>ReturnA</td>
+<td>LoopA</td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Exit A</strong></td>
+<td>ReturnA</td>
+<td>ReturnB</td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Miss A</strong></td>
+<td>ReturnB</td>
+<td>ReturnB</td>
+<td>ReturnMiss</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="29%" />
+<col width="21%" />
+<col width="23%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Union, tB &lt; tA</th>
+<th class="head">Enter B</th>
+<th class="head">Exit B</th>
+<th class="head">Miss B</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><strong>Enter A</strong></td>
+<td>ReturnB</td>
+<td>ReturnB</td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Exit A</strong></td>
+<td>LoopB</td>
+<td>ReturnA</td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Miss A</strong></td>
+<td>ReturnB</td>
+<td>ReturnB</td>
+<td>ReturnMiss</td>
+</tr>
+</tbody>
+</table>
+<p class="small"><span class="blue">Recursive CSG tree python prototype of Kensler pseudocode worked after state table corrections/extensions</span></p>
+<ul class="small simple">
+<li>BUT GPU/OptiX demands: <span class="red">no recursion in intersect program</span></li>
+</ul>
+<dl class="tiny docutils">
+<dt>[*] Ray Tracing CSG Objects Using Single Hit Intersections, Andrew Kensler (2006)</dt>
+<dd>with corrections by author of XRT Raytracer <a class="reference external" href="http://xrt.wikidot.com/doc:csg">http://xrt.wikidot.com/doc:csg</a></dd>
+</dl>
+</div>
+<div class="slide" id="csg-complete-binary-tree-serialization-simplifies-gpu-side">
+<h1><span class="small">CSG Complete Binary Tree Serialization -&gt; simplifies GPU side</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Bit Twiddling Navigation</p>
+<ul class="small last simple">
+<li>parent(i) = i/2</li>
+<li>leftchild(i) = 2*i</li>
+<li>rightchild(i) = 2*i + 1</li>
+<li>leftmost(height)  =  1 &lt;&lt; height</li>
+</ul>
+</div>
+<p class="small">CSG Tree, leaf node primitives, internal node operators, 4x4 transforms on any node,
+serialized as <span class="blue">complete binary tree</span>:</p>
+<ul class="small simple">
+<li>bit twiddling navigation <span class="red">avoids recursion</span></li>
+<li>no need to deserialize</li>
+<li>no child/parent pointers</li>
+<li>BUT: very inefficient when unbalanced</li>
+</ul>
+<p class="small"><strong>Height 3 complete binary tree with level order indices:</strong></p>
+<pre class="mypre">
+                                                   depth     elevation
+
+                     1                               0           3
+
+          10                   11                    1           2
+
+     100       101        110        111             2           1
+
+ 1000 1001  1010 1011  1100 1101  1110  1111         3           0
+</pre>
+<hr/><p class="small"><strong>postorder_next(i,elevation) = i &amp; 1 ? i &gt;&gt; 1 : (i &lt;&lt; elevation) + (1 &lt;&lt; elevation) ;</strong>   // from pattern of bits</p>
+<p class="tiny">Postorder tree traverse visits all nodes, starting from leftmost, such that children
+are visited prior to their parents.</p>
+</div>
+<div class="slide" id="evaluative-csg-intersection-implementation">
+<h1><span class="small">Evaluative CSG Intersection Implementation</span></h1>
+<p class="small">Implementation based around two small stacks containing:</p>
+<dl class="small docutils">
+<dt><em>tranches</em></dt>
+<dd>begin/end indices slicing the full postorder traversal</dd>
+<dt><em>float4 intersects</em></dt>
+<dd>normals, parametric t, left/right label</dd>
+</dl>
+<p class="small">Nested while loops over tranches and nodes
+provide the same traversal order as recursion does
+but without the memory expense.</p>
+<p class="small">Loop actions with advanced tmin for a sub-object require
+revisiting subtrees as changed tmin totally chances the
+intersects.</p>
+<p class="tiny">Parallels to binary expression tree evaluation techniques inspired the <em>Evaluative CSG</em> implementation.</p>
+</div>
+<div class="slide" id="iterative-csg-intersection-pseudo-code">
+<h1><span class="small">Iterative CSG intersection Pseudo-code</span></h1>
+<pre class="mypretiny">
+// pseudocode corresponding to opticks/oxrap/cu/csg_intersect_boolean.h:evaluative_csg
+fullTree = PACK( 1 << height, 1 >> 1 )  // leftmost, parent_of_root(=0)
+tranche.push(fullTree, ray.tmin)
+
+while (!tranche.empty)
+{
+    begin, end, tmin <- tranche.pop
+    node <- begin ;
+
+    while( node != end )
+    {
+        elevation = height - TREE_DEPTH(node) ;
+        if(is_primitive(node)){ isect <- intersect_primitive(node, tmin) ;  csg.push(isect) }
+        else{
+            i_left, i_right = csg.pop, csg.pop
+            l_state = CLASSIFY(i_left, ray.direction, tmin)
+            r_state = CLASSIFY(i_right, ray.direction, tmin)
+            action = LUT(operator(node), leftIsCloser)(l_state, r_state)
+
+            if(      action is ReturnLeft/Right)     csg.push(i_left or i_right)
+            else if( action is LoopLeft/Right)
+            {
+                left = 2*node ; right = 2*node + 1 ;
+                endTranche = PACK( node,  end );
+                leftTranche = PACK(  left << (elevation-1), right << (elevation-1) )
+                rightTranche = PACK(  right << (elevation-1),  node  )
+                loopTranche = action ? leftTranche : rightTranche
+
+                tranche.push(endTranche, tmin)
+                tranche.push(loopTranche, tminAdvanced )
+                break ; // to next tranche
+            }
+        }
+        node <- postorder_next(node, elevation)
+    }
+}
+isect = csg.pop(); // winning intersect
+</pre></div>
+<div class="slide" id="implicit-geometry-with-signed-distance-functions-sdf-and-r-function-composition">
+<h1><span class="small">Implicit Geometry with Signed Distance Functions (SDF) and R-function composition</span></h1>
+<p class="small">SDF(x,y,z) distance to solid surface, -ve/0/+ve : inside/on/outside</p>
+<p class="small">CSG composable using R-functions, eg <strong>min</strong> and <strong>max</strong></p>
+<ul class="small simple">
+<li>SDF(Union(A,B)) ~ min(SDF(A),SDB(B))</li>
+<li>SDF(Intersection(A,B)) ~  max(SDF(A),SDF(B))</li>
+<li>SDF(Difference(A,B)) ~ max(SDF(A),-SDF(B))</li>
+</ul>
+<p class="small">Recursive application of these combinations within CSG node trees
+yield implicit function representations.</p>
+<p class="tiny">R(Rvachev)-functions sign uniquely determined by argument signs -&gt; R-functions parallel CSG operations</p>
+</div>
+<div class="slide" id="advantages-of-fully-analytic-geometry">
+<h1><span class="small">Advantages of fully analytic geometry</span></h1>
+<ul class="small simple">
+<li>Geometry equivalence within numerical precision between Geant4 and Opticks on the GPU.</li>
+<li>Automated translation of Geant4 detector geometries into a GPU suitable form.</li>
+<li>Drastically simplified Opticks adoption, due to automated geometry translation.</li>
+<li>Allows Opticks to operate from Geant4 standard GDML files rather than tessellated G4DAE.</li>
+</ul>
+</div>
+<div class="slide" id="scratch">
+<h1><span class="small">Scratch</span></h1>
+<p class="tiny">Extended to complemented solids using : Miss -&gt; Exit, never closer + flip normals</p>
+<ul class="tiny simple">
+<li>implementation currently limited to height &lt;= 7, maximum 255 nodes</li>
+</ul>
 </div>
 <div class="slide" id="context-pages">
 <h1><span class="small">Context Pages</span></h1>
