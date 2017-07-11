@@ -1049,7 +1049,7 @@ thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
 <h1><span class="small">Ray Tracing CSG Objects Using Single Hit Intersections (A. Kensler) [*]</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">Outside/Inside Unions</p>
-<p class="small">normal.rayDir -&gt; Enter/Exit</p>
+<p class="small">dot(normal,rayDir) -&gt; Enter/Exit</p>
 <img alt="/env/presentation/kensler_union_of_two_spheres_from_outside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_outside.png" style="width: 300px;" />
 <img alt="/env/presentation/kensler_union_of_two_spheres_from_inside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_inside.png" style="width: 300px;" />
 <ul class="small last simple">
@@ -1170,41 +1170,21 @@ serialized as <span class="blue">complete binary tree</span>:</p>
 <p class="tiny">Postorder tree traverse visits all nodes, starting from leftmost, such that children
 are visited prior to their parents.</p>
 </div>
-<div class="slide" id="evaluative-csg-intersection-implementation">
-<h1><span class="small">Evaluative CSG Intersection Implementation</span></h1>
-<p class="small">Implementation based around two small stacks containing:</p>
-<dl class="small docutils">
-<dt><em>tranches</em></dt>
-<dd>begin/end indices slicing the full postorder traversal</dd>
-<dt><em>float4 intersects</em></dt>
-<dd>normals, parametric t, left/right label</dd>
-</dl>
-<p class="small">Nested while loops over tranches and nodes
-provide the same traversal order as recursion does
-but without the memory expense.</p>
-<p class="small">Loop actions with advanced tmin for a sub-object require
-revisiting subtrees as changed tmin totally chances the
-intersects.</p>
-<p class="tiny">Parallels to binary expression tree evaluation techniques inspired the <em>Evaluative CSG</em> implementation.</p>
-</div>
-<div class="slide" id="iterative-csg-intersection-pseudo-code">
-<h1><span class="small">Iterative CSG intersection Pseudo-code</span></h1>
+<div class="slide" id="evaluative-csg-intersection-pseudocode-recursion-emulated">
+<h1><span class="small">Evaluative CSG intersection Pseudocode : recursion emulated</span></h1>
 <pre class="mypretiny">
-// pseudocode corresponding to opticks/oxrap/cu/csg_intersect_boolean.h:evaluative_csg
 fullTree = PACK( 1 << height, 1 >> 1 )  // leftmost, parent_of_root(=0)
 tranche.push(fullTree, ray.tmin)
 
-while (!tranche.empty)
+while (!tranche.empty)        <b><span class="alarm"> // stack of begin/end indices </span></b>
 {
-    begin, end, tmin <- tranche.pop
-    node <- begin ;
-
-    while( node != end )
+    begin, end, tmin <- tranche.pop  ; node <- begin ;
+    while( node != end )                  <b><span class="alarm"> // over tranche of postorder traversal </span></b>
     {
         elevation = height - TREE_DEPTH(node) ;
         if(is_primitive(node)){ isect <- intersect_primitive(node, tmin) ;  csg.push(isect) }
         else{
-            i_left, i_right = csg.pop, csg.pop
+            i_left, i_right = csg.pop, csg.pop          <b><span class="alarm">  // csg stack of intersect normals, t </span></b>
             l_state = CLASSIFY(i_left, ray.direction, tmin)
             r_state = CLASSIFY(i_right, ray.direction, tmin)
             action = LUT(operator(node), leftIsCloser)(l_state, r_state)
@@ -1219,15 +1199,257 @@ while (!tranche.empty)
                 loopTranche = action ? leftTranche : rightTranche
 
                 tranche.push(endTranche, tmin)
-                tranche.push(loopTranche, tminAdvanced )
+                tranche.push(loopTranche, tminAdvanced ) <b><span class="alarm"> // subtree re-traversal with changed tmin </span></b>
                 break ; // to next tranche
             }
         }
-        node <- postorder_next(node, elevation)
+        node <- postorder_next(node, elevation)        <b><span class="alarm"> // bit twiddling postorder </span></b>
     }
 }
-isect = csg.pop(); // winning intersect
-</pre></div>
+isect = csg.pop();       <b><span class="alarm">  // winning intersect  </span></b>
+</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h</a></p>
+</div>
+<div class="slide" id="opticks-csg-primitives-closed-solids-consistent-normals">
+<h1><span class="small">Opticks CSG Primitives : Closed Solids, Consistent Normals</span></h1>
+<p class="small"><strong>Closed Solid</strong> as: <span class="blue">implementation requires otherside intersect</span>, <strong>Rigidly attached normals</strong></p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="39%" />
+<col width="29%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Type code</th>
+<th class="head">Python name</th>
+<th class="head">C++ nnode sub-struct</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>CSG_BOX3,CSG_BOX</td>
+<td>box3,box</td>
+<td>nbox</td>
+</tr>
+<tr><td>CSG_SPHERE,CSG_ZSPHERE</td>
+<td>sphere,zsphere</td>
+<td>nsphere,nzsphere</td>
+</tr>
+<tr><td>CSG_CYLINDER,CSG_DISC</td>
+<td>cylinder,disc</td>
+<td>ncylinder,ndisc</td>
+</tr>
+<tr><td>CSG_CONE</td>
+<td>cone</td>
+<td>ncone</td>
+</tr>
+<tr><td>CSG_CONVEXPOLYHEDRON</td>
+<td>convexpolyhedron</td>
+<td>nconvexpolyhedron</td>
+</tr>
+<tr><td>CSG_TRAPEZOID,CSG_SEGMENT</td>
+<td>trapezoid,segment</td>
+<td>nconvexpolyhedron</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><strong>zsphere, cone, cylinder, disc</strong> : truncated shapes <strong>closed</strong> by endcaps</li>
+<li><strong>disc</strong> : avoids endcap degeneracy with very thin cylinders</li>
+<li><strong>convexpolyhedron</strong> : defined by a set of planes, used for trapezoid and segment</li>
+<li><strong>segment</strong> :   prism shape used for deltaphi intersection</li>
+<li><strong>!complemented</strong> (inside&lt;-&gt;outside) solids handled by
+special casing classification (cannot miss otherside).</li>
+</ul>
+<p class="small">Non-primitives, <span class="red">high level CSG definition avoids loadsa code</span></p>
+<ul class="small simple">
+<li><strong>ellipsoid</strong> : non-uniform scaling of sphere,  <strong>polycone</strong> : union of cylinders and cones</li>
+<li><strong>inner-radii</strong> : via subtraction, <strong>deltaphi-segment</strong> : via intersect with <strong>segment</strong></li>
+</ul>
+</div>
+<div class="slide" id="opticks-csg-primitives-what-they-comprise">
+<h1><span class="small">Opticks CSG Primitives : What they comprise</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX Geometry</p>
+<p class="small">OptiX provides acceleration of geometrical intersection, not the intersection itself.</p>
+<ul class="small simple">
+<li>parametric ray : <strong>p(t) = p0 + t rayDir</strong></li>
+<li>implicit surface : <strong>f(p) = 0</strong></li>
+</ul>
+<p class="small">Intersect finding next closest root:</p>
+<ul class="small last simple">
+<li>smallest <strong>t</strong>, with <strong>t &gt; tmin</strong></li>
+<li>surface normal at <strong>t</strong></li>
+</ul>
+</div>
+<p class="small">OptiX/CUDA functions providing:</p>
+<ul class="small simple">
+<li>axis aligned bounding box (AABB)</li>
+<li>intersect ray position (parametric t), surface normal</li>
+</ul>
+<p class="small">C++/nnode sub-struct methods</p>
+<ul class="small simple">
+<li>signed distance function (SDF)</li>
+<li>parametric surface generation</li>
+</ul>
+<p class="small"><strong>Translation/rotation/scaling on any node</strong></p>
+<p class="small">Intersect inverse-transformed ray -&gt; intersect in primitive frame</p>
+<ul class="small simple">
+<li>parametric-t same in both frames</li>
+<li>normals, <strong>n_world = transpose(invert(TRS)) n_model</strong></li>
+</ul>
+<p class="small">Inverse transform transposed brings normal back to world frame</p>
+<ul class="small simple">
+<li><strong>rayDir</strong> NOT normalized</li>
+</ul>
+</div>
+<div class="slide" id="opticks-csg-primitives-on-parade">
+<h1><span class="small">Opticks CSG Primitives On Parade</span></h1>
+<img alt="/env/presentation/tboolean_parade.png" class="align-center" src="/env/presentation/tboolean_parade.png" style="width: 1000px;" />
+<p class="small">Three on right (Trapezoid, Segment, Icosahedron) all represented by planes with <strong>nconvexpolyhedron</strong></p>
+</div>
+<div class="slide" id="opticks-csg-serialized-into-optickscsg-format-numpy-buffers-json">
+<h1><span class="small">Opticks CSG Serialized into OpticksCSG format (numpy buffers, json)</span></h1>
+<pre class="mypretiny">
+
+// tboolean-parade
+
+from opticks.ana.base import opticks_main
+from opticks.analytic.csg import CSG
+
+args = opticks_main(csgpath="$TMP/$FUNCNAME")
+
+container = CSG("box", param=[0,0,0,1200], boundary=args.container, poly="MC", nx="20" )
+
+a = CSG("sphere", param=[0,0,0,100])
+b = CSG("zsphere", param=[0,0,0,100], param1=[-50,60,0,0])
+c = CSG("box3",param=[100,50,70,0])
+d = CSG("box",param=[0,0,10,50])
+e = CSG("cylinder",param=[0,0,0,100], param1=[-100,100,0,0])
+f = CSG("disc",param=[0,0,0,100], param1=[-1,1,0,0])
+g = CSG("cone", param=[100,-100,50,100])
+h = CSG.MakeTrapezoid(z=100, x1=80, y1=100, x2=100, y2=80)
+i = CSG.MakeSegment(phi0=0,phi1=45,sz=100,sr=100)
+j = CSG.MakeIcosahedron(scale=100.)
+
+prims = [a,b,c,d,e,f,g,h,i,j]
+
+...  // setting translations
+
+CSG.Serialize([container] + prims, args.csgpath )   <b><span class="alarm">  <-- write trees to file </span></b>
+</pre><ul class="small simple">
+<li>imported into C++ <strong>nnode</strong> tree by <strong>NCSG</strong></li>
+</ul>
+</div>
+<div class="slide" id="opticks-csg-balancing-deep-trees-drastically-improves-performance">
+<h1><span class="small">Opticks CSG : Balancing Deep Trees Drastically Improves Performance</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Positive form CSG Trees</p>
+<p class="small">Apply deMorgan pushing negations down tree</p>
+<ul class="small simple">
+<li><strong>A - B -&gt; A * !B</strong></li>
+<li><strong>!(A*B) -&gt; !A + !B</strong></li>
+<li><strong>!(A+B) -&gt; !A * !B</strong></li>
+<li><strong>!(A - B) -&gt; !(A*!B) -&gt; !A + B</strong></li>
+</ul>
+<p class="small">End with only UNION, INTERSECT operators,
+and some complemented leaves.</p>
+<p class="small last"><span class="red">COMMUTATIVE -&gt; easily rearranged</span></p>
+</div>
+<p class="small">Intended for solids, not scenes (tree height &lt;8, &lt;256 nodes[*])</p>
+<ul class="small simple">
+<li>unbalanced trees inefficiently handled as complete binary trees</li>
+<li>CSG trees non-unique, many expressions of same shape</li>
+</ul>
+<pre class="mypretiny">
+Dayabay TopESRCutHols lvidx:57  (height:9 totnodes:1023)
+di(di(di(di(di(di(di(di(di(cy,cy),cy),cy),cy),cy),cy),cy),cy),cy)
+
+                                                                    di
+                                                             di          cy
+                                                     di          cy
+                                             di          cy
+                                     di          cy
+                             di          cy
+                     di          cy
+             di          cy
+     di          cy
+ cy      cy
+
+
+Balanced Tree, height:4 totnodes:31
+in(in(in(in(cy,!cy),in(!cy,!cy)),in(in(!cy,!cy),in(!cy,!cy))),!cy)
+
+                                                             in
+                             in                                 !cy
+             in                              in
+     in              in              in              in
+ cy     !cy     !cy     !cy     !cy     !cy     !cy     !cy
+</pre><p class="tiny">[*] Algorithm has no inherent height limit, but use of complete binary tree imposes practical performance limitation</p>
+</div>
+<div class="slide" id="dayabay-esr-reflector-deep-csg-tree-disc-with-9-holes">
+<h1><span class="small">Dayabay ESR reflector : Deep CSG tree : disc with 9 holes</span></h1>
+<img alt="/env/presentation/lvidx_57_esr_deep_tree_disc_with_holes.png" class="align-center" src="/env/presentation/lvidx_57_esr_deep_tree_disc_with_holes.png" style="width: 1000px;" />
+</div>
+<div class="slide" id="subtraction-of-thin-csg-cylinder-speckle-in-the-hole">
+<h1><span class="small">Subtraction of thin CSG_CYLINDER -&gt; speckle in the  hole</span></h1>
+<p class="small">CSG_DISC implemented to handle disc like cylinders : intersects at middle (z1+z2)/2 and offsets, <span class="red">avoids issue</span></p>
+<img alt="/env/opticks_refs/speckle_lvTopESR.png" class="align-left" src="/env/opticks_refs/speckle_lvTopESR.png" style="width: 600px;" />
+<img alt="/env/opticks_refs/tboolean_esr_speckle_centered_on_pole_delta_10-3.png" class="align-right" src="/env/opticks_refs/tboolean_esr_speckle_centered_on_pole_delta_10-3.png" style="width: 500px;" />
+</div>
+<div class="slide" id="coincident-faces-are-primary-cause-of-issues-fake-intersects">
+<h1><span class="small">Coincident Faces are Primary Cause of Issues : Fake Intersects</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Cylinder - Cone</p>
+<p class="small">Coincident endcaps -&gt; issue</p>
+<img alt="/env/opticks_refs/lvidx_83_tbool_coincidence_artifact_at_cylinder_base.png" class="align-center" src="/env/opticks_refs/lvidx_83_tbool_coincidence_artifact_at_cylinder_base.png" style="width: 450px;" />
+<p class="small last">Grow subtracted cone downwards, avoids coincidence : <strong>does not change composite solid</strong></p>
+</div>
+<p class="small">Coincidences common (alignment too tempting?). To fix:</p>
+<ul class="small simple">
+<li><strong>A-B</strong> : grow correct dimension of subtracted shape</li>
+<li><strong>A+B</strong> : grow smaller interface shape into bigger, making join</li>
+</ul>
+<p class="small">Automated uncoincidence finder/fixer in operation, needs work</p>
+<img alt="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" class="small align-left" src="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" style="width: 500px;" />
+</div>
+<div class="slide" id="full-analytic-geometry-translation-workflow">
+<h1><span class="small">Full Analytic Geometry Translation Workflow</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">3D Formats : G4DAE, GDML, OpticksCSG, glTF</p>
+<dl class="small last docutils">
+<dt>G4DAE</dt>
+<dd>approximate G4 triangulated geometry, includes all material/surface optical properties</dd>
+<dt>GDML</dt>
+<dd>analytic G4 geometry</dd>
+<dt>OpticksCSG</dt>
+<dd>numpy buffers of nodes, transforms, planes, json metadata</dd>
+<dt>glTF</dt>
+<dd>json node tree referring to OpticksCSG extras for each solid</dd>
+</dl>
+</div>
+<p class="small">General CSG ray tracing on GPU allows operation from GDML files</p>
+<p class="small"><strong>gdml2gltf.py  (opticks.analytic.sc)</strong></p>
+<ul class="small simple">
+<li>wraps GDML in python</li>
+<li>translates G4 solids into OpticksCSG</li>
+<li>collects structure into glTF scene tree</li>
+<li>scene tree refers to OpticksCSG solids as extras</li>
+<li>writes OpticksCSG for each solid together with glTF to file</li>
+</ul>
+<p class="small"><strong>NScene</strong></p>
+<ul class="small simple">
+<li>loads glTF structure into <strong>nd</strong> scene tree</li>
+</ul>
+<p class="small"><strong>NCSG</strong></p>
+<ul class="small simple">
+<li>loads OpticksCSG into <strong>nnode</strong> trees for each solid</li>
+</ul>
+<p class="small"><strong>GScene/OScene</strong></p>
+<ul class="small simple">
+<li>converts into OptiX GPU buffers</li>
+</ul>
+<p class="tiny">glTF : (GL Transmission Format) &quot;JPEG of 3D&quot;), efficient transmission and loading of 3D scenes and models,
+<a class="reference external" href="https://www.khronos.org/gltf">https://www.khronos.org/gltf</a></p>
+</div>
 <div class="slide" id="implicit-geometry-with-signed-distance-functions-sdf-and-r-function-composition">
 <h1><span class="small">Implicit Geometry with Signed Distance Functions (SDF) and R-function composition</span></h1>
 <p class="small">SDF(x,y,z) distance to solid surface, -ve/0/+ve : inside/on/outside</p>
@@ -1356,6 +1578,11 @@ a = np.load(&quot;photons.npy&quot;)
 </pre>
 <p class="tiny last">(*) Windows VS2015, non-CUDA only so far</p>
 </div>
+</div>
+<div class="slide" id="debugging-coincident-subtractions">
+<h1><span class="small">Debugging Coincident Subtractions</span></h1>
+<p class="small">Switching subtraction into union with complemented -&gt; can see whats subtracted.</p>
+<img alt="/env/opticks_refs/lvidx_69_ring_box_cuts_artifact.png" class="align-center" src="/env/opticks_refs/lvidx_69_ring_box_cuts_artifact.png" style="width: 900px;" />
 </div>
 <div class="slide" id="youtube-video">
 <h1><span class="i">YouTube Video</span></h1>
