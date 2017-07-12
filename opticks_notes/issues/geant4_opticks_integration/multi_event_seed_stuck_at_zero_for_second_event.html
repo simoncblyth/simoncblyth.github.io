@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Multi Event : Seed Stuck at Zero for 2nd Event &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Multi Event : Seed Stuck at Zero for 2nd Event</a><ul>
+<li><a class="reference internal" href="#interop-mode">Interop Mode</a><ul>
+<li><a class="reference internal" href="#with-seed-buffer">WITH_SEED_BUFFER</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#compute-mode">Compute Mode</a></li>
+<li><a class="reference internal" href="#done-getting-optix-to-notice-cuda-thrust-change-to-photon-buffer">DONE: Getting OptiX to notice CUDA/Thrust change to Photon buffer</a><ul>
+<li><a class="reference internal" href="#dirty-cuda-interop-buffers">Dirty CUDA Interop Buffers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fix-using-buffer-copy-on-dirty-for-photon-buffer-and-manually-marking-dirty">FIX: Using BUFFER_COPY_ON_DIRTY for photon buffer and manually marking dirty</a></li>
+<li><a class="reference internal" href="#maybe-use-separate-input-only-seed-buffer">Maybe Use Separate INPUT_ONLY SEED BUFFER ?</a></li>
+<li><a class="reference internal" href="#todo-measure-multievent-compute-speed-using-input-output-seeded-photon-buffer-vs-input-only-seed-buffer">TODO: Measure multievent compute speed using INPUT_OUTPUT seeded photon buffer vs INPUT only seed buffer</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/multi_event_seed_stuck_at_zero_for_second_event.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="multi-event-seed-stuck-at-zero-for-2nd-event">
+<h1>Multi Event : Seed Stuck at Zero for 2nd Event<a class="headerlink" href="#multi-event-seed-stuck-at-zero-for-2nd-event" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><cite>ggeoview-/tests/TrivialTest.cc</cite></li>
+</ul>
+<div class="section" id="interop-mode">
+<h2>Interop Mode<a class="headerlink" href="#interop-mode" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>OKTest
+
+2016-09-13 12:55:19.887 INFO  [495555] [OEvent::upload@176] OEvent::upload (INTEROP) gensteps handed to OptiX by referencing OpenGL buffer id
+2016-09-13 12:55:19.887 INFO  [495555] [OEvent::upload@180] OEvent::upload DONE
+2016-09-13 12:55:19.887 INFO  [495555] [OpSeeder::seedPhotonsFromGensteps@52] OpSeeder::seedPhotonsFromGensteps
+2016-09-13 12:55:19.887 INFO  [495555] [OpSeeder::seedPhotonsFromGenstepsViaOpenGL@67] OpSeeder::seedPhotonsFromGenstepsViaOpenGL
+iexpand  counts_size 1 output_size 100000
+2016-09-13 12:55:19.941 INFO  [495555] [OEvent::markDirtyPhotonBuffer@98] OEvent::markDirtyPhotonBuffer
+libc++abi.dylib: terminating with uncaught exception of type optix::Exception: Unknown error
+        (Details: Function "RTresult _rtBufferMarkDirty(RTbuffer)" caught exception:
+         Must set or get buffer device pointer before calling rtBufferMarkDirty().,
+         file:/Users/umber/workspace/rel4.0-mac64-build-Release/sw/wsapps/raytracing/rtsdk/rel4.0/src/Objects/Buffer.cpp, line: 861)
+Abort trap: 6</pre>
+</div>
+<p>Cannot markDirty in INTEROP mode, with photon buffer control</p>
+<ul class="simple">
+<li>&#8220;OPTIX_INPUT_OUTPUT,INTEROP_PTR_FROM_OPENGL,BUFFER_COPY_ON_DIRTY&#8221;</li>
+</ul>
+<p>OptiX is not aware that the ptr was grabbed from OpenGL (INTEROP_PTR_FROM_OPENGL) so cannot mark it dirty
+and get OptiX to sync.</p>
+<div class="section" id="with-seed-buffer">
+<h3>WITH_SEED_BUFFER<a class="headerlink" href="#with-seed-buffer" title="Permalink to this headline">¶</a></h3>
+<p>Using seed buffer has some advantages</p>
+<ul class="simple">
+<li>photon buffer becomes &#8220;OPTIX_OUTPUT_ONLY,INTEROP_PTR_FROM_OPENGL&#8221;</li>
+<li>seed buffer &#8220;OPTIX_NON_INTEROP,OPTIX_INPUT_ONLY&#8221; (ie always pure compute buffer)</li>
+</ul>
+<div class="highlight-python"><pre>simon:optickscore blyth$ opticks-find WITH_SEED_BUFFER
+./optixrap/cu/generate.cu:#ifdef WITH_SEED_BUFFER
+./optixrap/cu/generate.cu:#ifdef WITH_SEED_BUFFER
+./optixrap/cu/generate.cu:    rtPrintf("(dumpseed WITH_SEED_BUFFER) genstep_id %u \n", genstep_id );
+./optickscore/OpticksEvent.cc:#ifdef WITH_SEED_BUFFER
+./opticksop/OpEngine.cc:#ifdef WITH_SEED_BUFFER
+./opticksop/OpSeeder.cc:#ifdef WITH_SEED_BUFFER
+./opticksop/OpSeeder.cc:#ifdef WITH_SEED_BUFFER
+./optickscore/OpticksSwitches.h:#define WITH_SEED_BUFFER 1
+simon:opticks blyth$
+simon:opticks blyth$
+simon:opticks blyth$ opticks-find OpticksSwitches.h
+./optixrap/cu/generate.cu:#include "OpticksSwitches.h"
+./optickscore/OpticksEvent.cc:#include "OpticksSwitches.h"
+./opticksop/OpEngine.cc:#include "OpticksSwitches.h"
+./opticksop/OpSeeder.cc:#include "OpticksSwitches.h"
+simon:opticks blyth$</pre>
+</div>
+</div>
+</div>
+<div class="section" id="compute-mode">
+<h2>Compute Mode<a class="headerlink" href="#compute-mode" title="Permalink to this headline">¶</a></h2>
+<p>Up to 2:</p>
+<div class="highlight-python"><pre>OKTest --cerenkov --trivial --save --compute --multievent 2
+TrivialTest --cerenkov --multievent 2</pre>
+</div>
+<ul class="simple">
+<li>1st evt passes</li>
+<li>2nd evt fails with seed stuck at zero</li>
+</ul>
+<p>Seed location in photon_buffer being zeroed in trivial,
+but that should be rewritten by the seeding of next event ?</p>
+<p>OpticksEvent buffer control:</p>
+<div class="highlight-python"><pre>* genstep : "OPTIX_INPUT_ONLY,UPLOAD_WITH_CUDA,BUFFER_COPY_ON_DIRTY"
+* photon :  "OPTIX_INPUT_OUTPUT,PTR_FROM_OPENGL"</pre>
+</div>
+<p>The seeds (genstep_id) stuck at zero for the 2nd evt:</p>
+<div class="highlight-python"><pre>In [9]: ox.view(np.int32)
+Out[9]:
+array([[[         0,          0,          0,          0],
+        [1065353216, 1065353216, 1065353216, 1065353216],
+        [         1,          1,         67,         80],  &lt;&lt;&lt; copied ghead always that of genstep 0
+        [         0,          0,          0,          0]],
+
+       [[         0,          0,          0,          0],
+        [1065353216, 1065353216, 1065353216, 1065353216],
+        [         1,          1,         67,         80],
+        [         1,          4,          0,          0]],   // photon_id photon_offset genstep_id genstep_offset
+
+       [[         0,          0,          0,          0],
+        [1065353216, 1065353216, 1065353216, 1065353216],
+        [         1,          1,         67,         80],
+        [         2,          8,          0,          0]],
+
+       ...,
+       [[         0,          0,          0,          0],
+        [1065353216, 1065353216, 1065353216, 1065353216],
+        [         1,          1,         67,         80],
+        [    612838,    2451352,          0,          0]],</pre>
+</div>
+</div>
+<div class="section" id="done-getting-optix-to-notice-cuda-thrust-change-to-photon-buffer">
+<h2>DONE: Getting OptiX to notice CUDA/Thrust change to Photon buffer<a class="headerlink" href="#done-getting-optix-to-notice-cuda-thrust-change-to-photon-buffer" title="Permalink to this headline">¶</a></h2>
+<p>Seeding is done by CUDA/Thrust, seems OptiX is not noticing.</p>
+<ul class="simple">
+<li>try manual dirtying of the photon buffer to force resync</li>
+</ul>
+<div class="section" id="dirty-cuda-interop-buffers">
+<h3>Dirty CUDA Interop Buffers<a class="headerlink" href="#dirty-cuda-interop-buffers" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://devtalk.nvidia.com/default/topic/925622/optix/should-i-free-buffer-data-/">https://devtalk.nvidia.com/default/topic/925622/optix/should-i-free-buffer-data-/</a></li>
+</ul>
+<p>Detlef:</p>
+<p>Another case would be CUDA interop buffers which use device side pointers where
+the update happens through CUDA device code. Then you&#8217;d need to make the buffer
+dirty manually to let OptiX know its contents have changed, to be able to
+rebuild accelerations structures etc.</p>
+</div>
+</div>
+<div class="section" id="fix-using-buffer-copy-on-dirty-for-photon-buffer-and-manually-marking-dirty">
+<h2>FIX: Using BUFFER_COPY_ON_DIRTY for photon buffer and manually marking dirty<a class="headerlink" href="#fix-using-buffer-copy-on-dirty-for-photon-buffer-and-manually-marking-dirty" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/commits/e3d49ccd4dd6">https://bitbucket.org/simoncblyth/opticks/commits/e3d49ccd4dd6</a></li>
+</ul>
+</div>
+<div class="section" id="maybe-use-separate-input-only-seed-buffer">
+<h2>Maybe Use Separate INPUT_ONLY SEED BUFFER ?<a class="headerlink" href="#maybe-use-separate-input-only-seed-buffer" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>THIS IS IMPLEMENTED BUT PRIOR TO TESTING FOUND THAT COULD
+GET MULTI EVENT TO WORK AS SHOWN ABOVE</li>
+</ul>
+<div class="highlight-python"><pre>simon:opticksop blyth$ opticks-find WITH_SEED_BUF
+./opticksop/OpSeeder.cc://#define WITH_SEED_BUF 1
+./opticksop/OpSeeder.cc:#ifdef WITH_SEED_BUF
+./opticksop/OpSeeder.cc:#ifdef WITH_SEED_BUF</pre>
+</div>
+</div>
+<div class="section" id="todo-measure-multievent-compute-speed-using-input-output-seeded-photon-buffer-vs-input-only-seed-buffer">
+<h2>TODO: Measure multievent compute speed using INPUT_OUTPUT seeded photon buffer vs INPUT only seed buffer<a class="headerlink" href="#todo-measure-multievent-compute-speed-using-input-output-seeded-photon-buffer-vs-input-only-seed-buffer" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

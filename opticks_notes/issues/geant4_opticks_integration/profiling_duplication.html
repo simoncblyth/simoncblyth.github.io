@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Profiling Duplication &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Profiling Duplication</a><ul>
+<li><a class="reference internal" href="#todo">TODO</a></li>
+<li><a class="reference internal" href="#opticksprofile">OpticksProfile</a></li>
+<li><a class="reference internal" href="#related-npy-timer">Related : npy-/Timer</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/profiling_duplication.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="profiling-duplication">
+<h1>Profiling Duplication<a class="headerlink" href="#profiling-duplication" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="todo">
+<h2>TODO<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h2>
+<p>OpticksProfile uses Timer internally, but other bare usage remains.</p>
+<ul class="simple">
+<li>move persisted OpticksProfile contents into a folder named OpticksProfile at top level
+and duplicate that within datestamped folders, following the old pattern of Timer</li>
+<li>get rid of legacy direct usage of npy/Timer</li>
+</ul>
+</div>
+<div class="section" id="opticksprofile">
+<h2>OpticksProfile<a class="headerlink" href="#opticksprofile" title="Permalink to this headline">¶</a></h2>
+<p>Canonical m_profile instance resides in Opticks instance, and is created with it.
+Used from Opticks via OK_PROFILE:</p>
+<div class="highlight-python"><pre>39 #define OK_PROFILE(s) \
+40     { \
+41        if(m_ok)\
+42        {\
+43           m_ok-&gt;profile((s)) ;\
+44        }\
+45     }
+
+215 template &lt;typename T&gt;
+216 void Opticks::profile(T label)
+221 void Opticks::dumpProfile(const char* msg, const char* startswith, const char* spacewith, double tcut)
+225 void Opticks::saveProfile()</pre>
+</div>
+<div class="highlight-python"><pre> 217 template &lt;typename T&gt;
+ 218 void Opticks::profile(T label)
+ 219 {
+ 220     m_profile-&gt;stamp&lt;T&gt;(label, m_tagoffset);
+ 221    // m_tagoffset is set by Opticks::makeEvent
+ 222 }
+
+
+
+
+
+simon:opticks blyth$ opticks-find OK_PROFILE | wc -l
+      38</pre>
+</div>
+<p>Profile stamps are persisted in ini and npy, holding the same information:</p>
+<div class="highlight-python"><pre>/tmp/blyth/opticks/evt/boolean/torch
+simon:torch blyth$ l
+total 40
+drwxr-xr-x  12 blyth  wheel  408 Mar  4 14:09 -1
+drwxr-xr-x  23 blyth  wheel  782 Mar  4 14:09 1
+-rw-r--r--   1 blyth  wheel  701 Mar  4 14:09 DeltaTime.ini
+-rw-r--r--   1 blyth  wheel  573 Mar  4 14:09 DeltaVM.ini
+-rw-r--r--   1 blyth  wheel  480 Mar  4 14:09 Opticks.npy
+-rw-r--r--   1 blyth  wheel  776 Mar  4 14:09 Time.ini
+-rw-r--r--   1 blyth  wheel  656 Mar  4 14:09 VM.ini</pre>
+</div>
+<p>Looks like this is currently only done at top level, not
+in the date stamped folders. So only the last invokation times
+are available.</p>
+</div>
+<div class="section" id="related-npy-timer">
+<h2>Related : npy-/Timer<a class="headerlink" href="#related-npy-timer" title="Permalink to this headline">¶</a></h2>
+<p>Other time info is stored with the saved events in t_delta.ini and t_absolute.ini:</p>
+<div class="highlight-python"><pre>simon:torch blyth$ cat 1/20170304_140910/t_delta.ini
+_seqhisMakeLookup=0.72714199999973061
+seqhisMakeLookup=0.010654000001522945
+seqhisApplyLookup=2.0999999833293259e-05
+_seqmatMakeLookup=9.9999670055694878e-07
+seqmatMakeLookup=0.006623000001127366
+seqmatApplyLookup=1.5000001440057531e-05
+indexSequenceInterop=0.03241399999751593
+indexBoundaries=0.034935000003315508
+_save=0.11633399999846006
+save=0.15342500000042492</pre>
+</div>
+<p>These are default column names from:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">opticksnpy</span><span class="o">/</span><span class="n">Timer</span><span class="o">.</span><span class="n">cpp</span>
+</pre></div>
+</div>
+<p>Canonical Timer instance:</p>
+<div class="highlight-python"><pre>m_timer = new Timer("Opticks::");</pre>
+</div>
+<div class="highlight-python"><pre>simon:opticks blyth$ opticks-find m_timer
+./optickscore/Opticks.cc:       m_timer(NULL),
+./optickscore/Opticks.cc:    m_timer = new Timer("Opticks::");
+./optickscore/Opticks.cc:    m_timer-&gt;setVerbose(true);
+./optickscore/Opticks.cc:    m_timer-&gt;start();
+./optickscore/Opticks.cc:    return m_timer ;
+./optickscore/OpticksEvent.cc:       if(m_timer)\
+./optickscore/OpticksEvent.cc:          Timer&amp; t = *(m_timer) ;\
+./optickscore/OpticksEvent.cc:          m_timer(NULL),
+./optickscore/OpticksEvent.cc:    return m_timer ;
+./optickscore/OpticksEvent.cc:    m_timer = new Timer("OpticksEvent");
+./optickscore/OpticksEvent.cc:    m_timer-&gt;setVerbose(false);
+./optickscore/OpticksEvent.cc:    m_timer-&gt;start();
+./optickscore/OpticksEvent.cc:    (*m_timer)("_save");
+./optickscore/OpticksEvent.cc:    (*m_timer)("save");
+./optickscore/OpticksEvent.cc:    m_timer-&gt;stop();
+./optickscore/OpticksEvent.cc:    m_ttable = m_timer-&gt;makeTable();
+./optickscore/OpticksEvent.cc:    (*m_timer)("load");
+./optixrap/OScene.cc:       (*m_timer)((s)); \
+./optixrap/OScene.cc:      m_timer(new Timer("OScene::")),
+./optixrap/OScene.cc:    m_timer-&gt;setVerbose(true);
+./optixrap/OScene.cc:    m_timer-&gt;start();
+./optickscore/Opticks.hh:       Timer*               m_timer ;
+./optickscore/OpticksEvent.hh:       Timer*                m_timer ;
+./optickscore/OpticksProfile.hh:    m_timer = new Timer("Opticks::");
+./optixrap/OScene.hh:       Timer*               m_timer ;
+simon:opticks blyth$</pre>
+</div>
+<div class="highlight-python"><pre>1563 void OpticksEvent::makeReport(bool verbose)
+1564 {
+1565     LOG(info) &lt;&lt; "OpticksEvent::makeReport " &lt;&lt; getTagDir()  ;
+1566
+1567     if(verbose)
+1568     m_parameters-&gt;dump();
+1569
+1570     m_timer-&gt;stop();
+1571
+1572     m_ttable = m_timer-&gt;makeTable();
+1573     if(verbose)
+1574     m_ttable-&gt;dump("OpticksEvent::makeReport");
+1575
+1576     m_report-&gt;add(m_parameters-&gt;getLines());
+1577     m_report-&gt;add(m_ttable-&gt;getLines());
+1578 }
+1579
+1580
+1581 void OpticksEvent::saveReport()
+1582 {
+1583     std::string tagdir = getTagDir();
+1584     saveReport(tagdir.c_str());
+1585
+1586     std::string anno = getTimeStamp() ;
+1587     std::string tagdir_ts = getTagDir(anno.c_str());
+1588     saveReport(tagdir_ts.c_str());
+1589 }</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

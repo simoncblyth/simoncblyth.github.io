@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Meshes from Parametric Shapes &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Meshes from Parametric Shapes</a><ul>
+<li><a class="reference internal" href="#joining-endcaps-to-body">Joining Endcaps to body</a></li>
+<li><a class="reference internal" href="#facemask-splitting">Facemask splitting</a></li>
+<li><a class="reference internal" href="#refining-boundary-faces">Refining boundary faces</a></li>
+<li><a class="reference internal" href="#boundary-curve">Boundary curve ?</a></li>
+<li><a class="reference internal" href="#objective-of-parametric-geometry-description">Objective of parametric geometry description</a></li>
+<li><a class="reference internal" href="#welding-with-openmesh">Welding with OpenMesh ?</a><ul>
+<li><a class="reference internal" href="#joining-meshes">Joining meshes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#review-parametric-approaches">Review Parametric Approaches</a><ul>
+<li><a class="reference internal" href="#par">par</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/parametric_shapes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="meshes-from-parametric-shapes">
+<h1>Meshes from Parametric Shapes<a class="headerlink" href="#meshes-from-parametric-shapes" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Complete sphere is easy as its a single continuous sheet
+but what about cylinders with endcaps, chopped spheres,
+chopped cones, cube or general convex polyhedron defined by
+planes.</li>
+<li>Endcap disks need control points to triangle fan around.</li>
+<li>How to join the sheets together...</li>
+<li>Each 3D vertex needs to have associated parametric uv (0:1,0:1),
+also perhaps a sheet index (eg for a cube).</li>
+<li>normals</li>
+<li>jump direct into OpenMesh ?</li>
+<li>need subdivision</li>
+</ul>
+<div class="section" id="joining-endcaps-to-body">
+<h2>Joining Endcaps to body<a class="headerlink" href="#joining-endcaps-to-body" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>when control the parametric domains and stepping
+can ensure that get identical vertices at borders of
+the uv spaces, which can then
+simply be collaped to one in combined meshes<ul>
+<li>actually just using add_vertex unique with
+some suitable length epsilon below which to snap
+vertices together this turns out to be straightforward.</li>
+<li>problem comes with general boolean combinations where there will
+not be equal numbers of vertices around the boundaries that
+need to be stitched together : need to come up with a local edge split/join
+algorithm that can locally change vertex counts around the boundary region</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="facemask-splitting">
+<h2>Facemask splitting<a class="headerlink" href="#facemask-splitting" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="refining-boundary-faces">
+<h2>Refining boundary faces<a class="headerlink" href="#refining-boundary-faces" title="Permalink to this headline">¶</a></h2>
+<p>Subdivision of triangles along boolean join by generating
+more parametric triangles would be good...</p>
+<ul class="simple">
+<li>but add_vertex_unique uniquing stymies somewhat the labelling of vertices
+with the uv parameter and surface index values that gave rise to them ...
+because only the first vertex (based on its position) and its parameter
+values would get stored.</li>
+</ul>
+<p>Given this complication, perhaps can use the implicit sdf for the
+sub-object to choose a face split location that is on the sub-object...
+of directly jump to considering the compound sdf. And do the
+splits at the intersection boundary ?</p>
+<p>TriMeshT.hh:</p>
+<div class="highlight-python"><pre>324   /** \brief Face split (= 1-to-3 split, calls corresponding PolyMeshT function).
+325    *
+326    * The properties of the new faces will be adjusted to the properties of the original face
+327    *
+328    * @param _fh Face handle that should be splitted
+329    * @param _p  New point position that will be inserted in the face
+330    *
+331    * @return Vertex handle of the new vertex
+332    */
+333   inline VertexHandle split_copy(FaceHandle _fh, const Point&amp; _p)
+334   { const VertexHandle vh = this-&gt;add_vertex(_p);  PolyMesh::split_copy(_fh, vh); return vh; }
+335</pre>
+</div>
+</div>
+<div class="section" id="boundary-curve">
+<h2>Boundary curve ?<a class="headerlink" href="#boundary-curve" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>simon:opticks blyth$ tboolean-;tboolean-hybrid-combinetest
+2017-05-31 20:52:53.167 INFO  [4234457] [main@70]  argc 2 argv[0] NOpenMeshCombineTest
+2017-05-31 20:52:53.168 INFO  [4234457] [&gt;::build_parametric_primitive@823] NOpenMesh&lt;T&gt;::build_parametric ns 6 nu 16 nv 16 num_vert(raw) 1734 epsilon 1e-05
+2017-05-31 20:52:53.306 INFO  [4234457] [&gt;::build_parametric_primitive@1006]  V 1538 E 4608 F 3072 Euler [(V - E + F)] 2
+2017-05-31 20:52:53.306 INFO  [4234457] [&gt;::build_parametric_primitive@1007] build_parametric euler 2 expect_euler 2 EULER_OK  nvertices 1538 expect_nvertices 1538 NVERTICES_OK
+2017-05-31 20:52:53.306 INFO  [4234457] [&gt;::build_parametric_primitive@823] NOpenMesh&lt;T&gt;::build_parametric ns 1 nu 16 nv 16 num_vert(raw) 289 epsilon 1e-05
+2017-05-31 20:52:53.310 INFO  [4234457] [&gt;::build_parametric_primitive@1006]  V 242 E 720 F 480 Euler [(V - E + F)] 2
+2017-05-31 20:52:53.310 INFO  [4234457] [&gt;::build_parametric_primitive@1007] build_parametric euler 2 expect_euler 2 EULER_OK  nvertices 242 expect_nvertices 242 NVERTICES_OK
+2017-05-31 20:52:53.310 INFO  [4234457] [&gt;::build_parametric@97] build_parametric leftmesh 0x7f8829d018b0 rightmesh 0x7f8829d021d0
+2017-05-31 20:52:53.315 INFO  [4234457] [&gt;::build_parametric@103] leftmesh inside node-&gt;right :   0 :   2728|  1 :     14|  2 :     14|  3 :     12|  4 :     28|  5 :     12|  6 :     12|  7 :    252|
+2017-05-31 20:52:53.315 INFO  [4234457] [&gt;::build_parametric@106] rightmesh inside node-&gt;left :   0 :     72|  1 :     10|  2 :     10|  3 :     36|  4 :      8|  5 :     16|  6 :     16|  7 :    312|
+2017-05-31 20:52:53.874 INFO  [4234457] [&gt;::dump_boundary_faces@168] boundary faces
+facemask:4
+ heh 4862 vh 855 -&gt; 837 uv (3; 5, 2) -&gt; (3; 4, 1) a_pos vec3(200.000000, -75.000000, -150.000000) -&gt; vec3(200.000000, -100.000000, -175.000000) _b_sdf          -4.744 -&gt;          25.000
+ heh 4765 vh 837 -&gt; 838 uv (3; 4, 1) -&gt; (3; 5, 1) a_pos vec3(200.000000, -100.000000, -175.000000) -&gt; vec3(200.000000, -75.000000, -175.000000) _b_sdf          25.000 -&gt;          15.058
+ heh 4860 vh 838 -&gt; 855 uv (3; 5, 1) -&gt; (3; 5, 2) a_pos vec3(200.000000, -75.000000, -175.000000) -&gt; vec3(200.000000, -75.000000, -150.000000) _b_sdf          15.058 -&gt;          -4.744
+
+ In this disposition can bisect along the lines of constant u and v...
+
+                        (5,2)
+                          +
+                         /|
+                        / |
+                       /  |
+                      /   |
+                     /    0
+                    /     |
+                   /      |
+                  +....0..-
+              (4,1)   (5,1)
+
+
+facemask:1
+ heh 4863 vh 837 -&gt; 855 uv (3; 4, 1) -&gt; (3; 5, 2) a_pos vec3(200.000000, -100.000000, -175.000000) -&gt; vec3(200.000000, -75.000000, -150.000000) _b_sdf          25.000 -&gt;          -4.744
+ heh 4864 vh 855 -&gt; 854 uv (3; 5, 2) -&gt; (3; 4, 2) a_pos vec3(200.000000, -75.000000, -150.000000) -&gt; vec3(200.000000, -100.000000, -150.000000) _b_sdf          -4.744 -&gt;           6.155
+ heh 4859 vh 854 -&gt; 837 uv (3; 4, 2) -&gt; (3; 4, 1) a_pos vec3(200.000000, -100.000000, -150.000000) -&gt; vec3(200.000000, -100.000000, -175.000000) _b_sdf           6.155 -&gt;          25.000
+
+
+
+
+
+facemask:4
+ heh 4861 vh 855 -&gt; 838 uv (3; 5, 2) -&gt; (3; 5, 1) a_pos vec3(200.000000, -75.000000, -150.000000) -&gt; vec3(200.000000, -75.000000, -175.000000) _b_sdf          -4.744 -&gt;          15.058
+ heh 4773 vh 838 -&gt; 839 uv (3; 5, 1) -&gt; (3; 6, 1) a_pos vec3(200.000000, -75.000000, -175.000000) -&gt; vec3(200.000000, -50.000000, -175.000000) _b_sdf          15.058 -&gt;           7.666
+ heh 4866 vh 839 -&gt; 855 uv (3; 6, 1) -&gt; (3; 5, 2) a_pos vec3(200.000000, -50.000000, -175.000000) -&gt; vec3(200.000000, -75.000000, -150.000000) _b_sdf           7.666 -&gt;          -4.744
+facemask:3
+ heh 4870 vh 839 -&gt; 856 uv (3; 6, 1) -&gt; (3; 6, 2) a_pos vec3(200.000000, -50.000000, -175.000000) -&gt; vec3(200.000000, -50.000000, -150.000000) _b_sdf           7.666 -&gt;         -12.917
+ heh 4868 vh 856 -&gt; 855 uv (3; 6, 2) -&gt; (3; 5, 2) a_pos vec3(200.000000, -50.000000, -150.000000) -&gt; vec3(200.000000, -75.000000, -150.000000) _b_sdf         -12.917 -&gt;          -4.744
+ heh 4867 vh 855 -&gt; 839 uv (3; 5, 2) -&gt; (3; 6, 1) a_pos vec3(200.000000, -75.000000, -150.000000) -&gt; vec3(200.000000, -50.000000, -175.000000) _b_sdf          -4.744 -&gt;           7.666
+facemask:4
+ heh 4874 vh 857 -&gt; 839 uv (3; 7, 2) -&gt; (3; 6, 1) a_pos vec3(200.000000, -25.000000, -150.000000) -&gt; vec3(200.000000, -50.000000, -175.000000) _b_sdf         -17.997 -&gt;           7.666
+ heh 4777 vh 839 -&gt; 840 uv (3; 6, 1) -&gt; (3; 7, 1) a_pos vec3(200.000000, -50.000000, -175.000000) -&gt; vec3(200.000000, -25.000000, -175.000000) _b_sdf           7.666 -&gt;           3.101
+ heh 4872 vh 840 -&gt; 857 uv (3; 7, 1) -&gt; (3; 7, 2) a_pos vec3(200.000000, -25.000000, -175.000000) -&gt; vec3(200.000000, -25.000000, -150.000000) _b_sdf           3.101 -&gt;         -17.997
+facemask:3
+ heh 4875 vh 839 -&gt; 857 uv (3; 6, 1) -&gt; (3; 7, 2) a_pos vec3(200.000000, -50.000000, -175.000000) -&gt; vec3(200.000000, -25.000000, -150.000000) _b_sdf           7.666 -&gt;         -17.997
+ heh 4876 vh 857 -&gt; 856 uv (3; 7, 2) -&gt; (3; 6, 2) a_pos vec3(200.000000, -25.000000, -150.000000) -&gt; vec3(200.000000, -50.000000, -150.000000) _b_sdf         -17.997 -&gt;         -12.917
+ heh 4871 vh 856 -&gt; 839 uv (3; 6, 2) -&gt; (3; 6, 1) a_pos vec3(200.000000, -50.000000, -150.000000) -&gt; vec3(200.000000, -50.000000, -175.000000) _b_sdf         -12.917 -&gt;           7.666
+facemask:4
+ heh 4873 vh 857 -&gt; 840 uv (3; 7, 2) -&gt; (3; 7, 1) a_pos vec3(200.000000, -25.000000, -150.000000) -&gt; vec3(200.000000, -25.000000, -175.000000) _b_sdf         -17.997 -&gt;           3.101
+ heh 4785 vh 840 -&gt; 841 uv (3; 7, 1) -&gt; (3; 8, 1) a_pos vec3(200.000000, -25.000000, -175.000000) -&gt; vec3(200.000000, 0.000000, -175.000000) _b_sdf           3.101 -&gt;           1.556
+ heh 4878 vh 841 -&gt; 857 uv (3; 8, 1) -&gt; (3; 7, 2) a_pos vec3(200.000000, 0.000000, -175.000000) -&gt; vec3(200.000000, -25.000000, -150.000000) _b_sdf           1.556 -&gt;         -17.997
+facemask:3
+ heh 4882 vh 841 -&gt; 858 uv (3; 8, 1) -&gt; (3; 8, 2) a_pos vec3(200.000000, 0.000000, -175.000000) -&gt; vec3(200.000000, 0.000000, -150.000000) _b_sdf           1.556 -&gt;         -19.722
+ heh 4880 vh 858 -&gt; 857 uv (3; 8, 2) -&gt; (3; 7, 2) a_pos vec3(200.000000, 0.000000, -150.000000) -&gt; vec3(200.000000, -25.000000, -150.000000) _b_sdf         -19.722 -&gt;         -17.997
+ heh 4879 vh 857 -&gt; 841 uv (3; 7, 2) -&gt; (3; 8, 1) a_pos vec3(200.000000, -25.000000, -150.000000) -&gt; vec3(200.000000, 0.000000, -175.000000) _b_sdf         -17.997 -&gt;           1.556
+facemask:4
+ heh 4886 vh 859 -&gt; 841 uv (3; 9, 2) -&gt; (3; 8, 1) a_pos vec3(200.000000, 25.000000, -150.000000) -&gt; vec3(200.000000, 0.000000, -175.000000) _b_sdf         -17.997 -&gt;           1.556
+ heh 4789 vh 841 -&gt; 842 uv (3; 8, 1) -&gt; (3; 9, 1) a_pos vec3(200.000000, 0.000000, -175.000000) -&gt; vec3(200.000000, 25.000000, -175.000000) _b_sdf           1.556 -&gt;           3.101
+ heh 4884 vh 842 -&gt; 859 uv (3; 9, 1) -&gt; (3; 9, 2) a_pos vec3(200.000000, 25.000000, -175.000000) -&gt; vec3(200.000000, 25.000000, -150.000000) _b_sdf           3.101 -&gt;         -17.997
+facemask:3
+ heh 4887 vh 841 -&gt; 859 uv (3; 8, 1) -&gt; (3; 9, 2) a_pos vec3(200.000000, 0.000000, -175.000000) -&gt; vec3(200.000000, 25.000000, -150.000000) _b_sdf           1.556 -&gt;         -17.997
+ heh 4888 vh 859 -&gt; 858 uv (3; 9, 2) -&gt; (3; 8, 2) a_pos vec3(200.000000, 25.000000, -150.000000) -&gt; vec3(200.000000, 0.000000, -150.000000) _b_sdf         -17.997 -&gt;         -19.722
+ heh 4883 vh 858 -&gt; 841 uv (3; 8, 2) -&gt; (3; 8, 1) a_pos vec3(200.000000, 0.000000, -150.000000) -&gt; vec3(200.000000, 0.000000, -175.000000) _b_sdf         -19.722 -&gt;           1.556
+facemask:4
+ heh 4885 vh 859 -&gt; 842 uv (3; 9, 2) -&gt; (3; 9, 1) a_pos vec3(200.000000, 25.000000, -150.000000) -&gt; vec3(200.000000, 25.000000, -175.000000) _b_sdf         -17.997 -&gt;           3.101
+ heh 4797 vh 842 -&gt; 843 uv (3; 9, 1) -&gt; (3;10, 1) a_pos vec3(200.000000, 25.000000, -175.000000) -&gt; vec3(200.000000, 50.000000, -175.000000) _b_sdf           3.101 -&gt;           7.666
+ heh 4890 vh 843 -&gt; 859 uv (3;10, 1) -&gt; (3; 9, 2) a_pos vec3(200.000000, 50.000000, -175.000000) -&gt; vec3(200.000000, 25.000000, -150.000000) _b_sdf           7.666 -&gt;         -17.997</pre>
+</div>
+</div>
+<div class="section" id="objective-of-parametric-geometry-description">
+<h2>Objective of parametric geometry description<a class="headerlink" href="#objective-of-parametric-geometry-description" title="Permalink to this headline">¶</a></h2>
+<p>Aiming to create a hybrid implicit/parametric polygonization
+of general CSG binary tree defined solids.  For this will
+need to:</p>
+<ul class="simple">
+<li>find intersection contours (using implicit sdf)</li>
+<li>split each shape according to whether the verts are inside the other shape,
+using parametric approach to find the intersect of the shapes</li>
+<li>will need subdiv when too few verts</li>
+<li>weld the split shapes together</li>
+</ul>
+<p>The welding of cut shapes is similar to the problem of joining endcaps
+to other sheets.</p>
+<p>Hmm for cube (and other convex polyhedra defined by planes)
+the welding will need to handle same verts from multiple sheets (4 for cube).</p>
+</div>
+<div class="section" id="welding-with-openmesh">
+<h2>Welding with OpenMesh ?<a class="headerlink" href="#welding-with-openmesh" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="joining-meshes">
+<h3>Joining meshes<a class="headerlink" href="#joining-meshes" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://mailman.rwth-aachen.de/pipermail/openmesh/2010-March/000405.html">https://mailman.rwth-aachen.de/pipermail/openmesh/2010-March/000405.html</a></p>
+<p>there is no predefined function to do that.</p>
+<p>The easiest way to do it is to create a map while adding the vertices to the
+other mesh, mapping from the old mesh vertex handle to the new mesh vertex
+handle. Than you can just iterate over all faces of the old mesh, use a
+FaceVertex iterator and add the face with the mapped vertex handles to the new
+mesh.</p>
+<p>Best Regards,
+Jan Möbius</p>
+<p>On Samstag, 6. March 2010, John Terrell wrote:
+&gt; Hi everyone, I have a need to combine multiple meshes into a single mesh
+&gt;  that contains all the data of the originals.   It&#8217;s easy to copy vertex
+&gt;  info over (just iterating over the vertices and adding them to the
+&gt;  aggregate mesh) but I can&#8217;t figure out a nice way to add the face data
+&gt;  (perhaps I&#8217;m missing something trivial).    Any help?
+&gt;
+&gt; Thanks.
+&gt;
+&gt; -John</p>
+</div>
+</div>
+<div class="section" id="review-parametric-approaches">
+<h2>Review Parametric Approaches<a class="headerlink" href="#review-parametric-approaches" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="par">
+<h3>par<a class="headerlink" href="#par" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/prideout/par/blob/master/par_shapes.h">https://github.com/prideout/par/blob/master/par_shapes.h</a></li>
+<li><a class="reference external" href="http://github.prideout.net/shapes">http://github.prideout.net/shapes</a></li>
+</ul>
+<p>Uses merge and weld approach to handle multi-sheet.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

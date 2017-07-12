@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sliced Composited Raytraced Rasterized &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sliced Composited Raytraced Rasterized</a><ul>
+<li><a class="reference internal" href="#test-geometries">Test geometries</a></li>
+<li><a class="reference internal" href="#oglrap">Oglrap</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/sliced_composited_raytrace_rasterized.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sliced-composited-raytraced-rasterized">
+<h1>Sliced Composited Raytraced Rasterized<a class="headerlink" href="#sliced-composited-raytraced-rasterized" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="test-geometries">
+<h2>Test geometries<a class="headerlink" href="#test-geometries" title="Permalink to this headline">¶</a></h2>
+<p>Single PMT:</p>
+<div class="highlight-python"><pre>tpmt-
+tpmt--    # makes the event in tmp
+tpmt-v    # loads event from tmp</pre>
+</div>
+<p>Dyb cerenkov with analytic PMTs:</p>
+<div class="highlight-python"><pre>op -c --analyticmesh 1</pre>
+</div>
+</div>
+<div class="section" id="oglrap">
+<h2>Oglrap<a class="headerlink" href="#oglrap" title="Permalink to this headline">¶</a></h2>
+<p>oglrap/gl/tex/frag.glsl:</p>
+<div class="highlight-python"><pre>15  void main ()
+16 {
+17    frag_colour = texture(ColorTex, texcoord);
+18    float depth = frag_colour.w ;  // alpha is hijacked for depth in pinhole_camera.cu material1_radiance.cu
+19    frag_colour.w = 1.0 ;
+20
+21    gl_FragDepth = depth  ;
+22
+23    if(NrmParam.z == 1)
+24    {
+25         if(depth &lt; ScanParam.x || depth &gt; ScanParam.y ) discard ;
+26    }</pre>
+</div>
+<p>With GUI &#8220;Composition/(nrm) scanmode&#8221; can ENABLE NrmParam.z and then use
+sliders to adjust ScanParam x and y.
+Hmm the x and y are not independently variable, they are tied to z and w.</p>
+<div class="highlight-python"><pre>simon:oglrap blyth$ grep getScanParamPtr *.*
+GUI.cc:    float* scanparam = composition-&gt;getScanParamPtr() ;
+Rdr.cc:        glUniform4fv(m_scanparam_location, 1, m_composition-&gt;getScanParamPtr());
+Renderer.cc:        glUniform4fv(m_scanparam_location, 1, m_composition-&gt;getScanParamPtr());
+simon:oglrap blyth$</pre>
+</div>
+<p>oglrap/GUI.cc:</p>
+<div class="highlight-python"><pre>496     ImGui::SliderInt( "nrmparam.z", np + 2,  0, 1  );
+497     ImGui::Text(" (nrm) scanmode : %s ",  *(np + 2) == 0 ? "DISABLED" : "ENABLED" );
+498
+499     float* scanparam = composition-&gt;getScanParamPtr() ;
+500     ImGui::SliderFloat( "scanparam.x", scanparam + 0,  0.f, 1.0f, "%0.3f", 2.0f );
+501     ImGui::SliderFloat( "scanparam.y", scanparam + 1,  0.f, 1.0f, "%0.3f", 2.0f );
+502     ImGui::SliderFloat( "scanparam.z", scanparam + 2,  0.f, 1.0f, "%0.3f", 2.0f );
+503     ImGui::SliderFloat( "scanparam.w", scanparam + 3,  0.f, 1.0f, "%0.3f", 2.0f );
+504
+505     *(scanparam + 0) = fmaxf( 0.0f , *(scanparam + 2) - *(scanparam + 3) ) ;
+506     *(scanparam + 1) = fminf( 1.0f , *(scanparam + 2) + *(scanparam + 3) ) ;
+507</pre>
+</div>
+<p>I suppose the problem here is that to produce something visible need to give two depth values
+where one is constrained to be greater than the other and they are both must be between 0 and 1.
+There is also a related problem of coarse/fine ranges as its quite difficult to get what
+you want when all the action is over a small portion of the depth range.</p>
+<p>Note that adjusting near/far to tightly contain some geometry of interest
+then allows the scan parameters to be much easier to control.</p>
+<p>The slicing applies to ray trace, but usually gives &#8220;conic section&#8221; cuts as the view
+is rarely precisely aligned with the geometry.</p>
+<p>Using orthogonal projection, avoiding rotation and fiddling with ScanParam w/z while watching x/y
+allows to create cross section &#8220;sliver&#8221; views.</p>
+<p>Maybe use a base and offset size ? But that has problems of going beyond the range.</p>
+<p>Looks like ImGui may soon have a double ended range slider.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/ocornut/imgui/issues/76">https://github.com/ocornut/imgui/issues/76</a></li>
+</ul>
+<p>Also a DragFloat looks like worth investigating, will probably need to get current with ImGui.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/ocornut/imgui/issues/180">https://github.com/ocornut/imgui/issues/180</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

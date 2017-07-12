@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Targetting Non Existing Volume &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/targetting_non_existing_volume.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="targetting-non-existing-volume">
+<h1>Targetting Non Existing Volume<a class="headerlink" href="#targetting-non-existing-volume" title="Permalink to this headline">¶</a></h1>
+<p>With partial geometry need way to change default target volume 3153:</p>
+<div class="highlight-python"><pre>2017-05-20 12:03:21.642 WARN  [2424808] [*GMesh::getTransform@855] GMesh::getTransform out of bounds  m_num_solids 11 index 3153
+2017-05-20 12:03:21.642 INFO  [2424808] [OpticksGen::targetGenstep@125] OpticksGen::targetGenstep setting frame 3153 1.0000,0.0000,0.0000,0.0000 0.0000,1.0000,0.0000,0.0000 0.0000,0.0000,1.0000,0.0000 0.0000,0.0000,0.0000,1.0000</pre>
+</div>
+<div class="highlight-python"><pre>(lldb) bt
+* thread #1: tid = 0x24e6c0, 0x00007fff8f018866 libsystem_kernel.dylib`__pthread_kill + 10, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+    frame #0: 0x00007fff8f018866 libsystem_kernel.dylib`__pthread_kill + 10
+    frame #1: 0x00007fff866b535c libsystem_pthread.dylib`pthread_kill + 92
+    frame #2: 0x00007fff8d405b1a libsystem_c.dylib`abort + 125
+    frame #3: 0x00007fff8d3cf9bf libsystem_c.dylib`__assert_rtn + 321
+    frame #4: 0x0000000101e65502 libGGeo.dylib`GMesh::getTransform(this=0x0000000108b5f760, index=3153) + 66 at GMesh.cc:854
+    frame #5: 0x0000000101eacb30 libGGeo.dylib`GGeo::getTransform(this=0x0000000105a138a0, index=3153) + 128 at GGeo.cc:1553
+    frame #6: 0x0000000101fdc85c libOpticksGeometry.dylib`OpticksGen::targetGenstep(this=0x0000000108b6aae0, gs=0x0000000108b6ab20) + 444 at OpticksGen.cc:124
+    frame #7: 0x0000000101fdc214 libOpticksGeometry.dylib`OpticksGen::makeTorchstep(this=0x0000000108b6aae0) + 52 at OpticksGen.cc:182
+    frame #8: 0x0000000101fdbdce libOpticksGeometry.dylib`OpticksGen::initInputGensteps(this=0x0000000108b6aae0) + 606 at OpticksGen.cc:74
+  * frame #9: 0x0000000101fdbb35 libOpticksGeometry.dylib`OpticksGen::init(this=0x0000000108b6aae0) + 21 at OpticksGen.cc:37
+    frame #10: 0x0000000101fdbb13 libOpticksGeometry.dylib`OpticksGen::OpticksGen(this=0x0000000108b6aae0, hub=0x0000000105a0ceb0) + 131 at OpticksGen.cc:32
+    frame #11: 0x0000000101fdbb5d libOpticksGeometry.dylib`OpticksGen::OpticksGen(this=0x0000000108b6aae0, hub=0x0000000105a0ceb0) + 29 at OpticksGen.cc:33
+    frame #12: 0x0000000101fd90d6 libOpticksGeometry.dylib`OpticksHub::init(this=0x0000000105a0ceb0) + 118 at OpticksHub.cc:96
+    frame #13: 0x0000000101fd8fb0 libOpticksGeometry.dylib`OpticksHub::OpticksHub(this=0x0000000105a0ceb0, ok=0x0000000105921a30) + 416 at OpticksHub.cc:81
+    frame #14: 0x0000000101fd918d libOpticksGeometry.dylib`OpticksHub::OpticksHub(this=0x0000000105a0ceb0, ok=0x0000000105921a30) + 29 at OpticksHub.cc:83
+    frame #15: 0x00000001039481e6 libOK.dylib`OKMgr::OKMgr(this=0x00007fff5fbfe918, argc=21, argv=0x00007fff5fbfe9f8, argforced=0x0000000000000000) + 262 at OKMgr.cc:46
+    frame #16: 0x000000010394864b libOK.dylib`OKMgr::OKMgr(this=0x00007fff5fbfe918, argc=21, argv=0x00007fff5fbfe9f8, argforced=0x0000000000000000) + 43 at OKMgr.cc:49
+    frame #17: 0x000000010000a93d OKTest`main(argc=21, argv=0x00007fff5fbfe9f8) + 1373 at OKTest.cc:60
+    frame #18: 0x00007fff8a48b5fd libdyld.dylib`start + 1
+    frame #19: 0x00007fff8a48b5fd libdyld.dylib`start + 1
+(lldb)</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

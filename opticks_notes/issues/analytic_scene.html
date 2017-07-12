@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Analytic Scene &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Analytic Scene</a><ul>
+<li><a class="reference internal" href="#detdesc-generation">Detdesc generation</a></li>
+<li><a class="reference internal" href="#multi-file-detdesc-parsing-with-ddbase-py">Multi File Detdesc Parsing with ddbase.py ?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/analytic_scene.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="analytic-scene">
+<h1>Analytic Scene<a class="headerlink" href="#analytic-scene" title="Permalink to this headline">¶</a></h1>
+<p>Looking uptree from lvPmtHemi see many nodes
+without geometry and just physvol/logvol striping,
+does this need a separate &#8220;placement&#8221; tree ? Prepping
+for OptiX/OpenGL instancing ?</p>
+<ul class="simple">
+<li>TODO: expand ddbase.py to handle this</li>
+</ul>
+<p>Checking users of lvPmtHemi AdPmts/geometry.xml uses paramphysvol to instance it around the rings etc..:</p>
+<div class="highlight-python"><pre>simon:pmt blyth$ pmt-dfind lvPmtHemi
+
+./AdPmts/geometry.xml:  &lt;physvol name="pvAdPmtUnit" logvol="/dd/Geometry/PMT/lvPmtHemiwPmtHolder"&gt;
+
+
+simon:DDDB blyth$ pmt-dfind lvPmtHemiwPmtHolder
+./AdPmts/geometry.xml:  &lt;physvol name="pvAdPmtUnit" logvol="/dd/Geometry/PMT/lvPmtHemiwPmtHolder"&gt;
+./PMT/geometry.xml:    &lt;logvolref href="hemi-pmt.xml#lvPmtHemiwPmtHolder"/&gt;
+./PMT/hemi-pmt.xml:  &lt;logvol name="lvPmtHemiwPmtHolder"&gt;
+simon:DDDB blyth$</pre>
+</div>
+<p>AdPmts/geometry.xml:</p>
+<div class="highlight-python"><pre>33   &lt;logvol name="lvAdPmtRing"&gt;
+34     &lt;paramphysvol number="AdPmtNperRing"&gt;
+35       &lt;physvol name="pvAdPmtInRing:1" logvol="/dd/Geometry/AdPmts/lvAdPmtUnit" /&gt;
+36       &lt;posXYZ/&gt;
+37       &lt;rotXYZ rotZ="AdPmtAngularSep" /&gt;
+38     &lt;/paramphysvol&gt;
+39   &lt;/logvol&gt;
+40
+41   &lt;logvol name="lvAdPmtArrayZero"&gt;
+42     &lt;paramphysvol number="AdPmtNrings"&gt;
+43       &lt;physvol name="pvAdPmtRingInCyl:1" logvol="/dd/Geometry/AdPmts/lvAdPmtRing"/&gt;
+44       &lt;posXYZ z="AdPmtZsep"/&gt;
+45     &lt;/paramphysvol&gt;
+46   &lt;/logvol&gt;</pre>
+</div>
+<div class="section" id="detdesc-generation">
+<h2>Detdesc generation<a class="headerlink" href="#detdesc-generation" title="Permalink to this headline">¶</a></h2>
+<p>Detdesc generation complicates things greatly... Take a look at GDML</p>
+<p>/usr/local/env/dyb/NuWa-trunk/dybgaudi/Detector/XmlDetDesc/python/XmlDetDescGen</p>
+</div>
+<div class="section" id="multi-file-detdesc-parsing-with-ddbase-py">
+<h2>Multi File Detdesc Parsing with ddbase.py ?<a class="headerlink" href="#multi-file-detdesc-parsing-with-ddbase-py" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://wiki.bnl.gov/dayabay/index.php?title=Tutorial:DetDesc/XML_Files">https://wiki.bnl.gov/dayabay/index.php?title=Tutorial:DetDesc/XML_Files</a></li>
+</ul>
+<p>Detdesc using catalog to handle cross-file ? Always ?</p>
+<div class="highlight-python"><pre>simon:PMT blyth$ pmt-dfind hemi-pmt.xml
+./PMT/geometry.xml:    &lt;logvolref href="hemi-pmt.xml#lvPmtHemiFrame"/&gt;
+./PMT/geometry.xml:    &lt;logvolref href="hemi-pmt.xml#lvPmtHemi"/&gt;
+./PMT/geometry.xml:    &lt;logvolref href="hemi-pmt.xml#lvPmtHemiwPmtHolder"/&gt;
+./PMT/geometry.xml:    &lt;logvolref href="hemi-pmt.xml#lvAdPmtCollar"/&gt;
+...
+
+ 06 &lt;DDDB&gt;
+  7
+  8   &lt;catalog name="PMT"&gt;
+  9
+ 10     &lt;logvolref href="hemi-pmt.xml#lvPmtHemiFrame"/&gt;
+ 11     &lt;logvolref href="hemi-pmt.xml#lvPmtHemi"/&gt;
+ 12     &lt;logvolref href="hemi-pmt.xml#lvPmtHemiwPmtHolder"/&gt;
+ 13     &lt;logvolref href="hemi-pmt.xml#lvAdPmtCollar"/&gt;
+ 14     &lt;logvolref href="hemi-pmt.xml#lvPmtHemiCathode"/&gt;
+ 15     &lt;logvolref href="hemi-pmt.xml#lvPmtHemiVacuum"/&gt;
+ 16     &lt;logvolref href="hemi-pmt.xml#lvPmtHemiBottom"/&gt;</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

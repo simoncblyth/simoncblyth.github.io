@@ -1,0 +1,824 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Missing CFG4 Surface Detect &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="geant4_opticks_integration" href="index.html" />
+    <link rel="next" title="G4/Op Integration Overview" href="integration_overview.html" />
+    <link rel="prev" title="OKG4 vizg4 noshow" href="okg4_vizg4_noshow.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="integration_overview.html" title="G4/Op Integration Overview"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="okg4_vizg4_noshow.html" title="OKG4 vizg4 noshow"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">geant4_opticks_integration</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Missing CFG4 Surface Detect</a><ul>
+<li><a class="reference internal" href="#issue">Issue</a></li>
+<li><a class="reference internal" href="#observations">Observations</a></li>
+<li><a class="reference internal" href="#fixed-n">Fixed ? N</a></li>
+<li><a class="reference internal" href="#cgdmldetector-vs-ctestdetector">CGDMLDetector vs CTestDetector</a></li>
+<li><a class="reference internal" href="#writing-g4dae-optical-surfaces">Writing G4DAE Optical surfaces</a></li>
+<li><a class="reference internal" href="#reading-g4dae-ggeo-optical-surfaces">Reading G4DAE/ggeo Optical Surfaces</a></li>
+<li><a class="reference internal" href="#ancient-gdml-export-has-no-surfaces-or-optical-props-is-also-has-no-material-properties">Ancient GDML Export has no surfaces OR optical props (is also has no material properties)</a></li>
+<li><a class="reference internal" href="#cgdmldetector-addmpt">CGDMLDetector::addMPT</a></li>
+<li><a class="reference internal" href="#cgdmldetector-addsurfaces">CGDMLDetector::addSurfaces ?</a></li>
+<li><a class="reference internal" href="#next">NEXT</a></li>
+<li><a class="reference internal" href="#code-trace-photon-sd-flags">Code Trace photon SD flags</a><ul>
+<li><a class="reference internal" href="#optixrap-where-flags-come-from">optixrap- where flags come from</a></li>
+<li><a class="reference internal" href="#optixrap-where-properties-come-from">optixrap where properties come from</a></li>
+<li><a class="reference internal" href="#cfg4-where-the-flags-come-from">CFG4 Where the flags come from</a></li>
+<li><a class="reference internal" href="#g4-where-detection-flags-come-from">G4 Where Detection flags come from</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="okg4_vizg4_noshow.html"
+                        title="previous chapter">OKG4 vizg4 noshow</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="integration_overview.html"
+                        title="next chapter">G4/Op Integration Overview</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/missing_cfg4_surface_detect.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="missing-cfg4-surface-detect">
+<h1>Missing CFG4 Surface Detect<a class="headerlink" href="#missing-cfg4-surface-detect" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="issue">
+<h2>Issue<a class="headerlink" href="#issue" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>OKG4Test running with DYB GDML geometry produces no hits, as no photons get flagged SURFACE_DETECT</li>
+<li>BUT tpmt&#8211; &#8211;okg4 running succeeds to produce hits and &#8220;SD&#8221; that matches between OK and G4</li>
+</ul>
+</div>
+<div class="section" id="observations">
+<h2>Observations<a class="headerlink" href="#observations" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>below code trace suggests lack of &#8220;SD&#8221; due to the GDML detector missing optical surfaces
+(with EFFICIENCY values) on PMTs ?</li>
+</ul>
+</div>
+<div class="section" id="fixed-n">
+<h2>Fixed ? N<a class="headerlink" href="#fixed-n" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>OKG4Test --save
+
+lldb OKG4Test -- --compute --save
+
+(lldb) b "OpRayleigh::GetMeanFreePath(G4Track const&amp;, double, G4ForceCondition*)"
+
+    ## torch running : G4 thinks in vacuum....
+
+OKG4Test --g4gun --compute --save</pre>
+</div>
+</div>
+<div class="section" id="cgdmldetector-vs-ctestdetector">
+<h2>CGDMLDetector vs CTestDetector<a class="headerlink" href="#cgdmldetector-vs-ctestdetector" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="writing-g4dae-optical-surfaces">
+<h2>Writing G4DAE Optical surfaces<a class="headerlink" href="#writing-g4dae-optical-surfaces" title="Permalink to this headline">¶</a></h2>
+<p>g4dae/src/G4DAEWriteStructure.cc:</p>
+<div class="highlight-python"><pre>499 G4Transform3D G4DAEWriteStructure::
+500 TraverseVolumeTree(const G4LogicalVolume* const volumePtr, const G4int depth)
+501 {
+...
+552    const G4int daughterCount = volumePtr-&gt;GetNoDaughters();
+...
+557    for (G4int i=0;i&lt;daughterCount;i++)   // Traverse all the children!
+558    {
+559       const G4VPhysicalVolume* const physvol = volumePtr-&gt;GetDaughter(i);
+...
+562       G4Transform3D daughterR;
+...
+564       daughterR = TraverseVolumeTree(physvol-&gt;GetLogicalVolume(),depth+1);
+565
+566       G4RotationMatrix rot, invrot;
+567       if (physvol-&gt;GetFrameRotation() != 0)
+568       {
+569          rot = *(physvol-&gt;GetFrameRotation());
+570          invrot = rot.inverse();
+571       }
+572
+573       // G4Transform3D P(rot,physvol-&gt;GetObjectTranslation());  GDML does this : not inverting the rotation portion
+574       G4Transform3D P(invrot,physvol-&gt;GetObjectTranslation());
+575
+576       PhysvolWrite(nodeElement,physvol,invR*P*daughterR,ModuleName);
+577       BorderSurfaceCache(GetBorderSurface(physvol));
+///
+///               GetBorderSurface   :  returns first G4LogicalBorderSurface* for which "pv1" == physvol
+///               BorderSurfaceCache :  forms and collects bordersurface and associated opticalsurface XML elements
+///
+578    }
+...
+581    structureElement-&gt;appendChild(nodeElement);
+...
+586    VolumeMap()[volumePtr] = R;  // always identity matrix ?
+...
+592    SkinSurfaceCache(GetSkinSurface(volumePtr));
+///
+///               GetSkinSurface    :  returns first G4LogicalSkinSurface* associated with G4LogicalVolume*  volumePtr
+///               SkinSurfaceCache  :  forms and collects skinsurface and associated opticalsurface XML elements
+///
+593
+594    return R;
+595 }</pre>
+</div>
+</div>
+<div class="section" id="reading-g4dae-ggeo-optical-surfaces">
+<h2>Reading G4DAE/ggeo Optical Surfaces<a class="headerlink" href="#reading-g4dae-ggeo-optical-surfaces" title="Permalink to this headline">¶</a></h2>
+<p>assimprap/AssimpGGeo.cc:</p>
+<div class="highlight-python"><pre>359 void AssimpGGeo::convertMaterials(const aiScene* scene, GGeo* gg, const char* query )
+360 {
+361     LOG(info)&lt;&lt;"AssimpGGeo::convertMaterials "
+362              &lt;&lt; " query " &lt;&lt; query
+363              &lt;&lt; " mNumMaterials " &lt;&lt; scene-&gt;mNumMaterials
+364              ;
+365
+366     //GDomain&lt;float&gt;* standard_domain = gg-&gt;getBoundaryLib()-&gt;getStandardDomain();
+367     GDomain&lt;float&gt;* standard_domain = gg-&gt;getBndLib()-&gt;getStandardDomain();
+368
+369
+370     for(unsigned int i = 0; i &lt; scene-&gt;mNumMaterials; i++)
+371     {
+372         unsigned int index = i ;  // hmm, make 1-based later
+373
+374         aiMaterial* mat = scene-&gt;mMaterials[i] ;
+375
+376         aiString name_;
+377         mat-&gt;Get(AI_MATKEY_NAME, name_);
+378
+379         const char* name = name_.C_Str();
+380
+381         //if(strncmp(query, name, strlen(query))!=0) continue ;
+382
+383         LOG(debug) &lt;&lt; "AssimpGGeo::convertMaterials " &lt;&lt; i &lt;&lt; " " &lt;&lt; name ;
+384
+385         const char* bspv1 = getStringProperty(mat, g4dae_bordersurface_physvolume1 );
+386         const char* bspv2 = getStringProperty(mat, g4dae_bordersurface_physvolume2 );
+387
+388         const char* sslv  = getStringProperty(mat, g4dae_skinsurface_volume );
+389
+390         const char* osnam = getStringProperty(mat, g4dae_opticalsurface_name );
+391         const char* ostyp = getStringProperty(mat, g4dae_opticalsurface_type );
+392         const char* osmod = getStringProperty(mat, g4dae_opticalsurface_model );
+393         const char* osfin = getStringProperty(mat, g4dae_opticalsurface_finish );
+394         const char* osval = getStringProperty(mat, g4dae_opticalsurface_value );
+395
+396
+397         GOpticalSurface* os = osnam &amp;&amp; ostyp &amp;&amp; osmod &amp;&amp; osfin &amp;&amp; osval ? new GOpticalSurface(osnam, ostyp, osmod, osfin, osval) : NULL ;
+...
+413         if( sslv )
+414         {
+415             assert(os &amp;&amp; "all ss must have associated os");
+416
+417             GSkinSurface* gss = new GSkinSurface(name, index, os);
+418
+419
+420             LOG(debug) &lt;&lt; "AssimpGGeo::convertMaterials GSkinSurface "
+421                       &lt;&lt; " name " &lt;&lt; name
+422                       &lt;&lt; " sslv " &lt;&lt; sslv
+423                       ;
+424
+425             gss-&gt;setStandardDomain(standard_domain);
+426             gss-&gt;setSkinSurface(sslv);
+427             addProperties(gss, mat );
+428
+429             LOG(debug) &lt;&lt; gss-&gt;description();
+430             gg-&gt;add(gss);
+431
+432             {
+433                 // without standard domain applied
+434                 GSkinSurface*  gss_raw = new GSkinSurface(name, index, os);
+435                 gss_raw-&gt;setSkinSurface(sslv);
+436                 addProperties(gss_raw, mat );
+437                 gg-&gt;addRaw(gss_raw);  // this was erroreously gss for a long time
+438             }
+439
+440         }
+441         else if (bspv1 &amp;&amp; bspv2 )
+442         {
+443             assert(os &amp;&amp; "all bs must have associated os");
+444             GBorderSurface* gbs = new GBorderSurface(name, index, os);
+445
+446             gbs-&gt;setStandardDomain(standard_domain);
+447             gbs-&gt;setBorderSurface(bspv1, bspv2);
+448             addProperties(gbs, mat );
+449
+450             LOG(debug) &lt;&lt; gbs-&gt;description();
+451
+452             gg-&gt;add(gbs);</pre>
+</div>
+<ul class="simple">
+<li>GSkinSurface and GBorderSurface holding the volume names are added to GGeo</li>
+</ul>
+<div class="highlight-python"><pre>228 GSkinSurface* GGeo::getSkinSurface(unsigned int index)
+229 {
+230     return m_skin_surfaces[index];
+231 }
+232 GBorderSurface* GGeo::getBorderSurface(unsigned int index)
+233 {
+234     return m_border_surfaces[index];
+235 }</pre>
+</div>
+<p>Hmm volume association not persisted in slib:</p>
+<div class="highlight-python"><pre>167 void GSurfaceLib::add(GBorderSurface* raw)
+168 {
+169     GPropertyMap&lt;float&gt;* surf = dynamic_cast&lt;GPropertyMap&lt;float&gt;* &gt;(raw);
+170     add(surf);
+171 }
+172 void GSurfaceLib::add(GSkinSurface* raw)
+173 {
+174     LOG(trace) &lt;&lt; "GSurfaceLib::add(GSkinSurface*) " &lt;&lt; ( raw ? raw-&gt;getName() : "NULL" ) ;
+175     GPropertyMap&lt;float&gt;* surf = dynamic_cast&lt;GPropertyMap&lt;float&gt;* &gt;(raw);
+176     add(surf);
+177 }</pre>
+</div>
+<p>GGeo associates imat/isur/osur/omat guint4 boundary index with GSolid(GNode).</p>
+<div class="highlight-python"><pre>0832 GSolid* AssimpGGeo::convertStructureVisit(GGeo* gg, AssimpNode* node, unsigned int depth, GSolid* /*parent*/)
+ 833 {
+ 834     // Associates node to extra information analogous to collada_to_chroma.py:visit
+ 835     //
+
+ 908     GSolid* solid = new GSolid(nodeIndex, gtransform, mesh, UINT_MAX, NULL ); // sensor starts NULL
+ 909     solid-&gt;setLevelTransform(ltransform);
+ 910
+ 911     const char* lv   = node-&gt;getName(0);
+ 912     const char* pv   = node-&gt;getName(1);
+ 913     const char* pv_p   = pnode-&gt;getName(1);
+ 914
+ 915     gg-&gt;countMeshUsage(msi, nodeIndex, lv, pv);
+ 916
+ 917     GBorderSurface* obs = gg-&gt;findBorderSurface(pv_p, pv);  // outer surface (parent-&gt;self)
+ 918     GBorderSurface* ibs = gg-&gt;findBorderSurface(pv, pv_p);  // inner surface (self-&gt;parent)
+ 919     GSkinSurface*   sks = gg-&gt;findSkinSurface(lv);
+ ...
+ 991     GBndLib* blib = gg-&gt;getBndLib();
+ 992     GSurfaceLib* slib = gg-&gt;getSurfaceLib();
+ 993
+ 994     // boundary identification via 4-uint
+ 995     unsigned int boundary = blib-&gt;addBoundary(
+ 996                                                mt_p-&gt;getShortName(),
+ 997                                                osurf ? osurf-&gt;getShortName() : NULL ,
+ 998                                                isurf ? isurf-&gt;getShortName() : NULL ,
+ 999                                                mt-&gt;getShortName()
+1000                                              );
+1001
+1002     solid-&gt;setBoundary(boundary);
+....
+1019     if(m_volnames)
+1020     {
+1021         solid-&gt;setPVName(pv);
+1022         solid-&gt;setLVName(lv);
+1023     }
+....
+1029     return solid ;
+1030 }
+
+///
+///       "boundary" int identifies unique combination of guint4 (imat,isur,osur,omat) indices
+///       and is assigned to the GSolid
+///
+///       how to reconstruct volume names for a surface post cache ?
+///
+///       seems no way to know if skin or border ??
+///       but are most interested in cathode SensorSurface
+///        ... which are logical skin surface (ie associated to only a few lv names
+///</pre>
+</div>
+<p>Solids recursively collected into GGeo:</p>
+<div class="highlight-python"><pre>802 void AssimpGGeo::convertStructure(GGeo* gg, AssimpNode* node, unsigned int depth, GSolid* parent)
+803 {
+804     // recursive traversal of the AssimpNode tree
+805     // note that full tree is traversed even when a partial selection is applied
+806
+807
+808     GSolid* solid = convertStructureVisit( gg, node, depth, parent);
+809
+810     bool selected = m_selection &amp;&amp; m_selection-&gt;contains(node) ;
+811
+812     solid-&gt;setSelected(selected);
+813
+814     gg-&gt;add(solid);
+815
+816     if(parent) // GNode hookup
+817     {
+818         parent-&gt;addChild(solid);
+819         solid-&gt;setParent(parent);
+820     }
+821     else
+822     {
+823         assert(node-&gt;getIndex() == 0);   // only root node has no parent
+824     }
+825
+826     for(unsigned int i = 0; i &lt; node-&gt;getNumChildren(); i++) convertStructure(gg, node-&gt;getChild(i), depth + 1, solid);
+827 }
+828</pre>
+</div>
+<div class="highlight-python"><pre>873 void GGeo::add(GSolid* solid)
+874 {
+875     m_solids.push_back(solid);
+876     unsigned int index = solid-&gt;getIndex(); // absolute node index, independent of the selection
+877     //printf("GGeo::add solid %u \n", index);
+878     m_solidmap[index] = solid ;
+879
+880     if(m_volnames)
+881     {
+882         m_lvlist-&gt;add(solid-&gt;getLVName());
+883         m_pvlist-&gt;add(solid-&gt;getPVName());
+884     }
+885
+886     GSolid* check = getSolid(index);
+887     assert(check == solid);
+888 }</pre>
+</div>
+<p>GSolid(GNode) are persisted into GMergedMesh(GMesh):</p>
+<div class="highlight-python"><pre>596 void GMesh::allocate()
+597 {
+598
+599     unsigned int numVertices = getNumVertices();
+600     unsigned int numFaces = getNumFaces();
+601     unsigned int numSolids = getNumSolids();
+...
+///
+///  lots of solid level info in GMesh
+///
+627     setCenterExtent(new gfloat4[numSolids]);
+628     setBBox(new gbbox[numSolids]);
+629     setMeshes(new unsigned int[numSolids]);
+630     setNodeInfo(new guint4[numSolids]);          //  nface/nvert/nodeIndex/parentIndex
+631     setIdentity(new guint4[numSolids]);          //  node/mesh/boundary/sensor
+632     setTransforms(new float[numSolids*16]);
+633
+634     LOG(info) &lt;&lt; "GMesh::allocate DONE " ;
+635 }</pre>
+</div>
+<p>GMergedMesh/0/identity.npy ana/mergedmesh.py:</p>
+<div class="highlight-python"><pre>In [1]: mm
+Out[1]:
+           aiidentity : (1, 1, 4)
+          itransforms : (1, 4, 4)
+
+                 bbox : (12230, 6)    ## numSolids
+        center_extent : (12230, 4)
+               meshes : (12230, 1)
+             nodeinfo : (12230, 4)    ## nface/nvert/nodeIndex/parentIndex
+             identity : (12230, 4)    ## nodeIndex/mesh/boundary/sensor
+            iidentity : (12230, 4)
+           transforms : (12230, 16)
+
+                nodes : (434816, 1)    ## numFaces
+           boundaries : (434816, 1)
+              sensors : (434816, 1)
+              indices : (1304448, 1)  ## 434816*3   "faces"
+
+             vertices : (225200, 3)      ## numVertices
+              normals : (225200, 3)
+               colors : (225200, 3)
+
+
+
+In [1]: import numpy as np
+
+In [2]: a = np.load("/tmp/identity.npy")
+
+In [3]: a.shape
+Out[3]: (12230, 4)
+
+In [4]: a
+Out[4]:
+array([[    0,   248,     0,     0],
+       [    1,   247,     1,     0],
+       [    2,    21,     2,     0],
+       ...,
+       [12227,   243,   122,     0],
+       [12228,   244,   122,     0],
+       [12229,   245,   122,     0]], dtype=uint32)</pre>
+</div>
+</div>
+<div class="section" id="ancient-gdml-export-has-no-surfaces-or-optical-props-is-also-has-no-material-properties">
+<h2>Ancient GDML Export has no surfaces OR optical props (is also has no material properties)<a class="headerlink" href="#ancient-gdml-export-has-no-surfaces-or-optical-props-is-also-has-no-material-properties" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>delta:DayaBay_VGDX_20140414-1300 blyth$ grep surface /tmp/g4_00.gdml
+delta:DayaBay_VGDX_20140414-1300 blyth$ grep optical /tmp/g4_00.gdml
+delta:DayaBay_VGDX_20140414-1300 blyth$ grep EFFICIENCY /tmp/g4_00.gdml
+delta:DayaBay_VGDX_20140414-1300 blyth$</pre>
+</div>
+</div>
+<div class="section" id="cgdmldetector-addmpt">
+<h2>CGDMLDetector::addMPT<a class="headerlink" href="#cgdmldetector-addmpt" title="Permalink to this headline">¶</a></h2>
+<p>Ancient GDML has materials, but they have no properties...
+Added them from the G4DAE/ggeo material library:</p>
+<div class="highlight-python"><pre>097 void CGDMLDetector::addMPT()
+ 98 {
+ 99     // GDML exported by geant4 that comes with nuwa lack material properties
+100     // so use the properties from the G4DAE export
+101
+///
+122     unsigned int ng4mat = m_traverser-&gt;getNumMaterialsWithoutMPT() ;
+123     for(unsigned int i=0 ; i &lt; ng4mat ; i++)
+124     {
+125         G4Material* g4mat = m_traverser-&gt;getMaterialWithoutMPT(i) ;
+126         const char* name = g4mat-&gt;GetName() ;
+127
+128         std::vector&lt;std::string&gt; elem;
+129         boost::split(elem,name,boost::is_any_of("/"));
+130         assert(elem.size() == 4 &amp;&amp; "expecting material names like /dd/Materials/GdDopedLS " );
+131         const char* shortname = elem[3].c_str();
+132
+133         const GMaterial* ggmat = m_lib-&gt;getMaterial(shortname);
+134         assert(ggmat &amp;&amp; strcmp(ggmat-&gt;getShortName(), shortname)==0 &amp;&amp; "failed to find corresponding G4DAE material") ;
+135
+136         LOG(debug) &lt;&lt; "CGDMLDetector::addMPT"
+137                   &lt;&lt; " g4mat " &lt;&lt; std::setw(45) &lt;&lt; name
+138                   &lt;&lt; " shortname " &lt;&lt; std::setw(25) &lt;&lt; shortname
+139                    ;
+140
+141         G4MaterialPropertiesTable* mpt = m_lib-&gt;makeMaterialPropertiesTable(ggmat);
+///
+///              CPropLib::makeMaterialPropertiesTable  converts ggeo material into G4 MPT
+///
+142         g4mat-&gt;SetMaterialPropertiesTable(mpt);
+143         //m_lib-&gt;dumpMaterial(g4mat, "CGDMLDetector::addMPT");
+144
+145     }</pre>
+</div>
+</div>
+<div class="section" id="cgdmldetector-addsurfaces">
+<h2>CGDMLDetector::addSurfaces ?<a class="headerlink" href="#cgdmldetector-addsurfaces" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>looks like the ancient GDML geometry lacks surfaces entirely</li>
+</ul>
+<p>Questions:</p>
+<ul class="simple">
+<li>are the volume names including the pointers between G4DAE and GDML matching
+(they should be the GDML and G4DAE were exported from the same process)<ul>
+<li>they are for the cathodes</li>
+</ul>
+</li>
+<li>vague recall that CTestDetector used BorderSurface in order pin down the
+photon direction to detect, for this need to have the pvnames from a tree traverse
+(see GGeoTest for this)</li>
+</ul>
+</div>
+<div class="section" id="next">
+<h2>NEXT<a class="headerlink" href="#next" title="Permalink to this headline">¶</a></h2>
+<p>Add methods like below to GGeo, like in GGeoTest:</p>
+<div class="highlight-python"><pre>//
+//    private:
+//        void findSensorVolumePairs();
+//    public:
+//        unsigned getNumSensorVolumePairs();
+//        const std::pair&lt;std::string, std::string&gt;&amp; getSensorVolumePair(unsigned p);</pre>
+</div>
+<p>Use the pairs in CGeometry to reconstruct G4LogicalBorderSurface for the cathodes
+when using CGDMLDetector.</p>
+<p>Avoid duplicated geometry loading in CProplib</p>
+</div>
+<div class="section" id="code-trace-photon-sd-flags">
+<h2>Code Trace photon SD flags<a class="headerlink" href="#code-trace-photon-sd-flags" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="optixrap-where-flags-come-from">
+<h3>optixrap- where flags come from<a class="headerlink" href="#optixrap-where-flags-come-from" title="Permalink to this headline">¶</a></h3>
+<p>oxrap/cu/genrate.cu:</p>
+<div class="highlight-python"><pre>402
+403         if(s.optical.x &gt; 0 )       // x/y/z/w:index/type/finish/value
+404         {
+405             command = propagate_at_surface(p, s, rng);
+406             if(command == BREAK)    break ;       // SURFACE_DETECT/SURFACE_ABSORB
+407             if(command == CONTINUE) continue ;    // SURFACE_DREFLECT/SURFACE_SREFLECT
+408         }
+409         else
+410         {
+411             //propagate_at_boundary(p, s, rng);     // BOUNDARY_RELECT/BOUNDARY_TRANSMIT
+412             propagate_at_boundary_geant4_style(p, s, rng);     // BOUNDARY_RELECT/BOUNDARY_TRANSMIT
+413             // tacit CONTINUE
+414         }</pre>
+</div>
+<p>oxrap/cu/propagate.h:</p>
+<div class="highlight-python"><pre>455 /*
+456 propagate_at_surface
+457 ======================
+458
+459 Inputs:
+460
+461 * s.surface.x detect
+462 * s.surface.y absorb              (1.f - reflectivity ) ?
+463 * s.surface.z reflect_specular
+464 * s.surface.w reflect_diffuse
+...
+488 __device__ int
+489 propagate_at_surface(Photon &amp;p, State &amp;s, curandState &amp;rng)
+490 {
+491
+492     float u = curand_uniform(&amp;rng);
+493
+494     if( u &lt; s.surface.y )   // absorb
+495     {
+496         s.flag = SURFACE_ABSORB ;
+497         return BREAK ;
+498     }
+499     else if ( u &lt; s.surface.y + s.surface.x )  // absorb + detect
+500     {
+501         s.flag = SURFACE_DETECT ;
+502         return BREAK ;
+503     }
+504     else if (u  &lt; s.surface.y + s.surface.x + s.surface.w )  // absorb + detect + reflect_diffuse
+505     {
+506         s.flag = SURFACE_DREFLECT ;
+507         propagate_at_diffuse_reflector(p, s, rng);
+508         return CONTINUE;
+509     }
+510     else
+511     {
+512         s.flag = SURFACE_SREFLECT ;
+513         propagate_at_specular_reflector(p, s, rng );
+514         return CONTINUE;
+515     }
+516 }</pre>
+</div>
+<ul class="simple">
+<li>surface handling requires &gt; 0 surface index</li>
+</ul>
+</div>
+<div class="section" id="optixrap-where-properties-come-from">
+<h3>optixrap where properties come from<a class="headerlink" href="#optixrap-where-properties-come-from" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>240 GPropertyMap&lt;float&gt;* GSurfaceLib::createStandardSurface(GPropertyMap&lt;float&gt;* src)
+241 {
+...
+258         GOpticalSurface* os = src-&gt;getOpticalSurface() ;  // GSkinSurface and GBorderSurface ctor plant the OpticalSurface into the PropertyMap
+259
+260         if(src-&gt;isSensor())
+261         {
+262             GProperty&lt;float&gt;* _EFFICIENCY = src-&gt;getProperty(EFFICIENCY);
+263             assert(_EFFICIENCY &amp;&amp; os &amp;&amp; "sensor surfaces must have an efficiency" );
+264
+265             if(m_fake_efficiency &gt;= 0.f &amp;&amp; m_fake_efficiency &lt;= 1.0f)
+266             {
+267                 _detect           = makeConstantProperty(m_fake_efficiency) ;
+268                 _absorb           = makeConstantProperty(1.0-m_fake_efficiency);
+269                 _reflect_specular = makeConstantProperty(0.0);
+270                 _reflect_diffuse  = makeConstantProperty(0.0);
+271             }
+272             else
+273             {
+274                 _detect = _EFFICIENCY ;
+275                 _absorb = GProperty&lt;float&gt;::make_one_minus( _detect );
+276                 _reflect_specular = makeConstantProperty(0.0);
+277                 _reflect_diffuse  = makeConstantProperty(0.0);
+278             }
+279         }
+280         else
+281         {
+282             GProperty&lt;float&gt;* _REFLECTIVITY = src-&gt;getProperty(REFLECTIVITY);
+283             assert(_REFLECTIVITY &amp;&amp; os &amp;&amp; "non-sensor surfaces must have a reflectivity " );
+284
+285             if(os-&gt;isSpecular())
+286             {
+287                 _detect  = makeConstantProperty(0.0) ;
+288                 _reflect_specular = _REFLECTIVITY ;
+289                 _reflect_diffuse  = makeConstantProperty(0.0) ;
+290                 _absorb  = GProperty&lt;float&gt;::make_one_minus(_reflect_specular);
+291             }
+292             else
+293             {
+294                 _detect  = makeConstantProperty(0.0) ;
+295                 _reflect_specular = makeConstantProperty(0.0) ;
+296                 _reflect_diffuse  = _REFLECTIVITY ;
+297                 _absorb  = GProperty&lt;float&gt;::make_one_minus(_reflect_diffuse);
+298             }
+299         }
+300     }</pre>
+</div>
+</div>
+<div class="section" id="cfg4-where-the-flags-come-from">
+<h3>CFG4 Where the flags come from<a class="headerlink" href="#cfg4-where-the-flags-come-from" title="Permalink to this headline">¶</a></h3>
+<p>cfg4/OpStatus.hh:</p>
+<div class="highlight-python"><pre>020 CFG4_API unsigned int OpPointFlag(const G4StepPoint* point, const G4OpBoundaryProcessStatus bst);</pre>
+</div>
+<p>cfg4/OpStatus.cc:</p>
+<div class="highlight-python"><pre>207 unsigned int OpPointFlag(const G4StepPoint* point, const G4OpBoundaryProcessStatus bst)
+208 {
+209     G4StepStatus status = point-&gt;GetStepStatus()  ;
+210     // TODO: cache the relevant process objects, so can just compare pointers ?
+211     const G4VProcess* process = point-&gt;GetProcessDefinedStep() ;
+212     const G4String&amp; processName = process ? process-&gt;GetProcessName() : "NoProc" ;
+213
+214     bool transportation = strcmp(processName,"Transportation") == 0 ;
+215     bool scatter = strcmp(processName, "OpRayleigh") == 0 ;
+216     bool absorption = strcmp(processName, "OpAbsorption") == 0 ;
+217
+218     unsigned int flag(0);
+219     if(absorption &amp;&amp; status == fPostStepDoItProc )
+220     {
+221         flag = BULK_ABSORB ;
+222     }
+223     else if(scatter &amp;&amp; status == fPostStepDoItProc )
+224     {
+225         flag = BULK_SCATTER ;
+226     }
+227     else if(transportation &amp;&amp; status == fWorldBoundary )
+228     {
+229         flag = SURFACE_ABSORB ;   // kludge for fWorldBoundary - no surface handling yet
+230     }
+231     else if(transportation &amp;&amp; status == fGeomBoundary )
+232     {
+233         flag = OpBoundaryFlag(bst) ; // BOUNDARY_TRANSMIT/BOUNDARY_REFLECT/NAN_ABORT/SURFACE_ABSORB/SURFACE_DETECT
+234     }
+235     return flag ;
+236 }
+
+
+144 unsigned int OpBoundaryFlag(const G4OpBoundaryProcessStatus status)  ///   non-API private function
+145 {
+146     unsigned int flag = 0 ;
+147     switch(status)
+148     {
+149         case FresnelRefraction:
+150                                flag=BOUNDARY_TRANSMIT;
+151                                break;
+152         case TotalInternalReflection:
+153         case       FresnelReflection:
+154                                flag=BOUNDARY_REFLECT;
+155                                break;
+156         case StepTooSmall:
+157                                flag=NAN_ABORT;
+158                                break;
+159         case Absorption:
+160                                flag=SURFACE_ABSORB ;
+161                                break;
+162         case Detection:
+163                                flag=SURFACE_DETECT ;
+164                                break;
+165         case Undefined:
+166         case Transmission:
+167         case BackScattering:</pre>
+</div>
+</div>
+<div class="section" id="g4-where-detection-flags-come-from">
+<h3>G4 Where Detection flags come from<a class="headerlink" href="#g4-where-detection-flags-come-from" title="Permalink to this headline">¶</a></h3>
+<p>g4-;g4-cls G4OpBoundaryProcess:</p>
+<div class="highlight-python"><pre>306 inline
+307 void G4OpBoundaryProcess::DoAbsorption()
+308 {
+309               theStatus = Absorption;
+310
+311               if ( G4BooleanRand(theEfficiency) ) {
+312
+313                  // EnergyDeposited =/= 0 means: photon has been detected
+314                  theStatus = Detection;
+315                  aParticleChange.ProposeLocalEnergyDeposit(thePhotonMomentum);
+316               }
+317               else {
+318                  aParticleChange.ProposeLocalEnergyDeposit(0.0);
+319               }
+320
+321               NewMomentum = OldMomentum;
+322               NewPolarization = OldPolarization;
+323
+324 //              aParticleChange.ProposeEnergy(0.0);
+325               aParticleChange.ProposeTrackStatus(fStopAndKill);
+326 }
+
+
+165 G4VParticleChange*
+166 G4OpBoundaryProcess::PostStepDoIt(const G4Track&amp; aTrack, const G4Step&amp; aStep)
+167 {
+168         theStatus = Undefined;
+///
+///    DoAbsorption gets called for each of the boundary types...
+///    coming up with "Detection" requires luck and a suitable theEfficiency value
+///
+///
+483         else if (type == dielectric_dielectric) {
+484
+485           if ( theFinish == polishedbackpainted ||
+486                theFinish == groundbackpainted ) {
+487              DielectricDielectric();
+488           }
+489           else {
+490              G4double rand = G4UniformRand();
+491              if ( rand &gt; theReflectivity ) {
+492                 if (rand &gt; theReflectivity + theTransmittance) {
+493                    DoAbsorption();
+494                 } else {
+495                    theStatus = Transmission;
+496                    NewMomentum = OldMomentum;
+497                    NewPolarization = OldPolarization;
+498                 }
+499              }</pre>
+</div>
+<p>Volume boundary needs G4LogicalBorderSurface or G4LogicalSkinSurface with MPT to provide non-zero EFFICIENCY:</p>
+<div class="highlight-python"><pre>337     if (Surface) OpticalSurface =
+338            dynamic_cast &lt;G4OpticalSurface*&gt; (Surface-&gt;GetSurfaceProperty());
+339
+340     if (OpticalSurface) {
+341
+342            type      = OpticalSurface-&gt;GetType();
+343        theModel  = OpticalSurface-&gt;GetModel();
+344        theFinish = OpticalSurface-&gt;GetFinish();
+345
+346        aMaterialPropertiesTable = OpticalSurface-&gt;
+347                     GetMaterialPropertiesTable();
+348
+349            if (aMaterialPropertiesTable) {
+...
+...
+387               PropertyPointer =
+388               aMaterialPropertiesTable-&gt;GetProperty("EFFICIENCY");
+389               if (PropertyPointer) {
+390                       theEfficiency =
+391                       PropertyPointer-&gt;Value(thePhotonMomentum);</pre>
+</div>
+<p>So it looks like the CGDMLDetector is missing Optical Surfaces whereas the CTestDetector has them ?</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="integration_overview.html" title="G4/Op Integration Overview"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="okg4_vizg4_noshow.html" title="OKG4 vizg4 noshow"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" >geant4_opticks_integration</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

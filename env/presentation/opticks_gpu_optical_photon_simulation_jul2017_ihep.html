@@ -936,8 +936,8 @@ interact only weakly.
 
 **Radical simulation speedup -> short development cycle -> improved understanding** -->
 </div>
-<div class="slide" id="summary-at-llr-workshop-nov-2016">
-<h1><span class="small">Summary at LLR Workshop (Nov 2016)</span></h1>
+<div class="slide" id="summary-from-llr-workshop-nov-2016">
+<h1><span class="small">Summary from LLR Workshop (Nov 2016)</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">Overview</p>
 <ul class="small last simple">
@@ -945,6 +945,7 @@ interact only weakly.
 <li>Expect: <strong>Opticks &gt; 1000x Geant4</strong> (with workstation GPUs)</li>
 <li><span class="red">photon propagation time --&gt; zero</span></li>
 <li><span class="blue">analytic geometry --&gt; precise Geant4 match</span></li>
+<li><strong>NOTE THE &quot;ANALYTIC&quot; CAVEAT</strong></li>
 </ul>
 </div>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
@@ -975,7 +976,6 @@ thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
 </ul>
 <p class="small last">CAVEAT : <strong>analytic geom needed for chi2 match</strong></p>
 </div>
-<p class="small">CUDA : Ray intersection, bounding box -&gt; OptiX</p>
 <p class="small"><strong>Geometry Status (Nov 2016)</strong></p>
 <ul class="small simple">
 <li>mostly approximated, using G4 tesselation</li>
@@ -1140,9 +1140,9 @@ thanks to massive parallelism made accessible by NVIDIA OptiX.</p>
 <div class="sidebar">
 <p class="first sidebar-title">Bit Twiddling Navigation</p>
 <ul class="small last simple">
-<li>parent(i) = i/2</li>
-<li>leftchild(i) = 2*i</li>
-<li>rightchild(i) = 2*i + 1</li>
+<li>parent(i) = i/2 = i &gt;&gt; 1</li>
+<li>leftchild(i) = 2*i = i &lt;&lt; 1</li>
+<li>rightchild(i) = 2*i + 1 = (i &lt;&lt; 1) + 1</li>
 <li>leftmost(height)  =  1 &lt;&lt; height</li>
 </ul>
 </div>
@@ -1252,7 +1252,7 @@ isect = csg.pop();       <b><span class="alarm">  // winning intersect  </span><
 </tbody>
 </table>
 <ul class="small simple">
-<li><strong>zsphere, cone, cylinder, disc</strong> : truncated shapes <strong>closed</strong> by endcaps</li>
+<li><strong>zsphere, cone, cylinder, disc</strong> : truncated shapes <strong>closed</strong> by endcaps <span class="red">&lt;-- NOT OPTIONAL</span></li>
 <li><strong>disc</strong> : avoids endcap degeneracy with very thin cylinders</li>
 <li><strong>convexpolyhedron</strong> : defined by a set of planes, used for trapezoid and segment</li>
 <li><strong>segment</strong> :   prism shape used for deltaphi intersection</li>
@@ -1301,8 +1301,8 @@ special casing classification (cannot miss otherside).</li>
 <li><strong>rayDir</strong> NOT normalized</li>
 </ul>
 </div>
-<div class="slide" id="opticks-csg-primitives-on-parade">
-<h1><span class="small">Opticks CSG Primitives On Parade</span></h1>
+<div class="slide" id="opticks-csg-primitives-on-parade-gpu-raytrace">
+<h1><span class="small">Opticks CSG Primitives On Parade (GPU raytrace)</span></h1>
 <img alt="/env/presentation/tboolean_parade.png" class="align-center" src="/env/presentation/tboolean_parade.png" style="width: 1000px;" />
 <p class="small">Three on right (Trapezoid, Segment, Icosahedron) all represented by planes with <strong>nconvexpolyhedron</strong></p>
 </div>
@@ -1408,7 +1408,7 @@ in(in(in(in(cy,!cy),in(!cy,!cy)),in(in(!cy,!cy),in(!cy,!cy))),!cy)
 <li><strong>A-B</strong> : grow correct dimension of subtracted shape</li>
 <li><strong>A+B</strong> : grow smaller interface shape into bigger, making join</li>
 </ul>
-<p class="small">Automated uncoincidence finder/fixer in operation, needs work</p>
+<p class="small">Automated coincidence finder/fixer in operation, needs work</p>
 <img alt="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" class="small align-left" src="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" style="width: 500px;" />
 </div>
 <div class="slide" id="full-analytic-geometry-translation-workflow">
@@ -1447,21 +1447,102 @@ in(in(in(in(cy,!cy),in(!cy,!cy)),in(in(!cy,!cy),in(!cy,!cy))),!cy)
 <ul class="small simple">
 <li>converts into OptiX GPU buffers</li>
 </ul>
-<p class="tiny">glTF : (GL Transmission Format) &quot;JPEG of 3D&quot;), efficient transmission and loading of 3D scenes and models,
+<p class="tiny">glTF : (GL Transmission Format) &quot;JPEG of 3D&quot; : efficient transmission and loading of 3D scenes and models,
 <a class="reference external" href="https://www.khronos.org/gltf">https://www.khronos.org/gltf</a></p>
 </div>
-<div class="slide" id="implicit-geometry-with-signed-distance-functions-sdf-and-r-function-composition">
-<h1><span class="small">Implicit Geometry with Signed Distance Functions (SDF) and R-function composition</span></h1>
-<p class="small">SDF(x,y,z) distance to solid surface, -ve/0/+ve : inside/on/outside</p>
-<p class="small">CSG composable using R-functions, eg <strong>min</strong> and <strong>max</strong></p>
+<div class="slide" id="signed-distance-function-sdf-modelling">
+<h1><span class="small">Signed Distance Function (SDF) Modelling</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">SDF definition</p>
+<p class="small">SDF(q(x,y,z) distance to solid surface</p>
+<ul class="small simple">
+<li>-ve : inside</li>
+<li>0 : on surface</li>
+<li>+ve : outside</li>
+</ul>
+<p class="small">SDF Examples:</p>
+<p class="small last">Sphere(center,radius) :  <strong>length(q,center) - radius</strong>
+Plane(normal, dist) : <strong>dot(normal,q) - dist</strong></p>
+</div>
+<p class="small">SDFs are composable using R-functions, eg <strong>min</strong> and <strong>max</strong></p>
 <ul class="small simple">
 <li>SDF(Union(A,B)) ~ min(SDF(A),SDB(B))</li>
 <li>SDF(Intersection(A,B)) ~  max(SDF(A),SDF(B))</li>
 <li>SDF(Difference(A,B)) ~ max(SDF(A),-SDF(B))</li>
+<li>SDF(!A) ~ -SDF(A)</li>
 </ul>
-<p class="small">Recursive application of these combinations within CSG node trees
-yield implicit function representations.</p>
-<p class="tiny">R(Rvachev)-functions sign uniquely determined by argument signs -&gt; R-functions parallel CSG operations</p>
+<p class="small">Recursively applicable to CSG trees</p>
+<ul class="small simple">
+<li>-&gt; <strong>implicit SDF for arbitrary CSG composite solid</strong></li>
+</ul>
+<p class="small">Allows:</p>
+<ul class="small simple">
+<li>analytic representation of arbitrary solid</li>
+<li>classification of point wrt solid</li>
+<li>polygonization by isosurface extraction -&gt; fast OpenGL rasterized visualization</li>
+</ul>
+<p class="small"><span class="red">SDFs extremely useful for geometry debugging</span></p>
+<p class="tiny">Rvachev-functions (R-functions) : sign uniquely determined by signs of arguments -&gt; parallel CSG operations</p>
+</div>
+<div class="slide" id="sdf-isosurface-extracted-polgonization-mesh-with-offset-gpu-raytrace">
+<h1><span class="small">SDF Isosurface Extracted Polgonization Mesh with offset GPU raytrace</span></h1>
+<img alt="/env/presentation/tboolean_interlocked_gpuoffset.png" class="align-center" src="/env/presentation/tboolean_interlocked_gpuoffset.png" style="width: 1000px;" />
+</div>
+<div class="slide" id="various-polygonization-approaches">
+<h1><span class="small">Various Polygonization Approaches</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Polygonization that just works ?</p>
+<p class="small">Not a solved problem, problems with some geometry</p>
+<ul class="small last simple">
+<li>very thin (eg PMT cathode)</li>
+<li>combinations of shapes of different scales</li>
+</ul>
+</div>
+<p class="small"><strong>Several Integrations of Open Source Polygonizations</strong></p>
+<dl class="small docutils">
+<dt>Marching Cubes</dt>
+<dd>fill bbox with cubes, generate triangles for cubes with sign changes,
+fixed resolution (<strong>miss features or too many tris</strong>)</dd>
+<dt>Dual Contouring</dt>
+<dd>multiresolution using octree (<strong>slow, finnicky</strong>)</dd>
+<dt>Implicit Mesher</dt>
+<dd>finds and follows surface, fast, fixed resolution, (<strong>needs help in finding</strong>)</dd>
+</dl>
+<p class="small"><strong>My own attempt (WIP)</strong></p>
+<dl class="small docutils">
+<dt>Hybrid Mesher</dt>
+<dd>combining SDF classification with parametric generation, (<strong>complicated mesh joining</strong>)</dd>
+</dl>
+</div>
+<div class="slide" id="debugging-the-translation-to-gpu-geometry">
+<h1><span class="small">Debugging the Translation to GPU Geometry</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">SDF zero scanning</p>
+<p class="small">Consider union of shapes</p>
+<ul class="small last simple">
+<li>coincident faces -&gt; internal zeros (artifact surfaces)</li>
+<li>count SDF zeros along scanlines across geometry &quot;cage&quot;<ul>
+<li>even crossings -&gt; expected</li>
+<li>odd crossings -&gt;</li>
+</ul>
+</li>
+</ul>
+</div>
+<blockquote class="small">
+<p><strong>Geometry Debugging using SDFs</strong></p>
+<ul class="simple">
+<li>select points on solid surface from the primitives (composite SDF~0) -&gt; <em>parsurf</em> bounding box</li>
+<li>SDF zero scanning</li>
+<li>classify child volume surface points against parent volume SDF (or v.v)</li>
+</ul>
+<p><strong>Codegen C++ (nnode) and Python (CSG) Debugging Workflow</strong></p>
+</blockquote>
+<p class="small"><strong>Solid Level</strong></p>
+<p class="small">Bounding box comparisons</p>
+<ul class="small simple">
+<li>eg G4Poly(via G4DAE) vs Opticks parametric surface</li>
+</ul>
+<p class="small"><strong>Structure Level</strong></p>
 </div>
 <div class="slide" id="advantages-of-fully-analytic-geometry">
 <h1><span class="small">Advantages of fully analytic geometry</span></h1>

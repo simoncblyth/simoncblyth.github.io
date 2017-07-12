@@ -1,0 +1,482 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Opticks Analytic Scene Description &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Opticks Analytic Scene Description</a><ul>
+<li><a class="reference internal" href="#issue-polygonization-repetition">ISSUE : Polygonization Repetition</a></li>
+<li><a class="reference internal" href="#gltf-samples">gltf samples</a></li>
+<li><a class="reference internal" href="#todo-make-input-serialization-smarter-avoiding-repetition">TODO : make input serialization smarter ? avoiding repetition</a></li>
+<li><a class="reference internal" href="#todo-converting-gdml-description-into-instance-ized-csg-trees-opticksscenegraph">TODO: Converting GDML description into instance-ized CSG trees &#8220;OpticksSceneGraph&#8221;</a><ul>
+<li><a class="reference internal" href="#whats-needed-in-opticksscenegraph">Whats needed in OpticksSceneGraph ?</a></li>
+<li><a class="reference internal" href="#gdml-ggeo-vs-g4dae-ggeo">GDML-&gt;GGeo vs G4DAE-&gt;GGeo</a></li>
+<li><a class="reference internal" href="#validation">Validation</a></li>
+<li><a class="reference internal" href="#opticksscenegraph-technicalites">OpticksSceneGraph Technicalites</a></li>
+<li><a class="reference internal" href="#why-not-parse-gdml-with-g4-and-work-with-g4-in-memory-tree">Why not parse GDML with G4 and work with G4 in-memory tree ?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/scene.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="opticks-analytic-scene-description">
+<h1>Opticks Analytic Scene Description<a class="headerlink" href="#opticks-analytic-scene-description" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="issue-polygonization-repetition">
+<h2>ISSUE : Polygonization Repetition<a class="headerlink" href="#issue-polygonization-repetition" title="Permalink to this headline">¶</a></h2>
+<p>This is a symptom of not having an efficient scene representation yet.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tboolean</span><span class="o">-</span><span class="mi">0</span><span class="o">-</span><span class="n">polygonize</span>
+</pre></div>
+</div>
+<p>Currently NCSG::Polygonize blindly applies to every CSG node tree without:</p>
+<ul class="simple">
+<li>detection of same solid</li>
+<li>caching to avoid repeating work</li>
+</ul>
+</div>
+<div class="section" id="gltf-samples">
+<h2>gltf samples<a class="headerlink" href="#gltf-samples" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/KhronosGroup/glTF-Sample-Models/blob/master/2.0/Lantern/glTF/Lantern.gltf">https://github.com/KhronosGroup/glTF-Sample-Models/blob/master/2.0/Lantern/glTF/Lantern.gltf</a></li>
+</ul>
+<div class="highlight-python"><pre>"meshes": [
+  {
+    "primitives": [
+      {
+        "attributes": {
+          "TEXCOORD_0": 0,
+          "NORMAL": 1,
+          "TANGENT": 2,
+          "POSITION": 3
+        },
+        "indices": 4,
+        "material": 0,
+        "mode": 4
+      }
+    ],
+    "name": "LanternPole_Body"
+  },
+  {
+    "primitives": [
+      {
+        "attributes": {
+          "TEXCOORD_0": 5,
+          "NORMAL": 6,
+          "TANGENT": 7,
+          "POSITION": 8
+        },
+        "indices": 9,
+        "material": 0,
+        "mode": 4
+      }
+    ],
+    "name": "LanternPole_Chain"
+  },
+  {
+    "primitives": [
+      {
+        "attributes": {
+          "TEXCOORD_0": 10,
+          "NORMAL": 11,
+          "TANGENT": 12,
+          "POSITION": 13
+        },
+        "indices": 14,
+        "material": 0,
+        "mode": 4
+      }
+    ],
+    "name": "LanternPole_Lantern"
+  }
+],
+
+
+
+"nodes": [
+  {
+    "children": [],
+    "mesh": 0,
+    "translation": [
+      -3.82315421,
+      13.01603,
+      0.0
+    ],
+    "name": "LanternPole_Body"
+  },
+  {
+    "children": [],
+    "mesh": 1,
+    "translation": [
+      -9.582001,
+      21.0378723,
+      0.0
+    ],
+    "name": "LanternPole_Chain"
+  },
+  {
+    "children": [],
+    "mesh": 2,
+    "translation": [
+      -9.582007,
+      18.0091515,
+      0.0
+    ],
+    "name": "LanternPole_Lantern"
+  },
+  {
+    "children": [
+      0,
+      1,
+      2
+    ],
+    "scale": [
+      0.06,
+      0.06,
+      0.06
+    ],
+    "translation": [
+      0.237,
+      -0.758,
+      0.0
+    ],
+    "name": "Lantern"
+  }
+],
+"scene": 0,
+"scenes": [
+  {
+    "nodes": [
+      3
+    ]
+  }
+],</pre>
+</div>
+</div>
+<div class="section" id="todo-make-input-serialization-smarter-avoiding-repetition">
+<h2>TODO : make input serialization smarter ? avoiding repetition<a class="headerlink" href="#todo-make-input-serialization-smarter-avoiding-repetition" title="Permalink to this headline">¶</a></h2>
+<p>Input serialization growing from the test geometry route
+which has previously only handled small collections of volumes (eg 5 PMT solids).</p>
+<p>Needs overhaul to handle</p>
+<ul class="simple">
+<li>material/surface/boundary assignment</li>
+<li>instances</li>
+<li>cache</li>
+</ul>
+<p>Python CSG level analysis of the trees ?</p>
+<ul class="simple">
+<li>currently the solid for every node gets converted, <cite>cn = solid.as_ncsg()</cite><ul>
+<li>instead use a higher level CSG node that can refer to a solid by index,
+the solids living in a separate directory (like meshes in the old mesh-centric approach)</li>
+</ul>
+</li>
+<li>howabout operating with separated lv too ?</li>
+</ul>
+<p>Ape the gdml structure in the NScene version:</p>
+<div class="highlight-python"><pre>768     def init(self):
+769
+770         self.materials = {}
+771         self.solids = {}
+772         self.volumes = {}
+773
+774         for e in self.findall_("materials/material"):
+775             self.materials[e.name] = e
+776
+777         for e in self.findall_("solids/*"):
+778             self.solids[e.name] = e
+779         pass
+780         for e in self.findall_("structure/*"):
+781             self.volumes[e.name] = e
+782         pass
+783         self.worldvol = self.elem.find("setup/world").attrib["ref"]
+784</pre>
+</div>
+<p>~/opticks/tests/tboolean_gdml.py:</p>
+<div class="highlight-python"><pre>51     gdml = GDML.parse(gdmlpath)
+52     tree = Tree(gdml.world)
+53
+54     subtree = tree.subtree(gsel, maxdepth=gmaxdepth, maxnode=gmaxnode, idx=gidx)
+55
+56     log.info(" subtree %s nodes " % len(subtree) )
+57
+58     cns = []
+59
+60     for i, node in enumerate(subtree):
+61
+62         solid = node.lv.solid
+63
+64         if i % 100 == 0:log.info("[%2d] converting solid %r " % (i,solid.name))
+65
+66         polyconfig = PolyConfig(node.lv.shortname)
+67
+68         cn = solid.as_ncsg()
+69
+70         has_name = cn.name is not None and len(cn.name) &gt; 0
+71         assert has_name, "\n"+str(solid)
+72
+73         if i &gt; 0: # skip first node transform which is placement of targetNode within its parent
+74             cn.transform = node.pv.transform
+75         pass
+76         cn.meta.update(polyconfig.meta )
+77         cn.meta.update(node.meta)
+78
+79         cn.boundary = args.testobject
+80         cns.append(cn)
+81     pass
+..
+84     container = CSG("box")
+85     container.boundary = args.container
+86     container.meta.update(PolyConfig("CONTAINER").meta)
+87
+88     objs = []
+89     objs.append(container)
+90     objs.extend(cns)
+91
+92     #for obj in objs: obj.dump()
+93
+94     CSG.Serialize(objs, args.csgpath, outmeta=True )</pre>
+</div>
+<div class="highlight-python"><pre>234     @classmethod
+235     def Serialize(cls, trees, base, outmeta=True):
+236         assert type(trees) is list
+237         assert type(base) is str and len(base) &gt; 5, ("invalid base directory %s " % base)
+238         base = os.path.expandvars(base)
+239         log.info("CSG.Serialize : writing %d trees to directory %s " % (len(trees), base))
+240         if not os.path.exists(base):
+241             os.makedirs(base)
+242         pass
+243         for it, tree in enumerate(trees):
+244             treedir = cls.treedir(base,it)
+245             if not os.path.exists(treedir):
+246                 os.makedirs(treedir)
+247             pass
+248             tree.save(treedir)
+249         pass
+250         boundaries = map(lambda tree:tree.boundary, trees)
+251         cls.CheckNonBlank(boundaries)
+252         open(cls.txtpath(base),"w").write("\n".join(boundaries))
+253
+254         if outmeta:
+255             meta = dict(mode="PyCsgInBox", name=os.path.basename(base), analytic=1, csgpath=base)
+256             meta_fmt_ = lambda meta:"_".join(["%s=%s" % kv for kv in meta.items()])
+257             print meta_fmt_(meta)  # communicates to tboolean--
+258         pass</pre>
+</div>
+<div class="highlight-python"><pre>void test_Polygonize(const char* basedir, int verbosity, std::vector&lt;NCSG*&gt;&amp; trees)
+{
+    int rc0 = NCSG::Deserialize(basedir, trees, verbosity );  // revive CSG node tree for each solid
+    assert(rc0 == 0 );
+
+    int rc1 = NCSG::Polygonize(basedir, trees, verbosity );
+    assert(rc1 == 0 );
+}</pre>
+</div>
+</div>
+<div class="section" id="todo-converting-gdml-description-into-instance-ized-csg-trees-opticksscenegraph">
+<h2>TODO: Converting GDML description into instance-ized CSG trees &#8220;OpticksSceneGraph&#8221;<a class="headerlink" href="#todo-converting-gdml-description-into-instance-ized-csg-trees-opticksscenegraph" title="Permalink to this headline">¶</a></h2>
+<p>CSG node trees are intended to describe individual &#8220;solids&#8221;
+not entire scenes.  These need to be combines into
+an OpticksSceneGraph format/serialization.</p>
+<p>This is similar to the conversion of G4DAE/COLLADA trees
+into GPU geometries. But as starting from source GDML tree,
+can do a more complete job.</p>
+<ul>
+<li><p class="first">use instancing for <em>all</em> solids (ie for all distinct shapes)
+minimizing the GPU memory requirements</p>
+<ul>
+<li><p class="first">ggeo analyses the G4DAE node tree to find
+repeated geometry ... this works but when have
+direct access to the source GDML tree presumably
+can do better by directly accessing all distinct shapes,
+making CSG trees for each of them</p>
+</li>
+<li><p class="first">unsure how good GDML is at avoiding repetion, suspect
+that some digesting will be needed</p>
+</li>
+<li><p class="first">polygonize the CSG trees into meshes, serialize and
+persist them together with the source CSG trees</p>
+<p>Currently with test geometry the meshes are not
+persisted, just directly uploaded to GPU/OpenGL, but
+when handling full geometries need to work with
+a geocache serialization to avoid repeating work.</p>
+</li>
+</ul>
+</li>
+<li><p class="first">construct scene graph structure (and serialization)
+aggregating references to the csg tree instances
+together with their transforms</p>
+<ul class="simple">
+<li>review OptiX geometry handling and OpenGL instancing, as currently
+used to see how best to structure this to be
+easily uploaded to GPU</li>
+</ul>
+</li>
+</ul>
+<div class="section" id="whats-needed-in-opticksscenegraph">
+<h3>Whats needed in OpticksSceneGraph ?<a class="headerlink" href="#whats-needed-in-opticksscenegraph" title="Permalink to this headline">¶</a></h3>
+<p>Simple buffer layout, for GPU consumption, be guided by customers:</p>
+<ul class="simple">
+<li>OptiX geometry instancing</li>
+<li>OpenGL geometry instancing</li>
+</ul>
+<p>For each instance (perhaps uint4 buffer)</p>
+<ul class="simple">
+<li>unsigned index reference to CSG tree,</li>
+<li>unsigned index reference to transform</li>
+<li>identity code or reference to identity</li>
+</ul>
+<p>What to do different from current GGeo ?</p>
+<ul class="simple">
+<li>GGeo is mesh-centric, aim for instance-centric</li>
+<li>design with simple serialization directory layout in mind</li>
+<li>defer concatenation into big buffers as late as possible,
+retaining structure in directories for easy debug</li>
+</ul>
+</div>
+<div class="section" id="gdml-ggeo-vs-g4dae-ggeo">
+<h3>GDML-&gt;GGeo vs G4DAE-&gt;GGeo<a class="headerlink" href="#gdml-ggeo-vs-g4dae-ggeo" title="Permalink to this headline">¶</a></h3>
+<p>So the process of converting GDML description, needs to
+follow a very similar course to the conversion of G4DAE
+COLLADA into a GPU description (GGeo and OGeo).</p>
+<p>Do this inside GGeo ? Or another package ?</p>
+<ul class="simple">
+<li>initially start in GGeo and see how it goes</li>
+<li>recall GGeo was intended as a dumb substrate initially ...</li>
+</ul>
+<p>The tasks are the same, so regard it as improving GGeo,
+not doing something new.</p>
+</div>
+<div class="section" id="validation">
+<h3>Validation<a class="headerlink" href="#validation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>implement in cfg4- OpticksSceneGraph -&gt; G4 conversion, so
+can compare two routes for geometry<ul>
+<li>GDML -&gt; G4</li>
+<li>GDML -&gt; OpticksSceneGraph -&gt; G4</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="opticksscenegraph-technicalites">
+<h3>OpticksSceneGraph Technicalites<a class="headerlink" href="#opticksscenegraph-technicalites" title="Permalink to this headline">¶</a></h3>
+<p>See scene- for examples of scene descriptions</p>
+<ul class="simple">
+<li>use structure similar to gltf-</li>
+<li>use python for parsing GDML rather than working in C++ with the G4 parse ?
+Then can start from the (pmt-) dd.py detdesc/lxml parse
+and bring it over to work with GDML</li>
+<li>no reason why not to use python for input geometry conversion,
+as in production this is only done once for each geometry<ul>
+<li>can always migrate the python to C++ with some minimal XML parser external
+if it proves inconvenient to require python preprocessing</li>
+</ul>
+</li>
+</ul>
+<p>Multi-level approach similar to NCSG chain, perhaps steered with
+an &#8220;NScene&#8221; ?</p>
+<ul class="simple">
+<li>python prepares input serialization from the GDML,
+finding all distinct shapes and writing CSG tree serializations
+for them,
+(directory structure of .npy .json .txt)</li>
+<li>npy- embellishes the directory structure
+eg using NPolygonization to write meshes into directory tree</li>
+<li>ggeo-  intermediate GPU geometry prep, however
+as have more control over NScene than with the COLLADA/Assimp/GGeo
+route expect will need less action at GGeo level</li>
+<li>oglrap- to OpenGL</li>
+<li>ogeo-  to OptiX</li>
+</ul>
+</div>
+<div class="section" id="why-not-parse-gdml-with-g4-and-work-with-g4-in-memory-tree">
+<h3>Why not parse GDML with G4 and work with G4 in-memory tree ?<a class="headerlink" href="#why-not-parse-gdml-with-g4-and-work-with-g4-in-memory-tree" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>prefer to keep G4 dependency to a minimum as this yields more generally usable code</li>
+<li>promotes an independent approach</li>
+<li>avoids having to work with G4 too much</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>OKG4 tpmt revisited &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="geant4_opticks_integration" href="index.html" />
+    <link rel="next" title="Reemission Review" href="reemission_review.html" />
+    <link rel="prev" title="SurLib with Test Geometry" href="surlib_with_test_geometry.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reemission_review.html" title="Reemission Review"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="surlib_with_test_geometry.html" title="SurLib with Test Geometry"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">geant4_opticks_integration</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">OKG4 tpmt revisited</a><ul>
+<li><a class="reference internal" href="#fixed-ctestdetector-kludgephotocathode-was-incorrectly-using-dielectric-dielectric">FIXED : CTestDetector::kludgePhotoCathode was incorrectly using dielectric_dielectric</a></li>
+<li><a class="reference internal" href="#perhaps-surface-conversion-not-yet-implemented-for-ctestdetector">Perhaps surface conversion not yet implemented for CTestDetector ?</a></li>
+<li><a class="reference internal" href="#g4-efficiency">G4 EFFICIENCY</a></li>
+<li><a class="reference internal" href="#divergence-following-many-changes-g4-not-stopping-at-cathode">Divergence following many changes : g4 not stopping at cathode ?</a></li>
+<li><a class="reference internal" href="#fixed-tpmt-takes-exception-to-duplicated-opaquevacuum-material-name">FIXED : tpmt takes exception to duplicated OpaqueVacuum material name</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="surlib_with_test_geometry.html"
+                        title="previous chapter">SurLib with Test Geometry</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reemission_review.html"
+                        title="next chapter">Reemission Review</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/okg4_tpmt_revisit.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="okg4-tpmt-revisited">
+<h1>OKG4 tpmt revisited<a class="headerlink" href="#okg4-tpmt-revisited" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="fixed-ctestdetector-kludgephotocathode-was-incorrectly-using-dielectric-dielectric">
+<h2>FIXED : CTestDetector::kludgePhotoCathode was incorrectly using dielectric_dielectric<a class="headerlink" href="#fixed-ctestdetector-kludgephotocathode-was-incorrectly-using-dielectric-dielectric" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>seqhis_ana  10:PmtInBox   -10:PmtInBox           c2
+        8cd        340272       340302             0.00  [3 ] TO BT SA
+        7cd        107599       107429             0.13  [3 ] TO BT SD
+       8ccd         23215        23047             0.61  [4 ] TO BT BT SA
+         4d         18866        19198             2.90  [2 ] TO AB
+        86d          3179         3400             7.42  [3 ] TO SC SA
+        4cd          2204         2108             2.14  [3 ] TO BT AB
+       4ccd          1696         1685             0.04  [4 ] TO BT BT AB
+        8bd          1446         1553             3.82  [3 ] TO BR SA
+       8c6d           382          261            22.77  [4 ] TO SC BT SA
+      86ccd           260          254             0.07  [5 ] TO BT BT SC SA
+     8cbbcd           190          205             0.57  [6 ] TO BT BR BR BT SA
+        46d           197          173             1.56  [3 ] TO SC AB
+        4bd           132          104             3.32  [3 ] TO BR AB
+       7c6d           111           72             8.31  [4 ] TO SC BT SD
+       866d            35           28             0.78  [4 ] TO SC SC SA
+      8cc6d            31           21             1.92  [5 ] TO SC BT BT SA
+   8cbc6ccd            31           16             4.79  [8 ] TO BT BT SC BT BR BT SA
+       8b6d            26           23             0.18  [4 ] TO SC BR SA
+     4cbbcd            24           14             2.63  [6 ] TO BT BR BR BT AB
+      46ccd            17           24             1.20  [5 ] TO BT BT SC AB
+                 500000       500000         3.11</pre>
+</div>
+<p>But material sequence looks to have bug...</p>
+<div class="highlight-python"><pre>A:seqmat_ana   10:PmtInBox
+           5e4        0.896         447871       [3 ] MO Py Bk
+          c4e4        0.046          23215       [4 ] MO Py MO Rk
+            44        0.038          18866       [2 ] MO MO
+           c44        0.009           4625       [3 ] MO MO Rk
+           ee4        0.004           2204       [3 ] MO Py Py
+          44e4        0.003           1696       [4 ] MO Py MO MO
+          5e44        0.001            493       [4 ] MO MO Py Bk
+           444        0.001            329       [3 ] MO MO MO
+         c44e4        0.001            260       [5 ] MO Py MO MO Rk
+        c4eee4        0.000            190       [6 ] MO Py Py Py MO Rk
+          c444        0.000             80       [4 ] MO MO MO Rk
+         c4e44        0.000             31       [5 ] MO MO Py MO Rk
+        44eee4        0.000             24       [6 ] MO Py Py Py MO MO
+         444e4        0.000             17       [5 ] MO Py MO MO MO
+      c4ee44e4        0.000             16       [8 ] MO Py MO MO Py Py MO Rk
+      c44e44e4        0.000             15       [8 ] MO Py MO MO Py MO MO Rk
+    44e4eeeee4        0.000              7       [10] MO Py Py Py Py Py MO Py MO MO
+        c444e4        0.000              7       [6 ] MO Py MO MO MO Rk
+    c4edbe44e4        0.000              6       [10] MO Py MO MO Py OV Vm Py MO Rk
+       c44eee4        0.000              5       [7 ] MO Py Py Py MO MO Rk
+                    500000         1.00
+ B:seqmat_ana   -10:PmtInBox
+           5e4        0.895         447731       [3 ] MO Py Bk
+            44        0.048          24151       [2 ] MO MO
+           4e4        0.046          23047       [3 ] MO Py MO
+           ee4        0.004           2108       [3 ] MO Py Py
+          44e4        0.004           1939       [4 ] MO Py MO MO
+           444        0.001            350       [3 ] MO MO MO
+          5e44        0.001            333       [4 ] MO MO Py Bk
+         4eee4        0.000            205       [5 ] MO Py Py Py MO
+         444e4        0.000             29       [5 ] MO Py MO MO MO
+          4e44        0.000             21       [4 ] MO MO Py MO
+        44eee4        0.000             18       [6 ] MO Py Py Py MO MO
+       4ee44e4        0.000             16       [7 ] MO Py MO MO Py Py MO
+          4444        0.000              9       [4 ] MO MO MO MO
+    4e5dbe44e4        0.000              6       [10] MO Py MO MO Py OV Vm Bk Py MO
+         44e44        0.000              5       [5 ] MO MO Py MO MO
+         5e444        0.000              5       [5 ] MO MO MO Py Bk
+         eeee4        0.000              4       [5 ] MO Py Py Py Py
+          eee4        0.000              4       [4 ] MO Py Py Py
+          ee44        0.000              2       [4 ] MO MO Py Py
+        ee44e4        0.000              2       [6 ] MO Py MO MO Py Py
+                    500000         1.00</pre>
+</div>
+</div>
+<div class="section" id="perhaps-surface-conversion-not-yet-implemented-for-ctestdetector">
+<h2>Perhaps surface conversion not yet implemented for CTestDetector ?<a class="headerlink" href="#perhaps-surface-conversion-not-yet-implemented-for-ctestdetector" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>097 // called by CGeometry::init for CGDMLDetector case
+ 98 void CSurLib::convert(CDetector* detector)
+ 99 {
+100     setDetector(detector);
+101     unsigned numSur = m_surlib-&gt;getNumSur();
+102     LOG(info) &lt;&lt; "CSurLib::convert  numSur " &lt;&lt; numSur  ;
+103     for(unsigned i=0 ; i &lt; numSur ; i++)
+104     {
+105         GSur* sur = m_surlib-&gt;getSur(i);
+106         G4OpticalSurface* os = makeOpticalSurface(sur);</pre>
+</div>
+</div>
+<div class="section" id="g4-efficiency">
+<h2>G4 EFFICIENCY<a class="headerlink" href="#g4-efficiency" title="Permalink to this headline">¶</a></h2>
+<p>Need cathode optical surface with EFFICIENCY, where did it go ?</p>
+<div class="highlight-python"><pre>simon:source blyth$ find . -name '*.cc' -exec grep -H EFFICIENCY {} \;
+./global/HEPNumerics/src/G4ConvergenceTester.cc:   out &lt;&lt; std::setw(20) &lt;&lt; "EFFICIENCY = " &lt;&lt; std::setw(13)  &lt;&lt; efficiency &lt;&lt; G4endl;
+./processes/optical/src/G4OpBoundaryProcess.cc:              aMaterialPropertiesTable-&gt;GetProperty("EFFICIENCY");
+simon:source blyth$ find . -name '*.hh' -exec grep -H EFFICIENCY {} \;
+simon:source blyth$
+
+387               PropertyPointer =
+388               aMaterialPropertiesTable-&gt;GetProperty("EFFICIENCY");
+389               if (PropertyPointer) {
+390                       theEfficiency =
+391                       PropertyPointer-&gt;Value(thePhotonMomentum);
+392               }
+
+
+306 inline
+307 void G4OpBoundaryProcess::DoAbsorption()
+308 {
+309               theStatus = Absorption;
+310
+311               if ( G4BooleanRand(theEfficiency) ) {
+312
+313                  // EnergyDeposited =/= 0 means: photon has been detected
+314                  theStatus = Detection;
+315                  aParticleChange.ProposeLocalEnergyDeposit(thePhotonMomentum);
+316               }
+317               else {
+318                  aParticleChange.ProposeLocalEnergyDeposit(0.0);
+319               }
+320
+321               NewMomentum = OldMomentum;
+322               NewPolarization = OldPolarization;
+323
+324 //              aParticleChange.ProposeEnergy(0.0);
+325               aParticleChange.ProposeTrackStatus(fStopAndKill);
+326 }</pre>
+</div>
+<ul class="simple">
+<li>caution are actually used the custom cfg4/DsG4OpBoundaryProcess.cc</li>
+</ul>
+</div>
+<div class="section" id="divergence-following-many-changes-g4-not-stopping-at-cathode">
+<h2>Divergence following many changes : g4 not stopping at cathode ?<a class="headerlink" href="#divergence-following-many-changes-g4-not-stopping-at-cathode" title="Permalink to this headline">¶</a></h2>
+<p>tpmt was formerly in near perfect agreement, recent changes have caused divergence</p>
+<p>CG4 now needs proper surface handling, not a kludge:</p>
+<div class="highlight-python"><pre>207 unsigned int OpPointFlag(const G4StepPoint* point, const G4OpBoundaryProcessStatus bst)
+208 {
+209     G4StepStatus status = point-&gt;GetStepStatus()  ;
+210     // TODO: cache the relevant process objects, so can just compare pointers ?
+211     const G4VProcess* process = point-&gt;GetProcessDefinedStep() ;
+212     const G4String&amp; processName = process ? process-&gt;GetProcessName() : "NoProc" ;
+213
+214     bool transportation = strcmp(processName,"Transportation") == 0 ;
+215     bool scatter = strcmp(processName, "OpRayleigh") == 0 ;
+216     bool absorption = strcmp(processName, "OpAbsorption") == 0 ;
+217
+218     unsigned int flag(0);
+219     if(absorption &amp;&amp; status == fPostStepDoItProc )
+220     {
+221         flag = BULK_ABSORB ;
+222     }
+223     else if(scatter &amp;&amp; status == fPostStepDoItProc )
+224     {
+225         flag = BULK_SCATTER ;
+226     }
+227     else if(transportation &amp;&amp; status == fWorldBoundary )
+228     {
+229         flag = SURFACE_ABSORB ;   // kludge for fWorldBoundary - no surface handling yet
+230     }
+231     else if(transportation &amp;&amp; status == fGeomBoundary )
+232     {
+233         flag = OpBoundaryFlag(bst) ; // BOUNDARY_TRANSMIT/BOUNDARY_REFLECT/NAN_ABORT/SURFACE_ABSORB/SURFACE_DETECT
+///
+//         ^^^^^^^^ SD from here ? perhaps missing optical surface with EFFICIENCY ?
+///
+234     }
+235     return flag ;
+236 }</pre>
+</div>
+<div class="highlight-python"><pre>tpmt-t ()
+{
+    tpmt-;
+    tpmt-- --okg4 --compute
+}
+
+
+[2016-10-25 13:13:45,923] p40907 {/Users/blyth/opticks/ana/tpmt.py:146} INFO -  a : PmtInBox/torch/ 10 :  20161025-1313 /tmp/blyth/opticks/evt/PmtInBox/torch/10/fdom.npy
+[2016-10-25 13:13:45,923] p40907 {/Users/blyth/opticks/ana/tpmt.py:147} INFO -  b : PmtInBox/torch/-10 :  20161025-1313 /tmp/blyth/opticks/evt/PmtInBox/torch/-10/fdom.npy
+
+
+   A:seqhis_ana   10:PmtInBox
+             8cd        0.676           6762       [3 ] TO BT SA
+             7cd        0.221           2209       [3 ] TO BT SD
+            8ccd        0.047            472       [4 ] TO BT BT SA
+              4d        0.038            384       [2 ] TO AB
+             86d        0.006             57       [3 ] TO SC SA
+             4cd        0.004             41       [3 ] TO BT AB
+             8bd        0.003             26       [3 ] TO BR SA
+            4ccd        0.002             24       [4 ] TO BT BT AB
+           86ccd        0.001              6       [5 ] TO BT BT SC SA
+            8c6d        0.001              6       [4 ] TO SC BT SA
+             46d        0.000              3       [3 ] TO SC AB
+            7c6d        0.000              3       [4 ] TO SC BT SD
+      8ccccc6ccd        0.000              1       [10] TO BT BT SC BT BT BT BT BT SA
+            866d        0.000              1       [4 ] TO SC SC SA
+            86bd        0.000              1       [4 ] TO BR SC SA
+           8c66d        0.000              1       [5 ] TO SC SC BT SA
+             4bd        0.000              1       [3 ] TO BR AB
+          8cbbcd        0.000              1       [6 ] TO BT BR BR BT SA
+      ccbccc6ccd        0.000              1       [10] TO BT BT SC BT BT BT BR BT BT
+                       10000         1.00
+   B:seqhis_ana   -10:PmtInBox
+        8ccccccd        0.431           4315       [8 ] TO BT BT BT BT BT BT SA
+         8ccbccd        0.285           2850       [7 ] TO BT BT BR BT BT SA
+            8ccd        0.045            455       [4 ] TO BT BT SA
+              4d        0.039            386       [2 ] TO AB
+      ccccbccccd        0.033            334       [10] TO BT BT BT BT BR BT BT BT BT
+        4ccccccd        0.031            314       [8 ] TO BT BT BT BT BT BT AB
+         4ccbccd        0.021            207       [7 ] TO BT BT BR BT BT AB
+       8cccccccd        0.017            168       [9 ] TO BT BT BT BT BT BT BT SA
+       8cccbcccd        0.015            154       [9 ] TO BT BT BT BR BT BT BT SA
+      8ccbcccccd        0.014            144       [10] TO BT BT BT BT BT BR BT BT SA
+       86ccccccd        0.006             60       [9 ] TO BT BT BT BT BT BT SC SA
+             86d        0.005             55       [3 ] TO SC SA
+      cccbcbcccd        0.004             40       [10] TO BT BT BT BR BT BR BT BT BT
+      bccbcbcccd        0.004             40       [10] TO BT BT BT BR BT BR BT BT BR
+             4cd        0.004             37       [3 ] TO BT AB
+            4ccd        0.004             36       [4 ] TO BT BT AB
+      cccbcccccd        0.003             33       [10] TO BT BT BT BT BT BR BT BT BT
+      8cccbbcccd        0.003             32       [10] TO BT BT BT BR BR BT BT BT SA
+        86ccbccd        0.003             31       [8 ] TO BT BT BR BT BT SC SA
+      cccccccccd        0.003             29       [10] TO BT BT BT BT BT BT BT BT BT
+                       10000         1.00
+   A:seqmat_ana   10:PmtInBox
+             5e4        0.897           8971       [3 ] MO Py Bk
+            c4e4        0.047            472       [4 ] MO Py MO Rk
+              44        0.038            384       [2 ] MO MO
+             c44        0.008             83       [3 ] MO MO Rk
+             ee4        0.004             41       [3 ] MO Py Py
+            44e4        0.002             24       [4 ] MO Py MO MO
+            5e44        0.001              9       [4 ] MO MO Py Bk
+           c44e4        0.001              6       [5 ] MO Py MO MO Rk
+             444        0.000              4       [3 ] MO MO MO
+            c444        0.000              2       [4 ] MO MO MO Rk
+      eedede44e4        0.000              1       [10] MO Py MO MO Py Vm Py Vm Py Py
+      c4edbe44e4        0.000              1       [10] MO Py MO MO Py OV Vm Py MO Rk
+          c4eee4        0.000              1       [6 ] MO Py Py Py MO Rk
+           5e444        0.000              1       [5 ] MO MO MO Py Bk
+                       10000         1.00
+   B:seqmat_ana   -10:PmtInBox
+         4ebd5e4        0.400           4004       [7 ] MO Py Bk Vm OV Py MO
+          4e55e4        0.285           2850       [6 ] MO Py Bk Bk Py MO
+              44        0.047            466       [2 ] MO MO
+             4e4        0.045            455       [3 ] MO Py MO
+        44ebd5e4        0.035            349       [8 ] MO Py Bk Vm OV Py MO MO
+         4e5d5e4        0.031            311       [7 ] MO Py Bk Vm Bk Py MO
+         44e55e4        0.024            238       [7 ] MO Py Bk Bk Py MO MO
+        4edbd5e4        0.017            168       [8 ] MO Py Bk Vm OV Vm Py MO
+       4eddbd5e4        0.014            144       [9 ] MO Py Bk Vm OV Vm Vm Py MO
+      edbdbbd5e4        0.014            136       [10] MO Py Bk Vm OV OV Vm OV Vm Py
+        4ebdd5e4        0.013            129       [8 ] MO Py Bk Vm Vm OV Py MO
+      bdbdbbd5e4        0.009             85       [10] MO Py Bk Vm OV OV Vm OV Vm OV
+      4ebdbbd5e4        0.007             66       [10] MO Py Bk Vm OV OV Vm OV Py MO
+      ebdbbdd5e4        0.004             40       [10] MO Py Bk Vm Vm OV OV Vm OV Py
+      bbdbbdd5e4        0.004             40       [10] MO Py Bk Vm Vm OV OV Vm OV OV
+             ee4        0.004             37       [3 ] MO Py Py
+            44e4        0.004             37       [4 ] MO Py MO MO
+      4ebddbd5e4        0.003             32       [10] MO Py Bk Vm OV Vm Vm OV Py MO
+      4edbdbd5e4        0.003             29       [10] MO Py Bk Vm OV Vm OV Vm Py MO
+       4ebddd5e4        0.003             28       [9 ] MO Py Bk Vm Vm Vm OV Py MO
+                       10000         1.00</pre>
+</div>
+</div>
+<div class="section" id="fixed-tpmt-takes-exception-to-duplicated-opaquevacuum-material-name">
+<h2>FIXED : tpmt takes exception to duplicated OpaqueVacuum material name<a class="headerlink" href="#fixed-tpmt-takes-exception-to-duplicated-opaquevacuum-material-name" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>tpmt-- --okg4 --compute
+
+
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@26] CMaterialBridge::initMap nmat (G4Material::GetNumberOfMaterials) 6
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@45]  i   0 name                          MineralOil shortname                          MineralOil index     3
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@45]  i   1 name                               Pyrex shortname                               Pyrex index    13
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@45]  i   2 name                              Vacuum shortname                              Vacuum index    12
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@45]  i   3 name                            Bialkali shortname                            Bialkali index     4
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@45]  i   4 name                        OpaqueVacuum shortname                        OpaqueVacuum index    10
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@45]  i   5 name                        OpaqueVacuum shortname                        OpaqueVacuum index    10
+2016-10-25 12:28:33.907 INFO  [3373620] [CMaterialBridge::initMap@52]  nmat 6 m_g4toix.size() 6 m_ixtoname.size() 5
+Assertion failed: (m_ixtoname.size() == nmat &amp;&amp; "there is probably a duplicated material name"), function initMap, file /Users/blyth/opticks/cfg4/CMaterialBridge.cc, line 60.
+Process 38758 stopped</pre>
+</div>
+<p>Fixed by G4Material recycling in CPropLib.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reemission_review.html" title="Reemission Review"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="surlib_with_test_geometry.html" title="SurLib with Test Geometry"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" >geant4_opticks_integration</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

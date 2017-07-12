@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CSG Complement &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">CSG Complement</a><ul>
+<li><a class="reference internal" href="#todo-look-into-and-handle-when-intersecting-two-complemented-solids">TODO: Look into and handle when intersecting two complemented solids</a></li>
+<li><a class="reference internal" href="#fixed-issue-complemented-solids-via-normal-flip-yields-unexpected-intersections-mirror-object">FIXED ISSUE : complemented solids via normal flip yields unexpected intersections (mirror object)</a></li>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#csg-single-hit-ray-trace-sub-object-combination-tables">CSG Single Hit Ray Trace Sub-object combination tables</a></li>
+<li><a class="reference internal" href="#difference-is-equivalent-to-intersect-with-complement">Difference is Equivalent to intersect with complement</a><ul>
+<li><a class="reference internal" href="#can-single-hit-csg-implementation-handle-complements">can single hit CSG implementation handle complements ?</a></li>
+<li><a class="reference internal" href="#intersect-a-b">INTERSECT(A, !B)</a></li>
+<li><a class="reference internal" href="#what-does-miss-b-mean">What does (MISS !B) mean ...</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/csg_complement.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="csg-complement">
+<h1>CSG Complement<a class="headerlink" href="#csg-complement" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="todo-look-into-and-handle-when-intersecting-two-complemented-solids">
+<h2>TODO: Look into and handle when intersecting two complemented solids<a class="headerlink" href="#todo-look-into-and-handle-when-intersecting-two-complemented-solids" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>hmm what happens with an intersect of two complemented solids ?? UNDEFINED BEHAVIOR ??</li>
+</ul>
+</div>
+<div class="section" id="fixed-issue-complemented-solids-via-normal-flip-yields-unexpected-intersections-mirror-object">
+<h2>FIXED ISSUE : complemented solids via normal flip yields unexpected intersections (mirror object)<a class="headerlink" href="#fixed-issue-complemented-solids-via-normal-flip-yields-unexpected-intersections-mirror-object" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>fixed by special casing complement solid MISS, changing the MISS to an EXIT ...
+as it is impossible to MISS the unbounded complementd solid</li>
+<li>see tboolean-complement for testing this</li>
+</ul>
+<p>csg_intersect_part.h:</p>
+<div class="highlight-python"><pre>164     if(complement)  // flip normal, even for miss need to signal the complement with a -0.f
+165     {
+166         // For valid_intersects this flips the normal
+167         // otherwise for misses all tt.xyz values should be zero
+168         // but nevertheless proceed to set signbits to signal a complement miss
+169         // to the caller... csg_intersect_boolean
+170
+171         tt.x = -tt.x ;
+172         tt.y = -tt.y ;
+173         tt.z = -tt.z ;
+174     }
+175
+176 }</pre>
+</div>
+<p>csg_intersect_boolean.h:</p>
+<div class="highlight-python"><pre>709                 IntersectionState_t l_state = CSG_CLASSIFY( csg.data[left], ray.direction, tmin );
+710                 IntersectionState_t r_state = CSG_CLASSIFY( csg.data[right], ray.direction, tmin );
+711
+712
+713                 float t_left  = fabsf( csg.data[left].w );
+714                 float t_right = fabsf( csg.data[right].w );
+715
+716                 bool leftIsCloser = t_left &lt;= t_right ;
+717
+718 #define WITH_COMPLEMENT 1
+719 #ifdef WITH_COMPLEMENT
+720                 // complements (signalled by -0.f) cannot Miss, only Exit, see opticks/notes/issues/csg_complement.rst
+721
+722                 // these are only valid (and only needed) for misses
+723                 bool l_complement = signbit(csg.data[left].x) ;
+724                 bool r_complement = signbit(csg.data[right].x) ;
+725
+726                 bool l_complement_miss = l_state == State_Miss &amp;&amp; l_complement ;
+727                 bool r_complement_miss = r_state == State_Miss &amp;&amp; r_complement ;
+728
+729                 if(r_complement_miss)
+730                 {
+731                     r_state = State_Exit ;
+732                     leftIsCloser = true ;
+733                 }
+734
+735                 if(l_complement_miss)
+736                 {
+737                     l_state = State_Exit ;
+738                     leftIsCloser = false ;
+739                 }
+740
+741 #endif
+742                 int ctrl = boolean_ctrl_packed_lookup( typecode , l_state, r_state, leftIsCloser ) ;
+743                 history_append( hist, nodeIdx, ctrl );</pre>
+</div>
+</div>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Translating DYB Near site geometry yields 22/249 excessively deep(greater that height 3) CSG trees</li>
+<li>tree modification mostly requires positive form (ie with no subtractions, only intersect and union operators
+which are easier to handle as they are commutative)</li>
+<li>making positive trees requires applying De Morgan&#8217;s laws which require complements</li>
+</ul>
+</div>
+<div class="section" id="csg-single-hit-ray-trace-sub-object-combination-tables">
+<h2>CSG Single Hit Ray Trace Sub-object combination tables<a class="headerlink" href="#csg-single-hit-ray-trace-sub-object-combination-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://xrt.wikidot.com/doc:csg">http://xrt.wikidot.com/doc:csg</a></li>
+</ul>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="33%" />
+<col width="33%" />
+<col width="17%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">UNION</th>
+<th class="head">Enter B</th>
+<th class="head">Exit B</th>
+<th class="head">Miss B</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Enter A</td>
+<td>ReturnAIfCloser,
+ReturnBIfCloser</td>
+<td>ReturnBIfCloser,
+AdvanceAAndLoop</td>
+<td>ReturnA</td>
+</tr>
+<tr class="row-odd"><td>Exit A</td>
+<td>ReturnAIfCloser,
+AdvanceBAndLoop</td>
+<td>ReturnAIfFarther,
+ReturnBIfFarther</td>
+<td>ReturnA</td>
+</tr>
+<tr class="row-even"><td>Miss A</td>
+<td>ReturnB</td>
+<td>ReturnB</td>
+<td>ReturnMiss</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="33%" />
+<col width="33%" />
+<col width="17%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">DIFFERENCE</th>
+<th class="head">Enter B</th>
+<th class="head">Exit B</th>
+<th class="head">Miss B</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Enter A</td>
+<td>ReturnAIfCloser,
+AdvanceBAndLoop</td>
+<td>AdvanceAAndLoopIfCloser,
+AdvanceBAndLoopIfCloser</td>
+<td>ReturnA</td>
+</tr>
+<tr class="row-odd"><td>Exit A</td>
+<td><p class="first">ReturnAIfCloser,</p>
+<p class="last">ReturnBIfCloser,
+FlipB</p>
+</td>
+<td>ReturnBIfCloser,
+FlipB
+AdvanceAAndLoop</td>
+<td>ReturnA</td>
+</tr>
+<tr class="row-even"><td>Miss A</td>
+<td>ReturnMiss</td>
+<td>ReturnMiss</td>
+<td>ReturnMiss</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="33%" />
+<col width="33%" />
+<col width="17%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">INTERSECTION</th>
+<th class="head">Enter B</th>
+<th class="head">Exit B</th>
+<th class="head">Miss B</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Enter A</td>
+<td>AdvanceAAndLoopIfCloser,
+AdvanceBAndLoopIfCloser</td>
+<td>ReturnAIfCloser,
+AdvanceBAndLoop</td>
+<td>ReturnMiss</td>
+</tr>
+<tr class="row-odd"><td>Exit A</td>
+<td>ReturnBIfCloser,
+AdvanceAAndLoop</td>
+<td>ReturnAIfCloser,
+ReturnBIfCloser</td>
+<td>ReturnMiss</td>
+</tr>
+<tr class="row-even"><td>Miss A</td>
+<td>ReturnMiss</td>
+<td>ReturnMiss</td>
+<td>ReturnMiss</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="difference-is-equivalent-to-intersect-with-complement">
+<h2>Difference is Equivalent to intersect with complement<a class="headerlink" href="#difference-is-equivalent-to-intersect-with-complement" title="Permalink to this headline">¶</a></h2>
+<p>Logical identity:</p>
+<div class="highlight-python"><pre>A - B  = A INTERSECT !B
+
+DIFFERENCE(A,B)  = INTERSECT(A,!B)</pre>
+</div>
+<div class="section" id="can-single-hit-csg-implementation-handle-complements">
+<h3>can single hit CSG implementation handle complements ?<a class="headerlink" href="#can-single-hit-csg-implementation-handle-complements" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>it must be possible, as it can handle difference</strong></li>
+<li>BUT: previous attempts to use unbounded CSG sub-objects (like infinite half-spaces defined by planes)
+failed  ... the single-hit-CSG algorithm relies on intersecting with the &#8220;other&#8221; side of sub-objects</li>
+<li>so long as intersects at infinity are shrouded by &#8220;ReturnTheOtherIfCloser&#8221; might
+manage to get away with unbounded ?</li>
+<li>Enter/Exit classification comes from comparison of normal and ray directions</li>
+</ul>
+<p>From within !B:</p>
+<ul class="simple">
+<li>intersects at infinity will be Exit(!B)</li>
+<li>close intersects (with the bubble) will also be Exit(!B)</li>
+<li>... seems no possibility to miss !B ?</li>
+<li>PERHAPS FOR COMPLEMENT-B NEED TO RECLASSIFY, MISS-B -&gt; EXIT-B ?
+MISS-B means it didnt intersect with the local bubble but when its a complement, the
+unbounded nature of !B converts that into EXIT-B ?</li>
+<li>for DIFFERENCE(A,B) MISS-B -&gt; ReturnA, need to get the INTERSECT(A,-B) table to ReturnA,
+intersects at infinity are always going to be further...</li>
+<li>INTERSECT(A,B) ExitB column bother EnterA,ExitA shrouded by ReturnAIfCloser
+which will always be true.... HENCE SEEMS THAT IT WILL WORK ...<ul>
+<li>FOR COMPLEMENTS RE-CLASSIFY MISS TO EXIT</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="intersect-a-b">
+<h3>INTERSECT(A, !B)<a class="headerlink" href="#intersect-a-b" title="Permalink to this headline">¶</a></h3>
+<p>Transposes &#8220;EnterB&#8221; with &#8220;ExitB&#8221;,  getting close to DIFFERENCE(A,B) table</p>
+<p>Mismatches being:</p>
+<ul class="simple">
+<li>presence of &#8220;FlipB&#8221; together with both &#8220;ReturnBIfCloser&#8221; in DIFFERENCE
+(but B is already flipped, so not a difference ?)</li>
+<li>presence of &#8220;ReturnA&#8221; in the &#8220;MissB&#8221; column of DIFFERENCE vs &#8220;ReturnMiss&#8221; in INTERSECTION(A,!B)</li>
+</ul>
+</div>
+<div class="section" id="what-does-miss-b-mean">
+<h3>What does (MISS !B) mean ...<a class="headerlink" href="#what-does-miss-b-mean" title="Permalink to this headline">¶</a></h3>
+<p>Think of an inside out sphere (air bubble in water), in some sense there is no way to miss !B,</p>
+<ul class="simple">
+<li>from inside the bubble (outside !B)... close intersect is inevitable</li>
+<li>from outside the bubble (inside !B)<ul>
+<li>either close intersect with the !B bubble surface</li>
+<li>OR intersect at infinity with surface of !B</li>
+</ul>
+</li>
+</ul>
+<p>oxrap/cu/csg_intersect_boolean.h:</p>
+<div class="highlight-python"><pre>267 #define CSG_CLASSIFY( ise, dir, tmin )   (fabsf((ise).w) &gt; (tmin) ?  ( (ise).x*(dir).x + (ise).y*(dir).y + (ise).z*(dir).z &lt; 0.f ? State_Enter : State_Exit ) : State_Miss )
+...
+705                 int left  = firstLeft ? csg.curr   : csg.curr-1 ;
+706                 int right = firstLeft ? csg.curr-1 : csg.curr   ;
+707
+708                 IntersectionState_t l_state = CSG_CLASSIFY( csg.data[left], ray.direction, tmin );
+709                 IntersectionState_t r_state = CSG_CLASSIFY( csg.data[right], ray.direction, tmin );
+710
+711                 float t_left  = fabsf( csg.data[left].w );
+712                 float t_right = fabsf( csg.data[right].w );
+713
+714                 int ctrl = boolean_ctrl_packed_lookup( typecode , l_state, r_state, t_left &lt;= t_right ) ;
+715                 history_append( hist, nodeIdx, ctrl );
+716</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -25,8 +25,8 @@
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" />
     <link rel="up" title="issues" href="../index.html" />
-    <link rel="next" title="G4/Op Integration Overview" href="integration_overview.html" />
-    <link rel="prev" title="Scintillation Photons" href="../scintillation_photons.html" /> 
+    <link rel="next" title="tconcentric" href="tconcentric.html" />
+    <link rel="prev" title="Groupvel Kludge Unintended Consequences" href="../groupvel/generational.html" /> 
   </head>
   <body>
     <div class="related">
@@ -36,10 +36,10 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="integration_overview.html" title="G4/Op Integration Overview"
+          <a href="tconcentric.html" title="tconcentric"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../scintillation_photons.html" title="Scintillation Photons"
+          <a href="../groupvel/generational.html" title="Groupvel Kludge Unintended Consequences"
              accesskey="P">previous</a> |</li>
         <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">issues</a> &raquo;</li> 
@@ -48,11 +48,11 @@
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../scintillation_photons.html"
-                        title="previous chapter">Scintillation Photons</a></p>
+  <p class="topless"><a href="../groupvel/generational.html"
+                        title="previous chapter">Groupvel Kludge Unintended Consequences</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="integration_overview.html"
-                        title="next chapter">G4/Op Integration Overview</a></p>
+  <p class="topless"><a href="tconcentric.html"
+                        title="next chapter">tconcentric</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../_sources/issues/geant4_opticks_integration/index.txt"
@@ -83,15 +83,454 @@
 <h1>geant4_opticks_integration<a class="headerlink" href="#geant4-opticks-integration" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="integration_overview.html">G4/Op Integration Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#objectives">Objectives</a></li>
-<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#see-also">See Also</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="integration_overview.html#done-high-level-cleanup-refactor">DONE : High Level Cleanup/Refactor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="integration_overview.html#todo-testing-untested-aspects-of-cleanup">TODO : Testing untested aspects of cleanup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tconcentric.html">tconcentric</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#setup">setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#remnant-pflags-discrep">remnant pflags discrep ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#resolved-seqmat-truncation-difference-c2-down-to-0-91">RESOLVED seqmat truncation difference, c2 down to 0.91</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#seqmat-still-some-truncation-difference">seqmat still some truncation difference ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#seqmat-mismatch-mostly-resolved">seqmat mismatch mostly resolved</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#psel-selection-of-truncated">psel selection of truncated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#opticks-seqmat">opticks seqmat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#issue-seqmat-mismatches-zeros">ISSUE: seqmat mismatches, zeros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#how-should-truncation-be-handled">how should truncation be handled ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#issue-negative-times-on-exceeding-time-domain">ISSUE : negative times on exceeding time domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#resolved-bad-rejoin-onto-scatter-3-in-1m">RESOLVED: bad REjoin onto scatter, 3 in 1M</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric.html#elaborated-fix">elaborated fix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric.html#initial-fix">initial fix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric.html#issue-rare-sc-ab-at-truncation">issue rare SC/AB at truncation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#wip-optical-step-collection">WIP : Optical Step Collection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#wip-material-code-mapping-generalization">WIP : Material Code Mapping Generalization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#mostly-resolved-pflags-inconsistency-due-to-incomplete-rejoins-ab-not-scrubbed-and-replaced-with-re">MOSTLY RESOLVED: pflags inconsistency : due to incomplete REjoins, AB not scrubbed and replaced with RE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric.html#mostly-resolved">Mostly Resolved</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#nov-4-2016-seqhis-chi2-now-less-than-1">Nov 4, 2016 : seqhis chi2 now less than 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#resolved-scattered-counts-and-distrib-mismatch">RESOLVED : scattered counts and distrib mismatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#match-no-selection-cfg4-ok-rayleigh-scattering-in-isolation">MATCH : no selection CFG4/OK rayleigh scattering in isolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#resolved-scatter-discrep">RESOLVED : scatter discrep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#fixed-wrong-wavelength-compression-decompression-in-cfg4">FIXED : wrong wavelength compression/decompression in CFG4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#asis-polarization-de-normalizing">ASIS : polarization de-normalizing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#viz">viz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#truncation-control">truncation control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#fixed-longstanding-pflags-issue">FIXED Longstanding pflags issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#fixed-opticks-not-doing-to-bt-bt-bt-br-by-polz-correction">FIXED : Opticks not doing &#8220;TO BT BT BT BR ..&#8221; by polz correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#fixed-chi2-large-contribs-from-sc-lines">FIXED : chi2 large contribs from SC lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#dbgzero-lines">dbgzero lines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric.html#seqmat-truncation-discrep-lots-of-zeros-in-tail">seqmat truncation discrep, lots of zeros in tail</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric.html#pflags">pflags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric.html#fixed-seqhis">FIXED seqhis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#remaining-discreps-by-cmx-selection">remaining discreps by cmx selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#truncation-avoidance-trick">truncation avoidance trick</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#zeros-in-long-tail-issue-from-truncation">zeros in long tail issue, from truncation ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#with-flags-fixed">with flags fixed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#fixed-funny-badflag-00">FIXED : funny badflag 00</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#avoiding-truncation-by-pushing-bouncemax-and-recordmax">avoiding truncation by pushing bouncemax and recordmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#switch-to-unified-model-fixes-incorrectly-specular-dr">switch to unified model fixes incorrectly specular DR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#post-dr-discrep">post DR discrep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#seqhis-after-optical-surfaces-hookup-with-test-geometry">seqhis after optical surfaces hookup with test geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#seqhis">seqhis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#lack-dr-due-to-lack-of-complete-optical-surface-with-test-geometry">lack DR due to lack of complete Optical Surface ? with test geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric.html#topline-8ccccd-4-opticks-deficit">topline 8ccccd 4% Opticks deficit</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="profiling_duplication.html">Profiling Duplication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="profiling_duplication.html#todo">TODO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profiling_duplication.html#opticksprofile">OpticksProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profiling_duplication.html#related-npy-timer">Related : npy-/Timer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="boolean_csg_on_gpu.html">Boolean CSG on GPU</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#todo-numerical-chi2-history-comparison-with-cfg4-booleans">TODO: numerical/chi2 history comparison with CFG4 booleans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#todo-python-trees-into-opticks">TODO : python trees into opticks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#todo-randbox-photon-source">TODO : randbox photon source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#todo-more-natural-test-tree-construction">TODO : more natural test tree construction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#todo-support-transforms-in-op-nodes">TODO: support transforms in op nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#todo-support-empties-ie-non-perfect-trees">TODO: support empties, ie non-perfect trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#todo-algorithm-characteristic-comparisons">TODO : algorithm characteristic comparisons</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#boolean-debugging">Boolean Debugging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#fixed-root-termination-problem">FIXED : Root Termination problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#slavish-py">slavish.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#csg-errors">CSG Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#done-boolean-csg-tree-implementation">DONE: boolean csg tree implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#optix-array">OptiX array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#c-two-meanings-of-static">C : Two meanings of static</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#cuda-guide-static-local-variables-within-function">CUDA guide : static local variables within function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#optix-cuda-static-variables">OptiX/CUDA static variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#adding-node-transforms">Adding node transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#optix-const-float3">OptiX : const float3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#optix-float4-as-a-very-short-stack">OptiX float4 as a very short stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#lookup-tables-in-c">Lookup tables in C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#whats-missing-for-opticks-csg-tree">Whats missing for opticks csg tree ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#needs-to-be-almost-complete-tree-anyhow-for-easy-serializing">Needs to be almost complete tree anyhow for easy serializing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#tree-threading">Tree Threading ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#csginbox-test-geometry">CsgInBox test geometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#where-is-the-tree">Where is the tree ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#tree-serialization">Tree serialization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#fixed-issue-ray-trace-near-tmin-clipping-fails-to-see-inside-booleans">FIXED Issue : ray trace &#8220;near/tmin&#8221; clipping fails to see inside booleans</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#scene-epsilon">scene_epsilon</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#fixed-issue-boolean-insides-invisible-from-outside">FIXED Issue : boolean insides invisible from outside</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#fixed-issue-cannot-see-booleans-from-inside">FIXED : Issue : cannot see booleans from inside</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#fixed-issue-ray-trace-of-box-shows-slab-intersects-extending-behind-the-box">FIXED : Issue : ray trace of box shows slab intersects extending behind the box</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="boolean_csg_on_gpu.html#cuda-fminf-fmaxf-max-infinity-nan-handling">CUDA fminf/fmaxf/max infinity/nan handling ?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#fixed-issue-boolean-intersection-lens-boundary-disappears-from-inside">FIXED Issue : boolean intersection &#8220;lens&#8221; : boundary disappears from inside</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#fixed-issue-lens-not-bending-light">FIXED Issue : lens not bending light</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boolean_csg_on_gpu.html#approach">approach</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="surlib_with_test_geometry.html">SurLib with Test Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpmt.html">tpmt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="review_analytic_geometry_workflow.html">Review Analytic Geometry Workflow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="review_analytic_geometry_workflow.html#changes-needed">Changes needed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="review_analytic_geometry_workflow.html#test-geometry">Test Geometry</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#configured-eg-in-tboolean">configured eg in tboolean-</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#config-string-parsed-with-ggeotestconfig">config string parsed with GGeoTestConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#ggeo-modifygeometry-steering-of-geometry-mods-in-test-mode">GGeo::modifyGeometry : steering of geometry mods in test mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#ggeotest-createboxinbox-act-on-config">GGeoTest::createBoxInBox act on config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#gmaker-make-tesselated-vertices-etc-in-associated-gmesh-analytic-desc-in-associated-gparts">GMaker::make tesselated vertices etc.. in associated GMesh, analytic desc in associated GParts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#gparts-provides-control-of-float-parts-n-part-4-4-and-uint-prim-n-prim-4-buffers">GParts provides control of float parts (n_part,4,4) and uint prim (n_prim,4) buffers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#hemi-pmt-cu">hemi-pmt.cu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#intersect-boolean-h">intersect_boolean.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#tree-generalization">tree generalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="review_analytic_geometry_workflow.html#recursion-to-iteration">recursion to iteration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sliced_composited_raytrace_rasterized.html">Sliced Composited Raytraced Rasterized</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sliced_composited_raytrace_rasterized.html#test-geometries">Test geometries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sliced_composited_raytrace_rasterized.html#oglrap">Oglrap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tracer_crash.html">Tracer Crash</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tracer_crash.html#tidy-actions">Tidy Actions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="okg4_g4gun_shakedown.html">OKG4 G4GUN Shakedown</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="okg4_g4gun_shakedown.html#red-gensteps-everywhere-issue">Red Gensteps everywhere issue</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="okg4_g4gun_shakedown.html#fixed-issue-g4gun-ignoring-gunconfig-argument-and-using-default">FIXED issue: G4Gun ignoring gunconfig argument and using default</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_g4gun_shakedown.html#genstep-visualization">Genstep visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_g4gun_shakedown.html#lack-of-scintillation-propagation">Lack of scintillation propagation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_g4gun_shakedown.html#genstep-examination">Genstep examination</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_g4gun_shakedown.html#tao-commit-changing-scintillaton-and-cerenkov">Tao commit changing Scintillaton and Cerenkov</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_g4gun_shakedown.html#debug-running">Debug running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_g4gun_shakedown.html#peculiarities">Peculiarities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_g4gun_shakedown.html#known-sources-of-difference">Known sources of difference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="juno_jpmt_viz_shakedown.html">JUNO JPMT Shakedown</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="juno_jpmt_viz_shakedown.html#issue-default-torch-source-goes-off-somewhere-in-tt">Issue : default torch source goes off somewhere in TT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="juno_jpmt_viz_shakedown.html#issue-segv-due-to-no-input-gensteps">Issue : segv due to no input gensteps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="material_code_mapping_generalization.html">Material Code Mapping Generalization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="material_code_mapping_generalization.html#issue-dec-2016-lookup-fails-with-live-g4gun">Issue : Dec 2016 : Lookup fails with live g4gun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="material_code_mapping_generalization.html#legacy-approach">Legacy Approach</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="material_code_mapping_generalization.html#translate-on-load">Translate on load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="material_code_mapping_generalization.html#lookups">Lookups</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="material_code_mapping_generalization.html#changes">Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geant4_optical_code_history.html">Geant4 Optical Code History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geant4_optical_code_history.html#geant4-on-github">Geant4 On Github</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geant4_optical_code_history.html#scattering-bug">Scattering Bug</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geant4_optical_code_history.html#proposevelocity-does-nothing-as-calculatevelocityforopticalphoton-is-repeatedly-called">ProposeVelocity does nothing as CalculateVelocityForOpticalPhoton is repeatedly called</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geant4_optical_code_history.html#groupvel-from-wrong-material-issue">GROUPVEL From Wrong Material Issue ?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geant4_optical_code_history.html#bug-1275-the-velocity-is-wrong-in-optical-photon-propagation">Bug 1275 : The velocity is wrong in optical photon propagation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geant4_optical_code_history.html#close-look-at-bug-1275">Close look at Bug 1275</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geant4_optical_code_history.html#checking-history">Checking History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GROUPVEL.html">GROUPVEL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#approach">Approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#issue-1">Issue 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#issue-2">Issue 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#see-also">See Also</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#transport-gets-velocity-from-prestep">Transport gets velocity from preStep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#groupvel-injection-at-tail-of-psdip-has-no-effect">GROUPVEL Injection at tail of PSDIP has no effect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#can-i-replace-g4transportation-with-a-debug-version">Can I replace G4Transportation with a debug version ?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="GROUPVEL.html#addtransportation">AddTransportation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#dsg4opboundaryprocess-dumping-looks-like-getting-groupvel-from-ac-instead-of-ls-and-mo">DsG4OpBoundaryProcess dumping : looks like getting groupvel from Ac instead of LS and MO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#back-to-basics-after-moving-to-fine-domain-1nm">Back to basics after moving to fine domain (1nm)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#tconcentric-check">tconcentric check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#review">Review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#now-get-g4-warnings-when-run-without-groupvel-option">Now get G4 warnings when run without groupvel option</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#opticks-groupvel">Opticks GROUPVEL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GROUPVEL.html#g4-groupvel">G4 GROUPVEL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reemission_review.html">Reemission Review</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#recsel-segv-last-one-issue">recsel segv : last one issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#fixing-rejoin-recording">fixing REJOIN recording</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#checking-matching-with-extremes-of-material-properties">checking matching with extremes of material properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#switch-off-reemission-with-nore-option">switch off reemission with nore option</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#tlaser-sizable-differences-in-many-categories-how-to-proceed">tlaser : sizable differences in many categories : how to proceed ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#push-stats-to-1m-have-35-crecorder-rec-discrepant-seqhis-seqmat">push stats to 1M have 35 CRecorder/Rec discrepant seqhis/seqmat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#seqhis-machinery-inconsistency-between-crecorder-and-rec">seqhis machinery inconsistency between CRecorder and Rec</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#pushing-out-truncation-pushes-out-the-problem">pushing out truncation, pushes out the problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#fixed-was-comparing-before-all-rejoins-are-in">FIXED : was comparing before all REJOINs are in</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#truncation-control">truncation control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#crecorder-m-seqhis">CRecorder m_seqhis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#rec-m-seqhis">Rec m_seqhis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#how-to-proceed">How to proceed ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#adopting-dybop-into-cfg4">Adopting DYBOp into CFG4</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#crecorder-and-rec-are-almost-matching-at-10k-level-truncation-difference">CRecorder and Rec are almost matching at 10k level : truncation difference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#hmm-seems-hijacking-parentid-is-not-so-easy">Hmm seems hijacking ParentID is not so easy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#attach-primaryphotonid">attach primaryPhotonId ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#flags-borked-so-flying-blind">flags borked, so flying blind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#live-reemission-photon-counts">live reemission photon counts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#contining-the-slot-for-reemiisions-with-g4">Contining the slot for reemiisions with G4 ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reemission_review.html#reemission-continuation-are-difficult-to-implement">reemission continuation are difficult to implement</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reemission_review.html#reemissionprob-is-not-a-standard-g4-property">REEMISSIONPROB is not a standard G4 property</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multi_event.html">Multi Event</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multi_event.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event.html#fixed-issue">FIXED : Issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event.html#fix">FIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event.html#workaround">Workaround</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event.html#things-to-try">Things to try</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multi_event.html#done-buffertest-cu-buffertest-cc">DONE : bufferTest.cu bufferTest.cc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multi_event.html#trivial-program-works">Trivial Program works</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tconcentric_distrib.html">tconcentric_distrib</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_distrib.html#look-for-presentational-hists">Look for presentational hists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_distrib.html#comparing-interpolation-blib">Comparing interpolation blib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_distrib.html#after-move-to-c2shape-comparisons-listing-seq-points-with-sum-of-distrib-chi2-20">After move to c2shape comparisons : listing seq points with sum of distrib chi2 &gt; 20</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_distrib.html#done-machinery-shakedown">DONE machinery shakedown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_distrib.html#multiplot-slice-0-10-quick-look">multiplot slice(0,10) quick look</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_distrib.html#tconcentric-agreement-sufficient-to-move-on-to-distribs">tconcentric agreement sufficient to move on to distribs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html">tconcentric pflags mismatch from_truncation handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#status">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#issue">Issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#fixed-by-enforcing-hard-truncate-in-canned-running">FIXED BY ENFORCING HARD_TRUNCATE IN CANNED RUNNING</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#internal-cfg4-opticks-event-inconsistency">Internal CFG4 Opticks event inconsistency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#crecorder-recordphoton">CRecorder::RecordPhoton</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#tconcentric-py">tconcentric.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#selecting-mismatch-using-pflags-debug">Selecting mismatch using PFLAGS_DEBUG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#dump-first-mismatch-photon">Dump first mismatch photon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#dump-2nd-mismatch">Dump 2nd mismatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_pflags_mismatch_from_truncation_handling.html#truncation-handling">Truncation handling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html">post recording has seqmat zeros</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#after-fix-seqmat-chi2-is-0-93">After Fix seqmat chi2 is 0.93</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#fix-required-matswap-based-on-next-boundary">FIX REQUIRED matSwap BASED ON NEXT BOUNDARY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#issue">Issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#cause">Cause</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#opticks-code-check-shows-no-kludging-for-dr-surface-dreflect">Opticks code check shows no kludging for DR SURFACE_DREFLECT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#cfg4-dumping-of-mismatched-photons">CFG4 Dumping of mismatched photons</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#flags-na-nan-abort-actually-means-boundary-status-steptoosmall">Flags : NA NAN_ABORT actually means boundary status StepTooSmall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#differences-between-live-and-canned-modes-of-crecorder">Differences between live and canned modes of CRecorder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#canned-post-writing-example">Canned post writing Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#live-pre-writing">Live pre writing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tconcentric_post_recording_has_seqmat_zeros.html#canned">Canned</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="review_geant4_stepping_time_velocity.html">Review Geant4 Stepping Time Velocity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="review_geant4_stepping_time_velocity.html#where-does-g4-set-times-anyhow">where does G4 set times anyhow ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="review_geant4_stepping_time_velocity.html#g4trackingmanager-processonetrack">G4TrackingManager::ProcessOneTrack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="review_geant4_stepping_time_velocity.html#g4step-initializestep-track-presteppoint">G4Step::InitializeStep Track-&gt;PreStepPoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="review_geant4_stepping_time_velocity.html#g4steppoint-addglobaltime">G4StepPoint::AddGlobalTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="review_geant4_stepping_time_velocity.html#g4step-updatetrack-poststeppoint-track">G4Step::UpdateTrack PostStepPoint-&gt;Track</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="interpol_mismatch_continued.html">Interpolation Mismatch Continued</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interpol_mismatch_continued.html#issue">Issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interpol_mismatch_continued.html#todo-check-time-distrib-diff-matches-expectation-from-groupvel-interpol-mismatch">TODO: check time distrib diff matches expectation from groupvel interpol mismatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interpol_mismatch_continued.html#testing-finebndtex">Testing finebndtex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interpol_mismatch_continued.html#how-to-up-samples">How to up samples ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interpol_mismatch_continued.html#possible-approaches-to-reduce-interpolation-mismatch">Possible Approaches to reduce interpolation mismatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interpol_mismatch_continued.html#dumping-interpol-deviations">Dumping Interpol deviations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html">SURFACE_DREFLECT (DR) diffuse reflection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html#issue-now-resolved">issue : now resolved</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html#cfg4-surface-dreflect-from-lobereflection-or-lambertianreflection">CFG4 SURFACE_DREFLECT from LobeReflection or LambertianReflection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html#cause-of-discrepant-reflection-different-imps">Cause of discrepant reflection, different imps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html#reimplement-opticks-diffuse-reflection">Reimplement Opticks diffuse reflection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html#surface-dreflect-discrepant-polarization-b-c">SURFACE_DREFLECT discrepant polarization b,c</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html#numpy-doreflection-calc">NumPy DoReflection calc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_DREFLECT_diffuse_reflection.html#chi2-after-fix-notably-the-pflags-decreased-from-1-21-to-1-07">chi2 after fix, notably the pflags decreased from 1.21 to 1.07</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_fails.html">Test Fails</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SURFACE_ABSORB.html">SURFACE_ABSORB</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#next">NEXT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#dbgseqhis">dbgseqhis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#boundary-37-with-os-rsoilsurface-wrong-way-around-inner-not-outer-surf">Boundary 37 (with os:RSOilSurface) : wrong way around ? inner not outer surf ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#concentric-test">Concentric test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#compare-with-tdefault-where-photons-distributed-randomly-from-point-source">Compare with tdefault where photons distributed randomly from point source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#complement-checks">Complement checks...</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#visual-inspection-of-photon-termination-points">Visual inspection of photon termination points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#surface-info-comparison-with-cinterpolationtest-and-ointerpolationtest">Surface info comparison with CInterpolationTest and OInterpolationTest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#commenting-out-esrair-reflectivity-diddle-doesnt-fix-the-20">Commenting out ESRAir reflectivity diddle doesnt fix the 20%</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#m-2016-oct-28-seqhis">1M 2016 Oct 28 seqhis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#sa-opticks">SA Opticks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SURFACE_ABSORB.html#g4-sa">G4 SA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tlaser.html">tlaser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#m-2016-oct-28-seqhis">1M 2016 Oct 28 seqhis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#done-badflags-fixed-by-categorizing-sam-samematerial-as-bt-in-cfg4-opstatus">DONE: badflags fixed by categorizing SAM:SameMaterial as BT in cfg4-/OpStatus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#done-property-comparison-using-g4-interpolation-and-opticks-tex-interpolation">DONE: property comparison using G4 interpolation and Opticks tex interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#using-constant-material-prop-values-gives-much-better-agreement">Using constant material prop values gives much better agreement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#with-fixpol-doesnt-change-much">With fixpol doesnt change much</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#progressive-masking-for-following-discreps-step-by-step">Progressive masking for following discreps step by step</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#after-rejoin-fix-still-large-discreps-eg-top-line-sa">After REJOIN fix still large discreps, eg top line SA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#optical-surface-trace">Optical Surface Trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#prior-to-fixing-aim">Prior to fixing aim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#laser-aim-issue">Laser aim issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#after-fix-aiming-restricted-to-top-seq">after fix aiming, restricted to top seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#after-fix-cg4-skin-surfaces">After fix CG4 skin surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#termination-boundaries">Termination boundaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#probable-cause-cg4-logical-skin-surfaces-lacking-lv">probable cause CG4 logical skin surfaces lacking lv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#after-fix-cg4-logical-skin-surfaces">After fix CG4 logical skin surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#full-seq-following-fixed-aim">full seq following fixed aim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlaser.html#initial-ana">initial ana</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="badflags.html">Badflags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interpol_mismatch.html">Interpol Mismatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tboxlaser.html">tboxlaser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tboxlaser.html#check-fx-machinery">check fx machinery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tbox.html">tbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="okg4_tpmt_revisit.html">OKG4 tpmt revisited</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="okg4_tpmt_revisit.html#fixed-ctestdetector-kludgephotocathode-was-incorrectly-using-dielectric-dielectric">FIXED : CTestDetector::kludgePhotoCathode was incorrectly using dielectric_dielectric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_tpmt_revisit.html#perhaps-surface-conversion-not-yet-implemented-for-ctestdetector">Perhaps surface conversion not yet implemented for CTestDetector ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_tpmt_revisit.html#g4-efficiency">G4 EFFICIENCY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_tpmt_revisit.html#divergence-following-many-changes-g4-not-stopping-at-cathode">Divergence following many changes : g4 not stopping at cathode ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_tpmt_revisit.html#fixed-tpmt-takes-exception-to-duplicated-opaquevacuum-material-name">FIXED : tpmt takes exception to duplicated OpaqueVacuum material name</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="missing_cfg4_surface_detect.html">Missing CFG4 Surface Detect</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#issue">Issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#observations">Observations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#fixed-n">Fixed ? N</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#cgdmldetector-vs-ctestdetector">CGDMLDetector vs CTestDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#writing-g4dae-optical-surfaces">Writing G4DAE Optical surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#reading-g4dae-ggeo-optical-surfaces">Reading G4DAE/ggeo Optical Surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#ancient-gdml-export-has-no-surfaces-or-optical-props-is-also-has-no-material-properties">Ancient GDML Export has no surfaces OR optical props (is also has no material properties)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#cgdmldetector-addmpt">CGDMLDetector::addMPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#cgdmldetector-addsurfaces">CGDMLDetector::addSurfaces ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#next">NEXT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="missing_cfg4_surface_detect.html#code-trace-photon-sd-flags">Code Trace photon SD flags</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="missing_cfg4_surface_detect.html#optixrap-where-flags-come-from">optixrap- where flags come from</a></li>
+<li class="toctree-l3"><a class="reference internal" href="missing_cfg4_surface_detect.html#optixrap-where-properties-come-from">optixrap where properties come from</a></li>
+<li class="toctree-l3"><a class="reference internal" href="missing_cfg4_surface_detect.html#cfg4-where-the-flags-come-from">CFG4 Where the flags come from</a></li>
+<li class="toctree-l3"><a class="reference internal" href="missing_cfg4_surface_detect.html#g4-where-detection-flags-come-from">G4 Where Detection flags come from</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="okg4_torch_shakedown.html">OKG4 Torch Shakedown</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#issues-overview">Issues Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#cg4-more-bt-than-ok-zero-order-fixed">CG4 more BT than OK : zero order fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#possible-cause-of-history-diff-no-evidence-seen-for-this-yet">Possible cause of history diff : no evidence seen for this yet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#major-culprit-was-incomplete-skin-surfaces-in-cg4-after-fixing-that">Major culprit was incomplete skin surfaces in CG4, after fixing that</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#cg4-zero-flags">CG4 zero flags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#what-would-be-useful-for-debugging">What would be useful for debugging ?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#tlaser-testing">tlaser testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#seqvol-volume-sequence-indexing">seqvol : volume sequence indexing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#simulation">Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#viz">Viz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#vizg4-using-opticks-index">vizg4 using opticks index ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#oktest-vizg4-fail">OKTest vizg4 fail</a></li>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#okg4test-vizg4-index-fail">OKG4Test vizg4 index fail</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#initially-not-in-same-ballpark-after-an-afternoon-get-into-same-ballpark">Initially not in same ballpark, after an afternoon get into same ballpark</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="okg4_torch_shakedown.html#zero-flags-sr">zero flags, SR?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#dbgseqhis-c0cac0cccd">dbgseqhis c0cac0cccd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#fixed-positional-bug">FIXED : Positional bug</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#bouncemax-zero-check">bouncemax zero check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_torch_shakedown.html#fixed-material-reporting-with-cg4">FIXED : Material reporting with CG4</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seqvol.html">seqvol : volume sequence indexing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#tlaser-node-index-dumping">tlaser node index dumping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#dbgseqhis">dbgseqhis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#where-did-the-surface-handling-come-from-in-opticks">Where did the surface handling come from in Opticks...</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#op-bnd-shows-no-isur-osur-duping-but-there-are-more-skin-surfs-that-border-surfs-so-this-is-a-bug">op &#8211;bnd : shows no isur/osur duping but there are more skin surfs that border surfs, SO THIS IS A BUG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#optical-buffer">optical_buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#closest-hit-propagate">closest_hit_propagate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#instance-identity-comes-from-the-intersects">instance_identity comes from the intersects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#mesh-intersect">mesh_intersect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#identitybuffer">identityBuffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seqvol.html#facerepeatedidentitybuffer">FaceRepeatedIdentityBuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="okg4_vizg4_noshow.html">OKG4 vizg4 noshow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="okg4_vizg4_noshow.html#issue">Issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_vizg4_noshow.html#tpmt-py">tpmt.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="okg4_vizg4_noshow.html#tokg4-py">tokg4.py</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="integration_overview.html">G4/Op Integration Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#objectives">Objectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#see-also">See Also</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#done-high-level-cleanup-refactor">DONE : High Level Cleanup/Refactor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#wip-multi-event-handling">WIP : Multi event handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="integration_overview.html#todo-g4-driven-multievent">TODO : G4 driven multievent</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#done-init-and-per-event-distinction">DONE : init and per-event distinction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#done-optical-step-collection">DONE : Optical Step Collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#done-material-code-mapping-generalization">DONE : Material Code Mapping Generalization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#done-integrated-g4gun-running">DONE : Integrated G4GUN running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#done-genstep-handling-rationalize">DONE : genstep handling rationalize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#done-avoid-duplication-between-okmgr-and-okg4mgr">DONE : avoid duplication between OKMgr and OKG4Mgr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#next-okmgr-okg4mgr-propagation-multi-event-test">NEXT : OKMgr/OKG4Mgr propagation multi-event test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#next-loaded-propagation-viz-lacks-index">NEXT : loaded propagation viz lacks index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#next-okg4-genstep-shakedown">NEXT : OKG4 genstep shakedown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#wip-integrated-torch-running-debug">WIP : Integrated Torch running debug</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#fixed-okg4-material-map-chicken-egg-problem">FIXED : OKG4 : Material Map chicken/egg problem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="integration_overview.html#mapping-a">Mapping A</a></li>
+<li class="toctree-l3"><a class="reference internal" href="integration_overview.html#mapping-b">Mapping B</a></li>
+<li class="toctree-l3"><a class="reference internal" href="integration_overview.html#fix">Fix</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#next-g4-op-comparison-of-generation-distribs">NEXT : G4/Op Comparison of generation distribs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#next-event-handling-in-integrated-mode">NEXT : event handling in integrated mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration_overview.html#next-move-cg4-event-creation-later-for-multi-event">NEXT : move CG4 event creation later for multi-event</a></li>
 <li class="toctree-l2"><a class="reference internal" href="integration_overview.html#approach">Approach</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="integration_overview.html#ggeoview-app">ggeoview-/App</a></li>
 <li class="toctree-l3"><a class="reference internal" href="integration_overview.html#opticksengine-base-class">OpticksEngine base class</a></li>
@@ -104,36 +543,72 @@
 <li class="toctree-l2"><a class="reference internal" href="integration_overview.html#todo">TODO</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="high_level_refactor.html">High Level Refactor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#objective">Objective</a></li>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#approach">Approach</a></li>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#done">DONE</a></li>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#tests-commands-to-run-whilst-refactoring">Tests Commands To Run Whilst Refactoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-op-record-vis-broken-by-opticksevent-simplifications">[FIXED] OP record vis broken by OpticksEvent simplifications</a></li>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-left-field-flakiness">[FIXED] Left field flakiness</a></li>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-photon-record-coloring-m-key-seems-wrong">FIXED: Photon record coloring M key seems wrong</a></li>
-<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-cfg4-load-count-mismatch-assert">[FIXED] CFG4 load count mismatch assert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interop_fails.html">Interop Failures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interop_fails.html#fixed-interop-mode-with-seed-buffer-get-hard-crash-even-with-trivial">FIXED : Interop mode with seed buffer : get hard crash even with trivial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interop_fails.html#trying-to-do-raytrace-when-loaded-fails-for-lack-of-record-buffer">Trying to do raytrace when loaded, fails for lack of record buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interop_fails.html#multi-event-testing-cuda-memory-error">Multi event testing CUDA memory error</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gui_photon_selection_failure.html">[FIXED] GUI Photon Selection Failure</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#fixed">FIXED</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#background">Background</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#approach-to-solving">Approach to solving</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#not-working">Not Working</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#working">Working</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html">Multi Event : Seed Stuck at Zero for 2nd Event</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#interop-mode">Interop Mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#with-seed-buffer">WITH_SEED_BUFFER</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gui_photon_flag_names_null.html">[FIXED] GUI Photon Flag Names All NULL</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="gui_photon_flag_names_null.html#progress">progress</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gui_photon_flag_names_null.html#initial-issue">initial issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#compute-mode">Compute Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#done-getting-optix-to-notice-cuda-thrust-change-to-photon-buffer">DONE: Getting OptiX to notice CUDA/Thrust change to Photon buffer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#dirty-cuda-interop-buffers">Dirty CUDA Interop Buffers</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#fix-using-buffer-copy-on-dirty-for-photon-buffer-and-manually-marking-dirty">FIX: Using BUFFER_COPY_ON_DIRTY for photon buffer and manually marking dirty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#maybe-use-separate-input-only-seed-buffer">Maybe Use Separate INPUT_ONLY SEED BUFFER ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_event_seed_stuck_at_zero_for_second_event.html#todo-measure-multievent-compute-speed-using-input-output-seeded-photon-buffer-vs-input-only-seed-buffer">TODO: Measure multievent compute speed using INPUT_OUTPUT seeded photon buffer vs INPUT only seed buffer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="optix_changing_event_buffer.html">OptiX Changing Event Buffer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optix_changing_event_buffer.html#objective">Objective</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optix_changing_event_buffer.html#observation-trying-to-prelaunch-in-init-fails">Observation : trying to prelaunch in init fails</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="optix_changing_event_buffer.html#context-validation-fails-without-evt-buffers">Context validation fails without evt buffers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="optix_changing_event_buffer.html#changing-event-buffers">Changing Event Buffers ?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="optix_changing_event_buffer.html#optix-400-guide-p14-on-optix-buffers">OptiX 400 Guide, p14 on OptiX Buffers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="optix_changing_event_buffer.html#optix-400-guide-p60-on-interop-buffers">OptiX 400 Guide, p60 on Interop Buffers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="optix_changing_event_buffer.html#thoughts">Thoughts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="optix_changing_event_buffer.html#experience">Experience</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="optix_changing_event_buffer.html#changing-opengl-buffers">Changing OpenGL Buffers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="optix_changing_event_buffer.html#glbufferdata">glBufferData</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="optix_changing_event_buffer.html#oglrap-scene-uploadevent">oglrap- Scene::uploadEvent</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="optical_step_collection.html">NEXT : G4 Optical Step Collection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optical_step_collection.html#objective">Objective</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optical_step_collection.html#stages">Stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optical_step_collection.html#review-old-collection-with-g4daechroma">Review old collection with G4DAEChroma</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="optical_step_collection.html#g4daechroma-observations">G4DAEChroma Observations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="optical_step_collection.html#csa-originally-named-after-chromastackaction-but-now-handles-detsimchroma"><em>csa-</em> originally named after ChromaStackAction,  but now handles DetSimChroma</a></li>
+<li class="toctree-l3"><a class="reference internal" href="optical_step_collection.html#g4daechroma-things-to-plunder-looks-like-very-little-npy-handles-most-of-it">G4DAEChroma Things to plunder : looks like very little, NPY handles most of it</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="optical_step_collection.html#approach-to-reviving-optical-step-collection">Approach to reviving optical step collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optical_step_collection.html#done-near-standard-g4-scintillation-cerenkov-step-collection">DONE : Near Standard G4 Scintillation/Cerenkov Step Collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optical_step_collection.html#todo-details-of-scintillation-generation-compare-opticks-vs-g4-generated-distrib">TODO: details of scintillation generation, compare Opticks vs G4 generated distrib</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="opticks_engineering.html">Opticks Engineering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ancient_gdml_export_lacks_material_properties.html">Material Properties</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ancient_gdml_export_lacks_material_properties.html#worked-around-issue-old-gdml-export-omits-material-properties">[WORKED AROUND] Issue : old GDML export omits material properties</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="broken_indexing.html">Broken Indexing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="broken_pmttest.html">Broken PMT Test</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="broken_pmttest.html#fixed">FIXED</a></li>
 <li class="toctree-l2"><a class="reference internal" href="broken_pmttest.html#issue-photon-record-positional-qwns-all-zero">Issue : photon record positional qwns all zero</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="broken_indexing.html">Broken Indexing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="g4gun_debug.html">G4GUN Debug</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="g4gun_debug.html#integration-starting-point-pure-g4gun">Integration starting point : pure g4gun</a></li>
 <li class="toctree-l2"><a class="reference internal" href="g4gun_debug.html#evt-debug-with-npy-g4gun-py">Evt debug with npy-/g4gun.py</a><ul>
@@ -148,12 +623,9 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="time_goes_backward.html">Time Goes Backward</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="time_goes_backward.html#fixed-issue-with-gdml-geometry-opticalphoton-time-going-backwards">[FIXED] Issue : with GDML geometry opticalphoton time going backwards</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ancient_gdml_export_lacks_material_properties.html">Material Properties</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ancient_gdml_export_lacks_material_properties.html#worked-around-issue-old-gdml-export-omits-material-properties">[WORKED AROUND] Issue : old GDML export omits material properties</a></li>
+<li class="toctree-l1"><a class="reference internal" href="g4gun_gdml_material_reporting.html">G4GUN Material Reporting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="g4gun_gdml_material_reporting.html#approach">Approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="g4gun_gdml_material_reporting.html#fishy-flags-in-history">Fishy flags in history</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="geant4_verbosity.html">Taming Geant4 Verbosity</a><ul>
@@ -163,6 +635,34 @@
 <li class="toctree-l2"><a class="reference internal" href="geant4_verbosity.html#issue-g4-init-is-slow-how-to-cache-the-physics-tables">Issue : g4 init is slow, how to cache the physics tables ?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geant4_verbosity.html#issue-g4-em-noise-control">Issue : g4 Em noise control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geant4_verbosity.html#issue-g4-noise-control">Issue : g4 noise control</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gui_photon_flag_names_null.html">[FIXED] GUI Photon Flag Names All NULL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gui_photon_flag_names_null.html#progress">progress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui_photon_flag_names_null.html#initial-issue">initial issue</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gui_photon_selection_failure.html">[FIXED] GUI Photon Selection Failure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#fixed">FIXED</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#background">Background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#approach-to-solving">Approach to solving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#not-working">Not Working</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui_photon_selection_failure.html#working">Working</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="high_level_refactor.html">High Level Refactor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#objective">Objective</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#approach">Approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#done">DONE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#tests-commands-to-run-whilst-refactoring">Tests Commands To Run Whilst Refactoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-op-record-vis-broken-by-opticksevent-simplifications">[FIXED] OP record vis broken by OpticksEvent simplifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-left-field-flakiness">[FIXED] Left field flakiness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-photon-record-coloring-m-key-seems-wrong">FIXED: Photon record coloring M key seems wrong</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_level_refactor.html#fixed-cfg4-load-count-mismatch-assert">[FIXED] CFG4 load count mismatch assert</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="time_goes_backward.html">Time Goes Backward</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="time_goes_backward.html#fixed-issue-with-gdml-geometry-opticalphoton-time-going-backwards">[FIXED] Issue : with GDML geometry opticalphoton time going backwards</a></li>
 </ul>
 </li>
 </ul>
@@ -182,10 +682,10 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="integration_overview.html" title="G4/Op Integration Overview"
+          <a href="tconcentric.html" title="tconcentric"
              >next</a> |</li>
         <li class="right" >
-          <a href="../scintillation_photons.html" title="Scintillation Photons"
+          <a href="../groupvel/generational.html" title="Groupvel Kludge Unintended Consequences"
              >previous</a> |</li>
         <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" >issues</a> &raquo;</li> 

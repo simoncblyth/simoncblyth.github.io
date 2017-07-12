@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Boost Visibility Linker Warnings &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="issues" href="index.html" />
+    <link rel="next" title="FIXED : Invisible Propagation" href="invisible_propagation.html" />
+    <link rel="prev" title="FIXED : CSG Deep Trees (solid level issue)" href="csg_deep_trees.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="invisible_propagation.html" title="FIXED : Invisible Propagation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="csg_deep_trees.html" title="FIXED : CSG Deep Trees (solid level issue)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">issues</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Boost Visibility Linker Warnings</a><ul>
+<li><a class="reference internal" href="#issue-many-linker-warnings">Issue : many linker warnings</a></li>
+<li><a class="reference internal" href="#solution">Solution ?</a></li>
+<li><a class="reference internal" href="#cause">Cause</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="csg_deep_trees.html"
+                        title="previous chapter">FIXED : CSG Deep Trees (solid level issue)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="invisible_propagation.html"
+                        title="next chapter">FIXED : Invisible Propagation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/boost_visibility_linker_warnings.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="boost-visibility-linker-warnings">
+<h1>Boost Visibility Linker Warnings<a class="headerlink" href="#boost-visibility-linker-warnings" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="issue-many-linker-warnings">
+<h2>Issue : many linker warnings<a class="headerlink" href="#issue-many-linker-warnings" title="Permalink to this headline">¶</a></h2>
+<p>Most opticks pkgs have many warnings like:</p>
+<div class="highlight-python"><pre>ld: warning: direct access in void boost::throw_exception&lt;boost::bad_function_call&gt;(boost::bad_function_call const&amp;) to global weak symbol typeinfo for boost::exception_detail::clone_impl&lt;boost::exception_detail::error_info_injector&lt;boost::bad_function_call&gt; &gt; means the weak symbol cannot be overridden at runtime. This was likely caused by different translation units being compiled with different visibility settings.
+ld: warning: direct access in boost::exception_detail::clone_impl&lt;boost::exception_detail::error_info_injector&lt;boost::bad_function_call&gt; &gt;::rethrow() const to global weak symbol typeinfo for boost::exception_detail::clone_impl&lt;boost::exception_detail::error_info_injector&lt;boost::bad_function_call&gt; &gt; means the weak symbol cannot be overridden at runtime. This was likely caused by different translation units being compiled with different visibility settings.
+ld: warning: direct access in void boost::throw_exception&lt;boost::bad_lexical_cast&gt;(boost::bad_lexical_cast const&amp;) to global weak symbol typeinfo for boost::exception_detail::clone_impl&lt;boost::exception_detail::error_info_injector&lt;boost::bad_lexical_cast&gt; &gt; means the weak symbol cannot be overridden at runtime. This was likely caused by different translation units being compiled with different visibility settings.</pre>
+</div>
+</div>
+<div class="section" id="solution">
+<h2>Solution ?<a class="headerlink" href="#solution" title="Permalink to this headline">¶</a></h2>
+<p>Rebuild boost libs with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">-</span><span class="n">fvisibility</span><span class="o">=</span><span class="n">hidden</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><a class="reference external" href="http://stackoverflow.com/questions/15059360/compiling-boost-1-53-libraries-with-gcc-with-symbol-visibility-hidden">http://stackoverflow.com/questions/15059360/compiling-boost-1-53-libraries-with-gcc-with-symbol-visibility-hidden</a></li>
+</ul>
+</div>
+<div class="section" id="cause">
+<h2>Cause<a class="headerlink" href="#cause" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>On Linux/OSX are using <strong>visibility=hidden</strong> in order to match WIN32 behaviour.</li>
+<li>This forces all symbols to be API exported eg with <strong>OKG4_API</strong></li>
+</ul>
+<p>okg4/OKG4_API_EXPORT.hh:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">23</span> <span class="c">#if defined (_WIN32)</span>
+<span class="mi">24</span>
+<span class="mi">25</span>    <span class="c">#if defined(okg4_EXPORTS)</span>
+<span class="mi">26</span>        <span class="c">#define  OKG4_API __declspec(dllexport)</span>
+<span class="mi">27</span>    <span class="c">#else</span>
+<span class="mi">28</span>        <span class="c">#define  OKG4_API __declspec(dllimport)</span>
+<span class="mi">29</span>    <span class="c">#endif</span>
+<span class="mi">30</span>
+<span class="mi">31</span> <span class="c">#else</span>
+<span class="mi">32</span>
+<span class="mi">33</span>    <span class="c">#define OKG4_API  __attribute__ ((visibility (&quot;default&quot;)))</span>
+<span class="mi">34</span>
+<span class="mi">35</span> <span class="c">#endif</span>
+</pre></div>
+</div>
+<p>cmake/Modules/EnvCompilationFlags:</p>
+<div class="highlight-python"><pre>set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="invisible_propagation.html" title="FIXED : Invisible Propagation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="csg_deep_trees.html" title="FIXED : CSG Deep Trees (solid level issue)"
+             >previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >issues</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

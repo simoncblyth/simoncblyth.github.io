@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SurLib with Test Geometry &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="geant4_opticks_integration" href="index.html" />
+    <link rel="next" title="OKG4 tpmt revisited" href="okg4_tpmt_revisit.html" />
+    <link rel="prev" title="geant4_opticks_integration" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="okg4_tpmt_revisit.html" title="OKG4 tpmt revisited"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="geant4_opticks_integration"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">geant4_opticks_integration</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">geant4_opticks_integration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="okg4_tpmt_revisit.html"
+                        title="next chapter">OKG4 tpmt revisited</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/issues/geant4_opticks_integration/surlib_with_test_geometry.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="surlib-with-test-geometry">
+<h1>SurLib with Test Geometry<a class="headerlink" href="#surlib-with-test-geometry" title="Permalink to this headline">¶</a></h1>
+<p>The <cite>&#8211;test</cite> option results in a totally changed mesh0
+so actions done in GGeo::loadFromCache depending
+on specific geometry volume indices will go stale...</p>
+<p>Idea for test geometry is to have all the materials
+and just use simplified geometry. Problems are that
+surfaces via GSur wrappers mix properties with specific geometry:</p>
+<ul class="simple">
+<li>border surfaces need to use PV indices</li>
+<li>skin surfaces need to use LV names</li>
+</ul>
+<p>PMTInBox is the test geometry that most needs
+to have proper surface handling...
+Hmm getting the general case to work just for the cathode
+surface seems overkill..</p>
+<p>So stick with CTestDetector::kludgePhotoCathode for now.</p>
+<div class="highlight-python"><pre>184 void OpticksGeometry::loadGeometry()
+185 {
+186     bool modify = m_opticks-&gt;hasOpt("test") ;
+...
+190     loadGeometryBase();  //  usually from cache
+...
+199     if(modify) modifyGeometry() ;
+200
+
+
+256 void OpticksGeometry::modifyGeometry()
+257 {
+258     assert(m_opticks-&gt;hasOpt("test"));
+259     LOG(debug) &lt;&lt; "OpticksGeometry::modifyGeometry" ;
+260
+261     std::string testconf = m_fcfg-&gt;getTestConfig();
+262     m_ggeo-&gt;modifyGeometry( testconf.empty() ? NULL : testconf.c_str() );
+263
+264
+265     if(m_ggeo-&gt;getMeshVerbosity() &gt; 2)
+266     {
+267         GMergedMesh* mesh0 = m_ggeo-&gt;getMergedMesh(0);
+268         if(mesh0)
+269         {
+270             mesh0-&gt;dumpSolids("OpticksGeometry::modifyGeometry mesh0");
+271             mesh0-&gt;save("$TMP", "GMergedMesh", "modifyGeometry") ;
+272         }
+273     }
+274
+275
+276     TIMER("modifyGeometry");
+277 }</pre>
+</div>
+<div class="highlight-python"><pre>601 void GGeo::loadFromCache()
+602 {
+603     LOG(trace) &lt;&lt; "GGeo::loadFromCache START" ;
+604
+605     m_geolib = GGeoLib::load(m_opticks);
+606
+607     const char* idpath = m_opticks-&gt;getIdPath() ;
+608     m_meshindex = GItemIndex::load(idpath, "MeshIndex");
+609
+610     if(m_volnames)
+611     {
+612         m_pvlist = GItemList::load(idpath, "PVNames");
+613         m_lvlist = GItemList::load(idpath, "LVNames");
+614     }
+615
+616     m_bndlib = GBndLib::load(m_opticks);  // GBndLib is persisted via index buffer, not float buffer
+617
+618
+619
+620     m_materiallib = GMaterialLib::load(m_opticks);
+621     m_surfacelib  = GSurfaceLib::load(m_opticks);
+622
+623     m_bndlib-&gt;setMaterialLib(m_materiallib);
+624     m_bndlib-&gt;setSurfaceLib(m_surfacelib);
+625
+626     m_scintillatorlib  = GScintillatorLib::load(m_opticks);
+627     m_sourcelib  = GSourceLib::load(m_opticks);
+628
+629     m_surlib = new GSurLib(this) ;
+630     m_surlib-&gt;dump("GGeo::loadFromCache GSurLib::dump");
+631
+632     LOG(trace) &lt;&lt; "GGeo::loadFromCache DONE" ;
+633 }</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="okg4_tpmt_revisit.html" title="OKG4 tpmt revisited"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="geant4_opticks_integration"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >issues</a> &raquo;</li>
+          <li><a href="index.html" >geant4_opticks_integration</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

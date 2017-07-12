@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CSG Intersect Comparisons &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">CSG Intersect Comparisons</a><ul>
+<li><a class="reference internal" href="#approaches">Approaches ?</a></li>
+<li><a class="reference internal" href="#cfg4-review">cfg4 review</a></li>
+<li><a class="reference internal" href="#makesolid">makeSolid</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/csg_intersect_comparisons.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="csg-intersect-comparisons">
+<h1>CSG Intersect Comparisons<a class="headerlink" href="#csg-intersect-comparisons" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="approaches">
+<h2>Approaches ?<a class="headerlink" href="#approaches" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Extend cfg4/CMaker to work with NCSG geometry</li>
+<li>cfg4 needs updating to NCSG rather than old commandline geometry</li>
+</ul>
+</div>
+<div class="section" id="cfg4-review">
+<h2>cfg4 review<a class="headerlink" href="#cfg4-review" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>13 CMaker
+14 ======
+15
+16 CMaker is a constitent of CTestDetector used
+17 to convert GCSG geometry into G4 geometry in
+18 G4VPhysicalVolume* CTestDetector::Construct().
+19
+20 CMaker::makeSolid handles some boolean intersection
+21 and union combinations via recursive calls to itself.
+22
+23 CMaker only handles the geometrical shapes.
+24 Material assignments are done elsewhere,
+25 at a higher level eg by CTestDetector.
+26
+
+
+36 CDetector
+37 ===========
+38
+39 *CDetector* is the base class of *CGDMLDetector* and *CTestDetector*,
+40 it is a *G4VUserDetectorConstruction* providing detector geometry to Geant4.
+41 The *CDetector* instance is a constituent of *CGeometry* which is
+42 instanciated in *CGeometry::init*.
+43
+
+57 CTestDetector
+58 =================
+59
+60 *CTestDetector* is a :doc:`CDetector` subclass that
+61 constructs simple Geant4 detector test geometries based on commandline specifications
+62 parsed and represented by an instance of :doc:`../ggeo/GGeoTestConfig`.
+63</pre>
+</div>
+</div>
+<div class="section" id="makesolid">
+<h2>makeSolid<a class="headerlink" href="#makesolid" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>070 G4VSolid* CMaker::makeSolid(OpticksCSG_t type, const glm::vec4&amp; param)
+ 71 {
+ 72     G4VSolid* solid = NULL ;
+ 73     switch(type)
+ 74     {
+ 75         case CSG_BOX:   solid = makeBox(param);break;
+ 76         case CSG_SPHERE:solid = makeSphere(param);break;
+ 77         case CSG_UNION:
+ 78         case CSG_INTERSECTION:
+ 79         case CSG_DIFFERENCE:
+ 80         case CSG_ZSPHERE:
+ 81         case CSG_ZLENS:
+ 82         case CSG_PMT:
+ 83         case CSG_PRISM:
+ 84         case CSG_TUBS:
+ 85         case CSG_PARTLIST:
+ 86         case CSG_CYLINDER:
+ 87         case CSG_DISC:
+ 88         case CSG_CONE:
+ 89         case CSG_MULTICONE:
+ 90         case CSG_BOX3:
+ 91         case CSG_PLANE:
+ 92         case CSG_SLAB:
+ 93         case CSG_TRAPEZOID:
+ 94         case CSG_ZERO:
+ 95         case CSG_UNDEFINED:
+ 96         case CSG_FLAGPARTLIST:
+ 97         case CSG_FLAGNODETREE:
+ 98         case CSG_FLAGINVISIBLE:
+ 99         case CSG_CONVEXPOLYHEDRON:
+100                          solid = NULL ; break ;
+101
+102     }
+103     return solid ;
+104 }</pre>
+</div>
+<div class="highlight-python"><pre>59 CTestDetector::CTestDetector(OpticksHub* hub, GGeoTestConfig* config, OpticksQuery* query)
+60   :
+61   CDetector(hub, query),
+62   m_config(config),
+63   m_maker(NULL)
+64 {
+65     init();
+66 }</pre>
+</div>
+<div class="highlight-python"><pre>delta:cfg4 blyth$ grep makeSolid *.*
+CMaker.cc://G4VSolid* CMaker::makeSolid(char shapecode, const glm::vec4&amp; param)
+CMaker.cc:G4VSolid* CMaker::makeSolid(OpticksCSG_t type, const glm::vec4&amp; param)
+CMaker.cc:G4VSolid* CMaker::makeSolid(GCSG* csg, unsigned int index)
+CMaker.cc:           &lt;&lt; "CMaker::makeSolid (GCSG)  "
+CMaker.cc:       G4VSolid* asol = makeSolid(csg, a );
+CMaker.cc:       G4VSolid* bsol = makeSolid(csg, b );
+CMaker.cc:       G4VSolid* isol = makeSolid(csg, i );
+CMaker.cc:       G4VSolid* jsol = makeSolid(csg, j );
+CMaker.cc:       G4VSolid* ksol = makeSolid(csg, k );
+CMaker.cc:       LOG(info) &lt;&lt; "CMaker::makeSolid csg Sphere"
+CMaker.cc:       LOG(info) &lt;&lt; "CMaker::makeSolid"
+CMaker.cc:       LOG(warning) &lt;&lt; "CMaker::makeSolid implementation missing " ;
+CMaker.hh:CMaker::makeSolid handles some boolean intersection
+CMaker.hh:        //G4VSolid* makeSolid(char shapecode, const glm::vec4&amp; param);
+CMaker.hh:        G4VSolid* makeSolid(OpticksCSG_t type, const glm::vec4&amp; param);
+CMaker.hh:        G4VSolid* makeSolid(GCSG* csg, unsigned int i);
+CTestDetector.cc:        G4VSolid* solid = m_maker-&gt;makeSolid(type, param);
+CTestDetector.cc:    G4VSolid* solid = m_maker-&gt;makeSolid(csg, i );
+delta:cfg4 blyth$</pre>
+</div>
+<p>This was the primordial CSG approach before NCSG:</p>
+<div class="highlight-python"><pre>107 G4VSolid* CMaker::makeSolid(GCSG* csg, unsigned int index)
+108 {
+109    // hmm this is somewhat specialized to known structure of DYB PMT
+110    //  eg intersections are limited to 3 ?
+111
+112     unsigned int nc = csg-&gt;getNumChildren(index);
+113     unsigned int fc = csg-&gt;getFirstChildIndex(index);
+114     unsigned int lc = csg-&gt;getLastChildIndex(index);
+115     unsigned int tc = csg-&gt;getTypeCode(index);
+116     const char* tn = csg-&gt;getTypeName(index);
+117</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
