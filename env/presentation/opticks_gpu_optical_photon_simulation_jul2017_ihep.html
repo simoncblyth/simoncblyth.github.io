@@ -981,7 +981,7 @@ interact only weakly.
 <ul class="small simple">
 <li><span class="red">general CSG tree intersection implemented on GPU</span></li>
 <li>automated conversion, GDML -&gt; glTF -&gt; Opticks GPU</li>
-<li>currently debugging coincident faces</li>
+<li>currently debugging geometry (coincident faces)</li>
 </ul>
 <p class="tiny">[1] LLR Workshop, <a class="reference external" href="https://simoncblyth.bitbucket.io/env/presentation/opticks_gpu_optical_photon_simulation_nov2016_llr.html">https://simoncblyth.bitbucket.io/env/presentation/opticks_gpu_optical_photon_simulation_nov2016_llr.html</a></p>
 </div>
@@ -1034,7 +1034,7 @@ interact only weakly.
 <ul class="small simple">
 <li>massive parallelism -&gt; more the merrier</li>
 <li>low register usage -&gt; keep it simple</li>
-<li>small stack size -&gt; avoid recursion</li>
+<li>small stack size -&gt; <strong>avoid recursion</strong></li>
 </ul>
 <p class="large"><span class="red">Classical approach not appropriate on GPU</span></p>
 </div>
@@ -1408,9 +1408,9 @@ in(in(in(in(cy,!cy),in(!cy,!cy)),in(in(!cy,!cy),in(!cy,!cy))),!cy)
 <p class="first sidebar-title">SDF definition</p>
 <p class="small">SDF(q(x,y,z) distance to solid surface</p>
 <ul class="small simple">
-<li>-ve : inside</li>
-<li>0 : on surface</li>
-<li>+ve : outside</li>
+<li>negative : inside</li>
+<li>zero : surface</li>
+<li>positive : outside</li>
 </ul>
 <p class="small">Defined for all primitives, eg:</p>
 <p class="small last">Sphere(center,radius) :  <strong>length(q,center) - radius</strong>
@@ -1459,21 +1459,21 @@ Plane(normal, dist) : <strong>dot(normal,q) - dist</strong></p>
 <p class="small"><strong>NScanTest : Find Problem Solids by SDF Scanning</strong></p>
 <p class="small">Count SDF zero crossings along scanlines (expect even)</p>
 <ul class="small simple">
-<li>odd crossings -&gt; coincidence artifacts</li>
+<li>odd crossings -&gt; coincidence <span class="red">false zeros</span></li>
 </ul>
-<p class="small"><span class="red">~5/249 solids not yet handled</span> by auto-uncoincidence</p>
+<p class="small"><span class="red">~5/249 odd solids</span> : not yet handled by auto-uncoincidence</p>
 <p class="small"><strong>GScene::compareMeshes : Bounding Box comparisons</strong></p>
-<p class="small">G4Poly(via G4DAE) vs Opticks parsurf</p>
+<p class="small">G4Poly(via G4DAE) vs Opticks parsurf (parametric surface)</p>
 <ul class="small simple">
 <li><span class="red">25/249 solids with max bbox dimension discrepancy &gt; 1mm</span></li>
-<li>causes of ~20 not explained by coincidence<ul>
-<li>parsurf bbox imprecision for intersects
-involving very different scale shapes</li>
-<li>G4Poly bugs : eg missing cylinders in unions</li>
+<li>causes of ~20 not explained by coincidence, presume:<ul>
+<li>G4Poly bugs(*) : some clear missing cylinders from unions</li>
+<li>parsurf bbox imprecision (very different size sub-objects)</li>
 </ul>
 </li>
-<li><span class="blue">NEXT STEP: compare CSG intersects between Opticks/G4 implementations for definitive answers</span></li>
 </ul>
+<p class="small"><span class="blue">NEXT STEP: direct intersect comparison between Opticks/G4 CSG implementations for definitive answers</span></p>
+<p class="tiny">(*) could also be G4DAE export of G4Poly</p>
 </div>
 <div class="slide" id="full-analytic-gdml-geometry-translation-workflow">
 <h1><span class="small">Full Analytic GDML Geometry Translation Workflow</span></h1>
