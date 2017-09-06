@@ -44,9 +44,11 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Opticks Integration with Geant4 Simulation</a><ul>
+<li><a class="reference internal" href="#geometry-overview">Geometry Overview</a></li>
 <li><a class="reference internal" href="#geometry-integration-exporting-geant4-geometry-into-g4dae-and-gdml-files">Geometry Integration : Exporting Geant4 geometry into G4DAE and GDML files</a><ul>
 <li><a class="reference internal" href="#future-of-opticks-geometry">Future of Opticks Geometry</a></li>
 <li><a class="reference internal" href="#simple-geometry-testing">Simple Geometry Testing</a></li>
+<li><a class="reference internal" href="#full-geometry-testing">Full Geometry Testing</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#event-data-integration-getting-photons-into-opticks">Event Data Integration : Getting Photons into Opticks</a><ul>
@@ -93,6 +95,15 @@
             
   <div class="section" id="opticks-integration-with-geant4-simulation">
 <h1>Opticks Integration with Geant4 Simulation<a class="headerlink" href="#opticks-integration-with-geant4-simulation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="geometry-overview">
+<h2>Geometry Overview<a class="headerlink" href="#geometry-overview" title="Permalink to this headline">¶</a></h2>
+<p>Opticks is intended to be run from geometry
+exported from Geant4, so that you can have a
+single geometry source definition that is
+auto converted into an Opticks geometry.</p>
+<p>For tests using simple geometries and photon sources
+it is also possible to define solids using a simple python CSG specification.</p>
+</div>
 <div class="section" id="geometry-integration-exporting-geant4-geometry-into-g4dae-and-gdml-files">
 <h2>Geometry Integration : Exporting Geant4 geometry into G4DAE and GDML files<a class="headerlink" href="#geometry-integration-exporting-geant4-geometry-into-g4dae-and-gdml-files" title="Permalink to this headline">¶</a></h2>
 <p>Opticks typically operates from geometries exported from
@@ -136,6 +147,16 @@ to file which is read by Opticks.</p>
 <ul class="simple">
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/tests/tboolean.bash">https://bitbucket.org/simoncblyth/opticks/src/tip/tests/tboolean.bash</a></li>
 </ul>
+<p>You can also define simple optical photon sources via commandline <strong>torch</strong> config
+arguments. Following good experience with python defined test geometry it
+is planned to overhaul source configuation to use a similar approach.</p>
+</div>
+<div class="section" id="full-geometry-testing">
+<h3>Full Geometry Testing<a class="headerlink" href="#full-geometry-testing" title="Permalink to this headline">¶</a></h3>
+<p>Opticks has some functionality in the <cite>Cfg4</cite> package
+for comparing itself to a Geant4 simulation that it creates itself.
+This package however needs to revisited following Opticks recent
+move to fully analytic CSG geometries.</p>
 </div>
 </div>
 <div class="section" id="event-data-integration-getting-photons-into-opticks">
@@ -218,11 +239,72 @@ older/simplified demo version of your geometry.</p>
 <h2>Configuring Opticks to use the Geometry<a class="headerlink" href="#configuring-opticks-to-use-the-geometry" title="Permalink to this headline">¶</a></h2>
 <p>The <strong>op.sh</strong> script is the primary entry point to running Opticks executables,
 the specific executable to run and environment variables to setup specifying
-a geometry are configured via command line arguments to this script. This script
-together with <cite>$OPTICKS_HOME/externals/opticksdata.bash</cite> needs to be
+a geometry are configured by this script based on the command line arguments provided.
+This script together with <cite>$OPTICKS_HOME/externals/opticksdata.bash</cite> needs to be
 adapted for the new geometry.</p>
 <p>Note it is possible via geometry query strings to define multiple virtual geometries
 that all use the same input geometry files selecting different volumes sets.</p>
+<div class="highlight-python"><pre>simon:opticks blyth$ op --help
+ubin /usr/local/opticks/lib/OKTest cfm cmdline --help
+=== op-export : OPTICKS_BINARY /usr/local/opticks/lib/OKTest
+
+op.sh : Opticks Launching Script
+===================================
+
+The **op.sh** script launches different Opticks executables
+or scripts depending on the arguments provided. It also
+sets environment variables picking a detector geometry
+and selecting volumes within the geometry.
+
+Most usage of Opticks should use this script.
+
+To see the options specific to particular scripts or
+executables use "-h" rather than the "--help"
+that provides this text.
+
+
+Profile Setup
+---------------
+
+To save typing add the below bash function to your .bash_profile::
+
+   op(){ op.sh $* ; }
+
+
+
+
+GEOMETRY SELECTION ARGUMENTS
+
+                --dyb :                       DYB : DayaBay Near Site
+               --dlin :                      DLIN : DayaBay LingAo Site
+               --dfar :                      DFAR : DayaBay Far Site
+               --dpib :                      DPIB : DayaBay PMT in Box of Mineral Oil Test Geometry
+               --dsst :                      DSST : DYB debugging SST rib impingement
+              --dsst2 :                     DSST2 : DYB debugging SST rib impingement
+              --dlv65 :                     DLV65 : DYB cycybobo lvid 65
+               --jpmt :                      JPMT : JUNO with PMTs
+              --j1707 :                     J1707 : JUNO with ~36k 3inch PMTs, ~18k 20inch PMTs, torus guide tube
+                --lxe :                       LXE : Geant4 LXe Liquid Xenon example
+
+
+
+BINARY SELECTION ARGUMENTS
+
+             --idpath :             OpticksIDPATH : Emit to stdout the path of the geocache directory for the geometry selected by arguments
+               --keys :            InteractorKeys : List key controls available in GGeoViewTest
+              --tcfg4 :                   CG4Test : Geant4 comparison simulation of simple test geometries
+               --okg4 :                  OKG4Test : Integrated Geant4/Opticks runing allowing G4GUN steps to be directly Opticks GPU propagated.
+             --tracer :               OTracerTest : Fast OpenGL viz and OptiX tracing, NO propagation. From ggeoview-/tests. Used for simple geometry/machinery checking
+          --gdml2gltf :              gdml2gltf.py : Once only geometry conversion of GDML input into GLTF file needed for analytic geocache creation
+                --mat :          GMaterialLibTest : Dump properties of material identified by 0-based index , eg op --mat 0
+               --cmat :          CMaterialLibTest :
+               --surf :           GSurfaceLibTest : Dump properties of surface identified by 0-based index , eg op --surf 0
+                --bnd :               GBndLibTest : Dump boundaries of a geometry, eg op --bnd --jpmt
+      --ctestdetector :         CTestDetectorTest : Test Geant4 simple detector construction using class cfg4-/CTestDetector
+      --cgdmldetector :         CGDMLDetectorTest : Test Geant4 GDML full detector construction using cfg4-/CGDMLDetector
+         --ngunconfig :            NGunConfigTest : Test Geant4 Gun configuration with npy-/NGunConfigTest
+...</pre>
+</div>
 </div>
 <div class="section" id="geocache">
 <h2>Geocache<a class="headerlink" href="#geocache" title="Permalink to this headline">¶</a></h2>
