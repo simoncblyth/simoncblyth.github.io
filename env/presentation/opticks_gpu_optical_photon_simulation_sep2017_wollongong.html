@@ -939,7 +939,7 @@ crossing a neutrino detector. -->
 </div>
 
 <div class="mycredit">
-<h2 style="background-color:lightgrey"> Simon C Blyth, National Taiwan University &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; Sept 2017, SDU </h2>
+<h2 style="background-color:lightgrey"> Simon C Blyth, National Taiwan University &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; Sept 2017, UOW </h2>
 </div>
 </div>
 <div class="slide" id="opticks-benefits">
@@ -1084,25 +1084,6 @@ geometry intersected, combine returns into pixel values</dd>
 <img alt="/env/presentation/1px.png" class="align-center" src="/env/presentation/1px.png" style="width: 1px; height: 100px;" />
 <p class="tiny"><tt class="docutils literal"><span class="pre">https://research.nvidia.com/publication/optix-general-purpose-ray-tracing-engine</span></tt></p>
 </div>
-<div class="slide" id="optix-performance-scaling-with-gpu-cores">
-<h1><span class="small">OptiX Performance Scaling with GPU cores</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Performance Linearity with CUDA cores</p>
-<img alt="/env/g4dae/core_linearity.png" class="last align-right" src="/env/g4dae/core_linearity.png" style="width: 500px;" />
-</div>
-<p class="small">OptiX sample rendering with 2 GPU IHEP workstation,</p>
-<ul class="small simple">
-<li>2 Tesla K20m (4992 cores) 28.0 ms/f</li>
-<li>1 Tesla K20m (2496 cores) 49.1 ms/f</li>
-<li>1 GeForce GT 750m (384 cores) 345.1 ms/f</li>
-</ul>
-<p class="small"><span class="red">Performance linear with GPU cores</span>, compared to laptop:</p>
-<ul class="small simple">
-<li>13x cores, 12x performance</li>
-<li>performance scales across GPUs</li>
-</ul>
-<p class="small">Benefit from multiple GPUs with no development effort.</p>
-</div>
 <div class="slide" id="optix-programming-model-raytrace-pipeline-made-from-cuda-programs">
 <h1><span class="small">OptiX Programming Model : raytrace pipeline made from CUDA programs</span></h1>
 <div class="sidebar">
@@ -1229,40 +1210,47 @@ communicate geometry to OptiX</li>
 <ul class="small simple">
 <li>3D parametric ray : <strong>ray(x,y,z;t) = rayOrigin  +  t * rayDirection</strong></li>
 <li>implicit equation of primitive : <strong>f(x,y,z) = 0</strong></li>
+<li>-&gt; polynomial in <strong>t</strong> , roots: <strong>t &gt; t_min</strong>  -&gt; intersection positions + surface normals</li>
 </ul>
 <img alt="/env/presentation/tboolean_parade_sep2017.png" class="align-center" src="/env/presentation/tboolean_parade_sep2017.png" style="width: 900px;" />
-<ul class="small simple">
-<li>polynomial roots in <strong>t</strong> -&gt; intersection positions + surface normals,  <span class="blue">calculated for every raytrace pixel</span></li>
-<li>same intersect calculation used for raytracing and photon propagation</li>
-<li><span class="red">full detector geometries composed from CSG boolean combinations of primitive solids</span></li>
-</ul>
 </div>
-<div class="slide" id="torus-much-more-difficult-expensive-than-other-primitives">
-<h1><span class="small">Torus : much more difficult/expensive than other primitives</span></h1>
+<div class="slide" id="ray-intersection-with-general-csg-binary-tree-solids-within-optix">
+<h1><span class="small">Ray intersection with general CSG binary tree solids within OptiX</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Torus artifacts</p>
-<blockquote>
-<img alt="/env/presentation/tboolean_torus_orthographic_artifact.png" class="align-right" src="/env/presentation/tboolean_torus_orthographic_artifact.png" style="width: 400px;" />
-</blockquote>
-<img alt="/env/presentation/torus_eqn_sqrt.png" class="align-right" src="/env/presentation/torus_eqn_sqrt.png" style="width: 400px;" />
-<img alt="/env/presentation/torus_eqn_quartic.png" class="last align-right" src="/env/presentation/torus_eqn_quartic.png" style="width: 400px;" />
+<p class="first sidebar-title">Very close GPU/CPU match is possible</p>
+<ul class="small last simple">
+<li>same analytic geometry</li>
+<li>same optical physics</li>
+</ul>
 </div>
-<p class="small">3D parametric ray : <strong>ray(x,y,z;t) = rayOrigin  +  t * rayDirection</strong></p>
+<p class="small"><strong>Performance on GPU requires</strong></p>
 <ul class="small simple">
-<li>ray-torus intersection -&gt; solve quartic polynomial in <strong>t</strong></li>
-<li>A t^4 + B t^3 + C t^2 + D t + E = 0</li>
+<li>massive parallelism -&gt; more the merrier</li>
+<li>low register usage -&gt; keep it simple</li>
+<li>small stack size -&gt; <strong>avoid recursion</strong> : OptiX demands: <span class="red">no recursion in intersect</span></li>
 </ul>
-<p class="small">High order equation</p>
+<p class="small"><strong>Approach (details in backup)</strong></p>
 <ul class="small simple">
-<li>very large difference between coefficients</li>
-<li>varying ray -&gt; wide range of very coefficients</li>
-<li>numerically problematic, requires double precision</li>
-<li>several mathematical approaches used, work in progress</li>
+<li>Complete Binary Tree Serialization<ul>
+<li>postorder tree traversal, just by bit twiddling (avoids recursion)</li>
 </ul>
-<p class="small"><strong>Best Solution : replace torus</strong></p>
-<ul class="small simple">
-<li>eg model PMT neck with hyperboloid, not cylinder-torus</li>
+</li>
+<li>Ray Tracing CSG Objects Using Single Hit Intersections (A. Kensler)[1]<ul>
+<li>binary intersect classification, lookup table</li>
+<li>avoids lots of state, BUT: sometimes advance <strong>t_min</strong> and re-intersect</li>
+<li>converted recursive pseudocode into &quot;Evaluative&quot; implementation [2]</li>
 </ul>
+</li>
+<li>Auto translation of GDML into GPU appropriate form<ul>
+<li>entire geometry translated, serialized, uploaded to GPU</li>
+</ul>
+</li>
+</ul>
+<dl class="tiny docutils">
+<dt>[1] Ray Tracing CSG Objects Using Single Hit Intersections, Andrew Kensler (2006)</dt>
+<dd>with corrections by author of XRT Raytracer <a class="reference external" href="http://xrt.wikidot.com/doc:csg">http://xrt.wikidot.com/doc:csg</a></dd>
+</dl>
+<p class="tiny">[2] Similar to binary expression tree evaluation using postorder traverse.</p>
 </div>
 <div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-3">
 <h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (3)</span></h1>
@@ -1281,6 +1269,178 @@ communicate geometry to OptiX</li>
 </div>
 <div class="slide" id="opticks-analytic-juno-pmt-snap-gpu-raytrace-1">
 <h1><span class="i">Opticks Analytic JUNO PMT Snap, GPU Raytrace (1)</span></h1>
+</div>
+<div class="slide" id="large-geometry-techniques-instancing-mandatory">
+<h1><span class="small">Large Geometry Techniques : Instancing Mandatory</span></h1>
+<p class="small"><strong>Geometry analysed to find repeats</strong></p>
+<p class="small">JUNO: 18k 20&quot; PMTs, 36k 3&quot; PMTs</p>
+<p class="small">Instances used by:</p>
+<ul class="small simple">
+<li>OptiX geometry</li>
+<li>OptiX acceleration structures</li>
+<li>OpenGL visualization</li>
+</ul>
+<p class="small"><strong>Advantages</strong></p>
+<ul class="small simple">
+<li>drastic reduction in GPU memory</li>
+<li>one set of vertices for each PMT type</li>
+<li>4x4 matrices position each PMT</li>
+</ul>
+<p class="small"><strong>Viz Optimizations (OpenGL 4+)</strong></p>
+<p class="small">Use geometry shader transform feedback:</p>
+<ul class="small simple">
+<li>cull non-visible instances</li>
+<li>level of detail (LOD) meshes<ul>
+<li>full/simplified/bbox</li>
+</ul>
+</li>
+<li>switch mesh based on distance to PMT</li>
+</ul>
+</div>
+<div class="slide" id="gpu-instance-culling-with-level-of-detail">
+<h1><span class="i">GPU Instance Culling with Level Of Detail</span></h1>
+</div>
+<div class="slide" id="idealized-geometry-tests-photon-generation-propagation-reemission">
+<h1><span class="small">Idealized geometry tests : photon generation, propagation, reemission</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Match achieved after many fixes</p>
+<ul class="small simple">
+<li>scattering, was comparing different implementations</li>
+<li>diffuse reflection, ported G4 approach</li>
+<li>reemission &quot;rejoining&quot;</li>
+<li>missing optical surfaces</li>
+<li>truncation recording discrepancy</li>
+<li>group velocity of wrong material after refraction (G4 issue 1275)</li>
+<li>interpolation mismatches</li>
+</ul>
+<p class="small last"><span class="red">Work guided by the next largest chi2 contributor</span></p>
+</div>
+<p class="small"><strong>Idealized &quot;tconcentric&quot; scintillator detector avoids any geometry issues, tests optical physics in isolation</strong></p>
+<p class="small">Single executable (cfg4 package):</p>
+<ul class="small simple">
+<li>performs both pure G4 and hybrid G4+Opticks simulations</li>
+<li>writes two events recording up to 16 steps of each photon</li>
+<li>photons indexed on GPU by history and material sequences</li>
+<li>history category counts comparison, Opticks/G4 chi2/df ~ 1.0</li>
+<li>position, time, polarization, wavelength recorded at each step</li>
+</ul>
+<p class="small">point-by-point chi2-distance comparisons of 8 photon properties for top 100 history categories</p>
+<ul class="small simple">
+<li>details in backup</li>
+</ul>
+<p class="small"><strong>NEXT STEPS</strong></p>
+<ul class="small simple">
+<li>JUNO integration + full JUNO geometry validation</li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://bugzilla-geant4.kek.jp/show_bug.cgi?id=1275">https://bugzilla-geant4.kek.jp/show_bug.cgi?id=1275</a></p>
+</div>
+<div class="slide" id="photon-propagation-times-geant4-cf-opticks">
+<h1><span class="small">Photon Propagation Times Geant4 cf Opticks</span></h1>
+<img alt="/env/optix/cfg4/PmtInBox-cfg4-2.png" class="align-center" src="/env/optix/cfg4/PmtInBox-cfg4-2.png" style="width: 800px;" />
+<table border="1" class="small docutils">
+<colgroup>
+<col width="28%" />
+<col width="24%" />
+<col width="24%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Test</th>
+<th class="head">Geant4 10.2</th>
+<th class="head">Opticks Interop</th>
+<th class="head">Opticks Compute</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Rainbow 1M(S)</td>
+<td>56 s</td>
+<td>1.62 s</td>
+<td>0.28 s</td>
+</tr>
+<tr><td>Rainbow 1M(P)</td>
+<td>58 s</td>
+<td>1.71 s</td>
+<td>0.25 s</td>
+</tr>
+<tr><td><strong>PmtInBox 0.5M</strong></td>
+<td><strong>41 s</strong></td>
+<td>0.81 s</td>
+<td><strong>0.15 s</strong></td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><strong>Opticks &gt; 200X Geant4</strong> with only 384 core mobile GPU[1] (multi-GPU workstation up to 20x more cores)</li>
+</ul>
+<ul class="small simple">
+<li><strong>Interop</strong> uses OpenGL buffers allowing visualization, <strong>Compute</strong> uses OptiX buffers</li>
+<li><strong>Interop/Compute</strong> : perfectly identical results, monitored by digest</li>
+</ul>
+<p class="tiny">[1] MacBook Pro (2013), NVIDIA GeForce GT 750M, 2048 MB, 384 cores</p>
+</div>
+<div class="slide" id="summary">
+<h1><span class="small">Summary</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Overview</p>
+<ul class="small last simple">
+<li><strong>Opticks 200x Geant4</strong> with mobile GPU</li>
+<li>Expect: <strong>Opticks &gt; 1000x Geant4</strong> (with workstation GPUs)</li>
+<li><span class="red">photon propagation time --&gt; zero</span></li>
+<li><span class="blue">automated full fidelity translation of GDML</span></li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> enables <em>Geant4</em> based simulations to benefit from optical photon simulation
+<strong>taking effectively zero time and zero CPU memory</strong>,
+due to massive parallelism made accessible by NVIDIA OptiX.
+GDML detector geometry is auto translated into a GPU optimized analytic form,
+equivalent to the source geometry.</p>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 20px;" />
+<ul class="simple">
+<li>The more photons the bigger the overall speedup (99% -&gt; 100x)</li>
+<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision</li>
+<li>Optical photon limited simulations can benefit greatly from Opticks+Geant4</li>
+</ul>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 20px;" />
+<p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
+</blockquote>
+</div>
+<div class="slide" id="list-of-backup-slides">
+<h1><span class="small">List of &quot;backup&quot; slides</span></h1>
+<p class="tiny"><strong>CSG</strong></p>
+<ul class="tiny simple">
+<li>Constructive Solid Geometry (CSG) : Shapes defined &quot;by construction&quot;</li>
+<li>CSG : Which primitive intersect to pick</li>
+<li>Ray Tracing CSG Objects Using Single Hit Intersections (A. Kensler)</li>
+<li>CSG Complete Binary Tree Serialization -&gt; simplifies GPU side</li>
+<li>Evaluative CSG intersection Pseudocode : recursion emulated</li>
+<li>Opticks CSG Primitives : Closed Solids, Consistent Normals</li>
+<li>Opticks CSG Primitives : What is included</li>
+<li>Opticks CSG : Balancing Deep Trees Drastically Improves Performance</li>
+<li>Dayabay ESR reflector : Deep CSG tree : disc with 9 holes</li>
+<li>Opticks CSG Serialized into OpticksCSG format (numpy buffers, json)</li>
+</ul>
+<p class="tiny"><strong>Validation</strong></p>
+<ul class="tiny simple">
+<li>tconcentric : spherical GdLS/LS/MineralOil</li>
+<li>tconcentric : Opticks/Geant4 chi2 comparison</li>
+<li>tconcentric : Opticks/Geant4 distrib chi2/df ~ 1.0</li>
+<li>PMT Opticks/Geant4 step distribution comparison TO BT [SD]</li>
+<li>PMT Opticks/Geant4 step distribution comparison : chi2/ndf</li>
+<li>Opticks/Geant4 Rainbow Step Sequence Comparison</li>
+<li>1M Rainbow S-Polarized, Comparison Opticks/Geant4</li>
+<li>Compare Opticks/Geant4 Simulations with Simple Lights/Geometries</li>
+</ul>
+<p class="tiny"><strong>Misc</strong></p>
+<ul class="tiny simple">
+<li>OptiX Performance Scaling with GPU cores</li>
+<li>Torus : much more difficult/expensive than other primitives</li>
+<li>Geometry Modelling : Tesselated vs Analytic Photomultiplier Tubes</li>
+<li>Hybrid Geant4/Opticks Event Workflow</li>
+<li>Open Source Opticks</li>
+</ul>
 </div>
 <div class="slide" id="constructive-solid-geometry-csg-shapes-defined-by-construction">
 <h1><span class="small">Constructive Solid Geometry (CSG) : Shapes defined &quot;by construction&quot;</span></h1>
@@ -1499,59 +1659,185 @@ while (!tranche.empty)        <b><span class="alarm"> // stack of begin/end indi
 isect = csg.pop();       <b><span class="alarm">  // winning intersect  </span></b>
 </pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h</a></p>
 </div>
-<div class="slide" id="large-geometry-techniques-instancing-mandatory">
-<h1><span class="small">Large Geometry Techniques : Instancing Mandatory</span></h1>
-<p class="small"><strong>Geometry analysed to find instances</strong></p>
-<p class="small">JUNO: ~90M --&gt; 0.1M triangles</p>
+<div class="slide" id="opticks-csg-primitives-closed-solids-consistent-normals">
+<h1><span class="small">Opticks CSG Primitives : Closed Solids, Consistent Normals</span></h1>
+<p class="small"><strong>Closed Solid</strong> as: <span class="blue">implementation requires otherside intersect</span>, <strong>Rigidly attached normals</strong></p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="39%" />
+<col width="29%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Type code</th>
+<th class="head">Python name</th>
+<th class="head">C++ nnode sub-struct</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>CSG_BOX3,CSG_BOX</td>
+<td>box3,box</td>
+<td>nbox</td>
+</tr>
+<tr><td>CSG_SPHERE,CSG_ZSPHERE</td>
+<td>sphere,zsphere</td>
+<td>nsphere,nzsphere</td>
+</tr>
+<tr><td>CSG_CYLINDER,CSG_DISC</td>
+<td>cylinder,disc</td>
+<td>ncylinder,ndisc</td>
+</tr>
+<tr><td>CSG_CONE</td>
+<td>cone</td>
+<td>ncone</td>
+</tr>
+<tr><td>CSG_CONVEXPOLYHEDRON</td>
+<td>convexpolyhedron</td>
+<td>nconvexpolyhedron</td>
+</tr>
+<tr><td>CSG_TRAPEZOID,CSG_SEGMENT</td>
+<td>trapezoid,segment</td>
+<td>nconvexpolyhedron</td>
+</tr>
+<tr><td>CSG_TORUS</td>
+<td>torus</td>
+<td>ntorus</td>
+</tr>
+<tr><td>CSG_HYPERBOLOID</td>
+<td>hyperboloid</td>
+<td>nhyperboloid</td>
+</tr>
+</tbody>
+</table>
 <ul class="small simple">
-<li>18k 20&quot; PMTs</li>
-<li>36k 3&quot; PMTs</li>
+<li><strong>zsphere, cone, cylinder, disc</strong> : truncated shapes <strong>closed</strong> by endcaps <span class="red">&lt;-- NOT OPTIONAL</span></li>
+<li><strong>disc</strong> : avoids endcap degeneracy with very thin cylinders</li>
+<li><strong>convexpolyhedron</strong> : defined by a set of planes, used for trapezoid and segment</li>
+<li><strong>segment</strong> :   prism shape used for deltaphi intersection</li>
+<li><strong>!complemented</strong> (inside&lt;-&gt;outside) solids handled by
+special casing classification (cannot miss otherside).</li>
 </ul>
-<p class="small"><strong>OpenGL instanced rendering</strong></p>
+<p class="small">Non-primitives, <span class="red">high level CSG definition avoids loadsa code</span></p>
 <ul class="small simple">
-<li>drastic reduction in GPU memory</li>
-<li>one set of vertices for each PMT type</li>
-<li>4x4 matrices position each PMT</li>
-</ul>
-<p class="small"><strong>Optimizations</strong></p>
-<ul class="small simple">
-<li>cull non-visible instances</li>
-<li>level of detail (LOD) meshes<ul>
-<li>full/simplified/bbox</li>
-</ul>
-</li>
-<li>switch mesh based on distance to PMT</li>
+<li><strong>ellipsoid</strong> : non-uniform scaling of sphere,  <strong>polycone</strong> : union of cylinders and cones</li>
+<li><strong>inner-radii</strong> : via subtraction, <strong>deltaphi-segment</strong> : via intersect with <strong>segment</strong></li>
 </ul>
 </div>
-<div class="slide" id="gpu-instance-culling-with-level-of-detail">
-<h1><span class="i">GPU Instance Culling with Level Of Detail</span></h1>
-</div>
-<div class="slide" id="idealized-geometry-tests-photon-generation-propagation-reemission">
-<h1><span class="small">Idealized geometry tests : photon generation, propagation, reemission</span></h1>
+<div class="slide" id="opticks-csg-primitives-what-is-included">
+<h1><span class="small">Opticks CSG Primitives : What is included</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Match achieved after many fixes</p>
+<p class="first sidebar-title">OptiX Geometry</p>
+<p class="small">OptiX provides acceleration of geometrical intersection, not the intersection itself.</p>
 <ul class="small simple">
-<li>scattering, was comparing different implementations</li>
-<li>diffuse reflection, ported G4 approach</li>
-<li>reemission &quot;rejoining&quot;</li>
-<li>missing optical surfaces</li>
-<li>truncation recording discrepancy</li>
-<li>group velocity of wrong material after refraction (G4 issue 1275)</li>
-<li>interpolation mismatches</li>
+<li>parametric ray : <strong>p(t) = p0 + t rayDir</strong></li>
+<li>implicit surface : <strong>f(p) = 0</strong></li>
 </ul>
-<p class="small last"><span class="red">Work guided by the next largest chi2 contributor</span></p>
+<p class="small">Intersect finding next closest root:</p>
+<ul class="small last simple">
+<li>smallest <strong>t</strong>, with <strong>t &gt; tmin</strong></li>
+<li>surface normal at <strong>t</strong></li>
+</ul>
 </div>
-<p class="small"><strong>Idealized &quot;tconcentric&quot; scintillator detector avoids any geometry issues, tests optical physics in isolation</strong></p>
-<p class="small">Single executable (cfg4 package):</p>
+<p class="small">OptiX/CUDA functions providing:</p>
 <ul class="small simple">
-<li>performs both pure G4 and hybrid G4+Opticks simulations</li>
-<li>writes two events recording up to 16 steps of each photon</li>
-<li>photons indexed on GPU by history and material sequences</li>
-<li>history category counts comparison, Opticks/G4 chi2/df ~ 1.0</li>
-<li>position, time, polarization, wavelength recorded at each step</li>
+<li>axis aligned bounding box (AABB)</li>
+<li>intersect ray position (parametric t), surface normal</li>
 </ul>
-<p class="small">point-by-point chi2-distance comparisons of 8 photon properties for top 100 history categories</p>
-<p class="tiny"><a class="reference external" href="https://bugzilla-geant4.kek.jp/show_bug.cgi?id=1275">https://bugzilla-geant4.kek.jp/show_bug.cgi?id=1275</a></p>
+<p class="small">C++/nnode sub-struct methods</p>
+<ul class="small simple">
+<li>signed distance function (SDF)</li>
+<li>parametric surface generation</li>
+</ul>
+<p class="small"><strong>4x4 Transforms on any node (translation/rotation/scaling)</strong></p>
+<p class="small"><span class="blue">Intersect inverse-transformed ray with un-transformed primitive</span></p>
+<ul class="small simple">
+<li>parametric-t same in both frames</li>
+<li>inverse transform transposed brings normal back to world frame</li>
+</ul>
+<p class="tiny">Supporting non-uniform scaling requires <strong>rayDir</strong> not be be normalized (or assumed to be normalized) by primitives.</p>
+</div>
+<div class="slide" id="opticks-csg-balancing-deep-trees-drastically-improves-performance">
+<h1><span class="small">Opticks CSG : Balancing Deep Trees Drastically Improves Performance</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Positive form CSG Trees</p>
+<p class="small">Apply deMorgan pushing negations down tree</p>
+<ul class="small simple">
+<li><strong>A - B -&gt; A * !B</strong></li>
+<li><strong>!(A*B) -&gt; !A + !B</strong></li>
+<li><strong>!(A+B) -&gt; !A * !B</strong></li>
+<li><strong>!(A - B) -&gt; !(A*!B) -&gt; !A + B</strong></li>
+</ul>
+<p class="small">End with only UNION, INTERSECT operators,
+and some complemented leaves.</p>
+<p class="small last"><span class="red">COMMUTATIVE -&gt; easily rearranged</span></p>
+</div>
+<p class="small">Intended for solids, not scenes (tree height &lt;8, &lt;256 nodes[*])</p>
+<ul class="small simple">
+<li>unbalanced trees inefficiently handled as complete binary trees</li>
+<li>CSG trees non-unique, many expressions of same shape</li>
+</ul>
+<pre class="mypretiny">
+Dayabay TopESRCutHols lvidx:57  (height:9 totnodes:1023)
+di(di(di(di(di(di(di(di(di(cy,cy),cy),cy),cy),cy),cy),cy),cy),cy)
+
+                                                                    di
+                                                             di          cy
+                                                     di          cy
+                                             di          cy
+                                     di          cy
+                             di          cy
+                     di          cy
+             di          cy
+     di          cy
+ cy      cy
+
+
+Balanced Tree, height:4 totnodes:31
+in(in(in(in(cy,!cy),in(!cy,!cy)),in(in(!cy,!cy),in(!cy,!cy))),!cy)
+
+                                                             in
+                             in                                 !cy
+             in                              in
+     in              in              in              in
+ cy     !cy     !cy     !cy     !cy     !cy     !cy     !cy
+</pre><p class="tiny">[*] Algorithm has no inherent height limit, but use of complete binary tree imposes practical performance limitation</p>
+</div>
+<div class="slide" id="dayabay-esr-reflector-deep-csg-tree-disc-with-9-holes">
+<h1><span class="small">Dayabay ESR reflector : Deep CSG tree : disc with 9 holes</span></h1>
+<img alt="/env/presentation/lvidx_57_esr_deep_tree_disc_with_holes.png" class="align-center" src="/env/presentation/lvidx_57_esr_deep_tree_disc_with_holes.png" style="width: 1000px;" />
+</div>
+<div class="slide" id="opticks-csg-serialized-into-optickscsg-format-numpy-buffers-json">
+<h1><span class="small">Opticks CSG Serialized into OpticksCSG format (numpy buffers, json)</span></h1>
+<pre class="mypretiny">
+
+// tboolean-parade
+
+from opticks.ana.base import opticks_main
+from opticks.analytic.csg import CSG
+
+args = opticks_main(csgpath="$TMP/$FUNCNAME")
+
+container = CSG("box", param=[0,0,0,1200], boundary=args.container, poly="MC", nx="20" )
+
+a = CSG("sphere", param=[0,0,0,100])
+b = CSG("zsphere", param=[0,0,0,100], param1=[-50,60,0,0])
+c = CSG("box3",param=[100,50,70,0])
+d = CSG.MakeTrapezoid(z=100, x1=80, y1=100, x2=100, y2=80)
+e = CSG("cylinder",param=[0,0,0,100], param1=[-100,100,0,0])
+f = CSG("disc",param=[0,0,0,100], param1=[-1,1,0,0])
+g = CSG("cone", param=[100,-100,50,100])
+h = CSG.MakeTorus(R=70, r=30)
+i = CSG.MakeHyperboloid(r0=80, zf=100, z1=-100, z2=100)
+j = CSG.MakeIcosahedron(scale=100.)
+
+prims = [a,b,c,d,e,f,g,h,i,j]
+
+...  // setting translations
+
+CSG.Serialize([container] + prims, args.csgpath )   <b><span class="alarm">  <-- write trees to file </span></b>
+</pre><ul class="small simple">
+<li>imported into C++ <strong>nnode</strong> tree by <strong>NCSG</strong></li>
+</ul>
 </div>
 <div class="slide" id="tconcentric-spherical-gdls-ls-mineraloil">
 <h1><span class="small">tconcentric : spherical GdLS/LS/MineralOil</span></h1>
@@ -2590,255 +2876,104 @@ ABCR: polarization, radius</p>
 </tbody>
 </table>
 </div>
-<div class="slide" id="photon-propagation-times-geant4-cf-opticks">
-<h1><span class="small">Photon Propagation Times Geant4 cf Opticks</span></h1>
-<img alt="/env/optix/cfg4/PmtInBox-cfg4-2.png" class="align-center" src="/env/optix/cfg4/PmtInBox-cfg4-2.png" style="width: 800px;" />
-<table border="1" class="small docutils">
-<colgroup>
-<col width="28%" />
-<col width="24%" />
-<col width="24%" />
-<col width="25%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">Test</th>
-<th class="head">Geant4 10.2</th>
-<th class="head">Opticks Interop</th>
-<th class="head">Opticks Compute</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>Rainbow 1M(S)</td>
-<td>56 s</td>
-<td>1.62 s</td>
-<td>0.28 s</td>
-</tr>
-<tr><td>Rainbow 1M(P)</td>
-<td>58 s</td>
-<td>1.71 s</td>
-<td>0.25 s</td>
-</tr>
-<tr><td><strong>PmtInBox 0.5M</strong></td>
-<td><strong>41 s</strong></td>
-<td>0.81 s</td>
-<td><strong>0.15 s</strong></td>
-</tr>
-</tbody>
-</table>
-<ul class="small simple">
-<li><strong>Opticks &gt; 200X Geant4</strong> with only 384 core mobile GPU[1] (multi-GPU workstation up to 20x more cores)</li>
+<div class="slide" id="opticks-geant4-rainbow-step-sequence-comparison">
+<h1><span class="small">Opticks/Geant4 Rainbow Step Sequence Comparison</span></h1>
+<dl class="small docutils">
+<dt><strong>Flags:</strong></dt>
+<dd><ul class="first last simple">
+<li>BT/BR: boundary transmit/reflect</li>
+<li>TO/SC/SA: torch/scatter/surface absorb</li>
 </ul>
-<ul class="small simple">
-<li><strong>Interop</strong> uses OpenGL buffers allowing visualization, <strong>Compute</strong> uses OptiX buffers</li>
-<li><strong>Interop/Compute</strong> : perfectly identical results, monitored by digest</li>
-</ul>
-<p class="tiny">[1] MacBook Pro (2013), NVIDIA GeForce GT 750M, 2048 MB, 384 cores</p>
+</dd>
+</dl>
+<p class="small"><strong>Statistically consistent photon histories in the two simulations : Multiple orders of rainbow apparent</strong></p>
+<pre class="mypre">
+ 64-bit uint  Opticks    Geant4    chi2                                      (tag:5,-5)
+
+        8ccd   819160    819654    0.15  [4 ] TO BT BT SA                    (cross droplet)
+         8bd   102087    101615    1.09  [3 ] TO BR SA                       (external reflect)
+       8cbcd    61869     61890    0.00  [5 ] TO BT BR BT SA                 (bow 1)
+      8cbbcd     9618      9577    0.09  [6 ] TO BT BR BR BT SA              (bow 2)
+     8cbbbcd     2604      2687    1.30  [7 ] TO BT BR BR BR BT SA           (bow 3)
+    8cbbbbcd     1056      1030    0.32  [8 ] TO BT BR BR BR BR BT SA        (bow 4)
+       86ccd     1014      1000    0.10  [5 ] TO BT BT SC SA
+   8cbbbbbcd      472       516    1.96  [9 ] TO BT BR BR BR BR BR BT SA     (bow 5)
+         86d      498       473    0.64  [3 ] TO SC SA
+  bbbbbbbbcd      304       294    0.17  [10] TO BT BR BR BR BR BR BR BR BR  (bow 8+ truncated)
+  8cbbbbbbcd      272       247    1.20  [10] TO BT BR BR BR BR BR BR BT SA  (bow 6)
+  cbbbbbbbcd      183       161    1.41  [10] TO BT BR BR BR BR BR BR BR BT  (bow 7 truncated)
+</pre></div>
+<div class="slide" id="m-rainbow-s-polarized-comparison-opticks-geant4">
+<h1><span class="small">1M Rainbow S-Polarized, Comparison Opticks/Geant4</span></h1>
+<p class="tiny">Deviation angle(degrees) of 1M parallel monochromatic photons in disc shaped beam incident on water sphere.
+Numbered bands are visible range expectations of first 11 rainbows.
+S-Polarized intersection (E field perpendicular to plane of incidence) arranged by directing polarization radially.</p>
+<img alt="/env/optix/cfg4/rainbow-cfg4-spol.png" class="align-center" src="/env/optix/cfg4/rainbow-cfg4-spol.png" style="width: 800px;" />
 </div>
-<div class="slide" id="summary">
-<h1><span class="small">Summary</span></h1>
+<div class="slide" id="compare-opticks-geant4-simulations-with-simple-lights-geometries">
+<h1><span class="small">Compare Opticks/Geant4 Simulations with Simple Lights/Geometries</span></h1>
+<div class="figure align-left">
+<img alt="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" src="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" style="width: 550px;" />
+<p class="caption">1M Photons -&gt; Water Sphere (S-Polarized)</p>
+</div>
+<div class="figure align-right">
+<img alt="/env/graphics/ggeoview/PmtInBox-approach.png" src="/env/graphics/ggeoview/PmtInBox-approach.png" style="width: 450px;" />
+<p class="caption">0.5M Photons -&gt; Dayabay PMT</p>
+</div>
+<img alt="/env/presentation/1px.png" class="align-center" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
+<dl class="small docutils">
+<dt><strong>Photon step records</strong></dt>
+<dd>128 bit per step : highly compressed position, time, wavelength, polarization vector, material/history codes</dd>
+<dt><strong>Photon flag sequence</strong></dt>
+<dd>16x 4-bit step flags recorded in uint64 sequence, indexed using Thrust GPU sort (1M indexed ~0.040s)</dd>
+</dl>
+<p class="small"><strong>Sequence index</strong> -&gt; interactive OpenGL selection of photons by flag sequence</p>
+</div>
+<div class="slide" id="optix-performance-scaling-with-gpu-cores">
+<h1><span class="small">OptiX Performance Scaling with GPU cores</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Overview</p>
-<ul class="small last simple">
-<li><strong>Opticks 200x Geant4</strong> with mobile GPU</li>
-<li>Expect: <strong>Opticks &gt; 1000x Geant4</strong> (with workstation GPUs)</li>
-<li><span class="red">photon propagation time --&gt; zero</span></li>
-<li><span class="blue">automated full fidelity translation of GDML</span></li>
-</ul>
+<p class="first sidebar-title">Performance Linearity with CUDA cores</p>
+<img alt="/env/g4dae/core_linearity.png" class="last align-right" src="/env/g4dae/core_linearity.png" style="width: 500px;" />
 </div>
-<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
-<!--  -->
+<p class="small">OptiX sample rendering with 2 GPU IHEP workstation,</p>
+<ul class="small simple">
+<li>2 Tesla K20m (4992 cores) 28.0 ms/f</li>
+<li>1 Tesla K20m (2496 cores) 49.1 ms/f</li>
+<li>1 GeForce GT 750m (384 cores) 345.1 ms/f</li>
+</ul>
+<p class="small"><span class="red">Performance linear with GPU cores</span>, compared to laptop:</p>
+<ul class="small simple">
+<li>13x cores, 12x performance</li>
+<li>performance scales across GPUs</li>
+</ul>
+<p class="small">Benefit from multiple GPUs with no development effort.</p>
+</div>
+<div class="slide" id="torus-much-more-difficult-expensive-than-other-primitives">
+<h1><span class="small">Torus : much more difficult/expensive than other primitives</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Torus artifacts</p>
 <blockquote>
-<p><em>Opticks</em> enables <em>Geant4</em> based simulations to benefit from optical photon simulation
-<strong>taking effectively zero time and zero CPU memory</strong>,
-due to massive parallelism made accessible by NVIDIA OptiX.
-GDML detector geometry is auto translated into a GPU optimized analytic form,
-equivalent to the source geometry.</p>
-<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 20px;" />
-<ul class="simple">
-<li>The more photons the bigger the overall speedup (99% -&gt; 100x)</li>
-<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision</li>
-<li>Large PMT based neutrino experiments, such as JUNO, can benefit the most</li>
-</ul>
-<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 20px;" />
-<p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
+<img alt="/env/presentation/tboolean_torus_orthographic_artifact.png" class="align-right" src="/env/presentation/tboolean_torus_orthographic_artifact.png" style="width: 400px;" />
 </blockquote>
+<img alt="/env/presentation/torus_eqn_sqrt.png" class="align-right" src="/env/presentation/torus_eqn_sqrt.png" style="width: 400px;" />
+<img alt="/env/presentation/torus_eqn_quartic.png" class="last align-right" src="/env/presentation/torus_eqn_quartic.png" style="width: 400px;" />
 </div>
-<div class="slide" id="extras">
-<h1><span class="i">Extras</span></h1>
-</div>
-<div class="slide" id="opticksdocs">
-<h1><span class="i">OpticksDocs</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Open Source Opticks</p>
+<p class="small">3D parametric ray : <strong>ray(x,y,z;t) = rayOrigin  +  t * rayDirection</strong></p>
 <ul class="small simple">
-<li><a class="reference external" href="http://simoncblyth.bitbucket.io/opticks/">http://simoncblyth.bitbucket.io/opticks/</a></li>
-<li><a class="reference external" href="http://bitbucket.org/simoncblyth/opticks/">http://bitbucket.org/simoncblyth/opticks/</a></li>
+<li>ray-torus intersection -&gt; solve quartic polynomial in <strong>t</strong></li>
+<li>A t^4 + B t^3 + C t^2 + D t + E = 0</li>
 </ul>
-<p class="small">Documentation, install instructions. Repository.</p>
+<p class="small">High order equation</p>
 <ul class="small simple">
-<li>Mac, Linux, Windows (*)</li>
-<li>16 C++ projects, ordered by dependency</li>
-<li>~200 &quot;Unit&quot; Tests (CMake/CTest)</li>
-<li>12 integration tests: tpmt, trainbow, tprism, treflect, tlens, tnewton, tg4gun, ...</li>
-<li>NumPy/Python analysis/debugging scripts</li>
+<li>very large difference between coefficients</li>
+<li>varying ray -&gt; wide range of very coefficients</li>
+<li>numerically problematic, requires double precision</li>
+<li>several mathematical approaches used, work in progress</li>
 </ul>
-<p class="small">Geometry/event data use NumPy serialization:</p>
-<pre class="small literal-block">
-import numpy as np
-a = np.load(&quot;photons.npy&quot;)
-</pre>
-<p class="tiny last">(*) Windows VS2015, non-CUDA only so far</p>
-</div>
-</div>
-<div class="slide" id="pushed-to-backup-as-too-detailed-or-duplicated">
-<h1><span class="small">Pushed to backup as too detailed or duplicated</span></h1>
-</div>
-<div class="slide" id="opticks-csg-primitives-closed-solids-consistent-normals">
-<h1><span class="small">Opticks CSG Primitives : Closed Solids, Consistent Normals</span></h1>
-<p class="small"><strong>Closed Solid</strong> as: <span class="blue">implementation requires otherside intersect</span>, <strong>Rigidly attached normals</strong></p>
-<table border="1" class="small docutils">
-<colgroup>
-<col width="39%" />
-<col width="29%" />
-<col width="32%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">Type code</th>
-<th class="head">Python name</th>
-<th class="head">C++ nnode sub-struct</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>CSG_BOX3,CSG_BOX</td>
-<td>box3,box</td>
-<td>nbox</td>
-</tr>
-<tr><td>CSG_SPHERE,CSG_ZSPHERE</td>
-<td>sphere,zsphere</td>
-<td>nsphere,nzsphere</td>
-</tr>
-<tr><td>CSG_CYLINDER,CSG_DISC</td>
-<td>cylinder,disc</td>
-<td>ncylinder,ndisc</td>
-</tr>
-<tr><td>CSG_CONE</td>
-<td>cone</td>
-<td>ncone</td>
-</tr>
-<tr><td>CSG_CONVEXPOLYHEDRON</td>
-<td>convexpolyhedron</td>
-<td>nconvexpolyhedron</td>
-</tr>
-<tr><td>CSG_TRAPEZOID,CSG_SEGMENT</td>
-<td>trapezoid,segment</td>
-<td>nconvexpolyhedron</td>
-</tr>
-<tr><td>CSG_TORUS</td>
-<td>torus</td>
-<td>ntorus</td>
-</tr>
-<tr><td>CSG_HYPERBOLOID</td>
-<td>hyperboloid</td>
-<td>nhyperboloid</td>
-</tr>
-</tbody>
-</table>
+<p class="small"><strong>Best Solution : replace torus</strong></p>
 <ul class="small simple">
-<li><strong>zsphere, cone, cylinder, disc</strong> : truncated shapes <strong>closed</strong> by endcaps <span class="red">&lt;-- NOT OPTIONAL</span></li>
-<li><strong>disc</strong> : avoids endcap degeneracy with very thin cylinders</li>
-<li><strong>convexpolyhedron</strong> : defined by a set of planes, used for trapezoid and segment</li>
-<li><strong>segment</strong> :   prism shape used for deltaphi intersection</li>
-<li><strong>!complemented</strong> (inside&lt;-&gt;outside) solids handled by
-special casing classification (cannot miss otherside).</li>
+<li>eg model PMT neck with hyperboloid, not cylinder-torus</li>
 </ul>
-<p class="small">Non-primitives, <span class="red">high level CSG definition avoids loadsa code</span></p>
-<ul class="small simple">
-<li><strong>ellipsoid</strong> : non-uniform scaling of sphere,  <strong>polycone</strong> : union of cylinders and cones</li>
-<li><strong>inner-radii</strong> : via subtraction, <strong>deltaphi-segment</strong> : via intersect with <strong>segment</strong></li>
-</ul>
-</div>
-<div class="slide" id="opticks-csg-primitives-what-is-included">
-<h1><span class="small">Opticks CSG Primitives : What is included</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">OptiX Geometry</p>
-<p class="small">OptiX provides acceleration of geometrical intersection, not the intersection itself.</p>
-<ul class="small simple">
-<li>parametric ray : <strong>p(t) = p0 + t rayDir</strong></li>
-<li>implicit surface : <strong>f(p) = 0</strong></li>
-</ul>
-<p class="small">Intersect finding next closest root:</p>
-<ul class="small last simple">
-<li>smallest <strong>t</strong>, with <strong>t &gt; tmin</strong></li>
-<li>surface normal at <strong>t</strong></li>
-</ul>
-</div>
-<p class="small">OptiX/CUDA functions providing:</p>
-<ul class="small simple">
-<li>axis aligned bounding box (AABB)</li>
-<li>intersect ray position (parametric t), surface normal</li>
-</ul>
-<p class="small">C++/nnode sub-struct methods</p>
-<ul class="small simple">
-<li>signed distance function (SDF)</li>
-<li>parametric surface generation</li>
-</ul>
-<p class="small"><strong>4x4 Transforms on any node (translation/rotation/scaling)</strong></p>
-<p class="small"><span class="blue">Intersect inverse-transformed ray with un-transformed primitive</span></p>
-<ul class="small simple">
-<li>parametric-t same in both frames</li>
-<li>inverse transform transposed brings normal back to world frame</li>
-</ul>
-<p class="tiny">Supporting non-uniform scaling requires <strong>rayDir</strong> not be be normalized (or assumed to be normalized) by primitives.</p>
-</div>
-<div class="slide" id="opticks-csg-balancing-deep-trees-drastically-improves-performance">
-<h1><span class="small">Opticks CSG : Balancing Deep Trees Drastically Improves Performance</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Positive form CSG Trees</p>
-<p class="small">Apply deMorgan pushing negations down tree</p>
-<ul class="small simple">
-<li><strong>A - B -&gt; A * !B</strong></li>
-<li><strong>!(A*B) -&gt; !A + !B</strong></li>
-<li><strong>!(A+B) -&gt; !A * !B</strong></li>
-<li><strong>!(A - B) -&gt; !(A*!B) -&gt; !A + B</strong></li>
-</ul>
-<p class="small">End with only UNION, INTERSECT operators,
-and some complemented leaves.</p>
-<p class="small last"><span class="red">COMMUTATIVE -&gt; easily rearranged</span></p>
-</div>
-<p class="small">Intended for solids, not scenes (tree height &lt;8, &lt;256 nodes[*])</p>
-<ul class="small simple">
-<li>unbalanced trees inefficiently handled as complete binary trees</li>
-<li>CSG trees non-unique, many expressions of same shape</li>
-</ul>
-<pre class="mypretiny">
-Dayabay TopESRCutHols lvidx:57  (height:9 totnodes:1023)
-di(di(di(di(di(di(di(di(di(cy,cy),cy),cy),cy),cy),cy),cy),cy),cy)
-
-                                                                    di
-                                                             di          cy
-                                                     di          cy
-                                             di          cy
-                                     di          cy
-                             di          cy
-                     di          cy
-             di          cy
-     di          cy
- cy      cy
-
-
-Balanced Tree, height:4 totnodes:31
-in(in(in(in(cy,!cy),in(!cy,!cy)),in(in(!cy,!cy),in(!cy,!cy))),!cy)
-
-                                                             in
-                             in                                 !cy
-             in                              in
-     in              in              in              in
- cy     !cy     !cy     !cy     !cy     !cy     !cy     !cy
-</pre><p class="tiny">[*] Algorithm has no inherent height limit, but use of complete binary tree imposes practical performance limitation</p>
-</div>
-<div class="slide" id="dayabay-esr-reflector-deep-csg-tree-disc-with-9-holes">
-<h1><span class="small">Dayabay ESR reflector : Deep CSG tree : disc with 9 holes</span></h1>
-<img alt="/env/presentation/lvidx_57_esr_deep_tree_disc_with_holes.png" class="align-center" src="/env/presentation/lvidx_57_esr_deep_tree_disc_with_holes.png" style="width: 1000px;" />
 </div>
 <div class="slide" id="geometry-modelling-tesselated-vs-analytic-photomultiplier-tubes">
 <h1><span class="small">Geometry Modelling : Tesselated vs Analytic Photomultiplier Tubes</span></h1>
@@ -2914,91 +3049,29 @@ enables unprecedented visualizations. -->
 <li>reuse/resize OptiX buffers for each event</li>
 </ul>
 </div>
-<div class="slide" id="opticks-geant4-rainbow-step-sequence-comparison">
-<h1><span class="small">Opticks/Geant4 Rainbow Step Sequence Comparison</span></h1>
-<dl class="small docutils">
-<dt><strong>Flags:</strong></dt>
-<dd><ul class="first last simple">
-<li>BT/BR: boundary transmit/reflect</li>
-<li>TO/SC/SA: torch/scatter/surface absorb</li>
+<div class="slide" id="opticksdocs">
+<h1><span class="i">OpticksDocs</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Open Source Opticks</p>
+<ul class="small simple">
+<li><a class="reference external" href="http://simoncblyth.bitbucket.io/opticks/">http://simoncblyth.bitbucket.io/opticks/</a></li>
+<li><a class="reference external" href="http://bitbucket.org/simoncblyth/opticks/">http://bitbucket.org/simoncblyth/opticks/</a></li>
 </ul>
-</dd>
-</dl>
-<p class="small"><strong>Statistically consistent photon histories in the two simulations : Multiple orders of rainbow apparent</strong></p>
-<pre class="mypre">
- 64-bit uint  Opticks    Geant4    chi2                                      (tag:5,-5)
-
-        8ccd   819160    819654    0.15  [4 ] TO BT BT SA                    (cross droplet)
-         8bd   102087    101615    1.09  [3 ] TO BR SA                       (external reflect)
-       8cbcd    61869     61890    0.00  [5 ] TO BT BR BT SA                 (bow 1)
-      8cbbcd     9618      9577    0.09  [6 ] TO BT BR BR BT SA              (bow 2)
-     8cbbbcd     2604      2687    1.30  [7 ] TO BT BR BR BR BT SA           (bow 3)
-    8cbbbbcd     1056      1030    0.32  [8 ] TO BT BR BR BR BR BT SA        (bow 4)
-       86ccd     1014      1000    0.10  [5 ] TO BT BT SC SA
-   8cbbbbbcd      472       516    1.96  [9 ] TO BT BR BR BR BR BR BT SA     (bow 5)
-         86d      498       473    0.64  [3 ] TO SC SA
-  bbbbbbbbcd      304       294    0.17  [10] TO BT BR BR BR BR BR BR BR BR  (bow 8+ truncated)
-  8cbbbbbbcd      272       247    1.20  [10] TO BT BR BR BR BR BR BR BT SA  (bow 6)
-  cbbbbbbbcd      183       161    1.41  [10] TO BT BR BR BR BR BR BR BR BT  (bow 7 truncated)
-</pre></div>
-<div class="slide" id="m-rainbow-s-polarized-comparison-opticks-geant4">
-<h1><span class="small">1M Rainbow S-Polarized, Comparison Opticks/Geant4</span></h1>
-<p class="tiny">Deviation angle(degrees) of 1M parallel monochromatic photons in disc shaped beam incident on water sphere.
-Numbered bands are visible range expectations of first 11 rainbows.
-S-Polarized intersection (E field perpendicular to plane of incidence) arranged by directing polarization radially.</p>
-<img alt="/env/optix/cfg4/rainbow-cfg4-spol.png" class="align-center" src="/env/optix/cfg4/rainbow-cfg4-spol.png" style="width: 800px;" />
-</div>
-<div class="slide" id="opticks-csg-serialized-into-optickscsg-format-numpy-buffers-json">
-<h1><span class="small">Opticks CSG Serialized into OpticksCSG format (numpy buffers, json)</span></h1>
-<pre class="mypretiny">
-
-// tboolean-parade
-
-from opticks.ana.base import opticks_main
-from opticks.analytic.csg import CSG
-
-args = opticks_main(csgpath="$TMP/$FUNCNAME")
-
-container = CSG("box", param=[0,0,0,1200], boundary=args.container, poly="MC", nx="20" )
-
-a = CSG("sphere", param=[0,0,0,100])
-b = CSG("zsphere", param=[0,0,0,100], param1=[-50,60,0,0])
-c = CSG("box3",param=[100,50,70,0])
-d = CSG.MakeTrapezoid(z=100, x1=80, y1=100, x2=100, y2=80)
-e = CSG("cylinder",param=[0,0,0,100], param1=[-100,100,0,0])
-f = CSG("disc",param=[0,0,0,100], param1=[-1,1,0,0])
-g = CSG("cone", param=[100,-100,50,100])
-h = CSG.MakeTorus(R=70, r=30)
-i = CSG.MakeHyperboloid(r0=80, zf=100, z1=-100, z2=100)
-j = CSG.MakeIcosahedron(scale=100.)
-
-prims = [a,b,c,d,e,f,g,h,i,j]
-
-...  // setting translations
-
-CSG.Serialize([container] + prims, args.csgpath )   <b><span class="alarm">  <-- write trees to file </span></b>
-</pre><ul class="small simple">
-<li>imported into C++ <strong>nnode</strong> tree by <strong>NCSG</strong></li>
+<p class="small">Documentation, install instructions. Repository.</p>
+<ul class="small simple">
+<li>Mac, Linux, Windows (*)</li>
+<li>16 C++ projects, ordered by dependency</li>
+<li>~200 &quot;Unit&quot; Tests (CMake/CTest)</li>
+<li>12 integration tests: tpmt, trainbow, tprism, treflect, tlens, tnewton, tg4gun, ...</li>
+<li>NumPy/Python analysis/debugging scripts</li>
 </ul>
+<p class="small">Geometry/event data use NumPy serialization:</p>
+<pre class="small literal-block">
+import numpy as np
+a = np.load(&quot;photons.npy&quot;)
+</pre>
+<p class="tiny last">(*) Windows VS2015, non-CUDA only so far</p>
 </div>
-<div class="slide" id="compare-opticks-geant4-simulations-with-simple-lights-geometries">
-<h1><span class="small">Compare Opticks/Geant4 Simulations with Simple Lights/Geometries</span></h1>
-<div class="figure align-left">
-<img alt="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" src="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" style="width: 550px;" />
-<p class="caption">1M Photons -&gt; Water Sphere (S-Polarized)</p>
-</div>
-<div class="figure align-right">
-<img alt="/env/graphics/ggeoview/PmtInBox-approach.png" src="/env/graphics/ggeoview/PmtInBox-approach.png" style="width: 450px;" />
-<p class="caption">0.5M Photons -&gt; Dayabay PMT</p>
-</div>
-<img alt="/env/presentation/1px.png" class="align-center" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
-<dl class="small docutils">
-<dt><strong>Photon step records</strong></dt>
-<dd>128 bit per step : highly compressed position, time, wavelength, polarization vector, material/history codes</dd>
-<dt><strong>Photon flag sequence</strong></dt>
-<dd>16x 4-bit step flags recorded in uint64 sequence, indexed using Thrust GPU sort (1M indexed ~0.040s)</dd>
-</dl>
-<p class="small"><strong>Sequence index</strong> -&gt; interactive OpenGL selection of photons by flag sequence</p>
 </div>
 </div>
 </body>
