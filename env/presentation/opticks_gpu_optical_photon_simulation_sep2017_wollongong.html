@@ -1300,6 +1300,66 @@ communicate geometry to OptiX</li>
 <div class="slide" id="gpu-instance-culling-with-level-of-detail">
 <h1><span class="i">GPU Instance Culling with Level Of Detail</span></h1>
 </div>
+<div class="slide" id="hybrid-geant4-opticks-event-workflow">
+<h1><span class="small">Hybrid Geant4/Opticks Event Workflow</span></h1>
+<!-- comment
+
+* interop between OpenGL/OptiX/Thrust/CUDA
+
+**Side Benefit : Performant Visualization**
+
+Migrating Geant4 C++ CSG tree geometry to the GPU
+enables unprecedented visualizations. -->
+<div class="sidebar">
+<p class="first sidebar-title">GPU Resident Photons</p>
+<dl class="small docutils">
+<dt><strong>Seeded on GPU</strong></dt>
+<dd>associate photons -&gt; gensteps (via seed buffer)</dd>
+<dt><strong>Generated on GPU, using gensteps:</strong></dt>
+<dd><p class="first"><em>~Stacks</em> collected before photon generation:</p>
+<ul class="last simple">
+<li>number of photons to generate</li>
+<li>start/end position of step</li>
+<li>other quantities needed for GPU generation</li>
+</ul>
+</dd>
+<dt><strong>Propagated on GPU</strong></dt>
+<dd><span class="red">Only photons hitting PMTs copied to CPU</span></dd>
+</dl>
+<p class="small">Thrust: <strong>high level C++ access to CUDA</strong></p>
+<div class="small figure align-right">
+<img alt="/env/numerics/thrust/thrust.png" src="/env/numerics/thrust/thrust.png" style="width: 300px;" />
+</div>
+<ul class="small last simple">
+<li><a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a></li>
+</ul>
+</div>
+<p class="small"><strong>Geant4/Detector Simulation</strong></p>
+<ul class="small simple">
+<li>modified Scintillation, Cerenkov processes<ul>
+<li>collect <em>genstep</em></li>
+<li>skip optical photon generation</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Opticks (OptiX/Thrust GPU interoperation)</strong></p>
+<ul class="small simple">
+<li><strong>OptiX</strong> : upload gensteps</li>
+<li><strong>Thrust</strong> : seeding, distribute genstep indices to photons</li>
+<li><strong>OptiX</strong> : launch photon generation and propagation</li>
+<li><strong>Thrust</strong> : pullback photons that hit PMTs</li>
+<li><strong>Thrust</strong> : index photon step sequences (optional)</li>
+</ul>
+<p class="small"><strong>Geant4/Detector Simulation</strong></p>
+<ul class="small simple">
+<li>populate standard hit collections</li>
+<li>subsequent electronics simulation proceeds unaltered</li>
+</ul>
+<p class="small"><strong>Multi-event handling</strong></p>
+<ul class="small simple">
+<li>reuse/resize OptiX buffers for each event</li>
+</ul>
+</div>
 <div class="slide" id="idealized-geometry-tests-photon-generation-propagation-reemission">
 <h1><span class="small">Idealized geometry tests : photon generation, propagation, reemission</span></h1>
 <div class="sidebar">
@@ -1401,7 +1461,7 @@ equivalent to the source geometry.</p>
 <ul class="simple">
 <li>The more photons the bigger the overall speedup (99% -&gt; 100x)</li>
 <li>Drastic speedup -&gt; better detector understanding -&gt; greater precision</li>
-<li>Optical photon limited simulations can benefit greatly from Opticks+Geant4</li>
+<li>Simulations limited by optical photons can benefit greatly from Opticks+Geant4</li>
 </ul>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 20px;" />
 <p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
@@ -2988,66 +3048,6 @@ S-Polarized intersection (E field perpendicular to plane of incidence) arranged 
 <li>geometry provided to OptiX in form of ray intersection and bounding box code</li>
 </ul>
 <p class="small"><strong>Aim : analytic description of geometry on critical optical path, remainder tesselated</strong></p>
-</div>
-<div class="slide" id="hybrid-geant4-opticks-event-workflow">
-<h1><span class="small">Hybrid Geant4/Opticks Event Workflow</span></h1>
-<!-- comment
-
-* interop between OpenGL/OptiX/Thrust/CUDA
-
-**Side Benefit : Performant Visualization**
-
-Migrating Geant4 C++ CSG tree geometry to the GPU
-enables unprecedented visualizations. -->
-<div class="sidebar">
-<p class="first sidebar-title">GPU Resident Photons</p>
-<dl class="small docutils">
-<dt><strong>Seeded on GPU</strong></dt>
-<dd>associate photons -&gt; gensteps (via seed buffer)</dd>
-<dt><strong>Generated on GPU, using gensteps:</strong></dt>
-<dd><p class="first"><em>~Stacks</em> collected before photon generation:</p>
-<ul class="last simple">
-<li>number of photons to generate</li>
-<li>start/end position of step</li>
-<li>other quantities needed for GPU generation</li>
-</ul>
-</dd>
-<dt><strong>Propagated on GPU</strong></dt>
-<dd><span class="red">Only photons hitting PMTs copied to CPU</span></dd>
-</dl>
-<p class="small">Thrust: <strong>high level C++ access to CUDA</strong></p>
-<div class="small figure align-right">
-<img alt="/env/numerics/thrust/thrust.png" src="/env/numerics/thrust/thrust.png" style="width: 300px;" />
-</div>
-<ul class="small last simple">
-<li><a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a></li>
-</ul>
-</div>
-<p class="small"><strong>Geant4/Detector Simulation</strong></p>
-<ul class="small simple">
-<li>modified Scintillation, Cerenkov processes<ul>
-<li>collect <em>genstep</em></li>
-<li>skip optical photon generation</li>
-</ul>
-</li>
-</ul>
-<p class="small"><strong>Opticks (OptiX/Thrust GPU interoperation)</strong></p>
-<ul class="small simple">
-<li><strong>OptiX</strong> : upload gensteps</li>
-<li><strong>Thrust</strong> : seeding, distribute genstep indices to photons</li>
-<li><strong>OptiX</strong> : launch photon generation and propagation</li>
-<li><strong>Thrust</strong> : pullback photons that hit PMTs</li>
-<li><strong>Thrust</strong> : index photon step sequences (optional)</li>
-</ul>
-<p class="small"><strong>Geant4/Detector Simulation</strong></p>
-<ul class="small simple">
-<li>populate standard hit collections</li>
-<li>subsequent electronics simulation proceeds unaltered</li>
-</ul>
-<p class="small"><strong>Multi-event handling</strong></p>
-<ul class="small simple">
-<li>reuse/resize OptiX buffers for each event</li>
-</ul>
 </div>
 <div class="slide" id="opticksdocs">
 <h1><span class="i">OpticksDocs</span></h1>

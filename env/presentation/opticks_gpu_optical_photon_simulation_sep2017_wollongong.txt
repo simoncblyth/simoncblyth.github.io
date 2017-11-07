@@ -962,9 +962,84 @@ Outline
    
 
 
-
 :i:`GPU Instance Culling with Level Of Detail`
 ------------------------------------------------------------- 
+
+
+
+
+:small:`Hybrid Geant4/Opticks Event Workflow`
+------------------------------------------------
+
+
+.. comment
+
+   * interop between OpenGL/OptiX/Thrust/CUDA  
+        
+   **Side Benefit : Performant Visualization**
+
+   Migrating Geant4 C++ CSG tree geometry to the GPU 
+   enables unprecedented visualizations.  
+ 
+
+
+.. sidebar:: GPU Resident Photons
+
+    .. class:: small
+
+       **Seeded on GPU** 
+          associate photons -> gensteps (via seed buffer)
+ 
+       **Generated on GPU, using gensteps:**
+          *~Stacks* collected before photon generation:
+
+          * number of photons to generate
+          * start/end position of step
+          * other quantities needed for GPU generation 
+
+       **Propagated on GPU**
+          :red:`Only photons hitting PMTs copied to CPU`
+
+
+       Thrust: **high level C++ access to CUDA**
+
+       .. figure:: /env/numerics/thrust/thrust.png
+          :width: 300px
+          :align: right
+
+       * https://developer.nvidia.com/Thrust
+       
+          
+
+         
+.. class:: small
+
+    **Geant4/Detector Simulation**
+
+    * modified Scintillation, Cerenkov processes 
+
+      * collect *genstep*
+      * skip optical photon generation
+
+    **Opticks (OptiX/Thrust GPU interoperation)** 
+
+    * **OptiX** : upload gensteps 
+    * **Thrust** : seeding, distribute genstep indices to photons
+    * **OptiX** : launch photon generation and propagation
+    * **Thrust** : pullback photons that hit PMTs 
+    * **Thrust** : index photon step sequences (optional)
+
+    **Geant4/Detector Simulation**
+
+    * populate standard hit collections 
+    * subsequent electronics simulation proceeds unaltered 
+
+    **Multi-event handling**
+
+    * reuse/resize OptiX buffers for each event 
+
+
+
 
 
 
@@ -1078,7 +1153,7 @@ Outline
 
   * The more photons the bigger the overall speedup (99% -> 100x) 
   * Drastic speedup -> better detector understanding -> greater precision
-  * Optical photon limited simulations can benefit greatly from Opticks+Geant4
+  * Simulations limited by optical photons can benefit greatly from Opticks+Geant4
 
 
   .. image:: /env/presentation/1px.png
@@ -1979,79 +2054,6 @@ Outline
    * geometry provided to OptiX in form of ray intersection and bounding box code
    
    **Aim : analytic description of geometry on critical optical path, remainder tesselated**  
-
-
-
-:small:`Hybrid Geant4/Opticks Event Workflow`
-------------------------------------------------
-
-
-.. comment
-
-   * interop between OpenGL/OptiX/Thrust/CUDA  
-        
-   **Side Benefit : Performant Visualization**
-
-   Migrating Geant4 C++ CSG tree geometry to the GPU 
-   enables unprecedented visualizations.  
- 
-
-
-.. sidebar:: GPU Resident Photons
-
-    .. class:: small
-
-       **Seeded on GPU** 
-          associate photons -> gensteps (via seed buffer)
- 
-       **Generated on GPU, using gensteps:**
-          *~Stacks* collected before photon generation:
-
-          * number of photons to generate
-          * start/end position of step
-          * other quantities needed for GPU generation 
-
-       **Propagated on GPU**
-          :red:`Only photons hitting PMTs copied to CPU`
-
-
-       Thrust: **high level C++ access to CUDA**
-
-       .. figure:: /env/numerics/thrust/thrust.png
-          :width: 300px
-          :align: right
-
-       * https://developer.nvidia.com/Thrust
-       
-          
-
-         
-.. class:: small
-
-    **Geant4/Detector Simulation**
-
-    * modified Scintillation, Cerenkov processes 
-
-      * collect *genstep*
-      * skip optical photon generation
-
-    **Opticks (OptiX/Thrust GPU interoperation)** 
-
-    * **OptiX** : upload gensteps 
-    * **Thrust** : seeding, distribute genstep indices to photons
-    * **OptiX** : launch photon generation and propagation
-    * **Thrust** : pullback photons that hit PMTs 
-    * **Thrust** : index photon step sequences (optional)
-
-    **Geant4/Detector Simulation**
-
-    * populate standard hit collections 
-    * subsequent electronics simulation proceeds unaltered 
-
-    **Multi-event handling**
-
-    * reuse/resize OptiX buffers for each event 
-
 
 
 

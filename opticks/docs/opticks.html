@@ -49,6 +49,7 @@
   <ul>
 <li><a class="reference internal" href="#">Opticks Install Instructions</a><ul>
 <li><a class="reference internal" href="#get-opticks">Get Opticks</a></li>
+<li><a class="reference internal" href="#bash-setup-envvars">Bash setup, envvars</a></li>
 <li><a class="reference internal" href="#opticks-installation-overview">Opticks Installation Overview</a></li>
 <li><a class="reference internal" href="#build-tools">Build Tools</a></li>
 <li><a class="reference internal" href="#cmake">CMake</a></li>
@@ -65,6 +66,8 @@
 </li>
 <li><a class="reference internal" href="#configuration-machinery">Configuration Machinery</a></li>
 <li><a class="reference internal" href="#opticks-without-nvidia-optix-and-cuda">Opticks Without NVIDIA OptiX and CUDA ?</a></li>
+<li><a class="reference internal" href="#geant4-dependency">Geant4 Dependency</a></li>
+<li><a class="reference internal" href="#embedded-opticks">Embedded Opticks</a></li>
 <li><a class="reference internal" href="#testing-installation">Testing Installation</a></li>
 <li><a class="reference internal" href="#issues-with-tests">Issues With Tests</a></li>
 <li><a class="reference internal" href="#running-opticks-scripts-and-executables">Running Opticks Scripts and Executables</a></li>
@@ -117,16 +120,29 @@
 <div class="section" id="get-opticks">
 <h2>Get Opticks<a class="headerlink" href="#get-opticks" title="Permalink to this headline">¶</a></h2>
 <p>Clone the repository from bitbucket:</p>
-<div class="highlight-python"><pre>hg clone http://bitbucket.org/simoncblyth/opticks</pre>
+<div class="highlight-python"><pre>cd
+hg clone http://bitbucket.org/simoncblyth/opticks
+hg clone ssh://hg@bitbucket.org/simoncblyth/opticks   # via SSH for developers</pre>
 </div>
+</div>
+<div class="section" id="bash-setup-envvars">
+<h2>Bash setup, envvars<a class="headerlink" href="#bash-setup-envvars" title="Permalink to this headline">¶</a></h2>
 <p>Connect the opticks bash functions to your shell by adding a line to your .bash_profile
-and configure the location of the install with the LOCAL_BASE environment variable:</p>
+and configure the location of the install with the LOCAL_BASE environment variable
+and the location of the source with the OPTICKS_HOME envvar:</p>
 <div class="highlight-python"><pre>opticks-(){ . $HOME/opticks/opticks.bash &amp;&amp; opticks-env $* ; }
-export LOCAL_BASE=/usr/local</pre>
+export LOCAL_BASE=/usr/local
+export OPTICKS_HOME=$HOME/opticks</pre>
 </div>
 <p>The first line defines the bash function <em>opticks-</em> that is termed a precursor function
 as running it will define other functions all starting with <em>opticks-</em> such as <em>opticks-vi</em>
 and <em>opticks-usage</em>.</p>
+<p>Some further .bash_profile setup simplifies use of Opticks binaries and analysis scripts:</p>
+<div class="highlight-python"><pre>op(){ op.sh $* ; }
+
+export PYTHONPATH=$HOME
+export PATH=$LOCAL_BASE/opticks/lib:$OPTICKS_HOME/bin:$PATH</pre>
+</div>
 </div>
 <div class="section" id="opticks-installation-overview">
 <h2>Opticks Installation Overview<a class="headerlink" href="#opticks-installation-overview" title="Permalink to this headline">¶</a></h2>
@@ -376,6 +392,12 @@ If a local Boost was required then:</p>
                   -DCOMPUTE_CAPABILITY=52 \
                   -DBOOST_ROOT=$(boost-prefix)</pre>
 </div>
+<p>Another configure example:</p>
+<div class="highlight-python"><pre>opticks-configure -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-7.0 \
+                  -DOptiX_INSTALL_DIR=/home/gpu/NVIDIA-OptiX-SDK-3.8.0-linux64/ \
+                  -DCOMPUTE_CAPABILITY=52 \
+                  -DBOOST_ROOT=/usr/local/lib</pre>
+</div>
 <p>The argument <cite>-DCOMPUTE_CAPABILITY=52</cite> specifies to compile for compute capability 5.2 architectures
 corresponding to Maxwell 2nd generation GPUs.
 Lookup the appropriate capability for your GPU in the below short table.</p>
@@ -426,10 +448,9 @@ in the build directory. These values are not overridden by rebuilding
 with the <em>opticks&#8211;</em> bash function.
 A subsequent <em>opticks-configure</em> however will wipe the build directory
 allowing new values to be set.</p>
-<dl class="docutils">
-<dt>To build::</dt>
-<dd>opticks&#8211;</dd>
-</dl>
+<p>To build:</p>
+<div class="highlight-python"><pre>opticks--</pre>
+</div>
 </div>
 </div>
 <div class="section" id="configuration-machinery">
@@ -468,6 +489,42 @@ using cmake switch WITH_OPTIX=OFF.</p>
 <p>The partial mode provides OpenGL visualizations of geometry and
 photon propagations loaded from file.
 This mode is not tested often, so provide copy/paste errors if it fails for you.</p>
+</div>
+<div class="section" id="geant4-dependency">
+<h2>Geant4 Dependency<a class="headerlink" href="#geant4-dependency" title="Permalink to this headline">¶</a></h2>
+<p>Opticks is structured as a collection of packages
+organized by their local and external dependencies, see <a class="reference internal" href="overview.html"><em>Opticks Overview</em></a> for a table.
+Only the two very highest level packages depend on Geant4.</p>
+<dl class="docutils">
+<dt>cfg4</dt>
+<dd>validation comparisons</dd>
+<dt>okg4</dt>
+<dd>integrated Opticks+G4 for “gun running&#8221;</dd>
+</dl>
+<p>Opticks dependency on Geant4 is intended to be loose
+in order to allow working with multiple G4 versions (within a certain version range),
+using version preprocessor macros to accommodate differences.
+So please send copy/paste reports of incompatibilities together with G4 versions.</p>
+<p>The weak G4 dependency allows you to test most of Opticks even
+without G4 installed.</p>
+</div>
+<div class="section" id="embedded-opticks">
+<h2>Embedded Opticks<a class="headerlink" href="#embedded-opticks" title="Permalink to this headline">¶</a></h2>
+<p>In production, Opticks is intended to be run in an embedded mode
+where, Geant4 and Opticks communicate via “gensteps” and “hits”
+without using any Geant4 headers. This works via some
+Geant4 dependant glue code within each detectors simulation framework
+that does the below:</p>
+<ul class="simple">
+<li>inhibits CPU generation of optical photons from G4Scintillation and G4Cerenkov processes,
+instead &#8220;gensteps&#8221; are collected</li>
+<li>invokes embedded Opticks (typically at the end of each event)
+passing the collected &#8220;gensteps&#8221; across to Opticks which performs the
+propagation</li>
+<li>pulls back the PMT hits and populates standard Geant4 hit collections with these</li>
+</ul>
+<p>Once the details of the above integration have been revisted for JUNO example
+integration code will be provided within the Opticks repository.</p>
 </div>
 <div class="section" id="testing-installation">
 <h2>Testing Installation<a class="headerlink" href="#testing-installation" title="Permalink to this headline">¶</a></h2>
