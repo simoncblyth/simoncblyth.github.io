@@ -1,0 +1,299 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>How opticks-full works &mdash; Opticks 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Geometry Cache" href="geocache.html" />
+    <link rel="prev" title="Opticks Overview" href="overview.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="geocache.html" title="Geometry Cache"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Opticks Overview"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">How opticks-full works</a><ul>
+<li><a class="reference internal" href="#opticks-full">opticks-full</a></li>
+<li><a class="reference internal" href="#opticks-configure">opticks-configure</a></li>
+<li><a class="reference internal" href="#opticks-cmake">opticks-cmake</a></li>
+<li><a class="reference internal" href="#opticks-cmake-info">opticks-cmake-info</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="overview.html"
+                        title="previous chapter">Opticks Overview</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="geocache.html"
+                        title="next chapter">Geometry Cache</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/docs/how_opticks_full_works.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="how-opticks-full-works">
+<h1>How opticks-full works<a class="headerlink" href="#how-opticks-full-works" title="Permalink to this headline">¶</a></h1>
+<p><em>opticks-full</em> is a bash function from the opticks.bash file that does the below:</p>
+<ol class="arabic simple">
+<li>installs externals <em>opticks-externals-install</em></li>
+<li>configures the build using CMake <em>opticks-configure</em></li>
+<li>invokes the build <em>opticks&#8211;</em></li>
+<li>prepares installcache <em>opticks-prepare-installcache</em></li>
+</ol>
+<p>The <em>opticks-vi</em> bash function allows you to examine/edit the functions.</p>
+<div class="section" id="opticks-full">
+<h2>opticks-full<a class="headerlink" href="#opticks-full" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>opticks-full()
+{
+    local msg="=== $FUNCNAME :"
+    echo $msg START $(date)
+    opticks-info
+
+    if [ ! -d "$(opticks-prefix)/externals" ]; then
+
+        echo $msg installing the below externals into $(opticks-prefix)/externals
+        opticks-externals
+        opticks-externals-install
+
+
+    else
+        echo $msg using preexisting externals from $(opticks-prefix)/externals
+    fi
+
+    opticks-configure
+
+    opticks--
+
+    opticks-prepare-installcache
+
+    echo $msg DONE $(date)
+}</pre>
+</div>
+</div>
+<div class="section" id="opticks-configure">
+<h2>opticks-configure<a class="headerlink" href="#opticks-configure" title="Permalink to this headline">¶</a></h2>
+<p><em>opticks-configure</em> wipes the build directory and then invokes <em>opticks-configure-system-boost</em>
+which in turn calls <em>opticks-cmake</em></p>
+<div class="highlight-python"><pre>opticks-wipe(){
+  local msg="=== $FUNCNAME : "
+   local bdir=$(opticks-bdir)
+   echo $msg wiping build dir $bdir
+   rm -rf $bdir
+}
+
+opticks-configure()
+{
+   opticks-wipe
+
+   case $(opticks-cmake-generator) in
+       "Visual Studio 14 2015") opticks-configure-local-boost $* ;;
+                             *) opticks-configure-system-boost $* ;;
+   esac
+}
+
+opticks-configure-system-boost()
+{
+   opticks-cmake $*
+}</pre>
+</div>
+</div>
+<div class="section" id="opticks-cmake">
+<h2>opticks-cmake<a class="headerlink" href="#opticks-cmake" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>opticks-cmake(){
+   local msg="=== $FUNCNAME : "
+   local iwd=$PWD
+   local bdir=$(opticks-bdir)
+
+   echo $msg configuring installation
+
+   mkdir -p $bdir
+   [ -f "$bdir/CMakeCache.txt" ] &amp;&amp; echo $msg configured already use opticks-configure to wipe build dir and re-configure &amp;&amp; return
+
+   opticks-bcd
+
+   g4-
+   xercesc-
+
+   opticks-cmake-info
+
+   cmake \
+        -G "$(opticks-cmake-generator)" \
+       -DCMAKE_BUILD_TYPE=Debug \
+       -DCOMPUTE_CAPABILITY=$(opticks-compute-capability) \
+       -DCMAKE_INSTALL_PREFIX=$(opticks-prefix) \
+       -DOptiX_INSTALL_DIR=$(opticks-optix-install-dir) \
+       -DGeant4_DIR=$(g4-cmake-dir) \
+       -DXERCESC_LIBRARY=$(xercesc-library) \
+       -DXERCESC_INCLUDE_DIR=$(xercesc-include-dir) \
+       $* \
+       $(opticks-sdir)
+
+   cd $iwd
+}</pre>
+</div>
+</div>
+<div class="section" id="opticks-cmake-info">
+<h2>opticks-cmake-info<a class="headerlink" href="#opticks-cmake-info" title="Permalink to this headline">¶</a></h2>
+<p><em>opticks-cmake-info</em> dumps the values of the variables that are input to cmake</p>
+<div class="highlight-python"><pre>opticks-cmake-info(){ cat &lt;&lt; EOI
+
+$FUNCNAME
+======================
+
+       NODE_TAG                   :  $NODE_TAG
+
+       opticks-sdir               :  $(opticks-sdir)
+       opticks-bdir               :  $(opticks-bdir)
+       opticks-cmake-generator    :  $(opticks-cmake-generator)
+       opticks-compute-capability :  $(opticks-compute-capability)
+       opticks-prefix             :  $(opticks-prefix)
+       opticks-optix-install-dir  :  $(opticks-optix-install-dir)
+       g4-cmake-dir               :  $(g4-cmake-dir)
+       xercesc-library            :  $(xercesc-library)
+       xercesc-include-dir        :  $(xercesc-include-dir)
+
+EOI
+}</pre>
+</div>
+<p>Example of running:</p>
+<div class="highlight-python"><pre>simon:docs blyth$ opticks-cmake-info
+
+opticks-cmake-info
+======================
+
+       NODE_TAG                   :  D
+
+       opticks-sdir               :  /Users/blyth/opticks
+       opticks-bdir               :  /usr/local/opticks/build
+       opticks-cmake-generator    :  Unix Makefiles
+       opticks-compute-capability :  30
+       opticks-prefix             :  /usr/local/opticks
+       opticks-optix-install-dir  :  /Developer/OptiX_380
+       g4-cmake-dir               :  /usr/local/opticks/externals/lib/Geant4-10.2.1
+       xercesc-library            :  /opt/local/lib/libxerces-c.dylib
+       xercesc-include-dir        :  /opt/local/include
+
+simon:docs blyth$</pre>
+</div>
+<p>All of the input variables come from other bash functions such as,</p>
+<ol class="arabic simple">
+<li><em>opticks-optix-install-dir</em></li>
+<li><em>opticks-compute-capability</em></li>
+</ol>
+<p>These yield different results depending on the setting of the NODE_TAG envvar.</p>
+<div class="highlight-python"><pre>opticks-optix-install-dir(){
+    local t=$NODE_TAG
+    case $t in
+       D_400) echo /Developer/OptiX_400 ;;
+       D) echo /Developer/OptiX_380 ;;
+    RYAN) echo /Developer/OptiX_380 ;;
+     GTL) echo ${MYENVTOP}/OptiX ;;
+    H5H2) echo ${MYENVTOP}/OptiX ;;
+       X) echo /usr/local/optix-3.8.0/NVIDIA-OptiX-SDK-3.8.0-linux64 ;;
+    #SDUGPU) echo /root/NVIDIA-OptiX-SDK-4.1.1-linux64 ;;
+    SDUGPU) echo /home/simon/NVIDIA-OptiX-SDK-4.1.1-linux64 ;;
+       *) echo /tmp ;;
+    esac
+}
+
+
+opticks-compute-capability(){
+    local t=$NODE_TAG
+    case $t in
+       D) echo 30 ;;
+    RYAN) echo 30 ;;
+     GTL) echo 30 ;;
+    H5H2) echo 50 ;;
+       X) echo 52 ;;
+  SDUGPU) echo 30 ;;
+       *) echo  0 ;;
+    esac
+}</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="geocache.html" title="Geometry Cache"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Opticks Overview"
+             >previous</a> |</li>
+        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
