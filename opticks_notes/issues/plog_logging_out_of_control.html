@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PLOG Logging is out of control &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PLOG Logging is out of control</a><ul>
+<li><a class="reference internal" href="#issue">Issue</a></li>
+<li><a class="reference internal" href="#temporary-fix-hide-behind-elog-workaround-macro">Temporary Fix : Hide Behind ELOG_WORKAROUND macro</a></li>
+<li><a class="reference internal" href="#current-logging-setup">Current Logging Setup</a></li>
+<li><a class="reference internal" href="#idea-for-proper-fix">Idea for proper fix</a></li>
+<li><a class="reference internal" href="#reproduce">Reproduce</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/plog_logging_out_of_control.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="plog-logging-is-out-of-control">
+<h1>PLOG Logging is out of control<a class="headerlink" href="#plog-logging-is-out-of-control" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="issue">
+<h2>Issue<a class="headerlink" href="#issue" title="Permalink to this headline">¶</a></h2>
+<p>Embedded mode revealed a deficiency in PLOG logging,
+there was no way to control the logging ...</p>
+<p>Expedient workaround from Tao was adding some static structs
+that initialize PLOG, turning on overly verbose logging.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/commits/edb3ae130a97d9a371292f81863e74d95888e567">https://bitbucket.org/simoncblyth/opticks/commits/edb3ae130a97d9a371292f81863e74d95888e567</a></li>
+</ul>
+<div class="highlight-python"><pre>+static struct OXRAPPLOGInit {
++    OXRAPPLOGInit() {
++
++        PLOG_(0, 0);
++
++    }
++} s_oxrapploginit;
++</pre>
+</div>
+<div class="highlight-python"><pre>simon:issues blyth$ opticks-find LOGInit
+./okop/OpMgr.cc:static struct OpMgrPLOGInit {
+./okop/OpMgr.cc:    OpMgrPLOGInit() {
+./optickscore/OpticksEvent.cc:static struct OKCLOGInit {
+./optickscore/OpticksEvent.cc:    OKCLOGInit() {
+./optixrap/OPropagator.cc:static struct OXRAPPLOGInit {
+./optixrap/OPropagator.cc:    OXRAPPLOGInit() {
+simon:opticks blyth$</pre>
+</div>
+<div class="highlight-python"><pre>simon:opticks blyth$ opticks-find PLOG_\(0
+./okop/OpMgr.cc:        PLOG_(0, 0);
+./optickscore/OpticksEvent.cc:        PLOG_(0, 0);
+./optixrap/OPropagator.cc:        PLOG_(0, 0);
+simon:opticks blyth$</pre>
+</div>
+</div>
+<div class="section" id="temporary-fix-hide-behind-elog-workaround-macro">
+<h2>Temporary Fix : Hide Behind ELOG_WORKAROUND macro<a class="headerlink" href="#temporary-fix-hide-behind-elog-workaround-macro" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="current-logging-setup">
+<h2>Current Logging Setup<a class="headerlink" href="#current-logging-setup" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>executable main sets up the loggers via macros like &#8220;<a href="#id1"><span class="problematic" id="id2">NPY_LOG__</span></a>&#8220;</li>
+<li>peculiar preprocessor arrangement plants loggers into every lib listed</li>
+<li>BUT for convenient use in embedded manner, do not have access to main</li>
+</ul>
+</div>
+<div class="section" id="idea-for-proper-fix">
+<h2>Idea for proper fix<a class="headerlink" href="#idea-for-proper-fix" title="Permalink to this headline">¶</a></h2>
+<p>Arrange for loggers to come into existance automatically
+via static structs... and then be configured from main
+(or elsewhere when operating in embedded mode)</p>
+</div>
+<div class="section" id="reproduce">
+<h2>Reproduce<a class="headerlink" href="#reproduce" title="Permalink to this headline">¶</a></h2>
+<p>Any command logs far too much</p>
+<div class="highlight-python"><pre>tboolean-
+tboolean-torus</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -23,7 +23,10 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="issues" href="index.html" />
+    <link rel="next" title="Malloc Debugging" href="malloc.html" />
+    <link rel="prev" title="Leftfield Error Following BFile change attempt" href="leftfield_error.html" /> 
   </head>
   <body>
     <div class="related">
@@ -32,7 +35,14 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="malloc.html" title="Malloc Debugging"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="leftfield_error.html" title="Leftfield Error Following BFile change attempt"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">issues</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -40,11 +50,22 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">oxrap OInterpolationTest asserts at python level for lack of IDPATH GBndLib.txt</a><ul>
+<li><a class="reference internal" href="#fixed-ointerpolationtest-pass-depending-on-cinterpolationtest-having-been-run-recently-tmp-unwiped">FIXED : OInterpolationTest PASS depending on CInterpolationTest having been run recently (/tmp unwiped)</a></li>
+<li><a class="reference internal" href="#hmm-sg-fail">Hmm SG Fail</a></li>
+<li><a class="reference internal" href="#dec-2017-ointerpolationtest-fail-back-again-improved-error-handling-not-fixed">Dec 2017 : OInterpolationTest FAIL back again, IMPROVED ERROR HANDLING : NOT FIXED</a></li>
+<li><a class="reference internal" href="#oct-2017-fixed-old-chestnut">Oct 2017 : FIXED old chestnut</a></li>
+<li><a class="reference internal" href="#june-2017">June 2017</a></li>
 <li><a class="reference internal" href="#another-lack-of-gbndlib-issue-in-ctestdetectortest">Another lack of GBndLib issue in CTestDetectorTest</a></li>
 </ul>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="leftfield_error.html"
+                        title="previous chapter">Leftfield Error Following BFile change attempt</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="malloc.html"
+                        title="next chapter">Malloc Debugging</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../_sources/issues/OInterpolationTest_Missing_GBndLib_txt.txt"
@@ -73,6 +94,171 @@
             
   <div class="section" id="oxrap-ointerpolationtest-asserts-at-python-level-for-lack-of-idpath-gbndlib-txt">
 <h1>oxrap OInterpolationTest asserts at python level for lack of IDPATH GBndLib.txt<a class="headerlink" href="#oxrap-ointerpolationtest-asserts-at-python-level-for-lack-of-idpath-gbndlib-txt" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="fixed-ointerpolationtest-pass-depending-on-cinterpolationtest-having-been-run-recently-tmp-unwiped">
+<h2>FIXED : OInterpolationTest PASS depending on CInterpolationTest having been run recently (/tmp unwiped)<a class="headerlink" href="#fixed-ointerpolationtest-pass-depending-on-cinterpolationtest-having-been-run-recently-tmp-unwiped" title="Permalink to this headline">¶</a></h2>
+<p>First run failing for lack of CInterpolationTest_interpol.npy</p>
+<div class="highlight-python"><pre>simon:optixrap blyth$ ll /tmp/blyth/opticks/InterpolationTest/
+total 48336
+drwxr-xr-x    3 blyth  wheel       102 Oct 23 11:00 GItemList
+drwxr-xr-x    5 blyth  wheel       170 Oct 23 11:00 GBndLib
+-rw-r--r--    1 blyth  wheel  12370912 Oct 23 11:01 CInterpolationTest_interpol.npy
+drwxr-xr-x    6 blyth  wheel       204 Oct 23 11:01 .
+drwxr-xr-x  170 blyth  wheel      5780 Oct 23 11:01 ..
+-rw-r--r--    1 blyth  wheel  12370896 Oct 23 11:02 OInterpolationTest_interpol.npy
+simon:optixrap blyth$</pre>
+</div>
+</div>
+<div class="section" id="hmm-sg-fail">
+<h2>Hmm SG Fail<a class="headerlink" href="#hmm-sg-fail" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>2017-10-18 20:14:23.329 INFO  [30557] [OContext::close@245] OContext::close m_cfg-&gt;apply() done.
+2017-10-18 20:14:28.137 INFO  [30557] [OContext::launch@322] OContext::launch LAUNCH time: 4.80798
+No handlers could be found for logger "opticks.ana.proplib"
+Traceback (most recent call last):
+  File "/home/simon/opticks/optixrap/tests/OInterpolationTest_interpol.py", line 20, in &lt;module&gt;
+    c = np.load(os.path.expandvars(os.path.join(base,"CInterpolationTest_%s.npy" % ext))).reshape(-1,4,2,nl,4)
+  File "/usr/local/anaconda2/lib/python2.7/site-packages/numpy/lib/npyio.py", line 370, in load
+    fid = open(file, "rb")
+IOError: [Errno 2] No such file or directory: '/tmp/simon/opticks/InterpolationTest/CInterpolationTest_interpol.npy'
+2017-10-18 20:14:28.272 INFO  [30557] [SSys::run@46] python /home/simon/opticks/optixrap/tests/OInterpolationTest_interpol.py rc_raw : 256 rc : 1
+2017-10-18 20:14:28.272 WARN  [30557] [SSys::run@52] SSys::run FAILED with  cmd python /home/simon/opticks/optixrap/tests/OInterpolationTest_interpol.py possibly you need to set export PATH=$OPTICKS_HOME/ana:$OPTICKS_HOME/bin:/usr/local/opticks/lib:$PATH
+[simon@localhost opticks]$
+
+[simon@localhost opticks]$ ll /tmp/simon/opticks/InterpolationTest/CInterpolationTest_interpol.npy
+ls: cannot access /tmp/simon/opticks/InterpolationTest/CInterpolationTest_interpol.npy: No such file or directory
+
+[simon@localhost opticks]$ ll /tmp/simon/opticks/InterpolationTest/
+total 11712
+drwxrwxr-x. 2 simon simon     4096 Oct 18 20:10 GBndLib
+drwxrwxr-x. 2 simon simon     4096 Oct 18 20:10 GItemList
+-rw-rw-r--. 1 simon simon 11981264 Oct 18 20:14 OInterpolationTest_interpol.npy
+[simon@localhost opticks]$</pre>
+</div>
+</div>
+<div class="section" id="dec-2017-ointerpolationtest-fail-back-again-improved-error-handling-not-fixed">
+<h2>Dec 2017 : OInterpolationTest FAIL back again, IMPROVED ERROR HANDLING : NOT FIXED<a class="headerlink" href="#dec-2017-ointerpolationtest-fail-back-again-improved-error-handling-not-fixed" title="Permalink to this headline">¶</a></h2>
+<p>TODO: fix this propertly when back in this context</p>
+<p>Improved handling of missing paths:</p>
+<div class="highlight-python"><pre>2017-12-10 10:58:46.927 INFO  [1419364] [OLaunchTest::launch@61] OLaunchTest entry   0 width     761 height     123 ptx                          OInterpolationTest.cu.ptx prog                                 OInterpolationTest
+2017-12-10 10:58:46.927 INFO  [1419364] [OContext::close@208] OContext::close numEntryPoint 1
+2017-12-10 10:58:46.927 INFO  [1419364] [OContext::close@212] OContext::close setEntryPointCount done.
+2017-12-10 10:58:46.940 INFO  [1419364] [OContext::close@218] OContext::close m_cfg-&gt;apply() done.
+args: /Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py
+[2017-12-10 10:58:50,452] p33898 {/Users/blyth/opticks/ana/nload.py:44} WARNING - np_load path_:$TMP/InterpolationTest/GBndLib/GBndLib.npy path:/tmp/blyth/opticks/InterpolationTest/GBndLib/GBndLib.npy DOES NOT EXIST
+[2017-12-10 10:58:50,452] p33898 {/Users/blyth/opticks/ana/nload.py:44} WARNING - np_load path_:$TMP/InterpolationTest/GBndLib/GBndLibOptical.npy path:/tmp/blyth/opticks/InterpolationTest/GBndLib/GBndLibOptical.npy DOES NOT EXIST
+[2017-12-10 10:58:50,452] p33898 {/Users/blyth/opticks/ana/proplib.py:100} WARNING - missing GBndLib data : cannot create blib Proplib
+[2017-12-10 10:58:50,452] p33898 {/Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py:21} WARNING - failed to load blib GPropLib from base:$TMP/InterpolationTest
+2017-12-10 10:58:50.459 INFO  [1419364] [SSys::run@46] python /Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py rc_raw : 0 rc : 0</pre>
+</div>
+<p>Looking for GBndLib.npy in $TMP/InterpolationTest:</p>
+<div class="highlight-python"><pre>2017-12-10 10:29:32.286 INFO  [1410434] [OInterpolationTest::launch@87] OInterpolationTest::launch nb   123 nx   761 ny   984 progname             OInterpolationTest name OInterpolationTest_interpol.npy base $TMP/InterpolationTest
+2017-12-10 10:29:32.287 INFO  [1410434] [OLaunchTest::init@50] OLaunchTest entry   0 width       1 height       1 ptx                          OInterpolationTest.cu.ptx prog                                 OInterpolationTest
+2017-12-10 10:29:32.287 INFO  [1410434] [OLaunchTest::launch@61] OLaunchTest entry   0 width     761 height     123 ptx                          OInterpolationTest.cu.ptx prog                                 OInterpolationTest
+2017-12-10 10:29:32.287 INFO  [1410434] [OContext::close@208] OContext::close numEntryPoint 1
+2017-12-10 10:29:32.287 INFO  [1410434] [OContext::close@212] OContext::close setEntryPointCount done.
+2017-12-10 10:29:32.301 INFO  [1410434] [OContext::close@218] OContext::close m_cfg-&gt;apply() done.
+args: /Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py
+Traceback (most recent call last):
+  File "/Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py", line 17, in &lt;module&gt;
+    blib = PropLib.load_GBndLib(base)
+  File "/Users/blyth/opticks/ana/proplib.py", line 96, in load_GBndLib
+    t = np.load(os.path.expandvars(os.path.join(base,"GBndLib/GBndLib.npy")))
+  File "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/lib/npyio.py", line 369, in load
+    fid = open(file, "rb")
+IOError: [Errno 2] No such file or directory: '/tmp/blyth/opticks/InterpolationTest/GBndLib/GBndLib.npy'
+2017-12-10 10:29:35.919 INFO  [1410434] [SSys::run@46] python /Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py rc_raw : 256 rc : 1
+2017-12-10 10:29:35.919 WARN  [1410434] [SSys::run@53] SSys::run FAILED with  cmd python /Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py
+simon:opticks blyth$
+simon:opticks blyth$</pre>
+</div>
+<p>ana/proplib.py:</p>
+<div class="highlight-python"><pre>68 class PropLib(object):
+..
+94     @classmethod
+95     def load_GBndLib(cls, base):
+96         t = np.load(os.path.expandvars(os.path.join(base,"GBndLib/GBndLib.npy")))
+97         o = np.load(os.path.expandvars(os.path.join(base,"GBndLib/GBndLibOptical.npy")))
+98         blib = cls("GBndLib", data=t, names=os.path.join(base,"GItemList/GBndLib.txt"), optical=o )
+99         return blib</pre>
+</div>
+<p>optixrap/tests/OInterpolationTest_interpol.py:</p>
+<div class="highlight-python"><pre>::</pre>
+</div>
+<blockquote>
+<div>delta:ana blyth$ l $TMP/InterpolationTest/
+total 46816
+-rw-r&#8211;r&#8211;  1 blyth  wheel  11981264 Dec 10 10:29 OInterpolationTest_interpol.npy
+-rw-r&#8211;r&#8211;  1 blyth  wheel  11981280 Dec  9 19:22 CInterpolationTest_interpol.npy
+drwxr-xr-x  3 blyth  wheel       102 Dec  5 12:17 GItemList
+delta:ana blyth$ l /tmp/blyth/opticks/InterpolationTest/GItemList/
+total 8
+-rw-r&#8211;r&#8211;  1 blyth  wheel  3771 Dec 10 10:29 GBndLib.txt
+delta:ana blyth$</div></blockquote>
+</div>
+<div class="section" id="oct-2017-fixed-old-chestnut">
+<h2>Oct 2017 : FIXED old chestnut<a class="headerlink" href="#oct-2017-fixed-old-chestnut" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>FIXED using GBndLib::saveAllOverride and overhaul of paths in the analysis scripts</li>
+</ul>
+<div class="highlight-python"><pre>2017-10-18 16:04:47.536 INFO  [151806] [OLaunchTest::init@50] OLaunchTest entry   0 width       1 height       1 ptx                          OInterpolationTest.cu.ptx prog                                 OInterpolationTest
+2017-10-18 16:04:47.536 INFO  [151806] [OLaunchTest::launch@61] OLaunchTest entry   0 width     761 height     123 ptx                          OInterpolationTest.cu.ptx prog                                 OInterpolationTest
+2017-10-18 16:04:47.536 INFO  [151806] [OContext::close@235] OContext::close numEntryPoint 1
+2017-10-18 16:04:47.536 INFO  [151806] [OContext::close@239] OContext::close setEntryPointCount done.
+2017-10-18 16:04:47.548 INFO  [151806] [OContext::close@245] OContext::close m_cfg-&gt;apply() done.
+2017-10-18 16:04:50.920 INFO  [151806] [OContext::launch@322] OContext::launch LAUNCH time: 3.37147
+Traceback (most recent call last):
+  File "/Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py", line 13, in &lt;module&gt;
+    blib = PropLib("GBndLib")
+  File "/Users/blyth/opticks/ana/proplib.py", line 126, in __init__
+    names = map(lambda _:_[:-1],file(npath).readlines())
+IOError: [Errno 2] No such file or directory: '/usr/local/opticks/opticksdata/export/DayaBay_VGDX_20140414-1300/g4_00.96ff965744a2f6b78c24e33c80d3a4cd.dae/GItemList/GBndLib.txt'
+2017-10-18 16:04:51.075 INFO  [151806] [SSys::run@46] python /Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py rc_raw : 256 rc : 1
+2017-10-18 16:04:51.075 WARN  [151806] [SSys::run@52] SSys::run FAILED with  cmd python /Users/blyth/opticks/optixrap/tests/OInterpolationTest_interpol.py possibly you need to set export PATH=$OPTICKS_HOME/ana:$OPTICKS_HOME/bin:/usr/local/opticks/lib:$PATH
+simon:opticks blyth$
+simon:opticks blyth$</pre>
+</div>
+<p>Old geocache have the missing file:</p>
+<div class="highlight-python"><pre>simon:g4_00.96ff965744a2f6b78c24e33c80d3a4cd.dae blyth$ mdfind GBndLib.txt
+/usr/local/env/geant4/geometry/export/DayaBay_VGDX_20140414-1300/g4_00.96ff965744a2f6b78c24e33c80d3a4cd.dae/GItemList/GBndLib.txt
+/usr/local/env/geant4/geometry/export/juno/test3.fcc8b4dc9474af8826b29bf172452160.dae/GItemList/GBndLib.txt
+/Users/simon/local/opticks/opticksdata/export/DayaBay_VGDX_20140414-1300/g4_00.96ff965744a2f6b78c24e33c80d3a4cd.dae/GItemList/GBndLib.txt
+
+simon:issues blyth$ cat /usr/local/env/geant4/geometry/export/DayaBay_VGDX_20140414-1300/g4_00.96ff965744a2f6b78c24e33c80d3a4cd.dae/GItemList/GBndLib.txt
+Vacuum///Vacuum
+Vacuum///Rock
+Rock///Air
+Air/NearPoolCoverSurface//PPE
+Air///Aluminium
+Aluminium///Foam
+Foam///Bakelite
+Bakelite///Air
+Air///MixGas
+Air///Air
+Air///Iron
+Rock///Rock
+Rock///DeadWater
+DeadWater/NearDeadLinerSurface//Tyvek
+Tyvek//NearOWSLinerSurface/OwsWater
+OwsWater///Tyvek
+...</pre>
+</div>
+<ul class="simple">
+<li>m_names GItemList is handled in base class GPropertyLib</li>
+<li>GBndLib is special (as boundaries can be dynamically added to test geometry)</li>
+<li>dynamic nature means GBndLib must be closed before the names are set</li>
+<li>GBndLibTest saves such a file to $TMP/GItemList/GBndLib.txt</li>
+</ul>
+<div class="highlight-python"><pre>simon:ggeo blyth$ opticks-find setNames
+./ggeo/GPropertyLib.cc:    setNames(other-&gt;getNames());  // need setter for m_attrnames hookup
+./ggeo/GPropertyLib.cc:    setNames(names);
+./ggeo/GPropertyLib.cc:    setNames(names);
+./ggeo/GPropertyLib.cc:void GPropertyLib::setNames(GItemList* names)
+./ggeo/tests/BoundariesNPYTest.cc:    blib-&gt;close();     //  BndLib is dynamic so requires a close before setNames is called setting the sequence for OpticksAttrSeq
+./ggeo/GPropertyLib.hh:        void setNames(GItemList* names);
+simon:opticks blyth$</pre>
+</div>
+</div>
+<div class="section" id="june-2017">
+<h2>June 2017<a class="headerlink" href="#june-2017" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>99% tests passed, 3 tests failed out of 234
 
 Total Test time (real) = 118.02 sec
@@ -196,6 +382,7 @@ simon:issues blyth$</pre>
  s 4 nf   0  i0 0:0  i1 434816:434816   il 0:0
  s 5 nf   0  i0 0:0  i1 434816:434816   il 0:0</pre>
 </div>
+</div>
 <div class="section" id="another-lack-of-gbndlib-issue-in-ctestdetectortest">
 <h2>Another lack of GBndLib issue in CTestDetectorTest<a class="headerlink" href="#another-lack-of-gbndlib-issue-in-ctestdetectortest" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -303,7 +490,14 @@ frame #4: 0x0000000100d342a0 libGGeo.dylib`GParts::registerBoundaries(this=0x000
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="malloc.html" title="Malloc Debugging"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="leftfield_error.html" title="Leftfield Error Following BFile change attempt"
+             >previous</a> |</li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >issues</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

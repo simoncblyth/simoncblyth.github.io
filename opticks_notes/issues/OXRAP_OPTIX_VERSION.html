@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>OXRAP_OPTIX_VERSION &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">OXRAP_OPTIX_VERSION</a><ul>
+<li><a class="reference internal" href="#primary-cmake">primary cmake</a></li>
+<li><a class="reference internal" href="#cmake-modification-of-fundamentals-not-advisable">cmake modification of fundamentals not advisable</a></li>
+<li><a class="reference internal" href="#use-of-detected-version">Use of detected version</a></li>
+<li><a class="reference internal" href="#optix-version-detection">OptiX Version Detection</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/OXRAP_OPTIX_VERSION.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="oxrap-optix-version">
+<h1>OXRAP_OPTIX_VERSION<a class="headerlink" href="#oxrap-optix-version" title="Permalink to this headline">¶</a></h1>
+<p>Playing around with selecting an OptiX version with <em>opticks-cmake-modify-ex3</em>
+leads to a confused cmake build, the header parsing yielding 411. But the
+version 380.</p>
+<p>This may be due to another level of caching.</p>
+<div class="highlight-python"><pre>12 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+13 set(OptiX_INSTALL_DIR "/tmp"             CACHE PATH   "Path to OptiX installed location.")
+14 set(COMPUTE_CAPABILITY "0"               CACHE STRING "GPU Compute Capability eg one of 0,30,50,52 " )
+15</pre>
+</div>
+<p>Conclude that it is better not to try to modify a cmake configuration to change OptiX version,
+instead just wiping the build dir and doing the primary opticks-cmake is the best way to operate.</p>
+<div class="section" id="primary-cmake">
+<h2>primary cmake<a class="headerlink" href="#primary-cmake" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>476 opticks-cmake(){
+477    local msg="=== $FUNCNAME : "
+478    local iwd=$PWD
+479    local bdir=$(opticks-bdir)
+480
+481    echo $msg configuring installation
+482
+483    mkdir -p $bdir
+484    [ -f "$bdir/CMakeCache.txt" ] &amp;&amp; echo $msg configured already use opticks-configure to wipe build dir and re-configure &amp;&amp; return
+485
+486    opticks-bcd
+487
+488    g4-
+489    xercesc-
+490
+491    opticks-cmake-info
+492
+493    cmake \
+494         -G "$(opticks-cmake-generator)" \
+495        -DCMAKE_BUILD_TYPE=Debug \
+496        -DCOMPUTE_CAPABILITY=$(opticks-compute-capability) \
+497        -DCMAKE_INSTALL_PREFIX=$(opticks-prefix) \
+498        -DOptiX_INSTALL_DIR=$(opticks-optix-install-dir) \
+499        -DGeant4_DIR=$(g4-cmake-dir) \
+500        -DXERCESC_LIBRARY=$(xercesc-library) \
+501        -DXERCESC_INCLUDE_DIR=$(xercesc-include-dir) \
+502        $* \
+503        $(opticks-sdir)
+504
+505    cd $iwd
+506 }</pre>
+</div>
+</div>
+<div class="section" id="cmake-modification-of-fundamentals-not-advisable">
+<h2>cmake modification of fundamentals not advisable<a class="headerlink" href="#cmake-modification-of-fundamentals-not-advisable" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>536 opticks-cmake-modify-ex3(){
+537
+538   local msg="=== $FUNCNAME : "
+539   local bdir=$(opticks-bdir)
+540   local bcache=$bdir/CMakeCache.txt
+541   [ ! -f "$bcache" ] &amp;&amp; echo $msg requires a preexisting $bcache from prior opticks-cmake run &amp;&amp; return
+542   opticks-bcd
+543
+544   echo $msg opticks-cmakecache-vars BEFORE MODIFY
+545   opticks-cmakecache-vars
+546
+547   cmake \
+548        -DOptiX_INSTALL_DIR=/Developer/OptiX_380 \
+549        -DCOMPUTE_CAPABILITY=30 \
+550           .
+551
+552   echo $msg opticks-cmakecache-vars AFTER MODIFY
+553   opticks-cmakecache-vars
+554
+555 }</pre>
+</div>
+</div>
+<div class="section" id="use-of-detected-version">
+<h2>Use of detected version<a class="headerlink" href="#use-of-detected-version" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>simon:opticks blyth$ opticks-find OXRAP_OPTIX_VERSION
+./optickscore/OpticksBufferSpec.cc:#if OXRAP_OPTIX_VERSION == 3080 || OXRAP_OPTIX_VERSION == 3090
+./optickscore/OpticksBufferSpec.cc:#elif OXRAP_OPTIX_VERSION == 400000 || OXRAP_OPTIX_VERSION == 40000 ||  OXRAP_OPTIX_VERSION == 40101
+./optickscore/OpticksBufferSpec.cc:#if OXRAP_OPTIX_VERSION == 3080 || OXRAP_OPTIX_VERSION == 3090
+./optickscore/OpticksBufferSpec.cc:#elif OXRAP_OPTIX_VERSION == 400000 || OXRAP_OPTIX_VERSION == 40000 ||  OXRAP_OPTIX_VERSION == 40101
+./optickscore/OpticksBufferSpec.cc:#if OXRAP_OPTIX_VERSION == 3080 || OXRAP_OPTIX_VERSION == 3090
+./optickscore/OpticksBufferSpec.cc:#elif OXRAP_OPTIX_VERSION == 400000 || OXRAP_OPTIX_VERSION == 40000 ||  OXRAP_OPTIX_VERSION == 40101
+./optickscore/tests/OpticksBufferSpecTest.cc:    LOG(info) &lt;&lt; "OXRAP_OPTIX_VERSION : " &lt;&lt; OXRAP_OPTIX_VERSION ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#if OXRAP_OPTIX_VERSION &gt;= 3080
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION &gt;= 3080 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " (NOT) OXRAP_OPTIX_VERSION &gt;= 3080 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#if OXRAP_OPTIX_VERSION == 3080
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION == 3080 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#elif OXRAP_OPTIX_VERSION == 3090
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION == 3090 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#elif OXRAP_OPTIX_VERSION == 40000
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION == 40000 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#elif OXRAP_OPTIX_VERSION == 400000
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION == 400000 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " (NOT) OXRAP_OPTIX_VERSION == 3080,3090,4000,400000 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#if OXRAP_OPTIX_VERSION == 3080 || OXRAP_OPTIX_VERSION == 3090
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION == 3080 || OXRAP_OPTIX_VERSION == 3090 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#elif OXRAP_OPTIX_VERSION == 40000
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION == 40000 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:#elif OXRAP_OPTIX_VERSION == 400000
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " OXRAP_OPTIX_VERSION == 400000 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./sysrap/tests/OpticksCMakeConfigTest.cc:    LOG(info) &lt;&lt; " (NOT) OXRAP_OPTIX_VERSION == 3080,3090,4000,400000 : " &lt;&lt; OXRAP_OPTIX_VERSION  ;
+./CMakeLists.txt:       message(STATUS "${name}.OXRAP_OPTIX_VERSION : ${OXRAP_OPTIX_VERSION} ")
+./CMakeLists.txt:# collects version defines, currently only OXRAP_OPTIX_VERSION and CFG4_G4VERSION_NUMBER
+./CMakeLists.txt:message("top.OXRAP_OPTIX_VERSION ${OXRAP_OPTIX_VERSION} ")
+./optixrap/CMakeLists.txt:set(OXRAP_OPTIX_VERSION 0 PARENT_SCOPE)
+./optixrap/CMakeLists.txt:            set(OXRAP_OPTIX_VERSION ${CMAKE_MATCH_1} PARENT_SCOPE)
+simon:opticks blyth$</pre>
+</div>
+</div>
+<div class="section" id="optix-version-detection">
+<h2>OptiX Version Detection<a class="headerlink" href="#optix-version-detection" title="Permalink to this headline">¶</a></h2>
+<p>OptiX Version detection parses ${OptiX_INCLUDE_DIRS}/optix.h</p>
+<div class="highlight-python"><pre>10 find_package(OptiX ${OPTICKS_OPTIX_VERSION} REQUIRED)
+11
+12
+13 ###### Find #define OPTIX_VERSION by parsing optix.h set variable at parent scope
+14 #
+15 # OptiX not playing ball with CMake version conventions, even EXACT has no teeth,
+16 # so parse the optix.h header to get the #define OPTIX_VERSION into CMake variable
+17 # This means can know the version at configure time
+18 # the value is written to inc/OpticksCMakeConfig.hh by top level CMakeLists.txt
+19
+20 set(OXRAP_OPTIX_VERSION 0 PARENT_SCOPE)
+21 if(OptiX_FOUND)
+22    message(STATUS "${name}.OPTICKS_OPTIX_VERSION : ${OPTICKS_OPTIX_VERSION}  FOUND ")
+23    message(STATUS "${name}.OptiX_INCLUDE_DIRS    : ${OptiX_INCLUDE_DIRS} ")
+24    message(STATUS "${name}.OptiX_LIBRARIES       : ${OptiX_LIBRARIES} ")
+25    file(READ "${OptiX_INCLUDE_DIRS}/optix.h" _contents)
+26    #message(STATUS "${name}.contents : ${_contents} ")
+27    string(REGEX REPLACE "\n" ";" _contents "${_contents}")
+28    foreach(_line ${_contents})
+29         if (_line MATCHES "#define OPTIX_VERSION ([0-9]+) ")
+30             set(OXRAP_OPTIX_VERSION ${CMAKE_MATCH_1} PARENT_SCOPE)
+31             message(STATUS "${name}._line ${_line} ===&gt; ${CMAKE_MATCH_1} ")
+32         endif()
+33    endforeach()
+34 else(OptiX_FOUND)
+35    message(STATUS "${name}.OPTICKS_OPTIX_VERSION : ${OPTICKS_OPTIX_VERSION}  NOT-FOUND ")
+36 endif(OptiX_FOUND)</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

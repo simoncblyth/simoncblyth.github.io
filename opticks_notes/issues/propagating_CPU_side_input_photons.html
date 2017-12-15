@@ -1,0 +1,296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>propagating_CPU_side_input_photons &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">propagating_CPU_side_input_photons</a><ul>
+<li><a class="reference internal" href="#testing-ncsg-emit-attached-to-container">testing NCSG emit attached to container</a></li>
+<li><a class="reference internal" href="#centralize-setnumphotonsperg4event-not-yet">centralize setNumPhotonsPerG4Event ? NOT YET</a></li>
+<li><a class="reference internal" href="#machinery-revolves-around-gensteps">Machinery revolves around gensteps</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/propagating_CPU_side_input_photons.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="propagating-cpu-side-input-photons">
+<h1>propagating_CPU_side_input_photons<a class="headerlink" href="#propagating-cpu-side-input-photons" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="testing-ncsg-emit-attached-to-container">
+<h2>testing NCSG emit attached to container<a class="headerlink" href="#testing-ncsg-emit-attached-to-container" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>tboolean-;tboolean-torus -D --okg4 --sourcedbg
+    # bi-simulate
+
+tboolean-;tboolean-torus -D --okg4 --sourcedbg  --load --vizg4
+    # load above evt, viz g4
+
+tboolean-;tboolean-torus -D --okg4 --sourcedbg  --load
+    # load above evt, viz ok
+
+## visually indistinguishable g4 and ok evts</pre>
+</div>
+</div>
+<div class="section" id="centralize-setnumphotonsperg4event-not-yet">
+<h2>centralize setNumPhotonsPerG4Event ? NOT YET<a class="headerlink" href="#centralize-setnumphotonsperg4event-not-yet" title="Permalink to this headline">¶</a></h2>
+<p>What does torch step need to know this ? Tis it not a CG4 detail ?</p>
+<div class="highlight-python"><pre>simon:opticks blyth$ opticks-find setNumPhotonsPerG4Event
+./cfg4/CGenerator.cc:void CGenerator::setNumPhotonsPerG4Event(unsigned num)
+./cfg4/CGenerator.cc:        evt-&gt;setNumPhotonsPerG4Event(getNumPhotonsPerG4Event()) ;
+./cfg4/CGenerator.cc:    setNumPhotonsPerG4Event( torch-&gt;getNumPhotonsPerG4Event());
+./cfg4/CGenerator.cc:    setNumPhotonsPerG4Event(0);
+./optickscore/Opticks.cc:    torchstep-&gt;setNumPhotonsPerG4Event(photons_per_g4event);
+./optickscore/OpticksEvent.cc:void OpticksEvent::setNumPhotonsPerG4Event(unsigned int n)
+./cfg4/CGenerator.hh:       void setNumPhotonsPerG4Event(unsigned num);
+./optickscore/OpticksEvent.hh:       void setNumPhotonsPerG4Event(unsigned int n);
+./opticksnpy/GenstepNPY.cpp:void GenstepNPY::setNumPhotonsPerG4Event(unsigned int n)
+./opticksnpy/TorchStepNPY.cpp:void TorchStepNPY::setNumPhotonsPerG4Event(unsigned int n)
+./opticksnpy/GenstepNPY.hpp:       void setNumPhotonsPerG4Event(unsigned int n);
+simon:opticks blyth$
+simon:opticks blyth$
+simon:opticks blyth$</pre>
+</div>
+</div>
+<div class="section" id="machinery-revolves-around-gensteps">
+<h2>Machinery revolves around gensteps<a class="headerlink" href="#machinery-revolves-around-gensteps" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>OpticksRun::setGensteps with gensteps from OpticksGen
+currently done at the highest level...</li>
+<li>handle input photons by associating them to a shim gensteps using the void* NPY::getAux</li>
+</ul>
+<div class="highlight-python"><pre>067 void OKMgr::propagate()
+ 68 {
+ 69     const Opticks&amp; ok = *m_ok ;
+ 70
+ 71     if(ok("nopropagate")) return ;
+ 72
+ 73     bool production = m_ok-&gt;isProduction();
+ 74
+ 75     if(ok.isLoad())
+ ..
+ 88     else if(m_num_event &gt; 0)
+ 89     {
+ 90         for(int i=0 ; i &lt; m_num_event ; i++)
+ 91         {
+ 92             m_run-&gt;createEvent(i);
+ 93
+ 94             m_run-&gt;setGensteps(m_gen-&gt;getInputGensteps());
+ 95
+ 96             m_propagator-&gt;propagate();
+ 97
+ 98             if(ok("save"))
+ 99             {
+100                 m_run-&gt;saveEvent();
+101                 if(!production) m_hub-&gt;anaEvent();
+102             }
+103
+104             m_run-&gt;resetEvent();
+105         }
+106
+107         m_ok-&gt;postpropagate();
+108     }
+109 }</pre>
+</div>
+<div class="highlight-python"><pre>56 void OKPropagator::propagate()
+57 {
+58     OK_PROFILE("OKPropagator::propagate.BEG");
+59
+60
+61     OpticksEvent* evt = m_hub-&gt;getEvent();
+62
+63     assert(evt);
+64
+65     LOG(fatal) &lt;&lt; "OKPropagator::propagate(" &lt;&lt; evt-&gt;getId() &lt;&lt; ") " &lt;&lt; m_ok-&gt;brief()   ;
+66
+67     if(m_viz) m_hub-&gt;target();     // if not Scene targetted, point Camera at gensteps
+68
+69     uploadEvent();
+70
+71     m_engine-&gt;propagate();        //  seedPhotonsFromGensteps, zeroRecords, propagate, indexSequence, indexBoundaries
+72
+73     OK_PROFILE("OKPropagator::propagate.MID");
+74
+75     if(m_viz) m_viz-&gt;indexPresentationPrep();
+76
+77     int nhit = m_ok-&gt;isSave() ? downloadEvent() : -1 ;
+78
+79     LOG(fatal) &lt;&lt; "OKPropagator::propagate(" &lt;&lt; evt-&gt;getId() &lt;&lt; ") DONE nhit: " &lt;&lt; nhit    ;
+80
+81     OK_PROFILE("OKPropagator::propagate.END");
+82 }</pre>
+</div>
+<div class="highlight-python"><pre>86 int OKPropagator::uploadEvent()
+87 {
+88     if(m_viz) m_viz-&gt;uploadEvent();
+//
+//    passing OpenGL buffers to the renderers
+//
+89
+90     int npho = -1 ;
+91 #ifdef WITH_OPTIX
+92     npho = m_engine-&gt;uploadEvent();
+93 #endif
+94     return npho ;
+95 }</pre>
+</div>
+<div class="highlight-python"><pre>274 void OpticksViz::uploadEvent()
+275 {
+276     if(m_hub-&gt;hasOpt("nooptix|noevent")) return ;
+277
+278     m_composition-&gt;update();
+279
+280     OpticksEvent* evt = m_run-&gt;getCurrentEvent() ;
+281
+282     uploadEvent(evt);
+283 }
+284
+285 void OpticksViz::uploadEvent(OpticksEvent* evt)
+286 {
+287     LOG(info) &lt;&lt; "OpticksViz::uploadEvent (" &lt;&lt; evt-&gt;getId() &lt;&lt; ")"  ;
+288
+289     m_scene-&gt;upload(evt);
+290
+291     if(m_hub-&gt;hasOpt("dbguploads"))
+292         m_scene-&gt;dump_uploads_table("OpticksViz::uploadEvent(--dbguploads)");
+293
+294     LOG(info) &lt;&lt; "OpticksViz::uploadEvent (" &lt;&lt; evt-&gt;getId() &lt;&lt; ") DONE "  ;
+295 }</pre>
+</div>
+<p>okop/OpEngine:</p>
+<div class="highlight-python"><pre>90 unsigned OpEngine::uploadEvent()
+91 {
+92     return m_oevt-&gt;upload();                   // creates OptiX buffers, uploads gensteps
+93 }</pre>
+</div>
+<p>oxrap/OEvent:</p>
+<div class="highlight-python"><pre>197 unsigned OEvent::upload()
+198 {
+199     OpticksEvent* evt = m_hub-&gt;getEvent();
+200     assert(evt);
+201     return upload(evt) ;
+202 }
+203
+204 unsigned OEvent::upload(OpticksEvent* evt)
+205 {
+206     OK_PROFILE("_OEvent::upload");
+207     LOG(debug)&lt;&lt;"OEvent::upload id " &lt;&lt; evt-&gt;getId()  ;
+208     setEvent(evt);
+209
+210     if(!m_buffers_created)
+211     {
+212         createBuffers(evt);
+213     }
+214     else
+215     {
+216         resizeBuffers(evt);
+217     }
+218     unsigned npho = uploadGensteps(evt);
+219
+220     LOG(debug)&lt;&lt;"OEvent::upload id " &lt;&lt; evt-&gt;getId() &lt;&lt; " DONE "  ;
+221
+222     OK_PROFILE("OEvent::upload");
+223
+224     return npho ;
+225 }</pre>
+</div>
+<div class="highlight-python"><pre>228 unsigned OEvent::uploadGensteps(OpticksEvent* evt)
+229 {
+230     NPY&lt;float&gt;* gensteps =  evt-&gt;getGenstepData() ;
+231
+232     unsigned npho = evt-&gt;getNumPhotons();
+233
+234     if(m_ocontext-&gt;isCompute())
+235     {
+236         LOG(info) &lt;&lt; "OEvent::uploadGensteps (COMPUTE) id " &lt;&lt; evt-&gt;getId() &lt;&lt; " " &lt;&lt; gensteps-&gt;getShapeString() &lt;&lt; " -&gt; " &lt;&lt; npho  ;
+237         OContext::upload&lt;float&gt;(m_genstep_buffer, gensteps);
+238     }
+239     else if(m_ocontext-&gt;isInterop())
+240     {
+241         assert(gensteps-&gt;getBufferId() &gt; 0);
+242         LOG(info) &lt;&lt; "OEvent::uploadGensteps (INTEROP) SKIP OpenGL BufferId " &lt;&lt; gensteps-&gt;getBufferId()  ;
+243     }
+244     return npho ;
+245 }</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>reemission review &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">reemission review</a><ul>
+<li><a class="reference internal" href="#crecorder-record-assuming-reemission-secondary-tracks-immediately-after-the-ab-tracks">CRecorder::Record assuming reemission &#8220;secondary&#8221;  tracks immediately after the AB tracks</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/reemission_review.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="reemission-review">
+<h1>reemission review<a class="headerlink" href="#reemission-review" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="crecorder-record-assuming-reemission-secondary-tracks-immediately-after-the-ab-tracks">
+<h2>CRecorder::Record assuming reemission &#8220;secondary&#8221;  tracks immediately after the AB tracks<a class="headerlink" href="#crecorder-record-assuming-reemission-secondary-tracks-immediately-after-the-ab-tracks" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>090 /**
+ 91 CRecorder::Record
+ 92 ===================
+ 93
+ 94 Not-zeroing m_slot for REJOINders
+ 95 ----------------------------------
+ 96
+ 97 * see notes/issues/reemission_review.rst
+ 98
+ 99 Rejoining happens on output side not in the crec CStp list.
+100
+101 The rejoins of AB(actually RE) tracks with reborn secondaries
+102 are done by writing two (or more) sequencts of track steps
+103 into the same record_id in the record buffer at the
+104 appropiate non-zeroed slot.
+105
+106 WAS a bit confused by this ...
+107
+108 This assumes that the REJOINing track will
+109 be the one immediately after the original AB.
+110 By virtue of the Cerenkov/Scintillation process setting:
+111
+112      SetTrackSecondariesFirst(true)
+113
+114 If not so, this will "join" unrelated tracks ?
+115
+116 Does this mean the local photon state is just for live mode ?
+117
+118
+119 **/
+120
+121 // invoked by CSteppingAction::setStep
+122 #ifdef USE_CUSTOM_BOUNDARY
+123 bool CRecorder::Record(DsG4OpBoundaryProcessStatus boundary_status)
+124 #else
+125 bool CRecorder::Record(G4OpBoundaryProcessStatus boundary_status)
+126 #endif
+127 {
+128     m_step_action = 0 ;
+129
+130     if(m_ctx._dbgrec)
+131     LOG(trace) &lt;&lt; "CRecorder::Record"
+132               &lt;&lt; " step_id " &lt;&lt; m_ctx._step_id
+133               &lt;&lt; " record_id " &lt;&lt; m_ctx._record_id
+134               &lt;&lt; " stage " &lt;&lt; CStage::Label(m_ctx._stage)
+135               ;
+136
+137     // stage is set by CG4Ctx::setStepOptical from CSteppingAction::setStep
+138     if(m_ctx._stage == CStage::START)
+139     {
+140         const G4StepPoint* pre = m_ctx._step-&gt;GetPreStepPoint() ;
+141         const G4ThreeVector&amp; pos = pre-&gt;GetPosition();
+142         m_crec-&gt;setOrigin(pos);
+143         m_crec-&gt;clearStp();
+144
+145         zeroPhoton();       // MUST be invoked prior to setBoundaryStatus, resetting photon history state
+146
+147         if(m_dbg) m_dbg-&gt;Clear();
+148     }
+149     else if(m_ctx._stage == CStage::REJOIN )
+150     {
+151         if(m_live)
+152         {
+153             decrementSlot();    // this allows REJOIN changing of a slot flag from BULK_ABSORB to BULK_REEMIT
+154         }
+155         else
+156         {
+157             m_crec-&gt;clearStp();
+158            // NB Not-zeroing m_slot for REJOINders, see above note
+159         }
+160     }
+161     else if(m_ctx._stage == CStage::RECOLL )
+162     {
+163         m_decrement_request = 0 ;
+164     }
+165 ...</pre>
+</div>
+<div class="highlight-python"><pre>simon:opticks blyth$ opticks-find SetTrackSecondariesFirst
+./cfg4/Cerenkov.cc:void Cerenkov::SetTrackSecondariesFirst(const G4bool state)
+./cfg4/DsPhysConsOptical.cc:        cerenkov-&gt;SetTrackSecondariesFirst(true);
+./cfg4/DsPhysConsOptical.cc:        cerenkov-&gt;SetTrackSecondariesFirst(true);
+./cfg4/DsPhysConsOptical.cc:    scint-&gt;SetTrackSecondariesFirst(true);
+./cfg4/DsPhysConsOptical.cc:        scint-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:        cerenkov-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:        cerenkov-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:        cerenkov-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:    scint-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:    scint-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:        scint-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:  fCerenkovProcess-&gt;SetTrackSecondariesFirst(true);
+./cfg4/OpNovicePhysicsList.cc:  fScintillationProcess-&gt;SetTrackSecondariesFirst(true);
+./cfg4/PhysicsList.cc:  opticalPhysics-&gt;SetTrackSecondariesFirst(kCerenkov,true);
+./cfg4/PhysicsList.cc:  opticalPhysics-&gt;SetTrackSecondariesFirst(kScintillation,true);
+./cfg4/Scintillation.cc:void Scintillation::SetTrackSecondariesFirst(const G4bool state)
+./cfg4/Cerenkov.hh:        void SetTrackSecondariesFirst(const G4bool state);
+./cfg4/Scintillation.hh:        void SetTrackSecondariesFirst(const G4bool state);
+./cfg4/DsG4Cerenkov.h:  void SetTrackSecondariesFirst(const G4bool state);
+./cfg4/DsG4Cerenkov.h:void DsG4Cerenkov::SetTrackSecondariesFirst(const G4bool state)
+./cfg4/DsG4Scintillation.h: void SetTrackSecondariesFirst(const G4bool state);
+./cfg4/DsG4Scintillation.h:void DsG4Scintillation::SetTrackSecondariesFirst(const G4bool state)
+simon:opticks blyth$</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

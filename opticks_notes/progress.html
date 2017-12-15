@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="index.html" />
     <link rel="next" title="Ideas" href="ideas.html" />
-    <link rel="prev" title="Opticks Development Notes" href="index.html" /> 
+    <link rel="prev" title="Opticks Abstracts" href="abstracts.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,7 +38,7 @@
           <a href="ideas.html" title="Ideas"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Opticks Development Notes"
+          <a href="abstracts.html" title="Opticks Abstracts"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -48,8 +48,21 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Progress</a><ul>
-<li><a class="reference internal" href="#july-solid-level-bbox-validations-via-and-fixes">2017 July : Solid level bbox Validations via  and fixes</a><ul>
+<li><a class="reference internal" href="#december">2017 December</a></li>
+<li><a class="reference internal" href="#november">2017 November</a></li>
+<li><a class="reference internal" href="#october">2017 October</a></li>
+<li><a class="reference internal" href="#september">2017 September</a><ul>
+<li><a class="reference internal" href="#big-geometry">Big Geometry</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#august-ellipsoid-torus-solve-quartic-troubles-hyperboloid-sor">2017 August : ellipsoid, torus solve-quartic troubles, hyperboloid, SOR</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
 <li><a class="reference internal" href="#solids">Solids</a></li>
+<li><a class="reference internal" href="#id1">Big Geometry</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#july-solid-level-bbox-validations-via-and-fixes">2017 July : Solid level bbox Validations via  and fixes</a><ul>
+<li><a class="reference internal" href="#id2">Solids</a></li>
 <li><a class="reference internal" href="#validation-machinery-for-comparison-g4dae-vs-gdml-gltf-geometries">Validation : machinery for comparison G4DAE vs GDML/glTF geometries</a></li>
 </ul>
 </li>
@@ -109,8 +122,8 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Opticks Development Notes</a></p>
+  <p class="topless"><a href="abstracts.html"
+                        title="previous chapter">Opticks Abstracts</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="ideas.html"
                         title="next chapter">Ideas</a></p>
@@ -145,14 +158,127 @@
 <p>Use <em>hg-month n</em> to review commits for the numbered month,
 negative n eg -12 for December of last year.</p>
 <p>Dont use colons in section text for easy title grepping.</p>
-<div class="section" id="july-solid-level-bbox-validations-via-and-fixes">
-<h2>2017 July : Solid level bbox Validations via  and fixes<a class="headerlink" href="#july-solid-level-bbox-validations-via-and-fixes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="december">
+<h2>2017 December<a class="headerlink" href="#december" title="Permalink to this headline">¶</a></h2>
+<p><strong>Aim : &#8220;&#8211;align&#8221; mode, taming randomness for perfectly aligned bi-simulation</strong></p>
+<ul class="simple">
+<li>investigate approaches allowing use of the same RNG sequence with Opticks and Geant4<ul>
+<li>if this turns out to be possible, can expect perfect (float precision level) matching</li>
+<li>would be an extremely powerful debugging tool, problems will then be directly apparent</li>
+</ul>
+</li>
+<li>add diffuse emitters for testing all angle incidence</li>
+<li>rework specular reflection to match Geant4, fixing polarization discrepancy</li>
+</ul>
+</div>
+<div class="section" id="november">
+<h2>2017 November<a class="headerlink" href="#november" title="Permalink to this headline">¶</a></h2>
+<p><strong>Focus : Improving automation/depth of integration testing</strong></p>
+<ul class="simple">
+<li>work with LZ user, on AssimpImporter issue</li>
+<li>introduce &#8220;&#8211;reflectcheat&#8221; so photons can stay aligned thru BR/SR</li>
+<li>direct point-by-point deviation comparisons, for use with common input photons,
+photons stay aligned until meet RNG (eg from BR/SR/SC/AB)</li>
+<li>introduce &#8220;&#8211;testauto&#8221; mode that dynamically changes surfaces (simplifying photon histories)
+allowing checks of intersect positions against SDFs without duplicating all the ~50 integration test
+geometries</li>
+<li>introduce G4 only universe wrapper volume, to reconcile the boundary-vs-volume
+model difference between G4 and Opticks</li>
+<li>get bounce truncation to match between Opticks and CFG4, eg for hall-of-mirrors situation</li>
+<li>reimplement the cfg4/CRecorder monolith into many pieces including CG4Ctx for better clarity</li>
+<li>translation of optical surfaces to Geant4 motivates a reworking of surface geometry
+representation, enhanced persisting simplifies processing and conversion to Geant4</li>
+</ul>
+</div>
+<div class="section" id="october">
+<h2>2017 October<a class="headerlink" href="#october" title="Permalink to this headline">¶</a></h2>
+<p><strong>Focus : push analytic NCSG throughout the Opticks processing/validation chain</strong></p>
+<ul class="simple">
+<li>enable any CSG solid to emit test photons, generated CPU side such that
+Opticks and Geant4 simulations are given exactly the same input photons</li>
+<li>pushed Opticks analytic geometry support thru to okg4, allowing Opticks test geometries to
+be auto-converted to Geant4 ones : for okg4 comparisons</li>
+<li>Opticks integration testing : automate comparison of intersect positions with geometry SDF values</li>
+<li>debugged Opticks installs on two new Linux distros, Axel desktop, Shandong headless GPU server</li>
+<li>presenting Opticks to the plenary session of the Geant4 Collaboration Meeting in Australia</li>
+</ul>
+</div>
+<div class="section" id="september">
+<h2>2017 September<a class="headerlink" href="#september" title="Permalink to this headline">¶</a></h2>
+<p><strong>Focus : embedded application of Opticks</strong></p>
+<ul class="simple">
+<li>work on some techniques to use Opticks on headless GPU server machines,
+such as combining pure compute raytrace geometry snapshots into mp4 movies</li>
+<li>work with Tao on Opticks/JUNO embedding</li>
+<li>implement embedded mode of Opticks operation using okop/OpMgr to run
+inside another process, such as JUNO offline</li>
+<li>introduce okop/OpMgr (pure compute Opticks manager)
+and usage on headless GPU servers</li>
+</ul>
+<div class="section" id="big-geometry">
+<h3>Big Geometry<a class="headerlink" href="#big-geometry" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Eureka : avoiding having two InstLODCull active regains sanity, with this proviso frustum culling and LOD forking are both working</li>
+<li>InstLODCull simplifications from moving uniform handling to UBO in RContext</li>
+</ul>
+</div>
+</div>
+<div class="section" id="august-ellipsoid-torus-solve-quartic-troubles-hyperboloid-sor">
+<h2>2017 August : ellipsoid, torus solve-quartic troubles, hyperboloid, SOR<a class="headerlink" href="#august-ellipsoid-torus-solve-quartic-troubles-hyperboloid-sor" title="Permalink to this headline">¶</a></h2>
+<p><strong>Focus : tricky primitives</strong></p>
+<div class="section" id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">implemented the primitives needed for JUNO : torus was difficult, also
+implemented hyperboloid  : perhaps we can look into replacing torus with
+hyperboloid for the PMT (it is much much easier computationally: just quadratics rather than quartics)</p>
+</li>
+<li><p class="first">moved analytic geometry processing pre-cache : so launch time is
+reduced from ~50 s to &lt; 5 s</p>
+</li>
+<li><p class="first">improved OpenGL visualisation performance using
+instance frustum culling and variable level-of-detail meshes for instances (=PMTs) based on
+distance to the instance.  These techniques use GPU compute (OpenGL transform feedback)
+prior to rendering each frame to skip instances that are not visible and replace distant instances with simpler
+geometry.   The improved performance will make it much easier to capture movies…</p>
+<p>As Macs only go to OpenGL 4.1 : I am limited to techniques available to that version
+which means no OpenGL compute shaders.  I could of use CUDA interop techniques but
+if possible it is better to stick with OpenGL for visualisation as that  can work on AMD
+(and perhaps even Intel) GPUs, meaning much more users can benefit from it.</p>
+</li>
+</ul>
+</div>
 <div class="section" id="solids">
 <h3>Solids<a class="headerlink" href="#solids" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>using doubles for quartic/cubic Solve now seems inevitable, issues are much reduced with doubles but not entirely fixed</li>
+<li>op &#8211;j1707 &#8211;gltf 3 : fully analytic raytrace works, not having any triangles saves gobs of GPU memory : investigate ways to skip torus intersects</li>
+<li>start on hyperbolic hyperboloid of one sheet, hope to model PMT neck with hyperboloid rather than subtracted torus</li>
+<li>torus artifacts gone, after move SolveCubicStrobachPolyFit to use initial gamma using SolveCubicPolyDivision instead of the cursed SolveCubicNumeric</li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h3>Big Geometry<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>investigate OpenGL LOD and Culling for coping with big geometry</li>
+<li>start checking whats needed to enable instance culling, over in  env- instcull-</li>
+<li>moving analytic GScene into geocache fixes j1707 slow startup, reducing from 50 secs to under 5 secs</li>
+<li>threading LODified meshes thru GGeoLib/GGeoTest</li>
+<li>prep for bringing dynamic GPU LOD fork+frustum culling like env- instcull- into oglrap-, plan to use first class citizen RBuf (of Renderer) to simplify the buffer juggling</li>
+</ul>
+</div>
+</div>
+<div class="section" id="july-solid-level-bbox-validations-via-and-fixes">
+<h2>2017 July : Solid level bbox Validations via  and fixes<a class="headerlink" href="#july-solid-level-bbox-validations-via-and-fixes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Solids<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>fix trapezoid misinterpretation (caused impingment) using new unplaced mesh dumping features added to both branches</li>
 <li>fixed cone-z misinterpretation</li>
 <li>added deltaphi imp via CSG_SEGMENT intersect, tboolean-cyslab tboolean-segment</li>
+<li>start on primitives needed for juno1707</li>
+<li>add zcut ellipsoid by using zsphere with scaling adjusted to be 1 for z</li>
+<li>investigate torus artifacts, by looking into cubic approach</li>
 </ul>
 </div>
 <div class="section" id="validation-machinery-for-comparison-g4dae-vs-gdml-gltf-geometries">
@@ -582,7 +708,7 @@ allowed to bring over the relevant env history into opticks repo</li>
           <a href="ideas.html" title="Ideas"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Opticks Development Notes"
+          <a href="abstracts.html" title="Opticks Abstracts"
              >previous</a> |</li>
         <li><a href="index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
       </ul>

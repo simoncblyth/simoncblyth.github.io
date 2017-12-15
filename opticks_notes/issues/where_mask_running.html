@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>where_mask_running &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">where_mask_running</a><ul>
+<li><a class="reference internal" href="#hmm-how-to-fast-forward-to-debug-single-photon">hmm : how to fast forward to debug single photon ?</a></li>
+<li><a class="reference internal" href="#test-masked-running">Test masked running</a></li>
+<li><a class="reference internal" href="#where-to-implement-masking">Where to implement masking ?</a><ul>
+<li><a class="reference internal" href="#trace-opticksevent-creation">Trace OpticksEvent creation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gpu-side">GPU Side</a></li>
+<li><a class="reference internal" href="#cpu-side">CPU Side</a><ul>
+<li><a class="reference internal" href="#id1">where mask running</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/where_mask_running.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="where-mask-running">
+<h1>where_mask_running<a class="headerlink" href="#where-mask-running" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="hmm-how-to-fast-forward-to-debug-single-photon">
+<h2>hmm : how to fast forward to debug single photon ?<a class="headerlink" href="#hmm-how-to-fast-forward-to-debug-single-photon" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>on CPU jumping to a photon is essential for easy debugging</li>
+<li>on GPU almost no point, as it dont help much with debugging,
+can just dump with pindex : but need to do it to match CPU</li>
+</ul>
+</div>
+<div class="section" id="test-masked-running">
+<h2>Test masked running<a class="headerlink" href="#test-masked-running" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>tboolean-;tboolean-box --mask 0,1,2,3 -D
+
+tboolean-;tboolean-box --okg4 --align --mask 0,1,2,3 --pindex 0 -D
+    ## runs, but needs some effort to make them the same photons as the unmasked sim
+
+tboolean-;tboolean-box --okg4 --align --mask 1230 --pindex 0 -D</pre>
+</div>
+</div>
+<div class="section" id="where-to-implement-masking">
+<h2>Where to implement masking ?<a class="headerlink" href="#where-to-implement-masking" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>where to apply the mask ?</li>
+<li>who needs to know about the mask ?</li>
+</ul>
+<p>Cannot just mask input photons, as the
+simulation also depends on curandStates etc..
+and when aligned the precooked rng relevant to a photon slot.</p>
+<p>So mask running needs to be aware of unmasked running, just restrict
+operations.</p>
+<p>This argues for incorporating an optional mask buffer
+within the OpticksEvent ?</p>
+<p>Alternatively the msk could be regarded as a global input living
+withing OpticksDbg ?</p>
+<ul class="simple">
+<li>have tried partially hiding the masking inside,  NEmitPhotonsNPY</li>
+</ul>
+<div class="section" id="trace-opticksevent-creation">
+<h3>Trace OpticksEvent creation<a class="headerlink" href="#trace-opticksevent-creation" title="Permalink to this headline">¶</a></h3>
+<p>ok-/OKMgr:</p>
+<div class="highlight-python"><pre>073 void OKMgr::propagate()
+ 74 {
+ 75     const Opticks&amp; ok = *m_ok ;
+ 76
+ 77     if(ok("nopropagate")) return ;
+ 78
+...
+ 94     else if(m_num_event &gt; 0)
+ 95     {
+ 96         for(int i=0 ; i &lt; m_num_event ; i++)
+ 97         {
+ 98             m_run-&gt;createEvent(i);
+ 99
+100             m_run-&gt;setGensteps(m_gen-&gt;getInputGensteps());
+101
+102             m_propagator-&gt;propagate();
+
+123 /**
+124 OpticksRun::setGensteps
+125 ------------------------
+126
+127 gensteps and maybe source photon data (via aux association) are lodged into m_g4evt
+128 before passing baton (sharing pointers) with m_evt
+129
+130 **/
+131 void OpticksRun::setGensteps(NPY&lt;float&gt;* gensteps) // THIS IS CALLED FROM VERY HIGH LEVEL IN OKMgr to OKG4Mgr
+132 {</pre>
+</div>
+<p>okg-/OpticksGen:</p>
+<div class="highlight-python"><pre>026 OpticksGen::OpticksGen(OpticksHub* hub)
+ 27    :
+ 28    m_hub(hub),
+ 29    m_ok(hub-&gt;getOpticks()),
+ 30    m_cfg(m_ok-&gt;getCfg()),
+ 31    m_ggb(hub-&gt;getGGeoBase()),
+ 32    m_blib(m_ggb-&gt;getBndLib()),
+ 33    m_lookup(hub-&gt;getLookup()),
+ 34    m_torchstep(NULL),
+ 35    m_fabstep(NULL),
+ 36    m_input_gensteps(NULL),
+ 37    m_csg_emit(hub-&gt;findEmitter()),
+ 38    m_emitter(m_csg_emit ? new NEmitPhotonsNPY(m_csg_emit, EMITSOURCE, m_ok-&gt;getSeed(), false) : NULL ),
+ 39    m_input_photons(NULL),
+ 40    m_source_code( m_emitter ? EMITSOURCE : m_ok-&gt;getSourceCode() )
+ 41 {
+
+ 51 void OpticksGen::init()
+ 52 {
+ 53     if(m_emitter)
+ 54     {
+ 55         initFromEmitter();
+ 56     }
+ 57     else
+ 58     {
+ 59         initFromGensteps();
+ 60     }
+ 61 }
+
+ 65 void OpticksGen::initFromEmitter()
+ 66 {
+ 67     // emitter bits and pieces get dressed up
+ 68     // perhaps make a class to do this ?
+ 69
+ 70     NPY&lt;float&gt;* iox = m_emitter-&gt;getPhotons();
+ 71     setInputPhotons(iox);
+ 72
+ 73     m_fabstep = m_emitter-&gt;getFabStep();
+ 74
+ 75     NPY&lt;float&gt;* gs = m_emitter-&gt;getFabStepData();
+ 76     assert( gs );
+ 77
+ 78     gs-&gt;setAux((void*)iox); // under-radar association of input photons with the fabricated genstep
+ 79
+ 80     // this gets picked up by OpticksRun::setGensteps
+ 81
+ 82
+ 83     const char* oac_ = "GS_EMITSOURCE" ;
+ 84
+ 85     gs-&gt;addActionControl(OpticksActionControl::Parse(oac_));
+ 86
+ 87     OpticksActionControl oac(gs-&gt;getActionControlPtr());
+ 88     setInputGensteps(gs);
+ 89
+ 90     LOG(info) &lt;&lt; "OpticksGen::initFromEmitter getting input photons and shim genstep "
+ 91               &lt;&lt; " input_photons " &lt;&lt; m_input_photons-&gt;getNumItems()
+ 92               &lt;&lt; " oac : " &lt;&lt; oac.description("oac")
+ 93               ;
+ 94 }</pre>
+</div>
+</div>
+</div>
+<div class="section" id="gpu-side">
+<h2>GPU Side<a class="headerlink" href="#gpu-side" title="Permalink to this headline">¶</a></h2>
+<p>Although not particularly useful for debugging, have to apply
+masking to GPU sim too for the output events to match those from CPU.</p>
+<p>All input buffers used by oxrap-/cu/generate.cu
+will need to be masked, directly for photon_id buffers and indirectly for gensteps.</p>
+<p>The buffers are created/uploaded with oxrap-/OEvent from the basis OpticksEvent, the
+heavy lifting done by OContext.</p>
+<dl class="docutils">
+<dt>genstep_buffer[genstep_offset]</dt>
+<dd>input gensteps</dd>
+<dt>source_buffer[photon_offset]</dt>
+<dd>input photons</dd>
+<dt>seed_buffer[photon_id]</dt>
+<dd>points to a genstep id, for emitconfig running
+this is probably all zeros : currently genstep still needed for
+emitconfig just for the gencode of EMITCONFIG</dd>
+<dt>rng_states[photon_id]</dt>
+<dd>buffer of pre-initialized curandState</dd>
+</dl>
+<div class="highlight-python"><pre>087 // input buffers
+ 88
+ 89 rtBuffer&lt;float4&gt;               genstep_buffer;
+ 90 rtBuffer&lt;float4&gt;               source_buffer;
+ 91 #ifdef WITH_SEED_BUFFER
+ 92 rtBuffer&lt;unsigned&gt;             seed_buffer ;
+ 93 #endif
+ 94 rtBuffer&lt;curandState, 1&gt;       rng_states ;
+ 95
+
+
+ 96 // output buffers
+ 97
+ 98 rtBuffer&lt;float4&gt;               photon_buffer;
+ 99 #ifdef WITH_RECORD
+100 rtBuffer&lt;short4&gt;               record_buffer;     // 2 short4 take same space as 1 float4 quad
+101 rtBuffer&lt;unsigned long long&gt;   sequence_buffer;   // unsigned long long, 8 bytes, 64 bits
+102 #endif
+103</pre>
+</div>
+</div>
+<div class="section" id="cpu-side">
+<h2>CPU Side<a class="headerlink" href="#cpu-side" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>where mask running<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Running on a subselection, picked via a where-mask of indices.
+Apply mask to emitconfig photons, and to the rng inputs.</p>
+<div class="highlight-python"><pre>161 CSource* CGenerator::initInputPhotonSource()
+162 {
+163     LOG(info) &lt;&lt; "CGenerator::initInputPhotonSource " ;
+164     NPY&lt;float&gt;* inputPhotons = m_hub-&gt;getInputPhotons();
+165     NPY&lt;float&gt;* inputGensteps = m_hub-&gt;getInputGensteps();
+166     GenstepNPY* gsnpy = m_hub-&gt;getGenstepNPY();
+167
+168     assert( inputPhotons );
+169     assert( inputGensteps );
+170     assert( gsnpy );
+171
+172     setGensteps(inputGensteps);
+173     setDynamic(false);
+174
+175     int verbosity = m_ok-&gt;isDbgSource() ? 10 : 0 ;
+176     CInputPhotonSource* cips = new CInputPhotonSource( m_ok, inputPhotons, gsnpy, verbosity) ;
+177
+178     setNumG4Event( cips-&gt;getNumG4Event() );
+179     setNumPhotonsPerG4Event( cips-&gt;getNumPhotonsPerG4Event() );
+180
+181     CSource* source  = static_cast&lt;CSource*&gt;(cips);
+182     return source ;
+183 }</pre>
+</div>
+<div class="highlight-python"><pre>013 void CPrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
+ 14 {
+ 15     m_source-&gt;GeneratePrimaryVertex(event);
+ 16 }</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

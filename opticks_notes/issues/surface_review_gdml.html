@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Surface Review GDML &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/surface_review_gdml.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="surface-review-gdml">
+<h1>Surface Review GDML<a class="headerlink" href="#surface-review-gdml" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>review of GDML write/read/reconstruction of border/skin surfaces</li>
+</ul>
+<p>Observations:</p>
+<ul class="simple">
+<li>ptr in names not optional</li>
+<li>use of ptr in names essential to flatten graph into tree ?</li>
+<li>pv names with the old pointers must get revived</li>
+</ul>
+<div class="highlight-python"><pre>854388       &lt;skinsurface name="Tube_surf" surfaceproperty="TubeSurface"&gt;
+854389         &lt;volumeref ref="lSurftube0x254b8d0"/&gt;
+854390       &lt;/skinsurface&gt;
+854391       &lt;bordersurface name="UpperChimneyTyvekSurface" surfaceproperty="UpperChimneyTyvekOpticalSurface"&gt;
+854392         &lt;physvolref ref="pUpperChimneyLS0x2547680"/&gt;
+854393         &lt;physvolref ref="pUpperChimneyTyvek0x2547de0"/&gt;
+854394       &lt;/bordersurface&gt;</pre>
+</div>
+<div class="highlight-python"><pre>g4-cls G4GDMLParser
+g4-cls G4GDMLReadStructure
+g4-cls G4GDMLWriteStructure</pre>
+</div>
+<p>rg:</p>
+<div class="highlight-python"><pre>277146     &lt;skinsurface name="Tube_surf" surfaceproperty="TubeSurface"&gt;
+277147       &lt;volumeref ref="lSurftube0x254b8d0"/&gt;
+277148     &lt;/skinsurface&gt;
+277149     &lt;bordersurface name="UpperChimneyTyvekSurface" surfaceproperty="UpperChimneyTyvekOpticalSurface"&gt;
+277150       &lt;physvolref ref="pUpperChimneyLS0x2547680"/&gt;
+277151       &lt;physvolref ref="pUpperChimneyTyvek0x2547de0"/&gt;
+277152     &lt;/bordersurface&gt;
+
+553   &lt;structure&gt;
+554     &lt;volume name="lUpperChimneyLS0x2547ae0"&gt;
+555       &lt;materialref ref="LS0x1481580"/&gt;
+556       &lt;solidref ref="Upper_LS_tube0x2547790"/&gt;
+557     &lt;/volume&gt;
+558     &lt;volume name="lUpperChimneySteel0x2547bb0"&gt;
+559       &lt;materialref ref="Steel0x14aa2a0"/&gt;
+560       &lt;solidref ref="Upper_Steel_tube0x2547890"/&gt;
+561     &lt;/volume&gt;
+562     &lt;volume name="lUpperChimneyTyvek0x2547c80"&gt;
+563       &lt;materialref ref="Tyvek0x14a7890"/&gt;
+564       &lt;solidref ref="Upper_Tyvek_tube0x2547990"/&gt;
+565     &lt;/volume&gt;
+566     &lt;volume name="lUpperChimney0x2547a50"&gt;
+567       &lt;materialref ref="Air0x14bb680"/&gt;
+568       &lt;solidref ref="Upper_Chimney0x25476d0"/&gt;
+569       &lt;physvol name="pUpperChimneyLS0x2547680"&gt;
+570         &lt;volumeref ref="lUpperChimneyLS0x2547ae0"/&gt;
+571       &lt;/physvol&gt;
+572       &lt;physvol name="pUpperChimneySteel0x2547d50"&gt;
+573         &lt;volumeref ref="lUpperChimneySteel0x2547bb0"/&gt;
+574       &lt;/physvol&gt;
+575       &lt;physvol name="pUpperChimneyTyvek0x2547de0"&gt;
+576         &lt;volumeref ref="lUpperChimneyTyvek0x2547c80"/&gt;
+577       &lt;/physvol&gt;
+578     &lt;/volume&gt;</pre>
+</div>
+<div class="highlight-python"><pre>g4-cls G4GDMLReadStructure
+
+111
+112       if (tag != "physvolref")  { continue; }
+113
+114       if (index==0)
+115         { pv1 = GetPhysvol(GenerateName(RefRead(child))); index++; } else
+116       if (index==1)
+117         { pv2 = GetPhysvol(GenerateName(RefRead(child))); index++; } else
+118       break;
+119    }
+120
+121    new G4LogicalBorderSurface(Strip(name),pv1,pv2,prop);
+122 }
+
+816 G4VPhysicalVolume* G4GDMLReadStructure::
+817 GetPhysvol(const G4String&amp; ref) const
+818 {
+819    G4VPhysicalVolume* physvolPtr =
+820      G4PhysicalVolumeStore::GetInstance()-&gt;GetVolume(ref,false);
+821
+822    if (!physvolPtr)
+823    {
+824      G4String error_msg = "Referenced physvol '" + ref + "' was not found!";
+825      G4Exception("G4GDMLReadStructure::GetPhysvol()", "ReadError",
+826                  FatalException, error_msg);
+827    }
+828
+829    return physvolPtr;
+830 }</pre>
+</div>
+<div class="highlight-python"><pre>g4-cls G4PhysicalVolumeStore
+
+078     G4VPhysicalVolume* GetVolume(const G4String&amp; name,
+ 79                                  G4bool verbose=true) const;
+ 80       // Return the pointer of the first volume in the collection having
+ 81       // that name.
+
+
+
+160 // ***************************************************************************
+161 // Retrieve the first volume pointer in the container having that name
+162 // ***************************************************************************
+163 //
+164 G4VPhysicalVolume*
+165 G4PhysicalVolumeStore::GetVolume(const G4String&amp; name, G4bool verbose) const
+166 {
+167   for (iterator i=GetInstance()-&gt;begin(); i!=GetInstance()-&gt;end(); i++)
+168   {
+169     if ((*i)-&gt;GetName() == name) { return *i; }
+170   }
+171   if (verbose)
+172   {
+173      std::ostringstream message;
+174      message &lt;&lt; "Volume NOT found in store !" &lt;&lt; G4endl
+175             &lt;&lt; "        Volume " &lt;&lt; name &lt;&lt; " NOT found in store !" &lt;&lt; G4endl
+176             &lt;&lt; "        Returning NULL pointer.";
+177      G4Exception("G4PhysicalVolumeStore::GetVolume()",
+178                  "GeomMgt1001", JustWarning, message);
+179   }
+180   return 0;
+181 }
+
+
+
+g4-cls G4GDMLRead
+
+145    G4String GenerateName(const G4String&amp; name, G4bool strip=false);</pre>
+</div>
+<div class="highlight-python"><pre>382 G4Transform3D G4GDMLWriteStructure::
+383 TraverseVolumeTree(const G4LogicalVolume* const volumePtr, const G4int depth)
+384 {
+
+
+443    const G4String name
+444      = GenerateName(tmplv-&gt;GetName(), tmplv);
+445    const G4String materialref
+446          = GenerateName(volumePtr-&gt;GetMaterial()-&gt;GetName(),
+447                         volumePtr-&gt;GetMaterial());
+448    const G4String solidref
+449          = GenerateName(solidPtr-&gt;GetName(),solidPtr);
+450
+451    xercesc::DOMElement* volumeElement = NewElement("volume");
+452    volumeElement-&gt;setAttributeNode(NewAttribute("name",name));
+453    xercesc::DOMElement* materialrefElement = NewElement("materialref");
+454    materialrefElement-&gt;setAttributeNode(NewAttribute("ref",materialref));
+455    volumeElement-&gt;appendChild(materialrefElement);
+456    xercesc::DOMElement* solidrefElement = NewElement("solidref");
+457    solidrefElement-&gt;setAttributeNode(NewAttribute("ref",solidref));
+458    volumeElement-&gt;appendChild(solidrefElement);
+459
+460    const G4int daughterCount = volumePtr-&gt;GetNoDaughters();
+461
+462    for (G4int i=0;i&lt;daughterCount;i++)   // Traverse all the children!
+463      {
+464        const G4VPhysicalVolume* const physvol = volumePtr-&gt;GetDaughter(i);
+465        const G4String ModuleName = Modularize(physvol,depth);
+466
+467        G4Transform3D daughterR;
+468
+469        if (ModuleName.empty())   // Check if subtree requested to be
+470      {                         // a separate module!
+471        daughterR = TraverseVolumeTree(physvol-&gt;GetLogicalVolume(),depth+1);
+472      }
+
+...
+
+514        else   // Is it a physvol?
+515          {
+516            G4RotationMatrix rot;
+517            if (physvol-&gt;GetFrameRotation() != 0)
+518          {
+519            rot = *(physvol-&gt;GetFrameRotation());
+520          }
+521            G4Transform3D P(rot,physvol-&gt;GetObjectTranslation());
+522
+523            PhysvolWrite(volumeElement,physvol,invR*P*daughterR,ModuleName);
+524          }
+525        BorderSurfaceCache(GetBorderSurface(physvol));
+526      }
+
+
+
+
+338 const G4LogicalBorderSurface*
+339 G4GDMLWriteStructure::GetBorderSurface(const G4VPhysicalVolume* const pvol)
+340 {
+341   G4LogicalBorderSurface* surf = 0;
+342   G4int nsurf = G4LogicalBorderSurface::GetNumberOfBorderSurfaces();
+343   if (nsurf)
+344   {
+345     const G4LogicalBorderSurfaceTable* btable =
+346           G4LogicalBorderSurface::GetSurfaceTable();
+347     std::vector&lt;G4LogicalBorderSurface*&gt;::const_iterator pos;
+348     for (pos = btable-&gt;begin(); pos != btable-&gt;end(); pos++)
+349     {
+350       if (pvol == (*pos)-&gt;GetVolume1())  // just the first in the couple
+351       {                                  // is enough
+352         surf = *pos; break;
+353       }
+354     }
+355   }
+356   return surf;
+357 }</pre>
+</div>
+<div class="highlight-python"><pre>107 void G4GDMLWriteStructure::PhysvolWrite(xercesc::DOMElement* volumeElement,
+108                                         const G4VPhysicalVolume* const physvol,
+109                                         const G4Transform3D&amp; T,
+110                                         const G4String&amp; ModuleName)
+111 {
+112    HepGeom::Scale3D scale;
+113    HepGeom::Rotate3D rotate;
+114    HepGeom::Translate3D translate;
+115
+116    T.getDecomposition(scale,rotate,translate);
+117
+118    const G4ThreeVector scl(scale(0,0),scale(1,1),scale(2,2));
+119    const G4ThreeVector rot = GetAngles(rotate.getRotation());
+120    const G4ThreeVector pos = T.getTranslation();
+121
+122    const G4String name = GenerateName(physvol-&gt;GetName(),physvol);
+123    const G4int copynumber = physvol-&gt;GetCopyNo();
+124
+125    xercesc::DOMElement* physvolElement = NewElement("physvol");
+126    physvolElement-&gt;setAttributeNode(NewAttribute("name",name));
+127    if (copynumber) physvolElement-&gt;setAttributeNode(NewAttribute("copynumber", copynumber));
+128
+129    volumeElement-&gt;appendChild(physvolElement);
+130
+131    G4LogicalVolume* lv;
+132    // Is it reflected?
+133    if (reflFactory-&gt;IsReflected(physvol-&gt;GetLogicalVolume()))
+134      {
+135        lv = reflFactory-&gt;GetConstituentLV(physvol-&gt;GetLogicalVolume());
+136      }
+137    else
+138      {
+139        lv = physvol-&gt;GetLogicalVolume();
+140      }
+141
+142    const G4String volumeref = GenerateName(lv-&gt;GetName(), lv);
+143
+144    if (ModuleName.empty())
+145    {
+146       xercesc::DOMElement* volumerefElement = NewElement("volumeref");
+147       volumerefElement-&gt;setAttributeNode(NewAttribute("ref",volumeref));
+148       physvolElement-&gt;appendChild(volumerefElement);
+149    }
+150    else</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

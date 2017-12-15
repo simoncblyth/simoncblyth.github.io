@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Primitive Cylinder With Inner Radius &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Primitive Cylinder With Inner Radius</a><ul>
+<li><a class="reference internal" href="#where-primitive-cy-with-inner-would-help">Where primitive Cy with Inner would Help</a></li>
+<li><a class="reference internal" href="#how-to-imp">How to imp ?</a></li>
+<li><a class="reference internal" href="#want-torus-primitive-to-have-an-associated-bounding-prim-triplet-cy-cy">Want torus primitive to have an associated bounding &#8220;prim&#8221; triplet: cy-cy</a></li>
+<li><a class="reference internal" href="#csg-intersect-bileaf">csg_intersect_bileaf</a></li>
+<li><a class="reference internal" href="#csg-intersect-part-h">csg_intersect_part.h</a></li>
+<li><a class="reference internal" href="#optix-selector-can-select-between-optix-prim-children">OptiX selector : can select between OptiX prim children</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/primitive_cylinder_with_inner.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="primitive-cylinder-with-inner-radius">
+<h1>Primitive Cylinder With Inner Radius<a class="headerlink" href="#primitive-cylinder-with-inner-radius" title="Permalink to this headline">¶</a></h1>
+<p>Currently cy with rmin is handled by
+CSG subtraction. Because the cylinder intersect
+is already complicated enough.</p>
+<div class="section" id="where-primitive-cy-with-inner-would-help">
+<h2>Where primitive Cy with Inner would Help<a class="headerlink" href="#where-primitive-cy-with-inner-would-help" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>quick torus bounding test to skip expensive (and artifact prone)
+quartic root finding when no intersect with a bounding in(cy,!cy)</li>
+<li>tree simplification</li>
+</ul>
+</div>
+<div class="section" id="how-to-imp">
+<h2>How to imp ?<a class="headerlink" href="#how-to-imp" title="Permalink to this headline">¶</a></h2>
+<p>Directly in the cy prim is a nono : too many cases.
+Perhaps some intermediate, single-operation primitive &#8220;bileaf&#8221;
+could be implemented.</p>
+</div>
+<div class="section" id="want-torus-primitive-to-have-an-associated-bounding-prim-triplet-cy-cy">
+<h2>Want torus primitive to have an associated bounding &#8220;prim&#8221; triplet: cy-cy<a class="headerlink" href="#want-torus-primitive-to-have-an-associated-bounding-prim-triplet-cy-cy" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>torus bounding cy-cy is known at initialization so should do it there</li>
+<li>need way to associate a CSG tree (no need to restrict to torus/prim)
+with a cheaper other CSG tree which can provide
+better bounding than aabb</li>
+<li>then</li>
+</ul>
+</div>
+<div class="section" id="csg-intersect-bileaf">
+<h2>csg_intersect_bileaf<a class="headerlink" href="#csg-intersect-bileaf" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>no need to restrict to cy-cy implement csg_intersect_bileaf
+for geometry of form operator(left,right) where left/right are primitives</li>
+<li>hmm no need for separate typecode when tree height is 1 its a bileaf</li>
+<li>interface needs to fit match csg_intersect_part</li>
+</ul>
+<div class="highlight-python"><pre>667             if(primitive)
+668             {
+669                 float4 isect = make_float4(0.f, 0.f, 0.f, 0.f) ;
+670
+671                 csg_intersect_part( prim, partOffset+nodeIdx-1, tmin, isect );</pre>
+</div>
+<p>intersect_analytic.cu</p>
+<ul class="simple">
+<li>needs to check if a tree has an associated bounding tree, and check intersect with that
+first ... no cannot do up here torus is usually deep in the tree</li>
+</ul>
+<div class="highlight-python"><pre>080
+ 81 #include "csg_intersect_primitive.h"
+ 82 #include "csg_intersect_part.h"
+ 83 #include "csg_intersect_boolean.h"
+ 84
+ 85 #include "intersect_ztubs.h"
+ 86 #include "intersect_zsphere.h"
+ 87 #include "intersect_box.h"
+ 88 #include "intersect_prism.h"
+ 89
+ 90
+ 91 RT_PROGRAM void bounds (int primIdx, float result[6])
+ 92 {
+ 93     //if(primIdx == 0) transform_test();
+...
+
+172 RT_PROGRAM void intersect(int primIdx)
+173 {
+174     const Prim&amp; prim    = primBuffer[primIdx];
+175
+176     unsigned partOffset  = prim.partOffset() ;
+177     unsigned numParts    = prim.numParts() ;   // &lt;-- nodes in tree for CSG_FLAGNODETREE
+178     unsigned primFlag    = prim.primFlag() ;
+179
+180     uint4 identity = identityBuffer[instance_index] ;
+181
+182
+183     if(primFlag == CSG_FLAGNODETREE)
+184     {
+185         Part pt0 = partBuffer[partOffset + 0] ;
+186
+187         identity.z = pt0.boundary() ;        // replace placeholder zero with test analytic geometry root node boundary
+188
+189         evaluative_csg( prim, identity );
+190         //intersect_csg( prim, identity );
+191
+192     }</pre>
+</div>
+</div>
+<div class="section" id="csg-intersect-part-h">
+<h2>csg_intersect_part.h<a class="headerlink" href="#csg-intersect-part-h" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>void csg_bounds_prim(int primIdx, const Prim&amp; prim, optix::Aabb* aabb )
+void csg_intersect_part(const Prim&amp; prim, const unsigned partIdx, const float&amp; tt_min, float4&amp; tt  )</pre>
+</div>
+<p>Fans out to the csg_bounds_sphere etc.. for all primitives:</p>
+<div class="highlight-python"><pre>105 static __device__
+106 void csg_intersect_part(const Prim&amp; prim, const unsigned partIdx, const float&amp; tt_min, float4&amp; tt  )
+107 {
+108     unsigned tranOffset = prim.tranOffset();
+109     unsigned planOffset = prim.planOffset();
+110     Part pt = partBuffer[partIdx] ;
+111
+112     unsigned typecode = pt.typecode() ;
+113     unsigned gtransformIdx = pt.gtransformIdx() ;  //  gtransformIdx is 1-based, 0 meaning None
+114     bool complement = pt.complement();
+115
+116     bool valid_intersect = false ;
+117
+118     if(gtransformIdx == 0)
+119     {
+120         switch(typecode)
+121         {
+122             case CSG_SPHERE:    valid_intersect = csg_intersect_sphere(   pt.q0,               tt_min, tt, ray.origin, ray.direction ) ; break ;
+123             case CSG_ZSPHERE:   valid_intersect = csg_intersect_zsphere(  pt.q0, pt.q1, pt.q2, tt_min, tt, ray.origin, ray.direction ) ; break ;
+124             case CSG_BOX:       valid_intersect = csg_intersect_box(      pt.q0,               tt_min, tt, ray.origin, ray.direction ) ; break ;
+125             case CSG_BOX3:      valid_intersect = csg_intersect_box3(     pt.q0,               tt_min, tt, ray.origin, ray.direction ) ; break ;</pre>
+</div>
+</div>
+<div class="section" id="optix-selector-can-select-between-optix-prim-children">
+<h2>OptiX selector : can select between OptiX prim children<a class="headerlink" href="#optix-selector-can-select-between-optix-prim-children" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>A selector is similar to a group in that it is a collection of higher
+level graph nodes. The number of nodes in the collection is set by
+rtSelectorSetChildCount, and the individual children are assigned with
+rtSelectorSetChild. Valid child types are rtGroup, rtGeometryGroup,
+rtTransform, and rtSelector.  The main difference between selectors and groups
+is that selectors do not have an acceleration structure associated with them.
+Instead, a visit program is specified with rtSelectorSetVisitProgram. This
+program is executed every time a ray encounters the selector node during graph
+traversal. The program specifies which children the ray should continue
+traversal through by calling rtIntersectChild.  A typical use case for a
+selector is dynamic (i.e. per-ray) level of detail: an object in the scene may
+be represented by a number of geometry nodes, each containing a different level
+of detail version of the object. The geometry groups containing these different
+representations can be assigned as children of a selector.
+
+The visit program
+can select which child to intersect using any criterion (e.g. based on the
+footprint or length of the current ray), and ignore the others.  As for groups
+and other graph nodes, child nodes of a selector can be shared with other graph
+nodes to allow flexible instancing.</pre>
+</div>
+<p>Maybe rays could have a lod flag used in selector to first
+intersect with cheap tree ?</p>
+<ul class="simple">
+<li>seems too awkward having to do something for all... rays
+just to handle some expensive geometry</li>
+</ul>
+<p>/Developer/OptiX/SDK/optixSelector/selector_example.cu:</p>
+<div class="highlight-python"><pre>29 #include &lt;optix.h&gt;
+30 #include &lt;optixu/optixu_math_namespace.h&gt;
+31
+32 using namespace optix;
+33
+34 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
+35
+36 RT_PROGRAM void visit()
+37 {
+38   unsigned int index = (unsigned int)( ray.direction.y &lt; 0.0f );
+39   rtIntersectChild( index );
+40 }</pre>
+</div>
+<div class="highlight-python"><pre>251     // Geometry group nodes
+252     RTgeometrygroup group[2];
+253     group[0] = makeGeometryGroup( context, instance[0], acceleration[0] );
+254     group[1] = makeGeometryGroup( context, instance[1], acceleration[1] );
+255
+256     /* Setup selector as top objects */
+257
+258     // Init selector node
+259     RTselector selector;
+260     RTprogram  stor_visit_program;
+261     RT_CHECK_ERROR( rtSelectorCreate(context,&amp;selector) );
+262     RT_CHECK_ERROR( rtProgramCreateFromPTXFile(context,ptxpath("selector_example.cu").c_str(),"visit",&amp;stor_visit_program) );
+263     RT_CHECK_ERROR( rtSelectorSetVisitProgram(selector,stor_visit_program) );
+264     RT_CHECK_ERROR( rtSelectorSetChildCount(selector,2) );
+265     RT_CHECK_ERROR( rtSelectorSetChild(selector, 0, group[0]) );
+266     RT_CHECK_ERROR( rtSelectorSetChild(selector, 1, group[1]) );</pre>
+</div>
+<p>Hmm could</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>j1707 near/far tweaks &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/j1707_near_far_tweaks.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="j1707-near-far-tweaks">
+<h1>j1707 near/far tweaks<a class="headerlink" href="#j1707-near-far-tweaks" title="Permalink to this headline">¶</a></h1>
+<p>Initial oglrap view is confusing due to bad near/far.</p>
+<p>Workaround is to target a smaller volume and ajust eye point</p>
+<div class="highlight-python"><pre>--target 12 --eye 0.5,0.5,0.0
+
+
+op --j1707 --gltf 3 --tracer  --instcull --lod 1 --lodconfig "levels=3,verbosity=2,instanced_lodify_onload=1" --debugger --target 12 --eye 0.5,0.5,0.0
+op --j1707 --gltf 3 --tracer  --instcull --lod 1 --lodconfig "levels=3,verbosity=2,instanced_lodify_onload=1" --debugger --target 12 --eye 0.5,0.5,0.0
+op --j1707 --gltf 3 --tracer  --instcull --lod 1 --debugger
+op --j1707 --gltf 3 --tracer  --instcull --lod 1 --debugger --target 12 --eye 0.5,0.5,0.0</pre>
+</div>
+<div class="highlight-python"><pre>550     &lt;box lunit="mm" name="sWorld0x14d9850" x="120000" y="120000" z="120000"/&gt;
+551   &lt;/solids&gt;
+552</pre>
+</div>
+<div class="highlight-python"><pre>2017-09-04 13:08:49.503 INFO  [2976304] [OpticksViz::uploadGeometry@264] OpticksViz::uploadGeometry setting target 0
+2017-09-04 13:08:49.503 FATAL [2976304] [OpticksGeometry::setTarget@131] OpticksGeometry::setTarget  based on CenterExtent from m_mesh0  target 0 aim 1 ce  0 0 0 60000
+2017-09-04 13:08:49.503 INFO  [2976304] [Composition::setCenterExtent@992] Composition::setCenterExtent ce 0.0000,0.0000,0.0000,60000.0000</pre>
+</div>
+<div class="highlight-python"><pre>delta:opticksgeo blyth$ opticks-find setTarget
+./ggeo/GColorizer.cc:void GColorizer::setTarget(nvec3* target)
+./ggeo/GColorizer.cc:    setTarget( reinterpret_cast&lt;nvec3*&gt;(vertex_colors) );
+./ggeo/GColorizer.cc:        LOG(warning) &lt;&lt; "GColorizer::traverse must setTarget before traverse " ;
+./oglrap/AxisApp.cc:    m_scene-&gt;setTarget(0, true);
+./oglrap/OpticksViz.cc:    m_geometry-&gt;setTarget(target, autocam);
+./oglrap/Scene.cc:    if(     strcmp(name,TARGET)==0)    setTarget(v);
+./oglrap/Scene.cc:        setTarget(value);
+./oglrap/Scene.cc:        m_hub-&gt;setTarget(m_touch);
+./oglrap/Scene.cc:void Scene::setTarget(unsigned int target, bool aim)
+./oglrap/Scene.cc:    m_hub-&gt;setTarget(target, aim); // sets center_extent in Composition via okg-/OpticksHub/OpticksGeometry
+./oglrap/tests/SceneCheck.cc:    m_scene-&gt;setTarget(target, autocam);
+./optickscore/Animator.cc:void Animator::setTarget(float* target)
+./optickscore/Animator.cc:    setTargetValue(val);
+./optickscore/Animator.cc:void Animator::setTargetValue(float val)
+./optickscore/Composition.cc:    // this is invoked by App::uploadGeometry/Scene::setTarget
+
+./opticksgeo/OpticksGeometry.cc:void  OpticksGeometry::setTarget(unsigned target, bool aim)
+./opticksgeo/OpticksGeometry.cc:        LOG(info) &lt;&lt; "OpticksGeometry::setTarget " &lt;&lt; target &lt;&lt; " deferring as geometry not loaded " ;
+./opticksgeo/OpticksGeometry.cc:    LOG(fatal)&lt;&lt;"OpticksGeometry::setTarget "
+
+./opticksgeo/OpticksHub.cc:void OpticksHub::setTarget(unsigned target, bool aim)
+./opticksgeo/OpticksHub.cc:    m_geometry-&gt;setTarget(target, aim );
+
+./ggeo/GColorizer.hh:        void setTarget(nvec3* target);  // where to write the colors
+./oglrap/Scene.hh:      //  void setTarget(unsigned int index=0, bool aim=true);
+./oglrap/Scene.hh:        void setTarget(unsigned int index=0, bool aim=true);
+./optickscore/Animator.hh:        void          setTargetValue(float value);
+./optickscore/Animator.hh:        void          setTarget(float* target); // qty to be stepped
+./opticksgeo/OpticksGeometry.hh:       void            setTarget(unsigned target=0, bool aim=true);
+./opticksgeo/OpticksHub.hh:       void setTarget(unsigned target=0, bool aim=true);
+./opticksnpy/TorchStepNPY.cpp:        case TARGET         : setTargetLocal(s)    ;break;
+./opticksnpy/TorchStepNPY.cpp:void TorchStepNPY::setTargetLocal(const char* s)
+./opticksnpy/TorchStepNPY.hpp:       void setTargetLocal(const char* s );
+delta:opticks blyth$
+delta:opticks blyth$</pre>
+</div>
+<div class="highlight-python"><pre>(lldb) bt
+* thread #1: tid = 0x2d97b1, 0x00007fff95594866 libsystem_kernel.dylib`__pthread_kill + 10, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+  * frame #0: 0x00007fff95594866 libsystem_kernel.dylib`__pthread_kill + 10
+    frame #1: 0x00007fff8cc3135c libsystem_pthread.dylib`pthread_kill + 92
+    frame #2: 0x00007fff93981b1a libsystem_c.dylib`abort + 125
+    frame #3: 0x00007fff9394b9bf libsystem_c.dylib`__assert_rtn + 321
+    frame #4: 0x0000000102284d7e libOpticksGeometry.dylib`OpticksGeometry::setTarget(this=0x0000000105b26440, target=0, aim=true) + 62 at OpticksGeometry.cc:119
+    frame #5: 0x000000010248466e libOGLRap.dylib`OpticksViz::uploadGeometry(this=0x0000000113cb4ee0) + 782 at OpticksViz.cc:266
+    frame #6: 0x0000000102484072 libOGLRap.dylib`OpticksViz::init(this=0x0000000113cb4ee0) + 802 at OpticksViz.cc:124
+    frame #7: 0x0000000102483d0a libOGLRap.dylib`OpticksViz::OpticksViz(this=0x0000000113cb4ee0, hub=0x0000000105b22490, idx=0x0000000113cb27a0, immediate=true) + 362 at OpticksViz.cc:86
+    frame #8: 0x0000000102484194 libOGLRap.dylib`OpticksViz::OpticksViz(this=0x0000000113cb4ee0, hub=0x0000000105b22490, idx=0x0000000113cb27a0, immediate=true) + 52 at OpticksViz.cc:88
+    frame #9: 0x0000000103c11300 libOK.dylib`OKMgr::OKMgr(this=0x00007fff5fbfe9e8, argc=13, argv=0x00007fff5fbfeac0, argforced=0x000000010001580d) + 544 at OKMgr.cc:43
+    frame #10: 0x0000000103c1164b libOK.dylib`OKMgr::OKMgr(this=0x00007fff5fbfe9e8, argc=13, argv=0x00007fff5fbfeac0, argforced=0x000000010001580d) + 43 at OKMgr.cc:49
+    frame #11: 0x000000010000a95d OTracerTest`main(argc=13, argv=0x00007fff5fbfeac0) + 1373 at OTracerTest.cc:64
+    frame #12: 0x00007fff90a075fd libdyld.dylib`start + 1
+(lldb)</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

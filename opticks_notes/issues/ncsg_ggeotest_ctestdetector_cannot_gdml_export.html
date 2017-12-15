@@ -1,0 +1,326 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ncsg_ggeotest_ctestdetector_cannot_gdml_export &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ncsg_ggeotest_ctestdetector_cannot_gdml_export</a><ul>
+<li><a class="reference internal" href="#fixed-issue">FIXED : Issue</a></li>
+<li><a class="reference internal" href="#observations">Observations</a><ul>
+<li><a class="reference internal" href="#ggeotest-created-geometry">GGeoTest created geometry</a></li>
+<li><a class="reference internal" href="#relationship-between-ncsg-trees">relationship between NCSG trees</a></li>
+<li><a class="reference internal" href="#setparent">setParent</a></li>
+<li><a class="reference internal" href="#cdetector-attachsurfaces-fail">CDetector::attachSurfaces fail</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#try-checking-the-g4-geometry-by-exporting-it">try checking the G4 geometry by exporting it</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/ncsg_ggeotest_ctestdetector_cannot_gdml_export.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ncsg-ggeotest-ctestdetector-cannot-gdml-export">
+<h1>ncsg_ggeotest_ctestdetector_cannot_gdml_export<a class="headerlink" href="#ncsg-ggeotest-ctestdetector-cannot-gdml-export" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="fixed-issue">
+<h2>FIXED : Issue<a class="headerlink" href="#fixed-issue" title="Permalink to this headline">¶</a></h2>
+<p>Export of test geometry to GDML fails, due to malformed bordersurface with
+missing pv reference.</p>
+<p>Fix required:</p>
+<ul class="simple">
+<li>avoid auto-containment motivated tree reversal, with a std::reverse in NCSG::Deserialize</li>
+<li>remove the reversal knockon code</li>
+<li>fixup parent/child hookup in GGeoTest</li>
+</ul>
+<div class="highlight-python"><pre>simon:opticks blyth$ tboolean-;tboolean-sphere-g
+(lldb) target create "CTestDetectorTest"
+2017-11-04 12:56:40.293 INFO  [2756750] [main@46] CTestDetectorTest
+2017-11-04 12:56:40.295 INFO  [2756750] [Opticks::dumpArgs@806] Opticks::configure argc 6
+  0 : CTestDetectorTest
+  1 : --test
+  2 : --testconfig
+  3 : analytic=1_csgpath=/tmp/blyth/opticks/tboolean-sphere--_name=tboolean-sphere--_mode=PyCsgInBox
+  4 : --export
+  5 : --dbgsurf
+2017-11-04 12:56:40.295 INFO  [2756750] [OpticksHub::configure@169] OpticksHub::configure m_gltf 0</pre>
+</div>
+</div>
+<div class="section" id="observations">
+<h2>Observations<a class="headerlink" href="#observations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ggeotest-created-geometry">
+<h3>GGeoTest created geometry<a class="headerlink" href="#ggeotest-created-geometry" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>bb0 is being overwritten by the overall bbox<ul>
+<li>have vague recollection of that</li>
+<li>only now visible because moved to reversed containment order for test geometry</li>
+</ul>
+</li>
+<li>parent node id are not being set<ul>
+<li>this is messing up bordersurface hookup and causing GDML export to fail</li>
+<li>maybe due to adhoc solid combination, not using standard GGeoLib way of making merged mesh
+NOPE the parent hookup needs to happen at tree level, prior to mesh creation</li>
+<li>TODO: find the standard parent hookup done by GGeo and take same approach for GGeoTest</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-python"><pre>2017-11-04 12:56:40.788 INFO  [2756750] [*GMaker::makeFromCSG@188] GMaker::makeFromCSG verbosity 0 index 2 boundary-spec Vacuum///Pyrex numTris 15164 trisMsg
+2017-11-04 12:56:40.868 INFO  [2756750] [*GMaker::makeFromCSG@188] GMaker::makeFromCSG verbosity 0 index 1 boundary-spec Rock//perfectAbsorbSurface/Vacuum numTris 19196 trisMsg
+2017-11-04 12:56:40.947 INFO  [2756750] [*GMaker::makeFromCSG@188] GMaker::makeFromCSG verbosity 0 index 0 boundary-spec Vacuum///Rock numTris 19196 trisMsg
+2017-11-04 12:56:40.948 INFO  [2756750] [GGeoTest::loadCSG@254] GGeoTest::loadCSG DONE
+2017-11-04 12:56:40.948 INFO  [2756750] [*GGeoTest::combineSolids@404] GGeoTest::combineSolids START
+2017-11-04 12:56:40.948 INFO  [2756750] [*GMergedMesh::combine@138] GMergedMesh::combine making new mesh  index 0 solids 3 verbosity 3
+2017-11-04 12:56:40.948 INFO  [2756750] [GSolid::Dump@204] GMergedMesh::combine (source solids) numSolid 3
+2017-11-04 12:56:40.948 INFO  [2756750] [GNode::dump@225] mesh.numSolids 0 mesh.ce.0 gfloat4      0.000      0.000      0.000      9.994
+2017-11-04 12:56:40.948 INFO  [2756750] [GNode::dump@225] mesh.numSolids 0 mesh.ce.0 gfloat4      0.000      0.000      0.000     11.000
+2017-11-04 12:56:40.948 INFO  [2756750] [GNode::dump@225] mesh.numSolids 0 mesh.ce.0 gfloat4      0.000      0.000      0.000     12.000
+2017-11-04 12:56:40.959 FATAL [2756750] [GMergedMesh::mergeSolidIdentity@564] GMergedMesh::mergeSolidIdentity mismatch  nodeIndex 2 m_cur_solid 0
+2017-11-04 12:56:40.960 INFO  [2756750] [GParts::add@736]  n0   0 n1   1 num_part_add   1 num_tran_add   1 num_plan_add   0 other_part_buffer  1,4,4 other_tran_buffer  1,3,4,4 other_plan_buffer  0,4
+2017-11-04 12:56:40.969 INFO  [2756750] [GParts::add@736]  n0   1 n1   2 num_part_add   1 num_tran_add   1 num_plan_add   0 other_part_buffer  1,4,4 other_tran_buffer  1,3,4,4 other_plan_buffer  0,4
+2017-11-04 12:56:40.978 FATAL [2756750] [GMergedMesh::mergeSolidIdentity@564] GMergedMesh::mergeSolidIdentity mismatch  nodeIndex 0 m_cur_solid 2
+2017-11-04 12:56:40.979 INFO  [2756750] [GParts::add@736]  n0   2 n1   3 num_part_add   1 num_tran_add   1 num_plan_add   0 other_part_buffer  1,4,4 other_tran_buffer  1,3,4,4 other_plan_buffer  0,4
+2017-11-04 12:56:41.000 INFO  [2756750] [GMergedMesh::dumpSolids@706] GMergedMesh::combine (combined result)  ce0 gfloat4      0.000      0.000      0.000     12.000
+    0 ce             gfloat4      0.000      0.000      0.000     12.000  bb  mn (   -12.000    -12.000    -12.000) mx (    12.000     12.000     12.000)
+    1 ce             gfloat4      0.000      0.000      0.000     11.000  bb  mn (   -11.000    -11.000    -11.000) mx (    11.000     11.000     11.000)
+    2 ce             gfloat4      0.000      0.000      0.000     12.000  bb  mn (   -12.000    -12.000    -12.000) mx (    12.000     12.000     12.000)
+    0 ni[nf/nv/nidx/pidx] (15164,45492,  2,4294967295)  id[nidx,midx,bidx,sidx]  (  2,  2, 33,  0)
+    1 ni[nf/nv/nidx/pidx] (19196,57588,  1,4294967295)  id[nidx,midx,bidx,sidx]  (  1,  1,123,  0)
+    2 ni[nf/nv/nidx/pidx] (19196,57588,  0,4294967295)  id[nidx,midx,bidx,sidx]  (  0,  0,  1,  0)
+2017-11-04 12:56:41.000 INFO  [2756750] [*GGeoTest::combineSolids@437] GGeoTest::combineSolids DONE</pre>
+</div>
+</div>
+<div class="section" id="relationship-between-ncsg-trees">
+<h3>relationship between NCSG trees<a class="headerlink" href="#relationship-between-ncsg-trees" title="Permalink to this headline">¶</a></h3>
+<p>Full geometry uses GLTF file to represent structural relationship.  For test
+geometry simple containment assumptions used.</p>
+<ul class="simple">
+<li></li>
+</ul>
+<div class="highlight-python"><pre>delta:opticksnpy blyth$ cd /tmp/blyth/opticks/tboolean-sphere--/
+delta:tboolean-sphere-- blyth$ l
+total 8
+-rw-r--r--  1 blyth  wheel   62 Nov  4 12:56 csg.txt
+drwxr-xr-x  8 blyth  wheel  272 Nov  2 18:55 2
+drwxr-xr-x  8 blyth  wheel  272 Nov  2 12:46 0
+drwxr-xr-x  8 blyth  wheel  272 Nov  2 12:46 1
+delta:tboolean-sphere-- blyth$
+delta:tboolean-sphere-- blyth$ cat csg.txt
+Vacuum///Rock
+Rock//perfectAbsorbSurface/Vacuum
+Vacuum///Pyrex</pre>
+</div>
+</div>
+<div class="section" id="setparent">
+<h3>setParent<a class="headerlink" href="#setparent" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>delta:opticks blyth$ opticks-find "&gt;setParent"
+./assimprap/AssimpGGeo.cc:        solid-&gt;setParent(parent);
+./assimprap/AssimpTree.cc:       wrap-&gt;setParent(parent);
+./ggeo/GScene.cc:    node-&gt;setParent(parent) ;   // tree hookup
+./opticksnpy/MultiViewNPY.cpp:    vec-&gt;setParent(this);</pre>
+</div>
+<p>Recursive method passes parent GSolid along to allow hookup</p>
+<div class="highlight-python"><pre>818 void AssimpGGeo::convertStructure(GGeo* gg, AssimpNode* node, unsigned int depth, GSolid* parent)
+819 {
+820     // recursive traversal of the AssimpNode tree
+821     // note that full tree is traversed even when a partial selection is applied
+822
+823
+824     GSolid* solid = convertStructureVisit( gg, node, depth, parent);
+825
+826     bool selected = m_nosel ? true : m_selection &amp;&amp; m_selection-&gt;contains(node) ;   // twas hotspot for geocache creation before nosel special case
+827
+828     solid-&gt;setSelected(selected);
+829
+830     gg-&gt;add(solid);
+831
+832     if(parent) // GNode hookup
+833     {
+834         parent-&gt;addChild(solid);
+835         solid-&gt;setParent(parent);
+836     }
+837     else
+838     {
+839         assert(node-&gt;getIndex() == 0);   // only root node has no parent
+840     }
+841
+842     for(unsigned int i = 0; i &lt; node-&gt;getNumChildren(); i++) convertStructure(gg, node-&gt;getChild(i), depth + 1, solid);
+843 }</pre>
+</div>
+</div>
+<div class="section" id="cdetector-attachsurfaces-fail">
+<h3>CDetector::attachSurfaces fail<a class="headerlink" href="#cdetector-attachsurfaces-fail" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>2017-11-04 12:56:41.847 INFO  [2756750] [CTraverser::Summary@106] CDetector::traverse numMaterials 3 numMaterialsWithoutMPT 0
+2017-11-04 12:56:41.847 INFO  [2756750] [CDetector::traverse@101] [--dbgsurf] CDetector::traverse DONE
+2017-11-04 12:56:41.847 INFO  [2756750] [CDetector::attachSurfaces@266] [--dbgsurf] CDetector::attachSurfaces START closing gsurlib, creating csurlib
+2017-11-04 12:56:41.847 INFO  [2756750] [GSurLib::close@134] [--dbgsurf] GSurLib::close START
+2017-11-04 12:56:41.847 INFO  [2756750] [GSurLib::examineSolidBndSurfaces@189] [--dbgsurf] GSurLib::examineSolidBndSurfaces numSolids 3 mm 0x10bb124f0
+2017-11-04 12:56:41.847 INFO  [2756750] [GSurLib::examineSolidBndSurfaces@213] GSurLib::examineSolidBndSurfaces [--dbgsurf]  numSolids 3
+ j      0 i(so-idx)      2 lv box_log0
+ j      1 i(so-idx)      1 lv box_log1
+ j      2 i(so-idx)      0 lv sphere_log2
+ j      0 i(so-idx)      2 node(ni.z)      0 node2(id.x)      0 boundary(id.z)      1 parent(ni.w) 4294967295 nodeinfo  (19196,57588,  0,4294967295)  bname Vacuum///Rock
+ j      1 i(so-idx)      1 node(ni.z)      1 node2(id.x)      1 boundary(id.z)    123 parent(ni.w) 4294967295 nodeinfo  (19196,57588,  1,4294967295)  bname Rock//perfectAbsorbSurface/Vacuum isur
+ j      2 i(so-idx)      0 node(ni.z)      2 node2(id.x)      2 boundary(id.z)     33 parent(ni.w) 4294967295 nodeinfo  (15164,45492,  2,4294967295)  bname Vacuum///Pyrex
+2017-11-04 12:56:41.848 INFO  [2756750] [GSurLib::examineSolidBndSurfaces@286]  node_mismatch 0 node2_mismatch 0
+2017-11-04 12:56:41.848 INFO  [2756750] [GSurLib::close@141] [--dbgsurf] GSurLib::close DONE
+2017-11-04 12:56:41.848 INFO  [2756750] [CSurLib::convert@136] [--dbgsurf] CSurLib::convert  numSur 48
+2017-11-04 12:56:41.848 INFO  [2756750] [*CSurLib::makeBorderSurface@225] CSurLib::makeBorderSurface name perfectAbsorbSurface ipv1 1 ipv2 4294967295
+Assertion failed: (ipv2 != GSurLib::UNSET &amp;&amp; "CSurLib::makeBorderSurface ipv2 UNSET"), function makeBorderSurface, file /Users/blyth/opticks/cfg4/CSurLib.cc, line 234.
+Process 68667 stopped
+* thread #1: tid = 0x2a108e, 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+    frame #0: 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10
+libsystem_kernel.dylib`__pthread_kill + 10:
+-&gt; 0x7fff8cc60866:  jae    0x7fff8cc60870            ; __pthread_kill + 20
+   0x7fff8cc60868:  movq   %rax, %rdi
+   0x7fff8cc6086b:  jmp    0x7fff8cc5d175            ; cerror_nocancel
+   0x7fff8cc60870:  retq
+(lldb)</pre>
+</div>
+</div>
+</div>
+<div class="section" id="try-checking-the-g4-geometry-by-exporting-it">
+<h2>try checking the G4 geometry by exporting it<a class="headerlink" href="#try-checking-the-g4-geometry-by-exporting-it" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>this motivated adding some asserts for earlier warning of bordersurface issues</li>
+</ul>
+<div class="highlight-python"><pre>simon:optickscore blyth$ tboolean-;tboolean-sphere-g --export
+(lldb) target create "CTestDetectorTest"
+Current executable set to 'CTestDetectorTest' (x86_64).
+(lldb) settings set -- target.run-args  "--test" "--testconfig" "analytic=1_csgpath=/tmp/blyth/opticks/tboolean-sphere--_name=tboolean-sphere--_mode=PyCsgInBox" "--export"
+(lldb) r
+Process 64968 launched: '/usr/local/opticks/lib/CTestDetectorTest' (x86_64)
+2017-11-02 18:44:35.529 INFO  [2406779] [main@42] CTestDetectorTest
+  0 : CTestDetectorTest
+  1 : --test
+  2 : --testconfig
+  3 : analytic=1_csgpath=/tmp/blyth/opticks/tboolean-sphere--_name=tboolean-sphere--_mode=PyCsgInBox
+  4 : --export
+2017-11-02 18:44:35.705 INFO  [2406779] [NSensorList::read@186] NSensorList::read  found 6888 sensors.
+
+
+(lldb) f 4
+frame #4: 0x0000000101c776d3 libG4persistency.dylib`G4GDMLWriteStructure::BorderSurfaceCache(this=0x000000010da00800, bsurf=&lt;unavailable&gt;) + 291 at G4GDMLWriteStructure.cc:245
+   242
+   243     const G4String volumeref1 = GenerateName(bsurf-&gt;GetVolume1()-&gt;GetName(),
+   244                                              bsurf-&gt;GetVolume1());
+-&gt; 245     const G4String volumeref2 = GenerateName(bsurf-&gt;GetVolume2()-&gt;GetName(),
+   246                                              bsurf-&gt;GetVolume2());
+   247     xercesc::DOMElement* volumerefElement1 = NewElement("physvolref");
+   248     xercesc::DOMElement* volumerefElement2 = NewElement("physvolref");
+(lldb) f 5
+frame #5: 0x0000000101c791af libG4persistency.dylib`G4GDMLWriteStructure::TraverseVolumeTree(this=0x000000010da00800, volumePtr=0x0000000112f43770, depth=0) + 4367 at G4GDMLWriteStructure.cc:525
+   522
+   523             PhysvolWrite(volumeElement,physvol,invR*P*daughterR,ModuleName);
+   524           }
+-&gt; 525         BorderSurfaceCache(GetBorderSurface(physvol));
+   526       }
+   527
+   528     if (cexport)  { ExportEnergyCuts(volumePtr); }
+(lldb) bt
+* thread #1: tid = 0x24b97b, 0x0000000101c606cb libG4persistency.dylib`G4GDMLWrite::GenerateName(G4String const&amp;, void const*) [inlined] std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::__get_short_size() const at string:1683, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS (code=1, address=0x18)
+    frame #0: 0x0000000101c606cb libG4persistency.dylib`G4GDMLWrite::GenerateName(G4String const&amp;, void const*) [inlined] std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::__get_short_size() const at string:1683
+    frame #1: 0x0000000101c606cb libG4persistency.dylib`G4GDMLWrite::GenerateName(G4String const&amp;, void const*) [inlined] std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::size() const at string:1398
+    frame #2: 0x0000000101c606cb libG4persistency.dylib`G4GDMLWrite::GenerateName(G4String const&amp;, void const*) [inlined] std::__1::basic_stringstream&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::basic_stringstream(this=0x0000000101cb31a8, __wch=&lt;unavailable&gt;) at ostream:1068
+    frame #3: 0x0000000101c606cb libG4persistency.dylib`G4GDMLWrite::GenerateName(this=0x0000000000000000, name=0x0000000000000018, ptr=0x0000000000000000) + 331 at G4GDMLWrite.cc:126
+    frame #4: 0x0000000101c776d3 libG4persistency.dylib`G4GDMLWriteStructure::BorderSurfaceCache(this=0x000000010da00800, bsurf=&lt;unavailable&gt;) + 291 at G4GDMLWriteStructure.cc:245
+  * frame #5: 0x0000000101c791af libG4persistency.dylib`G4GDMLWriteStructure::TraverseVolumeTree(this=0x000000010da00800, volumePtr=0x0000000112f43770, depth=0) + 4367 at G4GDMLWriteStructure.cc:525
+    frame #6: 0x0000000101c612d3 libG4persistency.dylib`G4GDMLWrite::Write(this=0x000000010da00800, fname=0x00007fff5fbfdad8, logvol=0x0000000112f43770, setSchemaLocation=&lt;unavailable&gt;, depth=0, refs=&lt;unavailable&gt;) + 1587 at G4GDMLWrite.cc:228
+    frame #7: 0x000000010171176c libcfg4.dylib`G4GDMLParser::Write(this=0x0000000112f8d880, filename=0x00007fff5fbfdad8, pvol=0x0000000112f42200, refs=true, schemaLocation=0x00007fff5fbfd950) + 236 at G4GDMLParser.icc:68
+    frame #8: 0x00000001017109a7 libcfg4.dylib`CDetector::export_gdml(this=0x0000000112f3c600, path_=0x0000000112f9a0a0) + 599 at CDetector.cc:309
+    frame #9: 0x000000010168a436 libcfg4.dylib`CGeometry::export_(this=0x0000000112f3c590) + 1558 at CGeometry.cc:155
+    frame #10: 0x0000000101689e06 libcfg4.dylib`CGeometry::postinitialize(this=0x0000000112f3c590) + 438 at CGeometry.cc:123
+    frame #11: 0x0000000101736d0b libcfg4.dylib`CG4::postinitialize(this=0x00007fff5fbfe840) + 683 at CG4.cc:221
+    frame #12: 0x00000001017369fc libcfg4.dylib`CG4::initialize(this=0x00007fff5fbfe840) + 540 at CG4.cc:176
+    frame #13: 0x00000001017367a5 libcfg4.dylib`CG4::init(this=0x00007fff5fbfe840) + 21 at CG4.cc:150
+    frame #14: 0x000000010173677c libcfg4.dylib`CG4::CG4(this=0x00007fff5fbfe840, hub=0x00007fff5fbfe8f8) + 1564 at CG4.cc:143
+    frame #15: 0x00000001017367cd libcfg4.dylib`CG4::CG4(this=0x00007fff5fbfe840, hub=0x00007fff5fbfe8f8) + 29 at CG4.cc:144
+    frame #16: 0x000000010000ca29 CTestDetectorTest`main(argc=5, argv=0x00007fff5fbfecb8) + 969 at CTestDetectorTest.cc:53
+    frame #17: 0x00007fff880d35fd libdyld.dylib`start + 1
+(lldb)</pre>
+</div>
+<div class="highlight-python"><pre>g4-cls G4GDMLWriteStructure</pre>
+</div>
+<p>Hmm probably because have a border surface on the world.</p>
+<p>Argh ... nope need to rejig GSurLib to work with analytic geometry.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

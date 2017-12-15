@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Viz On Headless GPU Compute Server &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Viz On Headless GPU Compute Server</a><ul>
+<li><a class="reference internal" href="#objective">Objective</a></li>
+<li><a class="reference internal" href="#snaptest-optix-compute-geometry-ray-trace-snapshot-executable">SnapTest : OptiX compute geometry ray trace snapshot executable</a></li>
+<li><a class="reference internal" href="#ok-tests-otracertest-cc">ok/tests/OTracerTest.cc</a></li>
+<li><a class="reference internal" href="#opmgr">OpMgr ?</a></li>
+<li><a class="reference internal" href="#which-pkg-to-put-snaptest-optest">Which pkg to put SnapTest/OpTest ?</a></li>
+<li><a class="reference internal" href="#gui-snapping">GUI snapping</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/viz_on_headless_gpu_compute_server.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="viz-on-headless-gpu-compute-server">
+<h1>Viz On Headless GPU Compute Server<a class="headerlink" href="#viz-on-headless-gpu-compute-server" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="objective">
+<h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>find way to exercise Opticks, and test performance on a headless GPU server,
+that does not even have OpenGL libs</li>
+</ul>
+</div>
+<div class="section" id="snaptest-optix-compute-geometry-ray-trace-snapshot-executable">
+<h2>SnapTest : OptiX compute geometry ray trace snapshot executable<a class="headerlink" href="#snaptest-optix-compute-geometry-ray-trace-snapshot-executable" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>most functionality already exists just need to extracate</li>
+<li>oxrap- should have all the dependencies needed to load geometry
+and run the ray tracer without any OpenGL graphics dependancy,
+hmm probably need to operate at higher level than oxrap</li>
+<li>Same flow as ok/tests/OTracerTest.cc but with OptiX compute extracated,
+and added ppm (or png) writing.</li>
+</ul>
+</div>
+<div class="section" id="ok-tests-otracertest-cc">
+<h2>ok/tests/OTracerTest.cc<a class="headerlink" href="#ok-tests-otracertest-cc" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>39 int main(int argc, char** argv)
+40 {
+..   ...  logging setup
+63
+64     OKMgr ok(argc, argv, "--tracer" );
+65
+66     ok.visualize();
+67
+68     exit(EXIT_SUCCESS);
+69 }</pre>
+</div>
+</div>
+<div class="section" id="opmgr">
+<h2>OpMgr ?<a class="headerlink" href="#opmgr" title="Permalink to this headline">¶</a></h2>
+<p>Actually compute only Opticks is an increasing need, not
+just for SnapTest... so make an OpMgr ? migrate ok/OKMgr
+into okop/OpMgr stripping out the viz, so okop tests using
+OpMgr can be compiled and linked on machines without OpenGL</p>
+</div>
+<div class="section" id="which-pkg-to-put-snaptest-optest">
+<h2>Which pkg to put SnapTest/OpTest ?<a class="headerlink" href="#which-pkg-to-put-snaptest-optest" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://simoncblyth.bitbucket.io/opticks/docs/overview.html#project-dependencies">https://simoncblyth.bitbucket.io/opticks/docs/overview.html#project-dependencies</a></li>
+<li>okop</li>
+<li>oxrap</li>
+</ul>
+</div>
+<div class="section" id="gui-snapping">
+<h2>GUI snapping<a class="headerlink" href="#gui-snapping" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>op --j1707 --gltf 3 --tracer --target 12 --eye 0.85,0.85,0. --snap --rendermode +bb0,+in1,+in2,+in3,-global</pre>
+</div>
+<div class="highlight-python"><pre>okop-snap()
+{
+    ## intended to give same snap as okop-snap-gui : currently getting black screen
+    op --snap --j1707 --gltf 3 --tracer --target 12 --eye 0.85,0.85,0.
+    libpng-;libpng-- /tmp/snap.ppm
+}
+
+
+okop-snap-gui()
+{
+    ## to make a snap, need to switch to OptiX render mode with "O" key once GUI has launched
+    op  --j1707 --gltf 3 --tracer --target 12 --eye 0.85,0.85,0. --rendermode +bb0,+in1,+in2,+in3,-global
+    libpng-;libpng-- /tmp/snap.ppm
+}</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

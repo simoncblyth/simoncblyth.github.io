@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>G4TheRayTracer &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">G4TheRayTracer</a><ul>
+<li><a class="reference internal" href="#g4-g4-cls-g4theraytracer">g4-;g4-cls G4TheRayTracer</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/G4TheRayTracer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="g4theraytracer">
+<h1>G4TheRayTracer<a class="headerlink" href="#g4theraytracer" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><pre>g4-;g4-cls G4RTSimpleScanner
+g4-;g4-cls G4VRTScanner
+
+
+
+
+
+tboolean-;tboolean-zsphere1 --okg4 --g4snap -D
+
+open /tmp/blyth/opticks/CRayTracer.jpeg</pre>
+</div>
+<ul class="simple">
+<li>after apply VisAtt get smth</li>
+<li>need to hook up Composition to take the snap with standard viewpoint/camera config</li>
+</ul>
+<div class="highlight-python"><pre>(lldb) b "G4TheRayTracer::CreateBitMap"
+
+
+Process 24031 stopped
+* thread #1: tid = 0x5d6b73, 0x0000000104677477 libG4RayTracer.dylib`G4TheRayTracer::CreateBitMap(this=0x000000010f0578a0) + 23 at G4TheRayTracer.cc:194, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000104677477 libG4RayTracer.dylib`G4TheRayTracer::CreateBitMap(this=0x000000010f0578a0) + 23 at G4TheRayTracer.cc:194
+   191  G4bool G4TheRayTracer::CreateBitMap()
+   192  {
+   193    G4int iEvent = 0;
+-&gt; 194    G4double stepAngle = viewSpan/100.;
+   195    G4double viewSpanX = stepAngle*nColumn;
+   196    G4double viewSpanY = stepAngle*nRow;
+   197    G4bool succeeded;
+(lldb) p nRow
+(G4int) $0 = 640
+(lldb) p nColumn
+(G4int) $1 = 640
+(lldb) p viewSpan
+(G4double) $2 = 0.087266462599716474
+(lldb)
+
+
+
+(lldb) c
+Process 24031 resuming
+Process 24031 stopped
+* thread #1: tid = 0x5d6b73, 0x0000000104677b99 libG4RayTracer.dylib`G4TheRayTracer::CreateBitMap(this=0x000000010f0578a0) + 1849 at G4TheRayTracer.cc:278, queue = 'com.apple.main-thread', stop reason = breakpoint 6.1
+    frame #0: 0x0000000104677b99 libG4RayTracer.dylib`G4TheRayTracer::CreateBitMap(this=0x000000010f0578a0) + 1849 at G4TheRayTracer.cc:278
+   275      theRayShooter-&gt;Shoot(anEvent,rayPosition,rayDirection.unit());
+   276      theEventManager-&gt;ProcessOneEvent(anEvent);
+   277      succeeded = GenerateColour(anEvent);
+-&gt; 278      colorR[iCoord] = (unsigned char)(int(255*rayColour.GetRed()));
+   279      colorG[iCoord] = (unsigned char)(int(255*rayColour.GetGreen()));
+   280      colorB[iCoord] = (unsigned char)(int(255*rayColour.GetBlue()));
+   281        } else {  // Ray does not intercept world at all.
+(lldb) p suceeded
+error: use of undeclared identifier 'suceeded'
+error: 1 errors parsing expression
+(lldb) p rayColour
+(G4Colour) $9 = (red = 1, green = 1, blue = 1, alpha = 1)
+(lldb)
+
+(lldb) p trajectory
+(G4RayTrajectory *) $20 = 0x000000010c6d1db0
+(lldb) p *trajectory
+(G4RayTrajectory) $21 = {
+  positionRecord = 0x00000001096327f0 size=2
+}
+(lldb)</pre>
+</div>
+<div class="highlight-python"><pre>g4-;g4-cls G4RayTrajectory
+g4-;g4-cls G4RayTrajectoryPoint   # perhaps need to apply VisAttributes ?</pre>
+</div>
+<div class="highlight-python"><pre>51 class G4RayTrajectoryPoint :public G4VTrajectoryPoint
+52 {
+53   public:
+54     G4RayTrajectoryPoint();
+55     virtual ~G4RayTrajectoryPoint();
+56
+57     inline void *operator new(size_t);
+58     inline void operator delete(void *aTrajectoryPoint);
+59   //    inline int operator==(const G4RayTrajectoryPoint&amp; right) const
+60   // { return (this==&amp;right); };
+61
+62   private:
+63     const G4VisAttributes* preStepAtt;
+64     const G4VisAttributes* postStepAtt;
+65     G4ThreeVector    surfaceNormal;
+66     G4double         stepLength;
+67</pre>
+</div>
+<div class="highlight-python"><pre>(lldb) b G4TheRayTracer::GetSurfaceColour
+
+(lldb) f 1
+frame #1: 0x0000000104677fb5 libG4RayTracer.dylib`G4TheRayTracer::GetSurfaceColour(this=0x000000010f0578a0, point=0x000000010c6d2ad0) + 37 at G4TheRayTracer.cc:344
+   341
+   342  G4Colour G4TheRayTracer::GetSurfaceColour(G4RayTrajectoryPoint* point)
+   343  {
+-&gt; 344    const G4VisAttributes* preAtt = point-&gt;GetPreStepAtt();
+   345    const G4VisAttributes* postAtt = point-&gt;GetPostStepAtt();
+   346
+   347    G4bool preVis = ValidColour(preAtt);
+(lldb) p point
+(G4RayTrajectoryPoint *) $26 = 0x000000010c6d2ad0
+(lldb) p *point
+(G4RayTrajectoryPoint) $27 = {
+  preStepAtt = 0x0000000000000000
+  postStepAtt = 0x0000000000000000
+  surfaceNormal = (dx = 1, dy = 0, dz = 0)
+  stepLength = 2657.1261006483824
+}
+(lldb)</pre>
+</div>
+<div class="highlight-python"><pre>simon:geant4_10_02_p01 blyth$ find examples -type f -exec grep -H G4VisAttributes {} \;
+examples/advanced/air_shower/src/UltraDetectorConstruction.cc:#include "G4VisAttributes.hh"
+examples/advanced/air_shower/src/UltraDetectorConstruction.cc:   G4VisAttributes* UniverseVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,1.0));
+examples/advanced/air_shower/src/UltraDetectorConstruction.cc:   World_log-&gt;SetVisAttributes (G4VisAttributes::Invisible);
+examples/advanced/air_shower/src/UltraDetectorConstruction.cc:G4VisAttributes* SurfaceVisAtt = new G4VisAttributes(G4Colour(0.0,0.0,1.0));
+examples/advanced/air_shower/src/UltraDetectorConstruction.cc:G4VisAttributes* SurfaceVisAtt = new G4VisAttributes(G4Colour(0.0,0.0,1.0));
+examples/advanced/air_shower/src/UltraDetectorConstruction.cc:  G4VisAttributes* PMTVisAtt   = new G4VisAttributes(true,G4Colour(0.0,0.0,1.0)) ;</pre>
+</div>
+<div class="section" id="g4-g4-cls-g4theraytracer">
+<h2>g4-;g4-cls G4TheRayTracer<a class="headerlink" href="#g4-g4-cls-g4theraytracer" title="Permalink to this headline">¶</a></h2>
+<p>setters for these:</p>
+<div class="highlight-python"><pre>149     G4ThreeVector eyePosition;
+150     G4ThreeVector targetPosition;
+151     G4ThreeVector eyeDirection;
+152     G4ThreeVector lightDirection;
+153     G4ThreeVector up;
+154     G4double headAngle;
+155     G4double viewSpan; // Angle per 100 pixels
+156     G4double attenuationLength;
+157</pre>
+</div>
+<div class="highlight-python"><pre>191 G4bool G4TheRayTracer::CreateBitMap()
+192 {
+193   G4int iEvent = 0;
+194   G4double stepAngle = viewSpan/100.;
+195   G4double viewSpanX = stepAngle*nColumn;
+196   G4double viewSpanY = stepAngle*nRow;
+197   G4bool succeeded;
+198
+199   G4VVisManager* visMan = G4VVisManager::GetConcreteInstance();
+200   visMan-&gt;IgnoreStateChanges(true);
+201</pre>
+</div>
+<div class="highlight-python"><pre>simon:geant4_10_02_p01 blyth$ g4-cc G4TheRayTracer
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RayTracer.cc:#include "G4TheRayTracer.hh"
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RayTracer.cc:  theRayTracer = new G4TheRayTracer;  // Establish default ray tracer.
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RayTracerViewer.cc:#include "G4TheRayTracer.hh"
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RayTracerViewer.cc: G4TheRayTracer* aTracer):
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RayTracerViewer.cc:  if (!aTracer) theTracer = new G4TheRayTracer;
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RayTracerXViewer.cc:#include "G4TheRayTracer.hh"
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RayTracerXViewer.cc:          new G4TheRayTracer(new G4RTJpegMaker, new G4RTXScanner))
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RTMessenger.cc:#include "G4TheRayTracer.hh"
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RTMessenger.cc:(G4TheRayTracer* p1)
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RTMessenger.cc:G4RTMessenger::G4RTMessenger(G4TheRayTracer* p1)
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4RTXScanner.cc:#include "G4TheRayTracer.hh"
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheMTRayTracer.cc:: G4TheRayTracer(figMaker,scanner)
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:// $Id: G4TheRayTracer.cc 86973 2014-11-21 11:57:27Z gcosmo $
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:#include "G4TheRayTracer.hh"
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4TheRayTracer::G4TheRayTracer(G4VFigureFileMaker* figMaker,
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4TheRayTracer::~G4TheRayTracer()
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:void G4TheRayTracer::Trace(const G4String&amp; fileName)
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:void G4TheRayTracer::StoreUserActions()
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:void G4TheRayTracer::RestoreUserActions()
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4bool G4TheRayTracer::CreateBitMap()
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:void G4TheRayTracer::CreateFigureFile(const G4String&amp; fileName)
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4bool G4TheRayTracer::GenerateColour(G4Event* anEvent)
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4Colour G4TheRayTracer::GetMixedColour
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4Colour G4TheRayTracer::GetSurfaceColour(G4RayTrajectoryPoint* point)
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4Colour G4TheRayTracer::Attenuate
+/usr/local/opticks/externals/g4/geant4_10_02_p01/source/visualization/RayTracer/src/G4TheRayTracer.cc:G4bool G4TheRayTracer::ValidColour(const G4VisAttributes* visAtt)
+simon:geant4_10_02_p01 blyth$</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>j1707 wire mode causes opengl GPU hang &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">j1707 wire mode causes opengl GPU hang</a><ul>
+<li><a class="reference internal" href="#fixed">FIXED</a></li>
+<li><a class="reference internal" href="#huh-i-though-i-disabled-wire-mode-already-but">Huh : I though I disabled wire mode already BUT</a></li>
+<li><a class="reference internal" href="#scene">Scene</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/j1707_wire_mode_causes_opengl_gpu_hang.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="j1707-wire-mode-causes-opengl-gpu-hang">
+<h1>j1707 wire mode causes opengl GPU hang<a class="headerlink" href="#j1707-wire-mode-causes-opengl-gpu-hang" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="fixed">
+<h2>FIXED<a class="headerlink" href="#fixed" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>non-empty render mode skipped WIRE restriction</li>
+</ul>
+</div>
+<div class="section" id="huh-i-though-i-disabled-wire-mode-already-but">
+<h2>Huh : I though I disabled wire mode already BUT<a class="headerlink" href="#huh-i-though-i-disabled-wire-mode-already-but" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>simon:issues blyth$ op --j1707 --tracer --gltf 3   # then press B a few times
+
+...
+Scene::nextGeometryStyle : none
+Interactor::key_pressed 265
+Interactor::key_pressed 265
+Interactor::key_pressed 265
+Scene::nextGeometryStyle : wire
+GPU hang occurred, msgtracer returned -1
+/Users/blyth/opticks/bin/op.sh: line 689: 12950 Abort trap: 6           /usr/local/opticks/lib/OTracerTest --j1707 --tracer --gltf 3
+/Users/blyth/opticks/bin/op.sh RC 134
+simon:issues blyth$</pre>
+</div>
+</div>
+<div class="section" id="scene">
+<h2>Scene<a class="headerlink" href="#scene" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>::</dt>
+<dd><p class="first">1152 unsigned int Scene::getNumGeometryStyle()
+1153 {
+1154     return m_num_geometry_style == 0 ? int(NUM_GEOMETRY_STYLE) : m_num_geometry_style ;
+1155 }</p>
+<p class="last">1177 void Scene::nextGeometryStyle()
+1178 {
+1179     int next = (m_geometry_style + 1) % getNumGeometryStyle();
+1180     setGeometryStyle( (GeometryStyle_t)next );
+1181
+1182     const char* stylename = getGeometryStyleName();
+1183     printf(&#8220;Scene::nextGeometryStyle : %s n&#8221;, stylename);
+1184 }</p>
+</dd>
+</dl>
+<div class="highlight-python"><pre>82    public:
+83         // disabled styles after NUM_GEOMETRY_STYLE
+84         typedef enum { BBOX, NORM, NONE, WIRE, NUM_GEOMETRY_STYLE, NORM_BBOX } GeometryStyle_t ;
+85         void setGeometryStyle(Scene::GeometryStyle_t style);
+86         unsigned int getNumGeometryStyle(); // allows ro override the enum
+87         void setNumGeometryStyle(unsigned int num_geometry_style); // used to disable WIRE style for JUNO
+88         void applyGeometryStyle();
+89         static const char* getGeometryStyleName(Scene::GeometryStyle_t style);
+90         const char* getGeometryStyleName();
+91         void nextGeometryStyle();</pre>
+</div>
+<div class="highlight-python"><pre>simon:oglrap blyth$ opticks-find setNumGeometryStyle
+./oglrap/OpticksViz.cc:            m_scene-&gt;setNumGeometryStyle(Scene::WIRE);
+./oglrap/Scene.cc:void Scene::setNumGeometryStyle(unsigned int num_geometry_style)
+./oglrap/Scene.hh:        void setNumGeometryStyle(unsigned int num_geometry_style); // used to disable WIRE style for JUNO
+simon:opticks blyth$</pre>
+</div>
+<div class="highlight-python"><pre>172 void OpticksViz::prepareScene(const char* rendermode)
+173 {
+174     if(rendermode)
+175     {
+176         LOG(warning) &lt;&lt; "OpticksViz::prepareScene using non-standard rendermode " &lt;&lt; rendermode ;
+177         m_scene-&gt;setRenderMode(rendermode);
+178     }
+179     else if(m_ok-&gt;isJuno())
+180     {
+181         LOG(warning) &lt;&lt; "disable GeometryStyle  WIRE for JUNO as too slow " ;
+182
+183         if(!hasOpt("jwire")) // use --jwire to enable wireframe with JUNO, do this only on workstations with very recent GPUs
+184         {
+185             m_scene-&gt;setNumGeometryStyle(Scene::WIRE);
+186         }
+187
+188         m_scene-&gt;setNumGlobalStyle(Scene::GVISVEC); // disable GVISVEC, GVEC debug styles
+189
+190         m_scene-&gt;setRenderMode("bb0,bb1,-global");
+191         std::string rmode = m_scene-&gt;getRenderMode();
+192         LOG(info) &lt;&lt; "App::prepareViz " &lt;&lt; rmode ;
+193     }
+194     else if(m_ok-&gt;isDayabay())
+195     {
+196         m_scene-&gt;setNumGlobalStyle(Scene::GVISVEC);   // disable GVISVEC, GVEC debug styles
+197     }</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

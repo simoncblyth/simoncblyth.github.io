@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>osx-optix-411-no-binary-for-GPU &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/osx-optix-411-no-binary-for-GPU.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="osx-optix-411-no-binary-for-gpu">
+<h1>osx-optix-411-no-binary-for-GPU<a class="headerlink" href="#osx-optix-411-no-binary-for-gpu" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>reconfigured for OptiX 411 with <em>opticks-cmake-modify-ex3</em></li>
+<li>get below ptx problem</li>
+<li>however suspect that changing OptiX version is not something that
+current cmake machinery (eg OptiX version detection) can handle
+as a config modification : it being necessary to do a full opticks-configure
+with wiping of the build dir to manage the change correctly</li>
+</ul>
+<p>TODO:</p>
+<blockquote>
+<div><ul class="simple">
+<li>try to find a faster way to jump OptiX versions,
+perhaps via separate bdir/prefix for different OptiX vers ?</li>
+</ul>
+</div></blockquote>
+<div class="highlight-python"><pre>op
+
+...
+
+2017-11-14 14:36:39.795 INFO  [4840800] [OContext::launch@294] OContext::launch COMPILE DONE
+2017-11-14 14:36:39.795 INFO  [4840800] [OContext::launch@296] OContext::launch COMPILE time: 5.2e-05
+2017-11-14 14:36:39.795 INFO  [4840800] [OContext::launch@305] OContext::launch PRELAUNCH START
+libc++abi.dylib: terminating with uncaught exception of type optix::Exception: Unknown error (Details: Function "RTresult _rtContextLaunch2D(RTcontext, unsigned int, RTsize, RTsize)" caught exception: Encountered a CUDA error: ptxas application ptx input, line 1557; error   : Argument 1 of instruction 'tex': .texref or .u64 register expected
+ptxas application ptx input, line 1568; error   : Argument 1 of instruction 'tex': .texref or .u64 register expected
+ptxas application ptx input, line 1579; error   : Argument 1 of instruction 'tex': .texref or .u64 register expected
+ptxas application ptx input, line 1590; error   : Argument 1 of instruction 'tex': .texref or .u64 register expected
+...
+ptxas application ptx input, line 4432; error   : Argument 1 of instruction 'tex': .texref or .u64 register expected
+ptxas application ptx input, line 4976; error   : Argument 1 of instruction 'tex': .texref or .u64 register expected
+ returned (209): No binary for GPU)
+/Users/blyth/opticks/bin/op.sh: line 787: 26873 Abort trap: 6           /usr/local/opticks/lib/OKTest --rendermode +global,+in0,+in1,+in2,+in3,+in4,+axis
+/Users/blyth/opticks/bin/op.sh RC 134
+simon:sysrap blyth$</pre>
+</div>
+<div class="highlight-python"><pre>opticks-cmake-modify-ex3(){
+
+  local msg="=== $FUNCNAME : "
+  local bdir=$(opticks-bdir)
+  local bcache=$bdir/CMakeCache.txt
+  [ ! -f "$bcache" ] &amp;&amp; echo $msg requires a preexisting $bcache from prior opticks-cmake run &amp;&amp; return
+  opticks-bcd
+
+  echo $msg opticks-cmakecache-vars BEFORE MODIFY
+  opticks-cmakecache-vars
+
+  cmake \
+       -DOptiX_INSTALL_DIR=/Developer/OptiX \
+       -DCOMPUTE_CAPABILITY=30 \
+          .
+
+  echo $msg opticks-cmakecache-vars AFTER MODIFY
+  opticks-cmakecache-vars
+
+}</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

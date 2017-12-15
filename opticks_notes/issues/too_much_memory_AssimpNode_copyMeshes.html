@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>AssimpNode copyMeshes causing memory issue with JUNO geometry &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">AssimpNode copyMeshes causing memory issue with JUNO geometry</a><ul>
+<li><a class="reference internal" href="#can-the-copy-be-skippe">Can the copy be skippe</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/too_much_memory_AssimpNode_copyMeshes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="assimpnode-copymeshes-causing-memory-issue-with-juno-geometry">
+<h1>AssimpNode copyMeshes causing memory issue with JUNO geometry<a class="headerlink" href="#assimpnode-copymeshes-causing-memory-issue-with-juno-geometry" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>linux with JUNO geometry takes a long time to create the
+geocache and pushes to limits of available memory</li>
+<li>initially thought this was due to premature globablization
+of verts : and hence easy to avoid by deferring this,
+but looking more closely seems not so easy</li>
+<li>BUT: actually could avoid mesh copying by operating direct
+from raw meshes... and hence cut memory requirements in half</li>
+</ul>
+<div class="section" id="can-the-copy-be-skippe">
+<h2>Can the copy be skippe<a class="headerlink" href="#can-the-copy-be-skippe" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>119 int AssimpGGeo::load(GGeo* ggeo)
+120 {
+121     // THIS IS THE ENTRY POINT SET IN OpticksGeometry::loadGeometryBase
+122
+123     Opticks* opticks = ggeo-&gt;getOpticks();
+124     OpticksResource* resource = opticks-&gt;getResource();
+125     OpticksQuery* query = opticks-&gt;getQuery() ;
+126
+127     const char* path = opticks-&gt;getDAEPath() ;
+128     const char* ctrl = resource-&gt;getCtrl() ;
+129     unsigned int verbosity = ggeo-&gt;getLoaderVerbosity();
+130
+131     LOG(info)&lt;&lt; "AssimpGGeo::load "
+132              &lt;&lt; " path " &lt;&lt; ( path ? path : "NULL" )
+133              &lt;&lt; " query " &lt;&lt; ( query ? query-&gt;getQueryString() : "NULL" )
+134              &lt;&lt; " ctrl " &lt;&lt; ( ctrl ? ctrl : "NULL" )
+135              &lt;&lt; " verbosity " &lt;&lt; verbosity
+136              ;
+137
+138     assert(path);
+139     assert(query);
+140     assert(ctrl);
+141
+142     AssimpImporter assimp(path);
+143
+144     assimp.import();
+145
+146     AssimpSelection* selection = assimp.select(query);
+147
+148     AssimpTree* tree = assimp.getTree();
+149
+150
+151     AssimpGGeo agg(ggeo, tree, selection);
+152
+153     agg.setVerbosity(verbosity);
+154
+155     int rc = agg.convert(ctrl);
+156
+157     return rc ;
+158 }
+159</pre>
+</div>
+<div class="highlight-python"><pre>193 void AssimpImporter::import(unsigned int flags)
+194 {
+195     LOG(info) &lt;&lt; "AssimpImporter::import path " &lt;&lt; m_path &lt;&lt; " flags " &lt;&lt; flags ;
+196     m_process_flags = flags ;
+197
+198     assert(m_path);
+199     m_aiscene = m_importer-&gt;ReadFile( m_path, flags );
+200
+201     if(!m_aiscene)
+202     {
+203         printf("AssimpImporter::import ERROR : \"%s\" \n", m_importer-&gt;GetErrorString() );
+204         return ;
+205     }
+206
+207     //dumpProcessFlags("AssimpImporter::import", flags);
+208     //dumpSceneFlags("AssimpImporter::import", m_aiscene-&gt;mFlags);
+209
+210     Summary("AssimpImporter::import DONE");
+211
+212     m_tree = new AssimpTree(m_aiscene);
+213 }
+
+
+016 AssimpTree::AssimpTree(const aiScene* scene)
+ 17   :
+ 18   m_scene(scene),
+ 19   m_root(NULL),
+ 20   m_registry(NULL),
+ 21   m_index(0),
+ 22   m_raw_index(0),
+ 23   m_wrap_index(0),
+ 24   m_dump(0)
+ 25 {
+ 26    m_registry = new AssimpRegistry ;
+ 27
+ 28    traverseWrap();
+ 29
+ 30    //m_registry-&gt;summary();
+ 31 }
+
+
+
+043 void AssimpTree::traverseWrap(const char* msg)
+ 44 {
+ 45    LOG(debug) &lt;&lt; msg ;
+ 46
+ 47    m_wrap_index = 0 ;
+ 48    m_dump = 0 ;
+ 49
+ 50    std::vector&lt;aiNode*&gt; ancestors ;
+ 51
+ 52    traverseWrap(m_scene-&gt;mRootNode, ancestors);
+ 53
+ 54    LOG(debug) &lt;&lt; "AssimpTree::traverseWrap m_wrap_index " &lt;&lt; m_wrap_index &lt;&lt; " m_dump " &lt;&lt; m_dump ;
+ 55 }
+
+
+057 void AssimpTree::traverseWrap(aiNode* node, std::vector&lt;aiNode*&gt; ancestors)
+ 58 {
+ 59    //
+ 60    // every node of the tree needs its own nodepath vector
+ 61    // this is used to establish a digest for each node, and
+ 62    // a pdigest for the parent
+ 63    //
+ 64    // NB the nodepath is complete, ie agnostic regarding visit criteria
+ 65
+ 66    std::vector&lt;aiNode*&gt; nodepath = ancestors ;
+ 67    nodepath.push_back(node) ;
+ 68
+ 69    if(node-&gt;mNumMeshes &gt; 0) visitWrap(nodepath);
+ 70
+ 71    for(unsigned int i = 0; i &lt; node-&gt;mNumChildren; i++) traverseWrap(node-&gt;mChildren[i], nodepath);
+ 72 }
+
+
+
+
+075 void AssimpTree::visitWrap(std::vector&lt;aiNode*&gt; nodepath)
+ 76 {
+ 77    AssimpNode* wrap = new AssimpNode(nodepath, this) ;
+ 78
+ 79    wrap-&gt;setIndex(m_wrap_index);
+ 80
+ 81    if(m_wrap_index == 0) setRoot(wrap);
+ 82
+ 83    m_registry-&gt;add(wrap);
+ 84
+ 85    // hookup relationships via digest matching : works on 1st pass as
+ 86    // parents always exist before children
+ 87    AssimpNode* parent = m_registry-&gt;lookup(wrap-&gt;getParentDigest());
+ 88
+ 89    if(parent)
+ 90    {
+ 91        wrap-&gt;setParent(parent);
+ 92        parent-&gt;addChild(wrap);
+ 93    }
+ 94
+ 95    aiMatrix4x4 transform = wrap-&gt;getGlobalTransform() ;
+ 96    wrap-&gt;copyMeshes(transform);
+ 97
+ 98    //if(m_wrap_index == 5000) wrap-&gt;ancestors();
+ 99
+100
+101    if(0)
+102    {
+103        if(parent) parent-&gt;summary("AssimpTree::traW--parent");
+104        wrap-&gt;summary("AssimpTree::traverseWrap");
+105        dumpTransform("AssimpTree::traverseWrap transform", transform);
+106    }
+107
+108    m_wrap_index++;
+109 }</pre>
+</div>
+<p>Looking at the users of AssimpTree it appears the globaliz mesh in the noe is not use</p>
+<div class="highlight-python"><pre>723 GMesh* AssimpGGeo::convertMesh(unsigned int index )
+724 {
+725     const aiScene* scene = m_tree-&gt;getScene();
+726     assert(index &lt; scene-&gt;mNumMeshes);
+727     aiMesh* mesh = scene-&gt;mMeshes[index] ;
+728     GMesh* graw = convertMesh(mesh, index );
+729     return graw ;
+730 }
+731
+732
+733 void AssimpGGeo::convertMeshes(const aiScene* scene, GGeo* gg, const char* /*query*/)
+734 {
+735     LOG(info)&lt;&lt; "AssimpGGeo::convertMeshes NumMeshes " &lt;&lt; scene-&gt;mNumMeshes ;
+736
+737     for(unsigned int i = 0; i &lt; scene-&gt;mNumMeshes; i++)
+738     {
+739         aiMesh* mesh = scene-&gt;mMeshes[i] ;
+740
+741         const char* meshname = mesh-&gt;mName.C_Str() ;
+742
+743         GMesh* graw = convertMesh(mesh, i );
+744
+745         GMesh* gmesh = graw-&gt;makeDedupedCopy(); // removes duplicate vertices, re-indexing faces accordingly
+746
+747         delete graw ;
+748
+749         gmesh-&gt;setName(meshname);
+750
+751         GMesh* gfixed = gg-&gt;invokeMeshJoin(gmesh);
+752
+753         assert(gfixed) ;
+754
+755         if(gfixed != gmesh)
+756         {
+757             LOG(trace) &lt;&lt; "AssimpGGeo::convertMeshes meshfixing was done for "
+758                         &lt;&lt; " meshname " &lt;&lt; meshname
+759                         &lt;&lt; " index " &lt;&lt; i
+760                          ;
+761
+762             delete gmesh ;
+763         }
+764
+765         gg-&gt;add(gfixed);
+766
+767     }
+768 }</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

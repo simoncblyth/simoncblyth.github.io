@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>material-names-wrong-in-gui &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">material-names-wrong-in-gui</a><ul>
+<li><a class="reference internal" href="#fixed-issue-some-gui-material-names-wrong-for-test-geometry">FIXED ISSUE: some GUI material names wrong for test geometry</a></li>
+<li><a class="reference internal" href="#observations">Observations</a></li>
+<li><a class="reference internal" href="#gui-tabs">GUI tabs</a></li>
+<li><a class="reference internal" href="#seqmat-indexing">seqmat indexing</a></li>
+<li><a class="reference internal" href="#smoking-gun-misplaced-methods-directly-accessing-m-ggeo-within-opticksgeo">SMOKING GUN : misplaced methods directly accessing m_ggeo within OpticksGeo</a></li>
+<li><a class="reference internal" href="#review-gui-code">Review GUI code</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/material-names-wrong-in-gui.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="material-names-wrong-in-gui">
+<h1>material-names-wrong-in-gui<a class="headerlink" href="#material-names-wrong-in-gui" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="fixed-issue-some-gui-material-names-wrong-for-test-geometry">
+<h2>FIXED ISSUE: some GUI material names wrong for test geometry<a class="headerlink" href="#fixed-issue-some-gui-material-names-wrong-for-test-geometry" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tboolean</span><span class="o">-</span><span class="n">media</span> <span class="o">--</span><span class="n">okg4</span> <span class="o">--</span><span class="n">load</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="observations">
+<h2>Observations<a class="headerlink" href="#observations" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>seqmat GItemIndex coming from okg-/OpticksIdx is providing labels with wrong materials
+for test geometry running</li>
+<li>CAUSE : was due to inappropriate direct use of m_ggeo within OpticksGeometry (where m_ggeo is instanciated)
+fixed by getting libs from hub</li>
+</ul>
+</div>
+<div class="section" id="gui-tabs">
+<h2>GUI tabs<a class="headerlink" href="#gui-tabs" title="Permalink to this headline">¶</a></h2>
+<p>GUI::show does most of these, with the event specifics done by Photons</p>
+<ul class="simple">
+<li>Help</li>
+<li>Params</li>
+<li>Stats</li>
+<li>Interactor</li>
+<li>Scene</li>
+<li>Composition</li>
+<li>View</li>
+<li>Camera</li>
+<li>Clipper</li>
+<li>Trackball</li>
+<li>Bookmarks</li>
+<li>State</li>
+<li>ABOVE ALL DIRECT FROM GUI::show</li>
+<li>Photon Flag Selection</li>
+<li>Photon Termination Boundaries (Photons.m_boundaries)<ul>
+<li>wrong Vacuum///Vacuum</li>
+</ul>
+</li>
+<li>Photon Flag Sequence Selection (Photons.m_seqhis)<ul>
+<li>correct</li>
+</ul>
+</li>
+<li>Photon Material Sequence Selection (Photons.m_seqmat)<ul>
+<li>labels wrong</li>
+</ul>
+</li>
+<li>BELOW ALL DIRECT FROM GUI::show</li>
+<li>GMaterialLib<ul>
+<li>correct</li>
+</ul>
+</li>
+<li>GSurfaceLib<ul>
+<li>correct</li>
+</ul>
+</li>
+<li>GFlags</li>
+<li>Dev</li>
+</ul>
+</div>
+<div class="section" id="seqmat-indexing">
+<h2>seqmat indexing<a class="headerlink" href="#seqmat-indexing" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>68 GItemIndex* OpticksIdx::makeMaterialItemIndex()
+69 {
+70     OpticksEvent* evt = getEvent();
+71     Index* seqmat_ = evt-&gt;getMaterialIndex() ;
+72     if(!seqmat_)
+73     {
+74          LOG(warning) &lt;&lt; "OpticksIdx::makeMaterialItemIndex NULL seqmat" ;
+75          return NULL ;
+76     }
+77
+78     OpticksAttrSeq* qmat = m_hub-&gt;getMaterialNames();
+79
+80     GItemIndex* seqmat = new GItemIndex(seqmat_) ;
+81     seqmat-&gt;setTitle("Photon Material Sequence Selection");
+82     seqmat-&gt;setHandler(qmat);
+83     seqmat-&gt;formTable();
+84
+85     return seqmat ;
+86 }</pre>
+</div>
+<div class="highlight-python"><pre>821 OpticksAttrSeq* OpticksHub::getFlagNames()
+822 {
+823     return m_ok-&gt;getFlagNames();
+824 }
+825 OpticksAttrSeq* OpticksHub::getMaterialNames()
+826 {
+827     return m_geometry-&gt;getMaterialNames();
+828 }
+829 OpticksAttrSeq* OpticksHub::getBoundaryNames()
+830 {
+831     return m_geometry-&gt;getBoundaryNames();
+832 }
+833 std::map&lt;unsigned int, std::string&gt; OpticksHub::getBoundaryNamesMap()
+834 {
+835     return m_geometry-&gt;getBoundaryNamesMap();
+836 }</pre>
+</div>
+</div>
+<div class="section" id="smoking-gun-misplaced-methods-directly-accessing-m-ggeo-within-opticksgeo">
+<h2>SMOKING GUN : misplaced methods directly accessing m_ggeo within OpticksGeo<a class="headerlink" href="#smoking-gun-misplaced-methods-directly-accessing-m-ggeo-within-opticksgeo" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>098 OpticksAttrSeq* OpticksGeometry::getMaterialNames()
+ 99 {
+100      OpticksAttrSeq* qmat = m_ggeo-&gt;getMaterialLib()-&gt;getAttrNames();
+101      qmat-&gt;setCtrl(OpticksAttrSeq::SEQUENCE_DEFAULTS);
+102      return qmat ;
+103 }
+104
+105 OpticksAttrSeq* OpticksGeometry::getBoundaryNames()
+106 {
+107      GBndLib* blib = m_ggeo-&gt;getBndLib();
+108      OpticksAttrSeq* qbnd = blib-&gt;getAttrNames();
+109      if(!qbnd-&gt;hasSequence())
+110      {
+111          blib-&gt;close();
+112          assert(qbnd-&gt;hasSequence());
+113      }
+114      qbnd-&gt;setCtrl(OpticksAttrSeq::VALUE_DEFAULTS);
+115      return qbnd ;
+116 }
+117
+118 std::map&lt;unsigned int, std::string&gt; OpticksGeometry::getBoundaryNamesMap()
+119 {
+120     OpticksAttrSeq* qbnd = getBoundaryNames() ;
+121     return qbnd-&gt;getNamesMap(OpticksAttrSeq::ONEBASED) ;
+122 }
+123</pre>
+</div>
+</div>
+<div class="section" id="review-gui-code">
+<h2>Review GUI code<a class="headerlink" href="#review-gui-code" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>034 OKMgr::OKMgr(int argc, char** argv, const char* argforced )
+ 35     :
+ 36     m_log(new SLog("OKMgr::OKMgr")),
+ 37     m_ok(new Opticks(argc, argv, argforced)),
+ 38     m_hub(new OpticksHub(m_ok)),            // immediate configure and loadGeometry
+ 39     m_idx(new OpticksIdx(m_hub)),
+ 40     m_num_event(m_ok-&gt;getMultiEvent()),     // after hub instanciation, as that configures Opticks
+ 41     m_gen(m_hub-&gt;getGen()),
+ 42     m_run(m_hub-&gt;getRun()),
+ 43     m_viz(m_ok-&gt;isCompute() ? NULL : new OpticksViz(m_hub, m_idx, true)),
+ 44     m_propagator(new OKPropagator(m_hub, m_idx, m_viz)),
+ 45     m_count(0)
+ 46 {
+ 47     init();
+ 48     (*m_log)("DONE");
+ 49 }
+
+
+062 OpticksViz::OpticksViz(OpticksHub* hub, OpticksIdx* idx, bool immediate)
+ 63     :
+ 64     m_log(new SLog("OpticksViz::OpticksViz")),
+ 65     m_hub(hub),
+ 66     m_ok(hub-&gt;getOpticks()),
+ 67     m_run(m_ok-&gt;getRun()),
+ 68     m_ggb(m_hub-&gt;getGGeoBase()),
+ 69     m_idx(idx),
+
+
+321 void OpticksViz::indexPresentationPrep()
+322 {
+323     if(!m_idx) return ;
+324
+325     LOG(info) &lt;&lt; "OpticksViz::indexPresentationPrep" ;
+326
+327     m_seqhis = m_idx-&gt;makeHistoryItemIndex();
+328     m_seqmat = m_idx-&gt;makeMaterialItemIndex();
+329     m_boundaries = m_idx-&gt;makeBoundaryItemIndex();
+330
+331 }</pre>
+</div>
+<div class="highlight-python"><pre>132 void OpticksViz::visualize()
+133 {
+134     prepareGUI();
+135     renderLoop();
+136 }
+
+333 void OpticksViz::prepareGUI()
+334 {
+335     Bookmarks* bookmarks=m_hub-&gt;getBookmarks();
+336
+337     bookmarks-&gt;create(0);
+338
+339 #ifdef GUI_
+340
+341     if(m_idx)
+342     {
+343         Types* types = m_ok-&gt;getTypes();  // needed for each render
+344         m_photons = new Photons(types, m_boundaries, m_seqhis, m_seqmat ) ; // GUI jacket
+345         m_scene-&gt;setPhotons(m_photons);
+346     }
+347
+348     m_gui = new GUI(m_hub) ;
+349     m_gui-&gt;setScene(m_scene);
+350     m_gui-&gt;setPhotons(m_photons);
+351     m_gui-&gt;setComposition(m_hub-&gt;getComposition());
+352     m_gui-&gt;setBookmarks(bookmarks);
+353     m_gui-&gt;setStateGUI(new StateGUI(m_hub-&gt;getState()));
+354     m_gui-&gt;setInteractor(m_interactor);   // status line</pre>
+</div>
+<div class="highlight-python"><pre>12 class OGLRAP_API Photons {
+13    public:
+14        Photons(Types* types, GItemIndex* boundaries, GItemIndex* seqhis, GItemIndex* seqmat);
+15    public:
+16        void gui();
+17        void gui_flag_selection();
+18        void gui_radio_select(GItemIndex* ii);
+19        void gui_item_index(GItemIndex* ii);
+20        const char* getSeqhisSelectedKey();
+21        const char* getSeqhisSelectedLabel();
+22    private:</pre>
+</div>
+<div class="highlight-python"><pre>043 void Photons::gui()
+ 44 {
+ 45 #ifdef GUI_
+ 46
+ 47     if(m_types)
+ 48     {
+ 49         ImGui::Spacing();
+ 50         if (ImGui::CollapsingHeader("Photon Flag Selection"))
+ 51         {
+ 52             gui_flag_selection();
+ 53         }
+ 54     }
+ 55
+ 56     if(m_boundaries)
+ 57     {
+ 58         ImGui::Spacing();
+ 59         GUI::gui_radio_select(m_boundaries);
+ 60     }
+ 61
+ 62     if(m_seqhis)
+ 63     {
+ 64         ImGui::Spacing();
+ 65         GUI::gui_radio_select(m_seqhis);
+ 66     }
+ 67
+ 68     if(m_seqmat)
+ 69     {
+ 70         ImGui::Spacing();
+ 71         GUI::gui_radio_select(m_seqmat);
+ 72     }
+ 73 #endif
+ 74 }
+
+
+749 void GUI::gui_radio_select(GItemIndex* ii)
+750 {
+751 #ifdef GUI_
+752     typedef std::vector&lt;std::string&gt; VS ;
+753     Index* index = ii-&gt;getIndex();
+754
+755     if (ImGui::CollapsingHeader(index-&gt;getTitle()))
+756     {
+757        VS&amp; labels = ii-&gt;getLabels();
+758        VS  names = index-&gt;getNames();
+759        assert(names.size() == labels.size());
+760
+761        int* ptr = index-&gt;getSelectedPtr();
+762
+763        std::string all("All ");
+764        all += index-&gt;getItemType() ;
+765
+766        ImGui::RadioButton( all.c_str(), ptr, 0 );
+767
+768        for(unsigned int i=0 ; i &lt; labels.size() ; i++)
+769        {
+770            std::string iname = names[i] ;
+771            std::string label = labels[i] ;
+772            unsigned int local  = index-&gt;getIndexLocal(iname.c_str()) ;
+773            ImGui::RadioButton( label.c_str(), ptr, local);  // when selected the local value is written into the ptr location
+774        }
+775        ImGui::Text("%s %d ", index-&gt;getItemType(), *ptr);
+776    }
+777 #endif
+778 }</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

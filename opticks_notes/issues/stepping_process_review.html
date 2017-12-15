@@ -1,0 +1,651 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>stepping_process_review &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">stepping_process_review</a><ul>
+<li><a class="reference internal" href="#possible-geant4-no-scatter-no-scatter-bug">Possible Geant4 no-scatter-no-scatter bug ?</a></li>
+<li><a class="reference internal" href="#lldb-python-scripted-breakpoints">lldb python scripted breakpoints</a></li>
+<li><a class="reference internal" href="#geant4-decision-making-absorb-scatter-sail-absorb-beats-scatter-but-sail-wins">Geant4 decision making : absorb/scatter/sail : absorb beats scatter but sail wins</a></li>
+<li><a class="reference internal" href="#g4steppingmanager-definephysicalsteplength">G4SteppingManager::DefinePhysicalStepLength</a></li>
+<li><a class="reference internal" href="#g4steppingmanager-definephysicalsteplength-are-proceeses-being-nullified-no">G4SteppingManager::DefinePhysicalStepLength  are proceeses being nullified ? : NO</a></li>
+<li><a class="reference internal" href="#setprocessdefinedstep-for-the-winning-process">SetProcessDefinedStep for the winning process</a></li>
+<li><a class="reference internal" href="#alongstepgpil-process-loop-often-just-transportation">AlongStepGPIL Process Loop : often just Transportation</a></li>
+<li><a class="reference internal" href="#g4steppingmanager-invokepoststepdoitprocs">G4SteppingManager::InvokePostStepDoItProcs</a></li>
+<li><a class="reference internal" href="#g4trackingmanager-big-picture-wrt-stepping">G4TrackingManager : big picture wrt stepping</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/stepping_process_review.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="stepping-process-review">
+<h1>stepping_process_review<a class="headerlink" href="#stepping-process-review" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="possible-geant4-no-scatter-no-scatter-bug">
+<h2>Possible Geant4 no-scatter-no-scatter bug ?<a class="headerlink" href="#possible-geant4-no-scatter-no-scatter-bug" title="Permalink to this headline">¶</a></h2>
+<p>The below method is central to G4 operation:</p>
+<div class="highlight-python"><pre>095 void G4VProcess::ResetNumberOfInteractionLengthLeft()
+ 96 {
+ 97   theNumberOfInteractionLengthLeft =  -std::log( G4UniformRand() );
+ 98   theInitialNumberOfInteractionLength = theNumberOfInteractionLengthLeft;
+ 99 }
+100</pre>
+</div>
+<p>Whilst attemping to align the random number consumption of
+Opticks and Geant4 optical only simulation I found that the
+Geant4 equivalent ResetNumberOfInteractionLengthLeft to
+the below u_absorption and u_scattering throws was only being called
+for the first step of &#8220;TO BT BT SA&#8221;.</p>
+<p>The reason is that the PostStepDoItProc which invokes the base
+G4VDiscreteProcess::PostStepDoItProc only happens for the winning process.</p>
+<p>This means that the same scattering and absorption length probabilities are reused
+until those processes actually happen. For absorption thats the end of the line, so no-problem
+but for scattering it means that the probability of not scattering is artificially
+the same from step to step until a scatter actually happens.</p>
+<p>If this is a bug, I guess its a very minor one.</p>
+<p>My workaround for this to align random consumption, invokes G4VDiscreteProcess::PostStepDoItProc
+at the end of the step for OpAbsorption and OpRayleigh in order to force interaction length
+resets for every step.</p>
+<div class="highlight-python"><pre>59 __device__ int propagate_to_boundary( Photon&amp; p, State&amp; s, curandState &amp;rng)
+60 {
+61     //float speed = SPEED_OF_LIGHT/s.material1.x ;    // .x:refractive_index    (phase velocity of light in medium)
+62     float speed = s.m1group2.x ;  // .x:group_velocity  (group velocity of light in the material) see: opticks-find GROUPVEL
+63
+64 #ifdef WITH_ALIGN_DEV
+65
+66     float u_boundary_burn = curand_uniform(&amp;rng) ;
+67     float u_scattering = curand_uniform(&amp;rng) ;
+68     float u_absorption = curand_uniform(&amp;rng) ;
+69
+70     float absorption_distance = -s.material1.y*logf(u_absorption) ;
+71     float scattering_distance = -s.material1.z*logf(u_scattering) ;
+72
+73     rtPrintf("propagate_to_boundary  u_boundary_burn:%10.4f \n", u_boundary_burn );
+74     rtPrintf("propagate_to_boundary  u_scattering:%10.4f \n", u_scattering );
+75     rtPrintf("propagate_to_boundary  u_absorption:%10.4f \n", u_absorption );
+76 #else
+77     float absorption_distance = -s.material1.y*logf(curand_uniform(&amp;rng));   // .y:absorption_length
+78     float scattering_distance = -s.material1.z*logf(curand_uniform(&amp;rng));   // .z:scattering_length
+79 #endif
+80
+81     if (absorption_distance &lt;= scattering_distance)
+82     {</pre>
+</div>
+<div class="highlight-python"><pre>096 void CSteppingAction::UserSteppingAction(const G4Step* step)
+ 97 {
+ 98     bool done = setStep(step);
+ 99
+...
+110     m_g4-&gt;poststep();
+111
+112     if(done)
+113     {
+114         G4Track* track = step-&gt;GetTrack();    // m_track is const qualified
+115         track-&gt;SetTrackStatus(fStopAndKill);
+116         // stops tracking when reach truncation as well as absorption
+117     }
+118     else
+119     {
+120         // guess work for alignment
+121         //if(postStatus == fGeomBoundary)
+122         // CProcessManager::ResetNumberOfInteractionLengthLeft( m_ctx._process_manager );
+123         CProcessManager::ClearNumberOfInteractionLengthLeft( m_ctx._process_manager, *m_ctx._track, *m_ctx._step );
+124     }
+125 }
+126</pre>
+</div>
+<div class="highlight-python"><pre>70 void CProcessManager::ClearNumberOfInteractionLengthLeft(G4ProcessManager* proMgr, const G4Track&amp; aTrack, const G4Step&amp; aStep)
+71 {
+72     G4ProcessVector* pl = proMgr-&gt;GetProcessList() ;
+73     G4int n = pl-&gt;entries() ;
+74
+75     for(int i=0 ; i &lt; n ; i++)
+76     {
+77         G4VProcess* p = (*pl)[i] ;
+78         const G4String&amp; name = p-&gt;GetProcessName() ;
+79         bool is_ab = name.compare("OpAbsorption") == 0 ;
+80         bool is_sc = name.compare("OpRayleigh") == 0 ;
+81         //bool is_bd = name.compare("OpBoundary") == 0 ;
+82         if( is_ab || is_sc )
+83         {
+84             G4VDiscreteProcess* dp = dynamic_cast&lt;G4VDiscreteProcess*&gt;(p) ;
+85             assert(dp);   // Transportation not discrete
+86             dp-&gt;G4VDiscreteProcess::PostStepDoIt( aTrack, aStep );
+87             // devious way to invoke the protected ClearNumberOfInteractionLengthLeft via G4VDiscreteProcess::PostStepDoIt
+88         }
+89     }
+90 }</pre>
+</div>
+</div>
+<div class="section" id="lldb-python-scripted-breakpoints">
+<h2>lldb python scripted breakpoints<a class="headerlink" href="#lldb-python-scripted-breakpoints" title="Permalink to this headline">¶</a></h2>
+<p>Setup scripted breakpoint dumping with lldb.</p>
+<p>cfg4/g4lldb.py:</p>
+<div class="highlight-python"><pre>41 def py_G4SteppingManager_DefinePhysicalStepLength(frame, bp_loc, sess):
+42     """
+43     ::
+44
+45         g4-;g4-cls G4SteppingManager
+46         g4-;g4-cls G4SteppingManager2
+47
+48         tboolean-;tboolean-box --okg4 --align -D
+49
+50
+51         (lldb) b -f G4SteppingManager2.cc -l 181
+52
+53             ## inside process loop after PostStepGPIL call giving physIntLength and fCondition
+54
+55         (lldb) br com  add 1 -F opticks.cfg4.g4lldb.py_G4SteppingManager_DefinePhysicalStepLength
+56
+57     """
+58     name = sys._getframe().f_code.co_name
+59
+60     global COUNT
+61     COUNT[name] += 1
+62
+63     kvar = "physIntLength fCondition PhysicalStep fStepStatus fPostStepDoItProcTriggered"
+64
+65     this = frame.FindVariable("this")
+66     proc = this.GetChildMemberWithName("fCurrentProcess")
+67     procName = proc.GetChildMemberWithName("theProcessName")
+68
+69     print
+70     print FMT % ( name, COUNT[name] )
+71     print FMT % ( "procName", procName )
+72
+73     for k in kvar.split():
+74         #v = frame.FindVariable(k)    gives no-value
+75         v = this.GetChildMemberWithName(k)
+76         print FMT % ( k, v )
+77     pass
+78     return False</pre>
+</div>
+</div>
+<div class="section" id="geant4-decision-making-absorb-scatter-sail-absorb-beats-scatter-but-sail-wins">
+<h2>Geant4 decision making : absorb/scatter/sail : absorb beats scatter but sail wins<a class="headerlink" href="#geant4-decision-making-absorb-scatter-sail-absorb-beats-scatter-but-sail-wins" title="Permalink to this headline">¶</a></h2>
+<p>Auto-breakpoint dumping from the above python</p>
+<div class="highlight-python"><pre>//      py_G4SteppingManager_DefinePhysicalStepLength : 1
+//                                           procName : (G4String) theProcessName = (std::__1::string = "OpBoundary")
+//                                      physIntLength : (G4double) physIntLength = 1.7976931348623157E+308
+//                                         fCondition : (G4ForceCondition) fCondition = Forced
+//                                       PhysicalStep : (G4double) PhysicalStep = 1.7976931348623157E+308
+//                                        fStepStatus : (G4StepStatus) fStepStatus = fUndefined
+//                         fPostStepDoItProcTriggered : (size_t) fPostStepDoItProcTriggered = 4
+
+//      py_G4SteppingManager_DefinePhysicalStepLength : 2
+//                                           procName : (G4String) theProcessName = (std::__1::string = "OpRayleigh")
+//                                      physIntLength : (G4double) physIntLength = 1004214.7797280541
+//                                         fCondition : (G4ForceCondition) fCondition = NotForced
+//                                       PhysicalStep : (G4double) PhysicalStep = 1.7976931348623157E+308
+//                                        fStepStatus : (G4StepStatus) fStepStatus = fUndefined
+//                         fPostStepDoItProcTriggered : (size_t) fPostStepDoItProcTriggered = 4
+
+//      py_G4SteppingManager_DefinePhysicalStepLength : 3
+//                                           procName : (G4String) theProcessName = (std::__1::string = "OpAbsorption")
+//                                      physIntLength : (G4double) physIntLength = 587006.70078147366
+//                                         fCondition : (G4ForceCondition) fCondition = NotForced
+//                                       PhysicalStep : (G4double) PhysicalStep = 1004214.7797280541
+//                                        fStepStatus : (G4StepStatus) fStepStatus = fPostStepDoItProc
+//                         fPostStepDoItProcTriggered : (size_t) fPostStepDoItProcTriggered = 1
+
+//      py_G4SteppingManager_DefinePhysicalStepLength : 4
+//                                           procName : (G4String) theProcessName = (std::__1::string = "Transportation")
+//                                      physIntLength : (G4double) physIntLength = 1.7976931348623157E+308
+//                                         fCondition : (G4ForceCondition) fCondition = Forced
+//                                       PhysicalStep : (G4double) PhysicalStep = 587006.70078147366
+//                                        fStepStatus : (G4StepStatus) fStepStatus = fPostStepDoItProc
+//                         fPostStepDoItProcTriggered : (size_t) fPostStepDoItProcTriggered = 2</pre>
+</div>
+</div>
+<div class="section" id="g4steppingmanager-definephysicalsteplength">
+<h2>G4SteppingManager::DefinePhysicalStepLength<a class="headerlink" href="#g4steppingmanager-definephysicalsteplength" title="Permalink to this headline">¶</a></h2>
+<p>Walk thru of below code makes sense, my problem
+is why it doesnt happen the same way after the GeomBoundary</p>
+<ul class="simple">
+<li>it has to happen, tis different material ...</li>
+</ul>
+<p>As expected the below are both called 3 times for &#8220;TO BT BT SA&#8221;</p>
+<div class="highlight-python"><pre>(lldb) b OpRayleigh::GetMeanFreePath
+(lldb) b G4OpAbsorption::GetMeanFreePath
+
+
+ (lldb) b G4VProcess::ResetNumberOfInteractionLengthLeft</pre>
+</div>
+<div class="highlight-python"><pre>g4-;g4-cls G4SteppingManager
+g4-;g4-cls G4SteppingManager2
+
+G4SteppingManager::DefinePhysicalStepLength
+
+127 /////////////////////////////////////////////////////////
+128  void G4SteppingManager::DefinePhysicalStepLength()
+129 /////////////////////////////////////////////////////////
+130 {
+131
+132 // ReSet the counter etc.
+133    PhysicalStep  = DBL_MAX;          // Initialize by a huge number
+134    physIntLength = DBL_MAX;          // Initialize by a huge number
+...
+162 // GPIL for PostStep
+163    fPostStepDoItProcTriggered = MAXofPostStepLoops;
+164
+165    for(size_t np=0; np &lt; MAXofPostStepLoops; np++){
+166      fCurrentProcess = (*fPostStepGetPhysIntVector)(np);
+167      if (fCurrentProcess== 0) {
+168        (*fSelectedPostStepDoItVector)[np] = InActivated;
+169        continue;
+170      }   // NULL means the process is inactivated by a user on fly.
+171
+172      physIntLength = fCurrentProcess-&gt;
+173                      PostStepGPIL( *fTrack,
+174                                                  fPreviousStepSize,
+175                                                       &amp;fCondition );
+...
+
+
+(lldb) b G4SteppingManager::DefinePhysicalStepLength
+(lldb) r
+(lldb) b 181
+(lldb) b 270  # for summary
+(lldb) c
+
+(lldb) frame variable fCurrentProcess-&gt;theProcessName physIntLength fCondition PhysicalStep
+
+(G4String) fCurrentProcess-&gt;theProcessName = (std::__1::string = "OpRayleigh")
+(G4double) physIntLength = 58700.67007814737
+(G4ForceCondition) fCondition = NotForced
+(G4double) PhysicalStep = 1.7976931348623157E+308
+
+(lldb) p (double)log(0.942989)*-1e6
+(double) $1 = 58700.661315972749
+
+
+(lldb) frame variable fCurrentProcess-&gt;theProcessName physIntLength fCondition PhysicalStep fStepStatus fPostStepDoItProcTriggered
+
+(G4String) fCurrentProcess-&gt;theProcessName = (std::__1::string = "OpAbsorption")
+(G4double) physIntLength = 12766112.786981029
+(G4ForceCondition) fCondition = NotForced
+(G4double) PhysicalStep = 58700.67007814737
+(G4StepStatus) fStepStatus = fPostStepDoItProc
+(size_t) fPostStepDoItProcTriggered = 2
+
+## OpRayleigh in lead
+
+(lldb) p (double)log(0.278981)*-1e6
+(double) $2 = 1276611.599838129
+
+(lldb) p (double)log(0.278981)*-1e7
+(double) $3 = 12766115.998381291
+
+
+181      switch (fCondition) {
+    182      case ExclusivelyForced:
+    183          (*fSelectedPostStepDoItVector)[np] = ExclusivelyForced;
+    184          fStepStatus = fExclusivelyForcedProc;
+    185          fStep-&gt;GetPostStepPoint()
+    186          -&gt;SetProcessDefinedStep(fCurrentProcess);
+    187          break;
+    ...
+    193      case Forced:
+    194          (*fSelectedPostStepDoItVector)[np] = Forced;
+    195          break;
+    196      case StronglyForced:
+    197          (*fSelectedPostStepDoItVector)[np] = StronglyForced;
+    198          break;
+    199      default:
+    200          (*fSelectedPostStepDoItVector)[np] = InActivated;
+    ////    ^^^^^^^^^  hmm NotForced gets InActivated, have to set some condition to stay selected
+    201          break;
+202      }
+
+
+(lldb) b G4SteppingManager::DefinePhysicalStepLength
+(lldb) b 206</pre>
+</div>
+</div>
+<div class="section" id="g4steppingmanager-definephysicalsteplength-are-proceeses-being-nullified-no">
+<h2>G4SteppingManager::DefinePhysicalStepLength  are proceeses being nullified ? : NO<a class="headerlink" href="#g4steppingmanager-definephysicalsteplength-are-proceeses-being-nullified-no" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>(lldb) fr v *fPostStepGetPhysIntVector-&gt;pProcVector
+(G4ProcessVector::G4ProcVector) *fPostStepGetPhysIntVector-&gt;pProcVector = size=5 {
+  [0] = 0x000000010f7a7030
+  [1] = 0x000000010f7a8f00
+  [2] = 0x000000010f7a8d70
+  [3] = 0x000000010f7a8770
+  [4] = 0x000000010f77fd70</pre>
+</div>
+</div>
+<div class="section" id="setprocessdefinedstep-for-the-winning-process">
+<h2>SetProcessDefinedStep for the winning process<a class="headerlink" href="#setprocessdefinedstep-for-the-winning-process" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>206      if (fCondition==ExclusivelyForced) {
+207          for(size_t nrest=np+1; nrest &lt; MAXofPostStepLoops; nrest++){
+208              (*fSelectedPostStepDoItVector)[nrest] = InActivated;
+209          }
+210          return;  // Take note the 'return' at here !!!
+211      }
+212      else{
+213          if(physIntLength &lt; PhysicalStep ){
+214              PhysicalStep = physIntLength;
+215              fStepStatus = fPostStepDoItProc;
+216              fPostStepDoItProcTriggered = G4int(np);
+217              fStep-&gt;GetPostStepPoint()
+218                  -&gt;SetProcessDefinedStep(fCurrentProcess);
+219          }
+220      }
+223    }
+
+
+
+225    if (fPostStepDoItProcTriggered&lt;MAXofPostStepLoops) {
+226        if ((*fSelectedPostStepDoItVector)[fPostStepDoItProcTriggered] ==
+227        InActivated) {
+228        (*fSelectedPostStepDoItVector)[fPostStepDoItProcTriggered] =
+229            NotForced;
+230        }
+231    }</pre>
+</div>
+<div class="highlight-python"><pre>(lldb) p *fAlongStepGetPhysIntVector
+(G4ProcessVector) $6 = {
+  pProcVector = 0x0000000111144560 size=1
+}</pre>
+</div>
+</div>
+<div class="section" id="alongstepgpil-process-loop-often-just-transportation">
+<h2>AlongStepGPIL Process Loop : often just Transportation<a class="headerlink" href="#alongstepgpil-process-loop-often-just-transportation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>G4VDiscreteProcess just does Post, no Along or AtRest
+so this will usually be just Transportation with optical photons
+(what about Scint ?)</li>
+</ul>
+<div class="highlight-python"><pre>(lldb) b 251
+
+
+233 // GPIL for AlongStep
+234    proposedSafety = DBL_MAX;
+235    G4double safetyProposedToAndByProcess = proposedSafety;
+236
+237    for(size_t kp=0; kp &lt; MAXofAlongStepLoops; kp++){
+238      fCurrentProcess = (*fAlongStepGetPhysIntVector)[kp];
+239      if (fCurrentProcess== 0) continue;
+240          // NULL means the process is inactivated by a user on fly.
+241
+242      physIntLength = fCurrentProcess-&gt;
+243                      AlongStepGPIL( *fTrack, fPreviousStepSize,
+244                                      PhysicalStep,
+245                      safetyProposedToAndByProcess,
+246                                     &amp;fGPILSelection );
+247 #ifdef G4VERBOSE
+248                          // !!!!! Verbose
+249      if(verboseLevel&gt;0) fVerbose-&gt;DPSLAlongStep();
+250 #endif
+
+///  PhysicalStep here comes from above np loop
+
+251      if(physIntLength &lt; PhysicalStep){
+252        PhysicalStep = physIntLength;
+253
+254        // Check if the process wants to be the GPIL winner. For example,
+255        // multi-scattering proposes Step limit, but won't be the winner.
+256        if(fGPILSelection==CandidateForSelection){
+257           fStepStatus = fAlongStepDoItProc;
+258           fStep-&gt;GetPostStepPoint()
+259                -&gt;SetProcessDefinedStep(fCurrentProcess);
+260        }
+261
+262           // Transportation is assumed to be the last process in the vector
+263        if(kp == MAXofAlongStepLoops-1)
+264       fStepStatus = fGeomBoundary;
+265      }
+266
+267      // Make sure to check the safety, even if Step is not limited
+268      //  by this process.                      J. Apostolakis, June 20, 1998
+269      //
+
+
+
+(lldb) b 270
+lldb) frame variable fStepStatus MAXofAlongStepLoops fGPILSelection physIntLength PhysicalStep safetyProposedToAndByProcess
+(G4StepStatus) fStepStatus = fGeomBoundary
+(size_t) MAXofAlongStepLoops = 1
+(G4GPILSelection) fGPILSelection = CandidateForSelection
+(G4double) physIntLength = 349.89999389648438
+(G4double) PhysicalStep = 349.89999389648438
+(G4double) safetyProposedToAndByProcess = 0.100006103515625
+(lldb)
+
+
+
+270      if (safetyProposedToAndByProcess &lt; proposedSafety)
+271         // proposedSafety keeps the smallest value:
+272         proposedSafety               = safetyProposedToAndByProcess;
+273      else
+274         // safetyProposedToAndByProcess always proposes a valid safety:
+275         safetyProposedToAndByProcess = proposedSafety;
+276
+277    }
+278 } // void G4SteppingManager::DefinePhysicalStepLength() //</pre>
+</div>
+<div class="highlight-python"><pre>(lldb) frame var  fStep-&gt;fpPreStepPoint-&gt;fPosition fStep-&gt;fpPreStepPoint-&gt;fGlobalTime fStep-&gt;fpPreStepPoint-&gt;fMomentumDirection  fStep-&gt;fpPreStepPoint-&gt;fpMaterial-&gt;fName
+(G4ThreeVector) fStep-&gt;fpPreStepPoint-&gt;fPosition = (dx = 11.291412353515625, dy = -34.645111083984375, dz = -449.89999389648438)
+(G4double) fStep-&gt;fpPreStepPoint-&gt;fGlobalTime = 0.20000000298023224
+(G4ThreeVector) fStep-&gt;fpPreStepPoint-&gt;fMomentumDirection = (dx = -0, dy = -0, dz = 1)
+(G4String) fStep-&gt;fpPreStepPoint-&gt;fpMaterial-&gt;fName = (std::__1::string = "Vacuum")
+(lldb)
+
+
+
+(lldb) frame variable fStepStatus MAXofAlongStepLoops fGPILSelection physIntLength PhysicalStep safetyProposedToAndByProcess
+(G4StepStatus) fStepStatus = fGeomBoundary
+(size_t) MAXofAlongStepLoops = 1
+(G4GPILSelection) fGPILSelection = CandidateForSelection
+(G4double) physIntLength = 200
+(G4double) PhysicalStep = 200
+(G4double) safetyProposedToAndByProcess = 0
+(lldb) frame var  fStep-&gt;fpPreStepPoint-&gt;fPosition fStep-&gt;fpPreStepPoint-&gt;fGlobalTime fStep-&gt;fpPreStepPoint-&gt;fMomentumDirection  fStep-&gt;fpPreStepPoint-&gt;fpMaterial-&gt;fName
+(G4ThreeVector) fStep-&gt;fpPreStepPoint-&gt;fPosition = (dx = 11.291412353515625, dy = -34.645111083984375, dz = -100)
+(G4double) fStep-&gt;fpPreStepPoint-&gt;fGlobalTime = 1.3671407830548261
+(G4ThreeVector) fStep-&gt;fpPreStepPoint-&gt;fMomentumDirection = (dx = -0, dy = -0, dz = 1)
+(G4String) fStep-&gt;fpPreStepPoint-&gt;fpMaterial-&gt;fName = (std::__1::string = "GlassSchottF2")
+(lldb)
+
+
+(lldb) frame var  fStep-&gt;fpPreStepPoint-&gt;fPosition fStep-&gt;fpPreStepPoint-&gt;fGlobalTime fStep-&gt;fpPreStepPoint-&gt;fMomentumDirection  fStep-&gt;fpPreStepPoint-&gt;fpMaterial-&gt;fName
+(G4ThreeVector) fStep-&gt;fpPreStepPoint-&gt;fPosition = (dx = 11.291412353515625, dy = -34.645111083984375, dz = 100)
+(G4double) fStep-&gt;fpPreStepPoint-&gt;fGlobalTime = 2.5790558894519888
+(G4ThreeVector) fStep-&gt;fpPreStepPoint-&gt;fMomentumDirection = (dx = -0, dy = -0, dz = 1)
+(G4String) fStep-&gt;fpPreStepPoint-&gt;fpMaterial-&gt;fName = (std::__1::string = "Vacuum")
+(lldb)
+
+(lldb) frame variable fStepStatus MAXofAlongStepLoops fGPILSelection physIntLength PhysicalStep safetyProposedToAndByProcess
+(G4StepStatus) fStepStatus = fGeomBoundary
+(size_t) MAXofAlongStepLoops = 1
+(G4GPILSelection) fGPILSelection = CandidateForSelection
+(G4double) physIntLength = 350
+(G4double) PhysicalStep = 350
+(G4double) safetyProposedToAndByProcess = 0
+(lldb)</pre>
+</div>
+</div>
+<div class="section" id="g4steppingmanager-invokepoststepdoitprocs">
+<h2>G4SteppingManager::InvokePostStepDoItProcs<a class="headerlink" href="#g4steppingmanager-invokepoststepdoitprocs" title="Permalink to this headline">¶</a></h2>
+<p>G4VDiscreteProcess::PostStepDoIt which clears interaction lengths
+G4VProcess::ClearNumberOfInteractionLengthLeft is only called for OpBoundary</p>
+<ul class="simple">
+<li>why ?</li>
+</ul>
+<div class="highlight-python"><pre>483 void G4SteppingManager::InvokePostStepDoItProcs()
+484 ////////////////////////////////////////////////////////
+485 {
+486
+487 // Invoke the specified discrete processes
+488    for(size_t np=0; np &lt; MAXofPostStepLoops; np++){
+489    //
+490    // Note: DoItVector has inverse order against GetPhysIntVector
+491    //       and SelectedPostStepDoItVector.
+492    //
+493      G4int Cond = (*fSelectedPostStepDoItVector)[MAXofPostStepLoops-np-1];
+494      if(Cond != InActivated){
+495        if( ((Cond == NotForced) &amp;&amp; (fStepStatus == fPostStepDoItProc)) ||
+496            ((Cond == Forced) &amp;&amp; (fStepStatus != fExclusivelyForcedProc)) ||
+498            ((Cond == ExclusivelyForced) &amp;&amp; (fStepStatus == fExclusivelyForcedProc)) ||
+499            ((Cond == StronglyForced) )
+500       ) {
+501
+502          InvokePSDIP(np);
+503          if ((np==0) &amp;&amp; (fTrack-&gt;GetNextVolume() == 0)){
+504            fStepStatus = fWorldBoundary;
+505            fStep-&gt;GetPostStepPoint()-&gt;SetStepStatus( fStepStatus );
+506          }
+507        }
+508      } //if(*fSelectedPostStepDoItVector(np)........
+509
+510      // Exit from PostStepLoop if the track has been killed,
+511      // but extra treatment for processes with Strongly Forced flag
+512      if(fTrack-&gt;GetTrackStatus() == fStopAndKill) {
+513        for(size_t np1=np+1; np1 &lt; MAXofPostStepLoops; np1++){
+514            G4int Cond2 = (*fSelectedPostStepDoItVector)[MAXofPostStepLoops-np1-1];
+515            if (Cond2 == StronglyForced) {
+516                InvokePSDIP(np1);
+517            }
+518        }
+519        break;
+520      }
+521    } //for(size_t np=0; np &lt; MAXofPostStepLoops; np++){
+522 }</pre>
+</div>
+</div>
+<div class="section" id="g4trackingmanager-big-picture-wrt-stepping">
+<h2>G4TrackingManager : big picture wrt stepping<a class="headerlink" href="#g4trackingmanager-big-picture-wrt-stepping" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>g4-;g4-cls G4TrackingManager
+
+
+067 void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
+ 69 {
+ 71   // Receiving a G4Track from the EventManager, this funciton has the
+ 72   // responsibility to trace the track till it stops.
+ 73   fpTrack = apValueG4Track;
+ 74   EventIsAborted = false;
+...
+ 88   // Give SteppingManger the pointer to the track which will be tracked
+ 89   fpSteppingManager-&gt;SetInitialStep(fpTrack);
+ 90
+ 91   // Pre tracking user intervention process.
+ 93   if( fpUserTrackingAction != 0 ) {
+ 94      fpUserTrackingAction-&gt;PreUserTrackingAction(fpTrack);
+ 95   }
+...
+110   // Give SteppingManger the maxmimum number of processes
+111   fpSteppingManager-&gt;GetProcessNumber();
+112
+113   // Give track the pointer to the Step
+114   fpTrack-&gt;SetStep(fpSteppingManager-&gt;GetStep());
+115
+116   // Inform beginning of tracking to physics processes
+117   fpTrack-&gt;GetDefinition()-&gt;GetProcessManager()-&gt;StartTracking(fpTrack);
+118
+119   // Track the particle Step-by-Step while it is alive
+120   //  G4StepStatus stepStatus;
+121
+122   while( (fpTrack-&gt;GetTrackStatus() == fAlive) ||
+123          (fpTrack-&gt;GetTrackStatus() == fStopButAlive) ){
+124
+125     fpTrack-&gt;IncrementCurrentStepNumber();
+126     fpSteppingManager-&gt;Stepping();
+127 #ifdef G4_STORE_TRAJECTORY
+128     if(StoreTrajectory) fpTrajectory-&gt;
+129                         AppendStep(fpSteppingManager-&gt;GetStep());
+130 #endif
+131     if(EventIsAborted) {
+132       fpTrack-&gt;SetTrackStatus( fKillTrackAndSecondaries );
+133     }
+134   }
+135   // Inform end of tracking to physics processes
+136   fpTrack-&gt;GetDefinition()-&gt;GetProcessManager()-&gt;EndTracking();
+137
+138   // Post tracking user intervention process.
+139   if( fpUserTrackingAction != 0 ) {
+140      fpUserTrackingAction-&gt;PostUserTrackingAction(fpTrack);
+141   }</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

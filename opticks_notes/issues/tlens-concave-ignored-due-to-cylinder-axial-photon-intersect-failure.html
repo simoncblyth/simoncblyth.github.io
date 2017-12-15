@@ -1,0 +1,362 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tlens-concave-ignored-due-to-cylinder-axial-photon-intersect-failure &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">tlens-concave-ignored-due-to-cylinder-axial-photon-intersect-failure</a><ul>
+<li><a class="reference internal" href="#issue">issue</a></li>
+<li><a class="reference internal" href="#fixed-thru-going-cylinder-axial-intersects">FIXED : thru-going cylinder axial intersects</a></li>
+<li><a class="reference internal" href="#tlens-convex-csg-intersection-of-two-spheres">tlens-convex : CSG intersection of two spheres</a></li>
+<li><a class="reference internal" href="#tlens-concave-csg-difference-of-a-cylinder-and-two-spheres">tlens-concave&#8211; : CSG difference of a cylinder and two spheres</a></li>
+<li><a class="reference internal" href="#possible-causes">possible causes</a></li>
+<li><a class="reference internal" href="#issue-reproduced-with-single-cylinder-and-axial-photons">Issue reproduced with single cylinder and axial photons</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/tlens-concave-ignored-due-to-cylinder-axial-photon-intersect-failure.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tlens-concave-ignored-due-to-cylinder-axial-photon-intersect-failure">
+<h1>tlens-concave-ignored-due-to-cylinder-axial-photon-intersect-failure<a class="headerlink" href="#tlens-concave-ignored-due-to-cylinder-axial-photon-intersect-failure" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="issue">
+<h2>issue<a class="headerlink" href="#issue" title="Permalink to this headline">¶</a></h2>
+<p>tlens-convex appears as expected, focussing the parallel beam,
+but photons are ignoring tlens-concave : they sail thru the lens without intersect.</p>
+</div>
+<div class="section" id="fixed-thru-going-cylinder-axial-intersects">
+<h2>FIXED : thru-going cylinder axial intersects<a class="headerlink" href="#fixed-thru-going-cylinder-axial-intersects" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>cylinder axial intersects was failing to pick the other intersect
+(via tmin cutting) for thru going axial photons</li>
+</ul>
+</div>
+<div class="section" id="tlens-convex-csg-intersection-of-two-spheres">
+<h2>tlens-convex : CSG intersection of two spheres<a class="headerlink" href="#tlens-convex-csg-intersection-of-two-spheres" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>simon:optixrap blyth$ tlens-convex--
+
+from opticks.ana.base import opticks_main
+from opticks.analytic.csg import CSG
+
+args = opticks_main(csgpath="/tmp/blyth/opticks/tlens-convex--", testobject="Vacuum///GlassSchottF2", container="Rock//perfectAbsorbSurface/Vacuum" )
+
+container = CSG("box", param=[-1,1,0,700], boundary=args.container, poly="MC", nx="20" )
+
+CSG.boundary = args.testobject
+CSG.kwa = dict(poly="IM", resolution="40", verbosity="0", ctrl="0" )
+
+al = CSG("sphere", param=[0,0,-600,641.2])
+ar = CSG("sphere", param=[0,0, 600,641.2])
+lens = CSG("intersection", left=al, right=ar )
+
+CSG.Serialize([container, lens ], args.csgpath )</pre>
+</div>
+</div>
+<div class="section" id="tlens-concave-csg-difference-of-a-cylinder-and-two-spheres">
+<h2>tlens-concave&#8211; : CSG difference of a cylinder and two spheres<a class="headerlink" href="#tlens-concave-csg-difference-of-a-cylinder-and-two-spheres" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>subtracting two big spheres from the cyclinder</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">opticks.ana.base</span> <span class="kn">import</span> <span class="n">opticks_main</span>
+<span class="kn">from</span> <span class="nn">opticks.analytic.csg</span> <span class="kn">import</span> <span class="n">CSG</span>
+
+<span class="n">args</span> <span class="o">=</span> <span class="n">opticks_main</span><span class="p">(</span><span class="n">csgpath</span><span class="o">=</span><span class="s">&quot;/tmp/blyth/opticks/tlens-concave--&quot;</span><span class="p">,</span> <span class="n">testobject</span><span class="o">=</span><span class="s">&quot;Vacuum///GlassSchottF2&quot;</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="s">&quot;Rock//perfectAbsorbSurface/Vacuum&quot;</span> <span class="p">)</span>
+
+<span class="n">cr</span> <span class="o">=</span> <span class="mf">300.</span>
+<span class="n">cz</span> <span class="o">=</span> <span class="mf">100.</span>
+
+<span class="n">sz</span> <span class="o">=</span> <span class="p">(</span><span class="n">cz</span><span class="o">*</span><span class="n">cz</span> <span class="o">+</span> <span class="n">cr</span><span class="o">*</span><span class="n">cr</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">cz</span> <span class="p">)</span>
+<span class="n">sr</span> <span class="o">=</span> <span class="n">sz</span>
+
+<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s">&quot; cr </span><span class="si">%s</span><span class="s"> cz </span><span class="si">%s</span><span class="s"> sr </span><span class="si">%s</span><span class="s"> sz </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cr</span><span class="p">,</span><span class="n">cz</span><span class="p">,</span><span class="n">sr</span><span class="p">,</span><span class="n">sz</span> <span class="p">))</span>
+
+
+<span class="n">container</span> <span class="o">=</span> <span class="n">CSG</span><span class="p">(</span><span class="s">&quot;box&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">sz</span><span class="p">],</span> <span class="n">boundary</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">container</span><span class="p">,</span> <span class="n">poly</span><span class="o">=</span><span class="s">&quot;MC&quot;</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="s">&quot;20&quot;</span> <span class="p">)</span>
+<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot; container.boundary : </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="n">container</span><span class="o">.</span><span class="n">boundary</span> <span class="p">)</span>
+
+<span class="n">CSG</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">testobject</span>
+<span class="n">CSG</span><span class="o">.</span><span class="n">kwa</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">poly</span><span class="o">=</span><span class="s">&quot;IM&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="s">&quot;50&quot;</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="s">&quot;0&quot;</span><span class="p">,</span> <span class="n">ctrl</span><span class="o">=</span><span class="s">&quot;0&quot;</span> <span class="p">)</span>
+
+<span class="n">cy</span> <span class="o">=</span> <span class="n">CSG</span><span class="p">(</span><span class="s">&quot;cylinder&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">cr</span><span class="p">],</span> <span class="n">param1</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">cz</span><span class="p">,</span><span class="n">cz</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">ar</span> <span class="o">=</span> <span class="n">CSG</span><span class="p">(</span><span class="s">&quot;sphere&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span><span class="n">sr</span><span class="p">],</span> <span class="n">complement</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">al</span> <span class="o">=</span> <span class="n">CSG</span><span class="p">(</span><span class="s">&quot;sphere&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span><span class="n">sr</span><span class="p">],</span> <span class="n">complement</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="n">lens</span> <span class="o">=</span> <span class="n">cy</span> <span class="o">-</span> <span class="n">ar</span> <span class="o">-</span> <span class="n">al</span>
+<span class="c">#lens = cy - al</span>
+<span class="c">#lens = cy</span>
+<span class="c">#lens = al</span>
+
+
+<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot; lens.boundary : </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="n">lens</span><span class="o">.</span><span class="n">boundary</span> <span class="p">)</span>
+
+
+<span class="n">CSG</span><span class="o">.</span><span class="n">Serialize</span><span class="p">([</span><span class="n">container</span><span class="p">,</span> <span class="n">lens</span> <span class="p">],</span> <span class="n">args</span><span class="o">.</span><span class="n">csgpath</span> <span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">          (-cz,cr)      (+cz,cr)</span>
+<span class="sd">               +---------+</span>
+<span class="sd">               |    |    |</span>
+<span class="sd">               |    |    |</span>
+<span class="sd">               |    |    |</span>
+<span class="sd">               |    |    |</span>
+<span class="sd">      ---------|----0----|-----------+------------------   --&gt; Z</span>
+<span class="sd">               |    |    |         (sz</span>
+<span class="sd">               |    |    |</span>
+<span class="sd">               |    |    |</span>
+<span class="sd">               |    |    |</span>
+<span class="sd">               +---------+</span>
+
+<span class="sd">    Find parameters of sphere that goes thru points (0,0) and (cz,cr)</span>
+
+<span class="sd">       sz = sr</span>
+
+<span class="sd">      (sz - cz)^2 + cr^2 = sr^2</span>
+
+<span class="sd">        sz^2 - 2 sz cz + cz^2 + cr^2 = sz^2</span>
+
+<span class="sd">                sz = (cz^2 + cr^2)/(2*cz)</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="possible-causes">
+<h2>possible causes<a class="headerlink" href="#possible-causes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>failure to label geometry with boundary ? hmm but convex manages</li>
+<li>incorrect bounds : calculating the bounds of a CSG shape is non-trivial
+suspect this goes wrong with CSG differences resulting in overly large
+CSG bounds<ul>
+<li>tried replacing the subtraction of big spheres with subtraction of zspheres
+to prevent : seemed to make no difference</li>
+</ul>
+</li>
+<li>huh : replacing the cylinder with a box3 to make a square lens behaving
+as expected : smth funny with cylinder endcaps ?</li>
+<li>huh : back to cylinder see more normal behaviour with off axis photons<ul>
+<li>so something is wrong with axial photon intersects onto cylinder endcaps
+but only when cylinder within CSG tree : red herring actually
+no need for CSG, just the issue is easily hidden by other non-axial photon intersects</li>
+<li>tboolean-cy appears to work as expected : so CSG tree somehow involved :</li>
+</ul>
+</li>
+<li>to see the issue have to shoot only axial photons otherwise
+lack of intersects is hidden, but CSG tree is implicated because
+for a cylinder with sphere chopped out of endcap : only the axial
+fail to intersect with the sphere</li>
+</ul>
+</div>
+<div class="section" id="issue-reproduced-with-single-cylinder-and-axial-photons">
+<h2>Issue reproduced with single cylinder and axial photons<a class="headerlink" href="#issue-reproduced-with-single-cylinder-and-axial-photons" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>tboolean-;tboolean-cyd</pre>
+</div>
+<div class="highlight-python"><pre>2344
+2345
+2346 #tboolean-cyd-torch-(){ tboolean-torchconfig-disc 1,1,599 ; }  ## non-axial works
+2347 tboolean-cyd-torch-(){ tboolean-torchconfig-disc 0,0,599 90 ; }  ## axial fails to intersect
+2348 tboolean-cyd(){ TESTCONFIG=$($FUNCNAME-) TORCHCONFIG=$($FUNCNAME-torch-) tboolean-- $* ; }
+2349 tboolean-cyd-(){  $FUNCNAME- | python $* ; }
+2350 tboolean-cyd--(){ cat &lt;&lt; EOP
+2351 import numpy as np
+2352 from opticks.ana.base import opticks_main
+2353 from opticks.analytic.csg import CSG
+2354 args = opticks_main(csgpath="$TMP/$FUNCNAME")
+2355
+2356 CSG.boundary = args.testobject
+2357 CSG.kwa = dict(verbosity="1", poly="IM", resolution="4" )
+2358
+2359 container = CSG("box", param=[0,0,0,1000], boundary=args.container, poly="IM", resolution="4", verbosity="0" )
+2360
+2361 ra = 200
+2362 z1 = -100
+2363 z2 = 100
+2364 delta = 0.1
+2365
+2366 a = CSG("cylinder", param=[0,0,0,ra], param1=[z1,z2,0,0] )
+2367 b = CSG("sphere", param=[0,0,z2,ra/2]  )
+2368
+2369 obj = a - b
+2370
+2371 CSG.Serialize([container, obj], args.csgpath )
+2372
+2373 EOP
+2374 }
+2375</pre>
+</div>
+<p>Arrange a pencil of 10 photons that all miss CSG intersect:</p>
+<div class="highlight-python"><pre>2017-10-26 14:56:13.296 INFO  [981246] [OPropagator::prelaunch@160] 1 : (0;10,1) prelaunch_times vali,comp,prel,lnch  0.0001 3.4517 0.1311 0.0000
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1360169472.0000) ori (   71.7140    29.2040   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1301596672.0000) ori (   83.7070    21.2881   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1587358208.0000) ori (    0.0240    17.7782   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1286056448.0000) ori (   88.5440     2.9255   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1300255232.0000) ori (  -81.8082    28.3031   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1455383040.0000) ori (   31.4812    51.2286   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1383789056.0000) ori (   58.5882    44.4151   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1564381696.0000) ori (  -21.0230   -21.1772   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1447647744.0000) ori (   61.3282     6.9006   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin     0.1000 abc (    0.0000     0.0000 -1433725440.0000) ori (  -62.1522    17.1455   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1360169472.0000) ori (   71.7140    29.2040   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1301596672.0000) ori (   83.7070    21.2881   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1587358208.0000) ori (    0.0240    17.7782   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1286056448.0000) ori (   88.5440     2.9255   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1300255232.0000) ori (  -81.8082    28.3031   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1455383040.0000) ori (   31.4812    51.2286   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1383789056.0000) ori (   58.5882    44.4151   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1564381696.0000) ori (  -21.0230   -21.1772   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1447647744.0000) ori (   61.3282     6.9006   599.0000) dir (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder tmin   499.1000 abc (    0.0000     0.0000 -1433725440.0000) ori (  -62.1522    17.1455   599.0000) dir (    0.0000     0.0000    -1.0000)
+2017-10-26 14:56:13.310 INFO  [981246] [OContext::launch@322] OContext::launch LAUNCH time: 0.014029</pre>
+</div>
+<div class="highlight-python"><pre>2017-10-26 15:01:31.894 INFO  [982826] [OPropagator::prelaunch@160] 1 : (0;10,1) prelaunch_times vali,comp,prel,lnch  0.0001 3.4215 0.1315 0.0000
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1360169472.0000)  m (   71.7140    29.2040   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1301596672.0000)  m (   83.7070    21.2881   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1587358208.0000)  m (    0.0240    17.7782   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1286056448.0000)  m (   88.5440     2.9255   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1300255232.0000)  m (  -81.8082    28.3031   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1455383040.0000)  m (   31.4812    51.2286   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1383789056.0000)  m (   58.5882    44.4151   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1564381696.0000)  m (  -21.0230   -21.1772   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1447647744.0000)  m (   61.3282     6.9006   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1433725440.0000)  m (  -62.1522    17.1455   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1360169472.0000)  m (   71.7140    29.2040   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1301596672.0000)  m (   83.7070    21.2881   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1587358208.0000)  m (    0.0240    17.7782   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1286056448.0000)  m (   88.5440     2.9255   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1300255232.0000)  m (  -81.8082    28.3031   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1455383040.0000)  m (   31.4812    51.2286   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1383789056.0000)  m (   58.5882    44.4151   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1564381696.0000)  m (  -21.0230   -21.1772   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1447647744.0000)  m (   61.3282     6.9006   699.0000)  n (    0.0000     0.0000    -1.0000)
+// csg_intersect_cylinder  tmin   499.1000 abc (    0.0000     0.0000 -1433725440.0000)  m (  -62.1522    17.1455   699.0000)  n (    0.0000     0.0000    -1.0000)
+2017-10-26 15:01:31.908 INFO  [982826] [OContext::launch@322] OContext::launch LAUNCH time: 0.014078</pre>
+</div>
+<div class="highlight-python"><pre>2017-10-26 15:08:52.081 INFO  [985131] [OPropagator::prelaunch@160] 1 : (0;10,1) prelaunch_times vali,comp,prel,lnch  0.0001 3.5851 0.1323 0.0000
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1360167936.0000)  m (   71.7140    29.2040   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1301597184.0000)  m (   83.7070    21.2881   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1587356672.0000)  m (    0.0240    17.7782   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1286056960.0000)  m (   88.5440     2.9255   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1300255744.0000)  m (  -81.8082    28.3031   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1455381504.0000)  m (   31.4812    51.2286   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1383789568.0000)  m (   58.5882    44.4151   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1564382208.0000)  m (  -21.0230   -21.1772   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1447648256.0000)  m (   61.3282     6.9006   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 abc (    0.0000     0.0000 -1433725952.0000)  m (  -62.1522    17.1455   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin     0.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1360167936.0000)  m (   71.7140    29.2040   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1301597184.0000)  m (   83.7070    21.2881   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1587356672.0000)  m (    0.0240    17.7782   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1286056960.0000)  m (   88.5440     2.9255   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1300255744.0000)  m (  -81.8082    28.3031   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1455381504.0000)  m (   31.4812    51.2286   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1383789568.0000)  m (   58.5882    44.4151   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1564382208.0000)  m (  -21.0230   -21.1772   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1447648256.0000)  m (   61.3282     6.9006   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 abc (    0.0000     0.0000 -1433725952.0000)  m (  -62.1522    17.1455   700.0000)  d (    0.0000     0.0000   200.0000)
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+// csg_intersect_cylinder  tmin   500.1000 tcan   500.0000  md 140000.0000 t_pcap_ax   700.0000 t_qcap_ax   500.0000
+2017-10-26 15:08:52.096 INFO  [985131] [OContext::launch@322] OContext::launch LAUNCH time: 0.014978</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

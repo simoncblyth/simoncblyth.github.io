@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>OBndLib_convert_issue_for_test_geometry_with_no_surfaces &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">OBndLib_convert_issue_for_test_geometry_with_no_surfaces</a><ul>
+<li><a class="reference internal" href="#fixed-issue">FIXED : Issue</a></li>
+<li><a class="reference internal" href="#remove-direct-access-to-m-ggeo-from-the-higher-levels-everyting-via-hub">Remove direct access to m_ggeo from the higher levels : everyting via hub</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/OBndLib_convert_issue_for_test_geometry_with_no_surfaces.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="obndlib-convert-issue-for-test-geometry-with-no-surfaces">
+<h1>OBndLib_convert_issue_for_test_geometry_with_no_surfaces<a class="headerlink" href="#obndlib-convert-issue-for-test-geometry-with-no-surfaces" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="fixed-issue">
+<h2>FIXED : Issue<a class="headerlink" href="#fixed-issue" title="Permalink to this headline">¶</a></h2>
+<p>A geometry with no surfaces asserted in OBndLib.</p>
+<div class="highlight-python"><pre>simon:ggeo blyth$ tboolean-;tboolean-media--
+
+from opticks.ana.base import opticks_main
+from opticks.analytic.csg import CSG
+
+args = opticks_main(csgpath="/tmp/blyth/opticks/tboolean-media--")
+
+omat = "Rock"
+osur = ""
+#isur = "perfectAbsorbSurface"
+isur = ""
+imat = "Pyrex"
+
+box = CSG("box", param=[0,0,0,400], boundary="/".join([omat,osur,isur,imat]), poly="MC", nx="20", emit=-1, emitconfig="photons=600000,wavelength=380,time=0.2,posdelta=0.1,sheetmask=0x1" )
+CSG.Serialize( [box], args.csgpath )</pre>
+</div>
+<div class="highlight-python"><pre>simon:ggeo blyth$ tboolean-;tboolean-media --okg4 -D
+
+...
+
+(  0)           0           1           0           0
+2017-11-10 16:09:30.004 ERROR [4187274] [*GBndLib::createBufferForTex2d@682] GBndLib::createBufferForTex2d NULL BUFFERS  mat 0x10d0118c0 sur 0x0
+Assertion failed: (orig &amp;&amp; "OBndLib::convert orig buffer NULL"), function convert, file /Users/blyth/opticks/optixrap/OBndLib.cc, line 86.
+Process 25213 stopped
+* thread #1: tid = 0x3fe48a, 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+    frame #0: 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10
+libsystem_kernel.dylib`__pthread_kill + 10:
+-&gt; 0x7fff8cc60866:  jae    0x7fff8cc60870            ; __pthread_kill + 20
+   0x7fff8cc60868:  movq   %rax, %rdi
+   0x7fff8cc6086b:  jmp    0x7fff8cc5d175            ; cerror_nocancel
+   0x7fff8cc60870:  retq
+(lldb) bt
+* thread #1: tid = 0x3fe48a, 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+  * frame #0: 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10
+    frame #1: 0x00007fff842fd35c libsystem_pthread.dylib`pthread_kill + 92
+    frame #2: 0x00007fff8b04db1a libsystem_c.dylib`abort + 125
+    frame #3: 0x00007fff8b0179bf libsystem_c.dylib`__assert_rtn + 321
+    frame #4: 0x000000010361a7ff libOptiXRap.dylib`OBndLib::convert(this=0x000000012001e190) + 367 at OBndLib.cc:86
+    frame #5: 0x0000000103621a11 libOptiXRap.dylib`OScene::init(this=0x000000010966f270) + 7361 at OScene.cc:171
+    frame #6: 0x000000010361fced libOptiXRap.dylib`OScene::OScene(this=0x000000010966f270, hub=0x000000010970ed20) + 317 at OScene.cc:85
+    frame #7: 0x0000000103621d3d libOptiXRap.dylib`OScene::OScene(this=0x000000010966f270, hub=0x000000010970ed20) + 29 at OScene.cc:87
+    frame #8: 0x0000000103bbad56 libOKOP.dylib`OpEngine::OpEngine(this=0x0000000109671450, hub=0x000000010970ed20) + 182 at OpEngine.cc:43
+    frame #9: 0x0000000103bbb21d libOKOP.dylib`OpEngine::OpEngine(this=0x0000000109671450, hub=0x000000010970ed20) + 29 at OpEngine.cc:55
+    frame #10: 0x0000000103f09a44 libOK.dylib`OKPropagator::OKPropagator(this=0x00000001096713f0, hub=0x000000010970ed20, idx=0x000000010d013a30, viz=0x00000001122980c0) + 196 at OKPropagator.cc:44
+    frame #11: 0x0000000103f09bbd libOK.dylib`OKPropagator::OKPropagator(this=0x00000001096713f0, hub=0x000000010970ed20, idx=0x000000010d013a30, viz=0x00000001122980c0) + 45 at OKPropagator.cc:52
+    frame #12: 0x00000001044d8ddf libokg4.dylib`OKG4Mgr::OKG4Mgr(this=0x00007fff5fbfe460, argc=27, argv=0x00007fff5fbfe548) + 831 at OKG4Mgr.cc:37
+    frame #13: 0x00000001044d8f53 libokg4.dylib`OKG4Mgr::OKG4Mgr(this=0x00007fff5fbfe460, argc=27, argv=0x00007fff5fbfe548) + 35 at OKG4Mgr.cc:41
+    frame #14: 0x00000001000132ee OKG4Test`main(argc=27, argv=0x00007fff5fbfe548) + 1486 at OKG4Test.cc:56
+    frame #15: 0x00007fff880d35fd libdyld.dylib`start + 1
+    frame #16: 0x00007fff880d35fd libdyld.dylib`start + 1
+(lldb)
+
+
+(lldb) f 5
+frame #5: 0x0000000103621a11 libOptiXRap.dylib`OScene::init(this=0x000000010966f270) + 7361 at OScene.cc:171
+   168
+   169      LOG(debug) &lt;&lt; "OScene::init (OBndLib)" ;
+   170      m_olib = new OBndLib(context,m_ggeo-&gt;getBndLib());
+   ///
+   ///                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^WRONG
+   ///        Ahha : bndlib should come hub, not ggeo : THERE ARE PROBABLY MORE OF THESE
+   ///
+-&gt; 171      m_olib-&gt;convert();
+   172      // this creates the BndLib dynamic buffers, which needs to be after OGeo
+   173      // as that may add boundaries when using analytic geometry
+   174
+(lldb)
+
+(lldb) f 4
+frame #4: 0x000000010361a7ff libOptiXRap.dylib`OBndLib::convert(this=0x000000012001e190) + 367 at OBndLib.cc:86
+   83
+   84       NPY&lt;float&gt;* orig = m_lib-&gt;getBuffer() ;  // (123, 4, 2, 39, 4)
+   85
+-&gt; 86       assert(orig &amp;&amp; "OBndLib::convert orig buffer NULL");
+   87
+   88       NPY&lt;float&gt;* buf = m_debug_buffer ? m_debug_buffer : orig ;
+   89
+(lldb)</pre>
+</div>
+<p>Ahha : bndlib should come hub, not ggeo : THERE ARE PROBABLY MORE OF THESE</p>
+<p>False alarm:</p>
+<div class="highlight-python"><pre>2017-11-10 16:09:29.717 INFO  [4187274] [OScene::init@111] OScene::init (OContext) stack_size_bytes: 2180
+2017-11-10 16:09:29.717 INFO  [4187274] [OScene::init@129] OScene::init ggeobase identifier : GGeoTest
+2017-11-10 16:09:29.717 INFO  [4187274] [OGeo::convert@172] OGeo::convert START  numMergedMesh: 1</pre>
+</div>
+</div>
+<div class="section" id="remove-direct-access-to-m-ggeo-from-the-higher-levels-everyting-via-hub">
+<h2>Remove direct access to m_ggeo from the higher levels : everyting via hub<a class="headerlink" href="#remove-direct-access-to-m-ggeo-from-the-higher-levels-everyting-via-hub" title="Permalink to this headline">¶</a></h2>
+<p>OpticksIdx needs GGeo for NSensorList</p>
+<div class="highlight-python"><pre>112 void OpticksIdx::indexEvtOld()
+113 {
+114     OpticksEvent* evt = getEvent();
+115     if(!evt) return ;
+116
+117     // TODO: wean this off use of Types, for the new way (GFlags..)
+118     Types* types = m_ok-&gt;getTypes();
+119     Typ* typ = m_ok-&gt;getTyp();
+120
+121     NPY&lt;float&gt;* ox = evt-&gt;getPhotonData();
+122
+123     if(ox &amp;&amp; ox-&gt;hasData())
+124     {
+125         PhotonsNPY* pho = new PhotonsNPY(ox);   // a detailed photon/record dumper : looks good for photon level debug
+126         pho-&gt;setTypes(types);
+127         pho-&gt;setTyp(typ);
+128         evt-&gt;setPhotonsNPY(pho);
+129
+130         GGeo* ggeo = m_hub-&gt;getGGeo();
+131
+132         if(!ggeo) LOG(fatal) &lt;&lt; "OpticksIdx::indexEvtOld"
+133                              &lt;&lt; " MUST OpticksHub::loadGeometry before OpticksIdx::indexEvtOld "
+134                              ;
+135
+136         assert(ggeo);
+137         HitsNPY* hit = new HitsNPY(ox, ggeo-&gt;getSensorList());
+138         evt-&gt;setHitsNPY(hit);
+139     }</pre>
+</div>
+<p>Move sensorlist to hub ?</p>
+<div class="highlight-python"><pre>simon:ggeo blyth$ opticks-find getSensorList
+./assimprap/AssimpGGeo.cc:    NSensorList* sens = gg-&gt;getSensorList();
+./assimprap/AssimpGGeo.cc:    NSensorList* sens = gg-&gt;getSensorList();
+./ggeo/GGeo.cc:NSensorList* GGeo::getSensorList()
+./ggeo/GPmt.cc:   897     NSensorList* sens = gg-&gt;getSensorList();
+
+
+./opticksgeo/OpticksIdx.cc:        HitsNPY* hit = new HitsNPY(ox, ggeo-&gt;getSensorList());
+
+
+./ggeo/GGeo.hh:        NSensorList*  getSensorList();
+./ggeo/GScene.cc:    m_sensor_list(ggeo-&gt;getSensorList()),
+
+simon:opticks blyth$</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

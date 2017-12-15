@@ -1,0 +1,689 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>surface_review &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">surface_review</a><ul>
+<li><a class="reference internal" href="#next">NEXT</a></li>
+<li><a class="reference internal" href="#done">DONE</a></li>
+<li><a class="reference internal" href="#surface-overhaul-approach">Surface Overhaul Approach</a></li>
+<li><a class="reference internal" href="#vague-recollection-of-the-history-of-this">Vague Recollection of the history of this..</a></li>
+<li><a class="reference internal" href="#surface-info-flows">Surface Info Flows</a><ul>
+<li><a class="reference internal" href="#ggeo-full-triangulated-geometry-flow">GGeo : Full Triangulated Geometry Flow</a></li>
+<li><a class="reference internal" href="#gscene-full-analytic-geometry-flow">GScene : Full Analytic Geometry Flow</a></li>
+<li><a class="reference internal" href="#ggeotest-test-geometry-flow">GGeoTest : Test Geometry Flow</a></li>
+<li><a class="reference internal" href="#fundamental-surface-difference-between-full-test-geometries">Fundamental surface difference between full/test geometries</a></li>
+<li><a class="reference internal" href="#gsurfacelib-csurfacelib-translation-of-both-full-and-test-geometries">GSurfaceLib -&gt; CSurfaceLib translation of both full and test geometries ?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tests">Tests</a></li>
+<li><a class="reference internal" href="#surfaces-with-test-geometry">Surfaces With Test Geometry</a></li>
+<li><a class="reference internal" href="#fixed-ctraverser-getpv-failing-to-find-a-bordersurface-pv">FIXED : CTraverser::getPV failing to find a bordersurface PV</a></li>
+<li><a class="reference internal" href="#hmm-gdml-reconstruction-does-nothing-special-but-there-are-ptrs-on-names">Hmm GDML reconstruction does nothing special : BUT there are ptrs on names</a></li>
+<li><a class="reference internal" href="#improved-proplib-persisting-with-json-metadata">Improved PropLib Persisting with JSON metadata</a><ul>
+<li><a class="reference internal" href="#where-to-tack-the-metadata">Where to tack the metadata ?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#potential-missing-surfaces">Potential Missing Surfaces ?</a></li>
+<li><a class="reference internal" href="#fixed-pv-addressing-the-ptr-were-being-trimmed">FIXED : PV Addressing, the ptr were being trimmed</a></li>
+<li><a class="reference internal" href="#gsurfacelib-model">GSurfaceLib model</a></li>
+<li><a class="reference internal" href="#csurlib-instanciated-by-cdetector-attachsurfaces-from-cgeometry-init">CSurLib instanciated by CDetector::attachSurfaces from CGeometry::init</a></li>
+<li><a class="reference internal" href="#gsurfacelib-save">GSurfaceLib::save</a></li>
+<li><a class="reference internal" href="#gsurlib-formerly-of-ggeo-now-moved-to-optickshub">GSurLib formerly of GGeo, now moved to OpticksHub</a></li>
+<li><a class="reference internal" href="#cdetector">CDetector</a></li>
+<li><a class="reference internal" href="#gsurlib">GSurLib</a></li>
+<li><a class="reference internal" href="#assimpggeo-convertmaterials-adding-to-ggeo-gsurfacelib">AssimpGGeo::convertMaterials adding to GGeo/GSurfaceLib</a></li>
+<li><a class="reference internal" href="#gsurfacelib-add">GSurfaceLib::add</a></li>
+<li><a class="reference internal" href="#gsurfacelib-in-geocache">GSurfaceLib in geocache</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/surface_review.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="surface-review">
+<h1>surface_review<a class="headerlink" href="#surface-review" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="next">
+<h2>NEXT<a class="headerlink" href="#next" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>check CSurfaceLib conversion from full geometry</li>
+</ol>
+</div>
+<div class="section" id="done">
+<h2>DONE<a class="headerlink" href="#done" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>get GSurfaceLib/GBndLib going for test geometry</li>
+<li>CSurfaceLib convert with test geometry</li>
+</ol>
+<ol class="arabic simple" start="6">
+<li>consign CSurLib/GSurLib/GSur to attic</li>
+</ol>
+<ol class="arabic simple" start="4">
+<li>DIDNT BOTHER : compare with old CSurLib/GSurLib/GSur approach</li>
+</ol>
+</div>
+<div class="section" id="surface-overhaul-approach">
+<h2>Surface Overhaul Approach<a class="headerlink" href="#surface-overhaul-approach" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Review the various surface info flows</li>
+<li>find sticking-points/workarounds/kludges</li>
+</ul>
+<p>Some things were done in an expedient manner
+in order to focus on part of the chain. As having
+full chain in flux is too much to handle.</p>
+<ul class="simple">
+<li><strong>NOW</strong> IS THE TIME TO FIX THESE THINGS.</li>
+<li>eg the border/skin info is available pre-cache, so kludging
+reconstruction of that post-cache points to infoloss
+in persisting and the GSurLib workaround that got out of control</li>
+</ul>
+</div>
+<div class="section" id="vague-recollection-of-the-history-of-this">
+<h2>Vague Recollection of the history of this..<a class="headerlink" href="#vague-recollection-of-the-history-of-this" title="Permalink to this headline">¶</a></h2>
+<p>Originally (whilst focus was entirely on OptiX geometry)
+materials and surfaces were not persisted to geocache,
+instead the boundary lib comprising all the interleaved props was persisted alone.</p>
+<p>Subsequently the need for dynamic boundaries for testing meant that moved to
+the boundary buffer tex being dynamically derived from integers representing
+materials and surfaces, and added PropLib persisting then.</p>
+<p>The thing is that OptiX does not need the border/skin surface volume names
+because the info is already present in the form of the boundary indices that
+are affixed to every piece of geometry. These boundary spec being formed pre-cache
+whilst the info is available.</p>
+<p>Subsequently cfg4 means need to reconstitute the G4 border/skin objects. Although
+it is in principal possible to disentangle these from the boundaries,
+it aint at all simple : resulting in complex workarounds in GSurLib/CSurLib/GSur/...</p>
+<p>Solution: improve the GPropLib persisting with some NMeta metadata
+so that the G4 geometry can be reconstructed without jumping thru hoops.
+Going back a few steps avoids the complexity of operating at just the last step.</p>
+</div>
+<div class="section" id="surface-info-flows">
+<h2>Surface Info Flows<a class="headerlink" href="#surface-info-flows" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ggeo-full-triangulated-geometry-flow">
+<h3>GGeo : Full Triangulated Geometry Flow<a class="headerlink" href="#ggeo-full-triangulated-geometry-flow" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>export of G4 border/skin surfaces into COLLADA G4DAE</li>
+<li>AssimpGGeo parsing of G4DAE into GGeo/GSurfaceLib</li>
+<li>persisting GGeo/GSurfaceLib to geocache</li>
+<li>loading GGeo/GSurfaceLib from geocache</li>
+<li>translation of loaded GGeo/GSurfaceLib into OptiX geometry</li>
+<li>translation of loaded GGeo/GSurfaceLib into Geant4 geometry</li>
+</ul>
+</div>
+<div class="section" id="gscene-full-analytic-geometry-flow">
+<h3>GScene : Full Analytic Geometry Flow<a class="headerlink" href="#gscene-full-analytic-geometry-flow" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>export G4 border/skin into GDML together with everything else<ul>
+<li>NB GDML looses some material/surf info, so the GDML flow is
+not standalone (even in current GDML, let alone some old GDML exports
+that are still supporting)... So it needs to be used together with G4DAE</li>
+</ul>
+</li>
+<li>python GDML parsing into GLTF json</li>
+<li>NGLTF/NScene/GScene parsing of GLTF, yielding GScene/GSurfaceLib</li>
+<li>FROM GSurfaceLib the story is the same as above</li>
+</ul>
+</div>
+<div class="section" id="ggeotest-test-geometry-flow">
+<h3>GGeoTest : Test Geometry Flow<a class="headerlink" href="#ggeotest-test-geometry-flow" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>parse NCSG python buffers into NCSGList of trees, including txt
+files with boundary specification for each solid</li>
+<li>construction of GGeoTest geometry from NCSG, the surfaces
+referred to by name within the boundary specification</li>
+</ul>
+</div>
+<div class="section" id="fundamental-surface-difference-between-full-test-geometries">
+<h3>Fundamental surface difference between full/test geometries<a class="headerlink" href="#fundamental-surface-difference-between-full-test-geometries" title="Permalink to this headline">¶</a></h3>
+<p>Notice the fundamental difference wrt surfaces between full and test geometries,</p>
+<ul class="simple">
+<li>full geometries have original &#8220;truth&#8221; sslv,bspv1,bspv2 names
+locating the surfaces which are NOW passed forward from the G4 geometry
+into GGeo/GSurfaceLib(GPropLib) using NMeta/json to survive the geocache
+this should allow simple reconstruction of a G4 geometry from the GGeo one</li>
+<li>hmm : what about surface identity, presumably this means there is duplication
+of same surface properties into different locations ?</li>
+<li>test geometries must create &#8220;truth&#8221; regarding surface locations as they go along<ul>
+<li>base geometry surfaces are referenced for their properties, NOT LOCATIONS</li>
+<li>locations specified by base geometry sslv/bspv1/bspv2 names are
+not applicable to test geometries which have entirely different names for the volumes</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="gsurfacelib-csurfacelib-translation-of-both-full-and-test-geometries">
+<h3>GSurfaceLib -&gt; CSurfaceLib translation of both full and test geometries ?<a class="headerlink" href="#gsurfacelib-csurfacelib-translation-of-both-full-and-test-geometries" title="Permalink to this headline">¶</a></h3>
+<p>Suspect easiest to make test geometry to look just like full geometry
+as soon as possible by giving them the requisite metadata names.</p>
+<p>Perhaps:</p>
+<ul class="simple">
+<li>dynamically apply modifications to base surface locations</li>
+<li>when are the names coming from (GMaker ?)</li>
+</ul>
+</div>
+</div>
+<div class="section" id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">op</span> <span class="o">-</span><span class="n">G</span>    <span class="c"># create geocache</span>
+
+<span class="n">op</span> <span class="o">--</span><span class="n">okg4</span> <span class="o">-</span><span class="n">D</span> <span class="o">--</span><span class="n">dbgsurf</span>    <span class="c"># load geocache and convert to G4</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="surfaces-with-test-geometry">
+<h2>Surfaces With Test Geometry<a class="headerlink" href="#surfaces-with-test-geometry" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="surface_review_test_geometry.html"><em>Surface Review Test Geometry</em></a></li>
+</ul>
+</div>
+<div class="section" id="fixed-ctraverser-getpv-failing-to-find-a-bordersurface-pv">
+<h2>FIXED : CTraverser::getPV failing to find a bordersurface PV<a class="headerlink" href="#fixed-ctraverser-getpv-failing-to-find-a-bordersurface-pv" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>fix entailed keeping the ptr suffix on pv, lv names,
+in a couple of places including invokation of G4GDMLParser</li>
+<li>TODO: check the analytic route via GLTF does the same</li>
+</ul>
+<div class="highlight-python"><pre>op --okg4 -D --dbgsurf
+
+
+simon:GNodeLib blyth$ grep 0xc13c018 PVNames.txt
+__dd__Geometry__Sites__lvNearHallBot--pvNearPoolDead0xc13c018
+simon:GNodeLib blyth$
+
+(lldb) p name
+(const char *) $0 = 0x000000010b420640 "/dd/Geometry/Sites/lvNearHallBot--pvNearPoolDead0xc13c018"</pre>
+</div>
+<div class="highlight-python"><pre>(lldb) p m_pvnames
+(std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;) $2 = size=12230 {
+  [0] = "World_PV"
+  [1] = "/dd/Structure/Sites/db-rock"
+  [2] = "/dd/Geometry/Sites/lvNearSiteRock#pvNearHallTop"
+  [3] = "/dd/Geometry/Sites/lvNearHallTop#pvNearTopCover"
+  [4] = "/dd/Geometry/Sites/lvNearHallTop#pvNearTeleRpc#pvNearTeleRpc:1"</pre>
+</div>
+<p>These m_pvnames are collected from the reconstructed &#8220;tree&#8221; in CTraverser::AncestorVisit</p>
+<p>Is G4GDMLParser trimming ptrs ? YEP: it was, reconfigured in CGDMLDetector</p>
+<div class="highlight-python"><pre>g4-cls G4GDMLParser</pre>
+</div>
+<div class="highlight-python"><pre>30868     &lt;volume name="/dd/Geometry/Sites/lvNearHallBot0xbf89c60"&gt;
+30869       &lt;materialref ref="/dd/Materials/Rock0xc0300c8"/&gt;
+30870       &lt;solidref ref="near_hall_bot0xbf3d718"/&gt;
+30871       &lt;physvol name="/dd/Geometry/Sites/lvNearHallBot#pvNearPoolDead0xc13c018"&gt;
+30872         &lt;volumeref ref="/dd/Geometry/Pool/lvNearPoolDead0xc2dc490"/&gt;
+30873         &lt;position name="/dd/Geometry/Sites/lvNearHallBot#pvNearPoolDead0xc13c018_pos" unit="mm" x="0" y="0" z="150"/&gt;
+30874       &lt;/physvol&gt;</pre>
+</div>
+</div>
+<div class="section" id="hmm-gdml-reconstruction-does-nothing-special-but-there-are-ptrs-on-names">
+<h2>Hmm GDML reconstruction does nothing special : BUT there are ptrs on names<a class="headerlink" href="#hmm-gdml-reconstruction-does-nothing-special-but-there-are-ptrs-on-names" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>NB <strong>Appending ptr in pv names does not mean they are all unique</strong>, as the PV get repeated</li>
+<li>reading GDML code makes me think that this may have been assumed</li>
+<li>for lv : i guess no, lv are recycled greatly</li>
+</ul>
+<div class="highlight-python"><pre>simon:GNodeLib blyth$ wc -l LVNames.txt
+   12230 LVNames.txt
+simon:GNodeLib blyth$ wc -l PVNames.txt
+   12230 PVNames.txt
+simon:GNodeLib blyth$ cat LVNames.txt | sort | uniq | wc -l
+     249
+simon:GNodeLib blyth$ cat PVNames.txt | sort | uniq | wc -l
+    5643</pre>
+</div>
+<ul class="simple">
+<li><a class="reference internal" href="surface_review_gdml.html"><em>Surface Review GDML</em></a></li>
+<li><a class="reference internal" href="surface_review_dae.html"><em>Surface Review DAE</em></a></li>
+</ul>
+</div>
+<div class="section" id="improved-proplib-persisting-with-json-metadata">
+<h2>Improved PropLib Persisting with JSON metadata<a class="headerlink" href="#improved-proplib-persisting-with-json-metadata" title="Permalink to this headline">¶</a></h2>
+<p>Added NMeta json infrastructure to enable full fidelity
+metadata to be stored with persisted PropLib.</p>
+<div class="section" id="where-to-tack-the-metadata">
+<h3>Where to tack the metadata ?<a class="headerlink" href="#where-to-tack-the-metadata" title="Permalink to this headline">¶</a></h3>
+<p>Adding surfaces/materials is not a common thing to do, so:</p>
+<ul class="simple">
+<li>global metadata for the entire PropLibs, dict-of-dict style
+top level keys being the material/surface names</li>
+<li>current NParameters uses BList string,string persisting
+which restricts it to a single level</li>
+<li>developed NMeta using nlohmann::json for more flexible metadata</li>
+<li>placed m_meta into GPropertyMap/GPropertyLib, the maps correpond to
+individual surf/mat etc.. and the libs to collections of those :
+NMeta is composable allowing the lib to amalgamate all meta data
+prior to save and then distribute it on load</li>
+</ul>
+<p>New metadata infrastructure operational via geocache:</p>
+<div class="highlight-python"><pre>simon:ggeo blyth$ op --surf 6
+...
+2017-11-07 21:12:30.368 INFO  [3558034] [GPropertyMap&lt;float&gt;::dumpMeta@146] GSurfaceLib::dump.index
+2017-11-07 21:12:30.368 INFO  [3558034] [NMeta::dump@74] {
+    "index": 6,
+    "name": "lvPmtHemiCathodeSensorSurface",
+    "shortname": "lvPmtHemiCathodeSensorSurface",
+    "sslv": "__dd__Geometry__PMT__lvPmtHemiCathode0xc2cdca0",
+    "type": "surface"
+}
+/Users/blyth/opticks/bin/op.sh RC 0
+simon:ggeo blyth$
+simon:ggeo blyth$</pre>
+</div>
+</div>
+</div>
+<div class="section" id="potential-missing-surfaces">
+<h2>Potential Missing Surfaces ?<a class="headerlink" href="#potential-missing-surfaces" title="Permalink to this headline">¶</a></h2>
+<p>Do the original G4 border/skin surfaces survive the journey ?</p>
+<ul class="simple">
+<li>TODO: a full geometry workflow test, but with a simple enough geometry to illustrate the issues</li>
+<li>assumption of one location for a named PV pair is incorrect ?
+(because node graph, not tree)</li>
+<li>using traversal indices may be a way to flatten the graph into a tree
+and avoid the issue</li>
+</ul>
+<p>Perhaps :</p>
+<ul class="simple">
+<li>get all the traversal indices of each PV name
+and then do parent/child relation checks to reconstruct
+valid border surface pairs ?</li>
+<li>for skin surfaces using logical name lookup should be ok</li>
+</ul>
+</div>
+<div class="section" id="fixed-pv-addressing-the-ptr-were-being-trimmed">
+<h2>FIXED : PV Addressing, the ptr were being trimmed<a class="headerlink" href="#fixed-pv-addressing-the-ptr-were-being-trimmed" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>CTraverser.m_pvnames are without the ptr</li>
+</ul>
+<div class="highlight-python"><pre>(lldb) p m_pvnames
+(std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;) $3 = size=12230 {
+  [0] = "World_PV"
+  [1] = "/dd/Structure/Sites/db-rock"
+  [2] = "/dd/Geometry/Sites/lvNearSiteRock#pvNearHallTop"
+  [3] = "/dd/Geometry/Sites/lvNearHallTop#pvNearTopCover"
+  [4] = "/dd/Geometry/Sites/lvNearHallTop#pvNearTeleRpc#pvNearTeleRpc:1"
+  [5] = "/dd/Geometry/RPC/lvRPCMod#pvRPCFoam"
+
+
+(lldb) p name
+(const char *) $4 = 0x000000010b2d7f60 "__dd__Geometry__Sites__lvNearHallBot--pvNearPoolDead0xc13c018"
+(lldb) p BStr::DAEIdToG4(name)
+(char *) $5 = 0x000000010b2d8ff0 "/dd/Geometry/Sites/lvNearHallBot--pvNearPoolDead"</pre>
+</div>
+</div>
+<div class="section" id="gsurfacelib-model">
+<h2>GSurfaceLib model<a class="headerlink" href="#gsurfacelib-model" title="Permalink to this headline">¶</a></h2>
+<p>When a set of surface props are attached at multiple locations
+(bpv1/bpv2 pairs or sslv) then the surface must be repeated.</p>
+<ul class="simple">
+<li>ie surface identity incorporates location</li>
+</ul>
+</div>
+<div class="section" id="csurlib-instanciated-by-cdetector-attachsurfaces-from-cgeometry-init">
+<h2>CSurLib instanciated by CDetector::attachSurfaces from CGeometry::init<a class="headerlink" href="#csurlib-instanciated-by-cdetector-attachsurfaces-from-cgeometry-init" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>267 void CDetector::attachSurfaces()
+268 {
+269     // invoked from CGeometry::init immediately after CTestDetector or GDMLDetector instanciation
+270
+271     if(m_dbgsurf)
+272         LOG(info) &lt;&lt; "[--dbgsurf] CDetector::attachSurfaces START closing gsurlib, creating csurlib  " ;
+273
+274     m_gsurlib-&gt;close();
+275
+276     m_csurlib = new CSurLib(m_gsurlib);
+277
+278     m_csurlib-&gt;convert(this);
+279
+280     if(m_dbgsurf)
+281         LOG(info) &lt;&lt; "[--dbgsurf] CDetector::attachSurfaces DONE " ;
+282
+283 }
+284
+
+
+ 56 void CGeometry::init()
+ 57 {
+ 58     CDetector* detector = NULL ;
+ 59     if(m_ok-&gt;hasOpt("test"))
+ 60     {
+ 61         LOG(fatal) &lt;&lt; "CGeometry::init G4 simple test geometry " ;
+ 62         OpticksQuery* query = NULL ;  // normally no OPTICKS_QUERY geometry subselection with test geometries
+ 63         detector  = static_cast&lt;CDetector*&gt;(new CTestDetector(m_hub, query)) ;
+ 64     }
+ 65     else
+ 66     {
+ 67         // no options here: will load the .gdml sidecar of the geocache .dae
+ 68         LOG(fatal) &lt;&lt; "CGeometry::init G4 GDML geometry " ;
+ 69         OpticksQuery* query = m_ok-&gt;getQuery();
+ 70         detector  = static_cast&lt;CDetector*&gt;(new CGDMLDetector(m_hub, query)) ;
+ 71     }
+ 72
+ 73     detector-&gt;attachSurfaces();
+ 74
+ 75     m_detector = detector ;
+ 76     m_lib = detector-&gt;getPropLib();
+ 77 }</pre>
+</div>
+</div>
+<div class="section" id="gsurfacelib-save">
+<h2>GSurfaceLib::save<a class="headerlink" href="#gsurfacelib-save" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>051 void GSurfaceLib::save()
+ 52 {
+ 53     saveToCache();
+///  from GPropertyLib::saveToCache
+ 54     saveOpticalBuffer();
+ 55 }
+
+ 73 void GSurfaceLib::saveOpticalBuffer()
+ 74 {
+ 75     NPY&lt;unsigned int&gt;* ibuf = createOpticalBuffer();
+ 76     saveToCache(ibuf, "Optical") ;
+ 77     setOpticalBuffer(ibuf);
+ 78 }
+
+
+418 void GPropertyLib::saveToCache()
+419 {
+420
+421     LOG(trace) &lt;&lt; "GPropertyLib::saveToCache" ;
+422
+423
+424     if(!isClosed()) close();
+425
+426     if(m_buffer)
+427     {
+428         std::string dir = getCacheDir();
+429         std::string name = getBufferName();
+430         m_buffer-&gt;save(dir.c_str(), name.c_str());
+431     }
+432
+433     if(m_names)
+434     {
+435         m_names-&gt;save(m_resource-&gt;getIdPath());
+436     }
+437
+438     LOG(trace) &lt;&lt; "GPropertyLib::saveToCache DONE" ;
+439
+440 }</pre>
+</div>
+</div>
+<div class="section" id="gsurlib-formerly-of-ggeo-now-moved-to-optickshub">
+<h2>GSurLib formerly of GGeo, now moved to OpticksHub<a class="headerlink" href="#gsurlib-formerly-of-ggeo-now-moved-to-optickshub" title="Permalink to this headline">¶</a></h2>
+<p>Aiming to eliminate GSurLib, as:</p>
+<ul class="simple">
+<li>overcomplicated</li>
+<li>only used by CSurLib</li>
+<li>the original purpose of distinguishing skin from border surfaces
+from their pattern of use : turned out not to be possible</li>
+</ul>
+</div>
+<div class="section" id="cdetector">
+<h2>CDetector<a class="headerlink" href="#cdetector" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>036 CDetector::CDetector(OpticksHub* hub, OpticksQuery* query)
+ 37   :
+ 38   m_hub(hub),
+ 39   m_ok(m_hub-&gt;getOpticks()),
+ 40   m_ggeo(m_hub-&gt;getGGeo()),
+ 41   m_blib(new CBndLib(m_hub)),
+ 42   m_gsurlib(m_hub-&gt;getSurLib()),   // invokes the deferred GGeo::createSurLib
+ 43   m_csurlib(NULL),
+
+621 GSurLib* OpticksHub::getSurLib()
+622 {
+623     return m_ggeo ? m_ggeo-&gt;getSurLib() : NULL ;
+624 }</pre>
+</div>
+</div>
+<div class="section" id="gsurlib">
+<h2>GSurLib<a class="headerlink" href="#gsurlib" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>GSurLib* OpticksHub::createSurLib(GGeoBase* ggb)
+{
+    GSurLib* gsl = new GSurLib(m_ok, ggb );
+    return gsl ;
+}
+
+GSurLib* OpticksHub::getSurLib()
+{
+    if( m_gsurlib == NULL )
+    {
+        // this method motivating making GGeoTest into a GGeoBase : ie standard geo provider
+        GGeoBase* ggb = getGGeoBase();    // three-way choice
+        m_gsurlib = createSurLib(ggb) ;
+    }
+    return m_gsurlib ;
+}</pre>
+</div>
+</div>
+<div class="section" id="assimpggeo-convertmaterials-adding-to-ggeo-gsurfacelib">
+<h2>AssimpGGeo::convertMaterials adding to GGeo/GSurfaceLib<a class="headerlink" href="#assimpggeo-convertmaterials-adding-to-ggeo-gsurfacelib" title="Permalink to this headline">¶</a></h2>
+<p>Assimp has no &#8220;surface&#8221; so aiMaterials are used to hold both surface and material
+info with g4dae extra properties to distinguish</p>
+<div class="highlight-python"><pre>392         LOG(debug) &lt;&lt; "AssimpGGeo::convertMaterials " &lt;&lt; i &lt;&lt; " " &lt;&lt; name ;
+393
+394         const char* bspv1 = getStringProperty(mat, g4dae_bordersurface_physvolume1 );
+395         const char* bspv2 = getStringProperty(mat, g4dae_bordersurface_physvolume2 );
+396
+397         const char* sslv  = getStringProperty(mat, g4dae_skinsurface_volume );
+398
+399         const char* osnam = getStringProperty(mat, g4dae_opticalsurface_name );
+400         const char* ostyp = getStringProperty(mat, g4dae_opticalsurface_type );
+401         const char* osmod = getStringProperty(mat, g4dae_opticalsurface_model );
+402         const char* osfin = getStringProperty(mat, g4dae_opticalsurface_finish );
+403         const char* osval = getStringProperty(mat, g4dae_opticalsurface_value );
+404
+405
+406         GOpticalSurface* os = osnam &amp;&amp; ostyp &amp;&amp; osmod &amp;&amp; osfin &amp;&amp; osval ? new GOpticalSurface(osnam, ostyp, osmod, osfin, osval) : NULL ;
+407
+408
+409         // assimp "materials" are used to hold skinsurface and bordersurface properties,
+410         // as well as material properties
+411         // which is which is determined by the properties present
+412
+413         if(os)
+414         {
+415             LOG(debug) &lt;&lt; "AssimpGGeo::convertMaterials os " &lt;&lt; i &lt;&lt; " " &lt;&lt; os-&gt;description();
+416
+417             // assert(strcmp(osnam, name) == 0);
+418             //      formerly enforced same-name convention between OpticalSurface
+419             //      and the skin or border surface that references it, but JUNO doesnt follow that
+420         }
+421
+422         if( sslv )
+423         {
+424             assert(os &amp;&amp; "all ss must have associated os");
+425
+426             GSkinSurface* gss = new GSkinSurface(name, index, os);
+427
+428
+429             LOG(debug) &lt;&lt; "AssimpGGeo::convertMaterials GSkinSurface "
+430                       &lt;&lt; " name " &lt;&lt; name
+431                       &lt;&lt; " sslv " &lt;&lt; sslv
+432                       ;
+433
+434             gss-&gt;setStandardDomain(standard_domain);
+435             gss-&gt;setSkinSurface(sslv);
+436             addProperties(gss, mat );
+437
+438             LOG(debug) &lt;&lt; gss-&gt;description();
+439             gg-&gt;add(gss);
+440
+441             {
+442                 // without standard domain applied
+443                 GSkinSurface*  gss_raw = new GSkinSurface(name, index, os);
+444                 gss_raw-&gt;setSkinSurface(sslv);
+445                 addProperties(gss_raw, mat );
+446                 gg-&gt;addRaw(gss_raw);  // this was erroreously gss for a long time
+447             }
+448
+449         }
+450         else if (bspv1 &amp;&amp; bspv2 )
+451         {
+452             assert(os &amp;&amp; "all bs must have associated os");
+453             GBorderSurface* gbs = new GBorderSurface(name, index, os);
+454
+455             gbs-&gt;setStandardDomain(standard_domain);
+456             gbs-&gt;setBorderSurface(bspv1, bspv2);
+457             addProperties(gbs, mat );
+458
+459             LOG(debug) &lt;&lt; gbs-&gt;description();
+460
+461             gg-&gt;add(gbs);
+462
+463             {
+464                 // without standard domain applied
+465                 GBorderSurface* gbs_raw = new GBorderSurface(name, index, os);
+466                 gbs_raw-&gt;setBorderSurface(bspv1, bspv2);
+467                 addProperties(gbs_raw, mat );
+468                 gg-&gt;addRaw(gbs_raw);
+469             }
+470         }
+471         else
+472         {
+473             assert(os==NULL);
+474
+475
+476             //printf("AssimpGGeo::convertMaterials aiScene materialIndex %u (GMaterial) name %s \n", i, name);
+477             GMaterial* gmat = new GMaterial(name, index);
+478             gmat-&gt;setStandardDomain(standard_domain);
+479             addProperties(gmat, mat );
+480             gg-&gt;add(gmat);
+481
+482             {
+483                 // without standard domain applied
+484                 GMaterial* gmat_raw = new GMaterial(name, index);
+485                 addProperties(gmat_raw, mat );
+486                 gg-&gt;addRaw(gmat_raw);
+487             }
+488
+489             if(hasVectorProperty(mat, EFFICIENCY ))
+490             {
+491                 assert(gg-&gt;getCathode() == NULL &amp;&amp; "only expecting one material with an EFFICIENCY property" );
+492                 gg-&gt;setCathode(gmat) ;
+493                 m_cathode = mat ;
+494             }</pre>
+</div>
+</div>
+<div class="section" id="gsurfacelib-add">
+<h2>GSurfaceLib::add<a class="headerlink" href="#gsurfacelib-add" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>202 void GSurfaceLib::add(GBorderSurface* raw)
+203 {
+204     GPropertyMap&lt;float&gt;* surf = dynamic_cast&lt;GPropertyMap&lt;float&gt;* &gt;(raw);
+205     add(surf);
+206 }
+207 void GSurfaceLib::add(GSkinSurface* raw)
+208 {
+209     LOG(trace) &lt;&lt; "GSurfaceLib::add(GSkinSurface*) " &lt;&lt; ( raw ? raw-&gt;getName() : "NULL" ) ;
+210     GPropertyMap&lt;float&gt;* surf = dynamic_cast&lt;GPropertyMap&lt;float&gt;* &gt;(raw);
+211     add(surf);
+212 }
+213
+214 void GSurfaceLib::add(GPropertyMap&lt;float&gt;* surf)
+215 {
+216     assert(!isClosed());
+217
+218     GPropertyMap&lt;float&gt;* ssurf = createStandardSurface(surf) ;
+219
+220     addDirect(ssurf);
+221 }
+222
+223
+224 void GSurfaceLib::addDirect(GPropertyMap&lt;float&gt;* surf)
+225 {
+226     assert(!isClosed());
+227     m_surfaces.push_back(surf);
+228 }</pre>
+</div>
+</div>
+<div class="section" id="gsurfacelib-in-geocache">
+<h2>GSurfaceLib in geocache<a class="headerlink" href="#gsurfacelib-in-geocache" title="Permalink to this headline">¶</a></h2>
+<p>No json or txt with the surfacelib:</p>
+<div class="highlight-python"><pre>simon:GSurfaceLib blyth$ ll
+total 128
+drwxr-xr-x   4 blyth  staff    136 Jul  3 15:04 .
+drwxr-xr-x  19 blyth  staff    646 Aug 29 10:46 ..
+-rw-r--r--   1 blyth  staff    848 Aug 30 13:35 GSurfaceLibOptical.npy
+-rw-r--r--   1 blyth  staff  59984 Aug 30 13:35 GSurfaceLib.npy
+simon:GSurfaceLib blyth$</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

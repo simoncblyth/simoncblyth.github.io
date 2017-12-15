@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FIXED : Geocache creation hotspot checking node in selection list &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FIXED : Geocache creation hotspot checking node in selection list</a><ul>
+<li><a class="reference internal" href="#making-geocache">Making geocache</a><ul>
+<li><a class="reference internal" href="#hotspot-assimpselection-contains">hotspot AssimpSelection::contains</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/j1707_geocache_creation_hotspot_checking_inside_selection_list.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fixed-geocache-creation-hotspot-checking-node-in-selection-list">
+<h1>FIXED : Geocache creation hotspot checking node in selection list<a class="headerlink" href="#fixed-geocache-creation-hotspot-checking-node-in-selection-list" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>but normally the selection is ALL, so special case this fixes hotspot</li>
+</ul>
+<div class="section" id="making-geocache">
+<h2>Making geocache<a class="headerlink" href="#making-geocache" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>simon:issues blyth$ op --j1707 -G</pre>
+</div>
+<div class="section" id="hotspot-assimpselection-contains">
+<h3>hotspot AssimpSelection::contains<a class="headerlink" href="#hotspot-assimpselection-contains" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>(lldb) bt
+* thread #1: tid = 0x2a1de, 0x0000000101e08336 libAssimpRap.dylib`AssimpSelection::contains(AssimpNode*) [inlined] bool std::__1::operator==&lt;AssimpNode**, AssimpNode**&gt;(__x=0x00007fff5fbfcb18, __y=0x00007fff5fbfcb10) + 15 at iterator:1287, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+  * frame #0: 0x0000000101e08336 libAssimpRap.dylib`AssimpSelection::contains(AssimpNode*) [inlined] bool std::__1::operator==&lt;AssimpNode**, AssimpNode**&gt;(__x=0x00007fff5fbfcb18, __y=0x00007fff5fbfcb10) + 15 at iterator:1287</pre>
+</div>
+<div class="highlight-python"><pre>(lldb) f 14
+frame #14: 0x0000000101e1060c libAssimpRap.dylib`AssimpGGeo::convert(this=0x00007fff5fbfd5b0, ctrl=0x00007fff5fbff00d) + 380 at AssimpGGeo.cc:170
+   167      convertMaterials(scene, m_ggeo, ctrl );
+   168      convertSensors( m_ggeo );
+   169      convertMeshes(scene, m_ggeo, ctrl);
+-&gt; 170      convertStructure(m_ggeo);
+   171
+   172      return 0 ;
+   173  }
+
+
+   817         GSolid* solid = convertStructureVisit( gg, node, depth, parent);
+   818
+-&gt; 819      bool selected = m_selection &amp;&amp; m_selection-&gt;contains(node) ;
+   820
+   821      solid-&gt;setSelected(selected);
+
+
+   97      bool AssimpSelection::contains(AssimpNode* node)
+   98   {
+-&gt; 99       return std::find(m_selection.begin(), m_selection.end(), node ) != m_selection.end() ;
+   100  }</pre>
+</div>
+<p>Hmm, probably much faster to re-apply a selection rather than checking
+for the node in the list of 0.25M nodes.
+But normally the selection is ALL, so can just special case this.</p>
+<div class="highlight-python"><pre>119 int AssimpGGeo::load(GGeo* ggeo)
+120 {
+121     // THIS IS THE ENTRY POINT SET IN OpticksGeometry::loadGeometryBase
+122
+123     Opticks* opticks = ggeo-&gt;getOpticks();
+124     OpticksResource* resource = opticks-&gt;getResource();
+125     OpticksQuery* query = opticks-&gt;getQuery() ;
+126
+127     const char* path = opticks-&gt;getDAEPath() ;
+128     const char* ctrl = resource-&gt;getCtrl() ;
+129     unsigned int verbosity = ggeo-&gt;getLoaderVerbosity();
+130
+131     LOG(info)&lt;&lt; "AssimpGGeo::load "
+132              &lt;&lt; " path " &lt;&lt; ( path ? path : "NULL" )
+133              &lt;&lt; " query " &lt;&lt; ( query ? query-&gt;getQueryString() : "NULL" )
+134              &lt;&lt; " ctrl " &lt;&lt; ( ctrl ? ctrl : "NULL" )
+135              &lt;&lt; " verbosity " &lt;&lt; verbosity
+136              ;
+137
+138     assert(path);
+139     assert(query);
+140     assert(ctrl);
+141
+142     AssimpImporter assimp(path);
+143
+144     assimp.import();
+145
+146     AssimpSelection* selection = assimp.select(query);
+147
+148     AssimpTree* tree = assimp.getTree();
+149
+150
+151     AssimpGGeo agg(ggeo, tree, selection);
+152
+153     agg.setVerbosity(verbosity);
+154
+155     int rc = agg.convert(ctrl);
+156
+157     return rc ;
+158 }</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

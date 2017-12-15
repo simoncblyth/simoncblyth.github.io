@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>torus Mandel-artifacts with SolveCubicStrobachPolyFit outside its bbox &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">torus Mandel-artifacts with SolveCubicStrobachPolyFit outside its bbox</a><ul>
+<li><a class="reference internal" href="#observations-with-tboolean-torus">Observations with tboolean-torus</a></li>
+<li><a class="reference internal" href="#huh-artifacts-gone-by-moving-to-initial-gamma-using-the-solvecubicpolydiv-method">HUH : Artifacts gone by moving to initial gamma using the SolveCubicPolyDiv method</a></li>
+<li><a class="reference internal" href="#todo">TODO</a></li>
+<li><a class="reference internal" href="#manual">manual</a></li>
+<li><a class="reference internal" href="#investigate">Investigate</a></li>
+<li><a class="reference internal" href="#is-this-a-bounds-bug">Is this a bounds bug ?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/torus_artifacts_with_SolveCubicStrobachPolyFit_outside_its_bbox.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="torus-mandel-artifacts-with-solvecubicstrobachpolyfit-outside-its-bbox">
+<h1>torus Mandel-artifacts with SolveCubicStrobachPolyFit outside its bbox<a class="headerlink" href="#torus-mandel-artifacts-with-solvecubicstrobachpolyfit-outside-its-bbox" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="observations-with-tboolean-torus">
+<h2>Observations with tboolean-torus<a class="headerlink" href="#observations-with-tboolean-torus" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>~/opticks_refs/torus_artifact_outside_bbox_with_SolveCubicStrobachPolyFit.png</li>
+</ul>
+<p>Artifacts resembling Mandlebrot set manifest above and below
+the torus (outside its bbox).</p>
+<ul class="simple">
+<li>not surprised by the Mandelbrot</li>
+<li>very surprised that the artifacts are outside the bbox : how can that happen ?</li>
+<li>potential for a very expensive bug here</li>
+<li>switching from the usual container + obj to just the obj
+in tboolean-torus makes the artifacts stay within obj bbox : why ?</li>
+<li>suggests I&#8217;m misunderstanding bbox mechanics, I thought that
+intersect routines only get called if the bbox yields a hit ?</li>
+</ul>
+</div>
+<div class="section" id="huh-artifacts-gone-by-moving-to-initial-gamma-using-the-solvecubicpolydiv-method">
+<h2>HUH : Artifacts gone by moving to initial gamma using the SolveCubicPolyDiv method<a class="headerlink" href="#huh-artifacts-gone-by-moving-to-initial-gamma-using-the-solvecubicpolydiv-method" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>GPU double precision trig appears to be a black art</li>
+</ul>
+</div>
+<div class="section" id="todo">
+<h2>TODO<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>review geometry setup in OGeo.cc</li>
+</ul>
+</div>
+<div class="section" id="manual">
+<h2>manual<a class="headerlink" href="#manual" title="Permalink to this headline">¶</a></h2>
+<p>Ray traversal invokes an intersection program when the current ray encounters
+one of a Geometry object’s primitives. It is the responsibility of an
+intersection program to compute whether the ray intersects with the primitive,
+and to report the parametric t-value of the intersection. Additionally, the
+intersection program is responsible for computing and reporting any details of
+the intersection, such as surface normal vectors, through attribute variables.
+Once the intersection program has determined the t-value of a ray-primitive
+intersection, it must report the result by calling a pair of OptiX functions,
+rtPotentialIntersection and rtReportIntersection:</p>
+</div>
+<div class="section" id="investigate">
+<h2>Investigate<a class="headerlink" href="#investigate" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>tboolean-torus(){ TESTCONFIG=$($FUNCNAME- 2&gt;/dev/null)    tboolean-- $* ; }
+tboolean-torus-(){  $FUNCNAME- | python $* ; }
+tboolean-torus--(){ cat &lt;&lt; EOP
+
+from opticks.ana.base import opticks_main
+from opticks.analytic.csg import CSG
+
+args = opticks_main(csgpath="$TMP/$FUNCNAME")
+
+CSG.boundary = args.testobject
+
+CSG.kwa = dict(poly="IM", resolution="50")
+
+container = CSG("box", param=[0,0,0,400], boundary=args.container, poly="MC", nx="20" )
+
+a = CSG.MakeTorus(R=100, r=50)
+
+#a = CSG.MakeTorus(R=1, r=0.5)
+#a.scale = [100,100,100]
+
+#CSG.Serialize([container, a], args.csgpath )
+CSG.Serialize([a], args.csgpath )</pre>
+</div>
+</div>
+<div class="section" id="is-this-a-bounds-bug">
+<h2>Is this a bounds bug ?<a class="headerlink" href="#is-this-a-bounds-bug" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>115 RT_PROGRAM void bounds (int primIdx, float result[6])
+116 {
+117     //if(primIdx == 0) transform_test();
+118     //if(primIdx == 0) solve_callable_test();
+119
+120     if(primIdx == 0)
+121     {
+122         unsigned partBuffer_size = partBuffer.size() ;
+123         unsigned planBuffer_size = planBuffer.size() ;
+124         unsigned tranBuffer_size = tranBuffer.size() ;
+125
+126         rtPrintf("// intersect_analytic.cu:bounds pts:%4d pln:%4d trs:%4d \n", partBuffer_size, planBuffer_size, tranBuffer_size );
+127     }
+129
+130     optix::Aabb* aabb = (optix::Aabb*)result;
+131     *aabb = optix::Aabb();
+132
+133     uint4 identity = identityBuffer[instance_index] ;  // instance_index from OGeo is 0 for non-instanced
+134
+135     const Prim prim    = primBuffer[primIdx];
+136     unsigned primFlag    = prim.primFlag() ;
+137
+138     if(primFlag == CSG_FLAGNODETREE || primFlag == CSG_FLAGINVISIBLE )
+139     {
+140         csg_bounds_prim(primIdx, prim, aabb);
+141     }
+...
+167     else
+168     {
+169         rtPrintf("## intersect_analytic.cu:bounds ABORT BAD primflag %d \n", primFlag );
+170         return ;
+171     }
+172     rtPrintf("// intersect_analytic.cu:bounds primIdx %d primFlag %d min %10.4f %10.4f %10.4f max %10.4f %10.4f %10.4f \n", primIdx, primFlag,
+173         result[0],
+174         result[1],
+175         result[2],
+176         result[3],
+177         result[4],
+178         result[5]
+179         );
+180
+181 }</pre>
+</div>
+<p>Torus + container box:</p>
+<div class="highlight-python"><pre>// intersect_analytic.cu:bounds pts:   2 pln:   0 trs:   6
+//csg_bounds_prim primIdx   0 partOffset   0 numParts   1 height  0 numNodes  1 tranBuffer_size   6
+//csg_bounds_prim primIdx   1 partOffset   1 numParts   1 height  0 numNodes  1 tranBuffer_size   6
+//csg_bounds_prim primIdx   0 nodeIdx  1 depth  0 elev  0 typecode 23 tranOffset  0 gtransformIdx  1 complement 0
+//csg_bounds_prim primIdx   1 nodeIdx  1 depth  0 elev  0 typecode  6 tranOffset  1 gtransformIdx  1 complement 0
+
+   1.000    0.000    0.000    0.000   (trIdx:  0)[vt]
+   0.000    1.000    0.000    0.000
+
+   1.000    0.000    0.000    0.000   (trIdx:  3)[vt]
+   0.000    1.000    0.000    0.000
+
+   0.000    0.000    1.000    0.000   (trIdx:  0)[vt]
+   0.000    0.000    0.000    1.000
+
+   0.000    0.000    1.000    0.000   (trIdx:  3)[vt]
+   0.000    0.000    0.000    1.000
+// csg_bounds_torus rmajor 100.000000 rminor 50.000000 rsum 150.000000  tr 1
+// intersect_analytic.cu:bounds primIdx 0 primFlag 101 min  -150.0000  -150.0000   -50.0000 max   150.0000   150.0000    50.0000
+// intersect_analytic.cu:bounds primIdx 1 primFlag 101 min  -400.0000  -400.0000  -400.0000 max   400.0000   400.0000   400.0000</pre>
+</div>
+<p>With only the torus:</p>
+<div class="highlight-python"><pre>// intersect_analytic.cu:bounds pts:   1 pln:   0 trs:   3
+//csg_bounds_prim primIdx   0 partOffset   0 numParts   1 height  0 numNodes  1 tranBuffer_size   3
+//csg_bounds_prim primIdx   0 nodeIdx  1 depth  0 elev  0 typecode 23 tranOffset  0 gtransformIdx  1 complement 0
+
+   1.000    0.000    0.000    0.000   (trIdx:  0)[vt]
+   0.000    1.000    0.000    0.000
+
+   0.000    0.000    1.000    0.000   (trIdx:  0)[vt]
+   0.000    0.000    0.000    1.000
+// csg_bounds_torus rmajor 100.000000 rminor 50.000000 rsum 150.000000  tr 1
+// intersect_analytic.cu:bounds primIdx 0 primFlag 101 min  -150.0000  -150.0000   -50.0000 max   150.0000   150.0000    50.0000</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FIXED : Scene GUI invisible in3 bb3 (missing struts) &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/j1707_Scene_GUI_invisible_in3_bb3.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fixed-scene-gui-invisible-in3-bb3-missing-struts">
+<h1>FIXED : Scene GUI invisible in3 bb3 (missing struts)<a class="headerlink" href="#fixed-scene-gui-invisible-in3-bb3-missing-struts" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Scene gui has selector, but seems 4th instance no show ?  Struts are missing</li>
+<li>Suspect off-by-1 in GScene::makeMergedMeshAndInstancedBuffers() YEP</li>
+</ul>
+<div class="highlight-python"><pre>op --j1707 --tracer --gltf 3
+
+global  :
+bb0     : 36k 3inch PMT bb
+bb1     : 18k 2O inch PMT bb
+bb2     : ~400 fastener? bb
+bb3     : nothing visible ???     &lt;------- ??????
+bb4     : nowt (expected)
+in0     : 3inch PMT
+in1     : 20 inch PMT
+in2     : the tip of the fastener
+in3     : nowt                    &lt;-------- ????
+in4     : nowt
+axis
+genstep
+nopstep
+photon
+record</pre>
+</div>
+<p>Separate renderers for each repeat:</p>
+<div class="highlight-python"><pre>448 void Scene::initRenderers()
+449 {
+450     LOG(debug) &lt;&lt; "Scene::initRenderers "
+451               &lt;&lt; " shader_dir " &lt;&lt; m_shader_dir
+452               &lt;&lt; " shader_incl_path " &lt;&lt; m_shader_incl_path
+453                ;
+454
+455     assert(m_shader_dir);
+456
+457     m_device = new Device();
+458
+459     m_colors = new Colors(m_device);
+460
+461     m_global_renderer = new Renderer("nrm", m_shader_dir, m_shader_incl_path );
+462     m_globalvec_renderer = new Renderer("nrmvec", m_shader_dir, m_shader_incl_path );
+463     m_raytrace_renderer = new Renderer("tex", m_shader_dir, m_shader_incl_path );
+464
+465    // small array of instance renderers to handle multiple assemblies of repeats
+466     for( unsigned int i=0 ; i &lt; MAX_INSTANCE_RENDERER ; i++)
+467     {
+468         m_instance_mode[i] = false ;
+469         m_instance_renderer[i] = new Renderer("inrm", m_shader_dir, m_shader_incl_path );
+470         m_instance_renderer[i]-&gt;setInstanced();
+471
+472         m_bbox_mode[i] = false ;
+473         m_bbox_renderer[i] = new Renderer("inrm", m_shader_dir, m_shader_incl_path );
+474         m_bbox_renderer[i]-&gt;setInstanced();
+475         m_bbox_renderer[i]-&gt;setWireframe(false);  // wireframe is much slower than filled
+476     }</pre>
+</div>
+<div class="highlight-python"><pre>592 void Scene::uploadGeometryInstanced(GMergedMesh* mm)
+593 {
+594     bool empty = mm-&gt;isEmpty();
+595     bool skip = mm-&gt;isSkip() ;
+596
+597     if(!skip &amp;&amp; !empty)
+598     {
+599
+600         assert(m_num_instance_renderer &lt; MAX_INSTANCE_RENDERER) ;
+601         LOG(trace)&lt;&lt; "Scene::uploadGeometryInstanced instance renderer " &lt;&lt; m_num_instance_renderer  ;
+602
+603         NPY&lt;float&gt;* ibuf = mm-&gt;getITransformsBuffer();
+604         assert(ibuf);
+605
+606         if(m_instance_renderer[m_num_instance_renderer])
+607         {
+608             m_instance_renderer[m_num_instance_renderer]-&gt;upload(mm);
+609             m_instance_mode[m_num_instance_renderer] = true ;
+610         }
+611
+612         LOG(trace)&lt;&lt; "Scene::uploadGeometryInstanced bbox renderer " &lt;&lt; m_num_instance_renderer  ;
+613         GBBoxMesh* bb = GBBoxMesh::create(mm); assert(bb);
+614
+615         if(m_bbox_renderer[m_num_instance_renderer])
+616         {
+617             m_bbox_renderer[m_num_instance_renderer]-&gt;upload(bb);
+618             m_bbox_mode[m_num_instance_renderer] = true ;
+619         }
+620
+621         m_num_instance_renderer++ ;
+622
+623     }
+624     else
+625     {
+626          LOG(warning) &lt;&lt; "Scene::uploadGeometry SKIPPING "
+627                       &lt;&lt; " empty " &lt;&lt; empty
+628                       &lt;&lt; " skip " &lt;&lt; skip
+629                       ;
+630     }
+631 }</pre>
+</div>
+<div class="highlight-python"><pre>op --j1707 --tracer --gltf 3 --OGLRAP trace
+op --j1707 --tracer --gltf 3 --OGLRAP debug</pre>
+</div>
+<p>Should have 5 mm, with global in mm0, but only see 4:</p>
+<div class="highlight-python"><pre>2017-08-17 16:46:13.522 DEBUG [261798] [Scene::uploadGeometry@640] Scene::uploadGeometry nmm 4
+2017-08-17 16:46:13.522 DEBUG [261798] [Scene::uploadGeometryGlobal@565] Scene::uploadGeometryGlobal
+2017-08-17 16:46:13.522 DEBUG [261798] [Scene::uploadGeometry@650] Scene::uploadGeometry 0 geoCode A
+2017-08-17 16:46:13.553 DEBUG [261798] [Scene::uploadGeometry@650] Scene::uploadGeometry 1 geoCode A
+2017-08-17 16:46:13.574 DEBUG [261798] [Scene::uploadGeometry@650] Scene::uploadGeometry 2 geoCode A
+2017-08-17 16:46:13.593 DEBUG [261798] [Scene::uploadGeometry@650] Scene::uploadGeometry 3 geoCode A
+2017-08-17 16:46:13.612 DEBUG [261798] [Scene::uploadGeometry@664] Scene::uploadGeometry m_num_instance_renderer 3</pre>
+</div>
+<div class="highlight-python"><pre>242 void OpticksViz::uploadGeometry()
+243 {
+244     NPY&lt;unsigned char&gt;* colors = m_hub-&gt;getColorBuffer();
+245
+246     m_scene-&gt;uploadColorBuffer( colors );  //     oglrap-/Colors preps texture, available to shaders as "uniform sampler1D Colors"
+247
+248     LOG(info) &lt;&lt; m_ok-&gt;description();
+249
+250     m_composition-&gt;setTimeDomain(        m_ok-&gt;getTimeDomain() );
+251     m_composition-&gt;setDomainCenterExtent(m_ok-&gt;getSpaceDomain());
+252
+253     m_scene-&gt;setGeometry(m_hub-&gt;getGGeo());
+254
+255     m_scene-&gt;uploadGeometry();
+256
+257     bool autocam = true ;
+258
+259     // handle commandline --target option that needs loaded geometry
+260     unsigned int target = m_geometry-&gt;getTargetDeferred();   // default to 0
+261     LOG(debug) &lt;&lt; "App::uploadGeometryViz setting target " &lt;&lt; target ;
+262
+263     m_geometry-&gt;setTarget(target, autocam);
+264
+265 }</pre>
+</div>
+<div class="highlight-python"><pre>634 void Scene::uploadGeometry()
+635 {
+636     // currently invoked from ggeoview main
+637     assert(m_ggeo &amp;&amp; "must setGeometry first");
+638     unsigned int nmm = m_ggeo-&gt;getNumMergedMesh();
+639
+640     LOG(debug) &lt;&lt; "Scene::uploadGeometry"
+641               &lt;&lt; " nmm " &lt;&lt; nmm
+642               ;</pre>
+</div>
+<p>5 triangulated are loaded:</p>
+<div class="highlight-python"><pre>2017-08-17 16:56:40.280 INFO  [269873] [*GMergedMesh::load@634] GMergedMesh::load dir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/0 -&gt; cachedir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/0 index 0 version (null) existsdir 1
+2017-08-17 16:56:40.523 INFO  [269873] [*GMergedMesh::load@634] GMergedMesh::load dir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/1 -&gt; cachedir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/1 index 1 version (null) existsdir 1
+2017-08-17 16:56:40.565 INFO  [269873] [*GMergedMesh::load@634] GMergedMesh::load dir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/2 -&gt; cachedir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/2 index 2 version (null) existsdir 1
+2017-08-17 16:56:40.590 INFO  [269873] [*GMergedMesh::load@634] GMergedMesh::load dir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/3 -&gt; cachedir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/3 index 3 version (null) existsdir 1
+2017-08-17 16:56:40.591 INFO  [269873] [*GMergedMesh::load@634] GMergedMesh::load dir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/4 -&gt; cachedir /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae/GMergedMesh/4 index 4 version (null) existsdir 1
+2017-08-17 16:56:41.162 INFO  [269873] [GMeshLib::loadMeshes@206] idpath /usr/local/opticks/opticksdata/export/juno1707/g4_00.a181a603769c1f98ad927e7367c7aa51.dae</pre>
+</div>
+<p>But GScene only sees 4:</p>
+<div class="highlight-python"><pre>2017-08-17 16:57:13.796 INFO  [269873] [GScene::init@165] GScene::init createVolumeTrue selected_count 290276
+2017-08-17 16:57:14.541 INFO  [269873] [GScene::makeMergedMeshAndInstancedBuffers@917] GScene::makeMergedMeshAndInstancedBuffers num_repeats 4 START
+2017-08-17 16:57:27.763 INFO  [269873] [GScene::makeMergedMeshAndInstancedBuffers@971] GScene::makeMergedMeshAndInstancedBuffers DONE num_repeats 4 nmm_created 4 nmm 4
+2017-08-17 16:57:27.764 INFO  [269873] [GScene::prepareVertexColors@204] GScene::prepareVertexColors START</pre>
+</div>
+<div class="highlight-python"><pre>911 void GScene::makeMergedMeshAndInstancedBuffers()   // using m_geolib to makeMergedMesh
+912 {
+913     unsigned num_repeats = std::max&lt;unsigned&gt;(1u,m_scene-&gt;getNumRepeats()); // global 0 included
+914     unsigned nmm_created = 0 ;
+915
+916     if(m_verbosity &gt; 0)
+917     LOG(info) &lt;&lt; "GScene::makeMergedMeshAndInstancedBuffers num_repeats " &lt;&lt; num_repeats &lt;&lt; " START " ;
+918</pre>
+</div>
+<div class="highlight-python"><pre>1453 unsigned NScene::getRepeatCount(unsigned ridx)
+1454 {
+1455     return m_repeat_count[ridx] ;
+1456 }
+1457 unsigned NScene::getNumRepeats()
+1458 {
+1459    // this assumes ridx is a contiguous index
+1460     return m_repeat_count.size() ;
+1461 }
+
+
+1371 void NScene::labelTree()
+1372 {
+1373     for(unsigned i=0 ; i &lt; m_repeat_candidates.size() ; i++)
+1374     {
+1375          std::string pdig = m_repeat_candidates.at(i);
+1376
+1377          unsigned ridx = deviseRepeatIndex(pdig);
+1378
+1379          assert(ridx == i + 1 );
+1380
+1381          std::vector&lt;nd*&gt; instances = m_root-&gt;find_nodes(pdig);
+1382
+1383          // recursive labelling starting from the instances
+1384          for(unsigned int p=0 ; p &lt; instances.size() ; p++)
+1385          {
+1386              labelTree_r(instances[p], ridx);
+1387          }
+1388     }
+1389
+1390     //if(m_verbosity &gt; 1)
+1391     LOG(info)&lt;&lt;"NScene::labelTree"
+1392              &lt;&lt; " label_count (non-zero ridx labelTree_r) " &lt;&lt; m_label_count
+1393              &lt;&lt; " num_repeat_candidates " &lt;&lt; m_repeat_candidates.size()
+1394              ;
+1395 }
+
+
+
+1394 #ifdef OLD_LABEL_TREE
+1395 void NScene::labelTree_r(nd* n, unsigned /*ridx*/)
+1396 {
+1397     unsigned ridx = deviseRepeatIndex_0(n) ;
+1398 #else
+1399 void NScene::labelTree_r(nd* n, unsigned ridx)
+1400 {
+1401 #endif
+1402     n-&gt;repeatIdx = ridx ;
+1403
+1404     if(m_repeat_count.count(ridx) == 0) m_repeat_count[ridx] = 0 ;
+1405     m_repeat_count[ridx]++ ;
+1406
+1407     if(ridx &gt; 0) m_label_count++ ;
+1408
+1409     for(nd* c : n-&gt;children) labelTree_r(c, ridx) ;
+1410 }
+1411</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

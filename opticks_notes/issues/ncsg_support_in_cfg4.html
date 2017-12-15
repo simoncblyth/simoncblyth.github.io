@@ -1,0 +1,635 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ncsg_support_in_cfg4 : Push CSG node tree support thru to cfg4 &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ncsg_support_in_cfg4 : Push CSG node tree support thru to cfg4</a><ul>
+<li><a class="reference internal" href="#objective">Objective</a></li>
+<li><a class="reference internal" href="#implement-emit">Implement emit</a></li>
+<li><a class="reference internal" href="#ideas">IDEAS</a><ul>
+<li><a class="reference internal" href="#need-more-automated-way-to-configure-torch-photon-sources-for-geometry-testing">Need more automated way to configure torch photon sources for geometry testing</a></li>
+<li><a class="reference internal" href="#where-to-coordinate">Where to coordinate ?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#status">STATUS</a></li>
+<li><a class="reference internal" href="#torch-config-convert">Torch Config Convert</a></li>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#approach">Approach</a></li>
+<li><a class="reference internal" href="#okg4mgr-vs-okmgr-principal-difference-is-instanciation-of-m-g4-cg4-with-m-hub-argument-in-okg4mgr">OKG4Mgr vs OKMgr : principal difference is instanciation of m_g4 (CG4) with m_hub argument in OKG4Mgr</a><ul>
+<li><a class="reference internal" href="#cg4-instanciates-cgeometry">CG4 : instanciates CGeometry</a></li>
+<li><a class="reference internal" href="#cgeometry-instanciates-cdetector-either-ctestdetector-or-ggdmldetector">CGeometry : instanciates CDetector  (either CTestDetector or GGDMLDetector)</a></li>
+<li><a class="reference internal" href="#ctestdetector">CTestDetector</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#here-is-the-terminator-line">Here is the terminator line</a></li>
+<li><a class="reference internal" href="#q-a">Q &amp; A</a><ul>
+<li><a class="reference internal" href="#what-kicks-off-geo-conversion">What kicks off geo conversion ?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gsurlib-close-issue">GSurLib close issue</a></li>
+<li><a class="reference internal" href="#review-gcsg-ggeo-created-used-in-cfg4">review GCSG, ggeo created, used in cfg4</a></li>
+<li><a class="reference internal" href="#ncsg">NCSG</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/ncsg_support_in_cfg4.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ncsg-support-in-cfg4-push-csg-node-tree-support-thru-to-cfg4">
+<h1>ncsg_support_in_cfg4 : Push CSG node tree support thru to cfg4<a class="headerlink" href="#ncsg-support-in-cfg4-push-csg-node-tree-support-thru-to-cfg4" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="objective">
+<h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
+<p>Direct CSG intersect comparisons between Opticks and G4 using Opticks
+defined test geometries, eg invoked by the tboolean- tests
+using &#8211;okg4 to switch on bi-simulation.</p>
+<p>For example, get the below to work and pass validation comparisons:</p>
+<div class="highlight-python"><pre>tboolean-;
+
+tboolean-torus --okg4 -D --dbgsurf
+   ## bi-simulation
+
+tboolean-torus --okg4 --load --vizg4
+   ## visualize the G4 evt
+
+tboolean-torus-a
+   ## OpticksEventCompareTest OR other such exe
+
+tboolean-torus-a --vizg4
+   ## load the G4 event, for dumping etc..</pre>
+</div>
+</div>
+<div class="section" id="implement-emit">
+<h2>Implement emit<a class="headerlink" href="#implement-emit" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>delta:opticks blyth$ cat /tmp/blyth/opticks/tboolean-torus--/0/meta.json
+{"nx": "20", "emit": -1, "poly": "MC"}delta:opticks blyth$
+delta:opticks blyth$</pre>
+</div>
+</div>
+<div class="section" id="ideas">
+<h2>IDEAS<a class="headerlink" href="#ideas" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="need-more-automated-way-to-configure-torch-photon-sources-for-geometry-testing">
+<h3>Need more automated way to configure torch photon sources for geometry testing<a class="headerlink" href="#need-more-automated-way-to-configure-torch-photon-sources-for-geometry-testing" title="Permalink to this headline">¶</a></h3>
+<p>When there are ~100 different geometries to test it is impractical
+to tweak torchconfig for each, so move to attaching emit config
+onto pieces of geometry (just primitives initially).</p>
+<p>Python level config can feed into NCSG metadata, that
+is searched for on loading geometry.</p>
+<ul class="simple">
+<li><em>emit -1/0/1</em>  : use int to control direction</li>
+<li><em>emitconfig string</em> options to NCSG</li>
+<li>a CSG point/light primitive, just for placing &#8220;emit&#8221; light sources would be useful</li>
+</ul>
+<p>NB need to continue to support the old custom torch config too, sometimes
+the control of polariziation and specific positions is required
+eg for lens/reflect/prism testing</p>
+<p>Aiming to be able to loop over large numbers of test geometries auto running okg4
+simulations and running analysis match validations.</p>
+<p>Focus first on small test geometries, once fixed issues there can consider
+full geometry testing.</p>
+<p>What this will require:</p>
+<ul class="simple">
+<li>add geometric normal methods to all nnode primitives
+(these already exist GPU side, just need to duplicate them CPU side).
+This is to allow generation of photon directions
+at random parametric points on the surface of the primitive</li>
+<li>revive support for CPU side photons copied to GPU : not efficient, but its
+just for testing (perhaps add emit mode in addition to torch)</li>
+</ul>
+<p>The emit functionality needs to be general enough to allow users providing
+other means to generate photons too (provide some API that enables external photon generation?).</p>
+</div>
+<div class="section" id="where-to-coordinate">
+<h3>Where to coordinate ?<a class="headerlink" href="#where-to-coordinate" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>okg-/OpticksGen ?</li>
+</ul>
+</div>
+</div>
+<div class="section" id="status">
+<h2>STATUS<a class="headerlink" href="#status" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>bi-simulation and analysis runs</li>
+<li>torch source translation into G4 fails to reproduce expected source photons</li>
+</ul>
+</div>
+<div class="section" id="torch-config-convert">
+<h2>Torch Config Convert<a class="headerlink" href="#torch-config-convert" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cfg4</span><span class="o">/</span><span class="n">CGenerator</span><span class="o">.</span><span class="n">cc</span>
+<span class="n">cfg4</span><span class="o">/</span><span class="n">CTorchSource</span><span class="o">.</span><span class="n">cc</span>
+</pre></div>
+</div>
+<div class="highlight-python"><pre>115 CG4::CG4(OpticksHub* hub)
+116    :
+117      m_hub(hub),
+118      m_ok(m_hub-&gt;getOpticks()),
+119      m_run(m_ok-&gt;getRun()),
+120      m_cfg(m_ok-&gt;getCfg()),
+121      m_physics(new CPhysics(this)),
+122      m_runManager(m_physics-&gt;getRunManager()),
+123      m_geometry(new CGeometry(m_hub)),
+124      m_hookup(m_geometry-&gt;hookup(this)),
+125      m_lib(m_geometry-&gt;getPropLib()),
+126      m_detector(m_geometry-&gt;getDetector()),
+127      m_generator(new CGenerator(m_hub, this)),
+128      m_collector(NULL),   // deferred instanciation until CG4::postinitialize after G4 materials have overridden lookupA
+129      m_recorder(new CRecorder(m_ok, m_geometry, m_generator-&gt;isDynamic())),
+130      //m_rec(new Rec(m_ok, m_geometry, m_generator-&gt;isDynamic())),
+131      m_steprec(new CStepRec(m_ok, m_generator-&gt;isDynamic())),
+132      m_visManager(NULL),
+133      m_uiManager(NULL),
+134      m_ui(NULL),
+135      m_pga(new CPrimaryGeneratorAction(m_generator-&gt;getSource())),
+136      m_sa(new CSteppingAction(this, m_generator-&gt;isDynamic())),
+137      m_ta(new CTrackingAction(this)),
+138      m_ra(new CRunAction(m_hub)),
+139      m_ea(new CEventAction(this)),
+140      m_initialized(false)
+141 {
+142      OK_PROFILE("CG4::CG4");
+143      init();
+144 }</pre>
+</div>
+</div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>creation of Geant4 geometries from the NCSG/GParts node tree description</li>
+<li>comparisons of GPU and CPU propagations using CSG node tree geometries</li>
+<li>tpmt-t tconcentric-t were primary users of cfg4 comparison funcs
+using GCSG translation : but GCSG translation to G4 geometry was
+very limited ... OpticksCSG supports many more primitives</li>
+</ul>
+</div>
+<div class="section" id="approach">
+<h2>Approach<a class="headerlink" href="#approach" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>review GCSG usage in cfg4</li>
+<li>decide what level to operate (NCSG/GParts/..) ?</li>
+<li>start with test geometry scope only, not full structure</li>
+<li>implement the conversion</li>
+<li>new versions of tpmt-t tconcentric-t</li>
+</ul>
+</div>
+<div class="section" id="okg4mgr-vs-okmgr-principal-difference-is-instanciation-of-m-g4-cg4-with-m-hub-argument-in-okg4mgr">
+<h2>OKG4Mgr vs OKMgr : principal difference is instanciation of m_g4 (CG4) with m_hub argument in OKG4Mgr<a class="headerlink" href="#okg4mgr-vs-okmgr-principal-difference-is-instanciation-of-m-g4-cg4-with-m-hub-argument-in-okg4mgr" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>okg4 option uses OKG4Test executable (OKG4Mgr) rather than default OKTest (OKMgr) executable</li>
+</ul>
+<div class="highlight-python"><pre>34 OKMgr::OKMgr(int argc, char** argv, const char* argforced )
+35     :
+36     m_log(new SLog("OKMgr::OKMgr")),
+37     m_ok(new Opticks(argc, argv, argforced)),
+38     m_hub(new OpticksHub(m_ok)),            // immediate configure and loadGeometry
+39     m_idx(new OpticksIdx(m_hub)),
+40     m_num_event(m_ok-&gt;getMultiEvent()),     // after hub instanciation, as that configures Opticks
+41     m_gen(m_hub-&gt;getGen()),
+42     m_run(m_hub-&gt;getRun()),
+43     m_viz(m_ok-&gt;isCompute() ? NULL : new OpticksViz(m_hub, m_idx, true)),
+44     m_propagator(new OKPropagator(m_hub, m_idx, m_viz)),
+45     m_count(0)
+46 {
+47     init();
+48     (*m_log)("DONE");
+49 }
+
+
+26 OKG4Mgr::OKG4Mgr(int argc, char** argv)
+27     :
+28     m_log(new SLog("OKG4Mgr::OKG4Mgr")),
+29     m_ok(new Opticks(argc, argv)),
+30     m_run(m_ok-&gt;getRun()),
+31     m_hub(new OpticksHub(m_ok)),                       // configure, loadGeometry and setupInputGensteps immediately
+32     m_load(m_ok-&gt;isLoad()),
+33     m_idx(new OpticksIdx(m_hub)),
+34     m_num_event(m_ok-&gt;getMultiEvent()),                    // after hub instanciation, as that configures Opticks
+35     m_gen(m_hub-&gt;getGen()),
+
+36     m_g4(m_load ? NULL : new CG4(m_hub)),                        // configure and initialize immediately
+..     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+37     m_viz(m_ok-&gt;isCompute() ? NULL : new OpticksViz(m_hub, m_idx, true)),    // true: load/create Bookmarks, setup shaders, upload geometry immediately
+38     m_propagator(new OKPropagator(m_hub, m_idx, m_viz))
+39 {
+40     (*m_log)("DONE");
+41 }
+42
+43 OKG4Mgr::~OKG4Mgr()
+44 {
+45     cleanup();
+46 }</pre>
+</div>
+<div class="section" id="cg4-instanciates-cgeometry">
+<h3>CG4 : instanciates CGeometry<a class="headerlink" href="#cg4-instanciates-cgeometry" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>115 CG4::CG4(OpticksHub* hub)
+116    :
+117      m_hub(hub),
+118      m_ok(m_hub-&gt;getOpticks()),
+119      m_run(m_ok-&gt;getRun()),
+120      m_cfg(m_ok-&gt;getCfg()),
+121      m_physics(new CPhysics(this)),
+122      m_runManager(m_physics-&gt;getRunManager()),
+123      m_geometry(new CGeometry(m_hub)),
+124      m_hookup(m_geometry-&gt;hookup(this)),
+125      m_lib(m_geometry-&gt;getPropLib()),
+126      m_detector(m_geometry-&gt;getDetector()),
+127      m_generator(new CGenerator(m_hub, this)),
+128      m_collector(NULL),   // deferred instanciation until CG4::postinitialize after G4 materials have overridden lookupA
+129      m_recorder(new CRecorder(m_ok, m_geometry, m_generator-&gt;isDynamic())),
+130      //m_rec(new Rec(m_ok, m_geometry, m_generator-&gt;isDynamic())),
+131      m_steprec(new CStepRec(m_ok, m_generator-&gt;isDynamic())),
+132      m_visManager(NULL),
+133      m_uiManager(NULL),
+134      m_ui(NULL),
+135      m_pga(new CPrimaryGeneratorAction(m_generator-&gt;getSource())),
+136      m_sa(new CSteppingAction(this, m_generator-&gt;isDynamic())),
+137      m_ta(new CTrackingAction(this)),
+138      m_ra(new CRunAction(m_hub)),
+139      m_ea(new CEventAction(this)),
+140      m_initialized(false)
+141 {
+142      OK_PROFILE("CG4::CG4");
+143      init();
+144 }</pre>
+</div>
+</div>
+<div class="section" id="cgeometry-instanciates-cdetector-either-ctestdetector-or-ggdmldetector">
+<h3>CGeometry : instanciates CDetector  (either CTestDetector or GGDMLDetector)<a class="headerlink" href="#cgeometry-instanciates-cdetector-either-ctestdetector-or-ggdmldetector" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>39 CGeometry::CGeometry(OpticksHub* hub)
+40    :
+41    m_hub(hub),
+42    m_ok(m_hub-&gt;getOpticks()),
+43    m_cfg(m_ok-&gt;getCfg()),
+44    m_detector(NULL),
+45    m_lib(NULL),
+46    m_material_table(NULL),
+47    m_material_bridge(NULL),
+48    m_surface_bridge(NULL)
+49 {
+50    init();
+51 }
+52
+53 void CGeometry::init()
+54 {
+55     CDetector* detector = NULL ;
+56     if(m_ok-&gt;hasOpt("test"))
+57     {
+58         LOG(fatal) &lt;&lt; "CGeometry::init G4 simple test geometry " ;
+59         std::string testconfig = m_cfg-&gt;getTestConfig();
+60         GGeoTestConfig* ggtc = new GGeoTestConfig( testconfig.empty() ? NULL : testconfig.c_str() );
+61         OpticksQuery* query = NULL ;  // normally no OPTICKS_QUERY geometry subselection with test geometries
+62         detector  = static_cast&lt;CDetector*&gt;(new CTestDetector(m_hub, ggtc, query)) ;
+63     }
+64     else
+65     {
+66         // no options here: will load the .gdml sidecar of the geocache .dae
+67         LOG(fatal) &lt;&lt; "CGeometry::init G4 GDML geometry " ;
+68         OpticksQuery* query = m_ok-&gt;getQuery();
+69         detector  = static_cast&lt;CDetector*&gt;(new CGDMLDetector(m_hub, query)) ;
+70     }
+71
+72     detector-&gt;attachSurfaces();
+73     //m_csurlib-&gt;convert(detector);
+74
+75     m_detector = detector ;
+76     m_lib = detector-&gt;getPropLib();
+77 }</pre>
+</div>
+</div>
+<div class="section" id="ctestdetector">
+<h3>CTestDetector<a class="headerlink" href="#ctestdetector" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>note that this is starting from scratch with the GGeoTestConfig,
+whereas now that GGeoTest lives in OpticksHub it can now use the existing GGeoTest instance</li>
+</ul>
+<div class="highlight-python"><pre>60 CTestDetector::CTestDetector(OpticksHub* hub, GGeoTestConfig* config, OpticksQuery* query)
+61   :
+62   CDetector(hub, query),
+63   m_config(config),
+64   m_maker(NULL)
+65 {
+66     init();
+67 }
+68
+69
+70
+71 void CTestDetector::init()
+72 {
+73     LOG(trace) &lt;&lt; "CTestDetector::init" ;
+74
+75     if(m_ok-&gt;hasOpt("dbgtestgeo"))
+76     {
+77         LOG(info) &lt;&lt; "CTestDetector::init --dbgtestgeo upping verbosity" ;
+78         setVerbosity(1);
+79     }
+80
+81
+82     m_maker = new CMaker(m_ok);
+83
+84     LOG(trace) &lt;&lt; "CTestDetector::init CMaker created" ;
+85
+86     G4VPhysicalVolume* top = makeDetector();
+87
+88     LOG(trace) &lt;&lt; "CTestDetector::init makeDetector DONE" ;
+89
+90     setTop(top) ;</pre>
+</div>
+</div>
+</div>
+<div class="section" id="here-is-the-terminator-line">
+<h2>Here is the terminator line<a class="headerlink" href="#here-is-the-terminator-line" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>tboolean-;tboolean-torus --okg4 -D
+tboolean-torus --okg4
+
+...
+2017-10-27 16:20:23.855 INFO  [1204353] [SLog::operator@15] OpticksHub::OpticksHub DONE
+
+*************************************************************
+ Geant4 version Name: geant4-10-02-patch-01    (26-February-2016)
+                      Copyright : Geant4 Collaboration
+                      Reference : NIM A 506 (2003), 250-303
+                            WWW : http://cern.ch/geant4
+*************************************************************
+
+2017-10-27 16:20:23.918 FATAL [1204353] [CGeometry::init@59] CGeometry::init G4 simple test geometry
+2017-10-27 16:20:23.918 INFO  [1204353] [GGeo::createSurLib@725] deferred creation of GSurLib
+2017-10-27 16:20:23.918 INFO  [1204353] [GSurLib::collectSur@79]  nsur 48
+2017-10-27 16:20:23.919 INFO  [1204353] [CPropLib::init@66] CPropLib::init
+2017-10-27 16:20:23.920 INFO  [1204353] [CPropLib::initCheckConstants@118] CPropLib::initCheckConstants mm 1 MeV 1 nanosecond 1 ns 1 nm 1e-06 GC::nanometer 1e-06 h_Planck 4.13567e-12 GC::h_Planck 4.13567e-12 c_light 299.792 GC::c_light 299.792 dscale 0.00123984
+2017-10-27 16:20:23.921 INFO  [1204353] [*CTestDetector::makeDetector@121] CTestDetector::makeDetector PmtInBox 0 BoxInBox 0 numSolidsMesh 2 numSolidsConfig 0
+Assertion failed: (( is_pib || is_bib ) &amp;&amp; "CTestDetector::makeDetector mode not recognized"), function makeDetector, file /Users/blyth/opticks/cfg4/CTestDetector.cc, line 128.
+/Users/blyth/opticks/bin/op.sh: line 754: 70618 Abort trap: 6           /usr/local/opticks/lib/OKG4Test --okg4 --rendermode +global,+axis --animtimemax 20 --timemax 20 --geocenter --stack 2180 --eye 1,0,0 --dbganalytic --test --testconfig analytic=1_csgpath=/tmp/blyth/opticks/tboolean-torus--_name=tboolean-torus--_mode=PyCsgInBox --torch --torchconfig type=discaxial_photons=100000_frame=-1_transform=1.000,0.000,0.000,0.000,0.000,1.000,0.000,0.000,0.000,0.000,1.000,0.000,0.000,0.000,0.000,1.000_source=0,0,0_target=0,0,0_time=0.1_radius=100_distance=400_zenithazimuth=0,1,0,1_material=Vacuum_wavelength=500 --torchdbg --tag 1 --cat tboolean-torus --save
+/Users/blyth/opticks/bin/op.sh RC 134
+simon:opticks blyth$</pre>
+</div>
+</div>
+<div class="section" id="q-a">
+<h2>Q &amp; A<a class="headerlink" href="#q-a" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="what-kicks-off-geo-conversion">
+<h3>What kicks off geo conversion ?<a class="headerlink" href="#what-kicks-off-geo-conversion" title="Permalink to this headline">¶</a></h3>
+<p>Loosely the instanciation chain:</p>
+<ul class="simple">
+<li>&#8211;okg4 -&gt; OKG4Test -&gt; OKG4Mgr -&gt; CG4 -&gt; CGeometry -&gt; CTestDetector/GGDMLDetector</li>
+</ul>
+</div>
+</div>
+<div class="section" id="gsurlib-close-issue">
+<h2>GSurLib close issue<a class="headerlink" href="#gsurlib-close-issue" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>2017-10-27 19:22:45.382 INFO  [1267219] [CDetector::attachSurfaces@240] CDetector::attachSurfaces
+2017-10-27 19:22:45.382 INFO  [1267219] [GSurLib::examineSolidBndSurfaces@115] GSurLib::examineSolidBndSurfaces numSolids 2
+2017-10-27 19:22:45.382 FATAL [1267219] [GSurLib::examineSolidBndSurfaces@137] GSurLib::examineSolidBndSurfaces i(mm-idx)      0 node(ni.z)      1 node2(id.x)      1 boundary(id.z)    123 parent(ni.w) 4294967295 bname Rock//perfectAbsorbSurface/Vacuum lv World0xc15cfc0
+Assertion failed: (node == i), function examineSolidBndSurfaces, file /Users/blyth/opticks/ggeo/GSurLib.cc, line 147.
+Process 86354 stopped
+* thread #1: tid = 0x135613, 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+    frame #0: 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10
+libsystem_kernel.dylib`__pthread_kill + 10:
+-&gt; 0x7fff8cc60866:  jae    0x7fff8cc60870            ; __pthread_kill + 20
+   0x7fff8cc60868:  movq   %rax, %rdi
+   0x7fff8cc6086b:  jmp    0x7fff8cc5d175            ; cerror_nocancel
+   0x7fff8cc60870:  retq
+(lldb) bt
+* thread #1: tid = 0x135613, 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+  * frame #0: 0x00007fff8cc60866 libsystem_kernel.dylib`__pthread_kill + 10
+    frame #1: 0x00007fff842fd35c libsystem_pthread.dylib`pthread_kill + 92
+    frame #2: 0x00007fff8b04db1a libsystem_c.dylib`abort + 125
+    frame #3: 0x00007fff8b0179bf libsystem_c.dylib`__assert_rtn + 321
+    frame #4: 0x00000001020edf0e libGGeo.dylib`GSurLib::examineSolidBndSurfaces(this=0x000000010de3c5d0) + 2110 at GSurLib.cc:147
+    frame #5: 0x00000001020ed6bd libGGeo.dylib`GSurLib::close(this=0x000000010de3c5d0) + 29 at GSurLib.cc:93
+    frame #6: 0x000000010411a697 libcfg4.dylib`CDetector::attachSurfaces(this=0x000000010de3c4e0) + 247 at CDetector.cc:244
+    frame #7: 0x0000000104094c63 libcfg4.dylib`CGeometry::init(this=0x000000010de3c470) + 867 at CGeometry.cc:77
+    frame #8: 0x00000001040948f0 libcfg4.dylib`CGeometry::CGeometry(this=0x000000010de3c470, hub=0x000000010950e770) + 112 at CGeometry.cc:50
+    frame #9: 0x0000000104094cbd libcfg4.dylib`CGeometry::CGeometry(this=0x000000010de3c470, hub=0x000000010950e770) + 29 at CGeometry.cc:51
+    frame #10: 0x000000010413e176 libcfg4.dylib`CG4::CG4(this=0x000000010dd008f0, hub=0x000000010950e770) + 214 at CG4.cc:122
+    frame #11: 0x000000010413e70d libcfg4.dylib`CG4::CG4(this=0x000000010dd008f0, hub=0x000000010950e770) + 29 at CG4.cc:144
+    frame #12: 0x0000000104231cc3 libokg4.dylib`OKG4Mgr::OKG4Mgr(this=0x00007fff5fbfe500, argc=27, argv=0x00007fff5fbfe5e8) + 547 at OKG4Mgr.cc:35
+    frame #13: 0x0000000104231f53 libokg4.dylib`OKG4Mgr::OKG4Mgr(this=0x00007fff5fbfe500, argc=27, argv=0x00007fff5fbfe5e8) + 35 at OKG4Mgr.cc:41
+    frame #14: 0x00000001000132ee OKG4Test`main(argc=27, argv=0x00007fff5fbfe5e8) + 1486 at OKG4Test.cc:56
+    frame #15: 0x00007fff880d35fd libdyld.dylib`start + 1
+    frame #16: 0x00007fff880d35fd libdyld.dylib`start + 1
+(lldb) f 6
+frame #6: 0x000000010411a697 libcfg4.dylib`CDetector::attachSurfaces(this=0x000000010de3c4e0) + 247 at CDetector.cc:244
+   241
+   242
+   243
+-&gt; 244      m_gsurlib-&gt;close();
+   245
+   246      m_csurlib = new CSurLib(m_gsurlib);
+   247
+(lldb)</pre>
+</div>
+<div class="highlight-python"><pre>104 void GSurLib::examineSolidBndSurfaces()
+105 {
+106     // this is deferred to CDetector::attachSurfaces
+107     // to allow CTestDetector to fixup mesh0 info
+108
+109     GGeo* gg = m_ggeo ;
+110
+111     GMergedMesh* mm = gg-&gt;getMergedMesh(0) ;
+112
+113     unsigned numSolids = mm-&gt;getNumSolids();
+114
+115     LOG(info) &lt;&lt; "GSurLib::examineSolidBndSurfaces"
+116               &lt;&lt; " numSolids " &lt;&lt; numSolids
+117               ;
+118
+119     for(unsigned i=0 ; i &lt; numSolids ; i++)
+120     {
+121         guint4 id = mm-&gt;getIdentity(i);
+122         guint4 ni = mm-&gt;getNodeInfo(i);
+123         const char* lv = gg-&gt;getLVName(i) ;
+124
+125         // hmm for test geometry the lv returned are the global ones, not the test geometry ones
+126         // and the boundary names look wrong too
+127
+128         unsigned node = ni.z ;
+129         unsigned parent = ni.w ;
+130
+131         unsigned node2 = id.x ;
+132         unsigned boundary = id.z ;
+133
+134         std::string bname = m_blib-&gt;shortname(boundary);
+135
+136         if(node != i)
+137            LOG(fatal) &lt;&lt; "GSurLib::examineSolidBndSurfaces"
+138                       &lt;&lt; " i(mm-idx) " &lt;&lt; std::setw(6) &lt;&lt; i
+139                       &lt;&lt; " node(ni.z) " &lt;&lt; std::setw(6) &lt;&lt; node
+140                       &lt;&lt; " node2(id.x) " &lt;&lt; std::setw(6) &lt;&lt; node2
+141                       &lt;&lt; " boundary(id.z) " &lt;&lt; std::setw(6) &lt;&lt; boundary
+142                       &lt;&lt; " parent(ni.w) " &lt;&lt; std::setw(6) &lt;&lt; parent
+143                       &lt;&lt; " bname " &lt;&lt; bname
+144                       &lt;&lt; " lv " &lt;&lt; ( lv ? lv : "NULL" )
+145                       ;
+146
+147         assert( node == i );
+148
+149
+150         //unsigned mesh = id.y ;
+151         //unsigned sensor = id.w ;
+152         assert( node2 == i );
+153
+154         guint4 bnd = m_blib-&gt;getBnd(boundary);</pre>
+</div>
+</div>
+<div class="section" id="review-gcsg-ggeo-created-used-in-cfg4">
+<h2>review GCSG, ggeo created, used in cfg4<a class="headerlink" href="#review-gcsg-ggeo-created-used-in-cfg4" title="Permalink to this headline">¶</a></h2>
+<p>GCSG:</p>
+<ul class="simple">
+<li>primordial CSG approach, used to describe manual/detdesc analytic PMT</li>
+<li>is referred to in past tense, as regarded as almost dead code, new dev should not use it.</li>
+<li>keeping alive to enable comparisons with new approaches only, until the new approaches can take over</li>
+<li>very limited, sphere/tubs/boolean, to what was needed for DYB PMT</li>
+</ul>
+<div class="highlight-python"><pre>simon:cfg4 blyth$ grep GCSG *.*
+CMaker.cc:#include "GCSG.hh"
+CMaker.cc:G4VSolid* CMaker::makeSolid(GCSG* csg, unsigned int index)
+CMaker.cc:           &lt;&lt; "CMaker::makeSolid (GCSG)  "
+CMaker.hh:class GCSG ;
+CMaker.hh:to convert GCSG geometry into G4 geometry in
+CMaker.hh:        G4VSolid* makeSolid(GCSG* csg, unsigned int i);  // ancient CSG
+CTestDetector.cc:#include "GCSG.hh"
+CTestDetector.cc:    GCSG* csg = pmt ? pmt-&gt;getCSG() : NULL ;
+CTestDetector.cc:G4LogicalVolume* CTestDetector::makeLV(GCSG* csg, unsigned int i)
+CTestDetector.hh:class GCSG ;
+CTestDetector.hh:    G4LogicalVolume* makeLV(GCSG* csg, unsigned int i);
+cfg4.bash:     Constitent of CTestDetector used to convert GCSG geometry
+simon:cfg4 blyth$</pre>
+</div>
+<div class="highlight-python"><pre>78 G4VSolid* CMaker::makeSolid(GCSG* csg, unsigned int index)
+79 {
+80    // hmm this is somewhat specialized to known structure of DYB PMT
+81    //  eg intersections are limited to 3 ?
+82
+83     unsigned int nc = csg-&gt;getNumChildren(index);
+84     unsigned int fc = csg-&gt;getFirstChildIndex(index);
+85     unsigned int lc = csg-&gt;getLastChildIndex(index);
+86     unsigned int tc = csg-&gt;getTypeCode(index);
+87     const char* tn = csg-&gt;getTypeName(index);
+88</pre>
+</div>
+<div class="highlight-python"><pre>105 G4VPhysicalVolume* CTestDetector::makeDetector()
+106 {
+107    // analagous to ggeo-/GGeoTest::CreateBoxInBox
+108    // but need to translate from a surface based geometry spec into a volume based one
+109    //
+110    // creates Russian doll geometry layer by layer, starting from the outermost
+111    // hooking up mother volume to prior
+112    //
+113     GMergedMesh* mm = m_ggeo-&gt;getMergedMesh(0);
+114     unsigned numSolidsMesh = mm-&gt;getNumSolids();
+115     unsigned int numSolidsConfig = m_config-&gt;getNumElements();
+116
+117     bool is_pib = isPmtInBox() ;
+118     bool is_bib = isBoxInBox() ;
+119     // CsgInBox not yet handled
+120
+121     LOG(info)  &lt;&lt; "CTestDetector::makeDetector"
+122                &lt;&lt; " PmtInBox " &lt;&lt; is_pib
+123                &lt;&lt; " BoxInBox " &lt;&lt; is_bib
+124                &lt;&lt; " numSolidsMesh " &lt;&lt; numSolidsMesh
+125                &lt;&lt; " numSolidsConfig " &lt;&lt; numSolidsConfig
+126               ;
+127
+128     assert( ( is_pib || is_bib ) &amp;&amp; "CTestDetector::makeDetector mode not recognized");
+129</pre>
+</div>
+</div>
+<div class="section" id="ncsg">
+<h2>NCSG<a class="headerlink" href="#ncsg" title="Permalink to this headline">¶</a></h2>
+<p>Huh, made start already.</p>
+<div class="highlight-python"><pre>294 G4VSolid* CMaker::makeSolid(NCSG* csg)
+295 {
+296     nnode* root_ = csg-&gt;getRoot();
+297
+298     G4VSolid* root = makeSolid_r(root_);
+299
+300     return root  ;
+301 }
+302
+303 G4VSolid* CMaker::makeSolid_r(const nnode* node)
+304 {
+305     // hmm rmin/rmax is handled as a CSG subtraction
+306     // so could collapse some operators into primitives</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

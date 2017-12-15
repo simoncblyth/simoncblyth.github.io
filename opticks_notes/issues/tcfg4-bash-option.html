@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tcfg4 bash level option &mdash; OpticksDevNotes 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpticksDevNotes 0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">tcfg4 bash level option</a><ul>
+<li><a class="reference internal" href="#op-sh-level-executable-switches-okg4-tcfg4-okg4test-cg4test-oktest">op.sh level executable switches, okg4/tcfg4/* -&gt; OKG4Test/CG4Test/OKTest</a></li>
+<li><a class="reference internal" href="#current-approach-for-comparisons-is-bi-simulation-with-okg4">Current approach for comparisons is bi-simulation with okg4</a></li>
+<li><a class="reference internal" href="#former-way-of-producing-g4-and-opticks-events-for-comparison">Former way of producing G4 and Opticks events for comparison</a></li>
+<li><a class="reference internal" href="#ancient-tcfg4-should-be-replaced-with-okg4">Ancient tcfg4 should be replaced with okg4 ?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/issues/tcfg4-bash-option.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tcfg4-bash-level-option">
+<h1>tcfg4 bash level option<a class="headerlink" href="#tcfg4-bash-level-option" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="op-sh-level-executable-switches-okg4-tcfg4-okg4test-cg4test-oktest">
+<h2>op.sh level executable switches, okg4/tcfg4/* -&gt; OKG4Test/CG4Test/OKTest<a class="headerlink" href="#op-sh-level-executable-switches-okg4-tcfg4-okg4test-cg4test-oktest" title="Permalink to this headline">¶</a></h2>
+<p>The tcfg4 bash level option was formerly used to
+create Opticks format &#8220;G4&#8221; events, using
+a bash level convention of negating the tag.</p>
+<div class="highlight-python"><pre>169 op-binary-name-default(){ echo OKTest ; }
+170
+171 op-binary-names(){ type op-binary-name | perl -ne 'm,--(\w*)\), &amp;&amp; print "$1\n" ' - ; }
+172 op-binary-name()
+173 {
+174    case $1 in
+175          --idpath) echo OpticksIDPATH ;;
+176            --keys) echo InteractorKeys ;;
+177           --tcfg4) echo CG4Test ;;
+178            --okg4) echo OKG4Test ;;
+179          --tracer) echo OTracerTest ;;
+180       --gdml2gltf) echo gdml2gltf.py ;;</pre>
+</div>
+</div>
+<div class="section" id="current-approach-for-comparisons-is-bi-simulation-with-okg4">
+<h2>Current approach for comparisons is bi-simulation with okg4<a class="headerlink" href="#current-approach-for-comparisons-is-bi-simulation-with-okg4" title="Permalink to this headline">¶</a></h2>
+<p>This was replaced on moving to bi-simulation
+whereby Opticks and G4 events are standardly
+both created at once.</p>
+<div class="highlight-python"><pre>34 void OpticksRun::createEvent(unsigned tagoffset)
+35 {
+36     m_ok-&gt;setTagOffset(tagoffset);
+37     // tagoffset is recorded with Opticks::setTagOffset within the makeEvent, but need it here before that
+38
+39     OK_PROFILE("OpticksRun::createEvent.BEG");
+40
+41     m_g4evt = m_ok-&gt;makeEvent(false, tagoffset) ;
+42     m_evt = m_ok-&gt;makeEvent(true, tagoffset) ;
+43
+44     LOG(trace) &lt;&lt; m_g4evt-&gt;brief() &lt;&lt; " " &lt;&lt; m_g4evt-&gt;getShapeString() ;
+45     LOG(trace) &lt;&lt; m_evt-&gt;brief() &lt;&lt; " " &lt;&lt; m_evt-&gt;getShapeString() ;
+46
+
+76 OpticksEvent* OpticksRun::getG4Event()
+77 {
+78     return m_g4evt ;
+79 }
+80 OpticksEvent* OpticksRun::getEvent()
+81 {
+82     return m_evt ;
+83 }
+84 OpticksEvent* OpticksRun::getCurrentEvent()
+85 {
+86     bool g4 = m_ok-&gt;hasOpt("vizg4|evtg4") ;
+87     return g4 ? m_g4evt : m_evt ;
+88 }
+89</pre>
+</div>
+</div>
+<div class="section" id="former-way-of-producing-g4-and-opticks-events-for-comparison">
+<h2>Former way of producing G4 and Opticks events for comparison<a class="headerlink" href="#former-way-of-producing-g4-and-opticks-events-for-comparison" title="Permalink to this headline">¶</a></h2>
+<p>The two launches are now replaced with a single &#8211;okg4 one.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">238</span> <span class="c">#tpmt-gen()</span>
+<span class="mi">239</span> <span class="c">#{</span>
+<span class="mi">240</span> <span class="c">#    tpmt--  --compute</span>
+<span class="mi">241</span> <span class="c">#    tpmt--  --tcfg4</span>
+<span class="mi">242</span> <span class="c">#}</span>
+</pre></div>
+</div>
+<p>Convention of tag negation with tcfg4 was required.  This
+same convention is now automatic.</p>
+<div class="highlight-python"><pre>184 tpmt--(){
+185    type $FUNCNAME
+186
+187     local msg="=== $FUNCNAME :"
+188
+189     local cmdline=$*
+190     local tag=$(tpmt-tag)
+191
+192     [ -z "$OPTICKS_INSTALL_PREFIX" ] &amp;&amp; echo missing envvar OPTICKS_INSTALL_PREFIX &amp;&amp; return
+193
+194     #if [ "${cmdline/--tcfg4}" != "${cmdline}" ]; then
+195     #    tag=-$tag
+196     #fi
+197     ## hmm suspect tag negation no longer needed, as doing both at once ???
+198
+199     local anakey
+200     if [ "${cmdline/--okg4}" != "${cmdline}" ]; then
+201         anakey=tpmt   ## compare OK and G4 evt histories
+202     else
+203         anakey=tevt    ## just dump OK history table
+204     fi</pre>
+</div>
+</div>
+<div class="section" id="ancient-tcfg4-should-be-replaced-with-okg4">
+<h2>Ancient tcfg4 should be replaced with okg4 ?<a class="headerlink" href="#ancient-tcfg4-should-be-replaced-with-okg4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>YES: almost all use of tcfg4 is now a bug</li>
+</ul>
+<div class="highlight-python"><pre>simon:tests blyth$ grep tcfg4 *.*
+tbox.bash:`tbox-- --tcfg4`
+tbox.bash:`tbox-- --tcfg4 --load`
+tg4gun.bash:#       --tcfg4 \
+tnewton.bash:Running with --tcfg4 option to use geant4 simulation runs into
+tpmt.bash:`tpmt-- --tcfg4`
+tpmt.bash:`tpmt-- --tcfg4 --load`
+tpmt.bash:    #if [ "${cmdline/--tcfg4}" != "${cmdline}" ]; then
+tpmt.bash:#    tpmt--  --tcfg4
+tpmt.bash:tpmt-v-g4() { tpmt-- --load --tcfg4 ; }
+trainbow.bash:    if [ "${cmdline/--tcfg4}" != "${cmdline}" ]; then
+trainbow.bash:   trainbow-- --${pol}pol --tcfg4
+trainbow.bash:trainbow-v-g4(){  trainbow-- $* --load --tcfg4 ; }
+ttemplate.bash:`ttemplate-- --tcfg4`
+ttemplate.bash:`ttemplate-- --tcfg4 --load`
+ttemplate.bash:    if [ "${cmdline/--tcfg4}" != "${cmdline}" ]; then
+ttemplate.bash:    ttemplate--  --tcfg4
+ttemplate.bash:ttemplate-v-g4() { ttemplate-- --load --tcfg4 ; }
+simon:tests blyth$</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">OpticksDevNotes 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
