@@ -1,41 +1,31 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>PLOG review &mdash; Opticks 0.0.1 documentation</title>
-    
+    <title>PLOG review &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Opticks 0.0.1 documentation" href="../index.html" /> 
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
@@ -55,29 +45,30 @@
 <li><a class="reference internal" href="#package-loggers">Package Loggers</a><ul>
 <li><a class="reference internal" href="#sysrap-log-hh-sysrap-log-cc">SYSRAP_LOG.hh  SYSRAP_LOG.cc</a></li>
 <li><a class="reference internal" href="#npy-log-hh-npy-log-cc">NPY_LOG.hh NPY_LOG.cc</a></li>
-<li><a class="reference internal" href="#same-pattern-followed-by-all-package-loggers">Same pattern followed by all package loggers ...</a></li>
+<li><a class="reference internal" href="#same-pattern-followed-by-all-package-loggers">Same pattern followed by all package loggers …</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/sysrap/PLOG_review.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/sysrap/PLOG_review.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -86,7 +77,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="plog-review">
 <h1>PLOG review<a class="headerlink" href="#plog-review" title="Permalink to this headline">¶</a></h1>
@@ -98,9 +89,10 @@ makes it simple to setup a chained multi-logger system with a
 main logger and loggers for each library with individually
 controlled logging levels via command line arguments,
 which all log to the same console and logfile.</p>
-<div class="highlight-python"><pre>OKTest --warn \              # global loglevel
-       --npy verbose \       # per-library loglevel
-       --sysrap warning</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OKTest</span> <span class="o">--</span><span class="n">warn</span> \              <span class="c1"># global loglevel</span>
+       <span class="o">--</span><span class="n">npy</span> <span class="n">verbose</span> \       <span class="c1"># per-library loglevel</span>
+       <span class="o">--</span><span class="n">sysrap</span> <span class="n">warning</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="plog">
@@ -118,75 +110,78 @@ which all log to the same console and logfile.</p>
 <p>A Logger can work as an Appender for another Logger. So you can chain several
 loggers together. This is useful for streaming log messages from a shared
 library to the main application binary.</p>
-<div class="highlight-python"><pre>// main app
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">main</span> <span class="n">app</span>
 
-// Functions imported form the shared library.
-extern "C" void initialize(plog::Severity severity, plog::IAppender* appender);
-extern "C" void foo();
+<span class="o">//</span> <span class="n">Functions</span> <span class="n">imported</span> <span class="n">form</span> <span class="n">the</span> <span class="n">shared</span> <span class="n">library</span><span class="o">.</span>
+<span class="n">extern</span> <span class="s2">&quot;C&quot;</span> <span class="n">void</span> <span class="n">initialize</span><span class="p">(</span><span class="n">plog</span><span class="p">::</span><span class="n">Severity</span> <span class="n">severity</span><span class="p">,</span> <span class="n">plog</span><span class="p">::</span><span class="n">IAppender</span><span class="o">*</span> <span class="n">appender</span><span class="p">);</span>
+<span class="n">extern</span> <span class="s2">&quot;C&quot;</span> <span class="n">void</span> <span class="n">foo</span><span class="p">();</span>
 
-int main()
-{
-    plog::init(plog::debug, "ChainedApp.txt"); // Initialize the main logger.
+<span class="nb">int</span> <span class="n">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">plog</span><span class="p">::</span><span class="n">init</span><span class="p">(</span><span class="n">plog</span><span class="p">::</span><span class="n">debug</span><span class="p">,</span> <span class="s2">&quot;ChainedApp.txt&quot;</span><span class="p">);</span> <span class="o">//</span> <span class="n">Initialize</span> <span class="n">the</span> <span class="n">main</span> <span class="n">logger</span><span class="o">.</span>
 
-    LOGD &lt;&lt; "Hello from app!"; // Write a log message.
+    <span class="n">LOGD</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;Hello from app!&quot;</span><span class="p">;</span> <span class="o">//</span> <span class="n">Write</span> <span class="n">a</span> <span class="n">log</span> <span class="n">message</span><span class="o">.</span>
 
-    initialize(plog::debug, plog::get()); // Initialize the logger in the shared library. Note that it has its own severity.
-    foo(); // Call a function from the shared library that produces a log message.
+    <span class="n">initialize</span><span class="p">(</span><span class="n">plog</span><span class="p">::</span><span class="n">debug</span><span class="p">,</span> <span class="n">plog</span><span class="p">::</span><span class="n">get</span><span class="p">());</span> <span class="o">//</span> <span class="n">Initialize</span> <span class="n">the</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">shared</span> <span class="n">library</span><span class="o">.</span> <span class="n">Note</span> <span class="n">that</span> <span class="n">it</span> <span class="n">has</span> <span class="n">its</span> <span class="n">own</span> <span class="n">severity</span><span class="o">.</span>
+    <span class="n">foo</span><span class="p">();</span> <span class="o">//</span> <span class="n">Call</span> <span class="n">a</span> <span class="n">function</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">shared</span> <span class="n">library</span> <span class="n">that</span> <span class="n">produces</span> <span class="n">a</span> <span class="n">log</span> <span class="n">message</span><span class="o">.</span>
 
-    return 0;
-}</pre>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>// shared library
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">shared</span> <span class="n">library</span>
 
-// Function that initializes the logger in the shared library.
-extern "C" void EXPORT initialize(plog::Severity severity, plog::IAppender* appender)
-{
-    plog::init(severity, appender); // Initialize the shared library logger.
-}
+<span class="o">//</span> <span class="n">Function</span> <span class="n">that</span> <span class="n">initializes</span> <span class="n">the</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">shared</span> <span class="n">library</span><span class="o">.</span>
+<span class="n">extern</span> <span class="s2">&quot;C&quot;</span> <span class="n">void</span> <span class="n">EXPORT</span> <span class="n">initialize</span><span class="p">(</span><span class="n">plog</span><span class="p">::</span><span class="n">Severity</span> <span class="n">severity</span><span class="p">,</span> <span class="n">plog</span><span class="p">::</span><span class="n">IAppender</span><span class="o">*</span> <span class="n">appender</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">plog</span><span class="p">::</span><span class="n">init</span><span class="p">(</span><span class="n">severity</span><span class="p">,</span> <span class="n">appender</span><span class="p">);</span> <span class="o">//</span> <span class="n">Initialize</span> <span class="n">the</span> <span class="n">shared</span> <span class="n">library</span> <span class="n">logger</span><span class="o">.</span>
+<span class="p">}</span>
 
-// Function that produces a log message.
-extern "C" void EXPORT foo()
-{
-    LOGI &lt;&lt; "Hello from shared lib!";
-}</pre>
+<span class="o">//</span> <span class="n">Function</span> <span class="n">that</span> <span class="n">produces</span> <span class="n">a</span> <span class="n">log</span> <span class="n">message</span><span class="o">.</span>
+<span class="n">extern</span> <span class="s2">&quot;C&quot;</span> <span class="n">void</span> <span class="n">EXPORT</span> <span class="n">foo</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">LOGI</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;Hello from shared lib!&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="typical-opticks-executable-main">
 <h2>Typical Opticks executable main<a class="headerlink" href="#typical-opticks-executable-main" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>01 // op --opticks
- 2
- 3 #include &lt;iostream&gt;
- 4
- 5 #include "BFile.hh"
- 6 #include "PLOG.hh"
- 7
- 8 #include "SYSRAP_LOG.hh"
- 9 #include "BRAP_LOG.hh"
-10 #include "NPY_LOG.hh"
-11 #include "OKCORE_LOG.hh"
-12
-13 #include "Opticks.hh"
-14
-..
-74 int main(int argc, char** argv)
-75 {
-76     PLOG_(argc,argv);
-77     LOG(info) &lt;&lt; argv[0] ;
-78
-79
-80     SYSRAP_LOG__ ;
-81     BRAP_LOG__ ;
-82     NPY_LOG__ ;
-83     OKCORE_LOG__ ;
-84
-85
-86     Opticks ok(argc, argv);
-87</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">01</span> <span class="o">//</span> <span class="n">op</span> <span class="o">--</span><span class="n">opticks</span>
+ <span class="mi">2</span>
+ <span class="mi">3</span> <span class="c1">#include &lt;iostream&gt;</span>
+ <span class="mi">4</span>
+ <span class="mi">5</span> <span class="c1">#include &quot;BFile.hh&quot;</span>
+ <span class="mi">6</span> <span class="c1">#include &quot;PLOG.hh&quot;</span>
+ <span class="mi">7</span>
+ <span class="mi">8</span> <span class="c1">#include &quot;SYSRAP_LOG.hh&quot;</span>
+ <span class="mi">9</span> <span class="c1">#include &quot;BRAP_LOG.hh&quot;</span>
+<span class="mi">10</span> <span class="c1">#include &quot;NPY_LOG.hh&quot;</span>
+<span class="mi">11</span> <span class="c1">#include &quot;OKCORE_LOG.hh&quot;</span>
+<span class="mi">12</span>
+<span class="mi">13</span> <span class="c1">#include &quot;Opticks.hh&quot;</span>
+<span class="mi">14</span>
+<span class="o">..</span>
+<span class="mi">74</span> <span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="nb">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+<span class="mi">75</span> <span class="p">{</span>
+<span class="mi">76</span>     <span class="n">PLOG_</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="n">argv</span><span class="p">);</span>
+<span class="mi">77</span>     <span class="n">LOG</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">;</span>
+<span class="mi">78</span>
+<span class="mi">79</span>
+<span class="mi">80</span>     <span class="n">SYSRAP_LOG__</span> <span class="p">;</span>
+<span class="mi">81</span>     <span class="n">BRAP_LOG__</span> <span class="p">;</span>
+<span class="mi">82</span>     <span class="n">NPY_LOG__</span> <span class="p">;</span>
+<span class="mi">83</span>     <span class="n">OKCORE_LOG__</span> <span class="p">;</span>
+<span class="mi">84</span>
+<span class="mi">85</span>
+<span class="mi">86</span>     <span class="n">Opticks</span> <span class="n">ok</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+<span class="mi">87</span>
+</pre></div>
 </div>
 <div class="section" id="plog-hh">
 <h3>PLOG.hh<a class="headerlink" href="#plog-hh" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><pre>005 #include &lt;cstddef&gt;
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>005 #include &lt;cstddef&gt;
   6 #include &lt;plog/Log.h&gt;
   7
   8 // translate from boost log levels to plog
@@ -200,7 +195,7 @@ extern "C" void EXPORT foo()
  16 // hmm dangerous but what alternative
  17 #define trace plog::verbose
  18
- 19 #include "SYSRAP_API_EXPORT.hh"
+ 19 #include &quot;SYSRAP_API_EXPORT.hh&quot;
 ...
 105 struct PLOG ;
 106
@@ -212,7 +207,7 @@ extern "C" void EXPORT foo()
 112     const char* logpath ;
 113     int   logmax ;
 114
-115     PLOG(int argc, char** argv, const char* fallback="VERBOSE", const char* prefix=NULL );
+115     PLOG(int argc, char** argv, const char* fallback=&quot;VERBOSE&quot;, const char* prefix=NULL );
 116
 117     const char* name();
 118     int parse( const char* fallback);
@@ -233,18 +228,19 @@ extern "C" void EXPORT foo()
 131 };
 132
 133
-134 #include "PLOG_INIT.hh"
-135</pre>
+134 #include &quot;PLOG_INIT.hh&quot;
+135
+</pre></div>
 </div>
 </div>
 <div class="section" id="plog-init-hh">
 <h3>PLOG_INIT.hh<a class="headerlink" href="#plog-init-hh" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><pre>01 #include &lt;plog/Log.h&gt;
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>01 #include &lt;plog/Log.h&gt;
  2 #include &lt;plog/Appenders/ColorConsoleAppender.h&gt;
  3 #include &lt;plog/Appenders/ConsoleAppender.h&gt;
  4 #include &lt;plog/Formatters/FuncMessageFormatter.h&gt;
  5
- 6 #include "PlainFormatter.hh"
+ 6 #include &quot;PlainFormatter.hh&quot;
  7
  8 /*
  9
@@ -287,17 +283,19 @@ extern "C" void EXPORT foo()
 46     PLOG_INIT( _plog.level,  &amp;consoleAppender, &amp;fileAppender ); \
 47 } \
 48
-...</pre>
+...
+</pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="what-plog-argc-argv-does">
 <h2>What PLOG_(argc, argv) does<a class="headerlink" href="#what-plog-argc-argv-does" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>74 int main(int argc, char** argv)
-75 {
-76     PLOG_(argc,argv);
-77     LOG(info) &lt;&lt; argv[0] ;
-78</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">74</span> <span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="nb">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+<span class="mi">75</span> <span class="p">{</span>
+<span class="mi">76</span>     <span class="n">PLOG_</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="n">argv</span><span class="p">);</span>
+<span class="mi">77</span>     <span class="n">LOG</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">;</span>
+<span class="mi">78</span>
+</pre></div>
 </div>
 <p>Instanciates PLOG struct into main which parses command line arguments into:</p>
 <ul class="simple">
@@ -310,9 +308,9 @@ file and console appenders.</p>
 </div>
 <div class="section" id="what-sysrap-log-and-other-pkg-macros-do">
 <h2>What <a href="#id1"><span class="problematic" id="id2">SYSRAP_LOG__</span></a> and other pkg macros do<a class="headerlink" href="#what-sysrap-log-and-other-pkg-macros-do" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre><span class="mi">5</span> <span class="c">#define SYSRAP_LOG__  {     SYSRAP_LOG::Initialize(PLOG::instance-&gt;prefixlevel_parse( info, &quot;SYSRAP&quot;), plog::get(), NULL );  }</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">5</span> <span class="c1">#define SYSRAP_LOG__  {     SYSRAP_LOG::Initialize(PLOG::instance-&gt;prefixlevel_parse( info, &quot;SYSRAP&quot;), plog::get(), NULL );  }</span>
 
-<span class="c">## notice that the main logger plog::get() is being passed to the lib logger as an appender</span>
+<span class="c1">## notice that the main logger plog::get() is being passed to the lib logger as an appender</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -327,74 +325,76 @@ logger acts as an appender for the main logger</li>
 <h2>Package Loggers<a class="headerlink" href="#package-loggers" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="sysrap-log-hh-sysrap-log-cc">
 <h3>SYSRAP_LOG.hh  SYSRAP_LOG.cc<a class="headerlink" href="#sysrap-log-hh-sysrap-log-cc" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><pre>01
- 2 #pragma once
- 3 #include "SYSRAP_API_EXPORT.hh"
- 4
- 5 #define SYSRAP_LOG__  {     SYSRAP_LOG::Initialize(PLOG::instance-&gt;prefixlevel_parse( info, "SYSRAP"), plog::get(), NULL );  }
- 6
- 7 #define SYSRAP_LOG_ {     SYSRAP_LOG::Initialize(plog::get()-&gt;getMaxSeverity(), plog::get(), NULL ); }
- 8 class SYSRAP_API SYSRAP_LOG {
- 9    public:
-10        static void Initialize(int level, void* app1, void* app2 );
-11        static void Check(const char* msg);
-12 };
-13
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">01</span>
+ <span class="mi">2</span> <span class="c1">#pragma once</span>
+ <span class="mi">3</span> <span class="c1">#include &quot;SYSRAP_API_EXPORT.hh&quot;</span>
+ <span class="mi">4</span>
+ <span class="mi">5</span> <span class="c1">#define SYSRAP_LOG__  {     SYSRAP_LOG::Initialize(PLOG::instance-&gt;prefixlevel_parse( info, &quot;SYSRAP&quot;), plog::get(), NULL );  }</span>
+ <span class="mi">6</span>
+ <span class="mi">7</span> <span class="c1">#define SYSRAP_LOG_ {     SYSRAP_LOG::Initialize(plog::get()-&gt;getMaxSeverity(), plog::get(), NULL ); }</span>
+ <span class="mi">8</span> <span class="k">class</span> <span class="nc">SYSRAP_API</span> <span class="n">SYSRAP_LOG</span> <span class="p">{</span>
+ <span class="mi">9</span>    <span class="n">public</span><span class="p">:</span>
+<span class="mi">10</span>        <span class="n">static</span> <span class="n">void</span> <span class="n">Initialize</span><span class="p">(</span><span class="nb">int</span> <span class="n">level</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app1</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app2</span> <span class="p">);</span>
+<span class="mi">11</span>        <span class="n">static</span> <span class="n">void</span> <span class="n">Check</span><span class="p">(</span><span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">msg</span><span class="p">);</span>
+<span class="mi">12</span> <span class="p">};</span>
+<span class="mi">13</span>
 
-01
- 2 #include &lt;plog/Log.h&gt;
- 3
- 4 #include "SYSRAP_LOG.hh"
- 5 #include "PLOG_INIT.hh"
- 6 #include "PLOG.hh"
- 7
- 8 void SYSRAP_LOG::Initialize(int level, void* app1, void* app2 )
- 9 {
-10     PLOG_INIT(level, app1, app2);
-11 }
-12 void SYSRAP_LOG::Check(const char* msg)
-13 {
-14     PLOG_CHECK(msg);
-15 }
-16</pre>
+<span class="mi">01</span>
+ <span class="mi">2</span> <span class="c1">#include &lt;plog/Log.h&gt;</span>
+ <span class="mi">3</span>
+ <span class="mi">4</span> <span class="c1">#include &quot;SYSRAP_LOG.hh&quot;</span>
+ <span class="mi">5</span> <span class="c1">#include &quot;PLOG_INIT.hh&quot;</span>
+ <span class="mi">6</span> <span class="c1">#include &quot;PLOG.hh&quot;</span>
+ <span class="mi">7</span>
+ <span class="mi">8</span> <span class="n">void</span> <span class="n">SYSRAP_LOG</span><span class="p">::</span><span class="n">Initialize</span><span class="p">(</span><span class="nb">int</span> <span class="n">level</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app1</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app2</span> <span class="p">)</span>
+ <span class="mi">9</span> <span class="p">{</span>
+<span class="mi">10</span>     <span class="n">PLOG_INIT</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">app1</span><span class="p">,</span> <span class="n">app2</span><span class="p">);</span>
+<span class="mi">11</span> <span class="p">}</span>
+<span class="mi">12</span> <span class="n">void</span> <span class="n">SYSRAP_LOG</span><span class="p">::</span><span class="n">Check</span><span class="p">(</span><span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">msg</span><span class="p">)</span>
+<span class="mi">13</span> <span class="p">{</span>
+<span class="mi">14</span>     <span class="n">PLOG_CHECK</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="mi">15</span> <span class="p">}</span>
+<span class="mi">16</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="npy-log-hh-npy-log-cc">
 <h3>NPY_LOG.hh NPY_LOG.cc<a class="headerlink" href="#npy-log-hh-npy-log-cc" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><pre>01
- 2 #pragma once
- 3 #include "NPY_API_EXPORT.hh"
- 4
- 5 #define NPY_LOG__  {     NPY_LOG::Initialize(PLOG::instance-&gt;prefixlevel_parse( info, "NPY"), plog::get(), NULL );  }
- 6
- 7 #define NPY_LOG_ {     NPY_LOG::Initialize(plog::get()-&gt;getMaxSeverity(), plog::get(), NULL ); }
- 8 class NPY_API NPY_LOG {
- 9    public:
-10        static void Initialize(int level, void* app1, void* app2 );
-11        static void Check(const char* msg);
-12 };
-13
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">01</span>
+ <span class="mi">2</span> <span class="c1">#pragma once</span>
+ <span class="mi">3</span> <span class="c1">#include &quot;NPY_API_EXPORT.hh&quot;</span>
+ <span class="mi">4</span>
+ <span class="mi">5</span> <span class="c1">#define NPY_LOG__  {     NPY_LOG::Initialize(PLOG::instance-&gt;prefixlevel_parse( info, &quot;NPY&quot;), plog::get(), NULL );  }</span>
+ <span class="mi">6</span>
+ <span class="mi">7</span> <span class="c1">#define NPY_LOG_ {     NPY_LOG::Initialize(plog::get()-&gt;getMaxSeverity(), plog::get(), NULL ); }</span>
+ <span class="mi">8</span> <span class="k">class</span> <span class="nc">NPY_API</span> <span class="n">NPY_LOG</span> <span class="p">{</span>
+ <span class="mi">9</span>    <span class="n">public</span><span class="p">:</span>
+<span class="mi">10</span>        <span class="n">static</span> <span class="n">void</span> <span class="n">Initialize</span><span class="p">(</span><span class="nb">int</span> <span class="n">level</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app1</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app2</span> <span class="p">);</span>
+<span class="mi">11</span>        <span class="n">static</span> <span class="n">void</span> <span class="n">Check</span><span class="p">(</span><span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">msg</span><span class="p">);</span>
+<span class="mi">12</span> <span class="p">};</span>
+<span class="mi">13</span>
 
-01
- 2 #include &lt;plog/Log.h&gt;
- 3
- 4 #include "NPY_LOG.hh"
- 5 #include "PLOG_INIT.hh"
- 6 #include "PLOG.hh"
- 7
- 8 void NPY_LOG::Initialize(int level, void* app1, void* app2 )
- 9 {
-10     PLOG_INIT(level, app1, app2);
-11 }
-12 void NPY_LOG::Check(const char* msg)
-13 {
-14     PLOG_CHECK(msg);
-15 }</pre>
+<span class="mi">01</span>
+ <span class="mi">2</span> <span class="c1">#include &lt;plog/Log.h&gt;</span>
+ <span class="mi">3</span>
+ <span class="mi">4</span> <span class="c1">#include &quot;NPY_LOG.hh&quot;</span>
+ <span class="mi">5</span> <span class="c1">#include &quot;PLOG_INIT.hh&quot;</span>
+ <span class="mi">6</span> <span class="c1">#include &quot;PLOG.hh&quot;</span>
+ <span class="mi">7</span>
+ <span class="mi">8</span> <span class="n">void</span> <span class="n">NPY_LOG</span><span class="p">::</span><span class="n">Initialize</span><span class="p">(</span><span class="nb">int</span> <span class="n">level</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app1</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app2</span> <span class="p">)</span>
+ <span class="mi">9</span> <span class="p">{</span>
+<span class="mi">10</span>     <span class="n">PLOG_INIT</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">app1</span><span class="p">,</span> <span class="n">app2</span><span class="p">);</span>
+<span class="mi">11</span> <span class="p">}</span>
+<span class="mi">12</span> <span class="n">void</span> <span class="n">NPY_LOG</span><span class="p">::</span><span class="n">Check</span><span class="p">(</span><span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">msg</span><span class="p">)</span>
+<span class="mi">13</span> <span class="p">{</span>
+<span class="mi">14</span>     <span class="n">PLOG_CHECK</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="mi">15</span> <span class="p">}</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="same-pattern-followed-by-all-package-loggers">
-<h3>Same pattern followed by all package loggers ...<a class="headerlink" href="#same-pattern-followed-by-all-package-loggers" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><pre>simon:opticks blyth$ find . -name '*_LOG.cc'
+<h3>Same pattern followed by all package loggers …<a class="headerlink" href="#same-pattern-followed-by-all-package-loggers" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>simon:opticks blyth$ find . -name &#39;*_LOG.cc&#39;
 ./assimprap/ASIRAP_LOG.cc
 ./boostrap/BRAP_LOG.cc
 ./cfg4/CFG4_LOG.cc
@@ -412,7 +412,8 @@ logger acts as an appender for the main logger</li>
 ./optixrap/OXRAP_LOG.cc
 ./sysrap/SYSRAP_LOG.cc
 ./thrustrap/THRAP_LOG.cc
-simon:opticks blyth$</pre>
+simon:opticks blyth$
+</pre></div>
 </div>
 <p>Using the preprocessor macros allows the same logging setup code to
 be planted in every library.</p>
@@ -426,18 +427,18 @@ be planted in every library.</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="../index.html">Opticks 0.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
     </div>
   </body>
 </html>
