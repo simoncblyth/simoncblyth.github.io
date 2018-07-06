@@ -1022,18 +1022,24 @@ interact only weakly.
 <li>NVIDIA OptiX ray tracing engine</li>
 </ul>
 </li>
-<li>Geometry<ul>
-<li><span class="red">general CSG boolean intersection on GPU</span></li>
-<li><span class="red">Geant4 geometry auto-translated to GPU without approximation</span></li>
+<li>G4 Geometry translation to GPU<ul>
+<li><span class="red">general CSG boolean intersection</span></li>
+<li><span class="red">auto-translated without approximation</span></li>
+<li><span class="red">simplified direct workflow</span></li>
 </ul>
 </li>
+<li>G4 Optical physics translation to GPU<ul>
 <li>Hybrid Geant4/Opticks event workflow</li>
+</ul>
+</li>
 <li>Validation with random sequence aligned running<ul>
-<li>perfect match for simple geometries</li>
+<li><span class="red">perfect match for simple geometries</span></li>
+<li><span class="red">reveals CSG issues with full geometries</span></li>
 </ul>
 </li>
 <li>Summary</li>
 </ul>
+<p class="small"><strong>CSG</strong> : <em>Constructive Solid Geometry</em>, using boolean tree representation</p>
 </div>
 <div class="slide" id="optical-photon-simulation-problem">
 <h1><tt class="docutils literal">Optical Photon Simulation <span class="pre">Problem...</span></tt></h1>
@@ -1047,11 +1053,10 @@ interact only weakly.
 <dd>many millions of optical photons in JUNO scintillator</dd>
 <dt><strong>Simulation Bottleneck</strong></dt>
 <dd>~99% CPU time, memory constraints</dd>
-<dt><strong>Optical photons : simple lifecycle</strong></dt>
+<dt><strong>Optical photons : naturally parallel, simple :</strong></dt>
 <dd><ul class="first last simple">
 <li>produced by Cerenkov+Scintillation</li>
 <li>yield only Photomultiplier hits</li>
-<li>parallel nature</li>
 </ul>
 </dd>
 </dl>
@@ -1068,67 +1073,61 @@ interact only weakly.
 
 Not a photo -->
 </div>
-<dl class="small docutils">
-<dt>Geometry, light sources, optical physics -&gt;</dt>
-<dd><ul class="first last simple">
+<p class="small">Geometry, light sources, optical physics -&gt;</p>
+<ul class="small simple">
 <li>pixel values at image plane</li>
 <li>photon parameters at detectors (eg PMTs)</li>
 </ul>
-</dd>
-<dt><strong>Ray tracing has many applications</strong> :</dt>
-<dd><ul class="first last simple">
+<p class="small"><strong>Ray tracing has many applications</strong> :</p>
+<ul class="small simple">
 <li>advertising, design, entertainment, games,...</li>
 <li>BUT : most ray tracers just render images</li>
-<li><strong>NVIDIA OptiX</strong> <span class="red">general intersection acceleration API</span></li>
 </ul>
-</dd>
-<dt><strong>Ray-geometry intersection</strong></dt>
-<dd><ul class="first last simple">
+<p class="small"><strong>Ray-geometry intersection</strong></p>
+<ul class="small simple">
 <li>hw+sw continuously optimized over 30 years</li>
 <li>performance &gt; 100M intersections per second per GPU</li>
 </ul>
-</dd>
-</dl>
 <pre class="mypre">
 
 </pre><dl class="small docutils">
 <dt><strong>rasterization</strong></dt>
 <dd>project 3D primitives onto 2D image plane, combine fragments into pixel values</dd>
 <dt><strong>ray tracing</strong></dt>
-<dd>cast rays thru image pixels into scene, recursively reflect/refract with
-geometry intersected, combine returns into pixel values</dd>
+<dd>cast rays thru image pixels into scene, recursively reflect/refract at
+intersects, combine returns into pixel values</dd>
 </dl>
 </div>
-<div class="slide" id="nvidia-optix-ray-tracing-engine">
-<h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine</span></h1>
+<div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix">
+<h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- http://developer.nvidia.com/optix</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">OptiX Raytracing Pipeline</p>
-<img alt="/env/optix/docs/optix-model.png" class="small last align-right" src="/env/optix/docs/optix-model.png" style="width: 450px;" />
+<p class="small">Analogous to OpenGL rasterization pipeline:</p>
+<img alt="/env/optix/docs/optix-model.png" class="last align-right" src="/env/optix/docs/optix-model.png" style="width: 450px;" />
 </div>
-<p class="small"><a class="reference external" href="http://developer.nvidia.com/optix">http://developer.nvidia.com/optix</a></p>
+<p class="small"><strong>OptiX makes GPU ray tracing accessible</strong></p>
 <ul class="small simple">
-<li>no rendering assumptions</li>
-<li>analogous to OpenGL rasterization pipeline</li>
-<li><strong>just accelerates ray-geometry intersections</strong></li>
+<li><strong>accelerates</strong> ray-geometry intersections</li>
+<li>simple : single-ray programming model</li>
+<li>&quot;...free to use within any application...&quot;</li>
+</ul>
+<p class="small"><strong>NVIDIA expertise:</strong></p>
+<ul class="small simple">
+<li>~linear scaling with CUDA cores across multiple GPUs</li>
+<li>acceleration structure creation + traversal (Blue)</li>
+<li>instanced sharing of geometry + acceleration structures</li>
 <li><span class="red">compiler optimized for GPU ray tracing</span></li>
-<li>regular updates, profit from new GPU tuning/features
-eg Volta tensor cores, RTX</li>
-<li>NVIDIA expertise on GPU/multi-GPU usage<ul>
-<li>~linear scaling with cores across GPUs</li>
+<li>regular updates, profit from new GPU features:<ul>
+<li>NVIDIA RTX™ with Volta GPUs</li>
 </ul>
 </li>
-<li>free to acquire, use, distribute non-commercially</li>
-<li><span class="blue">simple : single-ray programming model</span></li>
 </ul>
-<p class="small">Handled by NVIDIA OptiX (Blue) -&gt;</p>
+<p class="tiny"><tt class="docutils literal"><span class="pre">https://developer.nvidia.com/rtx</span></tt></p>
+<p class="small"><strong>User provides (Yellow):</strong></p>
 <ul class="small simple">
-<li>acceleration structure creation + traversal</li>
-<li>instanced sharing of geometry + acceleration structures</li>
-<li>optimized combination of CUDA programs into kernel</li>
-<li>cross GPU work scheduling</li>
+<li>ray generation</li>
+<li>geometry bounding box, intersects</li>
 </ul>
-<p class="small">Everything else : user supplied (Yellow) -&gt;</p>
-<p class="tiny"><tt class="docutils literal"><span class="pre">https://research.nvidia.com/publication/optix-general-purpose-ray-tracing-engine</span></tt></p>
 </div>
 <div class="slide" id="opticks-gpu-geometry-starts-from-ray-primitive-intersection">
 <h1><span class="small">Opticks : GPU Geometry starts from ray-primitive intersection</span></h1>
@@ -1142,8 +1141,8 @@ eg Volta tensor cores, RTX</li>
 <p class="caption"><span class="red">CUDA/OptiX intersection for ~10 primitives</span> -&gt; <span class="blue">Exact geometry translation</span></p>
 </div>
 </div>
-<div class="slide" id="ray-intersection-with-general-csg-binary-trees-within-optix-intersect">
-<h1><span class="small">Ray intersection with general CSG binary trees within OptiX intersect</span></h1>
+<div class="slide" id="ray-intersection-with-general-csg-binary-trees-on-gpu">
+<h1><span class="small">Ray intersection with general CSG binary trees, on GPU</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">Outside/Inside Unions</p>
 <p class="small">dot(normal,rayDir) -&gt; Enter/Exit</p>
@@ -1154,16 +1153,16 @@ eg Volta tensor cores, RTX</li>
 <li><strong>A * B</strong> boundary inside other</li>
 </ul>
 </div>
-<p class="small">CSG evaluation -&gt; <span class="blue">pick the primitive intersect</span>, lookup table:</p>
+<p class="small">Pick between pairs of nearest intersects, eg:</p>
 <table border="1" class="small docutils">
 <colgroup>
-<col width="29%" />
-<col width="21%" />
-<col width="23%" />
-<col width="27%" />
+<col width="37%" />
+<col width="17%" />
+<col width="24%" />
+<col width="22%" />
 </colgroup>
 <thead valign="bottom">
-<tr><th class="head">Union, tA &lt; tB</th>
+<tr><th class="head"><em>UNION</em> tA &lt; tB</th>
 <th class="head">Enter B</th>
 <th class="head">Exit B</th>
 <th class="head">Miss B</th>
@@ -1172,7 +1171,7 @@ eg Volta tensor cores, RTX</li>
 <tbody valign="top">
 <tr><td><strong>Enter A</strong></td>
 <td>ReturnA</td>
-<td>LoopA</td>
+<td><span class="blue">LoopA</span></td>
 <td>ReturnA</td>
 </tr>
 <tr><td><strong>Exit A</strong></td>
@@ -1188,14 +1187,19 @@ eg Volta tensor cores, RTX</li>
 </tbody>
 </table>
 <ul class="small simple">
-<li>single hit intersection[1] avoids state, BUT:
-sometimes advance <strong>t_min</strong> and re-intersect</li>
-<li>&quot;Evaluative&quot;[2] approach avoiding recursion:<ul>
-<li>bit twiddle navigation of complete binary tree</li>
+<li><em>Nearest hit intersect algorithm</em> [1] avoids state<ul>
+<li>sometimes <span class="blue">Loop</span> : advance <strong>t_min</strong> , re-intersect both</li>
+<li>classification shows if inside/outside</li>
+</ul>
+</li>
+<li><em>Evaluative</em> [2] implementation emulates recursion:<ul>
+<li><span class="red">recursion not allowed</span> in OptiX intersect programs</li>
+<li>bit twiddle traversal of complete binary tree</li>
 <li>stacks of postorder slices and intersects</li>
 </ul>
 </li>
 <li><span class="red">Identical geometry to Geant4</span><ul>
+<li>solving the same polynomials</li>
 <li>near perfect intersection match</li>
 </ul>
 </li>
@@ -1203,8 +1207,9 @@ sometimes advance <strong>t_min</strong> and re-intersect</li>
 <dl class="tiny docutils">
 <dt>[1] Ray Tracing CSG Objects Using Single Hit Intersections, Andrew Kensler (2006)</dt>
 <dd>with corrections by author of XRT Raytracer <a class="reference external" href="http://xrt.wikidot.com/doc:csg">http://xrt.wikidot.com/doc:csg</a></dd>
+<dt>[2] <a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h</a></dt>
+<dd>Similar to binary expression tree evaluation using postorder traverse.</dd>
 </dl>
-<p class="tiny">[2] Similar to binary expression tree evaluation using postorder traverse.</p>
 </div>
 <div class="slide" id="csg-complete-binary-tree-serialization-simplifies-gpu-side">
 <h1><span class="small">CSG Complete Binary Tree Serialization -&gt; simplifies GPU side</span></h1>
@@ -1243,21 +1248,21 @@ are visited prior to their parents.</p>
 </div>
 <div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-3">
 <h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (3)</span></h1>
+<p><tt class="docutils literal">GPU raytrace : purely analytic geometry (Daya Bay Near Site)</tt></p>
 </div>
 <div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-1">
 <h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (1)</span></h1>
 </div>
-<div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-0">
-<h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (0)</span></h1>
-</div>
 <div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-2">
 <h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (2)</span></h1>
+<p><tt class="docutils literal">Cutaway view of Daya Bay <span class="pre">Antineutrino-detector</span></tt></p>
 </div>
 <div class="slide" id="opticks-analytic-juno-chimney-gpu-raytrace-0">
 <h1><span class="i">Opticks Analytic JUNO Chimney, GPU Raytrace (0)</span></h1>
+<p><tt class="docutils literal">JUNO Chimney at top of Central Detector Scintillator</tt></p>
 </div>
-<div class="slide" id="geometry-geant4-opticks-geocache-optix-gpu">
-<h1><span class="small">Geometry : Geant4 -&gt; Opticks Geocache -&gt; OptiX GPU</span></h1>
+<div class="slide" id="opticks-translates-g4-geometry-to-gpu-without-approximation">
+<h1><span class="small">Opticks : translates G4 geometry to GPU, without approximation</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">Volumes -&gt; Boundaries</p>
 <p class="small"><strong>Ray tracing favors Boundaries</strong></p>
@@ -1275,6 +1280,11 @@ are visited prior to their parents.</p>
 </ul>
 </div>
 <dl class="small docutils">
+<dt><strong>Direct Geometry : Geant4 &quot;World&quot; -&gt; Opticks CSG -&gt; GPU</strong></dt>
+<dd><ul class="first last simple">
+<li>simpler : no G4DAE+GDML export/import</li>
+</ul>
+</dd>
 <dt><strong>Material/Surface/Scintillator properties</strong></dt>
 <dd><ul class="first last simple">
 <li>interpolated to standard wavelength domain</li>
@@ -1282,34 +1292,25 @@ are visited prior to their parents.</p>
 <li>&quot;reemission&quot; texture for wavelength generation</li>
 </ul>
 </dd>
-<dt><strong>Solids</strong></dt>
-<dd><ul class="first last simple">
-<li>converted to Opticks CSG complete binary trees</li>
-</ul>
-</dd>
 <dt><strong>Structure</strong></dt>
 <dd><ul class="first last simple">
 <li>repeated geometry instances identified (progeny digests)</li>
 <li>instance transforms used in OptiX/OpenGL geometry</li>
+<li>merge CSG trees into global + instance buffers</li>
+<li>export meshes to glTF 2.0 for 3D visualization</li>
 </ul>
 </dd>
-<dt><strong>Geocache Optimization</strong></dt>
+<dt><strong>Ease of Use</strong></dt>
 <dd><ul class="first last simple">
-<li>persist GPU ready NumPy buffers</li>
-<li>startup in seconds rather than minutes</li>
+<li>easy geometry : just handover &quot;World&quot;</li>
+<li>easy config : modern CMake + BCM[1]</li>
+<li>~easy event :  modify G4Cerenkov + G4Scintillation</li>
 </ul>
 </dd>
 </dl>
-<img alt="/env/presentation/1px.png" class="small align-center" src="/env/presentation/1px.png" style="width: 300px; height: 1px;" />
-<dl class="small docutils">
-<dt><strong>New Direct from G4 Workflow (Currently Debugging)</strong></dt>
-<dd><ul class="first last simple">
-<li>removes need for G4DAE+GDML export/import</li>
-<li><span class="red">greatly simplifies Opticks adoption</span></li>
-<li>glTF 2.0 export -&gt; 3D renders with many tools</li>
-</ul>
-</dd>
-</dl>
+<p class="tiny small">[1] Boost CMake 3.5+ modules : configure direct dependencies only</p>
+<p class="tiny small"><a class="reference external" href="https://github.com/BoostCMake/cmake_modules">https://github.com/BoostCMake/cmake_modules</a></p>
+<p class="tiny small"><a class="reference external" href="https://github.com/simoncblyth/bcm">https://github.com/simoncblyth/bcm</a></p>
 </div>
 <div class="slide" id="opticks-export-of-g4-geometry-to-gltf-2-0">
 <h1><tt class="docutils literal">Opticks Export of G4 geometry to glTF 2.0</tt></h1>
@@ -1329,8 +1330,8 @@ are visited prior to their parents.</p>
 </dl>
 </div>
 </div>
-<div class="slide" id="hybrid-geant4-opticks-event-workflow">
-<h1><span class="small">Hybrid Geant4/Opticks Event Workflow</span></h1>
+<div class="slide" id="opticks-translates-g4-optical-physics-to-gpu">
+<h1><span class="small">Opticks : translates G4 optical physics to GPU</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title">GPU Resident Photons</p>
 <dl class="small docutils">
@@ -1353,7 +1354,7 @@ are visited prior to their parents.</p>
 <li><a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a></li>
 </ul>
 </div>
-<p class="small"><span class="blue">OptiX : single-ray programming model</span> allows line-by-line translation</p>
+<p class="small"><span class="blue">OptiX : single-ray programming model</span> -&gt; line-by-line translation</p>
 <dl class="small docutils">
 <dt><strong>CUDA Ports of Geant4 classes</strong></dt>
 <dd><ul class="first last simple">
@@ -1471,15 +1472,35 @@ A([    [-191.6262, -240.3634,  450.    ,    5.566 ],    A([    [-191.626 , -240.
  ...
 </pre><p class="tiny"><a class="reference external" href="http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst">http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst</a></p>
 </div>
+<div class="slide" id="coincident-faces-are-primary-cause-of-issues-fake-intersects">
+<h1><span class="small">Coincident Faces are Primary Cause of Issues : Fake Intersects</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Cylinder - Cone</p>
+<p class="small">Coincident endcaps -&gt; issue</p>
+<img alt="/env/opticks_refs/lvidx_83_tbool_coincidence_artifact_at_cylinder_base.png" class="align-center" src="/env/opticks_refs/lvidx_83_tbool_coincidence_artifact_at_cylinder_base.png" style="width: 450px;" />
+<p class="small last">Grow subtracted cone downwards, avoids coincidence : <strong>does not change composite solid</strong></p>
+</div>
+<p class="small">Coincidences common (alignment too tempting?). To fix:</p>
+<ul class="small simple">
+<li><strong>A-B</strong> : grow correct dimension of subtracted shape</li>
+<li><strong>A+B</strong> : grow smaller interface shape into bigger, making join</li>
+<li><span class="red">case-by-case fixes straightforward, not so easy to automate</span></li>
+<li>WIP: automated coincidence finder/fixer</li>
+</ul>
+<img alt="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" class="small align-left" src="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" style="width: 500px;" />
+</div>
 <div class="slide" id="summary">
 <h1><span class="small">Summary</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">Overview</p>
+<p class="first sidebar-title">Highlights</p>
 <ul class="small last simple">
-<li><strong>Opticks 200x Geant4</strong> with mobile GPU</li>
-<li>Expect: <strong>Opticks &gt; 1000x Geant4</strong> (with workstation GPUs)</li>
-<li><span class="red">photon propagation time --&gt; zero</span></li>
-<li><span class="blue">automated full fidelity geometry translation</span></li>
+<li><strong>identical GPU geometry, auto-translated</strong></li>
+<li>aligned running -&gt; simple validation</li>
+<li>expect: <strong>Opticks &gt; 1000x Geant4</strong> (with workstation GPUs)</li>
+<li>more photons -&gt; more overall speedup<ul>
+<li>99% -&gt; 100x</li>
+</ul>
+</li>
 </ul>
 </div>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
@@ -1490,11 +1511,13 @@ A([    [-191.6262, -240.3634,  450.    ,    5.566 ],    A([    [-191.626 , -240.
 due to massive parallelism made accessible by NVIDIA OptiX.</p>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 10px;" />
 <ul class="simple">
-<li>The more photons the bigger the overall speedup (99% -&gt; 100x)</li>
-<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision</li>
-<li>Simulations limited by optical photons can benefit greatly</li>
+<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision<ul>
+<li>any simulation limited by optical photons can benefit</li>
+</ul>
+</li>
 </ul>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 10px;" />
+<p class="small">Subscribe to stay informed on Opticks:</p>
 <p class="huge"><a class="reference external" href="mailto:opticks+subscribe&#64;groups.io">opticks+subscribe&#64;groups.io</a></p>
 <p class="huge"><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></p>
 <p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
@@ -3223,6 +3246,9 @@ a = np.load(&quot;photons.npy&quot;)
 <ul class="large simple">
 <li>Opticks mailing list : <a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></li>
 </ul>
+</div>
+<div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-0">
+<h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (0)</span></h1>
 </div>
 </div>
 </body>
