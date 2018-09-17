@@ -1,3 +1,6 @@
+//
+// SCB:  ui/my-small-white/slides.js
+//
 // S5 v1.1 slides.js -- released into the Public Domain
 // Modified for Docutils (http://docutils.sf.net) by David Goodger
 //
@@ -561,6 +564,8 @@ function startup() {
     //
     var param = QUERY ; 
     var page = param.page || param.p || 0 ; 
+
+    //alert("Hello " + page );
     goTo(page);
 }
 

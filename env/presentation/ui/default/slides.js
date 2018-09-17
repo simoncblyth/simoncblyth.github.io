@@ -1,3 +1,5 @@
+// SCB: ui/default/slides.js
+//
 // S5 v1.1 slides.js -- released into the Public Domain
 // Modified for Docutils (http://docutils.sf.net) by David Goodger
 //

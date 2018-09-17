@@ -1,0 +1,2435 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<script src="ui/my-small-white/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/my-small-white/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/my-small-white/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/my-small-white/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/my-small-white/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title"><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+<!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+<style type="text/css">
+    span.alarm { color: red; }
+    span.warn { color: orange; }
+    span.ok { color: green; }
+    span.i { display: none; }
+    pre.sliteral { class:"literal-block small"; }
+    pre.mypre {
+         display: block;
+         font-family: monospace;
+         font-size: 20px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+    pre.mypretiny {
+         display: block;
+         font-family: monospace;
+         font-size: 15px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+    pre.myfoot {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: white;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+    a.mylink {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: black;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+
+    div.mytitle {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:0%; left:5%; width:90%; height:10% ;
+    }
+
+    div.mycredit {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:90%; left:5%; width:80%; height:10% ;
+    }
+
+
+
+
+
+</style><div class="mytitle">
+<h1 style="background-color:lightgrey"> <i>Opticks</i> : GPU Optical Photon Simulation for Particle Physics with NVIDIA® OptiX™ </h1>
+</div>
+
+<div class="mycredit">
+<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; Sept 2018, SDU, Qingdao </h2>
+</div>
+</div>
+<div class="slide" id="opticks-benefits">
+<h1><span class="i">Opticks Benefits</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Opticks &gt; 1000x Geant4 (*)</p>
+<p class="small">GPU massive parallelism <strong>eliminates bottleneck</strong>.</p>
+<ul class="small simple">
+<li>optical photon simulation time --&gt; zero</li>
+<li>optical photon CPU memory --&gt; zero</li>
+</ul>
+<p class="small">[zero: effectively, compared to rest of simulation]</p>
+<p class="small"><strong>More Photons -&gt; More Benefit</strong></p>
+<ul class="small simple">
+<li>huge time/energy savings for JUNO</li>
+</ul>
+<p class="small"><a class="reference external" href="http://bitbucket.org/simoncblyth/opticks">http://bitbucket.org/simoncblyth/opticks</a></p>
+<p class="small last">(*) core extrapolated from mobile GPU speed</p>
+</div>
+<!-- comment
+
+Neutrino detectors can benefit the most as their operation
+depends on production and propagation of sometimes many millions
+of optical photons.
+
+Neutrinos detectors need to be large, as neutrinos
+interact only weakly.
+
+**Radical simulation speedup -> short development cycle -> improved understanding** -->
+</div>
+<div class="slide" id="outline-tools-techniques-and-opticks">
+<h1>Outline : Tools, Techniques and Opticks</h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<ul class="small simple">
+<li>General Tools for data science<ul>
+<li><em>NumPy</em> : large array handling with python flexibility/brevity at C speed</li>
+</ul>
+</li>
+<li>Technique : Monte Carlo Method<ul>
+<li>apply randomness to model complex systems</li>
+<li>optical photon simulation, deciding history</li>
+<li>sampling using Cumulative Distribution Function</li>
+<li>modelling Scintillator Re-emission</li>
+<li>modelling Scattering and Absorption</li>
+<li>accept-reject sampling</li>
+<li>estimating pi</li>
+<li><em>NVIDIA CUDA + Thrust</em> : GPU estimating pi</li>
+</ul>
+</li>
+<li><em>Geant4</em> : Standard Monte Carlo in HEP<ul>
+<li>simulation toolkit generality</li>
+<li>overview</li>
+</ul>
+</li>
+<li>Optical Photon simulation problem<ul>
+<li>Hybrid solution : Geant4 + Opticks</li>
+<li>NVIDIA OptiX Ray Tracing Engine</li>
+</ul>
+</li>
+<li><em>Opticks</em> : optical photon simulation with NVIDIA OptiX<ul>
+<li>geometry workflow : geocache, GPU textures</li>
+<li>large geometry techniques, geometry modelling</li>
+<li>Geant4/Opticks event workflow</li>
+<li>Validation, performance comparisons</li>
+<li>Summary</li>
+</ul>
+</li>
+</ul>
+<!-- comment
+
+
+Opticks solves the very specific problem of handling the simulation of
+very large numbers of optical photons : which is very important for detectors
+with Photomultiplier tubes. relevant to neutrino detectors
+or dark matter search experiments, or who have simulations.
+
+The very large numbers of photons forced me to find faster data handling techniques.
+
+So despite the very specialized nature of Opticks simulation many of
+the techniques used are relevant to almost anyone doing data analysis
+from a wide range of fields. So after describing Opticks : I'll introduce
+you to some of the tools and techniques that I found.
+
+Could easily spend many hours introducing the features of these tools,
+but that would not be very useful :  as too much to grasp without practical usage ...
+
+So instead:
+
+* just give a flavor of what they do
+* convey how they work and why that makes them perform better than other approaches
+* describe simple approaches on how the tools fit together to provide cross language
+  numerical analysis environment
+
+
+Zen of NumPy
+
+* https://github.com/numpy/numpy/issues/2389
+
+Software Carpentry
+
+* https://software-carpentry.org/about/
+
+Best Practices for Scientific Computing
+
+* https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1001745
+
+* https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-in-practice/monte-carlo-simulation -->
+</div>
+<div class="slide" id="numpy-python-flexibility-brevity-at-c-speed">
+<h1><span class="small">NumPy : Python flexibility+brevity at C speed</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Opticks.NPY package</span></p>
+<ul class="small simple">
+<li>inspired by <em>NumPy</em> : does not depend on it</li>
+<li>implements <em>NumPy</em> serialization file format,
+into which almost everything(*) is persisted</li>
+<li><em>Opticks</em> analysis/debugging done with <em>NumPy</em> and <em>IPython</em></li>
+</ul>
+<p class="tiny last">(*) gensteps, photons, hits, analytic CSG geometry shapes, transforms, triangulated geometry vertices, triangles, material/surface properties ...</p>
+</div>
+<p class="small"><strong>“fundamental package for scientific computing with Python”</strong></p>
+<p class="small"><em>NumPy</em> arrays : simply an interface to C memory buffers</p>
+<ul class="small simple">
+<li><span class="red">extreme simplicity</span> : simple interop with C, C++, CUDA</li>
+<li>slices are no-copy &quot;views&quot; of underlying buffers</li>
+<li>reshape/transpose : just changes metadata</li>
+<li>fast memcpy, cudaMemcpy, serialization/deserialization</li>
+</ul>
+<p class="small">Very terse, no-loop python interface to C performance</p>
+<ul class="small simple">
+<li><strong>array-oriented computing</strong> (C loops under python control)</li>
+<li>interactive handling of very large N-dimensional arrays</li>
+<li>easily manipulate million item arrays from python<ul>
+<li>faster + more convenient than dealing with millions of C++ objects</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>“The NumPy array: a structure for efficient numerical computation”</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://hal.inria.fr/inria-00564007/document">https://hal.inria.fr/inria-00564007/document</a></li>
+</ul>
+</div>
+<div class="slide" id="numpy-central-to-python-ecosystem">
+<h1><span class="small">NumPy : Central to Python Ecosystem</span></h1>
+<ul class="small simple">
+<li><em>Python</em> : popular language for data science, machine learning (TensorFlow, Theano, Keras)</li>
+<li><em>NumPy</em> : Central to Ecosystem : Common Base Format/API : used by data science, machine learning packages
+(TensorFlow, Theano, Keras, Scikit-learn, MatplotLib)</li>
+</ul>
+<img alt="/env/presentation/numpy_ecosystem.png" class="align-center" src="/env/presentation/numpy_ecosystem.png" style="width: 700px;" />
+<p class="tiny"><a class="reference external" href="http://luispedro.org/files/talks/2014/09-pyss/pyss14.html">http://luispedro.org/files/talks/2014/09-pyss/pyss14.html</a></p>
+<p class="tiny"><a class="reference external" href="https://docs.scipy.org/doc/numpy/user/quickstart.html">https://docs.scipy.org/doc/numpy/user/quickstart.html</a></p>
+<p class="tiny"><a class="reference external" href="https://github.com/donnemartin/data-science-ipython-notebooks">https://github.com/donnemartin/data-science-ipython-notebooks</a></p>
+</div>
+<div class="slide" id="the-zen-of-numpy-by-its-creator-travis-oliphant">
+<h1><span class="small">The Zen of Numpy, by its creator, Travis Oliphant</span></h1>
+<pre class="mypre" >
+
+Strided is better than scattered.
+Contiguous is better than strided.
+Descriptive is better than imperative[1] (e.g. data-types).
+<b>Array-orientated is better than object-oriented.</b>
+<b>Broadcasting is a great idea -- use where possible!</b>
+<b>Vectorized is better than an explicit loop.</b>
+Unless it's complicated -- then use Cython or numexpr.
+<b>Think in higher dimensions.</b>
+
+</pre><p class="small"><strong>My take : best tool depends on nature of data</strong></p>
+<ul class="small simple">
+<li><em>NumPy</em> shines for large[2] and simple data ; splitting data to make it simple brings other benefits !</li>
+<li><em>NumPy</em> holistic approach : prepares you for <strong>vectorized and parallel</strong> processing</li>
+<li>no-looping makes for an terse, intuitive interactive interface</li>
+</ul>
+<p class="tiny">[1] <em>imperative</em> means step by step how to do something</p>
+<p class="tiny">[2] but not so large that has trouble fitting in memory</p>
+</div>
+<div class="slide" id="npy-minimal-file-format-metadata-header-data-buffer-trivial-to-parse">
+<h1><span class="small">NPY minimal file format : metadata header + data buffer : trivial to parse</span></h1>
+<ul class="small simple">
+<li>data accessible from anywhere : C/C++/CUDA/python/... ; Simple to <em>memcpy()</em> or <em>cudaMemcpy()</em> to GPU</li>
+</ul>
+<pre class="mypretiny">
+
+In [1]: a = np.arange(10)       <b> # array of 10 ints : 64 bit, 8 bytes each  </b>
+In [2]: np.save("a.npy", a )      <b> # persist the array : serializing it into a file </b>
+
+In [3]: a2 = np.load("a.npy")        <b> # load array from file into memory </b>
+In [4]: assert np.all( a == a2 )     <b> # check all elements the same </b>
+
+In [5]: !xxd a.npy                  <b> # run xxd in shell to hexdump the byte contents of the file </b>
+
+00000000: 934e 554d 5059 0100 7600 7b27 6465 7363  .NUMPY..v.{'desc
+00000010: 7227 3a20 273c 6938 272c 2027 666f 7274  r': '&lt;i8', 'fort
+00000020: 7261 6e5f 6f72 6465 7227 3a20 4661 6c73  ran_order': Fals
+00000030: 652c 2027 7368 6170 6527 3a20 2831 302c  e, 'shape': (10,   <b><span class="alarm"> # minimal metadata : type, shape   </span></b>
+00000040: 292c 207d 2020 2020 2020 2020 2020 2020  ), }
+00000050: 2020 2020 2020 2020 2020 2020 2020 2020
+00000060: 2020 2020 2020 2020 2020 2020 2020 2020
+00000070: 2020 2020 2020 2020 2020 2020 2020 200a                 .   <b><span class="alarm"> # 128 bytes of header  </span></b>
+00000080: 0000 0000 0000 0000 0100 0000 0000 0000  ................
+00000090: 0200 0000 0000 0000 0300 0000 0000 0000  ................
+000000a0: 0400 0000 0000 0000 0500 0000 0000 0000  ................   <b><span class="alarm"> # data buffer  </span></b>
+000000b0: 0600 0000 0000 0000 0700 0000 0000 0000  ................
+000000c0: 0800 0000 0000 0000 0900 0000 0000 0000  ................
+
+In [6]: !ls -l a.npy    <b> # small 128 byte header + (8 bytes per integer)*10 = 208 bytes total </b>
+-rw-r--r--  1 blyth  staff  208 Sep 13 11:01 a.npy
+
+In [7]: a
+Out[7]: array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+In [8]: a.shape
+Out[8]: (10,)
+
+</pre><p class="tiny">One possibility for compression with blosc <a class="reference external" href="http://bcolz.blosc.org/en/latest/intro.html">http://bcolz.blosc.org/en/latest/intro.html</a></p>
+</div>
+<div class="slide" id="monte-carlo-method-apply-randomness-to-model-complex-systems">
+<h1><span class="small">Monte Carlo Method : apply randomness to model complex systems</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="tiny">Casino de Monte-Carlo, Monaco (French Riviera)</span></p>
+<img alt="/env/presentation/casino_de_monte_carlo.png" class="align-center" src="/env/presentation/casino_de_monte_carlo.png" style="width: 350px;" />
+<ul class="small last simple">
+<li>named after city famous for casinos</li>
+<li>prior to computers : roulette wheel was a convenient RNG</li>
+<li>developed 1940s for neutron transport (Ulam, von Neumann) using
+first general purpose computer</li>
+</ul>
+</div>
+<p class="small"><strong>Simulate designs before building them</strong></p>
+<p class="small">Generate history of a system using random sampling techniques
+making variables follow expected PDFs[1]</p>
+<ul class="small simple">
+<li><span class="red">uniform random numbers [0,1] are mapped to probabilities</span></li>
+<li>applicable to problems <strong>too complex for an analytic solution</strong></li>
+<li>ubiquitous : physics/biology/engineering/finance/climate/...</li>
+<li><strong>eventually validate against real data measurements</strong><ul>
+<li><span class="red">hopefully find problems : improve models (PDFs)</span></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>simulation</strong> is vital to understand/design anything complex</p>
+<p class="tiny">[1] PDFs : probability density functions</p>
+<p class="tiny"><a class="reference external" href="https://www.slideserve.com/hafwen/monte-carlo-detector-simulation">https://www.slideserve.com/hafwen/monte-carlo-detector-simulation</a>
+Pat Ward, Cambridge University, 74 pages Powerpoint</p>
+<p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Monte_Carlo_method">https://en.wikipedia.org/wiki/Monte_Carlo_method</a></p>
+<!-- comment
+
+Historical review on MC Method : Ulam, Von Neumann
+
+https://fas.org/sgp/othergov/doe/lanl/pubs/00326867.pdf
+
+scattering length
+scattering distance
+
+pr(x;l) = e^(-x/l)
+
+log(pr) = -x/l
+
+x = -l*log(pr)
+
+
+https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-mathematical-foundations
+
+https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-mathematical-foundations/inverse-transform-sampling-method
+CDF of exponential
+
+https://www.eg.bucknell.edu/~xmeng/Course/CS6337/Note/master/node50.html
+
+https://www.eg.bucknell.edu/~xmeng/Course/CS6337/Note/master/node1.html -->
+</div>
+<div class="slide" id="optical-photon-simulation-deciding-history-on-way-to-boundary">
+<h1><span class="small">Optical Photon Simulation : Deciding history on way to boundary</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Possible Histories</span></p>
+<img alt="/env/presentation/to_boundary.png" class="align-center" src="/env/presentation/to_boundary.png" style="width: 500px;" />
+<ul class="small last simple">
+<li>optical photon simulation straightforward : as only a few processes</li>
+<li>BUT : principals are the same as full MC</li>
+</ul>
+</div>
+<ol class="small arabic simple">
+<li>intersect ray with geometry -&gt; distance to boundary</li>
+<li>lookup absorption length, scattering length for material
+depending on wavelength<ul>
+<li><em>Opticks</em> uses GPU texture interpolation</li>
+</ul>
+</li>
+<li>&quot;role dice&quot; : characteristic lengths -&gt; stochastic distances</li>
+</ol>
+<p class="small"><span class="red">Pick winning process from smallest distance</span></p>
+<pre class="mypretiny">
+boundary_distance = from_geometry  # no random number needed
+absorption_distance = -absorption_length * ln(u0)
+scattering_distance = -scattering_length * ln(u1)
+## u0, u1 uniform randoms in [0,1] : distances always +ve
+</pre><p class="small">If scatter:</p>
+<ol class="small arabic simple" start="4">
+<li>pick new photon direction at random</li>
+<li>set polarization perpendicular to new direction (transverse)
+and in same plane as direction and initial polarization</li>
+<li><strong>rejection-sampling used to pick new polarization</strong>
+such that angle between old and new follows cos^2 distribution</li>
+<li>then repeat from 1.</li>
+</ol>
+<p class="small"><span class="red">Theory (eg Rayleigh scattering) -&gt; PDFs used in the simulation</span></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/rayleigh.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/rayleigh.h</a></p>
+</div>
+<div class="slide" id="mc-method-sampling-using-cumulative-distribution-function-cdf">
+<h1><span class="small">MC Method : Sampling using Cumulative Distribution Function (CDF)</span></h1>
+<img alt="/env/presentation/normal_pdf_cdf.png" class="align-right" src="/env/presentation/normal_pdf_cdf.png" style="width: 400px;" />
+<p class="small"><strong>Cumulative distribution function (CDF)</strong></p>
+<ul class="small simple">
+<li>probability that value X is less than x</li>
+<li>obtain by integrating probability density function PDF</li>
+<li>CDF(-inf) = 0, CDF(inf) = 1</li>
+<li>monotonically increasing function</li>
+<li>relation between PDF f and CDF F<ul>
+<li><strong>F(b) - F(a) = P( a &lt; X &lt;= b ) = Integral a-&gt;b  f(x) dx</strong></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Map uniform randoms onto probabilities</strong></p>
+<ol class="small arabic simple">
+<li>integrate PDF -&gt; CDF (mapping PDF domain onto probability [0,1] )</li>
+<li>invert the CDF, so domain becomes [0,1]</li>
+<li>inverted_CDF(uniform random) -&gt; sample value</li>
+</ol>
+<p class="small"><strong>Intuitively : throw randoms uniformly &quot;vertically&quot;</strong></p>
+<ul class="small simple">
+<li>Sigmoid CDF : low probability close to zero or 1 corresponding to tails</li>
+<li>greater probability in high PDF areas</li>
+<li>extreme case of delta-function PDF : all probability at one value<ul>
+<li>sigmoid CDF becomes Heaviside step-function</li>
+</ul>
+</li>
+</ul>
+<p class="small"><span class="red">CDF &quot;encodes&quot; shape of PDF in convenient form for sampling</span></p>
+<p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_transform_sampling">https://en.wikipedia.org/wiki/Inverse_transform_sampling</a></p>
+</div>
+<div class="slide" id="monte-carlo-method-modelling-scintillator-re-emission">
+<h1><span class="small">Monte Carlo Method : Modelling Scintillator Re-emission</span></h1>
+<img alt="/env/presentation/inverted_cdf_GScintillatorLib_py.png" class="align-right" src="/env/presentation/inverted_cdf_GScintillatorLib_py.png" style="width: 500px;" />
+<dl class="small docutils">
+<dt><em>reemission_probability(wavelength)</em></dt>
+<dd>fraction of light absorbed in scintillator
+re-emitted with different wavelength.</dd>
+<dt>generating re-emitted wavelength</dt>
+<dd><ul class="first last simple">
+<li>expected <em>PDF(wavelength)</em> -&gt; <em>inverted_CDF(probability)</em></li>
+</ul>
+</dd>
+</dl>
+<p class="small"><strong>Opticks Re-emission model</strong></p>
+<ul class="small simple">
+<li>fraction of absorbed photons &quot;reincarnated&quot; in same thread</li>
+<li><em>inverted_CDF(probability)</em> -&gt; GPU &quot;re-emission&quot; texture</li>
+</ul>
+<div class="small"><pre class="mypretiny">
+float uniform_sample_reemit = curand_uniform(&rng);
+if (uniform_sample_reemit < reemission_probability )
+{
+    ...
+    p.wavelength = reemission_lookup(curand_uniform(&rng));   <b><span class="alarm"> # re-emission texture lookup  </span></b>
+    s.flag = BULK_REEMIT ;
+    return CONTINUE;
+}
+else
+{
+    s.flag = BULK_ABSORB ;
+    return BREAK;
+}
+</pre></div><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h</a></p>
+<!-- comment
+
+Light propagation in a large volume liquid scintillator
+
+(Borexino, 2000)
+
+https://www.sciencedirect.com/science/article/pii/S0168900299009614
+~/opticks_refs/borexino_light_propagation_in_large_scintillator.pdf -->
+</div>
+<div class="slide" id="monte-carlo-method-modelling-scattering-and-absorption">
+<h1><span class="small">Monte Carlo Method : Modelling Scattering and Absorption</span></h1>
+<img alt="/env/presentation/exponential_pdf_cdf.png" class="align-right" src="/env/presentation/exponential_pdf_cdf.png" style="width: 600px;" />
+<p class="small"><strong>Create sample with exponential PDF, using CDF</strong></p>
+<ul class="small simple">
+<li><strong>PDF(x) = (1/a) exp(-x/a)</strong></li>
+<li><strong>CDF(x) = 1 - exp(-x/a)</strong></li>
+</ul>
+<dl class="small docutils">
+<dt><em>a</em></dt>
+<dd>characteristic scale of process, eg decay time or scattering/absorption/attenuation length</dd>
+<dt><em>u</em></dt>
+<dd>uniform random value in [0,1] ; <em>1-u</em> equivalent to <em>u</em></dd>
+</dl>
+<p class="small"><strong>Known analytic form of CDF, means simple sampling:</strong></p>
+<p class="small"><span class="red">Equate CDF probability with uniform random value [0,1]</span></p>
+<ul class="small simple">
+<li><strong>CDF(x) = 1 - exp(-x/a) = u</strong></li>
+<li><strong>exp(-x/a) = 1 - u</strong></li>
+<li><strong>X = -a ln(1-u)</strong></li>
+<li><strong>X = -a ln(u)</strong></li>
+</ul>
+<dl class="small docutils">
+<dt><em>X</em></dt>
+<dd>stochastic distance/time obtained from characteristic scale <em>a</em> and uniform random <em>u</em></dd>
+</dl>
+<p class="tiny"><a class="reference external" href="https://www.eg.bucknell.edu/~xmeng/Course/CS6337/Note/master/node50.html">https://www.eg.bucknell.edu/~xmeng/Course/CS6337/Note/master/node50.html</a></p>
+<p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_transform_sampling">https://en.wikipedia.org/wiki/Inverse_transform_sampling</a></p>
+<!-- comment
+
+http://misclab.umeoce.maine.edu/boss/classes/RT_Weizmann/Radiation%20Transfer%20in%20Environmental%20Science%20-%20Lecture%207.pdf
+
+https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-in-practice/monte-carlo-simulation
+
+https://www.eg.bucknell.edu/~xmeng/Course/CS6337/Note/master/master.html
+
+https://plus.maths.org/content/light-attenuation-and-exponential-laws -->
+</div>
+<div class="slide" id="monte-carlo-method-accept-reject-sampling">
+<h1><span class="small">Monte Carlo Method : Accept-Reject Sampling</span></h1>
+<p class="small">Simple technique providing a sample that follows a distribution. Example PDF :  <strong>pdf(x) = (3/8).( 1 + x^2 )</strong></p>
+<ol class="small arabic simple">
+<li>scatter random points (x,y) across PDF graph  (piecewise for better efficiency)</li>
+<li>accept x for pdf(x) &lt; y  :  implement in C++ with <strong>do {   } while ( condition )</strong></li>
+</ol>
+<img alt="/env/presentation/accept_reject_sampling.png" class="small align-center" src="/env/presentation/accept_reject_sampling.png" style="width: 800px;" />
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py</a></p>
+<p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Rejection_sampling">https://en.wikipedia.org/wiki/Rejection_sampling</a></p>
+</div>
+<div class="slide" id="monte-carlo-method-accept-reject-sampling-numpy-code-in-ipython">
+<h1><span class="small">Monte Carlo Method : Accept-Reject Sampling (NumPy Code in IPython)</span></h1>
+<pre class="mypretiny">
+in [1]: import numpy as np
+In [2]: a = np.random.rand( 1000000,2 )     <b><span class="alarm">  # 2M random floats uniform in [0,1]  </span></b>
+
+In [3]: a[:,0] = a[:,0]*2. - 1.   #  [0,1] -> [-1,1]
+In [4]: a[:,1] = a[:,1]*0.75      #  [0,1] -> [0,0.75]     pdf(0) = pdf(1) = 0.75
+
+In [5]: pdf = lambda x:(3./8.)*(1+x**2)        <b><span class="alarm"> # simple symmetric PDF normalized on -1:1 </span></b>
+
+In [6]: w = np.where( a[:,1] < pdf(a[:,0]) )   <b><span class="alarm">  # indices of accepted sample  </span></b>
+
+In [7]: s = a[w][:,0]                   <b><span class="alarm">  # accepted sample of 666301 values </span></b>
+
+In [8]: s
+Out[8]: array([ 0.0382,  0.9755,  0.6855, ...,  0.5962,  0.9094, -0.8292])
+
+In [9]: s.shape
+Out[9]: (666301,)
+
+In [10]: a.shape
+Out[10]: (1000000, 2)
+
+In [11]: a
+Out[11]:
+array([[ 0.0382,  0.0752],
+       [ 0.9755,  0.0495],
+       [ 0.6855,  0.1835],
+       ...,
+       [ 0.5837,  0.7297],
+       [-0.7534,  0.7253],
+       [-0.8292,  0.0019]])
+</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py</a></p>
+</div>
+<div class="slide" id="mc-method-estimating-pi-from-circle-square-count-ratio-pi-r-2-2r-2">
+<h1><span class="small">MC Method : Estimating Pi from circle/square count ratio : pi r^2/(2r)^2</span></h1>
+<img alt="/env/presentation/estimate_pi.png" class="small align-center" src="/env/presentation/estimate_pi.png" style="width: 650px;" />
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/estimate_pi.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/estimate_pi.py</a></p>
+</div>
+<div class="slide" id="monte-carlo-method-estimating-pi-numpy-code-in-ipython">
+<h1><span class="small">Monte Carlo Method : Estimating Pi : NumPy Code in IPython</span></h1>
+<pre class="mypretiny">
+In [1]: from __future__ import division    <b><span class="alarm"> # python3 style default </span></b>
+In [2]: import numpy as np
+
+In [3]: a = np.random.rand( 1000000,2 )    <b><span class="alarm"> # 2M uniform [0,1] random floats   </span></b>
+
+In [4]: a[:,0] = a[:,0]*2. - 1.            <b><span class="alarm"> # NB: no loops at python level  </span></b>
+
+In [5]: a[:,1] = a[:,1]*2. - 1.
+
+In [6]: mask = np.sum(a*a,1) < 1           <b><span class="alarm"> # mask : array of booleans with same shape as a  </span></b>
+
+In [7]: w = np.where(mask)                 <b><span class="alarm"> # w : array of indices of a within the mask </span></b>
+
+In [8]: epi = 4*len(w[0])/len(a)           <b> # estimate of pi =  4*(cicle count)/(square count)   </b>
+
+In [9]: label = " estimate_pi 4*%d/%d = %10.5f  (%10.5f) " % (len(w[0]), len(a), epi, epi-np.pi )
+
+In [10]: a.shape
+Out[10]: (1000000, 2)
+
+In [11]: a[w].shape                        <b><span class="alarm"> # shape of the selection  </span></b>
+Out[11]: (785209, 2)
+
+In [12]: a[w]                             <b> # select via an array of indices </b>
+Out[12]:
+array([[-0.3253,  0.8069],
+       [ 0.2202, -0.8232],
+       [-0.9173, -0.088 ],
+       ...,
+       [ 0.1739, -0.1885],
+       [-0.1812, -0.8979],
+       [ 0.4604, -0.524 ]])
+
+</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/estimate_pi.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/estimate_pi.py</a></p>
+</div>
+<div class="slide" id="thrust-estimate-pi-operator-method-runs-on-device-gpu">
+<h1><span class="small">Thrust : Estimate pi : operator() method runs on device (GPU)</span></h1>
+<ul class="small simple">
+<li>C++ functor with <tt class="docutils literal">__device__ float operator()</tt></li>
+<li>struct member <em>N</em> set on host(CPU), used on device(GPU) : taken care of by <em>Thrust</em></li>
+</ul>
+<pre class="mypretiny">
+
+#include &lt;curand_kernel.h&gt;
+
+struct estimate_pi
+{
+    estimate_pi(int _N) : N(_N) {}
+
+    __device__ float operator()(unsigned seed)
+    {
+        float sum = 0;
+        curandState rng;
+        curand_init(seed, 0, 0, &rng);   <b><span class="alarm">// initializing curand is expensive better to split + persist </span></b>
+
+        for(int i = 0; i &lt; N; ++i)
+        {
+            float x = curand_uniform(&rng);
+            float y = curand_uniform(&rng);
+            float dist = sqrtf(x*x + y*y);
+            if(dist &lt;= 1.0f) sum += 1.0f;
+        }
+        sum *= 4.0f;
+        return sum / N;
+    }
+
+    int N ;
+};
+
+</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/thrustrap/tests/thrust_curand_estimate_pi.cu">https://bitbucket.org/simoncblyth/opticks/src/default/thrustrap/tests/thrust_curand_estimate_pi.cu</a></p>
+</div>
+<div class="slide" id="thrust-estimate-pi-thrust-transform-reduce-does-the-launch">
+<h1><span class="small">Thrust : Estimate pi : thrust::transform_reduce does the &quot;launch&quot;</span></h1>
+<pre class="mypretiny">
+#include &lt;thrust/iterator/counting_iterator.h&gt;
+#include &lt;thrust/transform_reduce.h&gt;
+#include &lt;iostream&gt;
+#include &lt;iomanip&gt;
+
+int main()
+{
+     int N = 10000; int M = 30000;
+
+     float estimate = thrust::transform_reduce(            <b>// NB functor call ordering is undefined </b>
+                thrust::counting_iterator&lt;int&gt;(0),
+                thrust::counting_iterator&lt;int&gt;(M),   <b><span class="alarm">// 1st two args define implicit sequence  </span></b>
+                estimate_pi(N),                      <b><span class="alarm">// the functor to apply to the sequence </span></b>
+                0.0f,                                <b><span class="alarm">// initial value of reduction </span></b>
+                thrust::plus&lt;float&gt;())/M ;           <b><span class="alarm">// how to combine results from the functor call </span></b>
+
+      std::cout
+          &lt;&lt; " M " &lt;&lt; M &lt;&lt; " N " &lt;&lt; N
+          &lt;&lt; std::setprecision(5) &lt;&lt; std::fixed
+          &lt;&lt; " estimate " &lt;&lt; estimate
+          &lt;&lt; " delta "   &lt;&lt; estimate - M_PI &lt;&lt; std::endl ;
+
+      return 0;
+}
+</pre><pre class="mypretiny">
+epsilon:tests blyth$ nvcc thrust_curand_estimate_pi.cu
+epsilon:tests blyth$ ./a.out
+ M 30000 N 10000 estimate 3.14142 delta -0.00017
+</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_cuda">https://bitbucket.org/simoncblyth/intro_to_cuda</a></p>
+</div>
+<div class="slide" id="geant4-monte-carlo-simulation-toolkit">
+<h1>Geant4 : Monte Carlo Simulation Toolkit</h1>
+</div>
+<div class="slide" id="geant4-monte-carlo-simulation-toolkit-generality">
+<h1>Geant4 : Monte Carlo Simulation Toolkit Generality</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Standard Simulation Tool of HEP</span></p>
+<p class="small"><strong>Geant4</strong> simulates particles travelling through matter</p>
+<ul class="small simple">
+<li>high energy, nuclear and accelerator physics</li>
+<li>medical physics : deciding radiotherapy doses/sources</li>
+<li>space engineering : satellites</li>
+</ul>
+<p class="small"><strong>Geant4 Approach</strong></p>
+<ul class="small simple">
+<li>geometry : <strong>tree of CSG solids</strong></li>
+<li>particles : track position and time etc..</li>
+<li>processes : nuclear, EM, weak, <strong>optical</strong></li>
+</ul>
+<p class="small"><strong>Very General and Capable Tool</strong></p>
+<ul class="small simple">
+<li><strong>mostly unused for optical photon propagation</strong></li>
+</ul>
+<p class="tiny last"><a class="reference external" href="https://geant4.web.cern.ch">https://geant4.web.cern.ch</a></p>
+</div>
+</div>
+<div class="slide" id="geant4-overview">
+<h1>Geant4 : Overview</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">No main()</span></p>
+<p class="small last"><em>Geant4</em> is a toolkit : it provides no <em>main()</em></p>
+</div>
+<p class="small"><strong>Initialization</strong></p>
+<ul class="small simple">
+<li>geometry defined as a heirarchy of volumes, with sensitive detector volumes</li>
+<li>physics particles and processes defined</li>
+<li>setup primary particle generation to be used for each event</li>
+</ul>
+<p class="small"><strong>Beginning of Run</strong></p>
+<ul class="small simple">
+<li>geometry optimized for navigation</li>
+<li>cross-section tables calculated for materials/cuts</li>
+</ul>
+<p class="small"><strong>Beginning of Event</strong></p>
+<ul class="small simple">
+<li><strong>primary tracks</strong> are generated and pushed onto stack</li>
+<li>physics processes of <strong>tracks</strong> can create <strong>secondary tracks</strong></li>
+<li>when stack empty, processing over</li>
+</ul>
+<p class="small"><strong>At Each Step of a Track</strong></p>
+<ul class="small simple">
+<li>all applicable processes &quot;compete&quot; : proposing physical interaction lengths (PIL)</li>
+<li>shortest PIL &quot;wins&quot; (limits the step and that process can generate secondary tracks and change
+the primary track)</li>
+</ul>
+<p class="tiny">60 slide intro from one of the primary Geant4 architects/developers</p>
+<p class="tiny"><a class="reference external" href="http://geant4.in2p3.fr/2005/Workshop/ShortCourse/session1/J.Apostolakis.pdf">http://geant4.in2p3.fr/2005/Workshop/ShortCourse/session1/J.Apostolakis.pdf</a></p>
+<!-- comment
+
+~/opticks_refs/Geant4_intro_J_Apostolakis.pdf -->
+</div>
+<div class="slide" id="optical-photon-simulation-problem">
+<h1><span class="incremental">Optical Photon Simulation Problem...</span></h1>
+</div>
+<div class="slide" id="jpmt-before-contact-2">
+<h1><span class="i">JPMT Before Contact 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Optical Photon Problem</p>
+<dl class="small docutils">
+<dt><strong>Cosmic muon backgrounds</strong></dt>
+<dd>many millions of optical photons in JUNO scintillator</dd>
+<dt><strong>Simulation Bottleneck</strong></dt>
+<dd>~99% CPU time, memory constraints</dd>
+<dt><strong>Optical photons : naturally parallel, simple :</strong></dt>
+<dd><ul class="first last simple">
+<li>produced by Cerenkov+Scintillation</li>
+<li>yield only Photomultiplier hits</li>
+</ul>
+</dd>
+</dl>
+<p class="small last"><strong>-&gt; Hybrid Solution : Geant4 + Opticks</strong></p>
+</div>
+</div>
+<div class="slide" id="ray-traced-image-synthesis-optical-photon-simulation">
+<h1><span class="small">Ray Traced Image Synthesis ≈ Optical Photon Simulation</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Not a Photo, a Calculation</p>
+<img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
+<p class="tiny last"><a class="reference external" href="http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf">http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf</a></p>
+</div>
+<p class="small">Geometry, light sources, optical physics -&gt;</p>
+<ul class="small simple">
+<li>pixel values at image plane</li>
+<li>photon parameters at detectors (eg PMTs)</li>
+</ul>
+<p class="small"><strong>Ray tracing has many applications</strong> :</p>
+<ul class="small simple">
+<li>advertising, design, entertainment, games,...</li>
+<li>BUT : most ray tracers just render images</li>
+</ul>
+<p class="small"><strong>Ray-geometry intersection</strong></p>
+<ul class="small simple">
+<li>hw+sw continuously optimized over 30 years</li>
+<li>performance &gt; 100M intersections per second per GPU</li>
+</ul>
+<pre class="mypre">
+
+</pre><dl class="small docutils">
+<dt><strong>rasterization</strong></dt>
+<dd>project 3D primitives onto 2D image plane, combine fragments into pixel values</dd>
+<dt><strong>ray tracing</strong></dt>
+<dd>cast rays thru image pixels into scene, recursively reflect/refract at
+intersects, combine returns into pixel values</dd>
+</dl>
+</div>
+<div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix">
+<h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- http://developer.nvidia.com/optix</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX Raytracing Pipeline</p>
+<p class="small">Analogous to OpenGL rasterization pipeline:</p>
+<img alt="/env/optix/docs/optix-model.png" class="last align-right" src="/env/optix/docs/optix-model.png" style="width: 450px;" />
+</div>
+<p class="small"><strong>OptiX makes GPU ray tracing accessible</strong></p>
+<ul class="small simple">
+<li><strong>accelerates</strong> ray-geometry intersections</li>
+<li>simple : single-ray programming model</li>
+<li>&quot;...free to use within any application...&quot;</li>
+</ul>
+<p class="small"><strong>NVIDIA expertise:</strong></p>
+<ul class="small simple">
+<li>~linear scaling with CUDA cores across multiple GPUs</li>
+<li>acceleration structure creation + traversal (Blue)</li>
+<li>instanced sharing of geometry + acceleration structures</li>
+<li><span class="red">compiler optimized for GPU ray tracing</span></li>
+<li>regular updates, profit from new GPU features:<ul>
+<li>NVIDIA RTX™ with Volta GPUs</li>
+</ul>
+</li>
+</ul>
+<p class="tiny"><tt class="docutils literal"><span class="pre">https://developer.nvidia.com/rtx</span></tt></p>
+<p class="small"><strong>User provides (Yellow):</strong></p>
+<ul class="small simple">
+<li>ray generation</li>
+<li>geometry bounding box, intersects</li>
+</ul>
+</div>
+<div class="slide" id="optix-performance-scaling-with-gpu-cores">
+<h1><span class="small">OptiX Performance Scaling with GPU cores</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Performance Linearity with CUDA cores</p>
+<img alt="/env/g4dae/core_linearity.png" class="last align-right" src="/env/g4dae/core_linearity.png" style="width: 500px;" />
+</div>
+<p class="small">OptiX sample rendering with 2 GPU IHEP workstation,</p>
+<ul class="small simple">
+<li>2 Tesla K20m (4992 cores) 28.0 ms/f</li>
+<li>1 Tesla K20m (2496 cores) 49.1 ms/f</li>
+<li>1 GeForce GT 750m (384 cores) 345.1 ms/f</li>
+</ul>
+<p class="small"><span class="red">Performance linear with GPU cores</span>, compared to laptop:</p>
+<ul class="small simple">
+<li>13x cores, 12x performance</li>
+<li>performance scales across GPUs</li>
+</ul>
+<p class="small">Benefit from multiple GPUs with no development effort.</p>
+</div>
+<div class="slide" id="opticks-gpu-geometry-starts-from-ray-primitive-intersection">
+<h1><span class="small">Opticks : GPU Geometry starts from ray-primitive intersection</span></h1>
+<ul class="small simple">
+<li>3D parametric ray : <strong>ray(x,y,z;t) = rayOrigin  +  t * rayDirection</strong></li>
+<li>implicit equation of primitive : <strong>f(x,y,z) = 0</strong></li>
+<li>-&gt; polynomial in <strong>t</strong> , roots: <strong>t &gt; t_min</strong>  -&gt; intersection positions + surface normals</li>
+</ul>
+<div class="figure align-center">
+<img alt="/env/presentation/tboolean_parade_sep2017.png" src="/env/presentation/tboolean_parade_sep2017.png" style="width: 900px;" />
+<p class="caption"><span class="red">CUDA/OptiX intersection for ~10 primitives</span> -&gt; <span class="blue">Exact geometry translation</span></p>
+</div>
+</div>
+<div class="slide" id="torus-much-more-difficult-expensive-than-other-primitives">
+<h1><span class="small">Torus : much more difficult/expensive than other primitives</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Torus artifacts</p>
+<blockquote>
+<img alt="/env/presentation/tboolean_torus_orthographic_artifact.png" class="align-right" src="/env/presentation/tboolean_torus_orthographic_artifact.png" style="width: 400px;" />
+</blockquote>
+<img alt="/env/presentation/torus_eqn_sqrt.png" class="align-right" src="/env/presentation/torus_eqn_sqrt.png" style="width: 400px;" />
+<img alt="/env/presentation/torus_eqn_quartic.png" class="last align-right" src="/env/presentation/torus_eqn_quartic.png" style="width: 400px;" />
+</div>
+<p class="small">3D parametric ray : <strong>ray(x,y,z;t) = rayOrigin  +  t * rayDirection</strong></p>
+<ul class="small simple">
+<li>ray-torus intersection -&gt; solve quartic polynomial in <strong>t</strong></li>
+<li>A t^4 + B t^3 + C t^2 + D t + E = 0</li>
+</ul>
+<p class="small">High order equation</p>
+<ul class="small simple">
+<li>very large difference between coefficients</li>
+<li>varying ray -&gt; wide range of very coefficients</li>
+<li>numerically problematic, requires double precision</li>
+<li>several mathematical approaches used, work in progress</li>
+</ul>
+<p class="small"><strong>Best Solution : replace torus</strong></p>
+<ul class="small simple">
+<li>eg model PMT neck with hyperboloid, not cylinder-torus</li>
+</ul>
+</div>
+<div class="slide" id="torus-different-artifacts-as-change-implementation-params-viewpoint">
+<h1><span class="small">Torus : different artifacts as change implementation/params/viewpoint</span></h1>
+<ul class="small simple">
+<li><span class="red">Only use Torus when there is no alternative</span></li>
+<li>especially avoid CSG combinations with Torus</li>
+</ul>
+<img alt="/env/presentation/torus_cloud_artifact_2017_08_14.png" class="align-left" src="/env/presentation/torus_cloud_artifact_2017_08_14.png" style="width: 500px;" />
+<img alt="/env/presentation/torus_cuts_artifact_2017_08_08.png" class="align-right" src="/env/presentation/torus_cuts_artifact_2017_08_08.png" style="width: 550px;" />
+<img alt="/env/presentation/torus_fan_artifact_2017_07_28.png" class="align-right" src="/env/presentation/torus_fan_artifact_2017_07_28.png" style="width: 350px;" />
+</div>
+<div class="slide" id="constructive-solid-geometry-csg-shapes-defined-by-construction">
+<h1><span class="small">Constructive Solid Geometry (CSG) : Shapes defined &quot;by construction&quot;</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">CSG Binary Tree</p>
+<img alt="/env/presentation/hanrahan_example_of_solid_object_formed_using_csg.png" class="align-right" src="/env/presentation/hanrahan_example_of_solid_object_formed_using_csg.png" style="width: 450px;" />
+<p class="small last">Primitives combined via binary operators</p>
+</div>
+<p class="small">Simple <em>by construction</em> definition, implicit geometry.</p>
+<ul class="small simple">
+<li><strong>A, B</strong> implicit primitive <strong>solids</strong></li>
+<li><strong>A + B</strong> : union (OR)</li>
+<li><strong>A * B</strong> : intersection (AND)</li>
+<li><strong>A - B</strong> : difference (AND NOT)</li>
+<li><strong>!B</strong> : complement (NOT) (inside &lt;-&gt; outside)</li>
+</ul>
+<p class="small">CSG expressions</p>
+<ul class="small simple">
+<li>non-unique: <strong>A - B == A * !B</strong></li>
+<li>represented by binary tree, primitives at leaves</li>
+</ul>
+<p class="small">3D Parametric Ray : <strong>ray(t) = r0 + t rDir</strong></p>
+<p class="small"><strong>Ray Geometry Intersection</strong></p>
+<ul class="small simple">
+<li>primitive : find <em>t</em> roots of implicit eqn</li>
+<li>composite : <span class="red">pick</span> primitive intersect, depending on CSG tree</li>
+</ul>
+<p class="large"><span class="red">How to pick exactly ?</span></p>
+</div>
+<div class="slide" id="csg-which-primitive-intersect-to-pick">
+<h1><span class="small">CSG : Which primitive intersect to pick ?</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">In/On/Out transitions</p>
+<img alt="/env/presentation/hanrahan_example_of_solid_object_formed_using_csg_roth_diagram.png" class="small last align-right" src="/env/presentation/hanrahan_example_of_solid_object_formed_using_csg_roth_diagram.png" style="width: 450px;" />
+</div>
+<p class="small">Classical Roth diagram approach</p>
+<ul class="small simple">
+<li>find all ray/primitive intersects</li>
+<li>recursively combine inside intervals using CSG operator</li>
+<li>works from leaves upwards</li>
+</ul>
+<p class="small">Computational requirements:</p>
+<ul class="small simple">
+<li>find all intersects, store them, order them</li>
+<li>recursive traverse</li>
+</ul>
+<p class="small">BUT : <strong>High performance on GPU requires</strong>:</p>
+<ul class="small simple">
+<li>massive parallelism -&gt; more the merrier</li>
+<li>low register usage -&gt; keep it simple</li>
+<li>small stack size -&gt; <strong>avoid recursion</strong></li>
+</ul>
+<p class="large"><span class="red">Classical approach not appropriate on GPU</span></p>
+</div>
+<div class="slide" id="ray-intersection-with-general-csg-binary-trees-on-gpu">
+<h1><span class="small">Ray intersection with general CSG binary trees, on GPU</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Outside/Inside Unions</p>
+<p class="small">dot(normal,rayDir) -&gt; Enter/Exit</p>
+<img alt="/env/presentation/kensler_union_of_two_spheres_from_outside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_outside.png" style="width: 300px;" />
+<img alt="/env/presentation/kensler_union_of_two_spheres_from_inside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_inside.png" style="width: 300px;" />
+<ul class="small last simple">
+<li><strong>A + B</strong> boundary not inside other</li>
+<li><strong>A * B</strong> boundary inside other</li>
+</ul>
+</div>
+<p class="small">Pick between pairs of nearest intersects, eg:</p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="37%" />
+<col width="17%" />
+<col width="24%" />
+<col width="22%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head"><em>UNION</em> tA &lt; tB</th>
+<th class="head">Enter B</th>
+<th class="head">Exit B</th>
+<th class="head">Miss B</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><strong>Enter A</strong></td>
+<td>ReturnA</td>
+<td><span class="blue">LoopA</span></td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Exit A</strong></td>
+<td>ReturnA</td>
+<td>ReturnB</td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Miss A</strong></td>
+<td>ReturnB</td>
+<td>ReturnB</td>
+<td>ReturnMiss</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><em>Nearest hit intersect algorithm</em> [1] avoids state<ul>
+<li>sometimes <span class="blue">Loop</span> : advance <strong>t_min</strong> , re-intersect both</li>
+<li>classification shows if inside/outside</li>
+</ul>
+</li>
+<li><em>Evaluative</em> [2] implementation emulates recursion:<ul>
+<li><span class="red">recursion not allowed</span> in OptiX intersect programs</li>
+<li>bit twiddle traversal of complete binary tree</li>
+<li>stacks of postorder slices and intersects</li>
+</ul>
+</li>
+<li><span class="red">Identical geometry to Geant4</span><ul>
+<li>solving the same polynomials</li>
+<li>near perfect intersection match</li>
+</ul>
+</li>
+</ul>
+<dl class="tiny docutils">
+<dt>[1] Ray Tracing CSG Objects Using Single Hit Intersections, Andrew Kensler (2006)</dt>
+<dd>with corrections by author of XRT Raytracer <a class="reference external" href="http://xrt.wikidot.com/doc:csg">http://xrt.wikidot.com/doc:csg</a></dd>
+<dt>[2] <a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h</a></dt>
+<dd>Similar to binary expression tree evaluation using postorder traverse.</dd>
+</dl>
+</div>
+<div class="slide" id="csg-complete-binary-tree-serialization-simplifies-gpu-side">
+<h1><span class="small">CSG Complete Binary Tree Serialization -&gt; simplifies GPU side</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Bit Twiddling Navigation</p>
+<ul class="small last simple">
+<li>parent(i) = i/2 = i &gt;&gt; 1</li>
+<li>leftchild(i) = 2*i = i &lt;&lt; 1</li>
+<li>rightchild(i) = 2*i + 1 = (i &lt;&lt; 1) + 1</li>
+<li>leftmost(height)  =  1 &lt;&lt; height</li>
+</ul>
+</div>
+<p class="small">Geant4 solid -&gt; CSG binary tree (leaf primitives, non-leaf operators, 4x4 transforms on any node)</p>
+<p class="small">Serialize to <strong>complete binary tree</strong> buffer:</p>
+<ul class="small simple">
+<li>no need to deserialize, no child/parent pointers</li>
+<li>bit twiddling navigation <span class="red">avoids recursion</span></li>
+<li>simple approach profits from small size of binary trees</li>
+<li>BUT: very inefficient when unbalanced</li>
+</ul>
+<p class="small"><strong>Height 3 complete binary tree with level order indices:</strong></p>
+<pre class="mypre">
+                                                   depth     elevation
+
+                     1                               0           3
+
+          10                   11                    1           2
+
+     100       101        110        111             2           1
+
+ 1000 1001  1010 1011  1100 1101  1110  1111         3           0
+</pre>
+<hr/><p class="small"><strong>postorder_next(i,elevation) = i &amp; 1 ? i &gt;&gt; 1 : (i &lt;&lt; elevation) + (1 &lt;&lt; elevation) ;</strong>   // from pattern of bits</p>
+<p class="tiny">Postorder tree traverse visits all nodes, starting from leftmost, such that children
+are visited prior to their parents.</p>
+</div>
+<div class="slide" id="evaluative-csg-intersection-pseudocode-recursion-emulated">
+<h1><span class="small">Evaluative CSG intersection Pseudocode : recursion emulated</span></h1>
+<pre class="mypretiny">
+fullTree = PACK( 1 << height, 1 >> 1 )  // leftmost, parent_of_root(=0)
+tranche.push(fullTree, ray.tmin)
+
+while (!tranche.empty)        <b><span class="alarm"> // stack of begin/end indices </span></b>
+{
+    begin, end, tmin <- tranche.pop  ; node <- begin ;
+    while( node != end )                  <b><span class="alarm"> // over tranche of postorder traversal </span></b>
+    {
+        elevation = height - TREE_DEPTH(node) ;
+        if(is_primitive(node)){ isect <- intersect_primitive(node, tmin) ;  csg.push(isect) }
+        else{
+            i_left, i_right = csg.pop, csg.pop          <b><span class="alarm">  // csg stack of intersect normals, t </span></b>
+            l_state = CLASSIFY(i_left, ray.direction, tmin)
+            r_state = CLASSIFY(i_right, ray.direction, tmin)
+            action = LUT(operator(node), leftIsCloser)(l_state, r_state)
+
+            if(      action is ReturnLeft/Right)     csg.push(i_left or i_right)
+            else if( action is LoopLeft/Right)
+            {
+                left = 2*node ; right = 2*node + 1 ;
+                endTranche = PACK( node,  end );
+                leftTranche = PACK(  left << (elevation-1), right << (elevation-1) )
+                rightTranche = PACK(  right << (elevation-1),  node  )
+                loopTranche = action ? leftTranche : rightTranche
+
+                tranche.push(endTranche, tmin)
+                tranche.push(loopTranche, tminAdvanced ) <b><span class="alarm"> // subtree re-traversal with changed tmin </span></b>
+                break ; // to next tranche
+            }
+        }
+        node <- postorder_next(node, elevation)        <b><span class="alarm"> // bit twiddling postorder </span></b>
+    }
+}
+isect = csg.pop();       <b><span class="alarm">  // winning intersect  </span></b>
+</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h</a></p>
+</div>
+<div class="slide" id="csg-deep-tree-juno-fastener">
+<h1><span class="small">CSG Deep Tree : JUNO &quot;fastener&quot;</span></h1>
+<img alt="/env/presentation/x016_deeptree.png" class="align-center" src="/env/presentation/x016_deeptree.png" style="width: 900px;" />
+</div>
+<div class="slide" id="csg-deep-tree-height-11-before-balancing-too-deep-for-gpu-raytrace">
+<h1><span class="small">CSG Deep Tree : height 11 before balancing, too deep for GPU raytrace</span></h1>
+<pre class="mypretiny">
+ NTreeAnalyse height 11 count 25    ( un : union,  cy : cylinder, di : difference )
+                                                                                       un
+
+                                                                               un              di
+
+                                                                       un          cy      cy      cy
+
+                                                               un          cy
+
+                                                       un          cy
+
+                                               un          cy
+
+                                       un          cy
+
+                               un          cy
+
+                       un          cy
+
+               un          cy
+
+       di          cy
+
+   cy      cy
+
+</pre><p class="small">CSG trees are non-unique</p>
+<ul class="small simple">
+<li>many possible expressions of same shape</li>
+<li>some much more efficiently represented as complete binary trees</li>
+</ul>
+</div>
+<div class="slide" id="csg-deep-tree-positivize-tree-using-de-morgan-s-laws">
+<h1><span class="small">CSG Deep Tree : Positivize tree using De Morgan's laws</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Positive form CSG Trees</p>
+<p class="small">Apply deMorgan pushing negations down tree</p>
+<ul class="small simple">
+<li><strong>A - B -&gt; A * !B</strong></li>
+<li><strong>!(A*B) -&gt; !A + !B</strong></li>
+<li><strong>!(A+B) -&gt; !A * !B</strong></li>
+<li><strong>!(A - B) -&gt; !(A*!B) -&gt; !A + B</strong></li>
+</ul>
+<p class="small">End with only UNION, INTERSECT operators,
+and some complemented leaves.</p>
+<p class="small last"><span class="red">COMMUTATIVE -&gt; easily rearranged</span></p>
+</div>
+<p class="small">1st step to allow balancing : <strong>Positivize</strong> : remove CSG difference <strong>di</strong> operators</p>
+<pre class="mypretiny">
+                                                     ...    ...
+
+                                               un          cy
+
+                                       un          cy
+
+                               un          cy
+
+                       un          cy
+
+               un          cy
+
+       di          cy
+
+   cy      cy
+
+</pre>
+
+<pre class="mypretiny">
+                                                     ...    ...
+
+                                               un          cy
+
+                                       un          cy
+
+                               un          cy
+
+                       un          cy
+
+               un          cy
+
+       in          cy
+
+   cy      !cy
+
+</pre></div>
+<div class="slide" id="csg-deep-tree-height-4-after-balancing-ok-for-gpu-raytrace">
+<h1><span class="small">CSG Deep Tree : height 4 after balancing, OK for GPU raytrace</span></h1>
+<pre class="mypretiny">
+NTreeAnalyse height 4 count 25
+                                                               un
+
+                               un                                                      un
+
+               un                              un                      un                      in
+
+       un              un              un              un          cy          in          cy     !cy
+
+   cy      cy      cy      cy      cy      cy      cy      cy              cy     !cy
+
+</pre><p class="small">un : union,  in : intersect, cy : cylinder, !cy : complemented cylinder</p>
+<p class="small">Balancing positive tree:</p>
+<ol class="small arabic simple">
+<li>classify tree operators and their placement<ul>
+<li>mono-operator trees can easily be rearranged as union <strong>un</strong> and intersection <strong>in</strong> operators are <strong>commutative</strong></li>
+<li>mono-operator above bileaf level can also easily be rearranged as the bileaf can be split off and combined</li>
+</ul>
+</li>
+<li>create complete binary tree of appropriate size filled with placeholders</li>
+<li>populate the tree replacing placeholders</li>
+<li>prune (pull primitives up to avoid placeholder pairings)</li>
+</ol>
+<p class="small"><strong>Not a general balancer : but succeeds with all CSG solid trees from Daya Bay and JUNO so far</strong></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/npy/NTreeBalance.cpp">https://bitbucket.org/simoncblyth/opticks/src/default/npy/NTreeBalance.cpp</a></p>
+</div>
+<div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-3">
+<h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (3)</span></h1>
+</div>
+<div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-1">
+<h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (1)</span></h1>
+</div>
+<div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-0">
+<h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (0)</span></h1>
+</div>
+<div class="slide" id="opticks-analytic-daya-bay-near-site-gpu-raytrace-2">
+<h1><span class="i">Opticks Analytic Daya Bay Near Site, GPU Raytrace (2)</span></h1>
+</div>
+<div class="slide" id="opticks-analytic-juno-chimney-gpu-raytrace-0">
+<h1><span class="i">Opticks Analytic JUNO Chimney, GPU Raytrace (0)</span></h1>
+</div>
+<div class="slide" id="opticks-analytic-juno-pmt-snap-gpu-raytrace-1">
+<h1><span class="i">Opticks Analytic JUNO PMT Snap, GPU Raytrace (1)</span></h1>
+</div>
+<div class="slide" id="csg-cylinder-torus-pmt-neck-spurious-intersects">
+<h1><span class="small">CSG : (Cylinder - Torus) PMT neck : spurious intersects</span></h1>
+<img alt="/env/presentation/tboolean_12_rasterized.png" class="align-right" src="/env/presentation/tboolean_12_rasterized.png" style="width: 550px;" />
+<img alt="/env/presentation/tboolean_12_raytrace.png" class="align-left" src="/env/presentation/tboolean_12_raytrace.png" style="width: 550px;" />
+<p class="small">OptiX Raytrace and OpenGL rasterized wireframe comparing neck models:</p>
+<ol class="small arabic simple">
+<li>Ellipsoid + Hyperboloid + Cylinder</li>
+<li>Ellipsoid + <span class="red">(Cylinder - Torus)</span> + Cylinder</li>
+</ol>
+<p class="small"><strong>Best Solution : use simpler neck model for physically unimportant PMT neck</strong></p>
+</div>
+<div class="slide" id="csg-alternative-pmt-neck-designs">
+<h1><span class="small">CSG : Alternative PMT neck designs</span></h1>
+<img alt="/env/presentation/x018_torus_hyperboloid_plt.png" class="align-left" src="/env/presentation/x018_torus_hyperboloid_plt.png" style="width: 550px;" />
+<img alt="/env/presentation/x018_torus_hyperboloid_plt_zoom.png" class="align-right" src="/env/presentation/x018_torus_hyperboloid_plt_zoom.png" style="width: 500px;" />
+<p class="small">Define Hyperboloid and Cone using <em>closest point on ellipse to center of torus circle</em></p>
+<ul class="small simple">
+<li>Cylinder-Torus : purple line</li>
+<li>Hyperboloid : dashed magenta, works with <em>Opticks</em>, BUT <em>G4Hype</em> has no z-range flexibility</li>
+<li>Cone : green, <strong>simplest</strong></li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py">https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py</a></p>
+</div>
+<div class="slide" id="numpy-example-closest-approach-of-ellipse-to-a-circle">
+<h1><span class="small">NumPy Example : closest approach of Ellipse to a Circle</span></h1>
+<pre class="mypretiny">
+
+import numpy as np
+
+def ellipse_closest_approach_to_point( ex, ez, _c ):
+    """ex, ez: ellipse semi-axes, c: coordinates of point in ellipse frame"""
+    c = np.asarray( _c )  ; assert c.shape == (2,)
+
+    t = np.linspace( 0, 2*np.pi, 1000000 )     <b><span class="alarm"> # t: array of 1M angles [0,2pi] </span></b>
+    e = np.zeros( [len(t), 2] )
+    e[:,0] = ex*np.cos(t)
+    e[:,1] = ez*np.sin(t)                      <b><span class="alarm"> # e: 1M parametric [x,z] points on the ellipse </span></b>
+
+    return  e[np.sum((e-c)**2, axis=1).argmin()]   <b><span class="alarm"> # point on ellipse closest to c </span></b>
+</pre><table border="1" class="small docutils">
+<colgroup>
+<col width="33%" />
+<col width="15%" />
+<col width="52%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">expression</th>
+<th class="head">shape</th>
+<th class="head">note</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">e</tt></td>
+<td><tt class="docutils literal">(1000000,2)</tt></td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><tt class="docutils literal">c</tt></td>
+<td><tt class="docutils literal">(2,)</tt></td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">e-c</span></tt></td>
+<td><tt class="docutils literal">(1000000,2)</tt></td>
+<td><em>c</em> is <strong>broadcast</strong> over <em>e</em> : must be compatible shape</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> 1)</tt></td>
+<td><tt class="docutils literal">(1000000,)</tt></td>
+<td><tt class="docutils literal">axis=1</tt> : summing over the axis of length 2</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> 0)</tt></td>
+<td><tt class="docutils literal">(2,)</tt></td>
+<td><tt class="docutils literal">axis=0</tt> : summing over axis of length 1M</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> None)</tt></td>
+<td><tt class="docutils literal">()</tt></td>
+<td><tt class="docutils literal">axis=None</tt> : summing over all elements, yielding scalar</td>
+</tr>
+</tbody>
+</table>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py">https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py</a></p>
+</div>
+<div class="slide" id="large-geometry-techniques-instancing-mandatory">
+<h1><span class="small">Large Geometry Techniques : Instancing Mandatory</span></h1>
+<p class="small"><strong>Geometry analysed to find instances</strong></p>
+<p class="small">JUNO: ~90M --&gt; 0.1M triangles</p>
+<ul class="small simple">
+<li>18k 20&quot; PMTs</li>
+<li>36k 3&quot; PMTs</li>
+</ul>
+<p class="small"><strong>OpenGL instanced rendering</strong></p>
+<ul class="small simple">
+<li>drastic reduction in GPU memory</li>
+<li>one set of vertices for each PMT type</li>
+<li>4x4 matrices position each PMT</li>
+</ul>
+<p class="small"><strong>Optimizations</strong></p>
+<ul class="small simple">
+<li>cull non-visible instances</li>
+<li>level of detail (LOD) meshes<ul>
+<li>full/simplified/bbox</li>
+</ul>
+</li>
+<li>switch mesh based on distance to PMT</li>
+</ul>
+</div>
+<div class="slide" id="opticks-translates-g4-geometry-to-gpu-without-approximation">
+<h1><span class="small">Opticks : translates G4 geometry to GPU, without approximation</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Volumes -&gt; Boundaries</p>
+<p class="small"><strong>Ray tracing favors Boundaries</strong></p>
+<p class="small">Material/surface boundary : 4 indices</p>
+<ul class="small simple">
+<li>outer material (parent)</li>
+<li>outer surface (inward photons, parent -&gt; self)</li>
+<li>inner surface (outward photons, self -&gt; parent)</li>
+<li>inner material (self)</li>
+</ul>
+<p class="small">Primitives labelled with unique boundary index</p>
+<ul class="small last simple">
+<li>ray primitive intersection -&gt; boundary index</li>
+<li>texture lookup -&gt; material/surface properties</li>
+</ul>
+</div>
+<dl class="small docutils">
+<dt><strong>Direct Geometry : Geant4 &quot;World&quot; -&gt; Opticks CSG -&gt; GPU</strong></dt>
+<dd><ul class="first last simple">
+<li>simpler : no G4DAE+GDML export/import</li>
+</ul>
+</dd>
+<dt><strong>Material/Surface/Scintillator properties</strong></dt>
+<dd><ul class="first last simple">
+<li>interpolated to standard wavelength domain</li>
+<li>interleaved into &quot;boundary&quot; texture</li>
+<li>&quot;reemission&quot; texture for wavelength generation</li>
+</ul>
+</dd>
+<dt><strong>Structure</strong></dt>
+<dd><ul class="first last simple">
+<li>repeated geometry instances identified (progeny digests)</li>
+<li>instance transforms used in OptiX/OpenGL geometry</li>
+<li>merge CSG trees into global + instance buffers</li>
+<li>export meshes to glTF 2.0 for 3D visualization</li>
+</ul>
+</dd>
+<dt><strong>Ease of Use</strong></dt>
+<dd><ul class="first last simple">
+<li>easy geometry : just handover &quot;World&quot;</li>
+<li>easy config : modern CMake + BCM[1]</li>
+<li>~easy event :  modify G4Cerenkov + G4Scintillation</li>
+</ul>
+</dd>
+</dl>
+<p class="tiny small">[1] Boost CMake 3.5+ modules : configure direct dependencies only</p>
+<p class="tiny small"><a class="reference external" href="https://github.com/BoostCMake/cmake_modules">https://github.com/BoostCMake/cmake_modules</a></p>
+<p class="tiny small"><a class="reference external" href="https://github.com/simoncblyth/bcm">https://github.com/simoncblyth/bcm</a></p>
+</div>
+<div class="slide" id="opticks-export-of-g4-geometry-to-gltf-2-0">
+<h1><tt class="docutils literal">Opticks Export of G4 geometry to glTF 2.0</tt></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Emerging 3D Standard</p>
+<blockquote>
+&quot;JPEG&quot; of 3D</blockquote>
+<img alt="/env/presentation/gltf.png" class="align-center" src="/env/presentation/gltf.png" style="width: 300px;" />
+<dl class="small last docutils">
+<dt><strong>Growing Adoption</strong></dt>
+<dd><a class="reference external" href="https://github.com/KhronosGroup/glTF">https://github.com/KhronosGroup/glTF</a>
+<a class="reference external" href="https://www.khronos.org/gltf/">https://www.khronos.org/gltf/</a></dd>
+<dt><strong>&lt;-- eg:Metal Renderer from GLTFKit</strong></dt>
+<dd><a class="reference external" href="https://github.com/warrenm/GLTFKit">https://github.com/warrenm/GLTFKit</a></dd>
+<dt><strong>Similar to Opticks geocache</strong></dt>
+<dd>JSON + binary buffers (eg NPY)</dd>
+</dl>
+</div>
+</div>
+<div class="slide" id="opticks-translates-g4-optical-physics-to-gpu">
+<h1><span class="small">Opticks : translates G4 optical physics to GPU</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">GPU Resident Photons</p>
+<dl class="small docutils">
+<dt><strong>Seeded on GPU</strong></dt>
+<dd>associate photons -&gt; <em>gensteps</em> (via seed buffer)</dd>
+<dt><strong>Generated on GPU, using genstep param:</strong></dt>
+<dd><ul class="first last simple">
+<li>number of photons to generate</li>
+<li>start/end position of step</li>
+</ul>
+</dd>
+<dt><strong>Propagated on GPU</strong></dt>
+<dd><span class="red">Only photons hitting PMTs copied to CPU</span></dd>
+</dl>
+<p class="small">Thrust: <strong>high level C++ access to CUDA</strong></p>
+<div class="small figure align-right">
+<img alt="/env/numerics/thrust/thrust.png" src="/env/numerics/thrust/thrust.png" style="width: 300px;" />
+</div>
+<ul class="small last simple">
+<li><a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a></li>
+</ul>
+</div>
+<p class="small"><span class="blue">OptiX : single-ray programming model</span> -&gt; line-by-line translation</p>
+<dl class="small docutils">
+<dt><strong>CUDA Ports of Geant4 classes</strong></dt>
+<dd><ul class="first last simple">
+<li>G4Cerenkov (only generation loop)</li>
+<li>G4Scintillation (only generation loop)</li>
+<li>G4OpAbsorption</li>
+<li>G4OpRayleigh</li>
+<li>G4OpBoundaryProcess (only a few surface types)</li>
+</ul>
+</dd>
+<dt><strong>Modify Cerenkov + Scintillation Processes</strong></dt>
+<dd><ul class="first last simple">
+<li>collect <em>genstep</em>, copy to GPU for generation</li>
+<li><span class="red">avoids copying millions of photons to GPU</span></li>
+</ul>
+</dd>
+<dt><strong>Scintillator Reemission</strong></dt>
+<dd><ul class="first last simple">
+<li>fraction of bulk absorbed &quot;reborn&quot; within same thread</li>
+<li>wavelength generated by reemission texture lookup</li>
+</ul>
+</dd>
+<dt><strong>Opticks (OptiX/Thrust GPU interoperation)</strong></dt>
+<dd><ul class="first last simple">
+<li><strong>OptiX</strong> : upload gensteps</li>
+<li><strong>Thrust</strong> : seeding, distribute genstep indices to photons</li>
+<li><strong>OptiX</strong> : launch photon generation and propagation</li>
+<li><strong>Thrust</strong> : pullback photons that hit PMTs</li>
+<li><strong>Thrust</strong> : index photon step sequences (optional)</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="slide" id="validation-compare-opticks-geant4-with-simple-lights-geometries">
+<h1><span class="small">Validation : Compare Opticks/Geant4 with Simple Lights/Geometries</span></h1>
+<div class="figure align-left">
+<img alt="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" src="/env/graphics/ggeoview/rainbow-spol-disc-incident-sphere.png" style="width: 550px;" />
+<p class="caption">1M Photons -&gt; Water Sphere (S-Polarized)</p>
+</div>
+<div class="figure align-right">
+<img alt="/env/graphics/ggeoview/PmtInBox-approach.png" src="/env/graphics/ggeoview/PmtInBox-approach.png" style="width: 420px;" />
+<p class="caption">0.5M Photons -&gt; Dayabay PMT</p>
+</div>
+<img alt="/env/presentation/1px.png" class="align-center" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
+<dl class="small docutils">
+<dt><strong>Photon step records</strong></dt>
+<dd>128 bit per step : highly compressed position, time, wavelength, polarization vector, material/history codes</dd>
+<dt><strong>Photon flag sequence</strong></dt>
+<dd>16x 4-bit step flags recorded in uint64 sequence, indexed using Thrust GPU sort (1M indexed ~0.040s)</dd>
+<dt><strong>Final Photons</strong></dt>
+<dd>Uncompressed : position, time, wavelength, direction, polarization, flags</dd>
+</dl>
+</div>
+<div class="slide" id="m-rainbow-s-polarized-comparison-opticks-geant4">
+<h1><span class="small">1M Rainbow S-Polarized, Comparison Opticks/Geant4</span></h1>
+<p class="tiny">Deviation angle(degrees) of 1M parallel monochromatic photons in disc shaped beam incident on water sphere.
+Numbered bands are visible range expectations of first 11 rainbows.
+S-Polarized intersection (E field perpendicular to plane of incidence) arranged by directing polarization radially.</p>
+<img alt="/env/optix/cfg4/rainbow-cfg4-spol.png" class="align-center" src="/env/optix/cfg4/rainbow-cfg4-spol.png" style="width: 800px;" />
+</div>
+<div class="slide" id="take-control-of-geant4-random-number-generator-rng">
+<h1><span class="small">Take Control of Geant4 Random Number Generator (RNG)</span></h1>
+<ul class="small simple">
+<li>controlling Geant4 randoms  -&gt; <span class="red">can align CPU and GPU sequences</span> -&gt; <strong>directly matched simulations</strong></li>
+<li><strong>need separate sequences for each photon : parallel GPU processing means order is undefined</strong></li>
+</ul>
+<p class="small">After <strong>CAlignEngine::SetSequenceIndex(int index)</strong> : subsequent <strong>G4UniformRand()</strong> give randoms from sequence <strong>index</strong></p>
+<pre class="mypre">
+// EngineMinimalTest.cc : demonstrate G4UniformRand control
+#include "Randomize.hh"                                              $ EngineMinimalTest
+                                                                     0.13049
+struct MyEngine : public CLHEP::MixMaxRng  // MixMax is default      0.617751
+{                                                                    0.995947
+    double flat(){ return .42 ; }                                    0.495902
+};                                                                   0.112917
+                                                                     0.289871
+int main(int argc, char** argv)                                      0.473044
+{                                                                    0.837619
+    if(argc > 1)                                                     0.359356
+       CLHEP::HepRandom::setTheEngine(new MyEngine());               0.926938
+
+    for( int i=0 ; i < 10 ; i++)                                     $ EngineMinimalTest 1
+         std::cout << G4UniformRand() << std::endl ;                 0.42
+                                                                     0.42
+    return 0 ;                                                       0.42
+}                                                                    ...
+</pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/cfg4/CAlignEngine.cc">https://bitbucket.org/simoncblyth/opticks/src/default/cfg4/CAlignEngine.cc</a></p>
+</div>
+<div class="slide" id="validation-aligning-cpu-and-gpu-simulations">
+<h1><span class="small">Validation : Aligning CPU and GPU Simulations</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">lldb python scripting</p>
+<ul class="small simple">
+<li>access C++ program state from python</li>
+<li>step-by-step compare photon parameters with expectations, break at deviations</li>
+</ul>
+<p class="small">Auto-configure breakpoints using code markers:</p>
+<p class="small"><tt class="docutils literal">opticks/tools/autobreakpoint.py</tt>
+<tt class="docutils literal">opticks/tools/g4lldb.py</tt></p>
+<p class="small"><strong>Ubiquitous Data access with NPY</strong></p>
+<p class="small last">All Opticks data managed in NumPy buffers,
+easy access from python,C++,CUDA,lldb-python</p>
+</div>
+<p class="small"><strong>Aligned zipping together of code and RNG values</strong></p>
+<ul class="small simple">
+<li>common input photon sample generated on <strong>CPU</strong></li>
+<li>random number sequences generated on <strong>GPU</strong> (cuRAND)
+and persisted to file (NPY buffers)</li>
+</ul>
+<p class="small">Single executable <tt class="docutils literal">lldb OKG4Test</tt>:</p>
+<ol class="small arabic simple">
+<li>run Opticks GPU simulation, persist event</li>
+<li>run Geant4 simulation<ul>
+<li>step-by-step check each G4 photon follows Opticks
+history and parameters, break at deviations</li>
+</ul>
+</li>
+<li>fix cause of misaligned RNG consumption, or other deviation<ul>
+<li>tricks needed on both sides : burning RNGs, jump backs</li>
+</ul>
+</li>
+</ol>
+<p class="small"><strong>Payoff :</strong>  <span class="red">simplest possible direct comparison validation</span></p>
+<p class="tiny"><a class="reference external" href="http://bitbucket.com/simoncblyth/opticks/src/tip/tools/autobreakpoint.py">http://bitbucket.com/simoncblyth/opticks/src/tip/tools/autobreakpoint.py</a></p>
+<p class="tiny">(lldb) help breakpoint command add</p>
+</div>
+<div class="slide" id="validation-direct-comparison-of-gpu-cpu-numpy-arrays">
+<h1><span class="small">Validation : Direct comparison of GPU/CPU NumPy arrays</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">CPU/GPU matching</p>
+<dl class="small last docutils">
+<dt><strong>Simple geometries</strong></dt>
+<dd>same geometry, same physics, same results</dd>
+<dt><strong>Full geometries</strong></dt>
+<dd>aligned running will find geometry issues
+eg coincident surface ambiguity</dd>
+<dt><strong>NEXT:</strong></dt>
+<dd>align generation, reemission, more geometries</dd>
+</dl>
+</div>
+<p class="small"><strong>tboolean-box simple geometry test</strong></p>
+<ul class="small simple">
+<li>100k photons : position, time, polarization : 1.2M floats</li>
+<li>34 deviations &gt; 1e-4 (mm or ns), largest 4e-4</li>
+<li>deviants all involve scattering (more flops?)</li>
+</ul>
+<pre class="mypretiny">
+
+In [11]: pdv = np.where(dv > 0.0001)[0]
+In [12]: ab.dumpline(pdv)
+      0   1230 : TO BR SC BT BR BT SA
+      1   2413 : TO BT BT SC BT BR BR BT SA
+      2   9041 : TO BT SC BR BR BR BR BT SA
+      3  14510 : TO SC BT BR BR BT SA
+      4  14747 : TO BT SC BR BR BR BR BR BR BR
+      5  14747 : TO BT SC BR BR BR BR BR BR BR
+    ...
+
+In [20]: ab.b.ox[pdv,0]                                 In [21]: ab.a.ox[pdv,0]
+Out[20]:                                                Out[21]:
+A()sliced                                               A()sliced
+A([    [-191.6262, -240.3634,  450.    ,    5.566 ],    A([    [-191.626 , -240.3634,  450.    ,    5.566 ],
+       [ 185.7708, -133.8457,  450.    ,    7.3141],           [ 185.7708, -133.8456,  450.    ,    7.3141],
+       [-450.    , -104.4142,  311.143 ,    9.0581],           [-450.    , -104.4142,  311.1431,    9.0581],
+       [  83.6955,  208.9171, -450.    ,    5.6188],           [  83.6954,  208.9172, -450.    ,    5.6188],
+       [  32.8972,  150.    ,   24.9922,    7.6757],           [  32.8973,  150.    ,   24.992 ,    7.6757],
+       [  32.8972,  150.    ,   24.9922,    7.6757],           [  32.8973,  150.    ,   24.992 ,    7.6757],
+       [ 450.    , -186.7449,  310.6051,    5.0707],           [ 450.    , -186.7451,  310.605 ,    5.0707],
+       [ 299.2227,  318.1443, -450.    ,    4.8717],           [ 299.2229,  318.144 , -450.    ,    4.8717],
+ ...
+</pre><p class="tiny"><a class="reference external" href="http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst">http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst</a></p>
+</div>
+<div class="slide" id="coincident-faces-are-primary-cause-of-issues-spurious-intersects">
+<h1><span class="small">Coincident Faces are Primary Cause of Issues : Spurious Intersects</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Cylinder - Cone</p>
+<p class="small">Coincident endcaps -&gt; spurious intersects</p>
+<img alt="/env/opticks_refs/lvidx_83_tbool_coincidence_artifact_at_cylinder_base.png" class="align-center" src="/env/opticks_refs/lvidx_83_tbool_coincidence_artifact_at_cylinder_base.png" style="width: 450px;" />
+<p class="small last">Grow subtracted cone downwards, avoids coincidence : <strong>does not change composite solid</strong></p>
+</div>
+<p class="small">Coincidences common (alignment too tempting?). To fix:</p>
+<ul class="small simple">
+<li><strong>A-B</strong> : grow correct dimension of subtracted shape</li>
+<li><strong>A+B</strong> : grow smaller interface shape into bigger, making join</li>
+<li><span class="red">case-by-case fixes straightforward, not so easy to automate</span></li>
+<li>WIP: automated coincidence finder/fixer</li>
+</ul>
+<img alt="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" class="small align-left" src="/env/opticks_refs/opticks_tscan_29_nzero_5_OcrGdsPrt.png" style="width: 500px;" />
+</div>
+<div class="slide" id="summary">
+<h1><span class="small">Summary</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Highlights</p>
+<ul class="small last simple">
+<li><strong>identical GPU geometry, auto-translated</strong></li>
+<li>aligned running -&gt; simple validation</li>
+<li>expect: <strong>Opticks &gt; 1000x Geant4</strong> (with workstation GPUs)</li>
+<li>more photons -&gt; more overall speedup<ul>
+<li>99% -&gt; 100x</li>
+</ul>
+</li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> enables <em>Geant4</em> based simulations to benefit from
+<strong>effectively zero time and zero CPU memory</strong> optical photon simulation,
+due to massive parallelism made accessible by NVIDIA OptiX.</p>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 10px;" />
+<ul class="simple">
+<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision</li>
+<li>Performance discontinuity -&gt; new possibilities -&gt; imagination required</li>
+</ul>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 10px;" />
+<p class="small">Subscribe to stay informed on Opticks:</p>
+<p class="huge"><a class="reference external" href="mailto:opticks+subscribe&#64;groups.io">opticks+subscribe&#64;groups.io</a></p>
+<p class="huge"><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></p>
+<p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
+</blockquote>
+</div>
+<div class="slide" id="extras">
+<h1><span class="i">Extras</span></h1>
+</div>
+<div class="slide" id="opticksdocs">
+<h1><span class="i">OpticksDocs</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Open Source Opticks</p>
+<ul class="small simple">
+<li><a class="reference external" href="http://simoncblyth.bitbucket.io/opticks/">http://simoncblyth.bitbucket.io/opticks/</a></li>
+<li><a class="reference external" href="http://bitbucket.org/simoncblyth/opticks/">http://bitbucket.org/simoncblyth/opticks/</a></li>
+</ul>
+<p class="small">Documentation, install instructions. Repository.</p>
+<ul class="small simple">
+<li>Mac, Linux, Windows (*)</li>
+<li>~20 C++ projects, ordered by dependency</li>
+<li>~370 &quot;Unit&quot; Tests (CMake/CTest)</li>
+<li>~50 integration tests: tpmt, trainbow, tprism, treflect, tlens, tnewton, tg4gun, ...</li>
+<li>NumPy/Python analysis/debugging scripts</li>
+</ul>
+<p class="small">Geometry/event data use NumPy serialization:</p>
+<pre class="small literal-block">
+import numpy as np
+a = np.load(&quot;photons.npy&quot;)
+</pre>
+<p class="tiny last">(*) Windows VS2015, non-CUDA only, not recently!</p>
+</div>
+
+       <style type="text/css">
+
+          div.slide { 
+             background-clip: border-box;
+             background-repeat: no-repeat;
+             height: 100%;
+          }
+          div.slide#slide0{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-benefits{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#visualizing-an-optical-photon-simulation{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 640px 360px;
+             background-position: 600px 100px;
+          }
+          div.slide#overview{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#cerenkov-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115923.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#cerenkov-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115935.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#scintillation-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121444.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#scintillation-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121435.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#standard-geant4-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.001.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#external-photon-simulation-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.002.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-001.png);
+             background-size: 1047px 795px;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview-m1-points{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-points-mat1.png);
+             background-size: 1435px 848px;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview-flag-selection{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-flag-seq-select.png);
+             background-size: 1436px 842px;
+             background-position: 0px 0px;
+          }
+          div.slide#ggeoview-cerenkov-geom-m1{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-m1-geom.png);
+             background-size: 1416px 845px;
+             background-position: 0px 0px;
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-1{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-2{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-inside-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_half.png);
+             background-size: 1432px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-wide_half.png);
+             background-size: 1409px 836px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-headview{
+             background-image: url(/env/graphics/ggeoview/jpmt-headview_half.png);
+             background-size: 1308px 783px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-backview{
+             background-image: url(/env/graphics/ggeoview/jpmt-backview_half.png);
+             background-size: 1149px 794px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-approach{
+             background-image: url(/env/graphics/ggeoview/jpmt-approach_half.png);
+             background-size: 1431px 839px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-arrival{
+             background-image: url(/env/graphics/ggeoview/jpmt-arrival_half.png);
+             background-size: 1427px 841px;
+             background-position: 0px 0px;
+          }
+          div.slide#optical-photon-simulation-problem{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-before-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-before-contact-2{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-before-contact-3{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-after-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-after-contact_half.png);
+             background-size: 1425px 840px;
+             background-position: 0px 0px;
+          }
+          div.slide#jpmt-inside-outside{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-outside_half.png);
+             background-size: 1401px 842px;
+             background-position: 0px 0px;
+          }
+          div.slide#nvidia-optix-in-action{
+             background-image: url(/env/presentation/optix-in-action_half.png);
+             background-size: 966px 646px;
+             background-position: 100px 50px;
+          }
+          div.slide#pmtinbox-approach-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+          }
+          div.slide#pmtinbox-approach-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+          }
+          div.slide#pmtinbox-after-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+          }
+          div.slide#pmtinbox-after-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-pmt-wall-photo-1{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-pmt-wall-photo-2{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-not-16-9{
+             background-image: url(/env/presentation/gtc2016/sk-PH20-water-withboat-apr23-wm.png);
+             background-size: 1181px 771px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-1{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-2{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-3{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#super-kamiokande-pmts-4{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#kamiokande-ii-1{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#kamiokande-ii-2{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#kamiokande-ii-3{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#fast-optical-photon-simulation{
+             background-image: url(/env/presentation/newtons-opticks.png);
+             background-size: 374px 684px;
+             background-position: 800px 0px;
+          }
+          div.slide#photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#old-hamamatsu-photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#old-photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-juno{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-goals{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+          }
+          div.slide#dayabay-reactor-neutrino-expt-far-site{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-far-site-2{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-far-site-3{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit-generality{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+          }
+          div.slide#seeing-neutrinos-via-scintillation-cherenkov-light{
+             background-image: url(/env/presentation/cherenkov.png);
+             background-size: 316px 203px;
+             background-position: 850px 400px;
+          }
+          div.slide#large-geometry-techniques-instancing-mandatory{
+             background-image: url(/env/graphics/ggeoview/ggv-juno-instancing.png);
+             background-size: 852px 592px;
+             background-position: 450px 80px;
+          }
+          div.slide#nvidia-optix-1{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+          }
+          div.slide#nvidia-optix-2{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticksdocs{
+             background-image: url(/env/presentation/OpticksDocs.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-1{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-2{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-1{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-2{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-1{
+             background-image: url(/env/presentation/EnergyResponseModel.png);
+             background-size: 693px 504px;
+             background-position: 0px 100px;
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-2{
+             background-image: url(/env/presentation/ConstrainingNonLinearity.png);
+             background-size: 761px 553px;
+             background-position: 0px 80px;
+          }
+          div.slide#daya-bay-ngd-analysis-most-precise-theta13{
+             background-image: url(/env/presentation/DYBZheTaup2015Theta13OscillationAnalysis.png);
+             background-size: 1057px 625px;
+             background-position: 100px 60px;
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-3{
+             background-image: url(/env/presentation/op_full_raytrace_3.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-1{
+             background-image: url(/env/presentation/op_full_raytrace_1.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-0{
+             background-image: url(/env/presentation/op_full_raytrace_0.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-2{
+             background-image: url(/env/presentation/op_full_raytrace_2.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-analytic-juno-chimney-gpu-raytrace-0{
+             background-image: url(/env/presentation/j1707_chimney_analytic_raytrace.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-analytic-juno-pmt-snap-gpu-raytrace-1{
+             background-image: url(/env/presentation/j1707-okop-snap.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#gpu-instance-culling-with-level-of-detail{
+             background-image: url(/env/presentation/j1707_lod_oglrap_instcull.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#opticks-export-of-g4-geometry-to-gltf-2-0{
+             background-image: url(/env/yoctoglrap/dyb_near_venice_half.png);
+             background-size: 1020px 737px;
+             background-position: 0px 0px;
+          } 
+
+       </style>
+    </div>
+</div>
+</body>
+</html>
