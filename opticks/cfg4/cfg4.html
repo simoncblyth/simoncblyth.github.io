@@ -6,15 +6,16 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Comparing Opticks with G4 for test geometry and light sources &#8212; Opticks 0.0.1 documentation</title>
+    <title>CFG4 &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="GGEO" href="../ggeo/GGEO.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -22,6 +23,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../ggeo/GGEO.html" title="GGEO"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
@@ -29,20 +33,26 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Comparing Opticks with G4 for test geometry and light sources</a><ul>
-<li><a class="reference internal" href="#summary">summary</a></li>
-<li><a class="reference internal" href="#todo">TODO</a></li>
-<li><a class="reference internal" href="#ggv-rainbow-p-pol">ggv-rainbow P pol</a></li>
-<li><a class="reference internal" href="#ggv-rainbow-s-pol">ggv-rainbow S pol</a></li>
-<li><a class="reference internal" href="#polarization-progression">Polarization Progression</a></li>
+<li><a class="reference internal" href="#">CFG4</a><ul>
+<li><a class="reference internal" href="#control">Control</a></li>
+<li><a class="reference internal" href="#high-level-geometry">High Level Geometry</a></li>
+<li><a class="reference internal" href="#low-level-geometry-materials-surfaces">Low Level Geometry : Materials/Surfaces</a></li>
+<li><a class="reference internal" href="#low-level-geometry-solids">Low Level Geometry : Solids</a></li>
+<li><a class="reference internal" href="#event">Event</a></li>
+<li><a class="reference internal" href="#geant4-plumbing">Geant4 Plumbing</a></li>
+<li><a class="reference internal" href="#geant4-utilities">Geant4 Utilities</a></li>
+<li><a class="reference internal" href="#others">Others</a></li>
 </ul>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../ggeo/GGEO.html"
+                        title="previous chapter">GGEO</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/cfg4/cfg4.rst.txt"
+      <li><a href="../_sources/cfg4/CFG4.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -66,301 +76,215 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="comparing-opticks-with-g4-for-test-geometry-and-light-sources">
-<h1>Comparing Opticks with G4 for test geometry and light sources<a class="headerlink" href="#comparing-opticks-with-g4-for-test-geometry-and-light-sources" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="summary">
-<h2>summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>P polarized matches well (with polvec in initial direction of the photon)</li>
-<li>S polarized are way off, looks to be due to Op playing Russian Roulette with S/P Polarization choice<ul>
-<li>TODO: implement the G4 way of doing things in Op</li>
-</ul>
-</li>
-</ul>
+  <div class="section" id="cfg4">
+<h1>CFG4<a class="headerlink" href="#cfg4" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="control">
+<h2>Control<a class="headerlink" href="#control" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CG4(OpticksHub* hub)</dt>
+<dd>high level steering</dd>
+</dl>
 </div>
-<div class="section" id="todo">
-<h2>TODO<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>check with simple box-in-box geometry with planar reflection</li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">----</span> <span class="n">P</span> <span class="o">-----</span>
-<span class="n">Evt</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="s2">&quot;torch&quot;</span><span class="p">,</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span><span class="s2">&quot;P Op&quot;</span><span class="p">)</span>
-                <span class="mi">8</span><span class="n">ccd</span>     <span class="mi">943087</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">8</span><span class="n">bd</span>      <span class="mi">30954</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BR</span> <span class="n">SA</span>
-               <span class="mi">8</span><span class="n">cbcd</span>      <span class="mi">19554</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-              <span class="mi">8</span><span class="n">cbbcd</span>       <span class="mi">2540</span> <span class="p">:</span>                     <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-               <span class="mi">86</span><span class="n">ccd</span>       <span class="mi">1239</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">SA</span>
-             <span class="mi">8</span><span class="n">cbbbcd</span>        <span class="mi">756</span> <span class="p">:</span>                  <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">86</span><span class="n">d</span>        <span class="mi">530</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BS</span> <span class="n">SA</span>
-            <span class="mi">8</span><span class="n">cbbbbcd</span>        <span class="mi">310</span> <span class="p">:</span>               <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">4</span><span class="n">cd</span>        <span class="mi">172</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">AB</span>
-           <span class="mi">8</span><span class="n">cbbbbbcd</span>        <span class="mi">146</span> <span class="p">:</span>            <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                <span class="mi">4</span><span class="n">ccd</span>        <span class="mi">135</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">AB</span>
-               <span class="mi">8</span><span class="n">c6cd</span>        <span class="mi">132</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">BT</span> <span class="n">SA</span>
-          <span class="n">bbbbbbbbcd</span>         <span class="mi">96</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span>
-          <span class="mi">8</span><span class="n">cbbbbbbcd</span>         <span class="mi">76</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                  <span class="mi">4</span><span class="n">d</span>         <span class="mi">51</span> <span class="p">:</span>                                 <span class="n">TORCH</span> <span class="n">AB</span>
-<span class="n">tot</span><span class="p">:</span> <span class="mi">1000000</span>
-<span class="n">Evt</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span><span class="s2">&quot;torch&quot;</span><span class="p">,</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span><span class="s2">&quot;P G4&quot;</span><span class="p">)</span>
-                <span class="mi">8</span><span class="n">ccd</span>     <span class="mi">943093</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">8</span><span class="n">bd</span>      <span class="mi">31029</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BR</span> <span class="n">SA</span>
-               <span class="mi">8</span><span class="n">cbcd</span>      <span class="mi">19431</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-              <span class="mi">8</span><span class="n">cbbcd</span>       <span class="mi">2601</span> <span class="p">:</span>                     <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-               <span class="mi">86</span><span class="n">ccd</span>       <span class="mi">1212</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">SA</span>
-             <span class="mi">8</span><span class="n">cbbbcd</span>        <span class="mi">757</span> <span class="p">:</span>                  <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">86</span><span class="n">d</span>        <span class="mi">517</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BS</span> <span class="n">SA</span>
-            <span class="mi">8</span><span class="n">cbbbbcd</span>        <span class="mi">316</span> <span class="p">:</span>               <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">4</span><span class="n">cd</span>        <span class="mi">202</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">AB</span>
-           <span class="mi">8</span><span class="n">cbbbbbcd</span>        <span class="mi">144</span> <span class="p">:</span>            <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-               <span class="mi">8</span><span class="n">c6cd</span>        <span class="mi">144</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">BT</span> <span class="n">SA</span>
-          <span class="mi">8</span><span class="n">bbbbbbbcd</span>        <span class="mi">127</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">SA</span>
-                <span class="mi">4</span><span class="n">ccd</span>        <span class="mi">105</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">AB</span>
-          <span class="mi">8</span><span class="n">cbbbbbbcd</span>         <span class="mi">77</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                  <span class="mi">4</span><span class="n">d</span>         <span class="mi">54</span> <span class="p">:</span>                                 <span class="n">TORCH</span> <span class="n">AB</span>
-<span class="n">tot</span><span class="p">:</span> <span class="mi">1000000</span>
-<span class="o">----</span> <span class="n">S</span> <span class="o">-----</span>
-<span class="n">Evt</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="s2">&quot;torch&quot;</span><span class="p">,</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span><span class="s2">&quot;S Op&quot;</span><span class="p">)</span>
-                <span class="mi">8</span><span class="n">ccd</span>     <span class="mi">819264</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">8</span><span class="n">bd</span>     <span class="mi">101941</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BR</span> <span class="n">SA</span>
-               <span class="mi">8</span><span class="n">cbcd</span>      <span class="mi">61864</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-              <span class="mi">8</span><span class="n">cbbcd</span>       <span class="mi">9691</span> <span class="p">:</span>                     <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-             <span class="mi">8</span><span class="n">cbbbcd</span>       <span class="mi">2557</span> <span class="p">:</span>                  <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-            <span class="mi">8</span><span class="n">cbbbbcd</span>       <span class="mi">1049</span> <span class="p">:</span>               <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-               <span class="mi">86</span><span class="n">ccd</span>       <span class="mi">1047</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">SA</span>
-                 <span class="mi">86</span><span class="n">d</span>        <span class="mi">507</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BS</span> <span class="n">SA</span>
-           <span class="mi">8</span><span class="n">cbbbbbcd</span>        <span class="mi">485</span> <span class="p">:</span>            <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-          <span class="n">bbbbbbbbcd</span>        <span class="mi">311</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span>
-          <span class="mi">8</span><span class="n">cbbbbbbcd</span>        <span class="mi">262</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">4</span><span class="n">cd</span>        <span class="mi">162</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">AB</span>
-                <span class="mi">86</span><span class="n">bd</span>        <span class="mi">140</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BR</span> <span class="n">BS</span> <span class="n">SA</span>
-          <span class="n">cbbbbbbbcd</span>        <span class="mi">136</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span>
-               <span class="mi">8</span><span class="n">c6cd</span>        <span class="mi">128</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">BT</span> <span class="n">SA</span>
-<span class="n">tot</span><span class="p">:</span> <span class="mi">1000000</span>
-<span class="n">Evt</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="s2">&quot;torch&quot;</span><span class="p">,</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span><span class="s2">&quot;S G4&quot;</span><span class="p">)</span>
-                <span class="mi">8</span><span class="n">ccd</span>     <span class="mi">881262</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">8</span><span class="n">bd</span>      <span class="mi">66471</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BR</span> <span class="n">SA</span>
-               <span class="mi">8</span><span class="n">cbcd</span>      <span class="mi">40644</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-              <span class="mi">8</span><span class="n">cbbcd</span>       <span class="mi">6131</span> <span class="p">:</span>                     <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-             <span class="mi">8</span><span class="n">cbbbcd</span>       <span class="mi">1706</span> <span class="p">:</span>                  <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-               <span class="mi">86</span><span class="n">ccd</span>       <span class="mi">1065</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">SA</span>
-            <span class="mi">8</span><span class="n">cbbbbcd</span>        <span class="mi">708</span> <span class="p">:</span>               <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-                 <span class="mi">86</span><span class="n">d</span>        <span class="mi">484</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BS</span> <span class="n">SA</span>
-           <span class="mi">8</span><span class="n">cbbbbbcd</span>        <span class="mi">319</span> <span class="p">:</span>            <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-          <span class="mi">8</span><span class="n">bbbbbbbcd</span>        <span class="mi">297</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">SA</span>
-                 <span class="mi">4</span><span class="n">cd</span>        <span class="mi">170</span> <span class="p">:</span>                              <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">AB</span>
-          <span class="mi">8</span><span class="n">cbbbbbbcd</span>        <span class="mi">160</span> <span class="p">:</span>         <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BR</span> <span class="n">BT</span> <span class="n">SA</span>
-               <span class="mi">8</span><span class="n">c6cd</span>        <span class="mi">115</span> <span class="p">:</span>                        <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BS</span> <span class="n">BT</span> <span class="n">SA</span>
-                <span class="mi">4</span><span class="n">ccd</span>         <span class="mi">99</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BT</span> <span class="n">BT</span> <span class="n">AB</span>
-                <span class="mi">86</span><span class="n">bd</span>         <span class="mi">69</span> <span class="p">:</span>                           <span class="n">TORCH</span> <span class="n">BR</span> <span class="n">BS</span> <span class="n">SA</span>
-<span class="n">tot</span><span class="p">:</span> <span class="mi">1000000</span>
+<div class="section" id="high-level-geometry">
+<h2>High Level Geometry<a class="headerlink" href="#high-level-geometry" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CGeometry(OpticksHub* hub)</dt>
+<dd>holder of CDetector</dd>
+<dt>CTestDetector</dt>
+<dd>G4VUserDetectorConstruction subclass, converts simple
+russian doll Opticks GGeoTest/NCSG/nnode geometries
+into Geant4 volume structures, using constituents: CMaker and CPropLib</dd>
+<dt>CGDMLDetector</dt>
+<dd>G4VUserDetectorConstruction subclass, loads GDML persisted G4 geometries
+with help from constituent: CPropLib
+addMPT() fixup info omitted from older GDML</dd>
+<dt>CDetector(G4VUserDetectorConstruction)</dt>
+<dd>base class of CTestDetector and CGDMLDetector providing geometry to Geant4
+holding CMaterialLib, CSurfaceLib.
+The attachSurfaces() method fixes up info lost by GDML</dd>
+</dl>
+</div>
+<div class="section" id="low-level-geometry-materials-surfaces">
+<h2>Low Level Geometry : Materials/Surfaces<a class="headerlink" href="#low-level-geometry-materials-surfaces" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CPropLib</dt>
+<dd>CPropLib is a constituent of CTestDetector that converts
+GGeo materials and surfaces into G4 materials and surfaces</dd>
+<dt>CMPT</dt>
+<dd>extends G4MaterialPropertiesTable</dd>
+<dt>CMaterialLib</dt>
+<dd>converts GGeo materials into G4 materials, a CPropLib subclass</dd>
+<dt>CMaterial</dt>
+<dd>extends G4Material just with a Digest</dd>
+<dt>CMaterialBridge</dt>
+<dd>wraps GMaterialLib, provides mapping between G4 and Opticks materials</dd>
+<dt>CSurfaceBridge</dt>
+<dd>wraps GSurfaceLib, contains CSkinSurfaceTable, CBorderSurfaceTable</dd>
+<dt>CSkinSurfaceTable</dt>
+<dd>subclass of CSurfaceTable</dd>
+<dt>CBorderSurfaceTable</dt>
+<dd>subclass of CSurfaceTable</dd>
+</dl>
+<p>CSurfaceTable</p>
+</div>
+<div class="section" id="low-level-geometry-solids">
+<h2>Low Level Geometry : Solids<a class="headerlink" href="#low-level-geometry-solids" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CSolid</dt>
+<dd>wrapper for G4VSolid, providing extent</dd>
+<dt>CMaker</dt>
+<dd>converts NCSG/nnode shapes into G4VSolid</dd>
+</dl>
+</div>
+<div class="section" id="event">
+<h2>Event<a class="headerlink" href="#event" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CRandomEngine</dt>
+<dd>m_engine instance resident of CG4, provides control of random number stream for aligned running</dd>
+<dt>CGenstepCollector</dt>
+<dd>collects gensteps and primaries</dd>
+<dt>CGenerator</dt>
+<dd><p class="first">m_generator instance resident of CG4 initializes CSource.m_source
+in initSource of subclass CGunSource/CTorchSource/CInputPhotonSource
+depending of source code of G4GUN/TORCH/EMITSOURCE</p>
+<p>This converts Opticks photon sources from hub into CSource(G4VPrimaryGenerator)
+to be consumed by CPrimaryGeneratorAction further down the CG4 initializer list:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m_generator</span><span class="p">(</span><span class="n">new</span> <span class="n">CGenerator</span><span class="p">(</span><span class="n">m_hub</span><span class="p">,</span> <span class="n">this</span><span class="p">)),</span>
+<span class="o">...</span>
+<span class="n">m_pga</span><span class="p">(</span><span class="n">new</span> <span class="n">CPrimaryGeneratorAction</span><span class="p">(</span><span class="n">m_generator</span><span class="o">-&gt;</span><span class="n">getSource</span><span class="p">())),</span>
 </pre></div>
 </div>
+</dd>
+<dt>CSource</dt>
+<dd><p class="first">m_source instance resident of CGenerator of type G4GUN/TORCH/EMITSOURCE</p>
+<p class="last">G4VPrimaryGenerator subclass, with <cite>GeneratePrimaryVertex(G4Event *evt)</cite>
+providing common functionality for the various source types</p>
+</dd>
+<dt>CTorchSource</dt>
+<dd><p class="first">Provides TorchStepNPY configurable optical photon squadrons just like the GPU eqivalent.
+Implemented using distribution generators from SingleParticleSource:</p>
+<p class="last">G4SPSPosDistribution
+G4SPSAngDistribution
+G4SPSEneDistribution</p>
+</dd>
+<dt>CInputPhotonSource</dt>
+<dd>convert NPY buffer of input photons into an G4Event with primary vertices
+for each photon up to the maximum configured number per event</dd>
+<dt>CGunSource</dt>
+<dd>Converts NGunConfig into G4VPrimaryGenerator
+with <cite>GeneratePrimaryVertex(G4Event *evt)</cite></dd>
+<dt>CPrimaryGeneratorAction</dt>
+<dd>isa G4VUserPrimaryGeneratorAction that uses the G4VPrimaryGenerator capabilities
+of the various CSource subclasses to <cite>GeneratePrimaries(G4Event*)</cite>
+which is invoked by Geant4 beamOn within CG4::propagate</dd>
+<dt>OpStatus</dt>
+<dd>G4 status/enum code formatters and translation of G4 codes to Opticks flags</dd>
+<dt>Recorder</dt>
+<dd><p class="first">Collects G4Step/G4StepPoint optical photon data
+into NPY arrays in Opticks array format
+which are persisted to .npy  within an OpticksEvent</p>
+<p class="last"><em>RecordStep</em> is called for all G4Step
+each of which is comprised of <em>pre</em> and <em>post</em> G4StepPoint,
+as a result the same G4StepPoint are “seen” twice,
+thus <em>RecordStep</em> only records the 1st of the pair
+(the 2nd will come around as the first at the next call)
+except for the last G4Step pair where both points are recorded</p>
+</dd>
+<dt>Rec</dt>
+<dd>Alternative implementation of Recorder using a vector of State instances</dd>
+<dt>State</dt>
+<dd>holds copy of G4Step together with G4OpBoundaryProcessStatus,
+a vector of State instances is held by Rec</dd>
+<dt>CRecorderLive</dt>
+<dd>DEAD CODE</dd>
+</dl>
 </div>
-<div class="section" id="ggv-rainbow-p-pol">
-<h2>ggv-rainbow P pol<a class="headerlink" href="#ggv-rainbow-p-pol" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">9</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">]])</span>
-</pre></div>
+<div class="section" id="geant4-plumbing">
+<h2>Geant4 Plumbing<a class="headerlink" href="#geant4-plumbing" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CPrimaryGeneratorAction</dt>
+<dd>G4VUserPrimaryGeneratorAction subclass, “shell” class just
+providing GeneratePrimaries(G4Event*)
+which passes through to CSource::GeneratePrimaryVertex</dd>
+<dt>CSteppingAction</dt>
+<dd>G4UserSteppingAction subclass, which feeds G4Step to the recorders
+in method CSteppingAction::UserSteppingAction(G4Step*)</dd>
+<dt>ActionInitialization</dt>
+<dd>G4VUserActionInitialization subclass, providing UserAction plumbing
+for CPrimaryGeneratorAction and CSteppingAction</dd>
+<dt>PhysicsList</dt>
+<dd><p class="first">G4VModularPhysicsList subclass, follow chroma : registered just</p>
+<p class="last">G4OpticalPhysics()
+G4EmPenelopePhysics(0)</p>
+</dd>
+</dl>
 </div>
+<div class="section" id="geant4-utilities">
+<h2>Geant4 Utilities<a class="headerlink" href="#geant4-utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Format</dt>
+<dd>G4 object string formatters for debugging</dd>
+<dt>CRayTracer</dt>
+<dd>interface to G4TheRayTracer, CPU ray tracer for G4 geometries</dd>
+</dl>
 </div>
-<div class="section" id="ggv-rainbow-s-pol">
-<h2>ggv-rainbow S pol<a class="headerlink" href="#ggv-rainbow-s-pol" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.0709</span><span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.1496</span><span class="p">,</span>  <span class="mf">0.9921</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.1024</span><span class="p">,</span>  <span class="mf">0.9921</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.0866</span><span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.0551</span><span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.0236</span><span class="p">,</span>  <span class="mf">1.</span>    <span class="p">]])</span>
+<div class="section" id="others">
+<h2>Others<a class="headerlink" href="#others" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CAction</span>
+<span class="n">CBndLib</span>
+<span class="n">CBoundaryProcess</span>
+<span class="n">CCheck</span>
+<span class="n">CDebug</span>
+<span class="n">CEventAction</span>
+<span class="n">CG4Ctx</span>
+<span class="n">CGenerator</span>
+<span class="n">CGunSource</span>
+<span class="n">CInputPhotonSource</span>
+<span class="n">CMaterialSort</span>
+<span class="n">CMaterialTable</span>
+<span class="n">CMath</span>
+<span class="n">COptical</span>
+<span class="n">COpticalSurface</span>
+<span class="n">CPhoton</span>
+<span class="n">CPhysics</span>
+<span class="n">CPoi</span>
+<span class="n">CPrimaryGeneratorAction</span>
+<span class="n">CProcess</span>
+<span class="n">CProcessManager</span>
+<span class="n">CProcessSwitches</span>
 
-<span class="n">In</span> <span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9291</span><span class="p">,</span>  <span class="mf">0.378</span> <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9685</span><span class="p">,</span>  <span class="mf">0.2441</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.937</span> <span class="p">,</span> <span class="o">-</span><span class="mf">0.3465</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.4016</span><span class="p">,</span>  <span class="mf">0.9134</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.0551</span><span class="p">]])</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">32</span><span class="p">]:</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpost_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">32</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">600.0183</span><span class="p">,</span>  <span class="o">-</span><span class="mf">42.7747</span><span class="p">,</span>  <span class="o">-</span><span class="mf">26.7342</span><span class="p">,</span>    <span class="mf">0.</span>    <span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">600.0183</span><span class="p">,</span>   <span class="mf">88.5891</span><span class="p">,</span>  <span class="o">-</span><span class="mf">44.203</span> <span class="p">,</span>    <span class="mf">0.</span>    <span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">600.0183</span><span class="p">,</span>  <span class="o">-</span><span class="mf">63.3198</span><span class="p">,</span>  <span class="o">-</span><span class="mf">62.6606</span><span class="p">,</span>    <span class="mf">0.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">600.0183</span><span class="p">,</span>   <span class="mf">52.4064</span><span class="p">,</span>  <span class="o">-</span><span class="mf">78.1518</span><span class="p">,</span>    <span class="mf">0.</span>    <span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">600.0183</span><span class="p">,</span>  <span class="o">-</span><span class="mf">32.5938</span><span class="p">,</span>  <span class="o">-</span><span class="mf">64.8213</span><span class="p">,</span>    <span class="mf">0.</span>    <span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">600.0183</span><span class="p">,</span>   <span class="mf">15.9673</span><span class="p">,</span>   <span class="mf">20.9845</span><span class="p">,</span>    <span class="mf">0.</span>    <span class="p">]])</span>
+<span class="n">CRec</span>
+<span class="n">CRecState</span>
+<span class="n">CRunAction</span>
+<span class="n">CSource</span>
+<span class="n">CStage</span>
+<span class="n">CStep</span>
+<span class="n">CStepRec</span>
+<span class="n">CStepStatus</span>
+<span class="n">CStepping</span>
+<span class="n">CSteppingAction</span>
+<span class="n">CSteppingState</span>
+<span class="n">CStp</span>
+<span class="n">CSurfaceLib</span>
+<span class="n">CTorchSource</span>
+<span class="n">CTrack</span>
+<span class="n">CTrackingAction</span>
+<span class="n">CTraverser</span>
+<span class="n">CVec</span>
+<span class="n">CVis</span>
+<span class="n">CWriter</span>
 
-<span class="n">In</span> <span class="p">[</span><span class="mi">34</span><span class="p">]:</span> <span class="n">pos_g4</span> <span class="o">=</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpost_</span><span class="p">(</span><span class="mi">0</span><span class="p">)[:,:</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">Cerenkov</span>
+<span class="n">Scintillation</span>
 
-<span class="n">In</span> <span class="p">[</span><span class="mi">35</span><span class="p">]:</span> <span class="n">phi_g4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">pos_g4</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">pos_g4</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>    <span class="c1"># flat -pi:pi</span>
-
-
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">38</span><span class="p">]:</span> <span class="n">pos_op</span> <span class="o">=</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpost_</span><span class="p">(</span><span class="mi">0</span><span class="p">)[:,:</span><span class="mi">3</span><span class="p">]</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">39</span><span class="p">]:</span> <span class="n">pos_op</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">39</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">599.9817</span><span class="p">,</span>   <span class="mf">32.4473</span><span class="p">,</span>   <span class="mf">79.6899</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">599.9817</span><span class="p">,</span>   <span class="mf">23.6579</span><span class="p">,</span>   <span class="mf">93.0204</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">599.9817</span><span class="p">,</span>   <span class="mf">19.7394</span><span class="p">,</span>    <span class="mf">0.0366</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">599.9817</span><span class="p">,</span>  <span class="o">-</span><span class="mf">33.9488</span><span class="p">,</span>   <span class="mf">91.4823</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">599.9817</span><span class="p">,</span>   <span class="mf">20.5817</span><span class="p">,</span>   <span class="o">-</span><span class="mf">9.0091</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">599.9817</span><span class="p">,</span>   <span class="o">-</span><span class="mf">0.9888</span><span class="p">,</span>  <span class="o">-</span><span class="mf">18.9703</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">40</span><span class="p">]:</span> <span class="n">phi_op</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">pos_op</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">pos_op</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>     <span class="c1"># flat -pi:pi</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">44</span><span class="p">]:</span> <span class="n">opx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">phi_op</span><span class="p">),</span><span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">49</span><span class="p">]:</span> <span class="n">opx</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_op</span><span class="p">)</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">50</span><span class="p">]:</span> <span class="n">opx</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_op</span><span class="p">)</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">51</span><span class="p">]:</span> <span class="n">opx</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">51</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9262</span><span class="p">,</span>  <span class="mf">0.3771</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9691</span><span class="p">,</span>  <span class="mf">0.2465</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.0019</span><span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9375</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3479</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.401</span> <span class="p">,</span>  <span class="mf">0.9161</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.9986</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0521</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
-
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">52</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">52</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9291</span><span class="p">,</span>  <span class="mf">0.378</span> <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9685</span><span class="p">,</span>  <span class="mf">0.2441</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.937</span> <span class="p">,</span> <span class="o">-</span><span class="mf">0.3465</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.4016</span><span class="p">,</span>  <span class="mf">0.9134</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.0551</span><span class="p">]])</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="polarization-progression">
-<h2>Polarization Progression<a class="headerlink" href="#polarization-progression" title="Permalink to this headline">¶</a></h2>
-<p>S Op pol vector stays alive modulo sign flips, never leaking into X:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9291</span><span class="p">,</span>  <span class="mf">0.378</span> <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9685</span><span class="p">,</span>  <span class="mf">0.2441</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.937</span> <span class="p">,</span> <span class="o">-</span><span class="mf">0.3465</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.4016</span><span class="p">,</span>  <span class="mf">0.9134</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.0551</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9291</span><span class="p">,</span>  <span class="mf">0.378</span> <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.9685</span><span class="p">,</span>  <span class="mf">0.2441</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.937</span> <span class="p">,</span> <span class="o">-</span><span class="mf">0.3465</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.4016</span><span class="p">,</span>  <span class="mf">0.9134</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.0551</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.9291</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.378</span> <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.9685</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2441</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.937</span> <span class="p">,</span>  <span class="mf">0.3465</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.4016</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9134</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span>  <span class="mf">0.0551</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">9</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.9291</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.378</span> <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.9685</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2441</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.937</span> <span class="p">,</span>  <span class="mf">0.3465</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.4016</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9134</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span>  <span class="mf">0.0551</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">10</span><span class="p">]:</span> <span class="n">evt_op</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">10</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.9685</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2441</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">11</span><span class="p">]:</span>
-</pre></div>
-</div>
-<p>G4 pol different approach:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">11</span><span class="p">]:</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">11</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.8504</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5276</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">0.8976</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4488</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.7087</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7008</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.0787</span><span class="p">,</span>  <span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.2283</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9764</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.</span>    <span class="p">,</span>  <span class="mf">0.2835</span><span class="p">,</span>  <span class="mf">0.9606</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">12</span><span class="p">]:</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">12</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.063</span> <span class="p">,</span>  <span class="mf">0.8425</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5276</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">0.1417</span><span class="p">,</span>  <span class="mf">0.8189</span><span class="p">,</span>  <span class="mf">0.5591</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">0.0079</span><span class="p">,</span>  <span class="mf">0.7087</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7008</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">0.3307</span><span class="p">,</span>  <span class="mf">0.2283</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9134</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">0.1811</span><span class="p">,</span>  <span class="mf">0.6299</span><span class="p">,</span>  <span class="mf">0.7559</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">0.1102</span><span class="p">,</span>  <span class="mf">0.7638</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6378</span><span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">13</span><span class="p">]:</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">13</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.126</span> <span class="p">,</span>  <span class="mf">0.1102</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9843</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">0.1417</span><span class="p">,</span>  <span class="mf">0.8189</span><span class="p">,</span>  <span class="mf">0.5591</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.0079</span><span class="p">,</span>  <span class="mf">0.7008</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7165</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.622</span> <span class="p">,</span>  <span class="mf">0.0787</span><span class="p">,</span>  <span class="mf">0.7717</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.3622</span><span class="p">,</span>  <span class="mf">0.2283</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9055</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.2126</span><span class="p">,</span>  <span class="mf">0.2835</span><span class="p">,</span>  <span class="mf">0.937</span> <span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">14</span><span class="p">]:</span> <span class="n">evt_g4</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">rpol_</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">14</span><span class="p">]:</span>
-<span class="n">array</span><span class="p">([[</span> <span class="mf">0.126</span> <span class="p">,</span>  <span class="mf">0.1102</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9843</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">,</span> <span class="o">-</span><span class="mf">1.</span>    <span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.0079</span><span class="p">,</span>  <span class="mf">0.7008</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7165</span><span class="p">],</span>
-       <span class="o">...</span><span class="p">,</span>
-       <span class="p">[</span> <span class="mf">0.622</span> <span class="p">,</span>  <span class="mf">0.0787</span><span class="p">,</span>  <span class="mf">0.7717</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.3622</span><span class="p">,</span>  <span class="mf">0.2283</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9055</span><span class="p">],</span>
-       <span class="p">[</span> <span class="mf">0.2126</span><span class="p">,</span>  <span class="mf">0.2835</span><span class="p">,</span>  <span class="mf">0.937</span> <span class="p">]])</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">15</span><span class="p">]:</span>
+<span class="n">DebugG4Transportation</span>
+<span class="n">OpNovicePhysicsList</span>
+<span class="n">OpNovicePhysicsListMessenger</span>
+<span class="n">OpRayleigh</span>
+<span class="n">OpStatus</span>
+<span class="n">PhysicsList</span>
+<span class="n">State</span>
+<span class="n">SteppingVerbose</span>
 </pre></div>
 </div>
 </div>
@@ -378,12 +302,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../ggeo/GGEO.html" title="GGEO"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
     </div>
   </body>
 </html>

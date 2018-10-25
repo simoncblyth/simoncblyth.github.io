@@ -13,7 +13,8 @@ Clone the repository from bitbucket::
 Bash setup, envvars
 ---------------------
 
-Connect the opticks bash functions to your shell by adding a line to your .bash_profile
+Connect the opticks bash functions to your shell by adding a line to your *.bash_profile*
+(or on some distributions *.bashrc*)
 and configure the location of the install with the LOCAL_BASE environment variable 
 and the location of the source with the OPTICKS_HOME envvar::
 
@@ -46,6 +47,8 @@ OPTICKS_COMPUTE_CAPABILITY    opticks-;opticks-compute-capability
 OPTICKS_OPTIX_INSTALL_DIR     opticks-;opticks-optix-install-dir
 ===========================  ========================================
 
+Use the ``1_Utilities/deviceQuery`` CUDA sample to show your compute capability.
+A list is provided at https://developer.nvidia.com/cuda-gpus
 
 Opticks Installation Overview
 --------------------------------
@@ -53,7 +56,7 @@ Opticks Installation Overview
 Opticks installation requires:
 
 * bash shell and build tools such as mercurial, git, curl, etc.. 
-* recent cmake 2.8.9+
+* recent cmake 3.5+
 * Boost C++ libraries 1.59+ 
 
 * installations of pre-requisites packages, see below for notes on versions
@@ -77,7 +80,7 @@ its externals requires unix tools including:
 * curl
 * tar
 * zip
-* cmake 2.8.9+
+* cmake 3.5+
 
 CMake
 -------
@@ -85,7 +88,7 @@ CMake
 A rather recent cmake version is required. Check your version with::
 
     simon:~ blyth$ cmake --version
-    cmake version 3.4.1
+    cmake version 3.11.0
 
 Updating build tools is best done via your system package manager.  
 For example on OSX with macports update cmake with::
@@ -169,6 +172,29 @@ CUDA installation guides:
 * http://docs.nvidia.com/cuda/cuda-installation-guide-mac-os-x/index.html
 
 
+Finding CUDA
+~~~~~~~~~~~~~
+
+Opticks uses the `FindCUDA.cmake` supplied by CMake to, eg 
+on macOS at `/opt/local/share/cmake-3.12/Modules/FindCUDA.cmake`.  
+Quoting from that::
+
+   29 # The script will prompt the user to specify ``CUDA_TOOLKIT_ROOT_DIR`` if
+   30 # the prefix cannot be determined by the location of nvcc in the system
+   31 # path and ``REQUIRED`` is specified to :command:`find_package`. 
+
+
+Thus check that `nvcc` is in your PATH, and preferably compile some CUDA examples
+on your system before installing Opticks.:: 
+
+    epsilon:opticks blyth$ which nvcc    # macOS
+    /Developer/NVIDIA/CUDA-9.1/bin/nvcc
+
+    [blyth@localhost ~]$ which nvcc   # Linux
+    /usr/local/cuda-9.2/bin/nvcc
+
+
+
 Opticks without an CUDA capable GPU ?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -193,8 +219,17 @@ both the OptiX library and the CUDA runtime.
 If you cannot use the latest CUDA (because of kernel incompatibility) you will need to
 use an older OptiX version contemporary with the CUDA version that your kernel supports.
 
-The reason for the extremes of caution regarding version combinations is that 
-the interface to the GPU is via kernel extensions where if anything goes 
+Version combinations that have been used:
+
+current
+   CUDA 9.1, OptiX 5.0.1
+
+earlier
+   CUDA 7.0, OptiX 3.80
+
+
+The reason for the extremes of caution regarding version combinations of drivers 
+is that the interface to the GPU is via kernel extensions where if anything goes 
 wrong there is no safety net. A bad kernel extension will cause kernel panics, 
 your machine crashes and continue to crash until the bad driver is removed 
 (on macOS the removal can be done by resetting NVRAM).

@@ -9,7 +9,7 @@
     <title>PLOG review &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -31,6 +31,7 @@
   <ul>
 <li><a class="reference internal" href="#">PLOG review</a><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#getting-rid-of-the-dangerous-re-define-of-trace">Getting rid of the dangerous re-define of trace</a></li>
 <li><a class="reference internal" href="#plog">plog</a><ul>
 <li><a class="reference internal" href="#chained-loggers">chained loggers</a></li>
 </ul>
@@ -92,6 +93,28 @@ which all log to the same console and logfile.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OKTest</span> <span class="o">--</span><span class="n">warn</span> \              <span class="c1"># global loglevel</span>
        <span class="o">--</span><span class="n">npy</span> <span class="n">verbose</span> \       <span class="c1"># per-library loglevel</span>
        <span class="o">--</span><span class="n">sysrap</span> <span class="n">warning</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-rid-of-the-dangerous-re-define-of-trace">
+<h2>Getting rid of the dangerous re-define of trace<a class="headerlink" href="#getting-rid-of-the-dangerous-re-define-of-trace" title="Permalink to this headline">¶</a></h2>
+<p>Observe a problem with xercesc headers : so bite the bullet
+and get rid of the dangerous define and switch all
+use of LOG(trace) into LOG(verbose)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:sysrap blyth$ hg diff PLOG.hh
+diff -r 3e7743e5bc48 sysrap/PLOG.hh
+--- a/sysrap/PLOG.hh    Thu Aug 16 00:01:19 2018 +0800
++++ b/sysrap/PLOG.hh    Thu Aug 16 12:57:29 2018 +0800
+@@ -15,7 +15,7 @@
+ using plog::verbose ;
+
+ // hmm dangerous but what alternative
+-#define trace plog::verbose
++//#define trace plog::verbose
+
+ #include &quot;SYSRAP_API_EXPORT.hh&quot;
+
+epsilon:sysrap blyth$
 </pre></div>
 </div>
 </div>
@@ -438,7 +461,7 @@ be planted in every library.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
     </div>
   </body>
 </html>

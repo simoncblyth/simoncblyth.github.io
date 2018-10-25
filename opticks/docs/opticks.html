@@ -9,7 +9,7 @@
     <title>Opticks Install Instructions &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -50,6 +50,7 @@
 </li>
 <li><a class="reference internal" href="#platform-support">Platform Support</a></li>
 <li><a class="reference internal" href="#opticks-pre-requisites-nvidia-optix-and-nvidia-cuda">Opticks Pre-requisites : NVIDIA OptiX and NVIDIA CUDA</a><ul>
+<li><a class="reference internal" href="#finding-cuda">Finding CUDA</a></li>
 <li><a class="reference internal" href="#opticks-without-an-cuda-capable-gpu">Opticks without an CUDA capable GPU ?</a></li>
 <li><a class="reference internal" href="#versions-of-cuda-and-optix">Versions of CUDA and OptiX</a></li>
 </ul>
@@ -133,7 +134,8 @@
 </div>
 <div class="section" id="bash-setup-envvars">
 <h2>Bash setup, envvars<a class="headerlink" href="#bash-setup-envvars" title="Permalink to this headline">¶</a></h2>
-<p>Connect the opticks bash functions to your shell by adding a line to your .bash_profile
+<p>Connect the opticks bash functions to your shell by adding a line to your <em>.bash_profile</em>
+(or on some distributions <em>.bashrc</em>)
 and configure the location of the install with the LOCAL_BASE environment variable
 and the location of the source with the OPTICKS_HOME envvar:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-(){ . $HOME/opticks/opticks.bash &amp;&amp; opticks-env $* ; }
@@ -179,13 +181,15 @@ export PATH=$LOCAL_BASE/opticks/lib:$OPTICKS_HOME/bin:$OPTICKS_HOME/ana:$PATH
 </tr>
 </tbody>
 </table>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">1_Utilities/deviceQuery</span></code> CUDA sample to show your compute capability.
+A list is provided at <a class="reference external" href="https://developer.nvidia.com/cuda-gpus">https://developer.nvidia.com/cuda-gpus</a></p>
 </div>
 <div class="section" id="opticks-installation-overview">
 <h2>Opticks Installation Overview<a class="headerlink" href="#opticks-installation-overview" title="Permalink to this headline">¶</a></h2>
 <p>Opticks installation requires:</p>
 <ul class="simple">
 <li>bash shell and build tools such as mercurial, git, curl, etc..</li>
-<li>recent cmake 2.8.9+</li>
+<li>recent cmake 3.5+</li>
 <li>Boost C++ libraries 1.59+</li>
 <li>installations of pre-requisites packages, see below for notes on versions<ul>
 <li>NVIDIA OptiX</li>
@@ -207,14 +211,14 @@ its externals requires unix tools including:</p>
 <li>curl</li>
 <li>tar</li>
 <li>zip</li>
-<li>cmake 2.8.9+</li>
+<li>cmake 3.5+</li>
 </ul>
 </div>
 <div class="section" id="cmake">
 <h2>CMake<a class="headerlink" href="#cmake" title="Permalink to this headline">¶</a></h2>
 <p>A rather recent cmake version is required. Check your version with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>simon:~ blyth$ cmake --version
-cmake version 3.4.1
+cmake version 3.11.0
 </pre></div>
 </div>
 <p>Updating build tools is best done via your system package manager.
@@ -322,6 +326,26 @@ Thrust is installed together with CUDA.</p>
 <li><a class="reference external" href="http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html">http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html</a></li>
 <li><a class="reference external" href="http://docs.nvidia.com/cuda/cuda-installation-guide-mac-os-x/index.html">http://docs.nvidia.com/cuda/cuda-installation-guide-mac-os-x/index.html</a></li>
 </ul>
+<div class="section" id="finding-cuda">
+<h3>Finding CUDA<a class="headerlink" href="#finding-cuda" title="Permalink to this headline">¶</a></h3>
+<p>Opticks uses the <cite>FindCUDA.cmake</cite> supplied by CMake to, eg
+on macOS at <cite>/opt/local/share/cmake-3.12/Modules/FindCUDA.cmake</cite>.
+Quoting from that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">29</span> <span class="c1"># The script will prompt the user to specify ``CUDA_TOOLKIT_ROOT_DIR`` if</span>
+<span class="mi">30</span> <span class="c1"># the prefix cannot be determined by the location of nvcc in the system</span>
+<span class="mi">31</span> <span class="c1"># path and ``REQUIRED`` is specified to :command:`find_package`.</span>
+</pre></div>
+</div>
+<p>Thus check that <cite>nvcc</cite> is in your PATH, and preferably compile some CUDA examples
+on your system before installing Opticks.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:opticks blyth$ which nvcc    # macOS
+/Developer/NVIDIA/CUDA-9.1/bin/nvcc
+
+[blyth@localhost ~]$ which nvcc   # Linux
+/usr/local/cuda-9.2/bin/nvcc
+</pre></div>
+</div>
+</div>
 <div class="section" id="opticks-without-an-cuda-capable-gpu">
 <h3>Opticks without an CUDA capable GPU ?<a class="headerlink" href="#opticks-without-an-cuda-capable-gpu" title="Permalink to this headline">¶</a></h3>
 <p>In the past an experimental port of Opticks onto a Windows machine without a CUDA capable GPU
@@ -340,8 +364,15 @@ This version pinning between CUDA and OptiX is because Opticks links against
 both the OptiX library and the CUDA runtime.</p>
 <p>If you cannot use the latest CUDA (because of kernel incompatibility) you will need to
 use an older OptiX version contemporary with the CUDA version that your kernel supports.</p>
-<p>The reason for the extremes of caution regarding version combinations is that
-the interface to the GPU is via kernel extensions where if anything goes
+<p>Version combinations that have been used:</p>
+<dl class="docutils">
+<dt>current</dt>
+<dd>CUDA 9.1, OptiX 5.0.1</dd>
+<dt>earlier</dt>
+<dd>CUDA 7.0, OptiX 3.80</dd>
+</dl>
+<p>The reason for the extremes of caution regarding version combinations of drivers
+is that the interface to the GPU is via kernel extensions where if anything goes
 wrong there is no safety net. A bad kernel extension will cause kernel panics,
 your machine crashes and continue to crash until the bad driver is removed
 (on macOS the removal can be done by resetting NVRAM).</p>
@@ -837,7 +868,7 @@ Total Test <span class="nb">time</span> <span class="o">(</span>real<span class=
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
     </div>
   </body>
 </html>
