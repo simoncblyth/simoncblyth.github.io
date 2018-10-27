@@ -1,0 +1,281 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Structure of Opticks &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Structure of Opticks</a><ul>
+<li><a class="reference internal" href="#opticks-projects">Opticks projects</a></li>
+<li><a class="reference internal" href="#opticks-externals">Opticks Externals</a><ul>
+<li><a class="reference internal" href="#base-externals">Base externals</a></li>
+<li><a class="reference internal" href="#visualization-externals">Visualization externals</a></li>
+<li><a class="reference internal" href="#mesh-manipulation-and-polygonization-externals">Mesh manipulation and polygonization externals</a></li>
+<li><a class="reference internal" href="#other-externals">Other externals</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#geometry-translation-steps">Geometry translation steps</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/docs/structure.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="structure-of-opticks">
+<h1>Structure of Opticks<a class="headerlink" href="#structure-of-opticks" title="Permalink to this headline">¶</a></h1>
+<p>Opticks is structured into ~20 separate CMake projects
+organized by their dependencies on each other and
+on ~17 external projects.</p>
+<p>This structure was adopted for development speed and flexibility,
+allowing (in principal) for OpenGL visualization of geometry/propagations
+even on machines without a suitable NVIDIA GPU.</p>
+<div class="section" id="opticks-projects">
+<h2>Opticks projects<a class="headerlink" href="#opticks-projects" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>OKConf</dt>
+<dd>detects versions of Geant4, OptiX available</dd>
+<dt>SysRap</dt>
+<dd>low level system utils</dd>
+<dt>BoostRap</dt>
+<dd>wrapper for boost file_system, program_options etc…</dd>
+<dt>NPY</dt>
+<dd><p class="first">numerical workhorse sub-project</p>
+<ul class="simple">
+<li>buffer persistency in NumPy format</li>
+<li>mesh handling/polygonization</li>
+<li>nnode, NCSG : CSG node tree representation of geometry</li>
+</ul>
+<p class="last">(currently this package is too big, it needs to be split)</p>
+</dd>
+<dt>YoctoGLRap</dt>
+<dd>wrapper for the YoctoGL external, providing glTF 2.0 3D
+file format parsing/writing</dd>
+<dt>OpticksCore</dt>
+<dd>commandline parsing, app config/steering</dd>
+<dt>GGeo</dt>
+<dd>Opticks geometry model ready for translation to GPU</dd>
+<dt>ExtG4</dt>
+<dd>translates Geant4 solids into NCSG trees and Geant4 trees of volumes
+into GGeo geometries</dd>
+<dt>AssimpRap</dt>
+<dd>wrapper for Assimp 3D geometry importer, can load G4DAE COLLADA geometry files
+(no longer needed with ExtG4 direct from Geant4 conversion)</dd>
+<dt>OpenMeshRap</dt>
+<dd>wrapper for OpenMesh, providing mesh traversal : used for mesh fixing
+(no longer needed with analytic geometry)</dd>
+<dt>OpticksGeo</dt>
+<dd>OpticksHub : non-viz hostside intersection of configuraton, geometry and event</dd>
+<dt>CUDARap</dt>
+<dd>wrapper for CUDA, used for RNG seed generation/persistance</dd>
+<dt>ThrustRap</dt>
+<dd><p class="first">wrapper for Thrust (higher level C++ access to CUDA), used for</p>
+<ul class="last simple">
+<li>photon seeding(associating photon “slots” with their gensteps prior to generation)</li>
+<li>copying back the hits</li>
+</ul>
+</dd>
+<dt>OptiXRap</dt>
+<dd><p class="first">wrapper for OptiX</p>
+<ul class="last simple">
+<li>CUDA code for primitive and CSG intersection</li>
+<li>converts GGeo geometry into OptiX geometry, using OGeo</li>
+<li>sets up OptiX context using OScene, OEvent</li>
+<li>provides OptiX GPU launcher in OPropagator</li>
+</ul>
+</dd>
+<dt>OGLRap</dt>
+<dd>wrapper for OpenGL, visualization of geometry and photon propagations</dd>
+<dt>OKOP</dt>
+<dd>pure compute propagation, with no OpenGL dependency</dd>
+<dt>OpticksGL</dt>
+<dd>OpenGL/OptiX/CUDA interop propagation using shared OpenGL buffers,
+allowing visualization of propagations directly from the shared interop
+GPU buffers</dd>
+<dt>OK</dt>
+<dd>high level manager with OpenGL visualization</dd>
+<dt>CFG4</dt>
+<dd>comparison of Opticks and Geant4 photon propagations, by
+running both Geant4 and Opticks propagations from same executable</dd>
+<dt>OKG4</dt>
+<dd>top level with visualization project intended for using
+Opticks with Geant4 embedded inside, for example to enable
+a Geant4 particle gun to be used within the Opticks context</dd>
+<dt>G4OK</dt>
+<dd>top level (non-visualization) project intended to provide simple
+interface between Geant4 code with embedded Opticks : to be
+used from Geant4 examples</dd>
+</dl>
+</div>
+<div class="section" id="opticks-externals">
+<h2>Opticks Externals<a class="headerlink" href="#opticks-externals" title="Permalink to this headline">¶</a></h2>
+<p>Following the adoption of fully analytic geometry and the
+direct from Geant4 approach many of these externals are no
+longer needed.</p>
+<div class="section" id="base-externals">
+<h3>Base externals<a class="headerlink" href="#base-externals" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>bcm</dt>
+<dd>boost CMake modules, target export/import for CMake 3.5+
+allows config to direct dependencies only, the rest of the tree
+gets configured automatically</dd>
+<dt>boost</dt>
+<dd>system, program_options, filesystem, regex</dd>
+<dt>glm</dt>
+<dd>vector, matrix, 3D projection mathematics</dd>
+<dt>plog</dt>
+<dd>logging</dd>
+<dt>xercesc</dt>
+<dd>XML parsing needed by g4</dd>
+<dt>g4</dt>
+<dd>geant4</dd>
+</dl>
+</div>
+<div class="section" id="visualization-externals">
+<h3>Visualization externals<a class="headerlink" href="#visualization-externals" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>glfw</dt>
+<dd>cross platform OpenGL and system events : keyboard, mouse</dd>
+<dt>gleq</dt>
+<dd>event queue for glfw</dd>
+<dt>glew</dt>
+<dd>OpenGL extension wrangler, providing access to OpenGL symbols</dd>
+<dt>imgui</dt>
+<dd>immediate mode OpenGL GUI</dd>
+</dl>
+</div>
+<div class="section" id="mesh-manipulation-and-polygonization-externals">
+<h3>Mesh manipulation and polygonization externals<a class="headerlink" href="#mesh-manipulation-and-polygonization-externals" title="Permalink to this headline">¶</a></h3>
+<p>All these are not needed with direct from G4 workflow, they
+are used for mesh manipulation and polygonization functionality.</p>
+<dl class="docutils">
+<dt>openmesh</dt>
+<dd>provides mesh traversal</dd>
+</dl>
+<p>oimplicitmesher
+odcs
+ocsgbsp</p>
+<blockquote>
+<div>polygonization</div></blockquote>
+</div>
+<div class="section" id="other-externals">
+<h3>Other externals<a class="headerlink" href="#other-externals" title="Permalink to this headline">¶</a></h3>
+<p>Only oyoctogl is still needed.</p>
+<dl class="docutils">
+<dt>assimp</dt>
+<dd>used for COLLADA DAE file format loading
+(not needed with direct from G4 workflow)</dd>
+<dt>opticksdata</dt>
+<dd>common repository for geometry
+(not needed with direct from G4 workflow)</dd>
+<dt>oyoctogl</dt>
+<dd>glTF 2.0 3D file format parsing/construction</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="section" id="geometry-translation-steps">
+<h1>Geometry translation steps<a class="headerlink" href="#geometry-translation-steps" title="Permalink to this headline">¶</a></h1>
+<p>Outline of the steps to translate Geant4 geometry to OptiX GPU Geometry</p>
+<ol class="arabic">
+<li><p class="first">analyse geometry to find different types of repeated instances of geometry together
+with the global geometry of solids that are not repeated enough to pass the
+instancing cuts.  Repeats that are contained within other repeats are disqualified
+in order to end up with “assemblies” of multiple volumes.
+This for example finds the ~5 volumes that comprise the JUNO PMTs and
+all their 4x4 transforms.</p>
+</li>
+<li><p class="first">convert each G4VSolid into a Opticks nnode/NCSG tree</p>
+</li>
+<li><p class="first">balance the NCSG tree by:</p>
+<ol class="loweralpha simple">
+<li>positivization : removing all subtractions in the tree by application of DeMorgans
+rules pushing negations into complemented primitives makes the tree easier to
+rearrange as it then contains commutative unions or intersections only</li>
+<li>rearrange the tree to make more balanced</li>
+</ol>
+<p>Balancing the tree is needed as many boolean solids (eg repeated subtractions)
+yield imbalanced trees which are inefficiently handled as complete binary trees.</p>
+</li>
+<li><p class="first">serialize the CSG tree of each solid into buffers</p>
+</li>
+<li><p class="first">serialize the structure of the full geometry into buffers for each instance
+as well as for the global non-instanced geometry</p>
+</li>
+<li><p class="first">interleave all material and surface properties as a function of wavelength
+into a buffer ready for conversion into a GPU texture</p>
+</li>
+<li><p class="first">apply the NVIDIA OptiX API to put the entire geometry into GPU buffers</p>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>
