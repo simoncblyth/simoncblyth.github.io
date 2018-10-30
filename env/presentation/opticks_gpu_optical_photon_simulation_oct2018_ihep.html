@@ -499,9 +499,15 @@ Structure
 <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; Oct 2018, IHEP, Beijing </h2>
 </div><!-- comment
 
-Opticks applies GPU massive parallelism to optical photon simulation, it is of most interest for
-neutrino detectors like JUNO : due to the very large numbers of photons produced in the JUNO scintillator
-... but any simulation that is limited by optical photons can benefit from Opticks
+Opticks applies GPU massive parallelism to optical photon simulation,
+
+* any simulation limited by optical photons can benefit greatly from Opticks
+
+  * the more limited the greater the benefit
+  * huge energy/time savings for JUNO
+
+
+
 
 And the benefits can be enormous... modern GPUs have more than 5000 cores, Opticks succeeds to
 port all of the optical photon simulation to the GPU : because you really do have
@@ -565,19 +571,54 @@ then my presentation will provide much to interest you. -->
 </div>
 <!-- comment
 
+Performance factors of three orders of magnitude
+are because simulating millions of optical photons
+is a near perfect fit for the strengths of the GPU
+
 Neutrino detectors can benefit the most as their operation
 depends on production and propagation of sometimes many millions
 of optical photons.
 
-Neutrinos detectors need to be large, as neutrinos
-interact only weakly.
-
-**Radical simulation speedup -> short development cycle -> improved understanding** -->
+**Radical speedup -> short development cycle -> improved understanding** -->
 </div>
-<div class="slide" id="outline-introducing-the-tools-gpu-numpy">
-<h1>Outline : Introducing the Tools : GPU + <em>NumPy</em></h1>
+<div class="slide" id="outline-tools-techniques-and-opticks">
+<h1>Outline : Tools, Techniques and Opticks</h1>
 <img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
-<ul class="simple">
+<span>&nbsp;</span>
+<span>&nbsp;</span><ul class="simple">
+<li>Introducing the Tools<ul>
+<li>GPU, CUDA, Thrust</li>
+<li><em>NumPy</em></li>
+</ul>
+</li>
+</ul>
+<span></span><ul class="simple">
+<li>Techniques<ul>
+<li>Monte Carlo Method</li>
+<li>Geant4</li>
+</ul>
+</li>
+</ul>
+<span></span><ul class="simple">
+<li>Opticks : Optical Photon Simulation<ul>
+<li>problem, solution</li>
+<li>geometry, validation</li>
+</ul>
+</li>
+</ul>
+<span>&nbsp;</span></div>
+<div class="slide" id="raytrace-diagram">
+<h1><span class="i">Raytrace Diagram</span></h1>
+</div>
+<div class="slide" id="ray-tracing-vs-rasterization">
+<h1><span class="i">Ray-tracing vs Rasterization</span></h1>
+<img alt="/env/presentation/nvidia/nv_rasterization.png" class="align-left" src="/env/presentation/nvidia/nv_rasterization.png" style="width: 550px;" />
+<img alt="/env/presentation/nvidia/nv_raytrace.png" class="align-right" src="/env/presentation/nvidia/nv_raytrace.png" style="width: 550px;" />
+</div>
+<div class="slide" id="outline-introducing-the-tools">
+<h1>Outline : Introducing the Tools</h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<div class="small"><span>&nbsp;</span></div><ul class="small simple">
 <li>Understanding GPUs<ul>
 <li>Graphical Origins</li>
 <li>NVIDIA Turing GPU</li>
@@ -585,24 +626,31 @@ interact only weakly.
 <li>Latency vs Throughput</li>
 </ul>
 </li>
+</ul>
+<div class="small"><span></span></div><ul class="small simple">
 <li>How to Make Effective Use of GPUs ?<ul>
-<li>Use Higher Level Libraries</li>
+<li>Use Higher Level Libraries -&gt; <em>Thrust</em></li>
 <li>Parallel / Simple / Uncoupled</li>
 </ul>
 </li>
+</ul>
+<div class="small"><span></span></div><ul class="small simple">
 <li>GPU Constraints -&gt; Array-Oriented Design -&gt; <em>NumPy</em><ul>
 <li>Serialization</li>
 <li>Serialization Benefits</li>
 </ul>
 </li>
-<li>What are <em>NumPy</em> and <em>NumPy</em> arrays ?<ul>
-<li>fundamental to Python Data Ecosystem</li>
-<li>large array handling with python flexibility/brevity at C speed</li>
+</ul>
+<div class="small"><span></span></div><ul class="small simple">
+<li><em>NumPy</em><ul>
+<li>Foundation of Python Data Ecosystem</li>
+<li>Python : fastest growing major programming language ? Why ?</li>
+<li>NumPy Example : closest approach of Ellipse to a Circle</li>
+<li>NumPy Example : NLL Reconstruction fit : On one slide</li>
 </ul>
 </li>
-<li>Python : fastest growing major programming language ? Why ?</li>
 </ul>
-<!-- comment
+<div class="small"><span></span></div><!-- comment
 
 To understand Opticks and why it is structured as it
 is you need to understand GPUs -->
@@ -804,14 +852,14 @@ http://web.cse.ohio-state.edu/~shen.94/781/Site/Slides_files/pipeline.pdf -->
 </ul>
 </li>
 <li>maximum thread launch size : so large its irrelevant</li>
-<li>maximum threads inflight : #SM*2048 = 80*2048 = 163,840<ul>
-<li>best latency hiding when launch &gt; ~10x this</li>
+<li>maximum threads inflight : #SM*2048 = 80*2048 ~ 160k<ul>
+<li>best latency hiding when launch &gt; ~10x this ~ 1M</li>
 </ul>
 </li>
 </ul>
-<ul class="tiny simple">
-<li>NVIDIA Titan V: 80 SM, 5120 CUDA cores</li>
-</ul>
+<p class="tiny">Understanding Throughput-oriented Architectures
+<a class="reference external" href="https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext">https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext</a></p>
+<p class="tiny">NVIDIA Titan V: 80 SM, 5120 CUDA cores</p>
 <!-- comment
 
 https://streamhpc.com/blog/2017-01-24/many-threads-can-run-gpu/
@@ -845,13 +893,13 @@ The maximum number of threads in flight is 2048 * #SM -->
 <li>(num_gensteps,6,4) <em>float32</em></li>
 <li>(num_csgnodes,4,4) <em>float32</em></li>
 <li>(num_transforms,3,4,4) <em>float32</em></li>
-<li>(num_planes,4,4) <em>float32</em></li>
+<li>(num_planes,4) <em>float32</em></li>
 <li>(num_flightpath_views,4,4) <em>float32</em></li>
 <li>...</li>
 </ul>
 </dd>
 </dl>
-<p class="small last">YET : <em>Opticks</em> does not depend on <em>NumPy/python</em></p>
+<p class="small last">YET : <em>Opticks</em> libs do not depend on <em>NumPy/python</em></p>
 </div>
 <dl class="small docutils">
 <dt><strong>Separate address space -&gt; Serialization</strong></dt>
@@ -889,15 +937,9 @@ The maximum number of threads in flight is 2048 * #SM -->
 <p class="tiny"><a class="reference external" href="https://realpython.com/numpy-array-programming/">https://realpython.com/numpy-array-programming/</a></p>
 <!-- comment
 
-
-
-
 Very limited libraries -> **re-think + re-implement** from scratch, eg:
    * ray-geometry intersection
    * Monte Carlo sampling
-
-
-
 
 **Small amount of GPU code : OptiX, CUDA, Thrust, OpenGL**
 
@@ -920,46 +962,123 @@ Very limited libraries -> **re-think + re-implement** from scratch, eg:
 
   * interactive debugging/analysis with *IPython + NumPy*
   * no *Python/NumPy* dependency for *Opticks* -->
-</div>
-<div class="slide" id="what-are-numpy-arrays">
-<h1><span class="i">What are NumPy Arrays</span></h1>
 <!-- comment
 
-At first glance NumPy doesnt seem very impressive : but that array could have hundreds of
-millions of elements in it, and it would enable you to efficently maniulate it :
+:small:`NumPy : Python flexibility+brevity at C speed`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-I will be showing examples, that I hope will demonstrate the power of NumPy -->
+.. sidebar:: :small:`Opticks.NPY package`
+
+    .. class:: small
+
+        * inspired by *NumPy* : does not depend on it
+        * implements *NumPy* serialization file format,
+          into which almost everything(*) is persisted
+        * *Opticks* analysis/debugging done with *NumPy* and *IPython*
+
+    .. class:: tiny
+
+        (*) gensteps, photons, hits, analytic CSG geometry shapes, transforms, triangulated geometry vertices, triangles, material/surface properties ...
+
+.. class:: small
+
+   **“fundamental package for scientific computing with Python”**
+
+   *NumPy* arrays : simply an interface to C memory buffers
+
+   * :red:`extreme simplicity` : simple interop with C, C++, CUDA
+   * slices are no-copy "views" of underlying buffers
+   * reshape/transpose : just changes metadata
+   * fast memcpy, cudaMemcpy, serialization/deserialization
+
+   Very terse, no-loop python interface to C performance
+
+   * **array-oriented computing** (C loops under python control)
+   * interactive handling of very large N-dimensional arrays
+   * easily manipulate million item arrays from python
+
+     * faster + more convenient than dealing with millions of C++ objects
+
+.. class:: small
+
+   **“The NumPy array: a structure for efficient numerical computation”**
+
+   * https://hal.inria.fr/inria-00564007/document
+
+
+.. class:: tiny
+
+   NPY file format specification
+
+   https://github.com/numpy/numpy/blob/master/doc/neps/nep-0001-npy-format.rst -->
+<!-- comment
+
+https://jeffknupp.com/blog/2017/09/15/python-is-the-fastest-growing-programming-language-due-to-a-feature-youve-never-heard-of/
+
+Secret weapon of NumPy
+
+https://github.com/python/peps/blob/master/pep-3118.txt -->
+<!-- comment
+
+
+
+
+:i:`What are NumPy Arrays`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. comment
+
+   At first glance NumPy doesnt seem very impressive : but that array could have hundreds of
+   millions of elements in it, and it would enable you to efficently maniulate it :
+
+   I will be showing examples, that I hope will demonstrate the power of NumPy
+
+
+
+:i:`What are NumPy Arrays 2`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+.. sidebar:: Ideal for Large Arrays
+
+    .. class:: small
+
+        **Natural Fit with Opticks Photon Simulation**
+
+        * millions of photons : large and simple data
+        * detector geometry : many thousands of PMTs, millions of vertices, triangles
+
+        *NumPy* 100x speedups compared to python are common, but more importantly:
+
+        * **NumPy+IPython provide excellent interactive environment**
+
+          * **array oriented** or **vectorized** approach (no looping) : terse + fast
+          * thinking **vectorized** prepares you for GPU
+
+    .. class:: tiny
+
+       http://www.scipy-lectures.org/intro/numpy/index.html
+
+
+.. comment -->
 </div>
-<div class="slide" id="what-are-numpy-arrays-2">
-<h1><span class="i">What are NumPy Arrays 2</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Ideal for Large Arrays</p>
-<p class="small"><strong>Natural Fit with Opticks Photon Simulation</strong></p>
+<div class="slide" id="numpy-foundation-of-python-data-ecosystem">
+<h1><span class="small">NumPy : Foundation of Python Data Ecosystem</span></h1>
+<p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy">https://bitbucket.org/simoncblyth/intro_to_numpy</a></p>
+<p class="small">Very terse, array-oriented (no-loop) python interface to C performance</p>
+<img alt="/env/presentation/numpy_ecosystem.png" class="align-right" src="/env/presentation/numpy_ecosystem.png" style="width: 700px;" />
 <ul class="small simple">
-<li>millions of photons : large and simple data</li>
-<li>detector geometry : many thousands of PMTs, millions of vertices, triangles</li>
+<li>C speed, python brevity + ease</li>
+<li><strong>array-oriented</strong></li>
+<li><strong>vectorized</strong> : no python loops</li>
+<li>efficiently work with large arrays</li>
 </ul>
-<p class="small"><em>NumPy</em> 100x speedups compared to python are common, but more importantly:</p>
-<ul class="small simple">
-<li><strong>NumPy+IPython provide excellent interactive environment</strong><ul>
-<li><strong>array oriented</strong> or <strong>vectorized</strong> approach (no looping) : terse + fast</li>
-<li>thinking <strong>vectorized</strong> prepares you for GPU</li>
-</ul>
-</li>
-</ul>
-<p class="tiny last"><a class="reference external" href="http://www.scipy-lectures.org/intro/numpy/index.html">http://www.scipy-lectures.org/intro/numpy/index.html</a></p>
-</div>
-<!-- comment -->
-</div>
-<div class="slide" id="numpy-fundamental-to-python-data-ecosystem">
-<h1><span class="small">NumPy : Fundamental to Python Data Ecosystem</span></h1>
-<ul class="small simple">
-<li>central nature of <em>NumPy</em> to the <em>Python</em> world makes mastering it exceedingly useful</li>
-<li>understanding it, enables C/C++ performance with python brevity + ease of development</li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy">https://bitbucket.org/simoncblyth/intro_to_numpy</a></li>
-</ul>
-<img alt="/env/presentation/numpy_ecosystem.png" class="align-center" src="/env/presentation/numpy_ecosystem.png" style="width: 600px;" />
-<p class="tiny"><a class="reference external" href="https://docs.scipy.org/doc/numpy/user/quickstart.html">https://docs.scipy.org/doc/numpy/user/quickstart.html</a></p>
+<dl class="small docutils">
+<dt>Recommended paper:</dt>
+<dd><em>The NumPy array: a structure for efficient numerical computation</em>
+<a class="reference external" href="https://hal.inria.fr/inria-00564007">https://hal.inria.fr/inria-00564007</a></dd>
+</dl>
+<div class="tiny"><span>&nbsp;</span></div><p class="tiny"><a class="reference external" href="https://docs.scipy.org/doc/numpy/user/quickstart.html">https://docs.scipy.org/doc/numpy/user/quickstart.html</a></p>
 <p class="tiny"><a class="reference external" href="http://www.scipy-lectures.org/intro/index.html">http://www.scipy-lectures.org/intro/index.html</a></p>
 <p class="tiny"><a class="reference external" href="https://github.com/donnemartin/data-science-ipython-notebooks">https://github.com/donnemartin/data-science-ipython-notebooks</a></p>
 <!-- comment
@@ -1000,6 +1119,118 @@ Looks set to become ever more dominant over next years...
 
 If you ever tried JNI... -->
 </div>
+<div class="slide" id="numpy-example-closest-approach-of-ellipse-to-a-circle">
+<h1><span class="small">NumPy Example : closest approach of Ellipse to a Circle</span></h1>
+<pre class="mypretiny">
+
+import numpy as np
+
+def ellipse_closest_approach_to_point( ex, ez, _c ):
+    """ex, ez: ellipse semi-axes, c: coordinates of point in ellipse frame"""
+    c = np.asarray( _c )  ; assert c.shape == (2,)
+
+    t = np.linspace( 0, 2*np.pi, 1000000 )     <b><span class="alarm"> # t: array of 1M angles [0,2pi] </span></b>
+    e = np.zeros( [len(t), 2] )
+    e[:,0] = ex*np.cos(t)
+    e[:,1] = ez*np.sin(t)                      <b><span class="alarm"> # e: 1M parametric [x,z] points on the ellipse </span></b>
+
+    return  e[np.sum((e-c)**2, axis=1).argmin()]   <b><span class="alarm"> # point on ellipse closest to c </span></b>
+</pre><table border="1" class="small docutils">
+<colgroup>
+<col width="33%" />
+<col width="15%" />
+<col width="52%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">expression</th>
+<th class="head">shape</th>
+<th class="head">note</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">e</tt></td>
+<td><tt class="docutils literal">(1000000,2)</tt></td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><tt class="docutils literal">c</tt></td>
+<td><tt class="docutils literal">(2,)</tt></td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">e-c</span></tt></td>
+<td><tt class="docutils literal">(1000000,2)</tt></td>
+<td><em>c</em> is <strong>broadcast</strong> over <em>e</em> : must be compatible shape</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> 1)</tt></td>
+<td><tt class="docutils literal">(1000000,)</tt></td>
+<td><tt class="docutils literal">axis=1</tt> : summing over the axis of length 2</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> 0)</tt></td>
+<td><tt class="docutils literal">(2,)</tt></td>
+<td><tt class="docutils literal">axis=0</tt> : summing over axis of length 1M</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> None)</tt></td>
+<td><tt class="docutils literal">()</tt></td>
+<td><tt class="docutils literal">axis=None</tt> : summing over all elements, yielding scalar</td>
+</tr>
+</tbody>
+</table>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py">https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py</a></p>
+</div>
+<div class="slide" id="numpy-example-nll-reconstruction-fit-on-one-slide">
+<h1><span class="small">NumPy Example : NLL Reconstruction fit : On one slide</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Array-oriented brevity : prototyping</span></p>
+<ul class="small simple">
+<li>introspect interactively with <em>IPython</em></li>
+<li>follow <strong>shape</strong> at every stage</li>
+</ul>
+<div class="small last"><pre class="mypretiny">
+In [5]: t_model([0,0,0])
+Out[5]: array([10., 10., 10., ..., 10., 10., 10.])
+
+In [6]: t_model([0,0,0]).shape
+Out[6]: (2500,)
+
+In [7]: t.shape
+Out[7]: (2500,)
+
+In [8]: t
+Out[8]: array([ 6.783 ,  5.4754,  6.1462, ... ])
+</pre></div></div>
+<pre class="mypretiny">
+#!/usr/bin/env python
+import numpy as np, scipy.stats as st, scipy.optimize as so
+np.random.seed(0)  # reproducibility
+
+<b><span class="alarm"># generate n*n (x,y,z) coordinates on a sphere </span></b>
+n = 50
+u,v = np.meshgrid( np.linspace(0,np.pi,n+2)[1:-1],
+                   np.linspace(0,2*np.pi,n+1)[:-1] )
+uu = u.ravel() ; vv = v.ravel()
+sph = np.zeros( [len(uu), 3] )
+sph[:,0] = np.sin(uu)*np.cos(vv)
+sph[:,1] = np.sin(uu)*np.sin(vv)
+sph[:,2] = np.cos(uu)
+R = 10  ; sph *= R
+
+<b><span class="alarm"># mockup "truth" position </span></b>
+parTru = np.array( [0,0,R/2, 1] )
+
+<b><span class="alarm"># distances from all the sphere coordinates to the "truth" position  </span></b>
+d = np.sqrt(np.sum((sph - parTru[:3])**2, axis=1 ))
+
+<b><span class="alarm"># mockup a time linear with the distance with a normal smearing     </span></b>
+t = d + parTru[3]*np.random.randn(len(d))
+
+<b><span class="alarm"># geometric "time" as function of position </span></b>
+t_model = lambda par:np.sqrt(np.sum((sph - par[:3])**2, axis=1 ))
+
+<b><span class="alarm"># Assumed PDF of "time" at each sphere position, normal around geometric time with some sigma. </span></b>
+NLL = lambda par:-np.sum( st.norm.logpdf(t, loc=t_model(par), scale=par[3] ))
+
+parIni = np.array( [0,0,0,1] )  # initial parameter values
+parFit = so.minimize(NLL, parIni, method='nelder-mead').x ; print(parFit)</pre><p class="class"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/recon_terse.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/recon_terse.py</a></p>
+</div>
 <div class="slide" id="outline-of-techniques-monte-carlo-method">
 <h1>Outline of Techniques : Monte Carlo Method</h1>
 <img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
@@ -1012,7 +1243,11 @@ If you ever tried JNI... -->
 <li>modelling Scattering and Absorption</li>
 <li>accept-reject sampling</li>
 <li>estimating pi</li>
-<li><em>NVIDIA CUDA + Thrust</em> : GPU estimating pi</li>
+</ul>
+</li>
+<li>Technique : <em>NVIDIA CUDA + Thrust</em><ul>
+<li>GPU estimating pi</li>
+<li>NLL Fitting Extended Example : <strong>CPU+GPU techniques</strong></li>
 </ul>
 </li>
 <li><em>Geant4</em> : Standard Monte Carlo in HEP<ul>
@@ -1338,7 +1573,8 @@ struct estimate_pi
     {
         float sum = 0;
         curandState rng;
-        curand_init(seed, 0, 0, &rng);   <b><span class="alarm">// initializing curand is expensive better to split + persist </span></b>
+        curand_init(seed, 0, 0, &rng);
+       <b><span class="alarm">// initializing curand is very expensive better to split/persist/load, see next pages </span></b>
 
         for(int i = 0; i &lt; N; ++i)
         {
@@ -1388,6 +1624,101 @@ epsilon:tests blyth$ nvcc thrust_curand_estimate_pi.cu
 epsilon:tests blyth$ ./a.out
  M 30000 N 10000 estimate 3.14142 delta -0.00017
 </pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_cuda">https://bitbucket.org/simoncblyth/intro_to_cuda</a></p>
+</div>
+<div class="slide" id="curand-random-number-generation-split-initialization-and-usage">
+<h1><span class="small">cuRAND Random Number Generation : Split Initialization and Usage</span></h1>
+<p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_cuda/src/tip/rng/rng_states.cu">https://bitbucket.org/simoncblyth/intro_to_cuda/src/tip/rng/rng_states.cu</a></p>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Persistent CUDA Context</span></p>
+<p class="small">GPU buffers live within CUDA context</p>
+<ul class="small simple">
+<li>load once at initialization</li>
+<li>reuse for multiple kernel launches</li>
+</ul>
+<p class="small">Opticks populates context at initialization:</p>
+<ul class="small last simple">
+<li>random number generator RNG (curandState)</li>
+<li>Geometry : CSG Nodes/Transforms/Vertices/...</li>
+</ul>
+</div>
+<p class="small">Concurrent generation of millions of reproducible sequences of pseudorandom numbers</p>
+<ul class="small simple">
+<li>sub-sequences assigned to each photon index</li>
+<li>curandState maintains position in sub-sequences</li>
+</ul>
+<p class="small"><tt class="docutils literal">curand_init</tt> very expensive -&gt; <strong>huge performance hit</strong>:</p>
+<ul class="small simple">
+<li>not just time to initialize</li>
+<li>ALSO : large stack -&gt; <span class="red">limits number of concurrent threads</span></li>
+</ul>
+<p class="small">Solution:</p>
+<ul class="small simple">
+<li>split initialization into separate launch(es)<ul>
+<li>do <strong>once</strong> only, at install time : persist state to installcache</li>
+<li>fixes maximum photon launch size : currently 3M threads</li>
+</ul>
+</li>
+<li>load rng_state into CUDA context at executable initialization, together with geometry</li>
+<li>subsequent CUDA launches, eg for each event<ul>
+<li>small stacksize, lightweight threads -&gt; <span class="red">generate randoms without initializing</span>, increment rng_state</li>
+</ul>
+</li>
+</ul>
+<p class="small"><span class="blue">Understanding this technicality -&gt; correct &quot;mental model&quot; of CUDA context</span></p>
+</div>
+<div class="slide" id="nll-fitting-extended-example-demo-cpu-gpu-project-techniques">
+<h1><span class="small">NLL Fitting Extended Example : Demo CPU+GPU project techniques</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Hiding the CUDA implementation</span></p>
+<div class="last"><hr/><pre class="mypretiny">
+// recon/Rec.hh <b><span class="alarm">// requires nvcc compilation </span></b>
+#include "NLL.hh"
+template&lt;typename T&gt;
+T Rec&lt;T&gt;::nll_() const
+{
+    return -thrust::transform_reduce(
+              thrust::make_counting_iterator(0),
+              thrust::make_counting_iterator(tnum),
+              *nll, <b><span class="alarm">// NLL functor </span></b>
+              T(0),
+              thrust::plus&lt;T&gt;()
+           );
+}
+</pre>
+<hr/><pre class="mypretiny">
+// recon/Recon.hh <b><span class="alarm">// gcc/clang/nvcc compilation </span></b>
+#include &lt;vector&gt;
+template &lt;typename T&gt; struct Rec ;
+template &lt;typename T&gt;
+struct Recon
+{
+    Rec&lt;T&gt;* rec ; <b><span class="alarm">// <-- CUDA imp hidden behind pointer </span></b>
+    Recon( const char* dir ) ;
+    T nll( const std::vector&lt;T&gt;& par );
+};
+</pre>
+<hr/></div></div>
+<p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_cuda/src/tip/recon/">https://bitbucket.org/simoncblyth/intro_to_cuda/src/tip/recon/</a></p>
+<p class="small"><strong>1. CPU+GPU Libs, Bridging header pattern</strong></p>
+<ul class="small simple">
+<li>GPU code library (nvcc) : <em>NLL</em> method</li>
+<li>CPU library + executable (gcc/clang) : <em>Minuit2</em> fitter</li>
+</ul>
+<dl class="small docutils">
+<dt><em>Recon.hh</em></dt>
+<dd>hides CUDA implementation behind <em>Rec&lt;T&gt;</em> pointer</dd>
+</dl>
+<p class="small"><strong>2. NumPy array read/write from C++/CUDA C/Thrust</strong></p>
+<ul class="small simple">
+<li>develop in C++/CUDA C/Thrust</li>
+<li>debug with <em>IPython/NumPy</em></li>
+</ul>
+<p class="small"><strong>3. Thrust : GPU development</strong></p>
+<ul class="small simple">
+<li>simplified : CPU&lt;-&gt;GPU copy, memory management</li>
+<li>high level <em>thrust::transform_reduce</em> with <em>functor</em></li>
+</ul>
+<p class="small"><span class="blue">Real CUDA usage -&gt; two compilers -&gt; interop techniques required</span></p>
 </div>
 <div class="slide" id="geant4-monte-carlo-simulation-toolkit">
 <h1>Geant4 : Monte Carlo Simulation Toolkit</h1>
@@ -1463,23 +1794,58 @@ the primary track)</li>
 
 ~/opticks_refs/Geant4_intro_J_Apostolakis.pdf -->
 </div>
-<div class="slide" id="outline-of-opticks-problem-and-solution">
-<h1>Outline of <em>Opticks</em> : Problem and Solution</h1>
+<div class="slide" id="outline-of-opticks-problem-solution-geometry-validation">
+<h1><span class="small">Outline of Opticks : Problem, Solution, Geometry, Validation</span></h1>
 <img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
-<ul class="simple">
-<li>Optical Photon simulation problem<ul>
-<li>Hybrid solution : Geant4 + Opticks</li>
-<li>NVIDIA OptiX Ray Tracing Engine</li>
+<!-- comment
+
+* OptiX Performance Scaling with GPU cores -->
+<ul class="tiny simple">
+<li>Optical Photon simulation problem, hybrid solution : Geant4 + Opticks</li>
+<li>Ray Traced Image Synthesis ≈ Optical Photon Simulation</li>
+<li>NVIDIA OptiX Ray Tracing Engine<ul>
+<li>BVH : Boundary Volume Hierarchy</li>
+<li>BVH Pascal : software emulation</li>
+<li>BVH Turing : hardware &quot;RT Cores&quot;</li>
 </ul>
 </li>
-<li><em>Opticks</em> : optical photon simulation with NVIDIA OptiX<ul>
-<li>geometry workflow : geocache, GPU textures</li>
-<li>large geometry techniques, geometry modelling</li>
-<li>Geant4/Opticks event workflow</li>
-<li>Validation, performance comparisons</li>
+<li>Primitives<ul>
+<li>GPU Geometry starts from ray-primitive intersection</li>
+<li>Torus : much more difficult/expensive than other primitives</li>
+</ul>
+</li>
+<li>CSG : Constructive Solid Geometry modelling<ul>
+<li>Shapes defined &quot;by construction&quot;</li>
+<li>Which primitive intersect to pick ?</li>
+<li>Ray intersection with general CSG binary trees, on GPU</li>
+<li>Complete Binary Tree Serialization -&gt; simplifies GPU side</li>
+<li>Evaluative CSG intersection Pseudocode : recursion emulated</li>
+<li>CSG Deep Tree : JUNO &quot;fastener&quot;, balancing reduces tree height: 11 -&gt; 4</li>
+<li>Geometry visualizations : Daya Bay Near Site, JUNO Central Detector</li>
+<li>CSG : (Cylinder - Torus) PMT neck : spurious intersects</li>
+<li>CSG : Alternative PMT neck designs</li>
+</ul>
+</li>
+<li>Translation<ul>
+<li>Auto-Instancing</li>
+<li>Opticks : translates G4 geometry to GPU, without approximation</li>
+<li>Opticks : Export of G4 geometry to glTF 2.0</li>
+<li>Opticks : translates G4 optical physics to GPU</li>
+</ul>
+</li>
+<li>Validation : Opticks/G4 statistical comparison<ul>
+<li>Simple Lights/Geometries</li>
+<li>1M Rainbow S-Polarized</li>
+</ul>
+</li>
+<li>Random Aligned Validation -&gt; direct comparison<ul>
+<li>Take Control of Geant4 Random Number Generator (RNG)</li>
+<li>Aligning CPU and GPU Simulations</li>
+<li>Direct comparison of GPU/CPU NumPy arrays</li>
+<li>Coincident Faces are Primary Cause of Issues : Spurious Intersects</li>
+</ul>
+</li>
 <li>Summary</li>
-</ul>
-</li>
 </ul>
 </div>
 <div class="slide" id="optical-photon-simulation-problem">
@@ -1524,16 +1890,17 @@ the primary track)</li>
 <p class="small"><strong>Ray-geometry intersection</strong></p>
 <ul class="small simple">
 <li>hw+sw continuously optimized over 30 years</li>
-<li>performance &gt; 100M intersections per second per GPU</li>
+<li>NVIDIA : <em>&quot;10+ Giga-ray intersections per second per GPU&quot;</em>
+(Turing GPU : hardware BVH acceleration )</li>
 </ul>
 <pre class="mypre">
 
 </pre><dl class="small docutils">
+<dt><strong>ray tracing</strong></dt>
+<dd><span class="blue">cast rays thru image pixels into scene, recursively reflect/refract at
+intersects, combine returns into pixel values</span></dd>
 <dt><strong>rasterization</strong></dt>
 <dd>project 3D primitives onto 2D image plane, combine fragments into pixel values</dd>
-<dt><strong>ray tracing</strong></dt>
-<dd>cast rays thru image pixels into scene, recursively reflect/refract at
-intersects, combine returns into pixel values</dd>
 </dl>
 </div>
 <div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix">
@@ -1581,25 +1948,31 @@ https://www.anandtech.com/show/13282/nvidia-turing-architecture-deep-dive/3
 https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_029.png
 https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_030.png
 https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_031.png -->
-</div>
-<div class="slide" id="optix-performance-scaling-with-gpu-cores">
-<h1><span class="small">OptiX Performance Scaling with GPU cores</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Performance Linearity with CUDA cores</p>
-<img alt="/env/g4dae/core_linearity.png" class="last align-right" src="/env/g4dae/core_linearity.png" style="width: 500px;" />
-</div>
-<p class="small">OptiX sample rendering with 2 GPU IHEP workstation,</p>
-<ul class="small simple">
-<li>2 Tesla K20m (4992 cores) 28.0 ms/f</li>
-<li>1 Tesla K20m (2496 cores) 49.1 ms/f</li>
-<li>1 GeForce GT 750m (384 cores) 345.1 ms/f</li>
-</ul>
-<p class="small"><span class="red">Performance linear with GPU cores</span>, compared to laptop:</p>
-<ul class="small simple">
-<li>13x cores, 12x performance</li>
-<li>performance scales across GPUs</li>
-</ul>
-<p class="small">Benefit from multiple GPUs with no development effort.</p>
+<!-- comment
+
+:small:`OptiX Performance Scaling with GPU cores`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. sidebar:: Performance Linearity with CUDA cores
+
+    .. image:: /env/g4dae/core_linearity.png
+       :width: 500px
+       :align: right
+
+.. class:: small
+
+    OptiX sample rendering with 2 GPU IHEP workstation,
+
+    * 2 Tesla K20m (4992 cores) 28.0 ms/f
+    * 1 Tesla K20m (2496 cores) 49.1 ms/f
+    * 1 GeForce GT 750m (384 cores) 345.1 ms/f
+
+    :red:`Performance linear with GPU cores`, compared to laptop:
+
+    * 13x cores, 12x performance
+    * performance scales across GPUs
+
+    Benefit from multiple GPUs with no development effort. -->
 </div>
 <div class="slide" id="opticks-gpu-geometry-starts-from-ray-primitive-intersection">
 <h1><span class="small">Opticks : GPU Geometry starts from ray-primitive intersection</span></h1>
@@ -1631,9 +2004,9 @@ https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_031.png -->
 <p class="small">High order equation</p>
 <ul class="small simple">
 <li>very large difference between coefficients</li>
-<li>varying ray -&gt; wide range of very coefficients</li>
+<li>varying ray -&gt; wide range of coefficients</li>
 <li>numerically problematic, requires double precision</li>
-<li>several mathematical approaches used, work in progress</li>
+<li>several mathematical approaches used</li>
 </ul>
 <p class="small"><strong>Best Solution : replace torus</strong></p>
 <ul class="small simple">
@@ -1991,6 +2364,9 @@ NTreeAnalyse height 4 count 25
 <div class="slide" id="j1808-top-rtx">
 <h1><span class="i">j1808_top_rtx</span></h1>
 </div>
+<div class="slide" id="j1808-escapes">
+<h1><span class="i">j1808_escapes</span></h1>
+</div>
 <div class="slide" id="csg-cylinder-torus-pmt-neck-spurious-intersects">
 <h1><span class="small">CSG : (Cylinder - Torus) PMT neck : spurious intersects</span></h1>
 <img alt="/env/presentation/tboolean_12_rasterized.png" class="align-right" src="/env/presentation/tboolean_12_rasterized.png" style="width: 550px;" />
@@ -2006,94 +2382,60 @@ NTreeAnalyse height 4 count 25
 <h1><span class="small">CSG : Alternative PMT neck designs</span></h1>
 <img alt="/env/presentation/x018_torus_hyperboloid_plt.png" class="align-left" src="/env/presentation/x018_torus_hyperboloid_plt.png" style="width: 550px;" />
 <img alt="/env/presentation/x018_torus_hyperboloid_plt_zoom.png" class="align-right" src="/env/presentation/x018_torus_hyperboloid_plt_zoom.png" style="width: 500px;" />
-<p class="small">Define Hyperboloid and Cone using <em>closest point on ellipse to center of torus circle</em></p>
+<p class="small">Hyperboloid and Cone defined using <em>closest point on ellipse to center of torus circle</em></p>
 <ul class="small simple">
-<li>Cylinder-Torus : purple line</li>
+<li>Cylinder-Torus : purple line, Cone : green, <strong>simplest</strong></li>
 <li>Hyperboloid : dashed magenta, works with <em>Opticks</em>, BUT <em>G4Hype</em> has no z-range flexibility</li>
-<li>Cone : green, <strong>simplest</strong></li>
 </ul>
 <p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py">https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py</a></p>
 </div>
-<div class="slide" id="numpy-example-closest-approach-of-ellipse-to-a-circle">
-<h1><span class="small">NumPy Example : closest approach of Ellipse to a Circle</span></h1>
-<pre class="mypretiny">
-
-import numpy as np
-
-def ellipse_closest_approach_to_point( ex, ez, _c ):
-    """ex, ez: ellipse semi-axes, c: coordinates of point in ellipse frame"""
-    c = np.asarray( _c )  ; assert c.shape == (2,)
-
-    t = np.linspace( 0, 2*np.pi, 1000000 )     <b><span class="alarm"> # t: array of 1M angles [0,2pi] </span></b>
-    e = np.zeros( [len(t), 2] )
-    e[:,0] = ex*np.cos(t)
-    e[:,1] = ez*np.sin(t)                      <b><span class="alarm"> # e: 1M parametric [x,z] points on the ellipse </span></b>
-
-    return  e[np.sum((e-c)**2, axis=1).argmin()]   <b><span class="alarm"> # point on ellipse closest to c </span></b>
-</pre><table border="1" class="small docutils">
-<colgroup>
-<col width="33%" />
-<col width="15%" />
-<col width="52%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">expression</th>
-<th class="head">shape</th>
-<th class="head">note</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td><tt class="docutils literal">e</tt></td>
-<td><tt class="docutils literal">(1000000,2)</tt></td>
-<td>&nbsp;</td>
-</tr>
-<tr><td><tt class="docutils literal">c</tt></td>
-<td><tt class="docutils literal">(2,)</tt></td>
-<td>&nbsp;</td>
-</tr>
-<tr><td><tt class="docutils literal"><span class="pre">e-c</span></tt></td>
-<td><tt class="docutils literal">(1000000,2)</tt></td>
-<td><em>c</em> is <strong>broadcast</strong> over <em>e</em> : must be compatible shape</td>
-</tr>
-<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> 1)</tt></td>
-<td><tt class="docutils literal">(1000000,)</tt></td>
-<td><tt class="docutils literal">axis=1</tt> : summing over the axis of length 2</td>
-</tr>
-<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> 0)</tt></td>
-<td><tt class="docutils literal">(2,)</tt></td>
-<td><tt class="docutils literal">axis=0</tt> : summing over axis of length 1M</td>
-</tr>
-<tr><td><tt class="docutils literal"><span class="pre">np.sum((e-c)**2,</span> None)</tt></td>
-<td><tt class="docutils literal">()</tt></td>
-<td><tt class="docutils literal">axis=None</tt> : summing over all elements, yielding scalar</td>
-</tr>
-</tbody>
-</table>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py">https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py</a></p>
-</div>
-<div class="slide" id="large-geometry-techniques-instancing-mandatory">
-<h1><span class="small">Large Geometry Techniques : Instancing Mandatory</span></h1>
-<p class="small"><strong>Geometry analysed to find instances</strong></p>
-<p class="small">JUNO: ~90M --&gt; 0.1M triangles</p>
+<div class="slide" id="opticks-auto-instancing">
+<h1><span class="small">Opticks : Auto-Instancing</span></h1>
+<p class="small"><strong>Structure Tree Analysis</strong></p>
 <ul class="small simple">
-<li>18k 20&quot; PMTs</li>
-<li>36k 3&quot; PMTs</li>
-</ul>
-<p class="small"><strong>OpenGL instanced rendering</strong></p>
-<ul class="small simple">
-<li>drastic reduction in GPU memory</li>
-<li>one set of vertices for each PMT type</li>
-<li>4x4 matrices position each PMT</li>
-</ul>
-<p class="small"><strong>Optimizations</strong></p>
-<ul class="small simple">
-<li>cull non-visible instances</li>
-<li>level of detail (LOD) meshes<ul>
-<li>full/simplified/bbox</li>
+<li>structure node progeny digests<ul>
+<li>sub-tree transforms &amp; shapes</li>
 </ul>
 </li>
-<li>switch mesh based on distance to PMT</li>
+<li>instancing criteria<ul>
+<li>number of repeats</li>
+<li>number of vertices</li>
+<li>exclude contained repeats</li>
 </ul>
+</li>
+</ul>
+<p class="small">-&gt; all repeated volumes + transforms</p>
+<p class="small">For JUNO, auto-finds:</p>
+<ul class="small simple">
+<li>20 inch PMTs, 3 inch PMTs</li>
+<li>acrylic fasteners, top-tracker elements</li>
+</ul>
+<p class="small"><span class="red">Avoids geometry specific code</span></p>
+<p class="small"><strong>OpenGL/OptiX instancing</strong></p>
+<ul class="small simple">
+<li><strong>one</strong> definition of repeated geometry</li>
+<li>4x4 transform for each placement</li>
+<li>drastic reduction in GPU memory</li>
+</ul>
+<!-- comment
+
+Automated is advantagous,
+as avoids geometry specific development -->
+<!-- comment
+
+JUNO: ~90M - -> 0.1M triangles
+
+* 18k 20" PMTs
+* 36k 3" PMTs
+
+**Optimizations**
+
+* cull non-visible instances
+* level of detail (LOD) meshes
+
+  * full/simplified/bbox
+
+* switch mesh based on distance to PMT -->
 </div>
 <div class="slide" id="opticks-translates-g4-geometry-to-gpu-without-approximation">
 <h1><span class="small">Opticks : translates G4 geometry to GPU, without approximation</span></h1>
@@ -2410,8 +2752,33 @@ due to massive parallelism made accessible by NVIDIA OptiX.</p>
 <p class="huge"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></p>
 </blockquote>
 </div>
-<div class="slide" id="extras">
-<h1><span class="i">Extras</span></h1>
+<div class="slide" id="opticks-references">
+<h1><span class="small">Opticks References</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Introductions</span></p>
+<dl class="small last docutils">
+<dt><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy">https://bitbucket.org/simoncblyth/intro_to_numpy</a></dt>
+<dd>Introducing NumPy, Array-oriented computing</dd>
+<dt><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_cuda">https://bitbucket.org/simoncblyth/intro_to_cuda</a></dt>
+<dd>Introducing CUDA and Thrust</dd>
+<dt><a class="reference external" href="https://github.com/simoncblyth/np">https://github.com/simoncblyth/np</a></dt>
+<dd>NumPy Array Serialization from C++</dd>
+</dl>
+</div>
+<dl class="docutils">
+<dt><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></dt>
+<dd>Opticks presentations and videos</dd>
+<dt><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></dt>
+<dd>Opticks mailing list archive</dd>
+<dt><a class="reference external" href="mailto:opticks+subscribe&#64;groups.io">opticks+subscribe&#64;groups.io</a></dt>
+<dd>send email to this address, to subscribe</dd>
+</dl>
+<dl class="huge docutils">
+<dt><a class="reference external" href="https://simoncblyth.bitbucket.io/opticks/index.html">https://simoncblyth.bitbucket.io/opticks/index.html</a></dt>
+<dd>Opticks installation instructions</dd>
+<dt><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></dt>
+<dd>Opticks code repository</dd>
+</dl>
 </div>
 <div class="slide" id="opticksdocs">
 <h1><span class="i">OpticksDocs</span></h1>
@@ -2458,49 +2825,6 @@ Unless it's complicated -- then use Cython or numexpr.
 </ul>
 <p class="tiny">[1] <em>imperative</em> means step by step how to do something</p>
 <p class="tiny">[2] but not so large that has trouble fitting in memory, np.memmap is possible but better to avoid for simplicity</p>
-</div>
-<div class="slide" id="numpy-python-flexibility-brevity-at-c-speed">
-<h1><span class="small">NumPy : Python flexibility+brevity at C speed</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Opticks.NPY package</span></p>
-<ul class="small simple">
-<li>inspired by <em>NumPy</em> : does not depend on it</li>
-<li>implements <em>NumPy</em> serialization file format,
-into which almost everything(*) is persisted</li>
-<li><em>Opticks</em> analysis/debugging done with <em>NumPy</em> and <em>IPython</em></li>
-</ul>
-<p class="tiny last">(*) gensteps, photons, hits, analytic CSG geometry shapes, transforms, triangulated geometry vertices, triangles, material/surface properties ...</p>
-</div>
-<p class="small"><strong>“fundamental package for scientific computing with Python”</strong></p>
-<p class="small"><em>NumPy</em> arrays : simply an interface to C memory buffers</p>
-<ul class="small simple">
-<li><span class="red">extreme simplicity</span> : simple interop with C, C++, CUDA</li>
-<li>slices are no-copy &quot;views&quot; of underlying buffers</li>
-<li>reshape/transpose : just changes metadata</li>
-<li>fast memcpy, cudaMemcpy, serialization/deserialization</li>
-</ul>
-<p class="small">Very terse, no-loop python interface to C performance</p>
-<ul class="small simple">
-<li><strong>array-oriented computing</strong> (C loops under python control)</li>
-<li>interactive handling of very large N-dimensional arrays</li>
-<li>easily manipulate million item arrays from python<ul>
-<li>faster + more convenient than dealing with millions of C++ objects</li>
-</ul>
-</li>
-</ul>
-<p class="small"><strong>“The NumPy array: a structure for efficient numerical computation”</strong></p>
-<ul class="small simple">
-<li><a class="reference external" href="https://hal.inria.fr/inria-00564007/document">https://hal.inria.fr/inria-00564007/document</a></li>
-</ul>
-<p class="tiny">NPY file format specification</p>
-<p class="tiny"><a class="reference external" href="https://github.com/numpy/numpy/blob/master/doc/neps/nep-0001-npy-format.rst">https://github.com/numpy/numpy/blob/master/doc/neps/nep-0001-npy-format.rst</a></p>
-<!-- comment
-
-https://jeffknupp.com/blog/2017/09/15/python-is-the-fastest-growing-programming-language-due-to-a-feature-youve-never-heard-of/
-
-Secret weapon of NumPy
-
-https://github.com/python/peps/blob/master/pep-3118.txt -->
 </div>
 <div class="slide" id="npy-minimal-file-format-metadata-header-data-buffer-trivial-to-parse">
 <h1><span class="small">NPY minimal file format : metadata header + data buffer : trivial to parse</span></h1>
@@ -2839,7 +3163,7 @@ Very simple file format : about as minimal as could be
              background-size: 316px 203px;
              background-position: 850px 400px;
           }
-          div.slide#large-geometry-techniques-instancing-mandatory{
+          div.slide#opticks-auto-instancing{
              background-image: url(/env/graphics/ggeoview/ggv-juno-instancing.png);
              background-size: 852px 592px;
              background-position: 450px 80px;
@@ -2969,6 +3293,21 @@ Very simple file format : about as minimal as could be
              background-size: 1280px 720px;
              background-position: 0px 0px;
           }
+          div.slide#raytrace-vs-raster{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_132.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#ray-tracing-vs-rasterization{
+             background-image: url(/env/presentation/nvidia/black.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#raytrace-diagram{
+             background-image: url(/env/presentation/graphics/1024px-ray_trace_diagram.svg.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
           div.slide#j1808-top-ogl{
              background-image: url(/env/presentation/j1808/j1808_top_ogl.png);
              background-size: 1280px 720px;
@@ -2977,6 +3316,11 @@ Very simple file format : about as minimal as could be
           div.slide#j1808-top-rtx{
              background-image: url(/env/presentation/j1808/j1808_top_rtx.png);
              background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#j1808-escapes{
+             background-image: url(/env/presentation/j1808/j1808_escapes.png);
+             background-size: auto auto;
              background-position: 0px 0px;
           } 
 
