@@ -499,21 +499,23 @@ Structure
 <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; Oct 2018, IHEP, Beijing </h2>
 </div><!-- comment
 
-Opticks applies GPU massive parallelism to optical photon simulation,
+**Opticks is an open source package** that applies GPU massive parallelism
+to optical photon simulation.
+
+This image represents the optical photons resulting from a 100GeV
+muon crossing the JUNO central detector, which is a large sphere of scintillator
+surrounded by many thousands of photomultiplier tubes, each PMT is able to detect single photons.
+
 
 * any simulation limited by optical photons can benefit greatly from Opticks
 
   * the more limited the greater the benefit
   * huge energy/time savings for JUNO
 
-
-
-
 And the benefits can be enormous... modern GPUs have more than 5000 cores, Opticks succeeds to
 port all of the optical photon simulation to the GPU : because you really do have
 millions of similar calculations for cosmic muon for example : the performance improvement
 over CPU is expected to be >1000
-
 
 Title:
 
@@ -550,6 +552,7 @@ If you wish to:
 * simply analyse C++ generated data from the comfort of python
 
 then my presentation will provide much to interest you. -->
+<!-- comment -->
 
 </div>
 <div class="slide" id="opticks-benefits">
@@ -606,14 +609,46 @@ of optical photons.
 </ul>
 </li>
 </ul>
-<span>&nbsp;</span></div>
+<span>&nbsp;</span><!-- comment
+
+Opticks is a specialized solution to a particular problem,
+but the **tools and techniques** vital to Opticks are widely applicable.
+They are directly relevant to anyone working with data in any field.
+
+I will highlight tools and techniques because I want you all to
+start using them.
+
+In particular NumPy, I think everyone that works with data in
+any field should be familiar with NumPy.  You dont need
+access to a GPU to use it, but learning it is just about the best preparation
+you could have for working with GPUs
+
+NumPy makes you think of your data in a different way, that matches how the GPU
+works with data. -->
+</div>
 <div class="slide" id="raytrace-diagram">
 <h1><span class="i">Raytrace Diagram</span></h1>
+<!-- comment
+
+Ray-tracing is a technique to generate images (ie pixel values)
+by casting rays from a viewpoint out through every pixel, into a scene geometry.
+Pixel values depend on what those rays intersect. -->
 </div>
 <div class="slide" id="ray-tracing-vs-rasterization">
 <h1><span class="i">Ray-tracing vs Rasterization</span></h1>
 <img alt="/env/presentation/nvidia/nv_rasterization.png" class="align-left" src="/env/presentation/nvidia/nv_rasterization.png" style="width: 550px;" />
 <img alt="/env/presentation/nvidia/nv_raytrace.png" class="align-right" src="/env/presentation/nvidia/nv_raytrace.png" style="width: 550px;" />
+<!-- comment
+
+Rasterization
+
+* starts from the objects in a scene, and projects them onto pixels in image plane
+* approximation : usually triangulated geometry
+
+ray-tracing
+
+* closer to the physics -> easier to create realistic images with raytracing
+* can use analytic geometry, rasterization is -->
 </div>
 <div class="slide" id="outline-introducing-the-tools">
 <h1>Outline : Introducing the Tools</h1>
@@ -652,40 +687,9 @@ of optical photons.
 </ul>
 <div class="small"><span></span></div><!-- comment
 
-To understand Opticks and why it is structured as it
-is you need to understand GPUs -->
-<!-- comment
-
-Opticks package applies GPU massive parallelism
-to remove a processing bottleneck.
-It is a very focussed solution to a particular problem : so it
-will only be of direct relevance to you if you are working with a simulation
-with performance limited by optical photons.
-
-To make this talk more directly relevant and useful to more of you,
-I will devote a substantial part of it to describing the techniques and
-tools that were particularly important.
-
-Despite the specialized nature of the Opticks simulation, the techniques
-and tools used can be directly relevant to anyone working in data analysis in
-almost any field.
-
-These have been principally monte carlo methods and the NumPy
-package  : which fits particularly well optical photon simulation.
-Another vital thing has been CUDA and Thrust, which I will cover briefly.
-However I gave a whole presentation introducing CUDA and Thrust last year.
-
-Could easily spend many hours introducing the features of these tools,
-but that would not be very useful :  as too much to grasp without practical usage ...
-
-So instead:
-
-* just give a flavor of what they do
-* convey how they work and why that makes them perform better than other approaches
-* describe simple approaches on how the tools fit together to provide cross language
-  numerical analysis environment
-
-* https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-in-practice/monte-carlo-simulation -->
+Next the tools, I'll introduce the GPU architecture, show how GPU constraints
+lead to an array-oriented way of working and hence lead to NumPy,
+them I'll introduce NumPy. -->
 </div>
 <div class="slide" id="understanding-gpus-graphical-origins-an-extremely-parallel-problem">
 <h1><span class="small">Understanding GPUs : Graphical Origins : An Extremely Parallel Problem</span></h1>
@@ -701,12 +705,42 @@ So instead:
 <img alt="/env/presentation/graphics/rendering_pipeline.png" class="small align-center" src="/env/presentation/graphics/rendering_pipeline.png" style="width: 800px;" />
 <!-- comment
 
+GPUs evolved to solve the extremely parallel problem of 3D graphics ...
+using small shaders.
+
+When developing with CUDA its best to keep these origins in mind.
+
+* for example, copying or operating on float4s 4*32bits is faster that *float3*
+  128bits are better for alignment reasons
+
+* graphics pipeline is based around 4x4 matrices
+  and 4 component homogeneous coordinates -->
+<!-- comment
+
 https://cg.informatik.uni-freiburg.de/course_notes/graphics_01_pipeline.pdf
 
 http://web.cse.ohio-state.edu/~shen.94/781/Site/Slides_files/pipeline.pdf -->
 </div>
 <div class="slide" id="nvidia-turing-gpu-72-sm-4608-cuda-cores">
 <h1><span class="incremental">NVIDIA Turing GPU : 72 SM, 4608 CUDA cores</span></h1>
+<!-- comment
+
+This is the latest NVIDIA GPU architecture, evolved for 3D graphics ...
+Notice the repeated elements, there are 72 SMs, streaming multiprocessors
+each with 64 CUDA cores for a total of almost 5000 CUDA cores.
+Other recent NVIDIA GPUs have more than 5000 CUDA cores
+
+This is very different from the CPU, which typically doesnt go past 16 cores
+
+GPUs continue to improve exponentially, whereas CPUs are not really managing
+to do that anymore : instead they are getting wider with more cores -->
+<!-- comment
+
+This is the latest Turing GPU architecture from NVIDIA : other recent ones
+as Pascal and Volta
+
+
+Tesla Fermi Kepler Maxwell Pascal Volta Turing -->
 </div>
 <div class="slide" id="nvidia-turing-gpu-72-sm-4608-cuda-cores-spec">
 <h1><span class="incremental">NVIDIA Turing GPU : 72 SM, 4608 CUDA cores (spec)</span></h1>
@@ -749,6 +783,14 @@ http://web.cse.ohio-state.edu/~shen.94/781/Site/Slides_files/pipeline.pdf -->
 <p class="small">Effective use of <strong>Totally different processor architecture</strong> -&gt; <span class="red">Total reorganization of data and computation</span></p>
 <p class="tiny">Understanding Throughput-oriented Architectures
 <a class="reference external" href="https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext">https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext</a></p>
+<!-- comment
+
+Latency hiding works using hardware multi-threading, so when one group of threads is blocked
+waiting to read from global memory for example : other groups of thread and be resumed. This
+is only effective at hiding latency when there are enough other threads in flight at the same time.
+
+Porting CPU code to run on the GPU : is not a straightforward thing to do, because the archirecture is totally
+different.  To make effective use of GPUs requires a total reorganization of data and compute. -->
 </div>
 <div class="slide" id="how-to-make-effective-use-of-gpus-use-higher-level-libraries">
 <h1><span class="small">How to Make Effective Use of GPUs ? -&gt; Use Higher Level Libraries</span></h1>
@@ -791,6 +833,16 @@ http://web.cse.ohio-state.edu/~shen.94/781/Site/Slides_files/pipeline.pdf -->
 <ul class="small simple">
 <li>Opticks : <a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></li>
 </ul>
+<!-- comment
+
+Benefiting from the experience of others by using higher level libraries is the first choice...
+But there are not so many available
+
+Thrust stands out as it is part of every CUDA installation, you just need to
+include the headers to use it... It avoid many of the hassles of using CUDA,
+including memory management, and deciding on launch sizes
+
+Its not an either/or, you can easily combine ordinary low level CUDA with Thrust. -->
 </div>
 <div class="slide" id="how-to-make-effective-use-of-gpus-parallel-simple-uncoupled">
 <h1><span class="small">How to Make Effective Use of GPUs ? Parallel / Simple / Uncoupled</span></h1>
@@ -860,6 +912,34 @@ http://web.cse.ohio-state.edu/~shen.94/781/Site/Slides_files/pipeline.pdf -->
 <p class="tiny">Understanding Throughput-oriented Architectures
 <a class="reference external" href="https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext">https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext</a></p>
 <p class="tiny">NVIDIA Titan V: 80 SM, 5120 CUDA cores</p>
+<!-- comment
+
+Four main things dictate how effective your use of the GPU is going to be ...
+
+* ideally you need to have many thousands of simple independent tasks to make best use of the GPU
+
+* each task needs to be simple : low register usage and small stacksize : otherwise you limit
+  the number of concurrent tasks
+
+* idependence of the tasks really helps, as development is then much easier
+
+Many people guess that you should launch only as many threads as there are cores
+in the GPU ... but thats wrong, you need to launch large multiples of that to get best performance
+
+The reason is latency hiding ... that works best when there is abundant parallelism,
+when the GPU workload resembles that from 3D graphics you will get best performance.
+
+
+
+So how does optical photon simulation stand on these criteria...
+
+* parallelism and synchronization are perfect : with millions of independent photons
+  to simulation
+
+* low register usage : not so perfect, work required to fit into small stack size
+
+  * eg GPU textures for property access : does wavelength interpolation in hardware,
+    so avoids code and resource consumption -->
 <!-- comment
 
 https://streamhpc.com/blog/2017-01-24/many-threads-can-run-gpu/
@@ -937,31 +1017,17 @@ The maximum number of threads in flight is 2048 * #SM -->
 <p class="tiny"><a class="reference external" href="https://realpython.com/numpy-array-programming/">https://realpython.com/numpy-array-programming/</a></p>
 <!-- comment
 
-Very limited libraries -> **re-think + re-implement** from scratch, eg:
-   * ray-geometry intersection
-   * Monte Carlo sampling
+GPU and CPU have separate address spaces, that means
+everything copied between them needs serialization/deserialization
 
-**Small amount of GPU code : OptiX, CUDA, Thrust, OpenGL**
+Adopting an array-oriented design for all data both
+on CPU and GPU is a hugely simplifies work CPU+GPU work
 
-* corresponding to "inner" loops from CPU code
+NumPy is leading array-oriented package, but that is a python extension ...
+YES : but the NumPy serialization format is very simple, so can easily
+read/write NumPy arrays from C++
 
-**Vast majority of Opticks code on CPU : geometry conversion**
-
-* geometry buffers serialization
-* boundary texture (material/surface properties)
-* reemission texture (reemission wavelength generation)
-
-**All data structures serialized**
-
-* required to copy to/from GPU
-
-**Benefits of serialization**
-
-* persist everything to file, in *NumPy* format
-* -> load into *NumPy* as arrays
-
-  * interactive debugging/analysis with *IPython + NumPy*
-  * no *Python/NumPy* dependency for *Opticks* -->
+Benefits : random access to data from arrays -->
 <!-- comment
 
 :small:`NumPy : Python flexibility+brevity at C speed`
@@ -1083,6 +1149,11 @@ https://github.com/python/peps/blob/master/pep-3118.txt -->
 <p class="tiny"><a class="reference external" href="https://github.com/donnemartin/data-science-ipython-notebooks">https://github.com/donnemartin/data-science-ipython-notebooks</a></p>
 <!-- comment
 
+* NumPy provides a terse python interface to large arrays, at C speed
+* NumPy is at the center of the python data universe
+* almost all python data packages use NumPy, or mimic its array interface -->
+<!-- comment
+
 Familiarity with NumPy fundmentals makes use of all these packages more straightforward.
 
 http://luispedro.org/files/talks/2014/09-pyss/pyss14.html -->
@@ -1108,6 +1179,8 @@ http://luispedro.org/files/talks/2014/09-pyss/pyss14.html -->
 <p class="tiny"><a class="reference external" href="https://insights.stackoverflow.com/trends">https://insights.stackoverflow.com/trends</a></p>
 <p class="tiny"><a class="reference external" href="https://jakevdp.github.io/blog/2014/05/05/introduction-to-the-python-buffer-protocol/">https://jakevdp.github.io/blog/2014/05/05/introduction-to-the-python-buffer-protocol/</a></p>
 <!-- comment
+
+Using NumPy means using python...
 
 Over the past 5 years, the python language has more than doubled its userbase according to this measure...
 
@@ -1230,6 +1303,21 @@ NLL = lambda par:-np.sum( st.norm.logpdf(t, loc=t_model(par), scale=par[3] ))
 
 parIni = np.array( [0,0,0,1] )  # initial parameter values
 parFit = so.minimize(NLL, parIni, method='nelder-mead').x ; print(parFit)</pre><p class="class"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/recon_terse.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/recon_terse.py</a></p>
+<!-- comment
+
+Notice:
+
+* brevity : comments longer than the code they describe
+* no loops : loops happen at C level
+
+  * looping over large arrays in python -> you need to improve your NumPy skills
+
+* details of what the script is doing are not so important
+
+  * but its brevity means its easy to find out
+  * run the commands one by one in *IPython*, look at the shapes at each stage
+  * when NumPy is confusing -> it usually means you are imagining something
+    to have a different shape than it actually has, so use interactive introspection to find out -->
 </div>
 <div class="slide" id="outline-of-techniques-monte-carlo-method">
 <h1>Outline of Techniques : Monte Carlo Method</h1>
@@ -1256,6 +1344,16 @@ parFit = so.minimize(NLL, parIni, method='nelder-mead').x ; print(parFit)</pre><
 </ul>
 </li>
 </ul>
+<!-- comment
+
+OK, so I've introduced to the tools, now we move to techniques
+
+On the GPU you do not have the luxury of lots of libraries to use and link against,
+instead you mostly have to implement things from first principals ...
+for example making a Monte Carlo simulation.
+
+So I'll cover some of those techniques and illustrate them with
+examples using NumPy and Thrust -->
 </div>
 <div class="slide" id="monte-carlo-method-apply-randomness-to-model-complex-systems">
 <h1><span class="small">Monte Carlo Method : apply randomness to model complex systems</span></h1>
@@ -1288,8 +1386,16 @@ Pat Ward, Cambridge University, 74 pages Powerpoint</p>
 <p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Monte_Carlo_method">https://en.wikipedia.org/wiki/Monte_Carlo_method</a></p>
 <!-- comment
 
-Now lets shift from Tools to Techniques : the Monte Carlo method
+Monte Carlo method : its ubiquitous, used in almost every field
 
+Applies randomness to modelling complex systems, by mapping random numbers
+to probabilities
+
+probability density functions (PDF) are the inputs to the monte carlo
+(representing our knowledge of the behaviour of the system)
+
+sampling techniques are used to create sets of sample values that follow the PDFs -->
+<!-- comment
 
 Historical review on MC Method : Ulam, Von Neumann
 
@@ -1353,7 +1459,15 @@ such that angle between old and new follows cos^2 distribution</li>
 <a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/rayleigh.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/rayleigh.h</a></p>
 <!-- comment
 
-How to actually use Monte Carlo method to implement an optical photon simulation... -->
+* The simulation actually generates a history of the system
+* for example consider a photon on its way to a boundary
+
+  * characteristic lengths are converted to stochastic distances
+    and the smallest length wins
+
+* details of rayleigh scattering are not important here,
+  what is important to understand is how the theory informs the simulation
+  of which quantities have what PDFs -->
 </div>
 <div class="slide" id="mc-method-sampling-using-cumulative-distribution-function-cdf">
 <h1><span class="small">MC Method : Sampling using Cumulative Distribution Function (CDF)</span></h1>
@@ -1384,6 +1498,14 @@ How to actually use Monte Carlo method to implement an optical photon simulation
 </ul>
 <p class="small"><span class="red">CDF &quot;encodes&quot; shape of PDF in convenient form for sampling</span></p>
 <p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_transform_sampling">https://en.wikipedia.org/wiki/Inverse_transform_sampling</a></p>
+<!-- comment
+
+so how to go from a PDF to a sample...
+
+The integral of the PDF, the CDF (cumulative distribution function)
+represents the probability that a quantitity is less than some value,
+so it always goes from 0 on left top 1 on the right... which is
+convenient for mapping to a uniform random number -->
 </div>
 <div class="slide" id="monte-carlo-method-modelling-scintillator-re-emission">
 <h1><span class="small">Monte Carlo Method : Modelling Scintillator Re-emission</span></h1>
@@ -1418,6 +1540,9 @@ else
     return BREAK;
 }
 </pre></div><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h</a></p>
+<!-- comment
+
+GPU textures are a convenient way to implement CDF lookups -->
 <!-- comment
 
 Light propagation in a large volume liquid scintillator
@@ -1457,6 +1582,12 @@ https://www.sciencedirect.com/science/article/pii/S0168900299009614
 <p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_transform_sampling">https://en.wikipedia.org/wiki/Inverse_transform_sampling</a></p>
 <!-- comment
 
+Scattering and absorption follow has exponential PDF,
+which makes it easy to obtain the analytic CDF function
+
+So can easily generate a sample that with exponential PDF -->
+<!-- comment
+
 http://misclab.umeoce.maine.edu/boss/classes/RT_Weizmann/Radiation%20Transfer%20in%20Environmental%20Science%20-%20Lecture%207.pdf
 
 https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-in-practice/monte-carlo-simulation
@@ -1475,6 +1606,16 @@ https://plus.maths.org/content/light-attenuation-and-exponential-laws -->
 <img alt="/env/presentation/accept_reject_sampling.png" class="small align-center" src="/env/presentation/accept_reject_sampling.png" style="width: 800px;" />
 <p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py</a></p>
 <p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Rejection_sampling">https://en.wikipedia.org/wiki/Rejection_sampling</a></p>
+<!-- comment
+
+It is not always possible/convenient/efficient to determine an analytic form for the CDF,
+so there is an alternative approach called accept-reject sampling
+
+Can just throw 2d randoms at the problem, apply a cut in one dimension,
+and you get sample from the other dimension -->
+<!-- comment
+
+http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf -->
 </div>
 <div class="slide" id="monte-carlo-method-accept-reject-sampling-numpy-code-in-ipython">
 <h1><span class="small">Monte Carlo Method : Accept-Reject Sampling (NumPy Code in IPython)</span></h1>
@@ -1510,6 +1651,9 @@ array([[ 0.0382,  0.0752],
        [-0.7534,  0.7253],
        [-0.8292,  0.0019]])
 </pre><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py">https://bitbucket.org/simoncblyth/intro_to_numpy/src/default/accept_reject_sampling.py</a></p>
+<!-- comment
+
+Prototype with NumPy (fast dev cycle) before doing it which CUDA, -->
 </div>
 <div class="slide" id="mc-method-estimating-pi-from-circle-square-count-ratio-pi-r-2-2r-2">
 <h1><span class="small">MC Method : Estimating Pi from circle/square count ratio : pi r^2/(2r)^2</span></h1>
