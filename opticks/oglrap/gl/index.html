@@ -9,7 +9,7 @@
     <title>OpenGL Render Pipelines &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -34,6 +34,8 @@
 <li><a class="reference internal" href="#gensteps">Gensteps</a></li>
 <li><a class="reference internal" href="#photons">Photons</a></li>
 <li><a class="reference internal" href="#records-corresponding-to-each-recorded-step-of-the-photon">Records : corresponding to each recorded step of the photon</a></li>
+<li><a class="reference internal" href="#geometry-shader-docs">Geometry Shader Docs</a></li>
+<li><a class="reference internal" href="#record-renderer-geometry-shaders">Record Renderer Geometry Shaders</a></li>
 <li><a class="reference internal" href="#unpartitioned-record-structure">Unpartitioned Record structure</a></li>
 </ul>
 </li>
@@ -94,21 +96,118 @@
 </div>
 <div class="section" id="records-corresponding-to-each-recorded-step-of-the-photon">
 <h2>Records : corresponding to each recorded step of the photon<a class="headerlink" href="#records-corresponding-to-each-recorded-step-of-the-photon" title="Permalink to this headline">¶</a></h2>
+<p>The records buffer of has shape (3M, 16, 2, 4) with each step point
+domain compressed into 2*4 shorts (16 bits) totalling 128 bits.</p>
+<p>Relevant sources:</p>
+<ul class="simple">
+<li><em>oxrap/cu/generate.cu</em></li>
+<li><a href="#id1"><span class="problematic" id="id2">*</span></a>oxrap/cu/photon.h</li>
+</ul>
+<p>The visualization renders this buffer with a single <em>glDrawArrays</em> in
+<em>oglrap/Rdr.cc:render</em>  which uses an OpenGL geometry shader with the
+event time as an input uniform.
+Actually there are three variants of the record renderer, presenting the photons
+as a flying point, shortline or longline.</p>
 <dl class="docutils">
 <dt>rec</dt>
-<dd>flying point presentation</dd>
+<dd>flying point presentation, oglrap/Scene.cc:m_record_renderer</dd>
 <dt>altrec</dt>
-<dd>long line strip presentation</dd>
+<dd>long line strip presentation, oglrap/Scene.cc:m_altrecord_renderer</dd>
 <dt>devrec</dt>
 <dd>vector (short line) presentation, vector length is controllable interactively
-via Composition/param.y</dd>
+via Composition/param.y, oglrap/Scene.cc:m_devrecord_renderer</dd>
+</dl>
+<p>The geometry shader is the crucial thing that must be understood to see how
+the visualization works:</p>
+<dl class="docutils">
+<dt>oglrap/gl/rec/geom.glsl</dt>
+<dd>flying point</dd>
+<dt>oglrap/gl/devrec/geom.glsl</dt>
+<dd>shortline “vector”</dd>
+<dt>oglrap/gl/altrec/geom.glsl</dt>
+<dd>longline</dd>
+</dl>
+<p>The input primitives to all three renderers are the same, LINE_STRIP,
+but the output primitive is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">401</span> <span class="n">void</span> <span class="n">Scene</span><span class="p">::</span><span class="n">initRenderers</span><span class="p">()</span>
+<span class="mi">402</span> <span class="p">{</span>
+<span class="o">...</span>
+<span class="mi">470</span>     <span class="n">m_record_renderer</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Rdr</span><span class="p">(</span><span class="n">m_device</span><span class="p">,</span> <span class="s2">&quot;rec&quot;</span><span class="p">,</span> <span class="n">m_shader_dir</span><span class="p">,</span> <span class="n">m_shader_incl_path</span> <span class="p">);</span>
+<span class="mi">471</span>     <span class="n">m_record_renderer</span><span class="o">-&gt;</span><span class="n">setPrimitive</span><span class="p">(</span><span class="n">Rdr</span><span class="p">::</span><span class="n">LINE_STRIP</span><span class="p">);</span>
+<span class="mi">472</span>
+<span class="mi">473</span>     <span class="n">m_altrecord_renderer</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Rdr</span><span class="p">(</span><span class="n">m_device</span><span class="p">,</span> <span class="s2">&quot;altrec&quot;</span><span class="p">,</span> <span class="n">m_shader_dir</span><span class="p">,</span> <span class="n">m_shader_incl_path</span><span class="p">);</span>
+<span class="mi">474</span>     <span class="n">m_altrecord_renderer</span><span class="o">-&gt;</span><span class="n">setPrimitive</span><span class="p">(</span><span class="n">Rdr</span><span class="p">::</span><span class="n">LINE_STRIP</span><span class="p">);</span>
+<span class="mi">475</span>
+<span class="mi">476</span>     <span class="n">m_devrecord_renderer</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Rdr</span><span class="p">(</span><span class="n">m_device</span><span class="p">,</span> <span class="s2">&quot;devrec&quot;</span><span class="p">,</span> <span class="n">m_shader_dir</span><span class="p">,</span> <span class="n">m_shader_incl_path</span><span class="p">);</span>
+<span class="mi">477</span>     <span class="n">m_devrecord_renderer</span><span class="o">-&gt;</span><span class="n">setPrimitive</span><span class="p">(</span><span class="n">Rdr</span><span class="p">::</span><span class="n">LINE_STRIP</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="geometry-shader-docs">
+<h2>Geometry Shader Docs<a class="headerlink" href="#geometry-shader-docs" title="Permalink to this headline">¶</a></h2>
+<p>The defining feature of the geometry shader is its ability to
+amplify or reduce geometry with respect to the input primitives.
+The Opticks photon visualization relies on the geometry shaders
+ability to emit zero primitives depending on the values in the
+record buffer that identify non-valid</p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.khronos.org/opengl/wiki/Geometry_Shader">https://www.khronos.org/opengl/wiki/Geometry_Shader</a></li>
+</ul>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="44%" />
+<col width="36%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">GS input</th>
+<th class="head">OpenGL primitives</th>
+<th class="head">vertex count</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>points</td>
+<td>GL_POINTS</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>lines</td>
+<td>GL_LINES,
+GL_LINE_STRIP,
+GL_LINE_LIST</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>The output_primitive must be one of the following:</p>
+<ul class="simple">
+<li>points</li>
+<li>line_strip</li>
+<li>triangle_strip</li>
+</ul>
+<p>These work exactly the same way their counterpart OpenGL rendering modes do. To
+output individual triangles or lines, simply use EndPrimitive (see below) after
+emitting each set of 3 or 2 vertices.</p>
+</div>
+<div class="section" id="record-renderer-geometry-shaders">
+<h2>Record Renderer Geometry Shaders<a class="headerlink" href="#record-renderer-geometry-shaders" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>oglrap/rec/geom.glsl::</dt>
+<dd>28 layout (lines) in;
+29 layout (points, max_vertices = 1) out;</dd>
+<dt>oglrap/devrec/geom.glsl::</dt>
+<dd>23 layout (lines) in;
+24 layout (line_strip, max_vertices = 2) out;</dd>
+<dt>oglrap/altrec/geom.glsl::</dt>
+<dd>22 layout (lines) in;
+23 layout (line_strip, max_vertices = 2) out;</dd>
 </dl>
 </div>
 <div class="section" id="unpartitioned-record-structure">
 <h2>Unpartitioned Record structure<a class="headerlink" href="#unpartitioned-record-structure" title="Permalink to this headline">¶</a></h2>
-<p>Below ascii art shows expected pattern of slots and times for MAXREC 5</p>
+<p>Below ascii art shows the pattern of record buffer slots and times
+for MAXREC 5 (for ease of presentation, actually MAXREC of 16 or 10 is used).</p>
 <ul class="simple">
-<li>remember that from point of view of shader the input time is <strong>CONSTANT</strong>
+<li>remember that from the point of view of the shader the input time is <strong>CONSTANT</strong>
 think of the drawing as a chart plotter tracing over all the steps of all the photons,
 this shader determines when to put the pen down onto the paper<ul>
 <li>it needs to lift pen between photons and avoid invalids</li>
@@ -118,11 +217,11 @@ this shader determines when to put the pen down onto the paper<ul>
 </ul>
 </li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span>     <span class="n">t</span>
 <span class="o">//</span>
 <span class="o">//</span>     <span class="o">|</span>
 <span class="o">//</span>     <span class="o">|</span>
-<span class="o">//</span>     <span class="n">t</span>
+<span class="o">//</span>     <span class="o">|</span>
 <span class="o">//</span>     <span class="o">|</span>          <span class="mi">3</span>
 <span class="o">//</span>     <span class="o">|</span>                                          <span class="mi">4</span>
 <span class="o">//</span>     <span class="o">|</span>      <span class="mi">2</span>                                <span class="mi">3</span>
@@ -199,7 +298,7 @@ indexed:   index used to fetch this vertex from the buffer</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
     </div>
   </body>
 </html>

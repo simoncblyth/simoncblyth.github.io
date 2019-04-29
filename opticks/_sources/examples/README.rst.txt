@@ -111,5 +111,117 @@ UseNPY(needs-revisit)
 
 
 
+UseOptiX
+   really minimal usage of OptiX C API, checking creation of context and buffer, 
+   no kernel launching
+
+UseOptiXProgram
+   OptiX C API creates raygen program and launches it, just dumping launch index  
+
+UseOptiXProgramPP
+   OptiX C++ API variant of the above : provides a command line interface to quickly run 
+   simple OptiX code (no buffers in context).
+
+UseOptiXBuffer
+    OptiX C API creates raygen program that just writes constant values to a buffer
+
+UseOptiXBufferPP
+   OptiX C++ API : creates in and out buffers from NPY arrays and launches a program that 
+   simply copies from in to out.  Provides a command line interface to quickly run variants
+   of the buffer accessing GPU code. 
+
+UseOptiXGeometry
+   Minimally demonstrate OptiX geometry without using OXRAP, performs a "standalone" raytrace
+   of a box with normal shader coloring.
+ 
+UseOptiXGeometryTriangles
+   Minimally demonstrate the use of optix::GeometryTriangles introduced in OptiX 6.0.0. 
+   Raytraces an octahedron writing a PPM file. 
+   Based on NPY and SYSRAP for buffer and PPM handling. No OXRAP.
+
+   * https://raytracing-docs.nvidia.com/optix/api/html/group___geometry_triangles.html
+
+UseOContextBufferPP
+   Use the OptiXRap.OContext to reimplement UseOptiXBufferPP in a higher level style, 
+   hoping to approach close enough to UseOptiXRap for the problem to manifest.  
+   But it hasnt.
+
+UseOptiXRap
+   Uses Opticks higher level OptiXRap API to test changing the sizes of buffers.  
+
+   Issue with OptiX 6.0.0 : the buffer manipulations seem to work but the rtPrintf 
+   output does not appear unless the buffer writing is commented out.
+
+   Huh, now rtPrintf seems to be working without any clear fix.  
+   Now not working.
+   Now working again, immediately after an oxrap--  
+
+   Perhaps a problem of host code being updated and PTX not, because the
+   PTX is from oxrap ?
+
+   Can change the progname via envvar::
+
+       USEOPTIXRAP_PROGNAME="bufferTest_2" UseOptiXRap   
+
+
+
+
+
+UseOpticksGLFW
+   minimal use of OpenGL via GLFW, pops up a window and renders a colorful rotating triangle. 
+   Key presses cause the GLFW_KEY_XX enum name to be emitted to stdout. Press ESCAPE to exit.
+
+UseOpticksGLFWSnap
+   variant of UseOpticksGLFW adding the capability to save screen images to PPM files
+
+UseOpticksGLFWSPPM
+   variant of UseOpticksGLFWSnap with the PPM handling from reusable sysrap/SPPM 
+
+UseShader
+   Formerly named UseOpticksGLFWShader
+
+   * adapted GLFW example, modified to use GLEW and GLM : it ran giving a black screen.
+   * adding a VAO makes the coloured triangle appear      
+   * added error checking and compilation log output 
+
+   This is a good starting point for creating self contained minimal reproducers. 
+
+UseOGLRapMinimal
+   Creates red-green-blue axes that can interact with using the usual controls. 
+   Tests the Rdr axis renderer in isolation using just Composition, Frame and Interactor
+   (no Scene).
+
+UseGeometryShader
+   Creates red-green-blue axes
+
+   Implemented in standalone single file fashion that sets up a geometry shader 
+   pipeline using the same shader strings as the Rdr axis renderer 
+   as used by UseOGLRapMinimal.  All the mat4 have been matched with
+   UseOGLRapMinimal.
+
+   Features a monolithic standalone getMVP, providing the ModelViewProjection matrix, which 
+   is useful for demo code.::
+
+       glm::mat4 getMVP(int width, int height, bool verbose)
+
+   Actually it was the comparison of the mat4 between
+   UseOGLRapMinimal which uses View::getTransforms 
+   and my standalone reimplementation of the matrix manipulations 
+   in UseGeometryShader that led to finding the "uninitialized forth row bug" 
+   that has been lurking for years ready to bite just at the wrong time 
+   following a Linux kernel and driver update and OptiX update.
+    
+   See the mis-named: notes/issues/OGLRap_GLFW_OpenGL_Linux_display_issue_with_new_driver.rst 
+
+
+UseOGLRap
+   same as OGLRap AxisAppCheck 
+
+UseOpticksGL
+   OAxisTest appears to be trying to change things with OptiX launches whilsy displaying with OpenGL
+
+UseOpticksGLEW
+    Just dumping version numbers from header. CMake machinery test.
+
 
 
