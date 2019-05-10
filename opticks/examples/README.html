@@ -9,7 +9,7 @@
     <title>Examples of Opticks Usage, especially the CMake machinery &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -154,6 +154,94 @@ BUT: this approach is jumping into the thicket of the dependency tree.  Better t
 get experience out in the leaves, before tackling the interior of the bush.</li>
 </ul>
 </dd>
+<dt>UseOptiX</dt>
+<dd>really minimal usage of OptiX C API, checking creation of context and buffer,
+no kernel launching</dd>
+<dt>UseOptiXProgram</dt>
+<dd>OptiX C API creates raygen program and launches it, just dumping launch index</dd>
+<dt>UseOptiXProgramPP</dt>
+<dd>OptiX C++ API variant of the above : provides a command line interface to quickly run
+simple OptiX code (no buffers in context).</dd>
+<dt>UseOptiXBuffer</dt>
+<dd>OptiX C API creates raygen program that just writes constant values to a buffer</dd>
+<dt>UseOptiXBufferPP</dt>
+<dd>OptiX C++ API : creates in and out buffers from NPY arrays and launches a program that
+simply copies from in to out.  Provides a command line interface to quickly run variants
+of the buffer accessing GPU code.</dd>
+<dt>UseOptiXGeometry</dt>
+<dd>Minimally demonstrate OptiX geometry without using OXRAP, performs a “standalone” raytrace
+of a box with normal shader coloring.</dd>
+<dt>UseOptiXGeometryTriangles</dt>
+<dd><p class="first">Minimally demonstrate the use of optix::GeometryTriangles introduced in OptiX 6.0.0.
+Raytraces an octahedron writing a PPM file.
+Based on NPY and SYSRAP for buffer and PPM handling. No OXRAP.</p>
+<ul class="last simple">
+<li><a class="reference external" href="https://raytracing-docs.nvidia.com/optix/api/html/group___geometry_triangles.html">https://raytracing-docs.nvidia.com/optix/api/html/group___geometry_triangles.html</a></li>
+</ul>
+</dd>
+<dt>UseOContextBufferPP</dt>
+<dd>Use the OptiXRap.OContext to reimplement UseOptiXBufferPP in a higher level style,
+hoping to approach close enough to UseOptiXRap for the problem to manifest.
+But it hasnt.</dd>
+<dt>UseOptiXRap</dt>
+<dd><p class="first">Uses Opticks higher level OptiXRap API to test changing the sizes of buffers.</p>
+<p>Issue with OptiX 6.0.0 : the buffer manipulations seem to work but the rtPrintf
+output does not appear unless the buffer writing is commented out.</p>
+<p>Huh, now rtPrintf seems to be working without any clear fix.
+Now not working.
+Now working again, immediately after an oxrap–</p>
+<p>Perhaps a problem of host code being updated and PTX not, because the
+PTX is from oxrap ?</p>
+<p>Can change the progname via envvar:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">USEOPTIXRAP_PROGNAME</span><span class="o">=</span><span class="s2">&quot;bufferTest_2&quot;</span> <span class="n">UseOptiXRap</span>
+</pre></div>
+</div>
+</dd>
+<dt>UseOpticksGLFW</dt>
+<dd>minimal use of OpenGL via GLFW, pops up a window and renders a colorful rotating triangle.
+Key presses cause the GLFW_KEY_XX enum name to be emitted to stdout. Press ESCAPE to exit.</dd>
+<dt>UseOpticksGLFWSnap</dt>
+<dd>variant of UseOpticksGLFW adding the capability to save screen images to PPM files</dd>
+<dt>UseOpticksGLFWSPPM</dt>
+<dd>variant of UseOpticksGLFWSnap with the PPM handling from reusable sysrap/SPPM</dd>
+<dt>UseShader</dt>
+<dd><p class="first">Formerly named UseOpticksGLFWShader</p>
+<ul class="simple">
+<li>adapted GLFW example, modified to use GLEW and GLM : it ran giving a black screen.</li>
+<li>adding a VAO makes the coloured triangle appear</li>
+<li>added error checking and compilation log output</li>
+</ul>
+<p class="last">This is a good starting point for creating self contained minimal reproducers.</p>
+</dd>
+<dt>UseOGLRapMinimal</dt>
+<dd>Creates red-green-blue axes that can interact with using the usual controls.
+Tests the Rdr axis renderer in isolation using just Composition, Frame and Interactor
+(no Scene).</dd>
+<dt>UseGeometryShader</dt>
+<dd><p class="first">Creates red-green-blue axes</p>
+<p>Implemented in standalone single file fashion that sets up a geometry shader
+pipeline using the same shader strings as the Rdr axis renderer
+as used by UseOGLRapMinimal.  All the mat4 have been matched with
+UseOGLRapMinimal.</p>
+<p>Features a monolithic standalone getMVP, providing the ModelViewProjection matrix, which
+is useful for demo code.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">glm</span><span class="p">::</span><span class="n">mat4</span> <span class="n">getMVP</span><span class="p">(</span><span class="nb">int</span> <span class="n">width</span><span class="p">,</span> <span class="nb">int</span> <span class="n">height</span><span class="p">,</span> <span class="nb">bool</span> <span class="n">verbose</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Actually it was the comparison of the mat4 between
+UseOGLRapMinimal which uses View::getTransforms
+and my standalone reimplementation of the matrix manipulations
+in UseGeometryShader that led to finding the “uninitialized forth row bug”
+that has been lurking for years ready to bite just at the wrong time
+following a Linux kernel and driver update and OptiX update.</p>
+<p class="last">See the mis-named: notes/issues/OGLRap_GLFW_OpenGL_Linux_display_issue_with_new_driver.rst</p>
+</dd>
+<dt>UseOGLRap</dt>
+<dd>same as OGLRap AxisAppCheck</dd>
+<dt>UseOpticksGL</dt>
+<dd>OAxisTest appears to be trying to change things with OptiX launches whilsy displaying with OpenGL</dd>
+<dt>UseOpticksGLEW</dt>
+<dd>Just dumping version numbers from header. CMake machinery test.</dd>
 </dl>
 </div>
 
@@ -174,7 +262,7 @@ get experience out in the leaves, before tackling the interior of the bush.</li>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
     </div>
   </body>
 </html>

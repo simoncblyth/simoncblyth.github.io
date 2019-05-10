@@ -9,13 +9,13 @@
     <title>Opticks Install Instructions &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Opticks Overview" href="overview.html" />
+    <link rel="next" title="Updating this documentation" href="updating_this_documentation.html" />
     <link rel="prev" title="Opticks : GPU Accelerated Optical Photon Simulation using NVIDIA OptiX" href="../index.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -25,7 +25,7 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="overview.html" title="Opticks Overview"
+          <a href="updating_this_documentation.html" title="Updating this documentation"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../index.html" title="Opticks : GPU Accelerated Optical Photon Simulation using NVIDIA OptiX"
@@ -47,7 +47,7 @@
 <li><a class="reference internal" href="#location-overrides-by-envvar">Location Overrides by envvar</a></li>
 <li><a class="reference internal" href="#opticks-installation-overview">Opticks Installation Overview</a></li>
 <li><a class="reference internal" href="#build-tools">Build Tools</a></li>
-<li><a class="reference internal" href="#cmake">CMake</a></li>
+<li><a class="reference internal" href="#cmake-version-3-12">CMake Version 3.12+</a></li>
 <li><a class="reference internal" href="#boost-c-libraries">Boost C++ Libraries</a><ul>
 <li><a class="reference internal" href="#updating-boost">Updating Boost</a></li>
 </ul>
@@ -96,8 +96,8 @@
   <p class="topless"><a href="../index.html"
                         title="previous chapter">Opticks : GPU Accelerated Optical Photon Simulation using NVIDIA OptiX</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="overview.html"
-                        title="next chapter">Opticks Overview</a></p>
+  <p class="topless"><a href="updating_this_documentation.html"
+                        title="next chapter">Updating this documentation</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -160,7 +160,8 @@ export PATH=$LOCAL_BASE/opticks/lib:$OPTICKS_HOME/bin:$OPTICKS_HOME/ana:$PATH
 <div class="section" id="check-your-bash-environment-setup">
 <h2>Check your bash environment setup<a class="headerlink" href="#check-your-bash-environment-setup" title="Permalink to this headline">¶</a></h2>
 <p>If the below commandline gives errors, check your <em>.bash_profile</em> OR <em>.bashrc</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ bash -lc &quot;opticks- ; opticks-info &quot;
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ bash -lc &quot;opticks- ; opticks-info &quot;    ## RHEL, Centos
+[blyth@localhost ~]$ bash -ic &quot;opticks- ; opticks-info &quot;    ## Ubuntu
 
 opticks-locations
 ==================
@@ -181,6 +182,7 @@ only on login and <em>.bashrc</em> is run for every new terminal window, BUT wit
 the <em>.bash_profile</em> is run for every new terminal window.  Thus for compatibility
 the best approach to put setup into <em>.bashrc</em> and source it from <em>.bash_profile</em> : giving
 the same behaviour on both Linux and macOS.</p>
+<p>For background on dotfiles <a class="reference external" href="http://mywiki.wooledge.org/DotFiles">http://mywiki.wooledge.org/DotFiles</a></p>
 </div>
 </div>
 <div class="section" id="location-overrides-by-envvar">
@@ -218,7 +220,7 @@ A list is provided at <a class="reference external" href="https://developer.nvid
 <p>Opticks installation requires:</p>
 <ul class="simple">
 <li>bash shell and build tools such as mercurial, git, curl, etc..</li>
-<li>recent cmake 3.5+</li>
+<li>recent cmake 3.8+</li>
 <li>Boost C++ libraries 1.59+</li>
 <li>installations of pre-requisites packages, see below for notes on versions<ul>
 <li>NVIDIA OptiX</li>
@@ -240,27 +242,54 @@ its externals requires unix tools including:</p>
 <li>curl</li>
 <li>tar</li>
 <li>zip</li>
-<li>cmake 3.5+</li>
+<li>cmake 3.12+</li>
 </ul>
 </div>
-<div class="section" id="cmake">
-<h2>CMake<a class="headerlink" href="#cmake" title="Permalink to this headline">¶</a></h2>
-<p>A rather recent cmake version is required. Check your version with:</p>
+<div class="section" id="cmake-version-3-12">
+<h2>CMake Version 3.12+<a class="headerlink" href="#cmake-version-3-12" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>I recommend use of at least 3.12 for building Opticks</strong>.</li>
+<li><strong>The most common Opticks build issues arise from using older CMake versions.</strong></li>
+</ul>
+<p>Check your version with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>simon:~ blyth$ cmake --version
-cmake version 3.11.0
+cmake version 3.12.0
 </pre></div>
 </div>
-<p>Updating build tools is best done via your system package manager.
-For example on OSX with macports update cmake with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">port</span> <span class="n">info</span> <span class="n">cmake</span>           <span class="c1"># check the version the package manager proposes</span>
-<span class="n">sudo</span> <span class="n">port</span> <span class="n">install</span> <span class="n">cmake</span>   <span class="c1"># do the install</span>
+<p>Although usually preferable to get build tools using your system
+package manager, the system cmake version will almost certainly
+not be recent enough.</p>
+<p>Opticks CMake infrastructure makes heavy use of recent CMake target
+import/export features used by BCM (Boost CMake Modules).
+The current Opticks CMake infrastructure was developed in May 2018
+using CMake 3.11 and 3.12 (I am currently using 3.14.1)
+The Opticks repository includes bash functions for local installs of
+cmake with precursor function <em>ocmake-</em> which will install 3.14.1</p>
+<p>For what goes wrong if you use an older CMake version see:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">notes/issues/cmake_target_link_libraries_for_imported_target.rst</span></code></li>
+</ul>
+<p>To install CMake 3.14.1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost opticks]$ ocmake-     ## run precursor function that defines the others
+[blyth@localhost opticks]$ ocmake-vi   ## take a look at the bash functions
+[blyth@localhost opticks]$ ocmake-info
+ocmake-info
+============
+
+ocmake-vers : 3.14.1
+ocmake-nam  : cmake-3.14.1
+ocmake-url  : https://github.com/Kitware/CMake/releases/download/v3.14.1/cmake-3.14.1.tar.gz
+ocmake-dir  : /home/blyth/local/opticks/externals/cmake/cmake-3.14.1
+
+[blyth@localhost opticks]$ ocmake--    ## downloads, configures, builds, installs
 </pre></div>
 </div>
-<p>If you or your system administrator are unable to update a tool via the system
-package manager then a local install of the tool must be done and your
-login shell PATH modified to use the updated tool. The Opticks repository
-includes bash functions for local installs of cmake with
-precursor function <em>cmake-</em>.</p>
+<p>After installation you will need to adjust you PATH to
+use the newer <em>cmake</em> binary. Check with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">which</span> <span class="n">cmake</span>
+<span class="n">cmake</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="boost-c-libraries">
 <h2>Boost C++ Libraries<a class="headerlink" href="#boost-c-libraries" title="Permalink to this headline">¶</a></h2>
@@ -887,7 +916,7 @@ Total Test <span class="nb">time</span> <span class="o">(</span>real<span class=
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="overview.html" title="Opticks Overview"
+          <a href="updating_this_documentation.html" title="Updating this documentation"
              >next</a> |</li>
         <li class="right" >
           <a href="../index.html" title="Opticks : GPU Accelerated Optical Photon Simulation using NVIDIA OptiX"
@@ -897,7 +926,7 @@ Total Test <span class="nb">time</span> <span class="o">(</span>real<span class=
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
     </div>
   </body>
 </html>
