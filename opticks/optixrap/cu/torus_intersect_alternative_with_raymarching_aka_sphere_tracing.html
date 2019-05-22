@@ -1,0 +1,361 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>torus_intersect_alternative_with_raymarching_aka_sphere_tracing &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">torus_intersect_alternative_with_raymarching_aka_sphere_tracing</a><ul>
+<li><a class="reference internal" href="#torus-intersect-iterative">Torus Intersect : Iterative</a></li>
+<li><a class="reference internal" href="#matt-zucker">Matt Zucker</a><ul>
+<li><a class="reference internal" href="#distance-between-a-point-and-a-torus">Distance between a point and a torus</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#inigo-quilez-ray-marching-rendering-with-distance-fields">Inigo Quilez : Ray marching, rendering with distance fields</a><ul>
+<li><a class="reference internal" href="#ray-marching">Ray  Marching</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#jamie-wong">Jamie Wong</a><ul>
+<li><a class="reference internal" href="#handling-non-uniform-scaling-eg-ellipsoid">Handling non-uniform scaling (eg ellipsoid)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#celarek">Celarek</a></li>
+<li><a class="reference internal" href="#ray-marching-sphere-tracing">Ray Marching Sphere Tracing</a><ul>
+<li><a class="reference internal" href="#bisection-refinement">bisection refinement</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#shadertoy-interactive-example-of-ray-marching-took-minutes-to-load-into-browser">Shadertoy interactive example of ray marching : took minutes to load into browser</a><ul>
+<li><a class="reference internal" href="#ray-marching-an-approximate-approach-to-find-intersect-with-distance-field-geometry">Ray Marching : an approximate approach to find intersect with distance field geometry</a></li>
+<li><a class="reference internal" href="#iq-ray-marching-primitives">iq : ray marching primitives</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/optixrap/cu/torus_intersect_alternative_with_raymarching_aka_sphere_tracing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="torus-intersect-alternative-with-raymarching-aka-sphere-tracing">
+<h1>torus_intersect_alternative_with_raymarching_aka_sphere_tracing<a class="headerlink" href="#torus-intersect-alternative-with-raymarching-aka-sphere-tracing" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a href="#id1"><span class="problematic" id="id2">:google:`Andrew Kensler`</span></a></li>
+</ul>
+<div class="section" id="torus-intersect-iterative">
+<h2>Torus Intersect : Iterative<a class="headerlink" href="#torus-intersect-iterative" title="Permalink to this headline">¶</a></h2>
+<p>A comparison of different iterative techniques for torus intersection
+(Newton wins).</p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.academia.edu/15919363/Iterative_Methods_for_Visualization_of_Implicit_Surfaces_On_GPU">https://www.academia.edu/15919363/Iterative_Methods_for_Visualization_of_Implicit_Surfaces_On_GPU</a></li>
+</ul>
+<p>Iterative Methods for Visualization of Implicit Surfaces On GPU
+International Symposium on Visual Computing, 2007
+Jean-claude Paul
+Rodrigo de Toledo</p>
+<p>The ray-casting of implicit surfaces on GPU has been ex- plored in the last few
+years. However, until recently, they were restricted to second degree
+(quadrics). We present an iterative solution to ray cast cubics and quartics on
+GPU. Our solution targets ecient implementa- tion, obtaining interactive
+rendering for thousands of surfaces per frame. We have given special attention
+to</p>
+<p>Publication Date: 2007</p>
+<ul class="simple">
+<li>~/opticks_refs/torus_Iterative_Methods_for_Visualization_of_I.pdf</li>
+</ul>
+</div>
+<div class="section" id="matt-zucker">
+<h2>Matt Zucker<a class="headerlink" href="#matt-zucker" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/mzucker?tab=repositories">https://github.com/mzucker?tab=repositories</a></li>
+<li><a class="reference external" href="https://github.com/mzucker/miniray">https://github.com/mzucker/miniray</a></li>
+<li><a class="reference external" href="https://mzucker.github.io/2016/08/03/miniray.html">https://mzucker.github.io/2016/08/03/miniray.html</a></li>
+</ul>
+<p>One immediate obstacle arose: the result of sweeping a 3D sphere along a 2D arc
+is a torus segment, and ray-torus intersection a bit hairy because it requires
+solving a quartic (fourth-order polynomial). Analytic solutions to general
+quartics exist, but they’re complex enough to spill the program way over the
+size of a business card.</p>
+<p>Fortunately, I had recently come across Inigo Quilez’s nvscene 2008
+presentation, Rendering Worlds With Two Triangles, which supplies a convenient
+dodge: raymarching, a.k.a. sphere tracing. Here’s an illustration of the
+process, from iq’s slides:</p>
+<p>Sphere tracing works by computing or estimating the distance between the
+current point on the ray (initially the ray origin) and the nearest point in
+the scene, and advancing along the ray by that distance, as shown above.
+Although it may be slower than analytic raytracying, it is numerically robust
+and guaranteed to converge to an intersection as long as the ray starts in free
+space and the distance estimate is less than or equal to the true distance.</p>
+<p>While analytically intersecting a ray and torus is hairy, computing the exact
+distance between a point and a torus is a piece of cake, and it admits a
+straightforward solution to clamping the angle to obtain arcs of less than
+360 deg.</p>
+<div class="section" id="distance-between-a-point-and-a-torus">
+<h3>Distance between a point and a torus<a class="headerlink" href="#distance-between-a-point-and-a-torus" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://iquilezles.org/www/articles/distfunctions/distfunctions.htm">http://iquilezles.org/www/articles/distfunctions/distfunctions.htm</a></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">float</span> <span class="n">sdTorus</span><span class="p">(</span> <span class="n">vec3</span> <span class="n">p</span><span class="p">,</span> <span class="n">vec2</span> <span class="n">t</span> <span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">vec2</span> <span class="n">q</span> <span class="o">=</span> <span class="n">vec2</span><span class="p">(</span><span class="n">length</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">xz</span><span class="p">)</span><span class="o">-</span><span class="n">t</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">length</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">-</span><span class="n">t</span><span class="o">.</span><span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="inigo-quilez-ray-marching-rendering-with-distance-fields">
+<h2>Inigo Quilez : Ray marching, rendering with distance fields<a class="headerlink" href="#inigo-quilez-ray-marching-rendering-with-distance-fields" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://iquilezles.org/www/material/nvscene2008/nvscene2008.htm">http://iquilezles.org/www/material/nvscene2008/nvscene2008.htm</a></li>
+<li><a class="reference external" href="http://iquilezles.org/www/material/nvscene2008/rwwtt.pdf">http://iquilezles.org/www/material/nvscene2008/rwwtt.pdf</a></li>
+</ul>
+<p>Raymarching : Kind of raytracing for all those objects that do not
+have an analytic intersection function.</p>
+<p>Similarly previous works</p>
+<ul class="simple">
+<li>“Ray tracing deterministic 3-D fractals” published at Siggraph 1989 by D.J.Sandin and others.</li>
+<li>“Per-pixel displacement mapping with distance functions”, appeared in GPU Gems 2 (2005) by W.Donnelly.</li>
+</ul>
+<p>The trick is to be able to compute or estimate (a lower bound of) the distance to the
+closest surface at any point in space.</p>
+<ul class="simple">
+<li>This allows for marching in large steps along the ray</li>
+</ul>
+<div class="section" id="ray-marching">
+<h3>Ray  Marching<a class="headerlink" href="#ray-marching" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://iquilezles.org/www/articles/raymarchingdf/raymarchingdf.htm">http://iquilezles.org/www/articles/raymarchingdf/raymarchingdf.htm</a></li>
+<li><a class="reference external" href="https://github.com/search?q=raymarching">https://github.com/search?q=raymarching</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="jamie-wong">
+<h2>Jamie Wong<a class="headerlink" href="#jamie-wong" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/">http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/</a></li>
+</ul>
+<p>In raymarching, the entire scene is defined in terms of a signed distance
+function. To find the intersection between the view ray and the scene, we start
+at the camera, and move a point along the view ray, bit by bit. At each step,
+we ask “Is this point inside the scene surface?”, or alternately phrased, “Does
+the SDF evaluate to a negative number at this point?“. If it does, we’re done!
+We hit something. If it’s not, we keep going up to some maximum number of steps
+along the ray.</p>
+<p>We could just step along a very small increment of the view ray every time, but
+we can do much better than this (both in terms of speed and in terms of
+accuracy) using “sphere tracing”. Instead of taking a tiny step, <strong>we take the
+maximum step we know is safe without going through the surface: we step by the
+distance to the surface, which the SDF provides us!</strong></p>
+<div class="section" id="handling-non-uniform-scaling-eg-ellipsoid">
+<h3>Handling non-uniform scaling (eg ellipsoid)<a class="headerlink" href="#handling-non-uniform-scaling-eg-ellipsoid" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/">http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/</a></li>
+</ul>
+<p>The principle for other non-rigid transformations is the same: as long as the
+sign is preserved by the transformation, you just need to figure out some
+compensation factor to ensure that you’re never overestimating the distance to
+the surface.</p>
+</div>
+</div>
+<div class="section" id="celarek">
+<h2>Celarek<a class="headerlink" href="#celarek" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://celarek.at/tag/ray-marching/">http://celarek.at/tag/ray-marching/</a></li>
+<li><a class="reference external" href="http://celarek.at/wp/wp-content/uploads/2014/05/realTimeFractalsReport.pdf">http://celarek.at/wp/wp-content/uploads/2014/05/realTimeFractalsReport.pdf</a></li>
+</ul>
+</div>
+<div class="section" id="ray-marching-sphere-tracing">
+<h2>Ray Marching Sphere Tracing<a class="headerlink" href="#ray-marching-sphere-tracing" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a href="#id3"><span class="problematic" id="id4">:google:`ray marching sphere tracing`</span></a></li>
+</ul>
+<div class="section" id="bisection-refinement">
+<h3>bisection refinement<a class="headerlink" href="#bisection-refinement" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://www.scratchapixel.com/lessons/advanced-rendering/rendering-distance-fields">https://www.scratchapixel.com/lessons/advanced-rendering/rendering-distance-fields</a></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">bisection</span> <span class="n">method</span>
+<span class="o">//</span> <span class="n">we</span> <span class="n">assume</span> <span class="n">evaluateImplicitFunction</span><span class="p">(</span><span class="n">P4</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">evaluateImplicitFunction</span><span class="p">(</span><span class="n">P5</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span>
+<span class="nb">float</span> <span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.0001</span><span class="p">;</span>
+<span class="n">Vec3f</span> <span class="n">intersectP</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Vec3f</span> <span class="n">midPoint</span> <span class="o">=</span> <span class="p">(</span><span class="n">P4</span> <span class="o">+</span> <span class="n">P5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">;</span>
+    <span class="nb">float</span> <span class="n">signedDistance</span> <span class="o">=</span> <span class="n">evaluateImplicitFunction</span><span class="p">(</span><span class="n">midPoint</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">fabs</span><span class="p">(</span><span class="n">signedDistance</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">intersectP</span> <span class="o">=</span> <span class="n">midPoint</span><span class="p">;</span> <span class="o">//</span> <span class="n">this</span> <span class="n">point</span> <span class="ow">is</span> <span class="n">close</span> <span class="n">enough</span> <span class="n">to</span> <span class="n">the</span> <span class="n">surface</span>
+        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="o">//</span> <span class="n">new</span> <span class="n">segment</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">signedDistance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">P5</span> <span class="o">=</span> <span class="n">midPoint</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="n">P4</span> <span class="o">=</span> <span class="n">midPoint</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Sphere tracing: a geometric method for the antialiased ray tracing of implicit surfaces, John C. Hart, 1996.</p>
+<ul class="simple">
+<li><a class="reference external" href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.48.3825&amp;rep=rep1&amp;type=pdf">http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.48.3825&amp;rep=rep1&amp;type=pdf</a></li>
+<li>~/opticks_refs/sphere_tracing_ray_marching_hart.pdf</li>
+</ul>
+</div>
+</div>
+<div class="section" id="shadertoy-interactive-example-of-ray-marching-took-minutes-to-load-into-browser">
+<h2>Shadertoy interactive example of ray marching : took minutes to load into browser<a class="headerlink" href="#shadertoy-interactive-example-of-ray-marching-took-minutes-to-load-into-browser" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://www.shadertoy.com/view/XsB3Rm">https://www.shadertoy.com/view/XsB3Rm</a></li>
+</ul>
+<p>Added Torus:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">float</span> <span class="n">sdTorus</span><span class="p">(</span><span class="n">vec3</span> <span class="n">p</span><span class="p">,</span> <span class="n">vec2</span> <span class="n">t</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">vec2</span> <span class="n">q</span> <span class="o">=</span> <span class="n">vec2</span><span class="p">(</span><span class="n">length</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">xz</span><span class="p">)</span><span class="o">-</span><span class="n">t</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">length</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">t</span><span class="o">.</span><span class="n">y</span> <span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>With distance field:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">vec2</span> <span class="n">t</span> <span class="o">=</span> <span class="n">vec2</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span> <span class="p">;</span>
+<span class="nb">float</span> <span class="n">d</span> <span class="o">=</span> <span class="n">sdTorus</span><span class="p">(</span> <span class="n">p</span><span class="p">,</span> <span class="n">t</span> <span class="p">);</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first"><a class="reference external" href="https://www.shadertoy.com/view/Xds3zN">https://www.shadertoy.com/view/Xds3zN</a></p>
+</li>
+<li><p class="first"><a class="reference external" href="https://www.shadertoy.com/view/XllGW4">https://www.shadertoy.com/view/XllGW4</a></p>
+<p>Tutorial in SDF using Shadertoy LESSON defines</p>
+</li>
+</ul>
+<div class="section" id="ray-marching-an-approximate-approach-to-find-intersect-with-distance-field-geometry">
+<h3>Ray Marching : an approximate approach to find intersect with distance field geometry<a class="headerlink" href="#ray-marching-an-approximate-approach-to-find-intersect-with-distance-field-geometry" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://www.shadertoy.com/view/XsB3Rm">https://www.shadertoy.com/view/XsB3Rm</a></li>
+<li>once have an approximate intersect : can then make it “effectively” exact<ul>
+<li>“refinement” in below code is a starting point for this</li>
+<li>iterate across the surface in smaller and smaller steps
+until they are small enough for the desired accuracy</li>
+</ul>
+</li>
+</ul>
+<p>Code from shadertoy demo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">bool</span> <span class="n">ray_marching</span><span class="p">(</span> <span class="n">vec3</span> <span class="n">o</span><span class="p">,</span> <span class="n">vec3</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">inout</span> <span class="nb">float</span> <span class="n">depth</span><span class="p">,</span> <span class="n">inout</span> <span class="n">vec3</span> <span class="n">n</span><span class="p">){</span>
+
+    <span class="nb">float</span> <span class="n">t</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="p">;</span>
+    <span class="nb">float</span> <span class="n">d</span> <span class="o">=</span> <span class="mf">10000.0</span> <span class="p">;</span>
+    <span class="nb">float</span> <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="p">;</span>
+    <span class="k">for</span><span class="p">(</span> <span class="nb">int</span> <span class="n">i</span><span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">vec3</span> <span class="n">v</span> <span class="o">=</span> <span class="n">o</span> <span class="o">+</span> <span class="nb">dir</span><span class="o">*</span><span class="n">t</span> <span class="p">;</span>   <span class="o">//</span> <span class="n">start</span> <span class="n">at</span> <span class="n">o</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">dist_field</span><span class="p">(</span> <span class="n">v</span> <span class="p">);</span>   <span class="o">//</span> <span class="n">closest</span> <span class="n">distance</span> <span class="n">to</span> <span class="n">surface</span> <span class="ow">in</span> <span class="nb">any</span> <span class="n">direction</span>
+        <span class="k">if</span><span class="p">(</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="p">){</span>
+            <span class="k">break</span> <span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span> <span class="nb">abs</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="mf">0.1</span> <span class="p">)</span> <span class="p">;</span>   <span class="o">//</span> <span class="n">absolute</span> <span class="n">distance</span> <span class="n">but</span> <span class="ow">not</span> <span class="n">smaller</span> <span class="n">than</span> <span class="mf">0.1</span> <span class="p">:</span> <span class="n">always</span> <span class="o">+</span><span class="n">ve</span> <span class="n">so</span> <span class="n">cannot</span> <span class="n">go</span> <span class="n">backwards</span>
+        <span class="n">t</span> <span class="o">+=</span> <span class="n">dt</span> <span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">depth</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">break</span> <span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span><span class="p">(</span> <span class="n">d</span> <span class="o">&gt;=</span> <span class="mf">0.001</span> <span class="p">){</span>
+        <span class="k">return</span> <span class="n">false</span> <span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">t</span> <span class="o">-=</span> <span class="n">dt</span> <span class="p">;</span>
+    <span class="k">for</span><span class="p">(</span> <span class="nb">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">dt</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="p">;</span>        <span class="o">//</span> <span class="n">refinement</span>
+        <span class="n">vec3</span> <span class="n">v</span> <span class="o">=</span> <span class="n">o</span> <span class="o">+</span> <span class="nb">dir</span><span class="o">*</span><span class="p">(</span> <span class="n">t</span><span class="o">+</span><span class="n">dt</span> <span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span> <span class="n">dist_field</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.001</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">dt</span> <span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">t</span> <span class="p">;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span> <span class="n">gradient</span><span class="p">(</span> <span class="n">o</span><span class="o">+</span><span class="nb">dir</span><span class="o">*</span><span class="n">t</span> <span class="p">));</span>
+    <span class="k">return</span> <span class="n">true</span> <span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="iq-ray-marching-primitives">
+<h3>iq : ray marching primitives<a class="headerlink" href="#iq-ray-marching-primitives" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://www.shadertoy.com/view/Xds3zN">https://www.shadertoy.com/view/Xds3zN</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

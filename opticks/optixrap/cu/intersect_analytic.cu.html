@@ -1,0 +1,166 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>intersect_analytic.cu &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">intersect_analytic.cu</a><ul>
+<li><a class="reference internal" href="#optix-intersection-interface">OptiX intersection interface</a></li>
+<li><a class="reference internal" href="#csg-intersect-part-h-primitive-intersection">csg_intersect_part.h : primitive intersection</a></li>
+<li><a class="reference internal" href="#csg-intersect-primitive-h-primitive-intersections-with-10-different-solids">csg_intersect_primitive.h : Primitive Intersections with ~10 different solids</a></li>
+<li><a class="reference internal" href="#csg-intersect-boolean-h">csg_intersect_boolean.h</a><ul>
+<li><a class="reference internal" href="#evaluative-csg">evaluative_csg</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/optixrap/cu/intersect_analytic.cu.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="intersect-analytic-cu">
+<h1>intersect_analytic.cu<a class="headerlink" href="#intersect-analytic-cu" title="Permalink to this headline">¶</a></h1>
+<p><em>intersect_analytic.cu</em> provides intersection of rays with arbitrarily complex
+solids represented using a constructive solid geometry model.
+The model uses a complete binary tree, with primitives at the leaves
+and boolean operations (intersection, union, difference) at the other nodes.</p>
+<p>The principal of the approach was described in a note by Andrew Kensler
+“Ray Tracing CSG Objects Using Single Hit Intersections”, that
+is available from: <a class="reference external" href="http://xrt.wikidot.com/doc:csg">http://xrt.wikidot.com/doc:csg</a> together with
+discussion of the technique as used in the XRT raytracer.</p>
+<div class="section" id="optix-intersection-interface">
+<h2>OptiX intersection interface<a class="headerlink" href="#optix-intersection-interface" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/intersect_analytic.cu">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/intersect_analytic.cu</a></li>
+<li>OptiX bounds and intersect programs, the relevant branch is CSG_FLAGNODETREE</li>
+</ul>
+<p>Buffers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">primBuffer</span> <span class="p">:</span> <span class="n">offsets</span> <span class="n">into</span> <span class="n">part</span><span class="o">/</span><span class="n">tran</span><span class="o">/</span><span class="n">plan</span> <span class="p">(</span><span class="mi">1</span> <span class="n">quad</span><span class="p">)</span>
+<span class="n">partBuffer</span> <span class="p">:</span> <span class="n">nodes</span> <span class="n">of</span> <span class="n">the</span> <span class="n">CSG</span> <span class="n">tree</span> <span class="p">(</span><span class="n">both</span> <span class="n">operators</span> <span class="ow">and</span> <span class="n">primitives</span><span class="p">)</span> <span class="p">(</span><span class="mi">4</span> <span class="n">quads</span><span class="p">)</span>
+<span class="n">tranBuffer</span> <span class="p">:</span> <span class="n">transforms</span>
+<span class="n">planBuffer</span> <span class="p">:</span> <span class="n">planes</span>
+
+<span class="n">quad</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">union</span> <span class="n">of</span> <span class="n">float4</span><span class="p">,</span> <span class="n">int4</span> <span class="ow">and</span> <span class="n">uint4</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="csg-intersect-part-h-primitive-intersection">
+<h2>csg_intersect_part.h : primitive intersection<a class="headerlink" href="#csg-intersect-part-h-primitive-intersection" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/csg_intersect_part.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/csg_intersect_part.h</a></li>
+</ul>
+<p>Typecode switch statement invoking bounds and intersect functions for each shape.</p>
+</div>
+<div class="section" id="csg-intersect-primitive-h-primitive-intersections-with-10-different-solids">
+<h2>csg_intersect_primitive.h : Primitive Intersections with ~10 different solids<a class="headerlink" href="#csg-intersect-primitive-h-primitive-intersections-with-10-different-solids" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/csg_intersect_primitive.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/csg_intersect_primitive.h</a></li>
+</ul>
+</div>
+<div class="section" id="csg-intersect-boolean-h">
+<h2>csg_intersect_boolean.h<a class="headerlink" href="#csg-intersect-boolean-h" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="evaluative-csg">
+<h3>evaluative_csg<a class="headerlink" href="#evaluative-csg" title="Permalink to this headline">¶</a></h3>
+<p>General approach is to emulate recursion using a stack of slices
+into the postorder traversal sequence of the complete binary tree.
+Uses the postorder traversal feature that left and right children of a
+node are always visted before the node itself.</p>
+<ul>
+<li><p class="first"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/csg_intersect_boolean.h#lines-545">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/csg_intersect_boolean.h#lines-545</a></p>
+<p>evaluative_csg (relevant branch is USE_TWIDDLE_POSTORDER)</p>
+</li>
+</ul>
+<p>Postorder Tranch and CSG intersect stacks used by evaluative_csg:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">186</span> <span class="c1">#define CSG_STACK_SIZE 15</span>
+<span class="mi">187</span> <span class="c1">#define TRANCHE_STACK_SIZE 4</span>
+<span class="o">...</span>
+<span class="mi">320</span> <span class="n">struct</span> <span class="n">Tranche</span>   <span class="o">//</span> <span class="nb">slice</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">pair</span> <span class="n">of</span> <span class="n">begin</span> <span class="ow">and</span> <span class="n">end</span> <span class="n">indices</span> <span class="n">of</span> <span class="n">the</span> <span class="n">postorder</span> <span class="n">traversal</span>
+<span class="mi">321</span> <span class="p">{</span>
+<span class="mi">322</span>     <span class="nb">float</span> <span class="n">tmin</span><span class="p">[</span><span class="n">TRANCHE_STACK_SIZE</span><span class="p">]</span> <span class="p">;</span>     <span class="o">//</span> <span class="n">TRANCHE_STACK_SIZE</span> <span class="ow">is</span> <span class="mi">4</span>
+<span class="mi">323</span>     <span class="n">unsigned</span>  <span class="nb">slice</span><span class="p">[</span><span class="n">TRANCHE_STACK_SIZE</span><span class="p">]</span> <span class="p">;</span>
+<span class="mi">324</span>     <span class="nb">int</span> <span class="n">curr</span> <span class="p">;</span>
+<span class="mi">325</span> <span class="p">};</span>
+<span class="o">...</span>
+<span class="mi">397</span> <span class="n">struct</span> <span class="n">CSG</span>      <span class="o">//</span> <span class="n">holds</span> <span class="n">isect</span><span class="p">(</span><span class="n">normal</span> <span class="ow">and</span> <span class="n">t</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nodeIdx</span>
+<span class="mi">398</span> <span class="p">{</span>
+<span class="mi">399</span>    <span class="n">float4</span> <span class="n">data</span><span class="p">[</span><span class="n">CSG_STACK_SIZE</span><span class="p">]</span> <span class="p">;</span>
+<span class="mi">400</span>    <span class="n">unsigned</span> <span class="n">idx</span><span class="p">[</span><span class="n">CSG_STACK_SIZE</span><span class="p">]</span> <span class="p">;</span>
+<span class="mi">401</span>    <span class="nb">int</span> <span class="n">curr</span> <span class="p">;</span>
+<span class="mi">402</span> <span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>
