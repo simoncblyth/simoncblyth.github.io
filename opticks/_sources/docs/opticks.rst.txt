@@ -178,6 +178,12 @@ directory              precursor        pkg name        notes
 boost                  boost-           Boost           components: system thread program_options log log_setup filesystem regex 
 =====================  ===============  =============   ==============================================================================
 
+
+The recommended minimum boost version is 1.53 as that is what I am using. 
+You might be able to survive with an earlier version, 
+but anything before 1.41 is known not to work. 
+
+
 Updating Boost 
 ~~~~~~~~~~~~~~~~
 
@@ -193,12 +199,6 @@ If possible use your system package manager to update Boost. If that is
 not possible then do a local Boost install.  Opticks includes bash functions
 starting *boost-* that can get and install Boost locally.
 
-::
-
-    opticks-
-    boost-
-    opticks-configure -DBOOST_ROOT=$(boost-prefix)
-
 
 Platform Support
 --------------------
@@ -206,8 +206,9 @@ Platform Support
 A recent Scientific Linux is the target platform for production running of Opticks, 
 but I am happy to try to help with installations on any Linux supported by CUDA.
 
-Most development has been done on macOS (late 2013 MacBook pro : the last Mac laptop with an NVIDIA GPU) 
-with occasional ports to keep thinks working on Scientific Linux.
+Initial development was done on macOS (late 2013 MacBook pro : the last Mac laptop with an NVIDIA GPU) 
+with occasional ports to keep thinks working on Scientific Linux. But now due to the lack of Macs 
+with NVIDIA GPUs development has moved to Linux CentOS 7 and Scientific Linux.
 
 
 
@@ -273,8 +274,7 @@ Versions of CUDA and OptiX
 
 I recommend you start your installation attempt with the lastest versions of OptiX
 together with the version of CUDA that it was built against, as stated in 
-the OptiX release notes. For example I am currently testing and seeing some success 
-with the latest OptiX 5.0.1, CUDA 9.1 on the almost latest build of macOS 10.13.4.
+the OptiX release notes. 
 This version pinning between CUDA and OptiX is because Opticks links against 
 both the OptiX library and the CUDA runtime.
 
@@ -302,7 +302,7 @@ Any issues with *earlier* version combinations will not be addressed.
 The reason for the extremes of caution regarding version combinations of drivers 
 is that the interface to the GPU is via kernel extensions where if anything goes 
 wrong there is no safety net. A bad kernel extension will cause kernel panics, 
-your machine crashes and continue to crash until the bad driver is removed 
+your machine crashes and continues to crash until the bad driver is removed 
 (on macOS the removal can be done by resetting NVRAM).
 
 
@@ -504,34 +504,6 @@ To build::
     opticks--
 
 
-Configuration Machinery
-------------------------
-
-If the above configuration suceeded for you then 
-you do not need to understand this machinery.
-
-The below commands from the *opticks-cmake* bash function 
-change directory to the build folder and invokes cmake 
-to generate a configuration cache file and multiple Makefiles.::
-
-   opticks-bcd
-   cmake \
-       -DCMAKE_BUILD_TYPE=Debug \
-       -DCMAKE_INSTALL_PREFIX=$(opticks-prefix) \
-       -DOptiX_INSTALL_DIR=$(optix-prefix) \
-       $* \
-       $(opticks-sdir)
-
-CMake is controlled via CMakeLists.txt files. 
-The top level one includes the below lines that 
-locate the CUDA and OptiX:: 
-
-    set(OPTICKS_CUDA_VERSION 7.0)
-    set(OPTICKS_OPTIX_VERSION 3.8)
-    ...
-    find_package(CUDA ${OPTICKS_CUDA_VERSION})
-    find_package(OptiX ${OPTICKS_OPTIX_VERSION})
-
 
 Opticks Without NVIDIA OptiX and CUDA ?
 ------------------------------------------
@@ -631,12 +603,48 @@ The *opticks-t* functions runs ctests for all the opticks projects::
     opticks-ctest : use -V to show output
 
 
-Issues With Tests
--------------------
 
-Some tests depend on the geometry cache being present. To create the geometry cache::
+Creating Legacy Workflow Geocache
+-----------------------------------
+
+Some tests depend on the geometry cache being present. To create the legacy geometry cache::
 
    op.sh -G 
+
+
+Creating Direct Workflow Geocache
+-----------------------------------
+
+The integration tests require a direct workflow geocache to exist as they 
+need it as their base geometry. The direct geocache is created by the OKX4Test executable
+which loads a GDML file and directly translates it into an Opticks GGeo geometry 
+instance and persists that into a direct geocache. 
+The bash function to do this is *geocache-create*, use that with::
+
+    geocache-              # run precursor function which defines the others 
+    type geocache-create   # take a look at what its doing 
+    geocache-create       
+
+Geocache creation is time and memory consuming, taking about 1 minute for the JUNO geometry 
+on a workstation with lots of memory. Fortunately this only needs to be done once per geometry, and 
+as the geocache is composed of binary .npy files they are fast to load and upload to the GPU.
+
+Near to the end of the logging from geocache creation you should find output 
+similar to the below which reports the OPTICKS_KEY value of the geometry::
+
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::reportGeoCacheCoordinates@755]  ok.idpath  /home/blyth/local/opticks/geocache/OKX4Test_lWorld0x4bc2710_PV_g4live/g4ok_gltf/f6cc352e44243f8fa536ab483ad390ce/1
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::reportGeoCacheCoordinates@756]  ok.keyspec OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::reportGeoCacheCoordinates@757]  To reuse this geometry: 
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::reportGeoCacheCoordinates@758]    1. set envvar OPTICKS_KEY=OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::reportGeoCacheCoordinates@759]    2. enable envvar sensitivity with --envkey argument to Opticks executables 
+    2019-07-01 16:14:08.129 FATAL [263983] [Opticks::reportGeoCacheCoordinates@767] THE LIVE keyspec DOES NOT MATCH THAT OF THE CURRENT ENVVAR 
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::reportGeoCacheCoordinates@768]  (envvar) OPTICKS_KEY=NONE
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::reportGeoCacheCoordinates@769]  (live)   OPTICKS_KEY=OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
+    2019-07-01 16:14:08.129 INFO  [263983] [Opticks::dumpRC@202]  rc 0 rcmsg : -
+
+
+To reuse the geometry the OPTICKS_KEY envvar needs to be exported from 
+`.bash_profile` or `.bashrc`, see the next section for an example.
 
 
 
@@ -666,6 +674,9 @@ to is provided below:
 
     PATH=$OPTICKS_HOME/bin:$LOCAL_BASE/opticks/lib:$PATH  ## easy access to scripts and executables
     export PATH
+
+    export OPTICKS_KEY=OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
+    ## picking a geometry
 
 
 Opticks NumPy based Analysis
