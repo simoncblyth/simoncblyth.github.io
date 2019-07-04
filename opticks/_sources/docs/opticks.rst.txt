@@ -318,7 +318,7 @@ Sometimes due to the suitable NVIDIA driver not yet being installed by
 your system admin it is necessary to use older OptiX+CUDA versions.  
 Opticks aims to allow this for recent version combinations only.
 
-Extract from .bashrc::
+Extract from .opticks_setup::
 
     # The location to look for OptiX libs defaults to $(opticks-prefix)/externals/OptiX
     # to override that while testing a non-standard OptiX version set the OPTICKS_OPTIX_INSTALL_DIR envvar 
@@ -644,16 +644,31 @@ similar to the below which reports the OPTICKS_KEY value of the geometry::
 
 
 To reuse the geometry the OPTICKS_KEY envvar needs to be exported from 
-`.bash_profile` or `.bashrc`, see the next section for an example.
+`.opticks_setup`, see the next section for an example.
 
 
 
-Running Opticks Scripts and Executables
-----------------------------------------
+Bash Setup for Running Opticks Scripts and Executables 
+--------------------------------------------------------------
+
+Recommended arrangment of bash setup scripts:
+
+* `~/.bash_profile` should source `~/.bashrc`
+* `~/.bashrc` should source `~/.opticks_setup` (PRIOR to any early exits)
+
+Using this approach succeeds to setup the opticks bash functions
+and exports with either "bash -l" or "bash -i" or from within
+scripts using shebang line "#!/bin/bash -l". 
+
+This makes the setup immune to differing treatments of when 
+`~/.bash_profile` and `~/.bashrc` are to invoked by various Linux 
+distros and macOS. 
 
 All Opticks executables including the tests are installed 
-into $LOCAL_BASE/opticks/lib/ an example `.bash_profile` 
-to is provided below:
+into $LOCAL_BASE/opticks/lib/ 
+
+
+Example `~/.bash_profile`:
 
 .. code-block:: sh
 
@@ -663,11 +678,41 @@ to is provided below:
             . ~/.bashrc
     fi
 
+
+
+Some Linux distros (Ubuntu) have a default `.bashrc` which early exits. 
+It is necessary to *source ~/.opticks_setup* prior to the early exit.  
+Example `~/.bashrc`:
+
+.. code-block:: sh
+
+    # .bashrc
+
+    vip(){ vim ~/.bash_profile ~/.bashrc ~/.opticks_setup ; } 
+    ini(){ source ~/.bashrc ; } 
+
+    source ~/.opticks_setup
+
+    ##### below from default Ubuntu .bashrc early exits if bash is not invoked with -i option 
+
+    # If not running interactively, don't do anything
+    case $- in
+        *i*) ;;
+          *) return;;
+    esac
+
+
+Example `~/.opticks_setup`:
+
+.. code-block:: sh
+
+    # .opticks_setup
+
     export LOCAL_BASE=$HOME/local             ## opticks hookup is needed by all Opticks users 
     export OPTICKS_HOME=$HOME/opticks
 
-    opticks-(){  [ -r $HOME/opticks/opticks.bash ] && . $HOME/opticks/opticks.bash && opticks-env $* ; }
-    opticks-                                  ## defines several bash functions beginning opticks- eg opticks-info
+    opticks-(){  [ -r $OPTICKS_HOME/opticks.bash ] && . $OPTICKS_HOME/opticks.bash && opticks-env $* ; }
+    opticks-     ##  
 
     o(){ cd $(opticks-home) ; hg st ; }
     op(){ op.sh $* ; }
@@ -677,6 +722,10 @@ to is provided below:
 
     export OPTICKS_KEY=OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
     ## picking a geometry
+
+
+For notes about this see `notes/issues/ubuntu-bash-login-shell-differences.rst`
+
 
 
 Opticks NumPy based Analysis
