@@ -39,7 +39,8 @@
   <ul>
 <li><a class="reference internal" href="#">Opticks Install Instructions</a><ul>
 <li><a class="reference internal" href="#get-opticks">Get Opticks</a></li>
-<li><a class="reference internal" href="#bash-setup-envvars">Bash setup, envvars</a></li>
+<li><a class="reference internal" href="#bash-shell-setup-with-opticks-setup">Bash Shell Setup with .opticks_setup</a></li>
+<li><a class="reference internal" href="#recommended-bash-setup-arrangement">Recommended bash setup arrangement</a></li>
 <li><a class="reference internal" href="#check-your-bash-environment-setup">Check your bash environment setup</a><ul>
 <li><a class="reference internal" href="#bash-profile-or-bashrc-macos-and-linux">.bash_profile OR .bashrc, macOS and Linux</a></li>
 </ul>
@@ -78,7 +79,6 @@
 <li><a class="reference internal" href="#testing-installation">Testing Installation</a></li>
 <li><a class="reference internal" href="#creating-legacy-workflow-geocache">Creating Legacy Workflow Geocache</a></li>
 <li><a class="reference internal" href="#creating-direct-workflow-geocache">Creating Direct Workflow Geocache</a></li>
-<li><a class="reference internal" href="#bash-setup-for-running-opticks-scripts-and-executables">Bash Setup for Running Opticks Scripts and Executables</a></li>
 <li><a class="reference internal" href="#opticks-numpy-based-analysis">Opticks NumPy based Analysis</a></li>
 <li><a class="reference internal" href="#systems-where-opticks-has-been-installed">Systems where Opticks has been Installed</a><ul>
 <li><a class="reference internal" href="#macos-10-13-4-17e199-high-sierra-xcode-9-2">macOS 10.13.4 (17E199) High Sierra, Xcode 9.2</a></li>
@@ -137,32 +137,100 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="bash-setup-envvars">
-<h2>Bash setup, envvars<a class="headerlink" href="#bash-setup-envvars" title="Permalink to this headline">¶</a></h2>
-<p>Connect the opticks bash functions to your shell by adding a line to your <em>.bashrc</em> (Linux)
-OR <em>.bash_profile</em> (macOS).  Also configure the location of the install with the LOCAL_BASE environment variable
-and the location of the source with the OPTICKS_HOME envvar:</p>
+<div class="section" id="bash-shell-setup-with-opticks-setup">
+<h2>Bash Shell Setup with .opticks_setup<a class="headerlink" href="#bash-shell-setup-with-opticks-setup" title="Permalink to this headline">¶</a></h2>
+<p>Example <cite>~/.opticks_setup</cite>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .opticks_setup</span>
+
+<span class="nb">export</span> <span class="nv">LOCAL_BASE</span><span class="o">=</span><span class="nv">$HOME</span>/local
+<span class="nb">export</span> <span class="nv">OPTICKS_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/opticks
+<span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$HOME</span>
+
+opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
+opticks-     <span class="c1">##</span>
+
+o<span class="o">(){</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> hg st <span class="p">;</span> <span class="o">}</span>
+op<span class="o">(){</span> op.sh <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
+
+<span class="nv">PATH</span><span class="o">=</span><span class="nv">$OPTICKS_HOME</span>/bin:<span class="nv">$OPTICKS_HOME</span>/ana:<span class="nv">$LOCAL_BASE</span>/opticks/lib:<span class="nv">$PATH</span>  <span class="c1">## easy access to scripts and executables</span>
+<span class="nb">export</span> PATH
+
+<span class="nb">export</span> <span class="nv">OPTICKS_KEY</span><span class="o">=</span>OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
+<span class="c1">## picking a geometry</span>
+</pre></div>
+</div>
+<p>Envvars:</p>
+<dl class="docutils">
+<dt>LOCAL_BASE</dt>
+<dd>configures the root of the install, canonically “/usr/local” but can be $HOME/local of you dont
+have permissions for “/usr/local”</dd>
+<dt>OPTICKS_HOME</dt>
+<dd>path to the “opticks” source directory</dd>
+<dt>PYTHONPATH</dt>
+<dd>directory containing the “opticks” source directory, allowing “import opticks”
+to work from python scripts</dd>
+<dt>OPTICKS_KEY</dt>
+<dd>picks a geometry geocache, created with the geocache-create function</dd>
+<dt>PATH</dt>
+<dd>Opticks executables including more than 400 tests are installed into $LOCAL_BASE/opticks/lib,
+setting the PATH as indicated gives easy access to these as well as many scripts</dd>
+</dl>
+<p>The most important lines of the setup are:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-(){ . $HOME/opticks/opticks.bash &amp;&amp; opticks-env $* ; }
-export LOCAL_BASE=/usr/local
-export OPTICKS_HOME=$HOME/opticks
+opticks-
 </pre></div>
 </div>
 <p>The first line defines the bash function <em>opticks-</em> that is termed a precursor function
 as running it will define other functions all starting with <em>opticks-</em> such as <em>opticks-vi</em>
-and <em>opticks-usage</em>.</p>
-<p>Some further .bash_profile setup simplifies use of Opticks binaries and analysis scripts:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>op(){ op.sh $* ; }
+and <em>opticks-usage</em>.  The second line runs the function which defines further functions.</p>
+</div>
+<div class="section" id="recommended-bash-setup-arrangement">
+<h2>Recommended bash setup arrangement<a class="headerlink" href="#recommended-bash-setup-arrangement" title="Permalink to this headline">¶</a></h2>
+<p>The recommended arrangment of bash setup scripts:</p>
+<ul class="simple">
+<li><cite>~/.bash_profile</cite> should source <cite>~/.bashrc</cite></li>
+<li><cite>~/.bashrc</cite> should source <cite>~/.opticks_setup</cite> (PRIOR to any early exits)</li>
+</ul>
+<p>Using this approach succeeds to setup the opticks bash functions
+and exports with either “bash -l” or “bash -i” or from within
+scripts using shebang line “#!/bin/bash -l”.</p>
+<p>This makes the setup immune to differing treatments of when
+<cite>~/.bash_profile</cite> and <cite>~/.bashrc</cite> are to invoked by various Linux
+distros and macOS.</p>
+<p>Example <cite>~/.bash_profile</cite>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bash_profile</span>
 
-export PYTHONPATH=$HOME
-export PATH=$LOCAL_BASE/opticks/lib:$OPTICKS_HOME/bin:$OPTICKS_HOME/ana:$PATH
+<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span><span class="p">;</span> <span class="k">then</span>                 <span class="c1">## typical setup</span>
+        . ~/.bashrc
+<span class="k">fi</span>
 </pre></div>
 </div>
+<p>Some Linux distros (Ubuntu) have a default <cite>.bashrc</cite> which early exits.
+It is necessary to <em>source ~/.opticks_setup</em> prior to the early exit.
+Example <cite>~/.bashrc</cite>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bashrc</span>
+
+vip<span class="o">(){</span> vim ~/.bash_profile ~/.bashrc ~/.opticks_setup <span class="p">;</span> <span class="o">}</span>
+ini<span class="o">(){</span> <span class="nb">source</span> ~/.bashrc <span class="p">;</span> <span class="o">}</span>
+
+<span class="nb">source</span> ~/.opticks_setup
+
+<span class="c1">##### below from default Ubuntu .bashrc early exits if bash is not invoked with -i option</span>
+
+<span class="c1"># If not running interactively, don&#39;t do anything</span>
+<span class="k">case</span> <span class="nv">$-</span> in
+    *i*<span class="o">)</span> <span class="p">;;</span>
+      *<span class="o">)</span> <span class="k">return</span><span class="p">;;</span>
+<span class="k">esac</span>
+</pre></div>
+</div>
+<p>For notes about this see <cite>notes/issues/ubuntu-bash-login-shell-differences.rst</cite></p>
 </div>
 <div class="section" id="check-your-bash-environment-setup">
 <h2>Check your bash environment setup<a class="headerlink" href="#check-your-bash-environment-setup" title="Permalink to this headline">¶</a></h2>
-<p>If the below commandline gives errors, check your <em>.bash_profile</em> OR <em>.bashrc</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ bash -lc &quot;opticks- ; opticks-info &quot;    ## RHEL, Centos
-[blyth@localhost ~]$ bash -ic &quot;opticks- ; opticks-info &quot;    ## Ubuntu
+<p>If the below commandline gives errors, compare your <em>.bash_profile</em>  <em>.bashrc</em> and <em>.opticks_setup</em> with
+the above examples.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ bash -lc &quot;opticks- ; opticks-info &quot;    ## RHEL, Centos (and Ubuntu too)
 
 opticks-locations
 ==================
@@ -809,69 +877,6 @@ similar to the below which reports the OPTICKS_KEY value of the geometry:</p>
 </div>
 <p>To reuse the geometry the OPTICKS_KEY envvar needs to be exported from
 <cite>.opticks_setup</cite>, see the next section for an example.</p>
-</div>
-<div class="section" id="bash-setup-for-running-opticks-scripts-and-executables">
-<h2>Bash Setup for Running Opticks Scripts and Executables<a class="headerlink" href="#bash-setup-for-running-opticks-scripts-and-executables" title="Permalink to this headline">¶</a></h2>
-<p>Recommended arrangment of bash setup scripts:</p>
-<ul class="simple">
-<li><cite>~/.bash_profile</cite> should source <cite>~/.bashrc</cite></li>
-<li><cite>~/.bashrc</cite> should source <cite>~/.opticks_setup</cite> (PRIOR to any early exits)</li>
-</ul>
-<p>Using this approach succeeds to setup the opticks bash functions
-and exports with either “bash -l” or “bash -i” or from within
-scripts using shebang line “#!/bin/bash -l”.</p>
-<p>This makes the setup immune to differing treatments of when
-<cite>~/.bash_profile</cite> and <cite>~/.bashrc</cite> are to invoked by various Linux
-distros and macOS.</p>
-<p>All Opticks executables including the tests are installed
-into $LOCAL_BASE/opticks/lib/</p>
-<p>Example <cite>~/.bash_profile</cite>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bash_profile</span>
-
-<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span><span class="p">;</span> <span class="k">then</span>                 <span class="c1">## typical setup</span>
-        . ~/.bashrc
-<span class="k">fi</span>
-</pre></div>
-</div>
-<p>Some Linux distros (Ubuntu) have a default <cite>.bashrc</cite> which early exits.
-It is necessary to <em>source ~/.opticks_setup</em> prior to the early exit.
-Example <cite>~/.bashrc</cite>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bashrc</span>
-
-vip<span class="o">(){</span> vim ~/.bash_profile ~/.bashrc ~/.opticks_setup <span class="p">;</span> <span class="o">}</span>
-ini<span class="o">(){</span> <span class="nb">source</span> ~/.bashrc <span class="p">;</span> <span class="o">}</span>
-
-<span class="nb">source</span> ~/.opticks_setup
-
-<span class="c1">##### below from default Ubuntu .bashrc early exits if bash is not invoked with -i option</span>
-
-<span class="c1"># If not running interactively, don&#39;t do anything</span>
-<span class="k">case</span> <span class="nv">$-</span> in
-    *i*<span class="o">)</span> <span class="p">;;</span>
-      *<span class="o">)</span> <span class="k">return</span><span class="p">;;</span>
-<span class="k">esac</span>
-</pre></div>
-</div>
-<p>Example <cite>~/.opticks_setup</cite>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .opticks_setup</span>
-
-<span class="nb">export</span> <span class="nv">LOCAL_BASE</span><span class="o">=</span><span class="nv">$HOME</span>/local             <span class="c1">## opticks hookup is needed by all Opticks users</span>
-<span class="nb">export</span> <span class="nv">OPTICKS_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/opticks
-
-opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
-opticks-     <span class="c1">##</span>
-
-o<span class="o">(){</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> hg st <span class="p">;</span> <span class="o">}</span>
-op<span class="o">(){</span> op.sh <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
-
-<span class="nv">PATH</span><span class="o">=</span><span class="nv">$OPTICKS_HOME</span>/bin:<span class="nv">$LOCAL_BASE</span>/opticks/lib:<span class="nv">$PATH</span>  <span class="c1">## easy access to scripts and executables</span>
-<span class="nb">export</span> PATH
-
-<span class="nb">export</span> <span class="nv">OPTICKS_KEY</span><span class="o">=</span>OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
-<span class="c1">## picking a geometry</span>
-</pre></div>
-</div>
-<p>For notes about this see <cite>notes/issues/ubuntu-bash-login-shell-differences.rst</cite></p>
 </div>
 <div class="section" id="opticks-numpy-based-analysis">
 <h2>Opticks NumPy based Analysis<a class="headerlink" href="#opticks-numpy-based-analysis" title="Permalink to this headline">¶</a></h2>
