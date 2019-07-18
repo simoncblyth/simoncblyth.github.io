@@ -1,0 +1,271 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>CerenkovMinimal &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">CerenkovMinimal</a><ul>
+<li><a class="reference internal" href="#aligned-rng-stream">Aligned RNG stream</a></li>
+<li><a class="reference internal" href="#l4cerenkov">L4Cerenkov</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/examples/Geant4/CerenkovMinimal/CerenkovMinimal.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="cerenkovminimal">
+<h1>CerenkovMinimal<a class="headerlink" href="#cerenkovminimal" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>CerenkovMinimal.cc</dt>
+<dd>main, includes only G4.hh</dd>
+<dt>G4</dt>
+<dd>holds instances of all the below action classes, PhysicsList&lt;L4Cerenkov&gt;
+and the Ctx. Connects them up.</dd>
+<dt>PhysicsList</dt>
+<dd>mostly standard but with templated Cerenkov class</dd>
+<dt>L4Cerenkov</dt>
+<dd><p class="first">minimally modified Cerenkov process that invokes
+G4Opticks::GetOpticks()-&gt;collectCerenkovStep</p>
+<p class="last">Currently for validation the ordinary photon generation loop
+is performed, with G4Opticks::setAlignIndex(photon_record_id)
+being called at the head before any consumption of random numbers
+and G4Opticks::setAlignIndex(-1) being called at the tail of the loop</p>
+</dd>
+<dt>Cerenkov</dt>
+<dd>not currently used. Looks like a shim subclass
+of G4Cerenkov with PostStepGetPhysicalInteractionLength
+reimplemented for easy prodding</dd>
+<dt>DetectorConstruction</dt>
+<dd>very standard, in the style of simple Geant4 examples</dd>
+<dt>SensitiveDetector</dt>
+<dd>processHits invokes G4Opticks::collectHit</dd>
+<dt>Ctx</dt>
+<dd><p class="first">instance is resident of G4 and is passed as only argument to
+all the action ctors. Nexus.</p>
+<p>Ctx::setTrack currently kills non-optical tracks after the first
+genstep has been collected : for debugging with a single genstep</p>
+<p class="last">Ctx::setTrackOptical invokes G4Opticks::setAlignIndex(photon_record_id)
+Ctx::postTrackOptical invokes G4Opticks::setAlignIndex(-1)</p>
+</dd>
+<dt>TrackInfo</dt>
+<dd>used to pass the photon_record_id from the L4Cerenkov photon generation
+loop to subsequent propagation.</dd>
+<dt>RunAction</dt>
+<dd>BeginOfRunAction passes world volume with G4Opticks::setGeometry
+EndOfRunAction invokes G4Opticks::Finalize</dd>
+<dt>EventAction</dt>
+<dd>EndOfEventAction invokes G4Opticks::propagateOpticalPhotons</dd>
+<dt>TrackingAction</dt>
+<dd>handoff G4Track to Ctx::setTrack and Ctx::postTrack</dd>
+<dt>SteppingAction</dt>
+<dd>handoff G4Step to Ctx::setStep</dd>
+<dt>PrimaryGeneratorAction</dt>
+<dd>standard simple G4ParticleGun</dd>
+</dl>
+<p>OpHit</p>
+<div class="section" id="aligned-rng-stream">
+<h2>Aligned RNG stream<a class="headerlink" href="#aligned-rng-stream" title="Permalink to this headline">¶</a></h2>
+<p>Notice the calls to G4Opticks::setAlignIndex, which invoke CAlignEngine::SetSequenceIndex</p>
+<ul class="simple">
+<li>L4Cerenkov : with argument photon_record_id and -1 bracketing the body of the photon generation</li>
+<li>Ctx::setTrackOptical Ctx::postTrackOptical which get invoked while propagating</li>
+</ul>
+<p>This is done to allow the RNG sequence for each photon to be continuous in order to
+make it possible to match with the RNG sequence used on GPU.  Note this approach
+has also been made to work across Scintillator reemission in CFG4.</p>
+</div>
+<div class="section" id="l4cerenkov">
+<h2>L4Cerenkov<a class="headerlink" href="#l4cerenkov" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>random alignment setup is done prior to any consumption of
+random numbers within the photon generation loop</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">182</span> <span class="n">G4VParticleChange</span><span class="o">*</span>
+<span class="mi">183</span> <span class="n">L4Cerenkov</span><span class="p">::</span><span class="n">PostStepDoIt</span><span class="p">(</span><span class="n">const</span> <span class="n">G4Track</span><span class="o">&amp;</span> <span class="n">aTrack</span><span class="p">,</span> <span class="n">const</span> <span class="n">G4Step</span><span class="o">&amp;</span> <span class="n">aStep</span><span class="p">)</span>
+<span class="mi">184</span>
+<span class="o">...</span>
+<span class="mi">292</span>         <span class="n">G4double</span> <span class="n">MeanNumberOfPhotons1</span> <span class="o">=</span>
+<span class="mi">293</span>                      <span class="n">GetAverageNumberOfPhotons</span><span class="p">(</span><span class="n">charge</span><span class="p">,</span><span class="n">beta1</span><span class="p">,</span><span class="n">aMaterial</span><span class="p">,</span><span class="n">Rindex</span><span class="p">);</span>
+<span class="mi">294</span>         <span class="n">G4double</span> <span class="n">MeanNumberOfPhotons2</span> <span class="o">=</span>
+<span class="mi">295</span>                      <span class="n">GetAverageNumberOfPhotons</span><span class="p">(</span><span class="n">charge</span><span class="p">,</span><span class="n">beta2</span><span class="p">,</span><span class="n">aMaterial</span><span class="p">,</span><span class="n">Rindex</span><span class="p">);</span>
+<span class="mi">296</span>
+<span class="mi">297</span>
+<span class="mi">298</span> <span class="c1">#ifdef WITH_OPTICKS</span>
+<span class="mi">299</span>     <span class="n">unsigned</span> <span class="n">opticks_photon_offset</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
+<span class="mi">300</span>     <span class="p">{</span>
+<span class="mi">301</span>         <span class="n">const</span> <span class="n">G4ParticleDefinition</span><span class="o">*</span> <span class="n">definition</span> <span class="o">=</span> <span class="n">aParticle</span><span class="o">-&gt;</span><span class="n">GetDefinition</span><span class="p">();</span>
+<span class="mi">302</span>         <span class="n">G4ThreeVector</span> <span class="n">deltaPosition</span> <span class="o">=</span> <span class="n">aStep</span><span class="o">.</span><span class="n">GetDeltaPosition</span><span class="p">();</span>
+<span class="mi">303</span>         <span class="n">G4int</span> <span class="n">materialIndex</span> <span class="o">=</span> <span class="n">aMaterial</span><span class="o">-&gt;</span><span class="n">GetIndex</span><span class="p">();</span>
+<span class="mi">304</span>         <span class="n">G4cout</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;L4Cerenkov::PostStepDoIt&quot;</span>
+<span class="mi">305</span>                <span class="o">&lt;&lt;</span> <span class="s2">&quot; dp (Pmax-Pmin) &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">dp</span>
+<span class="mi">306</span>                <span class="o">&lt;&lt;</span> <span class="n">G4endl</span>
+<span class="mi">307</span>                <span class="p">;</span>
+<span class="mi">308</span>
+<span class="mi">309</span>         <span class="n">opticks_photon_offset</span> <span class="o">=</span> <span class="n">G4Opticks</span><span class="p">::</span><span class="n">GetOpticks</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">getNumPhotons</span><span class="p">();</span>
+<span class="mi">310</span>         <span class="o">//</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">photons</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">gensteps</span> <span class="n">collected</span> <span class="n">before</span> <span class="n">this</span> <span class="n">one</span>
+<span class="mi">311</span>         <span class="o">//</span> <span class="n">within</span> <span class="n">this</span> <span class="n">OpticksEvent</span> <span class="p">(</span><span class="n">potentially</span> <span class="n">crossing</span> <span class="n">multiple</span> <span class="n">G4Event</span><span class="p">)</span>
+<span class="mi">312</span>
+<span class="mi">313</span>         <span class="n">G4Opticks</span><span class="p">::</span><span class="n">GetOpticks</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">collectCerenkovStep</span><span class="p">(</span>
+<span class="mi">314</span>                <span class="mi">0</span><span class="p">,</span>                  <span class="o">//</span> <span class="mi">0</span>     <span class="nb">id</span><span class="p">:</span><span class="n">zero</span> <span class="n">means</span> <span class="n">use</span> <span class="n">cerenkov</span> <span class="n">step</span> <span class="n">count</span>
+<span class="mi">315</span>                <span class="n">aTrack</span><span class="o">.</span><span class="n">GetTrackID</span><span class="p">(),</span>
+<span class="mi">316</span>                <span class="n">materialIndex</span><span class="p">,</span>
+<span class="mi">317</span>                <span class="n">NumPhotons</span><span class="p">,</span>
+<span class="mi">318</span>
+<span class="mi">319</span>                <span class="n">x0</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span>                <span class="o">//</span> <span class="mi">1</span>
+<span class="mi">320</span>                <span class="n">x0</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span>
+<span class="mi">321</span>                <span class="n">x0</span><span class="o">.</span><span class="n">z</span><span class="p">(),</span>
+<span class="mi">322</span>                <span class="n">t0</span><span class="p">,</span>
+<span class="mi">323</span>
+<span class="mi">324</span>                <span class="n">deltaPosition</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span>     <span class="o">//</span> <span class="mi">2</span>
+<span class="mi">325</span>                <span class="n">deltaPosition</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span>
+<span class="mi">326</span>                <span class="n">deltaPosition</span><span class="o">.</span><span class="n">z</span><span class="p">(),</span>
+<span class="mi">327</span>                <span class="n">aStep</span><span class="o">.</span><span class="n">GetStepLength</span><span class="p">(),</span>
+<span class="mi">328</span>
+<span class="mi">329</span>                <span class="n">definition</span><span class="o">-&gt;</span><span class="n">GetPDGEncoding</span><span class="p">(),</span>   <span class="o">//</span> <span class="mi">3</span>
+<span class="mi">330</span>                <span class="n">definition</span><span class="o">-&gt;</span><span class="n">GetPDGCharge</span><span class="p">(),</span>
+<span class="mi">331</span>                <span class="n">aTrack</span><span class="o">.</span><span class="n">GetWeight</span><span class="p">(),</span>
+<span class="mi">332</span>                <span class="n">pPreStepPoint</span><span class="o">-&gt;</span><span class="n">GetVelocity</span><span class="p">(),</span>
+<span class="mi">333</span>
+<span class="mi">334</span>                <span class="n">BetaInverse</span><span class="p">,</span>       <span class="o">//</span> <span class="mi">4</span>
+<span class="mi">335</span>                <span class="n">Pmin</span><span class="p">,</span>
+<span class="mi">336</span>                <span class="n">Pmax</span><span class="p">,</span>
+<span class="mi">337</span>                <span class="n">maxCos</span><span class="p">,</span>
+<span class="mi">338</span>
+<span class="mi">339</span>                <span class="n">maxSin2</span><span class="p">,</span>   <span class="o">//</span> <span class="mi">5</span>
+<span class="mi">340</span>                <span class="n">MeanNumberOfPhotons1</span><span class="p">,</span>
+<span class="mi">341</span>                <span class="n">MeanNumberOfPhotons2</span><span class="p">,</span>
+<span class="mi">342</span>                <span class="n">pPostStepPoint</span><span class="o">-&gt;</span><span class="n">GetVelocity</span><span class="p">()</span>
+<span class="mi">343</span>         <span class="p">);</span>
+<span class="mi">344</span>     <span class="p">}</span>
+<span class="mi">345</span> <span class="c1">#endif</span>
+<span class="mi">346</span>
+<span class="mi">347</span>
+<span class="mi">348</span>     <span class="o">//</span> <span class="n">NB</span> <span class="n">eventually</span> <span class="n">the</span> <span class="n">below</span> <span class="n">CPU</span> <span class="n">photon</span> <span class="n">generation</span> <span class="n">loop</span>
+<span class="mi">349</span>     <span class="o">//</span>    <span class="n">will</span> <span class="n">be</span> <span class="n">skipped</span><span class="p">,</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">kept</span> <span class="k">for</span> <span class="n">now</span> <span class="n">to</span> <span class="n">allow</span> <span class="n">comparisons</span> <span class="k">for</span> <span class="n">validation</span>
+<span class="mi">350</span>
+<span class="mi">351</span>     <span class="k">for</span> <span class="p">(</span><span class="n">G4int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NumPhotons</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+<span class="mi">352</span>
+<span class="mi">353</span>         <span class="o">//</span> <span class="n">Determine</span> <span class="n">photon</span> <span class="n">energy</span>
+<span class="mi">354</span> <span class="c1">#ifdef WITH_OPTICKS</span>
+<span class="mi">355</span>         <span class="n">unsigned</span> <span class="n">record_id</span> <span class="o">=</span> <span class="n">opticks_photon_offset</span><span class="o">+</span><span class="n">i</span> <span class="p">;</span>
+<span class="mi">356</span>         <span class="n">G4Opticks</span><span class="p">::</span><span class="n">GetOpticks</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setAlignIndex</span><span class="p">(</span><span class="n">record_id</span><span class="p">);</span>
+<span class="mi">357</span> <span class="c1">#endif</span>
+<span class="mi">358</span>
+<span class="mi">359</span>         <span class="n">G4double</span> <span class="n">rand</span><span class="p">;</span>
+<span class="mi">360</span>         <span class="n">G4double</span> <span class="n">sampledEnergy</span><span class="p">,</span> <span class="n">sampledRI</span><span class="p">;</span>
+<span class="mi">361</span>         <span class="n">G4double</span> <span class="n">cosTheta</span><span class="p">,</span> <span class="n">sin2Theta</span><span class="p">;</span>
+<span class="mi">362</span>
+<span class="mi">363</span>         <span class="o">//</span> <span class="n">sample</span> <span class="n">an</span> <span class="n">energy</span>
+<span class="mi">364</span>
+<span class="mi">365</span>         <span class="n">do</span> <span class="p">{</span>
+<span class="mi">366</span>             <span class="n">rand</span> <span class="o">=</span> <span class="n">G4UniformRand</span><span class="p">();</span>
+<span class="mi">367</span>             <span class="n">sampledEnergy</span> <span class="o">=</span> <span class="n">Pmin</span> <span class="o">+</span> <span class="n">rand</span> <span class="o">*</span> <span class="n">dp</span><span class="p">;</span>
+<span class="mi">368</span>             <span class="n">sampledRI</span> <span class="o">=</span> <span class="n">Rindex</span><span class="o">-&gt;</span><span class="n">Value</span><span class="p">(</span><span class="n">sampledEnergy</span><span class="p">);</span>
+<span class="mi">369</span>             <span class="n">cosTheta</span> <span class="o">=</span> <span class="n">BetaInverse</span> <span class="o">/</span> <span class="n">sampledRI</span><span class="p">;</span>
+
+<span class="o">...</span>    <span class="n">standard</span> <span class="n">Cerenkov</span> <span class="n">generation</span> <span class="o">....</span>
+
+<span class="mi">463</span>         <span class="n">aParticleChange</span><span class="o">.</span><span class="n">AddSecondary</span><span class="p">(</span><span class="n">aSecondaryTrack</span><span class="p">);</span>
+<span class="mi">464</span>
+<span class="mi">465</span>
+<span class="mi">466</span> <span class="c1">#ifdef WITH_OPTICKS</span>
+<span class="mi">467</span>         <span class="n">aSecondaryTrack</span><span class="o">-&gt;</span><span class="n">SetUserInformation</span><span class="p">(</span><span class="n">new</span> <span class="n">TrackInfo</span><span class="p">(</span> <span class="n">record_id</span> <span class="p">)</span> <span class="p">);</span>
+<span class="mi">468</span>         <span class="n">G4Opticks</span><span class="p">::</span><span class="n">GetOpticks</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setAlignIndex</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+<span class="mi">469</span> <span class="c1">#endif</span>
+<span class="mi">470</span>
+<span class="mi">471</span>
+<span class="mi">472</span>     <span class="p">}</span>  <span class="o">//</span> <span class="n">CPU</span> <span class="n">photon</span> <span class="n">generation</span> <span class="n">loop</span>
+<span class="mi">473</span>
+<span class="mi">474</span>     <span class="k">if</span> <span class="p">(</span><span class="n">verboseLevel</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+<span class="mi">475</span>        <span class="n">G4cout</span> <span class="o">&lt;&lt;</span><span class="s2">&quot;L4Cerenkov::PostStepDoIt DONE -- NumberOfSecondaries = &quot;</span>
+<span class="mi">476</span>               <span class="o">&lt;&lt;</span> <span class="n">aParticleChange</span><span class="o">.</span><span class="n">GetNumberOfSecondaries</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">G4endl</span><span class="p">;</span>
+<span class="mi">477</span>     <span class="p">}</span>
+<span class="mi">478</span>
+<span class="mi">479</span>
+<span class="mi">480</span> <span class="c1">#ifdef WITH_OPTICKS</span>
+<span class="mi">481</span>        <span class="n">G4cout</span>
+<span class="mi">482</span>            <span class="o">&lt;&lt;</span> <span class="s2">&quot;L4Cerenkov::PostStepDoIt G4Opticks.collectSecondaryPhotons&quot;</span>
+<span class="mi">483</span>            <span class="o">&lt;&lt;</span> <span class="n">G4endl</span>
+<span class="mi">484</span>            <span class="p">;</span>
+<span class="mi">485</span>
+<span class="mi">486</span>         <span class="n">G4Opticks</span><span class="p">::</span><span class="n">GetOpticks</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">collectSecondaryPhotons</span><span class="p">(</span><span class="n">pParticleChange</span><span class="p">)</span> <span class="p">;</span>
+<span class="mi">487</span> <span class="c1">#endif</span>
+<span class="mi">488</span>
+<span class="mi">489</span>         <span class="k">return</span> <span class="n">pParticleChange</span><span class="p">;</span>
+<span class="mi">490</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

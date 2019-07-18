@@ -39,7 +39,8 @@
   <ul>
 <li><a class="reference internal" href="#">Opticks Install Instructions</a><ul>
 <li><a class="reference internal" href="#get-opticks">Get Opticks</a></li>
-<li><a class="reference internal" href="#bash-setup-envvars">Bash setup, envvars</a></li>
+<li><a class="reference internal" href="#bash-shell-setup-with-opticks-setup">Bash Shell Setup with .opticks_setup</a></li>
+<li><a class="reference internal" href="#recommended-bash-setup-arrangement">Recommended bash setup arrangement</a></li>
 <li><a class="reference internal" href="#check-your-bash-environment-setup">Check your bash environment setup</a><ul>
 <li><a class="reference internal" href="#bash-profile-or-bashrc-macos-and-linux">.bash_profile OR .bashrc, macOS and Linux</a></li>
 </ul>
@@ -57,9 +58,10 @@
 <li><a class="reference internal" href="#finding-cuda">Finding CUDA</a></li>
 <li><a class="reference internal" href="#opticks-without-an-cuda-capable-gpu">Opticks without an CUDA capable GPU ?</a></li>
 <li><a class="reference internal" href="#versions-of-cuda-and-optix">Versions of CUDA and OptiX</a></li>
+<li><a class="reference internal" href="#using-a-non-standard-optix-version">Using a non-standard OptiX version</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#testing-cuda-and-optix-installs-and-nvcc-toolchain">Testing CUDA and OptiX Installs and nvcc toolchain</a></li>
+<li><a class="reference internal" href="#testin-cuda-and-optix-installs-and-nvcc-toolchain">Testin CUDA and OptiX Installs and nvcc toolchain</a></li>
 <li><a class="reference internal" href="#testing-thrust">Testing Thrust</a></li>
 <li><a class="reference internal" href="#geant4">Geant4</a><ul>
 <li><a class="reference internal" href="#geant4-version">Geant4 Version</a></li>
@@ -71,13 +73,12 @@
 <li><a class="reference internal" href="#manually-configuring-opticks">Manually Configuring Opticks</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#configuration-machinery">Configuration Machinery</a></li>
 <li><a class="reference internal" href="#opticks-without-nvidia-optix-and-cuda">Opticks Without NVIDIA OptiX and CUDA ?</a></li>
 <li><a class="reference internal" href="#geant4-dependency">Geant4 Dependency</a></li>
 <li><a class="reference internal" href="#embedded-opticks">Embedded Opticks</a></li>
 <li><a class="reference internal" href="#testing-installation">Testing Installation</a></li>
-<li><a class="reference internal" href="#issues-with-tests">Issues With Tests</a></li>
-<li><a class="reference internal" href="#running-opticks-scripts-and-executables">Running Opticks Scripts and Executables</a></li>
+<li><a class="reference internal" href="#creating-legacy-workflow-geocache">Creating Legacy Workflow Geocache</a></li>
+<li><a class="reference internal" href="#creating-direct-workflow-geocache">Creating Direct Workflow Geocache</a></li>
 <li><a class="reference internal" href="#opticks-numpy-based-analysis">Opticks NumPy based Analysis</a></li>
 <li><a class="reference internal" href="#systems-where-opticks-has-been-installed">Systems where Opticks has been Installed</a><ul>
 <li><a class="reference internal" href="#macos-10-13-4-17e199-high-sierra-xcode-9-2">macOS 10.13.4 (17E199) High Sierra, Xcode 9.2</a></li>
@@ -136,32 +137,100 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="bash-setup-envvars">
-<h2>Bash setup, envvars<a class="headerlink" href="#bash-setup-envvars" title="Permalink to this headline">¶</a></h2>
-<p>Connect the opticks bash functions to your shell by adding a line to your <em>.bashrc</em> (Linux)
-OR <em>.bash_profile</em> (macOS).  Also configure the location of the install with the LOCAL_BASE environment variable
-and the location of the source with the OPTICKS_HOME envvar:</p>
+<div class="section" id="bash-shell-setup-with-opticks-setup">
+<h2>Bash Shell Setup with .opticks_setup<a class="headerlink" href="#bash-shell-setup-with-opticks-setup" title="Permalink to this headline">¶</a></h2>
+<p>Example <cite>~/.opticks_setup</cite>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .opticks_setup</span>
+
+<span class="nb">export</span> <span class="nv">LOCAL_BASE</span><span class="o">=</span><span class="nv">$HOME</span>/local
+<span class="nb">export</span> <span class="nv">OPTICKS_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/opticks
+<span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$HOME</span>
+
+opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
+opticks-     <span class="c1">##</span>
+
+o<span class="o">(){</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> hg st <span class="p">;</span> <span class="o">}</span>
+op<span class="o">(){</span> op.sh <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
+
+<span class="nv">PATH</span><span class="o">=</span><span class="nv">$OPTICKS_HOME</span>/bin:<span class="nv">$OPTICKS_HOME</span>/ana:<span class="nv">$LOCAL_BASE</span>/opticks/lib:<span class="nv">$PATH</span>  <span class="c1">## easy access to scripts and executables</span>
+<span class="nb">export</span> PATH
+
+<span class="nb">export</span> <span class="nv">OPTICKS_KEY</span><span class="o">=</span>OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
+<span class="c1">## picking a geometry</span>
+</pre></div>
+</div>
+<p>Envvars:</p>
+<dl class="docutils">
+<dt>LOCAL_BASE</dt>
+<dd>configures the root of the install, canonically “/usr/local” but can be $HOME/local of you dont
+have permissions for “/usr/local”</dd>
+<dt>OPTICKS_HOME</dt>
+<dd>path to the “opticks” source directory</dd>
+<dt>PYTHONPATH</dt>
+<dd>directory containing the “opticks” source directory, allowing “import opticks”
+to work from python scripts</dd>
+<dt>OPTICKS_KEY</dt>
+<dd>picks a geometry geocache, created with the geocache-create function</dd>
+<dt>PATH</dt>
+<dd>Opticks executables including more than 400 tests are installed into $LOCAL_BASE/opticks/lib,
+setting the PATH as indicated gives easy access to these as well as many scripts</dd>
+</dl>
+<p>The most important lines of the setup are:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-(){ . $HOME/opticks/opticks.bash &amp;&amp; opticks-env $* ; }
-export LOCAL_BASE=/usr/local
-export OPTICKS_HOME=$HOME/opticks
+opticks-
 </pre></div>
 </div>
 <p>The first line defines the bash function <em>opticks-</em> that is termed a precursor function
 as running it will define other functions all starting with <em>opticks-</em> such as <em>opticks-vi</em>
-and <em>opticks-usage</em>.</p>
-<p>Some further .bash_profile setup simplifies use of Opticks binaries and analysis scripts:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>op(){ op.sh $* ; }
+and <em>opticks-usage</em>.  The second line runs the function which defines further functions.</p>
+</div>
+<div class="section" id="recommended-bash-setup-arrangement">
+<h2>Recommended bash setup arrangement<a class="headerlink" href="#recommended-bash-setup-arrangement" title="Permalink to this headline">¶</a></h2>
+<p>The recommended arrangment of bash setup scripts:</p>
+<ul class="simple">
+<li><cite>~/.bash_profile</cite> should source <cite>~/.bashrc</cite></li>
+<li><cite>~/.bashrc</cite> should source <cite>~/.opticks_setup</cite> (PRIOR to any early exits)</li>
+</ul>
+<p>Using this approach succeeds to setup the opticks bash functions
+and exports with either “bash -l” or “bash -i” or from within
+scripts using shebang line “#!/bin/bash -l”.</p>
+<p>This makes the setup immune to differing treatments of when
+<cite>~/.bash_profile</cite> and <cite>~/.bashrc</cite> are to invoked by various Linux
+distros and macOS.</p>
+<p>Example <cite>~/.bash_profile</cite>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bash_profile</span>
 
-export PYTHONPATH=$HOME
-export PATH=$LOCAL_BASE/opticks/lib:$OPTICKS_HOME/bin:$OPTICKS_HOME/ana:$PATH
+<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span><span class="p">;</span> <span class="k">then</span>                 <span class="c1">## typical setup</span>
+        . ~/.bashrc
+<span class="k">fi</span>
 </pre></div>
 </div>
+<p>Some Linux distros (Ubuntu) have a default <cite>.bashrc</cite> which early exits.
+It is necessary to <em>source ~/.opticks_setup</em> prior to the early exit.
+Example <cite>~/.bashrc</cite>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bashrc</span>
+
+vip<span class="o">(){</span> vim ~/.bash_profile ~/.bashrc ~/.opticks_setup <span class="p">;</span> <span class="o">}</span>
+ini<span class="o">(){</span> <span class="nb">source</span> ~/.bashrc <span class="p">;</span> <span class="o">}</span>
+
+<span class="nb">source</span> ~/.opticks_setup
+
+<span class="c1">##### below from default Ubuntu .bashrc early exits if bash is not invoked with -i option</span>
+
+<span class="c1"># If not running interactively, don&#39;t do anything</span>
+<span class="k">case</span> <span class="nv">$-</span> in
+    *i*<span class="o">)</span> <span class="p">;;</span>
+      *<span class="o">)</span> <span class="k">return</span><span class="p">;;</span>
+<span class="k">esac</span>
+</pre></div>
+</div>
+<p>For notes about this see <cite>notes/issues/ubuntu-bash-login-shell-differences.rst</cite></p>
 </div>
 <div class="section" id="check-your-bash-environment-setup">
 <h2>Check your bash environment setup<a class="headerlink" href="#check-your-bash-environment-setup" title="Permalink to this headline">¶</a></h2>
-<p>If the below commandline gives errors, check your <em>.bash_profile</em> OR <em>.bashrc</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ bash -lc &quot;opticks- ; opticks-info &quot;    ## RHEL, Centos
-[blyth@localhost ~]$ bash -ic &quot;opticks- ; opticks-info &quot;    ## Ubuntu
+<p>If the below commandline gives errors, compare your <em>.bash_profile</em>  <em>.bashrc</em> and <em>.opticks_setup</em> with
+the above examples.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ bash -lc &quot;opticks- ; opticks-info &quot;    ## RHEL, Centos (and Ubuntu too)
 
 opticks-locations
 ==================
@@ -318,6 +387,9 @@ your system. The FindBoost.cmake provided with cmake is used to locate the insta
 </tr>
 </tbody>
 </table>
+<p>The recommended minimum boost version is 1.53 as that is what I am using.
+You might be able to survive with an earlier version,
+but anything before 1.41 is known not to work.</p>
 <div class="section" id="updating-boost">
 <h3>Updating Boost<a class="headerlink" href="#updating-boost" title="Permalink to this headline">¶</a></h3>
 <p>If your version of Boost is not recent enough the cmake configuring
@@ -331,19 +403,15 @@ step will yield errors like the below.:</p>
 <p>If possible use your system package manager to update Boost. If that is
 not possible then do a local Boost install.  Opticks includes bash functions
 starting <em>boost-</em> that can get and install Boost locally.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-
-boost-
-opticks-configure -DBOOST_ROOT=$(boost-prefix)
-</pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="platform-support">
 <h2>Platform Support<a class="headerlink" href="#platform-support" title="Permalink to this headline">¶</a></h2>
 <p>A recent Scientific Linux is the target platform for production running of Opticks,
 but I am happy to try to help with installations on any Linux supported by CUDA.</p>
-<p>Most development has been done on macOS (late 2013 MacBook pro : the last Mac laptop with an NVIDIA GPU)
-with occasional ports to keep thinks working on Scientific Linux.</p>
+<p>Initial development was done on macOS (late 2013 MacBook pro : the last Mac laptop with an NVIDIA GPU)
+with occasional ports to keep thinks working on Scientific Linux. But now due to the lack of Macs
+with NVIDIA GPUs development has moved to Linux CentOS 7 and Scientific Linux.</p>
 </div>
 <div class="section" id="opticks-pre-requisites-nvidia-optix-and-nvidia-cuda">
 <h2>Opticks Pre-requisites : NVIDIA OptiX and NVIDIA CUDA<a class="headerlink" href="#opticks-pre-requisites-nvidia-optix-and-nvidia-cuda" title="Permalink to this headline">¶</a></h2>
@@ -416,28 +484,64 @@ allowing outreach demonstrations in schools without CUDA capable GPUs.</p>
 <h3>Versions of CUDA and OptiX<a class="headerlink" href="#versions-of-cuda-and-optix" title="Permalink to this headline">¶</a></h3>
 <p>I recommend you start your installation attempt with the lastest versions of OptiX
 together with the version of CUDA that it was built against, as stated in
-the OptiX release notes. For example I am currently testing and seeing some success
-with the latest OptiX 5.0.1, CUDA 9.1 on the almost latest build of macOS 10.13.4.
+the OptiX release notes.
 This version pinning between CUDA and OptiX is because Opticks links against
 both the OptiX library and the CUDA runtime.</p>
 <p>If you cannot use the latest CUDA (because of kernel incompatibility) you will need to
 use an older OptiX version contemporary with the CUDA version that your kernel supports.</p>
 <p>Version combinations that have been used:</p>
 <dl class="docutils">
-<dt>current</dt>
-<dd>CUDA 9.1, OptiX 5.0.1</dd>
-<dt>earlier</dt>
+<dt><em>current</em></dt>
+<dd>CUDA 10.1, OptiX 6.0.0</dd>
+<dt><em>previous</em></dt>
+<dd>CUDA 9.1, OptiX 5.1.1
+CUDA 9.1, OptiX 5.1.0</dd>
+<dt><em>earlier</em></dt>
 <dd>CUDA 7.0, OptiX 3.80</dd>
 </dl>
+<p>The <em>current</em> version combination is regularly tested, the <em>previous</em> one
+relies on your bug reports <a class="reference external" href="https://groups.io/g/opticks/topics">https://groups.io/g/opticks/topics</a> to keep it working.
+Any issues with <em>earlier</em> version combinations will not be addressed.</p>
 <p>The reason for the extremes of caution regarding version combinations of drivers
 is that the interface to the GPU is via kernel extensions where if anything goes
 wrong there is no safety net. A bad kernel extension will cause kernel panics,
-your machine crashes and continue to crash until the bad driver is removed
+your machine crashes and continues to crash until the bad driver is removed
 (on macOS the removal can be done by resetting NVRAM).</p>
 </div>
+<div class="section" id="using-a-non-standard-optix-version">
+<h3>Using a non-standard OptiX version<a class="headerlink" href="#using-a-non-standard-optix-version" title="Permalink to this headline">¶</a></h3>
+<p>Opticks tends to adopt new OptiX versions very soon after they become
+available approximately twice per year. This is because OptiX continues
+to improve rapidly. Updating OptiX typically also requires an update of
+the CUDA version and the NVIDIA driver.</p>
+<p>Sometimes due to the suitable NVIDIA driver not yet being installed by
+your system admin it is necessary to use older OptiX+CUDA versions.
+Opticks aims to allow this for recent version combinations only.</p>
+<p>Extract from .opticks_setup:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># The location to look for OptiX libs defaults to $(opticks-prefix)/externals/OptiX
+# to override that while testing a non-standard OptiX version set the OPTICKS_OPTIX_INSTALL_DIR envvar
+# which overrides the default in bash function opticks-optix-install-dir
+#
+unset OPTICKS_OPTIX_INSTALL_DIR
+export OPTICKS_OPTIX_INSTALL_DIR=/usr/local/OptiX_511
+
+export CUDA_VERSION=10.1
+unset LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-${CUDA_VERSION}/lib64
+
+# Normally Opticks executables find the OptiX libs via the RPATH
+#  &quot;$ORIGIN/../lib:$ORIGIN/../lib64:$ORIGIN/../externals/lib:$ORIGIN/../externals/lib64:$ORIGIN/../externals/OptiX/lib64&quot;
+#
+# when using a non-standard OptiX version (older or newer)
+# it is necessary to append to LD_LIBRARY_PATH as penance for being non-standard
+#
+[ -n &quot;$OPTICKS_OPTIX_INSTALL_DIR&quot; ] &amp;&amp; LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${OPTICKS_OPTIX_INSTALL_DIR}/lib64
+</pre></div>
 </div>
-<div class="section" id="testing-cuda-and-optix-installs-and-nvcc-toolchain">
-<h2>Testing CUDA and OptiX Installs and nvcc toolchain<a class="headerlink" href="#testing-cuda-and-optix-installs-and-nvcc-toolchain" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="testin-cuda-and-optix-installs-and-nvcc-toolchain">
+<h2>Testin CUDA and OptiX Installs and nvcc toolchain<a class="headerlink" href="#testin-cuda-and-optix-installs-and-nvcc-toolchain" title="Permalink to this headline">¶</a></h2>
 <p>Before trying to install Opticks check your CUDA and OptiX installs:</p>
 <ol class="arabic simple">
 <li>run the precompiled CUDA and OptiX sample binaries</li>
@@ -652,33 +756,6 @@ allowing new values to be set.</p>
 </div>
 </div>
 </div>
-<div class="section" id="configuration-machinery">
-<h2>Configuration Machinery<a class="headerlink" href="#configuration-machinery" title="Permalink to this headline">¶</a></h2>
-<p>If the above configuration suceeded for you then
-you do not need to understand this machinery.</p>
-<p>The below commands from the <em>opticks-cmake</em> bash function
-change directory to the build folder and invokes cmake
-to generate a configuration cache file and multiple Makefiles.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-bcd
-cmake \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_INSTALL_PREFIX=$(opticks-prefix) \
-    -DOptiX_INSTALL_DIR=$(optix-prefix) \
-    $* \
-    $(opticks-sdir)
-</pre></div>
-</div>
-<p>CMake is controlled via CMakeLists.txt files.
-The top level one includes the below lines that
-locate the CUDA and OptiX:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>set(OPTICKS_CUDA_VERSION 7.0)
-set(OPTICKS_OPTIX_VERSION 3.8)
-...
-find_package(CUDA ${OPTICKS_CUDA_VERSION})
-find_package(OptiX ${OPTICKS_OPTIX_VERSION})
-</pre></div>
-</div>
-</div>
 <div class="section" id="opticks-without-nvidia-optix-and-cuda">
 <h2>Opticks Without NVIDIA OptiX and CUDA ?<a class="headerlink" href="#opticks-without-nvidia-optix-and-cuda" title="Permalink to this headline">¶</a></h2>
 <p>High performance optical photon simulation requires an NVIDIA GPU
@@ -763,37 +840,43 @@ opticks-ctest : use -V to show output
 </pre></div>
 </div>
 </div>
-<div class="section" id="issues-with-tests">
-<h2>Issues With Tests<a class="headerlink" href="#issues-with-tests" title="Permalink to this headline">¶</a></h2>
-<p>Some tests depend on the geometry cache being present. To create the geometry cache:</p>
+<div class="section" id="creating-legacy-workflow-geocache">
+<h2>Creating Legacy Workflow Geocache<a class="headerlink" href="#creating-legacy-workflow-geocache" title="Permalink to this headline">¶</a></h2>
+<p>Some tests depend on the geometry cache being present. To create the legacy geometry cache:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">op</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">G</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="running-opticks-scripts-and-executables">
-<h2>Running Opticks Scripts and Executables<a class="headerlink" href="#running-opticks-scripts-and-executables" title="Permalink to this headline">¶</a></h2>
-<p>All Opticks executables including the tests are installed
-into $LOCAL_BASE/opticks/lib/ an example <cite>.bash_profile</cite>
-to is provided below:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bash_profile</span>
-
-<span class="k">if</span> <span class="o">[</span> -f ~/.bashrc <span class="o">]</span><span class="p">;</span> <span class="k">then</span>                 <span class="c1">## typical setup</span>
-        . ~/.bashrc
-<span class="k">fi</span>
-
-<span class="nb">export</span> <span class="nv">LOCAL_BASE</span><span class="o">=</span><span class="nv">$HOME</span>/local             <span class="c1">## opticks hookup is needed by all Opticks users</span>
-<span class="nb">export</span> <span class="nv">OPTICKS_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/opticks
-
-opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
-opticks-                                  <span class="c1">## defines several bash functions beginning opticks- eg opticks-info</span>
-
-o<span class="o">(){</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> hg st <span class="p">;</span> <span class="o">}</span>
-op<span class="o">(){</span> op.sh <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
-
-<span class="nv">PATH</span><span class="o">=</span><span class="nv">$OPTICKS_HOME</span>/bin:<span class="nv">$LOCAL_BASE</span>/opticks/lib:<span class="nv">$PATH</span>  <span class="c1">## easy access to scripts and executables</span>
-<span class="nb">export</span> PATH
+<div class="section" id="creating-direct-workflow-geocache">
+<h2>Creating Direct Workflow Geocache<a class="headerlink" href="#creating-direct-workflow-geocache" title="Permalink to this headline">¶</a></h2>
+<p>The integration tests require a direct workflow geocache to exist as they
+need it as their base geometry. The direct geocache is created by the OKX4Test executable
+which loads a GDML file and directly translates it into an Opticks GGeo geometry
+instance and persists that into a direct geocache.
+The bash function to do this is <em>geocache-create</em>, use that with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">geocache</span><span class="o">-</span>              <span class="c1"># run precursor function which defines the others</span>
+<span class="nb">type</span> <span class="n">geocache</span><span class="o">-</span><span class="n">create</span>   <span class="c1"># take a look at what its doing</span>
+<span class="n">geocache</span><span class="o">-</span><span class="n">create</span>
 </pre></div>
 </div>
+<p>Geocache creation is time and memory consuming, taking about 1 minute for the JUNO geometry
+on a workstation with lots of memory. Fortunately this only needs to be done once per geometry, and
+as the geocache is composed of binary .npy files they are fast to load and upload to the GPU.</p>
+<p>Near to the end of the logging from geocache creation you should find output
+similar to the below which reports the OPTICKS_KEY value of the geometry:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@755</span><span class="p">]</span>  <span class="n">ok</span><span class="o">.</span><span class="n">idpath</span>  <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">blyth</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">geocache</span><span class="o">/</span><span class="n">OKX4Test_lWorld0x4bc2710_PV_g4live</span><span class="o">/</span><span class="n">g4ok_gltf</span><span class="o">/</span><span class="n">f6cc352e44243f8fa536ab483ad390ce</span><span class="o">/</span><span class="mi">1</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@756</span><span class="p">]</span>  <span class="n">ok</span><span class="o">.</span><span class="n">keyspec</span> <span class="n">OKX4Test</span><span class="o">.</span><span class="n">X4PhysicalVolume</span><span class="o">.</span><span class="n">lWorld0x4bc2710_PV</span><span class="o">.</span><span class="n">f6cc352e44243f8fa536ab483ad390ce</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@757</span><span class="p">]</span>  <span class="n">To</span> <span class="n">reuse</span> <span class="n">this</span> <span class="n">geometry</span><span class="p">:</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@758</span><span class="p">]</span>    <span class="mf">1.</span> <span class="nb">set</span> <span class="n">envvar</span> <span class="n">OPTICKS_KEY</span><span class="o">=</span><span class="n">OKX4Test</span><span class="o">.</span><span class="n">X4PhysicalVolume</span><span class="o">.</span><span class="n">lWorld0x4bc2710_PV</span><span class="o">.</span><span class="n">f6cc352e44243f8fa536ab483ad390ce</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@759</span><span class="p">]</span>    <span class="mf">2.</span> <span class="n">enable</span> <span class="n">envvar</span> <span class="n">sensitivity</span> <span class="k">with</span> <span class="o">--</span><span class="n">envkey</span> <span class="n">argument</span> <span class="n">to</span> <span class="n">Opticks</span> <span class="n">executables</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">FATAL</span> <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@767</span><span class="p">]</span> <span class="n">THE</span> <span class="n">LIVE</span> <span class="n">keyspec</span> <span class="n">DOES</span> <span class="n">NOT</span> <span class="n">MATCH</span> <span class="n">THAT</span> <span class="n">OF</span> <span class="n">THE</span> <span class="n">CURRENT</span> <span class="n">ENVVAR</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@768</span><span class="p">]</span>  <span class="p">(</span><span class="n">envvar</span><span class="p">)</span> <span class="n">OPTICKS_KEY</span><span class="o">=</span><span class="n">NONE</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportGeoCacheCoordinates</span><span class="nd">@769</span><span class="p">]</span>  <span class="p">(</span><span class="n">live</span><span class="p">)</span>   <span class="n">OPTICKS_KEY</span><span class="o">=</span><span class="n">OKX4Test</span><span class="o">.</span><span class="n">X4PhysicalVolume</span><span class="o">.</span><span class="n">lWorld0x4bc2710_PV</span><span class="o">.</span><span class="n">f6cc352e44243f8fa536ab483ad390ce</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">08.129</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">263983</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">dumpRC</span><span class="nd">@202</span><span class="p">]</span>  <span class="n">rc</span> <span class="mi">0</span> <span class="n">rcmsg</span> <span class="p">:</span> <span class="o">-</span>
+</pre></div>
+</div>
+<p>To reuse the geometry the OPTICKS_KEY envvar needs to be exported from
+<cite>.opticks_setup</cite>, see the next section for an example.</p>
 </div>
 <div class="section" id="opticks-numpy-based-analysis">
 <h2>Opticks NumPy based Analysis<a class="headerlink" href="#opticks-numpy-based-analysis" title="Permalink to this headline">¶</a></h2>
