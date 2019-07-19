@@ -406,6 +406,8 @@ ul.auto-toc {
 <!-- Incremental Display
 =================== -->
 <style type="text/css">
+
+    .strike { text-decoration: line-through; }
     span.alarm { color: red; }
     span.warn { color: orange; }
     span.ok { color: green; }
@@ -473,31 +475,34 @@ ul.auto-toc {
 <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP &mdash; https://bitbucket.org/simoncblyth/opticks &mdash; July 2019, IHEP </h2>
 </div>
 </div>
-<div class="slide" id="contents">
-<h1>Contents</h1>
+<div class="slide" id="outline">
+<h1>Outline</h1>
 <img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
 <div class="small"><span>&nbsp;</span></div><ul class="small simple">
-<li>Brief Introduction<ul>
+<li>Introduction<ul>
 <li>Optical Photon Simulation Problem...</li>
+<li>Rasterization and Ray Tracing</li>
+<li>Ray Traced Rendering ~ Photon Simulation</li>
+<li><span class="blue">NVIDIA TITAN RTX GPU</span></li>
 <li>NVIDIA OptiX Ray Tracing Engine</li>
 <li>Boundary Volume Heirarchy (BVH) algorithm</li>
+<li>Opticks Primitives, CSG on GPU</li>
+<li>Translate Geometry and Physics</li>
+<li><span class="blue">Geometry changes enabling translation</span></li>
 </ul>
 </li>
-<li>Adopt OptiX 6.0.0<ul>
-<li>RTX mode gives 6x performance jump with TITAN RTX</li>
+<li>p15 <span class="red">Updates</span> : Support OptiX 6.0.0, RTX mode, RT Cores<ul>
+<li>JUNO-360 benchmark, RTX mode speedup, multi-GPU scaling</li>
 </ul>
 </li>
-<li>Geometry changes</li>
-<li>GPU Geometry starts from ray-primitive intersection</li>
-<li>Ray intersection with general CSG binary trees, on GPU</li>
-<li>Torus : much more difficult/expensive than other primitives</li>
-<li>CSG : (Cylinder - Torus) PMT neck : spurious intersects</li>
-<li>CSG : Alternative PMT neck designs</li>
-<li>Translate Geant4 Geometry to GPU, Without Approximation</li>
-<li>Translate Geant4 Optical Physics to GPU (OptiX/CUDA)</li>
-<li>Random Aligned Validation : Direct comparison of GPU/CPU NumPy arrays</li>
-<li>Progress on Validation : JUNO Geometry Issues</li>
-<li>Progress on Ease-of-use</li>
+<li>p21 <span class="red">Validation</span> : Systematic Scan of 40 JUNO Solids<ul>
+<li>Random Aligned Bi-Simulation -&gt; Direct Array Comparison</li>
+</ul>
+</li>
+<li>p34 <span class="red">Performance</span> : Scanning from 1M to 60M photons<ul>
+<li>Opticks vs Geant4 performance (test geometry)</li>
+</ul>
+</li>
 <li>Opticks : Aims to Revolutionize JUNO Muon Simulation</li>
 <li>Links</li>
 </ul>
@@ -569,11 +574,11 @@ ray-tracing
 <li><strong>accelerates</strong> ray-geometry intersections</li>
 <li>simple : single-ray programming model</li>
 <li>&quot;...free to use within any application...&quot;</li>
-<li><span class="red">access to RT Cores (Turing+) with NVIDIA RTX™ mode</span></li>
+<li><span class="red">access RT Cores[1] with OptiX 6.0.0+ via RTX™ mode</span></li>
 </ul>
 <p class="small"><strong>NVIDIA expertise:</strong></p>
 <ul class="small simple">
-<li>~linear scaling up to 4 GPUs</li>
+<li><span class="red">~linear scaling up to 4 GPUs</span></li>
 <li>acceleration structure creation + traversal (Blue)</li>
 <li>instanced sharing of geometry + acceleration structures</li>
 <li>compiler optimized for GPU ray tracing</li>
@@ -584,6 +589,7 @@ ray-tracing
 <li>ray generation</li>
 <li>geometry bounding box, intersects</li>
 </ul>
+<p class="tiny">[1] Turing+ GPUs eg NVIDIA TITAN RTX</p>
 </div>
 <div class="slide" id="bvh">
 <h1><span class="i">BVH</span></h1>
@@ -670,307 +676,11 @@ ray-tracing
 <dd>Similar to binary expression tree evaluation using postorder traverse.</dd>
 </dl>
 </div>
-<div class="slide" id="geocache-360">
-<h1><span class="i">geocache_360</span></h1>
-</div>
-<div class="slide" id="geocache-360-2">
-<h1><span class="i">geocache_360 2</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Equirectangular Projection</span></p>
-<p class="small"><strong>Ray tracing Benchmark</strong></p>
-<ul class="small simple">
-<li>JUNO 360 degree view from scintillator</li>
-<li>very high resolution 59M pixels 10240x5760 = 8x8x1280x720</li>
-<li>compare GPUs and RTX mode</li>
-<li>checking scaling across multiple GPUs</li>
-</ul>
-<dl class="small last docutils">
-<dt>&quot;cvd&quot;</dt>
-<dd>CUDA_VISIBLE_DEVICES envvar, used to select GPUs</dd>
-</dl>
-</div>
-</div>
-<div class="slide" id="bench-20190526-202537">
-<h1><span class="i">bench_20190526_202537</span></h1>
-</div>
-<div class="slide" id="bench-20190526-202537-2">
-<h1><span class="i">bench_20190526_202537 2</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">NVIDIA OptiX 6.0.0 : RTX Mode</span></p>
-<p class="small">Ray trace performance improvements:</p>
-<ul class="small simple">
-<li>1.25x with TITAN V</li>
-<li>3.5x with TITAN RTX (RT Cores)<ul>
-<li>BVH traversal done in hardware</li>
-<li>analytic intersection still software</li>
-<li>triangle geometry can be done in hardware</li>
-</ul>
-</li>
-</ul>
-<dl class="small last docutils">
-<dt><strong>Initially was 3x worse with RTX</strong></dt>
-<dd><p class="first">OptiX developers helped find the cause</p>
-<ul class="last simple">
-<li>unused double precision torus code</li>
-</ul>
-</dd>
-</dl>
-</div>
-</div>
-<div class="slide" id="bench-20190526-143808">
-<h1><span class="i">bench_20190526_143808</span></h1>
-</div>
-<div class="slide" id="opticks-juno-progress-geometry-changes-to-enable-translation-to-gpu">
-<h1><span class="small">Opticks+JUNO Progress : Geometry Changes to enable translation to GPU</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Systematic JUNO Solid Testing</span></p>
-<p class="small"><strong>Aligned bi-simulation</strong></p>
-<dl class="small last docutils">
-<dt>40 geometries</dt>
-<dd>test containers for all JUNO solids</dd>
-<dt>bi-simulation executable</dt>
-<dd>save propagations from <em>Opticks</em> and <em>Geant4</em></dd>
-<dt>input photons</dt>
-<dd>feed same initial photons to <em>Opticks</em> and <em>Geant4</em></dd>
-<dt>input cuRAND randoms to <em>Geant4</em></dt>
-<dd>same random sequence for <em>Opticks</em> and <em>Geant4</em></dd>
-<dt>masked running for debugging</dt>
-<dd>repeat bi-simulation of any photon subset</dd>
-</dl>
-</div>
-<p class="small">First 2 change geometry, last 2 change modelling only</p>
-<dl class="small docutils">
-<dt>Guide Tube Torus <span class="classifier-delimiter">:</span> <span class="classifier">removed (for now)</span></dt>
-<dd>AVOIDED : <span class="red">OptiX 6.0.0 NOT working with torus intersect</span></dd>
-<dt>PMT_20inch_body <span class="classifier-delimiter">:</span> <span class="classifier">simplified neck</span></dt>
-<dd>FIXED : &quot;cylinder - torus&quot; -&gt; polycone</dd>
-<dt>PMT_20inch_inner <span class="classifier-delimiter">:</span> <span class="classifier">simplified CSG modelling</span></dt>
-<dd>FIXED : depth 4 tree (31 nodes) -&gt; 1 primitive</dd>
-<dt>sAirTT <span class="classifier-delimiter">:</span> <span class="classifier">CSG modelling coincidence avoided</span></dt>
-<dd>FIXED : &quot;box - cylinder&quot; : growing the subtracted</dd>
-</dl>
-</div>
-<div class="slide" id="random-aligned-validation-direct-comparison-of-gpu-cpu-numpy-arrays">
-<h1><span class="small">Random Aligned Validation : Direct comparison of GPU/CPU NumPy arrays</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">bi-simulation direct matching</span></p>
-<dl class="small docutils">
-<dt><strong>Align CPU/GPU Random Number Sequences</strong></dt>
-<dd>G4 random engine providing <em>cuRAND</em> sequence</dd>
-<dt><strong>&quot;Align&quot; CPU/GPU codes (some jumps)</strong></dt>
-<dd><span class="red">simplest possible direct comparison</span></dd>
-<dt><strong>Simple geometries</strong></dt>
-<dd>same geometry, same physics, same results</dd>
-</dl>
-<p class="small last"><strong>JUNO geometry</strong> : systematic checking ongoing</p>
-</div>
-<p class="small"><strong>systematic checking all 40 JUNO solids</strong></p>
-<ul class="small simple">
-<li>mis-aligned, mostly &lt; 0.5%</li>
-<li>deviants : mostly &lt; 0.05%</li>
-</ul>
-<pre class="mypretiny">
-
-In [11]: pdv = np.where(dv > 0.0001)[0]
-In [12]: ab.dumpline(pdv)
-      0   1230 : TO BR SC BT BR BT SA
-      1   2413 : TO BT BT SC BT BR BR BT SA
-      2   9041 : TO BT SC BR BR BR BR BT SA
-      3  14510 : TO SC BT BR BR BT SA
-      4  14747 : TO BT SC BR BR BR BR BR BR BR
-      5  14747 : TO BT SC BR BR BR BR BR BR BR
-    ...
-
-In [20]: ab.b.ox[pdv,0]                                 In [21]: ab.a.ox[pdv,0]
-Out[20]:                                                Out[21]:
-A()sliced                                               A()sliced
-A([    [-191.6262, -240.3634,  450.    ,    5.566 ],    A([    [-191.626 , -240.3634,  450.    ,    5.566 ],
-       [ 185.7708, -133.8457,  450.    ,    7.3141],           [ 185.7708, -133.8456,  450.    ,    7.3141],
-       [-450.    , -104.4142,  311.143 ,    9.0581],           [-450.    , -104.4142,  311.1431,    9.0581],
-       [  83.6955,  208.9171, -450.    ,    5.6188],           [  83.6954,  208.9172, -450.    ,    5.6188],
-       [  32.8972,  150.    ,   24.9922,    7.6757],           [  32.8973,  150.    ,   24.992 ,    7.6757],
-       [  32.8972,  150.    ,   24.9922,    7.6757],           [  32.8973,  150.    ,   24.992 ,    7.6757],
-       [ 450.    , -186.7449,  310.6051,    5.0707],           [ 450.    , -186.7451,  310.605 ,    5.0707],
-       [ 299.2227,  318.1443, -450.    ,    4.8717],           [ 299.2229,  318.144 , -450.    ,    4.8717],
- ...
-</pre><p class="tiny"><a class="reference external" href="http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst">http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst</a></p>
-</div>
-<div class="slide" id="tv21-1m-a">
-<h1><span class="i">tv21_1M_a</span></h1>
-</div>
-<div class="slide" id="tv21-1m-c">
-<h1><span class="i">tv21_1M_c</span></h1>
-</div>
-<div class="slide" id="tv16-fastener">
-<h1><span class="i">tv16_Fastener</span></h1>
-</div>
-<div class="slide" id="tv34-1m-a">
-<h1><span class="i">tv34_1M_a</span></h1>
-</div>
-<div class="slide" id="absmry-1m">
-<h1><span class="i">absmry_1M</span></h1>
-</div>
-<div class="slide" id="absmry-1m-2">
-<h1><span class="i">absmry_1M 2</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Mis-aligned + Deviation Summary</span></p>
-<dl class="small last docutils">
-<dt>npho</dt>
-<dd>number of photons (1M)</dd>
-<dt>fmal</dt>
-<dd>mis-aligned history fraction <span class="red">mostly &lt; 0.5%</span></dd>
-<dt>ndvp</dt>
-<dd>deviant photons <span class="red">mostly &lt; 0.05% (500/1M)</span></dd>
-<dt>rpost_dv</dt>
-<dd>&lt;16 step point positions, times (compressed)</dd>
-<dt>rpol_dv</dt>
-<dd>&lt;16 step point polarizations (compressed)</dd>
-<dt>ox_dv</dt>
-<dd>final position, time, direction, polarization, wavelength (float)</dd>
-<dt><strong>mis-alignment</strong></dt>
-<dd><span class="blue">debug needed to duplicate G4 indigestion</span></dd>
-<dt><strong>deviants</strong></dt>
-<dd><span class="blue">f32 vs f64 + many bounces + &quot;lever arm&quot; ?</span>
-(f64 tests to confirm)</dd>
-</dl>
-</div>
-</div>
-<div class="slide" id="ta34-1m">
-<h1><span class="i">ta34_1M</span></h1>
-</div>
-<div class="slide" id="ta34-1m-2">
-<h1><span class="i">ta34_1M 2</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Example Solid : sInnerWater</span></p>
-<dl class="small docutils">
-<dt>nitem</dt>
-<dd>photons compared</dd>
-<dt>nelem</dt>
-<dd>floats compared (many millions)</dd>
-<dt>fwar/ferr/ffat</dt>
-<dd>fractions above deviation cuts</dd>
-<dt>ndvp</dt>
-<dd>total error/fatal photons</dd>
-</dl>
-<p class="small">Mis-aligned &lt;-&gt; deviant mixing</p>
-<ul class="small simple">
-<li><span class="red">1st priority : fix/reduce mis-alignment</span></li>
-</ul>
-<dl class="tiny last docutils">
-<dt>BT(BR)</dt>
-<dd>boundary transmit(reflect)</dd>
-<dt>SC(AB)</dt>
-<dd>bulk scatter(absorb)</dd>
-<dt>SA</dt>
-<dd>surface absorb</dd>
-</dl>
-</div>
-<!-- comment
-
-update these profilesmry.py plots with::
-
-    ip profilesmry.py on J and then copy:
-
-    cd ~/simoncblyth.bitbucket.io/env/presentation/ana
-    scp J:local/opticks/tmp/ana/* . -->
-</div>
-<div class="slide" id="opticks-vs-geant4">
-<h1><span class="i">Opticks_vs_Geant4</span></h1>
-</div>
-<div class="slide" id="opticks-speedup">
-<h1><span class="i">Opticks_Speedup</span></h1>
-</div>
-<div class="slide" id="rtx-speedup">
-<h1><span class="i">RTX_Speedup</span></h1>
-</div>
-<div class="slide" id="overheads">
-<h1><span class="i">Overheads</span></h1>
-</div>
-<div class="slide" id="interval-over-launch">
-<h1><span class="i">Interval_over_Launch</span></h1>
-</div>
-<div class="slide" id="nhit">
-<h1><span class="i">NHit</span></h1>
-</div>
-<div class="slide" id="torus-much-more-difficult-expensive-than-other-primitives">
-<h1><span class="small">Torus : much more difficult/expensive than other primitives</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Torus artifacts</p>
-<blockquote>
-<img alt="/env/presentation/tboolean_torus_orthographic_artifact.png" class="align-right" src="/env/presentation/tboolean_torus_orthographic_artifact.png" style="width: 400px;" />
-</blockquote>
-<img alt="/env/presentation/torus_eqn_sqrt.png" class="align-right" src="/env/presentation/torus_eqn_sqrt.png" style="width: 400px;" />
-<img alt="/env/presentation/torus_eqn_quartic.png" class="last align-right" src="/env/presentation/torus_eqn_quartic.png" style="width: 400px;" />
-</div>
-<p class="small">3D parametric ray : <strong>ray(x,y,z;t) = rayOrigin  +  t * rayDirection</strong></p>
-<ul class="small simple">
-<li>ray-torus intersection -&gt; solve quartic polynomial in <strong>t</strong></li>
-<li>A t^4 + B t^3 + C t^2 + D t + E = 0</li>
-</ul>
-<p class="small"><strong>Solving Quartics</strong></p>
-<ul class="small simple">
-<li>requires double precision</li>
-<li>very large difference between coefficients</li>
-<li>varying ray -&gt; wide range of coefficients</li>
-<li>numerically problematic</li>
-<li>several mathematical approaches tried : <span class="red">no clear winner</span></li>
-<li>adopted approach[1] avoids artifacts in primitives, but still has issues in CSG combinations</li>
-</ul>
-<p class="small"><strong>Best Solution : avoid Torus</strong></p>
-<ul class="small simple">
-<li>avoids the expense as well as the problems</li>
-<li>eg model PMT neck with hyperboloid or polycone, not cylinder-torus</li>
-</ul>
-<p class="tiny">[1] Depressed quartic + resolvent cubic</p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_torus.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_torus.h</a></p>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/SolveQuartic.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/SolveQuartic.h</a></p>
-</div>
-<div class="slide" id="torus-different-artifacts-as-change-implementation-params-viewpoint">
-<h1><span class="small">Torus : different artifacts as change implementation/params/viewpoint</span></h1>
-<ul class="small simple">
-<li><span class="red">Wide variety of artifacts as change viewpoint, changing quartic coefficients</span></li>
-</ul>
-<img alt="/env/presentation/torus_cloud_artifact_2017_08_14.png" class="align-left" src="/env/presentation/torus_cloud_artifact_2017_08_14.png" style="width: 500px;" />
-<img alt="/env/presentation/torus_cuts_artifact_2017_08_08.png" class="align-right" src="/env/presentation/torus_cuts_artifact_2017_08_08.png" style="width: 550px;" />
-<img alt="/env/presentation/torus_fan_artifact_2017_07_28.png" class="align-right" src="/env/presentation/torus_fan_artifact_2017_07_28.png" style="width: 350px;" />
-</div>
-<div class="slide" id="csg-cylinder-torus-pmt-neck-spurious-intersects">
-<h1><span class="small">CSG : (Cylinder - Torus) PMT neck : spurious intersects</span></h1>
-<img alt="/env/presentation/tboolean_12_rasterized.png" class="align-right" src="/env/presentation/tboolean_12_rasterized.png" style="width: 550px;" />
-<img alt="/env/presentation/tboolean_12_raytrace.png" class="align-left" src="/env/presentation/tboolean_12_raytrace.png" style="width: 550px;" />
-<p class="small">OptiX Raytrace and OpenGL rasterized wireframe comparing neck models:</p>
-<ol class="small arabic simple">
-<li>Ellipsoid + Hyperboloid + Cylinder</li>
-<li>Ellipsoid + <span class="red">(Cylinder - Torus)</span> + Cylinder</li>
-</ol>
-<ul class="small simple">
-<li>unfortunately Geant4 does not support z-cut hyperboloid, so use polycone ?</li>
-</ul>
-<p class="small"><strong>Best Solution : use simpler model for optically unimportant PMT neck</strong></p>
-</div>
-<div class="slide" id="csg-alternative-pmt-neck-designs">
-<h1><span class="small">CSG : Alternative PMT neck designs</span></h1>
-<img alt="/env/presentation/x018_torus_hyperboloid_plt.png" class="align-left" src="/env/presentation/x018_torus_hyperboloid_plt.png" style="width: 550px;" />
-<img alt="/env/presentation/x018_torus_hyperboloid_plt_zoom.png" class="align-right" src="/env/presentation/x018_torus_hyperboloid_plt_zoom.png" style="width: 500px;" />
-<p class="small">Hyperboloid and Cone defined using <em>closest point on ellipse to center of torus circle</em></p>
-<ul class="small simple">
-<li>Cylinder-Torus : purple line, Cone : green, <strong>simplest</strong></li>
-<li>Hyperboloid : dashed magenta, works with <em>Opticks</em>, BUT <em>G4Hype</em> has no z-range flexibility</li>
-</ul>
-<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py">https://bitbucket.org/simoncblyth/opticks/src/tip/ana/x018_torus_hyperboloid_plt.py</a></p>
-</div>
-<div class="slide" id="j1808-top-rtx">
-<h1><span class="i">j1808_top_rtx</span></h1>
-</div>
-<div class="slide" id="j1808-top-ogl">
-<h1><span class="i">j1808_top_ogl</span></h1>
-</div>
 <div class="slide" id="opticks-translate-geant4-geometry-to-gpu-without-approximation">
 <h1><span class="small">Opticks : Translate Geant4 Geometry to GPU, Without Approximation</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Direct Geometry Translation</span></p>
 <ul class="small last simple">
-<li><span class="red">2018:</span> <strong>full reimplementation of translation</strong></li>
 <li>automatic geo-management, simplifying usage</li>
 <li>unified handling of analytic and triangulated</li>
 <li>no separate export+import stages</li>
@@ -1011,6 +721,40 @@ update these profilesmry.py plots with::
 <dt>[1] G4 primitives used need corresponding Opticks implementations, contributions for</dt>
 <dd>any unsupported geometry are welcome</dd>
 </dl>
+</div>
+<div class="slide" id="juno-geometry-changes-to-enable-translation-to-gpu">
+<h1><span class="small">JUNO Geometry Changes to enable translation to GPU</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Torus intersection</span></p>
+<p class="small"><strong>Double heavy quartic root finding</strong></p>
+<ul class="small simple">
+<li>works with OptiX 5.1, but precision problem in CSG combinations</li>
+<li>crashes with OptiX 6.0.0</li>
+<li>mere presence in OptiX kernel kills RTX mode performance by factor 10</li>
+</ul>
+<p class="small"><strong>Alternative Approach To Try</strong></p>
+<ul class="small last simple">
+<li>ray marching (aka sphere tracing) signed distance functions (SDF)</li>
+<li>generate CUDA SDF code once per solid</li>
+<li>distils shape complexity into SDF</li>
+<li>avoids billions of tree traversals</li>
+<li>good potential for torus and complex CSG solids, eg PMTs</li>
+</ul>
+</div>
+<p class="small">First 2 change geometry, last 2 change modelling only</p>
+<dl class="small docutils">
+<dt>Guide Tube Torus <span class="classifier-delimiter">:</span> <span class="classifier">removed (for now)</span></dt>
+<dd>AVOIDED : <span class="red">OptiX 6.0.0 NOT working with torus intersect</span></dd>
+<dt>PMT_20inch_body <span class="classifier-delimiter">:</span> <span class="classifier">simplified neck</span></dt>
+<dd>FIXED : &quot;cylinder - torus&quot; -&gt; polycone</dd>
+<dt>PMT_20inch_inner <span class="classifier-delimiter">:</span> <span class="classifier">simplified CSG modelling</span></dt>
+<dd>FIXED : depth 4 tree (31 nodes) -&gt; 1 primitive</dd>
+<dt>sAirTT <span class="classifier-delimiter">:</span> <span class="classifier">CSG modelling coincidence avoided</span></dt>
+<dd>FIXED : &quot;box - cylinder&quot; : growing the subtracted</dd>
+</dl>
+</div>
+<div class="slide" id="inch-pmt-neck-cylinder-torus-polycone">
+<h1><span class="incremental">20inch PMT neck : &quot;cylinder-torus&quot; -&gt; polycone</span></h1>
 </div>
 <div class="slide" id="opticks-translate-geant4-optical-physics-to-gpu-optix-cuda">
 <h1><span class="small">Opticks : Translate Geant4 Optical Physics to GPU (OptiX/CUDA)</span></h1>
@@ -1071,62 +815,396 @@ update these profilesmry.py plots with::
 </dd>
 </dl>
 </div>
-<div class="slide" id="opticks-progress-on-ease-of-use">
-<h1><span class="small">Opticks : Progress on Ease-of-Use</span></h1>
-<!-- comment
-
-Opticks operates mostly at the level of Geant4 and
-it can benefit anyone with a simulation limited by optical photons,
-so some kind of integration with Geant4 is needed.
-
-The ultimate ease-of-use goal is for Opticks acceleration
-to be transparently applied, Geant4 just getting a lot faster and
-less memory hungry when a compatible GPU is available.
-We are a long way from that ultimate.
-
-In discussions about this with several Geant4 coordinators
-the conclusion was to initially aim for an Opticks advanced example
-to be included with the Geant4 distribution -->
-<!-- comment
-
-The experience of trying to get several users up and running
-with Opticks at the start of 2018 made me realize how vital
-ease of use is making -->
+<div class="slide" id="geocache-360">
+<h1><span class="i">geocache_360</span></h1>
+</div>
+<div class="slide" id="juno-360-benchmark-with-optix-6-0-0-rtx-mode">
+<h1>JUNO-360 benchmark with OptiX 6.0.0, RTX mode</h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Aim of Geant4+Opticks Examples</span></p>
+<p class="first sidebar-title"><span class="small">Ray tracing Benchmark</span></p>
 <ul class="small last simple">
-<li>exposure to <em>Opticks</em> for all <em>Geant4</em> users</li>
-<li>quickstart for <em>Geant4</em> + <em>Opticks</em> learning / evaluation</li>
-<li>demonstrate utility of scintillation + Cerenkov <em>gensteps</em> to <em>Geant4</em> members</li>
+<li>JUNO 360 degree view</li>
+<li>Equirectangular Projection</li>
+<li>very high resolution 59M pixels<ul>
+<li>10240x5760 = 8x8x1280x720</li>
+</ul>
+</li>
+<li>compare GPUs and RTX mode</li>
+<li>checking scaling across multiple GPUs</li>
 </ul>
 </div>
-<p class="small"><em>Geant4</em> + <em>Opticks</em> History</p>
-<dl class="small docutils">
-<dt><strong>2014</strong> <span class="classifier-delimiter">:</span> <span class="classifier">19th Geant4 Collaboration Meeting, Okinawa</span></dt>
-<dd>proto-Opticks (G4DAE) presented</dd>
-<dt><strong>2017</strong> <span class="classifier-delimiter">:</span> <span class="classifier">22nd Geant4 Collaboration Meeting, Australia</span></dt>
-<dd>presented Opticks (CSG on GPU) to plenary session,
-discussions on how <em>Opticks</em> might be integrated with <em>Geant4</em>,
-<span class="blue">conclude on an advanced example as initial target</span></dd>
-<dt><strong>2018</strong> <span class="classifier-delimiter">:</span> <span class="classifier">23rd CHEP Conference, Bulgaria</span></dt>
-<dd><p class="first">discussions with Geant4 EM/Optical coordinator reach agreement on high level
-structure of example</p>
+</div>
+<div class="slide" id="bench-20190526-202537">
+<h1><span class="i">bench_20190526_202537</span></h1>
+</div>
+<div class="slide" id="bench-20190526-202537-2">
+<h1><span class="i">bench_20190526_202537 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">NVIDIA OptiX 6.0.0 : RTX Mode</span></p>
+<p class="small">Ray trace performance improvements:</p>
+<ul class="small simple">
+<li>1.25x with TITAN V</li>
+<li>3.5x with TITAN RTX (RT Cores)<ul>
+<li>BVH traversal done in hardware</li>
+<li>analytic intersection still software</li>
+<li>triangle geometry can be done in hardware</li>
+</ul>
+</li>
+</ul>
+<dl class="small last docutils">
+<dt><strong>Initially was 0.33x with RTX</strong></dt>
+<dd><p class="first">OptiX developers helped find the cause</p>
 <ul class="last simple">
-<li>primary concern from <em>Geant4</em> members is that ongoing support for the examples
-will be provided</li>
+<li>unused double precision torus code</li>
+<li>performance improved by eliminating <em>.f64</em> from PTX, <em>ptx.py</em></li>
 </ul>
 </dd>
 </dl>
-<p class="small"><strong>Ease-of-use was focus of 2018 developments</strong></p>
-<ol class="small arabic simple">
-<li>Direct Geometry Translation -&gt; <span class="red">automated geometry management</span></li>
-<li>Modern CMake with BCM[1] -&gt; <span class="red">automated configuration</span></li>
-<li><em>G4Opticks</em> API -&gt; <span class="red">simple embedding</span> of <em>Opticks</em> within <em>G4</em> apps</li>
-</ol>
-<p class="tiny">[1] Boost CMake 3.5+ modules : configure direct dependencies only
-<a class="reference external" href="https://github.com/BoostCMake/cmake_modules">https://github.com/BoostCMake/cmake_modules</a>
-<a class="reference external" href="https://github.com/simoncblyth/bcm">https://github.com/simoncblyth/bcm</a></p>
-<span></span></div>
+</div>
+</div>
+<div class="slide" id="bench-20190526-143808">
+<h1><span class="i">bench_20190526_143808</span></h1>
+</div>
+<div class="slide" id="bench-20190526-143808-2">
+<h1><span class="i">bench_20190526_143808 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">GPU Scaling Performance</span></p>
+<p class="small"><strong>Opticks on IHEP GPU Cluster</strong></p>
+<p class="small">OptiX : Almost perfect scaling for 1,2,4 GPUs</p>
+<ul class="small simple">
+<li>degrades for &gt; 4 GPUs</li>
+<li>PCIe bus congestion, pinned host memory</li>
+</ul>
+<dl class="small last docutils">
+<dt>&quot;cvd&quot; selects GPUs</dt>
+<dd>CUDA_VISIBLE_DEVICES envvar</dd>
+<dt>R0/R1</dt>
+<dd>RTX mode OFF/ON</dd>
+<dt><strong>NVIDIA Tesla V100 GPUs</strong></dt>
+<dd>No RT Cores, RTX still gives ~ 1.25x</dd>
+</dl>
+</div>
+</div>
+<div class="slide" id="validation-systematic-scan-of-all-40-juno-solids">
+<h1><span class="small">Validation : Systematic Scan of All 40 JUNO Solids</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Masked Running</span></p>
+<p class="small">Repeatable bi-simulation of any photon subset</p>
+<ul class="small last simple">
+<li>essential for debugging</li>
+<li>limited to input photons (not gensteps)</li>
+<li>constructs curandState buffer subset</li>
+</ul>
+</div>
+<p class="small"><strong>Create test geometries using solids, materials, surfaces from base geometry geocache</strong></p>
+<dl class="small docutils">
+<dt>40 geometries</dt>
+<dd>test containers for all JUNO solids</dd>
+<dt>input photons</dt>
+<dd>feed same initial photons to <em>Opticks</em> and <em>Geant4</em></dd>
+<dt>input cuRAND randoms to <em>Geant4</em></dt>
+<dd>same random sequence for <em>Opticks</em> and <em>Geant4</em></dd>
+<dt>bi-simulation executable</dt>
+<dd>save propagations from <em>Opticks</em> and <em>Geant4</em> as <em>OpticksEvents</em> (.npy arrays)</dd>
+</dl>
+</div>
+<div class="slide" id="validation-random-aligned-bi-simulation-direct-array-comparison">
+<h1><span class="small">Validation : Random Aligned Bi-Simulation -&gt; Direct Array Comparison</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">3-way &quot;zip&quot; : 2*code + randoms</span></p>
+<dl class="small last docutils">
+<dt><strong>Align CPU/GPU Random Number Sequences</strong></dt>
+<dd>G4 random engine providing <em>cuRAND</em> sequence</dd>
+<dt><strong>&quot;Align&quot; CPU/GPU codes (some jumps)</strong></dt>
+<dd><span class="red">simplest possible direct comparison</span></dd>
+</dl>
+</div>
+<p class="small"><strong>NPY serialized arrays</strong></p>
+<ul class="small simple">
+<li>convenient analysis with <em>NumPy</em></li>
+<li><em>np.load(path, mmap_mode=&quot;r&quot;)</em> : loading array slices</li>
+</ul>
+<span>&nbsp;</span>
+
+<pre class="mypretiny">
+
+
+
+
+In [11]: pdv = np.where(dv > 0.0001)[0]
+In [12]: ab.dumpline(pdv)
+      0   1230 : TO BR SC BT BR BT SA
+      1   2413 : TO BT BT SC BT BR BR BT SA
+      2   9041 : TO BT SC BR BR BR BR BT SA
+      3  14510 : TO SC BT BR BR BT SA
+      4  14747 : TO BT SC BR BR BR BR BR BR BR
+      5  14747 : TO BT SC BR BR BR BR BR BR BR
+    ...
+
+In [20]: ab.b.ox[pdv,0]                                 In [21]: ab.a.ox[pdv,0]
+Out[20]:                                                Out[21]:
+A()sliced                                               A()sliced
+A([    [-191.6262, -240.3634,  450.    ,    5.566 ],    A([    [-191.626 , -240.3634,  450.    ,    5.566 ],
+       [ 185.7708, -133.8457,  450.    ,    7.3141],           [ 185.7708, -133.8456,  450.    ,    7.3141],
+       [-450.    , -104.4142,  311.143 ,    9.0581],           [-450.    , -104.4142,  311.1431,    9.0581],
+       [  83.6955,  208.9171, -450.    ,    5.6188],           [  83.6954,  208.9172, -450.    ,    5.6188],
+       [  32.8972,  150.    ,   24.9922,    7.6757],           [  32.8973,  150.    ,   24.992 ,    7.6757],
+       [  32.8972,  150.    ,   24.9922,    7.6757],           [  32.8973,  150.    ,   24.992 ,    7.6757],
+       [ 450.    , -186.7449,  310.6051,    5.0707],           [ 450.    , -186.7451,  310.605 ,    5.0707],
+       [ 299.2227,  318.1443, -450.    ,    4.8717],           [ 299.2229,  318.144 , -450.    ,    4.8717],
+ ...
+</pre><p class="tiny"><a class="reference external" href="http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst">http://bitbucket.com/simoncblyth/opticks/src/tip/notes/issues/tboolean_box_perfect_alignment_small_deviations.rst</a></p>
+</div>
+<div class="slide" id="tv21-1m-a">
+<h1><span class="i">tv21_1M_a</span></h1>
+</div>
+<div class="slide" id="tv21-1m-a-2">
+<h1><span class="i">tv21_1M_a 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">&quot;Darkroom&quot; Geometry Testing</span></p>
+<p class="small"><strong>Random Aligned Bi-Simulation</strong></p>
+<ul class="small simple">
+<li>shoot 1M photons at solid</li>
+<li>save <em>Geant4</em> and <em>Opticks</em> propagations</li>
+<li><em>NumPy</em> analysis</li>
+</ul>
+<p class="small"><strong>Future flags (next step point)</strong></p>
+<dl class="small last docutils">
+<dt>Cyan</dt>
+<dd>BT : boundary transmit</dd>
+<dt>Orange</dt>
+<dd>SA : surface absorb</dd>
+<dt>Yellow</dt>
+<dd>BR : boundary reflect</dd>
+</dl>
+</div>
+</div>
+<div class="slide" id="tv21-1m-c">
+<h1><span class="i">tv21_1M_c</span></h1>
+</div>
+<div class="slide" id="tv16-fastener">
+<h1><span class="i">tv16_Fastener</span></h1>
+</div>
+<div class="slide" id="tv34-1m-a">
+<h1><span class="i">tv34_1M_a</span></h1>
+</div>
+<div class="slide" id="absmry-1m">
+<h1><span class="i">absmry_1M</span></h1>
+</div>
+<div class="slide" id="absmry-1m-2">
+<h1><span class="i">absmry_1M 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Mis-aligned + Deviation Summary</span></p>
+<dl class="small last docutils">
+<dt>npho</dt>
+<dd>number of photons (1M)</dd>
+<dt>fmal</dt>
+<dd>mis-aligned history fraction <span class="red">mostly &lt; 0.5%</span></dd>
+<dt>ndvp</dt>
+<dd>deviant photons <span class="red">mostly &lt; 0.05% (500/1M)</span></dd>
+<dt>rpost_dv</dt>
+<dd>&lt;16 step point positions, times (compressed)</dd>
+<dt>rpol_dv</dt>
+<dd>&lt;16 step point polarizations (compressed)</dd>
+<dt>ox_dv</dt>
+<dd>final position, time, direction, polarization, wavelength (float)</dd>
+<dt><strong>mis-alignment</strong></dt>
+<dd><span class="blue">debug needed to duplicate G4 indigestion</span></dd>
+<dt><strong>deviants</strong></dt>
+<dd><span class="blue">f32 vs f64 + many bounces + &quot;lever arm&quot; ?</span>
+(f64 tests to confirm)</dd>
+</dl>
+</div>
+</div>
+<div class="slide" id="ta34-1m">
+<h1><span class="i">ta34_1M</span></h1>
+</div>
+<div class="slide" id="ta34-1m-2">
+<h1><span class="i">ta34_1M 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Example Solid : sInnerWater</span></p>
+<dl class="small docutils">
+<dt>nitem</dt>
+<dd>photons compared</dd>
+<dt>nelem</dt>
+<dd>floats compared (many millions)</dd>
+<dt>fwar/ferr/ffat</dt>
+<dd>fractions above deviation cuts</dd>
+<dt>ndvp</dt>
+<dd>total error/fatal photons</dd>
+</dl>
+<dl class="tiny last docutils">
+<dt>BT(BR)</dt>
+<dd>boundary transmit(reflect)</dd>
+<dt>SC(AB)</dt>
+<dd>bulk scatter(absorb)</dd>
+<dt>SA</dt>
+<dd>surface absorb</dd>
+</dl>
+</div>
+</div>
+<div class="slide" id="validation-issue-1-history-mis-alignment-0-01-0-50-of-photons">
+<h1><span class="small">Validation Issue 1 : History Mis-alignment : 0.01-0.50% of photons</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">3-way zipper snagged</span></p>
+<ul class="small last simple">
+<li>starts aligned, then history diverges</li>
+<li><span class="red">py scripted lldb (macOS) required</span></li>
+<li><em>G4</em> random edge cases not yet duplicated</li>
+<li>Several tricks[1] already in use, more needed</li>
+</ul>
+</div>
+<p class="small"><strong>Large Range 0.01% 0.50% 3% depending on extent</strong></p>
+<dl class="small docutils">
+<dt>PMT_20inch_inner2_solid(LV 19) 163/1M</dt>
+<dd>extra BR(boundary reflect) or BT(boundary transmit)</dd>
+<dt>sWorld(LV 39) 29906/1M ~3%</dt>
+<dd><ul class="first last simple">
+<li>large extent : direct photons travel 360m</li>
+<li>many &quot;maxbounce&quot; truncations, lots of scattering</li>
+</ul>
+</dd>
+</dl>
+<pre class="mypretiny">
+
+ab.mal (LV 19)
+aligned   999837/1000000 : 0.9998 : 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+maligned     163/1000000 : 0.0002 : 2908,4860,5477,12338,17891,18117,28709,32764,37671,43675,45874,...
+
+      0   2908 : * :                   TO BT BR BR BT SA                 TO BT BR BR BR BT SA
+      1   4860 : * :                      TO BT BT BT SA                    TO BT BT BT BT SA
+      2   5477 : * :                      TO BT BT BT SA                    TO BT BT BT BT SA
+      3  12338 : * :                      TO BT BR BT SA        TO BT BR BR BR BR BR BR BR BR
+...
+ab.mal (LV 39)
+aligned   970094/1000000 : 0.9701 : 0,1,2,4,5,6,7,8,9,10,11,12,13,14,16,17,18,19,20,21,22,23,24,26,27
+maligned   29906/1000000 : 0.0299 : 3,15,25,80,132,288,294,329,376,377,379,436,511,536,655,662,...
+slice(0, 25, None)
+      0      3 : * :        TO BT SC BR BR BR BR BR BR BR        TO BT SC BR BR BR BR BR SC BR
+      1     15 : * :        TO BT SC BR BR BR BR BR SC BR        TO BT SC BR BR SC BT SC BT SC
+      2     25 : * :                 TO BT SC BR BR BR AB        TO BT SC BR BR BR BR BR BR BR
+      3     80 : * :                 TO BT BT SC BT BR AB        TO BT BT SC BT BR BR SC BR AB
+...
+</pre><p class="tiny">[1] <a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/notes/issues/alignment_options_review.rst">https://bitbucket.org/simoncblyth/opticks/src/tip/notes/issues/alignment_options_review.rst</a></p>
+</div>
+<div class="slide" id="validation-issue-2-history-aligned-but-deviant-mostly-0-05-of-photons">
+<h1><span class="small">Validation Issue 2 : History Aligned but Deviant : Mostly &lt; 0.05% of photons</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Interference : Mis-aligned &lt;-&gt; deviant</span></p>
+<ul class="small last simple">
+<li>mis-aligned, but same history -&gt; large &quot;invalid&quot; deviations</li>
+<li>TODO: improve alignment judgement<ul>
+<li>eg: compare randoms collected at end of propagations <em>--utaildebug</em></li>
+</ul>
+</li>
+</ul>
+</div>
+<p class="small"><strong>float vs double precision</strong></p>
+<dl class="small docutils">
+<dt>Likely cause of deviations</dt>
+<dd><ul class="first last simple">
+<li>small deviations grow from bounce to bounce</li>
+<li>&quot;lever arm&quot; amplification of small errors depending on geometry</li>
+<li><em>Opticks</em> uses <em>double</em> only when unavoidable
+(eg scattering/absorption distance from <em>log(u)</em> [1])</li>
+<li><em>Geant4</em> uses <em>double</em> everywhere</li>
+<li><em>double</em> has high performance cost on GPU</li>
+<li><em>OptiX</em> can only partially[2] operate in <em>double</em> precision</li>
+</ul>
+</dd>
+<dt><strong>Plan</strong></dt>
+<dd><ul class="first last simple">
+<li>attempt to isolate sources, with double precision tests</li>
+</ul>
+</dd>
+</dl>
+<p class="tiny">[1] <a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/propagate.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/propagate.h</a></p>
+<p class="tiny">[2] <a class="reference external" href="https://devtalk.nvidia.com/default/topic/1036155/optix/double-precision-of-ray-lengths/">https://devtalk.nvidia.com/default/topic/1036155/optix/double-precision-of-ray-lengths/</a></p>
+</div>
+<div class="slide" id="performance-scanning-from-1m-to-60m-photons">
+<h1><span class="small">Performance : Scanning from 1M to 60M photons</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Raised photon ceiling 3M-&gt;60M</span></p>
+<ul class="small simple">
+<li>fixed memory leaks</li>
+<li>dynamic pre-cooking[1] avoids 200GB files</li>
+</ul>
+<p class="small"><strong>Issue : aimed for 100M, only reached 60M</strong></p>
+<ul class="small last simple">
+<li>less hits than expected for 70M+</li>
+</ul>
+</div>
+<p class="small"><strong>tboolean-box test Geometry + input photons</strong></p>
+<ul class="small simple">
+<li>input photons : convenient for debugging, but high overheads</li>
+</ul>
+<p class="small"><strong>Production Mode : does the minimum</strong></p>
+<ul class="small simple">
+<li>only saves hits</li>
+<li>skips : genstep, photon, source, record, sequence, index, ..</li>
+<li>no <em>Geant4</em> propagation</li>
+</ul>
+<p class="small"><strong>Multi-Event Running</strong> : measure <span class="red">interval</span> and <span class="red">launch</span></p>
+<dl class="small docutils">
+<dt><span class="red">interval</span> <span class="classifier-delimiter">:</span> <span class="classifier"><strong>avg time between successive launches</strong> (includes all overheads)</span></dt>
+<dd><ul class="first last simple">
+<li>upload photons/gensteps</li>
+<li><span class="red">launch</span> : avg <strong>photon generation + propagation</strong> time</li>
+<li>download hits</li>
+</ul>
+</dd>
+</dl>
+<p class="tiny">[1] TCURAND GPU randoms on host
+<a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/thrustrap/TCURAND.hh">https://bitbucket.org/simoncblyth/opticks/src/tip/thrustrap/TCURAND.hh</a></p>
+<!-- comment
+
+update these profilesmry.py plots with::
+
+    ip profilesmry.py on J and then copy:
+
+    cd ~/simoncblyth.bitbucket.io/env/presentation/ana
+    scp J:local/opticks/tmp/ana/* . -->
+</div>
+<div class="slide" id="nhit">
+<h1><span class="i">NHit</span></h1>
+</div>
+<div class="slide" id="opticks-vs-geant4">
+<h1><span class="i">Opticks_vs_Geant4</span></h1>
+</div>
+<div class="slide" id="opticks-vs-geant4-2">
+<h1><span class="i">Opticks_vs_Geant4 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Drastic Speedup &gt;&gt; 1000x</span></p>
+<p class="small"><strong>Simple Test Geometry, Input Photons</strong></p>
+<p class="small">G4 extrapolation vs Opticks Times</p>
+<dl class="small docutils">
+<dt>60M photons</dt>
+<dd><ul class="first last simple">
+<li><em>Geant4</em> ~6,000s (100min)</li>
+<li><em>Opticks</em> 0.38-0.84s (RTX ON)</li>
+<li>RTX MODE giving ~6x speedup</li>
+</ul>
+</dd>
+<dt>Expect input gensteps closer to &quot;launch&quot;</dt>
+<dd><ul class="first last simple">
+<li><strong>launch</strong> : best case</li>
+<li><strong>interval</strong> : worst case</li>
+</ul>
+</dd>
+</dl>
+<p class="small last">Full geometry speedup expected to be more,
+as more ray tracing.</p>
+</div>
+</div>
+<div class="slide" id="overheads">
+<h1><span class="i">Overheads</span></h1>
+</div>
+<div class="slide" id="opticks-speedup">
+<h1><span class="i">Opticks_Speedup</span></h1>
+</div>
+<div class="slide" id="rtx-speedup">
+<h1><span class="i">RTX_Speedup</span></h1>
+</div>
 <div class="slide" id="opticks-1-aims-to-revolutionize-juno-muon-simulation">
 <h1><span class="small">Opticks[1] : Aims to Revolutionize JUNO Muon Simulation</span></h1>
 <div class="sidebar">
@@ -1147,15 +1225,15 @@ will be provided</li>
 <li>optical photon CPU memory --&gt; ~zero</li>
 </ul>
 </li>
-<li>muon workload perfect for GPUs, <em>Opticks</em> &gt; 1000x <em>Geant4</em><ul>
-<li>optical photon CPU time --&gt; ~zero</li>
+<li>muon workload perfect for GPUs, <em>Opticks</em> &gt;&gt; 1000x <em>Geant4</em><ul>
+<li>optical photon simulation time --&gt; ~zero</li>
 </ul>
 </li>
 </ul>
-<p class="small"><strong>Status : validation iteration ongoing</strong></p>
+<p class="small"><strong>Status : validation iterations ongoing</strong></p>
 <ul class="small simple">
-<li>validation by direct comparison of random sequence aligned GPU and CPU simulations</li>
-<li>minor PMT geometry simplifications needed to proceed to next iteration</li>
+<li>direct comparison of random aligned bi-simulations</li>
+<li>geometry changes made at GDML level</li>
 </ul>
 <p class="tiny">[1] Open source project <a class="reference external" href="http://bitbucket.org/simoncblyth/opticks">http://bitbucket.org/simoncblyth/opticks</a></p>
 <p class="tiny">[2] NVIDIA OptiX ray tracing engine</p>
@@ -1638,7 +1716,7 @@ will be provided</li>
              background-size: 1280px 720px;
              background-position: 0px 0px;
           }
-          div.slide#geocache-360-2{
+          div.slide#juno-360-benchmark-with-optix-6-0-0-rtx-mode{
              background-image: url(/env/presentation/geocache_360.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
@@ -1678,6 +1756,11 @@ will be provided</li>
              background-size: 1280px 720px;
              background-position: 0px 0px;
           }
+          div.slide#tv21-1m-a-2{
+             background-image: url(/env/presentation/ana/tv21_1M_a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
           div.slide#tv21-1m-c{
              background-image: url(/env/presentation/ana/tv21_1M_c.png);
              background-size: 1280px 720px;
@@ -1703,6 +1786,11 @@ will be provided</li>
              background-size: 1280px 720px;
              background-position: 0px 0px;
           }
+          div.slide#opticks-vs-geant4-2{
+             background-image: url(/env/presentation/ana/Opticks_vs_Geant4.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
           div.slide#nhit{
              background-image: url(/env/presentation/ana/NHit.png);
              background-size: 1280px 720px;
@@ -1723,6 +1811,11 @@ will be provided</li>
              background-size: auto auto;
              background-position: 0px 0px;
           }
+          div.slide#bench-20190526-143808-2{
+             background-image: url(/env/presentation/ana/bench_20190526_143808.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
           div.slide#bench-20190526-202537{
              background-image: url(/env/presentation/ana/bench_20190526_202537.png);
              background-size: auto auto;
@@ -1735,6 +1828,16 @@ will be provided</li>
           }
           div.slide#tv16-fastener{
              background-image: url(/env/presentation/tv/tv16_Fastener.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#tv20-polycone-neck{
+             background-image: url(/env/presentation/tv/tv20_polycone_neck.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+          }
+          div.slide#inch-pmt-neck-cylinder-torus-polycone{
+             background-image: url(/env/presentation/tv/tv20_polycone_neck.png);
              background-size: auto auto;
              background-position: 0px 0px;
           } 
