@@ -490,7 +490,10 @@ Whats missing:
 
   * intro screen shot showing high stats photon propagation, explain analytic geom
 
-* replace conclusion slide -->
+* replace conclusion slide
+
+* SIGGRAPH 2018, announcing RTX
+* https://www.youtube.com/watch?v=LP6miCI6-h4 -->
 <div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey">
@@ -603,6 +606,26 @@ Whats missing:
 <li><span class="red">ray trace dedicated hardware : RT cores</span></li>
 </ul>
 </div>
+<div class="slide" id="siggraph-2018-announcing-worlds-first-ray-tracing-gpu">
+<h1><span class="i">SIGGRAPH_2018_Announcing_Worlds_First_Ray_Tracing_GPU</span></h1>
+<pre>
+
+
+
+
+
+
+
+</pre><table border="1" class="huge docutils align-right">
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><span class="white">10 Giga Rays/s</span></td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="slide" id="ray-tracing-vs-rasterization">
 <h1><span class="i">Ray-tracing vs Rasterization</span></h1>
 <img alt="/env/presentation/nvidia/nv_rasterization.png" class="align-left" src="/env/presentation/nvidia/nv_rasterization.png" style="width: 550px;" />
@@ -651,15 +674,17 @@ RTX Launch -->
 
 
 
+
+
 </pre><div class="sidebar">
-<p class="first sidebar-title"><span class="small">NVIDIA RTX Platform : Hybrid Rendering</span></p>
+<p class="first sidebar-title"><span class="small">RTX Platform : Hybrid Rendering</span></p>
 <ul class="small simple">
 <li><span class="red">Ray trace (RT cores)</span></li>
 <li>AI inference (Tensor cores) -&gt; Denoising</li>
 <li>Compute (SM, CUDA cores)</li>
 <li>Rasterization (pipeline)</li>
 </ul>
-<p class="small last">-&gt; <span class="red">real-time realistic 3D rendering</span></p>
+<p class="small last">-&gt; <span class="red">real-time photoreal cinematic 3D rendering</span></p>
 </div>
 </div>
 <div class="slide" id="spatial-index-acceleration-structure">
@@ -683,6 +708,20 @@ RTX Launch -->
 <li>accelerates ray-geometry intersection</li>
 </ul>
 </div>
+<!-- comment
+
+:i:`SIGGRAPH_2019_Eric_Enderton_RT_Cores`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. raw:: html
+
+    <pre>
+    </pre>
+
+
+.. class:: small
+
+    SIGGRAPH 2019, GPU Ray Tracing for Film and Design - - Introduction, Eric Enderton, NVIDIA -->
 </div>
 <div class="slide" id="hardware-traversal-of-bvh-spatial-index">
 <h1><tt class="docutils literal">Hardware Traversal of BVH Spatial Index</tt></h1>
@@ -693,7 +732,6 @@ https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_029.png
 https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_030.png
 https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_031.png -->
 <!-- comment
-
 
 
 :small:`CPU vs GPU architectures, Latency vs Throughput`
@@ -735,17 +773,6 @@ https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_031.png -->
    Porting CPU code to run on the GPU : is not a straightforward thing to do, because the archirecture is totally
    different.  To make effective use of GPUs requires a total reorganization of data and compute.
 
-
-
-:i:`Introducing OptiX 7`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. sidebar:: :small:`low-level CUDA-centric thin API`
-
-    .. class:: small
-
-        * Vulkanization : *flexibility* + thread-safety
-        * :red:`Need rewrite : Opticks<->OptiX7 interface`
 
 
 `TITAN RTX : 72 Raytrace Dedicated RT Cores, 4608 CUDA Cores, 24GB VRAM, 2500 USD`
@@ -976,6 +1003,47 @@ https://images.anandtech.com/galleries/6660/NV_Turing_Editors_Day_031.png -->
 </div>
 <div class="slide" id="j1808-top-ogl">
 <h1><span class="i">j1808_top_ogl</span></h1>
+</div>
+<div class="slide" id="validation-of-opticks-simulation-by-comparison-with-geant4">
+<h1><span class="small">Validation of Opticks Simulation by Comparison with Geant4</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Random Aligned Bi-Simulation</span></p>
+<p class="small">Same inputs to <em>Opticks</em> and <em>Geant4</em>:</p>
+<ul class="small simple">
+<li>CPU generated photons</li>
+<li>GPU generated randoms, fed to <em>Geant4</em></li>
+</ul>
+<p class="small">Common recording into <em>OpticksEvents</em>:</p>
+<ul class="small simple">
+<li>compressed photon step record, up to 16 steps</li>
+<li>persisted as <em>NumPy</em> arrays for python analysis</li>
+</ul>
+<p class="small">Aligned random consumption, direct comparison:</p>
+<ul class="small last simple">
+<li>~every <strong>scatter, absorb, reflect, transmit</strong>
+at matched positions, times, polarization, wavlen</li>
+</ul>
+</div>
+<p class="small"><strong>Bi-simulations of all JUNO solids, with millions of photons</strong></p>
+<dl class="small docutils">
+<dt>mis-aligned histories</dt>
+<dd>mostly &lt; 0.25%, &lt; 0.50% for largest solids</dd>
+<dt>deviant photons within matched history</dt>
+<dd>&lt; 0.05% (500/1M)</dd>
+</dl>
+<p class="small"><strong>Primary sources of problems</strong></p>
+<ul class="small simple">
+<li>grazing incidence, edge skimmers</li>
+<li>incidence at constituent solid boundaries</li>
+</ul>
+<p class="small"><strong>Primary cause : float vs double</strong></p>
+<p class="small"><em>Geant4</em> uses <em>double</em> everywhere, <em>Opticks</em> only sparingly (observed <em>double</em> costing 10x slowdown with RTX)</p>
+<p class="small"><strong>Conclude</strong></p>
+<ul class="small simple">
+<li><span class="blue">neatly oriented photons more prone to issues than realistic ones</span></li>
+<li>perfect &quot;technical&quot; matching not feasible</li>
+<li>instead shift validation to more realistic full detector &quot;calibration&quot; situation</li>
+</ul>
 <!-- comment
 
 * DELL Precision 7920T Workstation
@@ -1386,55 +1454,133 @@ JUNO-360 benchmark with OptiX 6.0.0, RTX mode
          **NVIDIA Tesla V100 GPUs**
             No RT Cores, RTX still gives ~ 1.25x -->
 </div>
-<div class="slide" id="overview-opticks-aims-to-transform-optical-photon-simulation">
-<h1><span class="small">Overview : Opticks Aims to Transform Optical Photon Simulation</span></h1>
+<div class="slide" id="where-next-for-opticks">
+<h1><span class="small">Where Next for Opticks ?</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Removes Memory and Time Bottlenecks</span></p>
-<img alt="/env/presentation/opticks_juno_pmt_muon_approach_portrait.png" class="last align-right" src="/env/presentation/opticks_juno_pmt_muon_approach_portrait.png" style="width: 450px;" />
-</div>
-<p class="small"><span class="blue">State-of-the-art GPU ray tracing applied to optical simulation</span></p>
-<ul class="small simple">
-<li>replaces Geant4 optical simulation with GPU equivalent<ul>
-<li>translate G4 geometry to GPU without approximation</li>
-<li>port G4 optical physics to CUDA</li>
-</ul>
-</li>
-</ul>
-<p class="small"><strong>Optical photons generated+propagated entirely on GPU</strong></p>
-<ul class="small simple">
-<li>only photons hitting PMTs require CPU memory<ul>
-<li>optical photon CPU memory --&gt; ~zero</li>
-</ul>
-</li>
-<li>muon workload perfect for GPUs, <em>Opticks</em> &gt; 1000x <em>Geant4</em><ul>
-<li>optical photon simulation time --&gt; ~zero</li>
-</ul>
-</li>
-</ul>
-<p class="small"><strong>Status : validation iterations ongoing</strong></p>
-<ul class="small simple">
-<li>direct comparison of random aligned bi-simulations</li>
-<li>1st release on <strong>/cvmfs/opticks.ihep.ac.cn/</strong></li>
+<p class="first sidebar-title"><span class="small">NVIDIA OptiX 7 : Entirely new API</span></p>
+<ul class="small last simple">
+<li>introduced August 2019</li>
+<li>low-level CUDA-centric thin API</li>
+<li><span class="strike">near perfect scaling to 4 GPUs, for free</span></li>
 </ul>
 </div>
-<div class="slide" id="opticks-links">
-<h1><span class="small">Opticks Links</span></h1>
-<dl class="docutils">
-<dt><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></dt>
-<dd>Opticks presentations and videos</dd>
-<dt><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></dt>
-<dd>Opticks mailing list archive</dd>
-<dt><a class="reference external" href="mailto:opticks+subscribe&#64;groups.io">opticks+subscribe&#64;groups.io</a></dt>
-<dd>send email to this address, to subscribe</dd>
-<dt>/cvmfs/opticks.ihep.ac.cn/ok/releases/Opticks-0.0.0_alpha/</dt>
-<dd>1st technical release onto CVMFS</dd>
-</dl>
-<dl class="huge docutils">
-<dt><a class="reference external" href="https://simoncblyth.bitbucket.io/opticks/index.html">https://simoncblyth.bitbucket.io/opticks/index.html</a></dt>
-<dd>Opticks installation instructions</dd>
-<dt><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></dt>
-<dd>Opticks code repository</dd>
-</dl>
+<p class="small"><strong>JUNO+Opticks into Production</strong></p>
+<ul class="small simple">
+<li>optimize geometry modelling</li>
+<li>full JUNO geometry validation iteration</li>
+<li>offline integration</li>
+<li>optimize GPU cluster throughput:<ul>
+<li>multi-GPU strategy, split/join events to fit VRAM</li>
+</ul>
+</li>
+<li>support OptiX 7, find multi-GPU load balancing approach</li>
+</ul>
+<pre>
+</pre><p class="small"><strong>Geant4+Opticks Integration : Work with Geant4 Collaboration</strong></p>
+<ul class="small simple">
+<li>finalize <em>Geant4+Opticks</em> extended example<ul>
+<li>aiming for <em>Geant4</em> distrib</li>
+</ul>
+</li>
+<li>prototype <em>Genstep</em> interface inside <em>Geant4</em><ul>
+<li>avoid customizing <em>G4Cerenkov</em> <em>G4Scintillation</em></li>
+</ul>
+</li>
+</ul>
+<pre>
+</pre><p class="small"><strong>Expand Community : Webinars, Conference Tutorials ?</strong></p>
+<ul class="small simple">
+<li>geometry translation help : NEXO, DUNE, LZ</li>
+<li>interest -&gt; usage : SABRE, Baikal GVD, KM3Net, MicroBooNE</li>
+<li>expand interest : scintillator using medical imaging companies</li>
+</ul>
+</div>
+<div class="slide" id="meeting-the-challenge-of-juno-simulation-with-opticks">
+<h1><span class="small">Meeting the Challenge of JUNO Simulation with Opticks</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Highlights 2019</p>
+<ul class="small last simple">
+<li>Profit from hardware accelerated ray tracing</li>
+<li><strong>Opticks &gt; 1000x Geant4</strong> (single Turing GPU)</li>
+<li>more photons -&gt; more overall speedup<ul>
+<li>99% -&gt; 100x</li>
+</ul>
+</li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> : state-of-the-art GPU ray tracing applied to optical photon simulation and
+integrated with <em>Geant4</em> to eliminate memory and time bottlenecks.</p>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
+<ul class="simple">
+<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision<ul>
+<li><strong>any simulation limited by optical photons can benefit</strong></li>
+</ul>
+</li>
+</ul>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 10px;" />
+</blockquote>
+<table border="1" class="docutils align-center">
+<colgroup>
+<col width="53%" />
+<col width="47%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
+<td>code repository</td>
+</tr>
+<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
+<td>presentations and videos</td>
+</tr>
+<tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
+<td>forum/mailing list archive</td>
+</tr>
+<tr><td>email:opticks+subscribe&#64;groups.io</td>
+<td>subscribe to mailing list</td>
+</tr>
+</tbody>
+</table>
+<!-- comment
+
+*Opticks* uses hardware accelerated GPU ray tracing
+via NVIDIA OptiX to give **effectively zero time and zero CPU memory**
+optical photon simulation to *Geant4* applications. -->
+<!-- comment
+
+:small:`Overview : Opticks Aims to Transform Optical Photon Simulation`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. sidebar:: :small:`Removes Memory and Time Bottlenecks`
+
+    .. image:: /env/presentation/opticks_juno_pmt_muon_approach_portrait.png
+       :width: 450px
+       :align: right
+
+.. class:: small
+
+    :blue:`State-of-the-art GPU ray tracing applied to optical simulation`
+
+    * replaces Geant4 optical simulation with GPU equivalent
+
+      * translate G4 geometry to GPU without approximation
+      * port G4 optical physics to CUDA
+
+    **Optical photons generated+propagated entirely on GPU**
+
+    * only photons hitting PMTs require CPU memory
+
+      * optical photon CPU memory - -> ~zero
+
+    * muon workload perfect for GPUs, *Opticks* > 1000x *Geant4*
+
+      * optical photon simulation time - -> ~zero
+
+    **Status : validation iterations ongoing**
+
+    * direct comparison of random aligned bi-simulations
+    * 1st release on **/cvmfs/opticks.ihep.ac.cn/** -->
 </div>
 <div class="slide" id="geocache-360">
 <h1><span class="i">geocache_360</span></h1>
@@ -1866,6 +2012,16 @@ JUNO-360 benchmark with OptiX 6.0.0, RTX mode
              background-size: 1280px 720px;
              background-position: 0px 0px;
           }
+          div.slide#siggraph-2018-announcing-worlds-first-ray-tracing-gpu{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2018_Announcing_Worlds_First_Ray_Tracing_GPU_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
+          div.slide#siggraph-2019-eric-enderton-rt-cores{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2019_Eric_Enderton_RT_Cores.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+          }
           div.slide#nvidia-turing-gpu-72-sm-4608-cuda-cores{
              background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_009.png);
              background-size: 1280px 720px;
@@ -2045,6 +2201,11 @@ JUNO-360 benchmark with OptiX 6.0.0, RTX mode
              background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
+          }
+          div.slide#where-next-for-opticks{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 640px 360px;
+             background-position: 670px 300px;
           }
           div.slide#turing-built-for-rtx{
              background-image: url(/env/presentation/nvidia/TURING_Built_for_RTX_half.png);
