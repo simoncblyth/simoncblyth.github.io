@@ -9,7 +9,7 @@
     <title>Opticks Install Instructions &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -63,10 +63,7 @@
 </li>
 <li><a class="reference internal" href="#testin-cuda-and-optix-installs-and-nvcc-toolchain">Testin CUDA and OptiX Installs and nvcc toolchain</a></li>
 <li><a class="reference internal" href="#testing-thrust">Testing Thrust</a></li>
-<li><a class="reference internal" href="#geant4">Geant4</a><ul>
-<li><a class="reference internal" href="#geant4-version">Geant4 Version</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#geant4">Geant4</a></li>
 <li><a class="reference internal" href="#building-opticks">Building Opticks</a><ul>
 <li><a class="reference internal" href="#externals">Externals</a></li>
 <li><a class="reference internal" href="#separate-installation-of-externals">Separate installation of externals</a></li>
@@ -75,7 +72,7 @@
 </li>
 <li><a class="reference internal" href="#opticks-without-nvidia-optix-and-cuda">Opticks Without NVIDIA OptiX and CUDA ?</a></li>
 <li><a class="reference internal" href="#geant4-dependency">Geant4 Dependency</a></li>
-<li><a class="reference internal" href="#embedded-opticks">Embedded Opticks</a></li>
+<li><a class="reference internal" href="#embedded-opticks-using-g4ok-package">Embedded Opticks using G4OK package</a></li>
 <li><a class="reference internal" href="#testing-installation">Testing Installation</a></li>
 <li><a class="reference internal" href="#creating-legacy-workflow-geocache">Creating Legacy Workflow Geocache</a></li>
 <li><a class="reference internal" href="#creating-direct-workflow-geocache">Creating Direct Workflow Geocache</a></li>
@@ -157,6 +154,12 @@ op<span class="o">(){</span> op.sh <span class="nv">$*</span> <span class="p">;<
 
 <span class="nb">export</span> <span class="nv">OPTICKS_KEY</span><span class="o">=</span>OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
 <span class="c1">## picking a geometry</span>
+
+
+<span class="nb">export</span> <span class="nv">TMP</span><span class="o">=</span>/home/blyth/local/opticks/tmp
+tmp<span class="o">(){</span> <span class="nb">cd</span> <span class="nv">$TMP</span> <span class="p">;</span> <span class="nb">pwd</span> <span class="p">;</span>  <span class="o">}</span>
+<span class="nb">export</span> <span class="nv">OPTICKS_EVENT_BASE</span><span class="o">=</span><span class="nv">$TMP</span>
+<span class="c1">## define a directory in which to store test events, used by integration tests</span>
 </pre></div>
 </div>
 <p>Envvars:</p>
@@ -174,6 +177,16 @@ to work from python scripts</dd>
 <dt>PATH</dt>
 <dd>Opticks executables including more than 400 tests are installed into $LOCAL_BASE/opticks/lib,
 setting the PATH as indicated gives easy access to these as well as many scripts</dd>
+<dt>TMP</dt>
+<dd>when undefined a default directory of /tmp/username/opticks is used as scratch space by unit tests</dd>
+<dt>OPTICKS_EVENT_BASE</dt>
+<dd><p class="first">The OPTICKS_EVENT_BASE envvar is used by both C++ boostrap/BOpticksEvent.cc and
+python ana/nload.py to define a directory beneath with events are stored.
+When undefined this defaults to the TMP envvar value or its default.</p>
+<p class="last">Some integration tests write photon propagation OpticksEvents which are loaded into
+python for analysis by scripts directly invoked from the C++ executable.
+OpticksEvents comprise several .npy arrays  necessitating the NumPy python module for loading.</p>
+</dd>
 </dl>
 <p>The most important lines of the setup are:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-(){ . $HOME/opticks/opticks.bash &amp;&amp; opticks-env $* ; }
@@ -492,7 +505,7 @@ use an older OptiX version contemporary with the CUDA version that your kernel s
 <p>Version combinations that have been used:</p>
 <dl class="docutils">
 <dt><em>current</em></dt>
-<dd>CUDA 10.1, OptiX 6.0.0</dd>
+<dd>CUDA 10.1, OptiX 6.5.0</dd>
 <dt><em>previous</em></dt>
 <dd>CUDA 9.1, OptiX 5.1.1
 CUDA 9.1, OptiX 5.1.0</dd>
@@ -561,17 +574,10 @@ You are recommended to try some of the Thrust examples to check your nvcc toolch
 </div>
 <div class="section" id="geant4">
 <h2>Geant4<a class="headerlink" href="#geant4" title="Permalink to this headline">¶</a></h2>
-<p>As installing Geant4 takes a long time and considerable storage space it is not installed by <em>opticks-full</em>.
-You can however intall Geant4 and XercesC with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opticks</span><span class="o">-</span><span class="n">optionals</span><span class="o">-</span><span class="n">install</span>    <span class="c1"># which uses the xercesc- and g4- precursors</span>
-</pre></div>
-</div>
-<div class="section" id="geant4-version">
-<h3>Geant4 Version<a class="headerlink" href="#geant4-version" title="Permalink to this headline">¶</a></h3>
-<p>The <em>g4-</em> precursor selects a version of Geant4.  Currently a bit dated, this is intended to be brought uptodate soon.
+<p>Geant4 installed as the last external in the <em>opticks-externals</em> list.
+The <em>g4-</em> precursor selects a version of Geant4.  Currently a bit dated, this is intended to be brought uptodate sometime.
 The coupling between Opticks and Geant4 is intended to be weak : so a range of
 recent versions of Geant4 are intended to be supported.</p>
-</div>
 </div>
 <div class="section" id="building-opticks">
 <h2>Building Opticks<a class="headerlink" href="#building-opticks" title="Permalink to this headline">¶</a></h2>
@@ -591,6 +597,26 @@ and run again from scratch.</p>
 <h3>Externals<a class="headerlink" href="#externals" title="Permalink to this headline">¶</a></h3>
 <p>The <em>opticks-full</em> command automatically downloads and installs the below external packages
 into the places required by Opticks.</p>
+<p>To list the externals installed by <em>opticks-full</em> use the <em>opticks-externals</em> function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost opticks]$ opticks-externals
+bcm
+glm
+glfw
+glew
+gleq
+imgui
+assimp
+openmesh
+plog
+opticksdata
+oimplicitmesher
+odcs
+oyoctogl
+ocsgbsp
+xercesc
+g4
+</pre></div>
+</div>
 <table border="1" class="docutils">
 <colgroup>
 <col width="13%" />
@@ -604,60 +630,72 @@ into the places required by Opticks.</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>glm-</td>
+<tr class="row-even"><td>bcm</td>
+<td>BCM</td>
+<td>My fork of Boost CMake Modules, which eases use of modern CMake target import/export</td>
+</tr>
+<tr class="row-odd"><td>glm-</td>
 <td>GLM</td>
 <td>OpenGL mathematics, 3D transforms</td>
-</tr>
-<tr class="row-odd"><td>assimp-</td>
-<td>Assimp</td>
-<td>Assimp 3D asset importer, my fork that handles G4DAE extras</td>
-</tr>
-<tr class="row-even"><td>openmesh-</td>
-<td>OpenMesh</td>
-<td>basis for mesh navigation and fixing</td>
-</tr>
-<tr class="row-odd"><td>glew-</td>
-<td>GLEW</td>
-<td>OpenGL extensions loading library, cmake build didnt work, includes vc12 sln for windows</td>
 </tr>
 <tr class="row-even"><td>glfw-</td>
 <td>GLFW</td>
 <td>Interface between system and OpenGL, creating windows and receiving input</td>
 </tr>
-<tr class="row-odd"><td>gleq-</td>
+<tr class="row-odd"><td>glew-</td>
+<td>GLEW</td>
+<td>OpenGL extensions loading library, cmake build didnt work, includes vc12 sln for windows</td>
+</tr>
+<tr class="row-even"><td>gleq-</td>
 <td>GLEQ</td>
 <td>Keyboard event handling header from GLFW author, header only</td>
 </tr>
-<tr class="row-even"><td>imgui-</td>
+<tr class="row-odd"><td>imgui-</td>
 <td>ImGui</td>
 <td>OpenGL immediate mode GUI, depends on glfw and glew</td>
 </tr>
-<tr class="row-odd"><td>plog-</td>
+<tr class="row-even"><td>assimp-</td>
+<td>Assimp</td>
+<td>Assimp 3D asset importer, my fork that handles G4DAE extras</td>
+</tr>
+<tr class="row-odd"><td>openmesh-</td>
+<td>OpenMesh</td>
+<td>basis for mesh navigation and fixing</td>
+</tr>
+<tr class="row-even"><td>plog-</td>
 <td>PLog</td>
 <td>Header only logging, supporting multi dll logging on windows</td>
 </tr>
-<tr class="row-even"><td>opticksdata-</td>
+<tr class="row-odd"><td>opticksdata-</td>
 <td><ul class="first last simple">
 <li></li>
 </ul>
 </td>
 <td>Dayabay G4DAE and GDML geometry files for testing Opticks</td>
 </tr>
-<tr class="row-odd"><td>oimplicitmesher-</td>
+<tr class="row-even"><td>oimplicitmesher-</td>
 <td>ImplicitMesher</td>
 <td>Polygonization of implicitly defined shapes</td>
 </tr>
-<tr class="row-even"><td>odcs-</td>
+<tr class="row-odd"><td>odcs-</td>
 <td>DualContouringSample</td>
 <td>Alternate polygonization using Octree for multi-resolution, however its slow</td>
+</tr>
+<tr class="row-even"><td>oyoctogl-</td>
+<td>YoctoGL</td>
+<td>Used for glTF geometry file format handling, parsing/serializing</td>
 </tr>
 <tr class="row-odd"><td>ocsgbsp-</td>
 <td>CSGBSP</td>
 <td>Another BSP approach to polygonization under investigation</td>
 </tr>
-<tr class="row-even"><td>oyoctogl-</td>
-<td>YoctoGL</td>
-<td>Used for glTF geometry file format handling, parsing/serializing</td>
+<tr class="row-even"><td>xercesc</td>
+<td>XercesC</td>
+<td>XML handling dependency of Geant4, required for GDML parsing</td>
+</tr>
+<tr class="row-odd"><td>g4</td>
+<td>Geant4</td>
+<td>The preeminent simulation toolkit</td>
 </tr>
 </tbody>
 </table>
@@ -771,13 +809,16 @@ This mode is not tested often, so provide copy/paste errors if it fails for you.
 <div class="section" id="geant4-dependency">
 <h2>Geant4 Dependency<a class="headerlink" href="#geant4-dependency" title="Permalink to this headline">¶</a></h2>
 <p>Opticks is structured as a collection of packages
-organized by their local and external dependencies, see <a class="reference internal" href="overview.html"><span class="doc">Opticks Overview</span></a> for a table.
-Only the two very highest level packages depend on Geant4.</p>
+organized by their local and external dependencies, see <a class="reference internal" href="overview.html"><span class="doc">Opticks Overview</span></a> for a table
+or run the bash function <em>opticks-deps</em>.
+Only a few of the very highest level packages depend on Geant4.</p>
 <dl class="docutils">
 <dt>cfg4</dt>
 <dd>validation comparisons</dd>
 <dt>okg4</dt>
 <dd>integrated Opticks+G4 for “gun running”</dd>
+<dt>g4ok</dt>
+<dd>minimal interface for embedding Opticks inside Geant4 applications</dd>
 </dl>
 <p>Opticks dependency on Geant4 is intended to be loose
 in order to allow working with multiple G4 versions (within a certain version range),
@@ -786,8 +827,8 @@ So please send copy/paste reports of incompatibilities together with G4 versions
 <p>The weak G4 dependency allows you to test most of Opticks even
 without G4 installed.</p>
 </div>
-<div class="section" id="embedded-opticks">
-<h2>Embedded Opticks<a class="headerlink" href="#embedded-opticks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="embedded-opticks-using-g4ok-package">
+<h2>Embedded Opticks using G4OK package<a class="headerlink" href="#embedded-opticks-using-g4ok-package" title="Permalink to this headline">¶</a></h2>
 <p>In production, Opticks is intended to be run in an embedded mode
 where, Geant4 and Opticks communicate via “gensteps” and “hits”
 without using any Geant4 headers. This works via some
@@ -907,7 +948,8 @@ python and the ipython and numpy extensions.</p>
 <div class="section" id="linux-gcc-toolchain">
 <h3>Linux : GCC toolchain<a class="headerlink" href="#linux-gcc-toolchain" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Opticks has been ported to a DELL Precision Workstation, running Ubuntu</li>
+<li>DELL Precision Workstation, running Ubuntu</li>
+<li>DELL Precision Workstation, running CentOS 7</li>
 <li>NVIDIA Quadro M5000</li>
 </ul>
 </div>
@@ -1009,7 +1051,7 @@ Total Test <span class="nb">time</span> <span class="o">(</span>real<span class=
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Simon C Blyth.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
     </div>
   </body>
 </html>
