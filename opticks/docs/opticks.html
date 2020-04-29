@@ -58,9 +58,15 @@
 <li><a class="reference internal" href="#finding-cuda">Finding CUDA</a></li>
 <li><a class="reference internal" href="#opticks-without-an-cuda-capable-gpu">Opticks without an CUDA capable GPU ?</a></li>
 <li><a class="reference internal" href="#versions-of-cuda-and-optix">Versions of CUDA and OptiX</a></li>
+<li><a class="reference internal" href="#nvidia-driver-versions">NVIDIA Driver Versions</a></li>
+<li><a class="reference internal" href="#optix-6-5-0-august-26-2019">OptiX 6.5.0 (August 26, 2019)</a></li>
+<li><a class="reference internal" href="#problems-with-optix-6-5-0-driver-440-33-01-cuda-10-2">Problems with OptiX 6.5.0, Driver 440.33.01, CUDA 10.2</a></li>
+<li><a class="reference internal" href="#optix-7-0-0-july-29-2019">OptiX 7.0.0 (July 29, 2019)</a></li>
+<li><a class="reference internal" href="#optix-6-0-0-february-2018">OptiX 6.0.0 (February 2018)</a></li>
 <li><a class="reference internal" href="#using-a-non-standard-optix-version">Using a non-standard OptiX version</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#building-opticks-against-foreign-externals-such-as-geant4-boost">Building Opticks against “foreign” externals such as Geant4, Boost</a></li>
 <li><a class="reference internal" href="#testin-cuda-and-optix-installs-and-nvcc-toolchain">Testin CUDA and OptiX Installs and nvcc toolchain</a></li>
 <li><a class="reference internal" href="#testing-thrust">Testing Thrust</a></li>
 <li><a class="reference internal" href="#geant4">Geant4</a></li>
@@ -521,6 +527,122 @@ wrong there is no safety net. A bad kernel extension will cause kernel panics,
 your machine crashes and continues to crash until the bad driver is removed
 (on macOS the removal can be done by resetting NVRAM).</p>
 </div>
+<div class="section" id="nvidia-driver-versions">
+<h3>NVIDIA Driver Versions<a class="headerlink" href="#nvidia-driver-versions" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="12%" />
+<col width="16%" />
+<col width="36%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">OptiX</th>
+<th class="head">Date</th>
+<th class="head">Driver (Linux)</th>
+<th class="head">Working</th>
+<th class="head">Problems Reported</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>6.5.0</td>
+<td>Aug 26, 2019</td>
+<td>435.17</td>
+<td>435.21 CUDA 10.1  TITAN RTX, TITAN V</td>
+<td>Sajan: 440.33.01 and CUDA 10.2</td>
+</tr>
+<tr class="row-odd"><td>7.0.0</td>
+<td>July 29, 2019</td>
+<td>435.12</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>6.0.0</td>
+<td>Feb 2018</td>
+<td>418.30</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The release notes from every version of OptiX states the
+required minimum version of the NVIDIA Driver that must be used
+for that version of OptiX. In recent releases that driver version
+has been from the so called short-lived series.</p>
+<p>From <a class="reference external" href="https://www.nvidia.com/en-gb/drivers/unix/">https://www.nvidia.com/en-gb/drivers/unix/</a> on April 29, 2020:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Latest</span> <span class="n">Long</span> <span class="n">Lived</span> <span class="n">Branch</span> <span class="n">version</span><span class="p">:</span> <span class="mf">440.82</span>
+<span class="n">Latest</span> <span class="n">Short</span> <span class="n">Lived</span> <span class="n">Branch</span> <span class="n">version</span><span class="p">:</span> <span class="mf">435.21</span>
+</pre></div>
+</div>
+<p>Note that the long-lived series may have version numbers that exceed those
+of the short-lived series but the features needed for OptiX take much longer
+to appear in that series.</p>
+<p>The releases from the longer-lived driver branches are intended for
+users who do not need the latest and greatest features.</p>
+<p>If you cannot change your driver version this sometimes means that
+an older version of OptiX must be used to work with your driver.</p>
+</div>
+<div class="section" id="optix-6-5-0-august-26-2019">
+<h3>OptiX 6.5.0 (August 26, 2019)<a class="headerlink" href="#optix-6-5-0-august-26-2019" title="Permalink to this headline">¶</a></h3>
+<p>Quote from release notes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OptiX</span> <span class="mf">6.5</span><span class="o">.</span><span class="mi">0</span> <span class="n">requires</span> <span class="n">that</span> <span class="n">you</span> <span class="n">install</span> <span class="n">the</span> <span class="mf">436.02</span> <span class="n">driver</span> <span class="n">on</span> <span class="n">Windows</span> <span class="ow">or</span> <span class="n">the</span> <span class="mf">435.17</span> <span class="n">Driver</span> <span class="k">for</span> <span class="n">linux</span><span class="o">.</span> <span class="n">Operating</span> <span class="n">System</span><span class="p">:</span>
+
+<span class="o">*</span> <span class="n">Windows</span> <span class="mi">7</span><span class="o">/</span><span class="mf">8.1</span><span class="o">/</span><span class="mi">10</span> <span class="mi">64</span><span class="o">-</span><span class="n">bit</span>
+<span class="o">*</span> <span class="n">Linux</span> <span class="n">RHEL</span> <span class="mf">4.8</span><span class="o">+</span> <span class="ow">or</span> <span class="n">Ubuntu</span> <span class="mf">10.10</span><span class="o">+</span> <span class="mi">64</span><span class="o">-</span><span class="n">bit</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="problems-with-optix-6-5-0-driver-440-33-01-cuda-10-2">
+<h3>Problems with OptiX 6.5.0, Driver 440.33.01, CUDA 10.2<a class="headerlink" href="#problems-with-optix-6-5-0-driver-440-33-01-cuda-10-2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://www.nvidia.com/en-gb/drivers/unix/">https://www.nvidia.com/en-gb/drivers/unix/</a></li>
+</ul>
+<p>Search the OptiX forum for “driver” and looking for Linux reports:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://forums.developer.nvidia.com/search?q=driver%20%20category%3A167">https://forums.developer.nvidia.com/search?q=driver%20%20category%3A167</a></li>
+<li><a class="reference external" href="https://forums.developer.nvidia.com/t/optix7-and-game-ready-driver-440-97/83907">https://forums.developer.nvidia.com/t/optix7-and-game-ready-driver-440-97/83907</a></li>
+</ul>
+<p>From droettger of NVIDIA on Nov 20, 2019 regarding a problem with optix7:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Yes</span><span class="p">,</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">bug</span> <span class="ow">in</span> <span class="n">R440</span> <span class="n">drivers</span> <span class="ow">and</span> <span class="n">a</span> <span class="n">serious</span> <span class="n">test</span> <span class="n">escape</span><span class="o">.</span>
+
+<span class="n">This</span> <span class="n">has</span> <span class="n">been</span> <span class="n">fixed</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">meantime</span><span class="o">.</span> <span class="n">The</span> <span class="n">just</span> <span class="n">released</span> <span class="n">Windows</span> <span class="n">driver</span> <span class="mf">441.28</span> <span class="n">has</span> <span class="n">picked</span> <span class="n">up</span> <span class="n">the</span> <span class="n">fix</span> <span class="n">already</span><span class="o">.</span>
+<span class="n">Unfortunately</span> <span class="n">Linux</span> <span class="mf">440.31</span> <span class="n">drivers</span> <span class="n">have</span> <span class="n">been</span> <span class="n">cut</span> <span class="n">before</span> <span class="n">the</span> <span class="n">fix</span><span class="o">.</span> <span class="n">The</span> <span class="nb">next</span> <span class="mi">441</span> <span class="n">Linux</span> <span class="n">drivers</span> <span class="n">should</span> <span class="n">have</span> <span class="n">it</span><span class="o">.</span>
+
+<span class="n">If</span> <span class="n">you</span> <span class="n">already</span> <span class="n">hacked</span> <span class="n">that</span> <span class="n">integer</span> <span class="n">field</span> <span class="n">to</span> <span class="mi">0</span> <span class="n">when</span> <span class="n">preTransform</span> <span class="ow">is</span> <span class="n">null</span><span class="p">,</span> <span class="n">the</span> <span class="n">expected</span> <span class="n">value</span> <span class="n">when</span> <span class="n">preTransform</span> <span class="ow">is</span> <span class="n">actually</span> <span class="n">containing</span> <span class="mi">3</span><span class="n">x4</span> <span class="n">matrices</span> <span class="ow">is</span> <span class="mh">0x21E1</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="optix-7-0-0-july-29-2019">
+<h3>OptiX 7.0.0 (July 29, 2019)<a class="headerlink" href="#optix-7-0-0-july-29-2019" title="Permalink to this headline">¶</a></h3>
+<p><strong>An entirely new API : not yet supported by Opticks.</strong></p>
+<p>Quote from release notes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OptiX</span> <span class="mf">7.0</span><span class="o">.</span><span class="mi">0</span> <span class="n">requires</span> <span class="n">that</span> <span class="n">you</span> <span class="n">install</span> <span class="n">the</span> <span class="mf">435.80</span> <span class="n">driver</span> <span class="n">on</span> <span class="n">Windows</span> <span class="ow">or</span> <span class="n">the</span> <span class="mf">435.12</span> <span class="n">Driver</span> <span class="k">for</span> <span class="n">linux</span><span class="o">.</span>
+<span class="n">Note</span> <span class="n">OptiX</span> <span class="n">dll</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">SDK</span> <span class="n">are</span> <span class="n">no</span> <span class="n">longer</span> <span class="n">needed</span> <span class="n">since</span> <span class="n">the</span> <span class="n">symbols</span> <span class="n">are</span> <span class="n">loaded</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">driver</span><span class="o">.</span>
+
+<span class="o">*</span> <span class="n">Windows</span> <span class="mi">7</span><span class="o">/</span><span class="mf">8.1</span><span class="o">/</span><span class="mi">10</span> <span class="mi">64</span><span class="o">-</span><span class="n">bit</span><span class="p">;</span>
+<span class="o">*</span> <span class="n">Linux</span> <span class="n">RHEL</span> <span class="mf">4.8</span><span class="o">+</span> <span class="ow">or</span> <span class="n">Ubuntu</span> <span class="mf">10.10</span><span class="o">+</span> <span class="mi">64</span><span class="o">-</span><span class="n">bit</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="optix-6-0-0-february-2018">
+<h3>OptiX 6.0.0 (February 2018)<a class="headerlink" href="#optix-6-0-0-february-2018" title="Permalink to this headline">¶</a></h3>
+<p><strong>first version of OptiX with support for Turing GPUs and RT Cores</strong></p>
+<p>Quote from release notes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Graphics</span> <span class="n">Driver</span><span class="p">:</span>
+
+<span class="o">*</span> <span class="n">Windows</span><span class="p">:</span> <span class="n">driver</span> <span class="n">version</span> <span class="mf">418.81</span> <span class="ow">or</span> <span class="n">later</span> <span class="ow">is</span> <span class="n">required</span><span class="o">.</span>
+<span class="o">*</span> <span class="n">Linux</span><span class="p">:</span> <span class="n">driver</span> <span class="n">version</span> <span class="mf">418.30</span> <span class="ow">or</span> <span class="n">later</span> <span class="ow">is</span> <span class="n">required</span><span class="o">.</span>
+
+<span class="n">OS</span><span class="p">:</span>
+
+<span class="o">*</span> <span class="n">Windows</span> <span class="mi">7</span><span class="o">/</span><span class="mf">8.1</span><span class="o">/</span><span class="mi">10</span> <span class="mi">64</span><span class="o">-</span><span class="n">bit</span>
+<span class="o">*</span> <span class="n">Linux</span> <span class="n">RHEL</span> <span class="mf">4.8</span><span class="o">+</span> <span class="ow">or</span> <span class="n">Ubuntu</span> <span class="mf">10.10</span><span class="o">+</span> <span class="mi">64</span><span class="o">-</span><span class="n">bit</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="using-a-non-standard-optix-version">
 <h3>Using a non-standard OptiX version<a class="headerlink" href="#using-a-non-standard-optix-version" title="Permalink to this headline">¶</a></h3>
 <p>Opticks tends to adopt new OptiX versions very soon after they become
@@ -552,6 +674,81 @@ export LD_LIBRARY_PATH=/usr/local/cuda-${CUDA_VERSION}/lib64
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="building-opticks-against-foreign-externals-such-as-geant4-boost">
+<h2>Building Opticks against “foreign” externals such as Geant4, Boost<a class="headerlink" href="#building-opticks-against-foreign-externals-such-as-geant4-boost" title="Permalink to this headline">¶</a></h2>
+<p>When integrating Opticks with a detector simulation framework
+it is important that externals that are incommon between Opticks and the framework
+are one and the same to avoid symbol inconsistency between different versions of libraries.
+The most likely packages to be in common are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Boost</span>
+<span class="n">Geant4</span>
+<span class="n">XercesC</span>
+<span class="n">GLEW</span>
+</pre></div>
+</div>
+<p>The Opticks build is sensitive to the CMAKE_PREFIX_PATH envvar
+allowing Opticks to build against “foreign” externals. To check which external that
+the CMake based build will pick use the find_package.py script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:opticks blyth$ find_package.py Geant4
+Geant4                         : /usr/local/foreign/lib/Geant4-10.5.1/Geant4Config.cmake
+Geant4                         : /usr/local/opticks/externals/lib/Geant4-10.4.2/Geant4Config.cmake
+</pre></div>
+</div>
+<p>If you can integrate Opticks with your framework using CMake then the non-CMake
+opticks-config system which is based on pkg-config pc files is not relevant to you.
+Conversely if you need to integrate with legacy build systems such as CMT
+then it is necessary to arrange consistency between the two config systems.
+To check which external that non-CMake pkg-config based builds will pick use the
+pkg_config.py script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ pkg_config.py Geant4
+geant4                         : /usr/local/foreign/lib/pkgconfig/geant4.pc
+geant4                         : /usr/local/opticks/externals/lib/pkgconfig/geant4.pc
+</pre></div>
+</div>
+<p>And also directly with opticks-config (or shorthand oc):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opticks</span><span class="o">-</span><span class="n">config</span> <span class="o">--</span><span class="n">cflags</span> <span class="n">Geant4</span>
+<span class="n">opticks</span><span class="o">-</span><span class="n">config</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p>To keep consistency between the CMake and pkg-config configuration systems it is
+necessary for do several things:</p>
+<ol class="arabic">
+<li><p class="first">ensure that the original CMAKE_PREFIX_PATH and PKG_CONFIG_PATH are consistent, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">CMAKE_PREFIX_PATH</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">foreign</span>
+<span class="n">export</span> <span class="n">PKG_CONFIG_PATH</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">foreign</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">pkgconfig</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">ensure that pc files are present for relevant packages in the lib/pkgconfig
+or lib64/pkgconfig directories beneath all relevant prefix dirs, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">foreign</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">pkgconfig</span><span class="o">/</span><span class="n">geant4</span><span class="o">.</span><span class="n">pc</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">foreign</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">pkgconfig</span><span class="o">/</span><span class="n">boost</span><span class="o">.</span><span class="n">pc</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">generate any missing pc files with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g4</span><span class="o">-</span><span class="n">pcc</span><span class="o">-</span><span class="nb">all</span>
+<span class="n">boost</span><span class="o">-</span><span class="n">pcc</span><span class="o">-</span><span class="nb">all</span>
+</pre></div>
+</div>
+<p>These use find_package.py which iterates over prefixes in CMAKE_PREFIX_PATH
+writing .pc files.</p>
+</li>
+<li><p class="first">check consistency with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">find_package</span><span class="o">.</span><span class="n">py</span> <span class="n">Boost</span>
+<span class="n">pkg_config</span><span class="o">.</span><span class="n">py</span> <span class="n">Boost</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">do cleaninstalls following changes to CMAKE_PREFIX_PATH and PKG_CONFIG_PATH with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">opticks</span>
+<span class="n">om</span><span class="o">-</span>
+<span class="n">om</span><span class="o">-</span><span class="n">cleaninstall</span>
+</pre></div>
+</div>
+</li>
+</ol>
 </div>
 <div class="section" id="testin-cuda-and-optix-installs-and-nvcc-toolchain">
 <h2>Testin CUDA and OptiX Installs and nvcc toolchain<a class="headerlink" href="#testin-cuda-and-optix-installs-and-nvcc-toolchain" title="Permalink to this headline">¶</a></h2>
