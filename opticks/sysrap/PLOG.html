@@ -27,6 +27,15 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PLOG : Logging Infrastructure</a><ul>
+<li><a class="reference internal" href="#new-approach-to-initialization">new approach to initialization</a></li>
+<li><a class="reference internal" href="#older-low-level-approach">older low level approach</a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -56,31 +65,109 @@
             
   <div class="section" id="plog-logging-infrastructure">
 <h1>PLOG : Logging Infrastructure<a class="headerlink" href="#plog-logging-infrastructure" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="new-approach-to-initialization">
+<h2>new approach to initialization<a class="headerlink" href="#new-approach-to-initialization" title="Permalink to this headline">¶</a></h2>
 <p>Opticks executables follow the following pattern.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;SYSRAP_LOG.hh&quot;  // headers for each projects logger</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&quot;BRAP_LOG.hh&quot;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&quot;NPY_LOG.hh&quot;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&quot;OKCORE_LOG.hh&quot;</span><span class="cp"></span>
-
-<span class="cp">#include</span> <span class="cpf">&quot;PLOG.hh&quot;        // infrastructure header</span><span class="cp"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;OPTICKS_LOG.hh&quot;  // brings in separate headers for each projects logger depending on defines such as OPTICKS_GGEO</span><span class="cp"></span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="n">PLOG_</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>  <span class="c1">// pass arguments to PLOG_ macro</span>
-
-    <span class="n">SYSRAP_LOG__</span> <span class="p">;</span>     <span class="c1">// setup loggers for all projects you want to see output from</span>
-    <span class="n">BRAP_LOG__</span> <span class="p">;</span>
-    <span class="n">NPY_LOG__</span> <span class="p">;</span>
-    <span class="n">OKCORE_LOG__</span> <span class="p">;</span>
+    <span class="n">OPTICKS_LOG</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>  <span class="c1">// pass arguments to PLOG_ macro</span>
 
     <span class="n">Opticks</span> <span class="n">ok</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
 
     <span class="c1">//  ...  exercise Opticks  ...</span>
-
     <span class="k">return</span> <span class="mi">0</span> <span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p>OPTICKS_LOG is a macro from OPTICKS_LOG.hh that must be placed in the main program:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#define OPTICKS_LOG(argc, argv) {      PLOG_COLOR(argc, argv);     OPTICKS_LOG_::Initialize(PLOG::instance, plog::get(), NULL ); }</span>
+</pre></div>
+</div>
+<p>The PLOG_COLOR macro from PLOG_INIT.hh creates two static appenders in the main compilation unit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#define PLOG_COLOR(argc, argv) \</span>
+<span class="p">{</span> \
+    <span class="n">PLOG</span><span class="o">*</span> <span class="n">_plog</span> <span class="o">=</span> <span class="n">new</span> <span class="n">PLOG</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span> \
+    <span class="n">static</span> <span class="n">plog</span><span class="p">::</span><span class="n">RollingFileAppender</span><span class="o">&lt;</span><span class="n">plog</span><span class="p">::</span><span class="n">TxtFormatter</span><span class="o">&gt;</span> <span class="n">fileAppender</span><span class="p">(</span> <span class="n">_plog</span><span class="o">-&gt;</span><span class="n">filename</span><span class="p">,</span> <span class="n">_plog</span><span class="o">-&gt;</span><span class="n">maxFileSize</span><span class="p">,</span> <span class="n">_plog</span><span class="o">-&gt;</span><span class="n">maxFiles</span> <span class="p">);</span> \
+    <span class="n">static</span> <span class="n">plog</span><span class="p">::</span><span class="n">ColorConsoleAppender</span><span class="o">&lt;</span><span class="n">plog</span><span class="p">::</span><span class="n">TxtFormatter</span><span class="o">&gt;</span> <span class="n">consoleAppender</span><span class="p">;</span> \
+    <span class="n">PLOG_INIT</span><span class="p">(</span> <span class="n">_plog</span><span class="o">-&gt;</span><span class="n">level</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">consoleAppender</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fileAppender</span> <span class="p">);</span> \
+<span class="p">}</span> \
+</pre></div>
+</div>
+<p>The PLOG_INIT macro also from PLOG_INIT.hh applies plog::init to the main consoleAppender and adds the fileAppender:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#define PLOG_INIT(level, app1, app2 ) \</span>
+<span class="p">{</span> \
+    <span class="n">plog</span><span class="p">::</span><span class="n">IAppender</span><span class="o">*</span> <span class="n">appender1</span> <span class="o">=</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="n">plog</span><span class="p">::</span><span class="n">IAppender</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">app1</span><span class="p">)</span> <span class="p">;</span> \
+    <span class="n">plog</span><span class="p">::</span><span class="n">IAppender</span><span class="o">*</span> <span class="n">appender2</span> <span class="o">=</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="n">plog</span><span class="p">::</span><span class="n">IAppender</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">app2</span><span class="p">)</span> <span class="p">;</span> \
+    <span class="n">plog</span><span class="p">::</span><span class="n">Severity</span> <span class="n">severity</span> <span class="o">=</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="n">plog</span><span class="p">::</span><span class="n">Severity</span><span class="o">&gt;</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="p">;</span> \
+    <span class="n">plog</span><span class="p">::</span><span class="n">init</span><span class="p">(</span> <span class="n">severity</span> <span class="p">,</span>  <span class="n">appender1</span> <span class="p">);</span> \
+    <span class="k">if</span><span class="p">(</span><span class="n">appender2</span><span class="p">)</span> \
+        <span class="n">plog</span><span class="p">::</span><span class="n">get</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">addAppender</span><span class="p">(</span><span class="n">appender2</span><span class="p">)</span> <span class="p">;</span> \
+<span class="p">}</span> \
+</pre></div>
+</div>
+<p>The subsequent <a href="#id1"><span class="problematic" id="id2">OPTICKS_LOG_</span></a>::Initialize passes the primary instance returned by plog::get() in the
+main compilation unit to the static logging setup in each of the shared object libraries selected
+by compilation defines such as OPTICKS_SYSRAP, OPTICKS_BRAP.</p>
+<p>Extracts from OPTICKS_LOG.hh showing the <a href="#id3"><span class="problematic" id="id4">OPTICKS_LOG_</span></a>::Initialize:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="c1">#ifdef OPTICKS_SYSRAP</span>
+<span class="c1">#include &quot;SYSRAP_LOG.hh&quot;</span>
+<span class="c1">#endif</span>
+<span class="c1">#ifdef OPTICKS_BRAP</span>
+<span class="c1">#include &quot;BRAP_LOG.hh&quot;</span>
+<span class="c1">#endif</span>
+<span class="c1">#ifdef OPTICKS_NPY</span>
+<span class="c1">#include &quot;NPY_LOG.hh&quot;</span>
+<span class="c1">#endif</span>
+
+<span class="o">...</span>
+
+<span class="k">class</span> <span class="nc">SYSRAP_API</span> <span class="n">OPTICKS_LOG_</span> <span class="p">{</span>
+   <span class="n">public</span><span class="p">:</span>
+       <span class="o">//</span> <span class="n">initialize</span> <span class="nb">all</span> <span class="n">linked</span> <span class="n">loggers</span> <span class="ow">and</span> <span class="n">hookup</span> <span class="n">the</span> <span class="n">main</span> <span class="n">logger</span>
+       <span class="n">static</span> <span class="n">void</span> <span class="n">Initialize</span><span class="p">(</span><span class="n">PLOG</span><span class="o">*</span> <span class="n">instance</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app1</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app2</span> <span class="p">)</span>
+       <span class="p">{</span>
+           <span class="nb">int</span> <span class="n">max_level</span> <span class="o">=</span> <span class="n">instance</span><span class="o">-&gt;</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;info&quot;</span><span class="p">)</span> <span class="p">;</span>
+           <span class="o">//</span> <span class="n">note</span> <span class="p">:</span> <span class="n">can</span> <span class="n">decrease</span> <span class="n">verbosity</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">max_level</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">subproj</span><span class="p">,</span> <span class="n">but</span> <span class="ow">not</span> <span class="n">increase</span>
+
+<span class="c1">#ifdef OPTICKS_SYSRAP</span>
+    <span class="n">SYSRAP_LOG</span><span class="p">::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">instance</span><span class="o">-&gt;</span><span class="n">prefixlevel_parse</span><span class="p">(</span> <span class="n">max_level</span><span class="p">,</span> <span class="s2">&quot;SYSRAP&quot;</span><span class="p">),</span> <span class="n">app1</span><span class="p">,</span> <span class="n">NULL</span> <span class="p">);</span>
+<span class="c1">#endif</span>
+<span class="c1">#ifdef OPTICKS_BRAP</span>
+    <span class="n">BRAP_LOG</span><span class="p">::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">instance</span><span class="o">-&gt;</span><span class="n">prefixlevel_parse</span><span class="p">(</span> <span class="n">max_level</span><span class="p">,</span> <span class="s2">&quot;BRAP&quot;</span><span class="p">),</span> <span class="n">app1</span><span class="p">,</span> <span class="n">NULL</span> <span class="p">);</span>
+<span class="c1">#endif</span>
+<span class="c1">#ifdef OPTICKS_NPY</span>
+    <span class="n">NPY_LOG</span><span class="p">::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">instance</span><span class="o">-&gt;</span><span class="n">prefixlevel_parse</span><span class="p">(</span> <span class="n">max_level</span><span class="p">,</span> <span class="s2">&quot;NPY&quot;</span><span class="p">),</span> <span class="n">app1</span><span class="p">,</span> <span class="n">NULL</span> <span class="p">);</span>
+<span class="c1">#endif</span>
+</pre></div>
+</div>
+<p>From SYSRAP_LOG.cc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">SYSRAP_LOG</span><span class="p">::</span><span class="n">Initialize</span><span class="p">(</span><span class="nb">int</span> <span class="n">level</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app1</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">app2</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">PLOG_INIT</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">app1</span><span class="p">,</span> <span class="n">app2</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The somewhat bizarre usage implementation based on preprocessor
+macros allows the static logger symbols to be planted within
+each of the shared objects in a manner that works on Mac, Linux
+and Windows.</p>
+<p>The structure was based on the Chained example from my fork of the upstream plog</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/simoncblyth/plog/tree/master/samples/Chained">https://github.com/simoncblyth/plog/tree/master/samples/Chained</a></li>
+</ul>
+<p>The structure relies on the static plog instances in all of the libraries and
+those in the main being distinct which means that it needs
+compilation options:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">fvisibility</span><span class="o">=</span><span class="n">hidden</span>
+<span class="o">-</span><span class="n">fvisibility</span><span class="o">-</span><span class="n">inlines</span><span class="o">-</span><span class="n">hidden</span>
+</pre></div>
+</div>
+<p>These are configured in cmake/Modules/OpticksCXXFlags.cmake
+The big advantage of this is that the logging level can be
+individually controlled for each of the libraries.</p>
 <p><em>PLOG</em> parses command line arguments and configures the
 logging level of each project, for example:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>OpticksResourceTest --sysrap trace --npy info   <span class="c1"># lower cased tags identify the projects</span>
@@ -158,10 +245,37 @@ GGeoViewTest --npy debug
 </tr>
 </tbody>
 </table>
-<p>The somewhat bizarre usage implementation based on preprocessor
-macros allows the static logger symbols to be planted within
-each of the shared objects in a manner that works on Mac, Linux
-and Windows.</p>
+</div>
+<div class="section" id="older-low-level-approach">
+<h2>older low level approach<a class="headerlink" href="#older-low-level-approach" title="Permalink to this headline">¶</a></h2>
+<p>This old approach has been replaced by the OPTICKS_LOG
+approach described above, although some test executables
+have yet to be updated.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;SYSRAP_LOG.hh&quot;  // headers for each projects logger</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;BRAP_LOG.hh&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;NPY_LOG.hh&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;OKCORE_LOG.hh&quot;</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&quot;PLOG.hh&quot;        // infrastructure header</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">PLOG_</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>  <span class="c1">// pass arguments to PLOG_ macro</span>
+
+    <span class="n">SYSRAP_LOG__</span> <span class="p">;</span>     <span class="c1">// setup loggers for all projects you want to see output from</span>
+    <span class="n">BRAP_LOG__</span> <span class="p">;</span>
+    <span class="n">NPY_LOG__</span> <span class="p">;</span>
+    <span class="n">OKCORE_LOG__</span> <span class="p">;</span>
+
+    <span class="n">Opticks</span> <span class="n">ok</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+
+    <span class="c1">//  ...  exercise Opticks  ...</span>
+
+    <span class="k">return</span> <span class="mi">0</span> <span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
