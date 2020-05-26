@@ -1,21 +1,29 @@
+//
+// SCB:  ui/my-small-white/slides.js
+//  SCB Dec 2019 : add toggleAnno which invoked with the "a" key 
+//  to hide page numbers "currentSlide" and navigation links "navLinks" 
+//
 // S5 v1.1 slides.js -- released into the Public Domain
 // Modified for Docutils (http://docutils.sf.net) by David Goodger
 //
 // Please see http://www.meyerweb.com/eric/tools/s5/credits.html for
 // information about all the wonderful and talented contributors to this code!
-//
-//  A1
 
 var undef;
 var slideCSS = '';
 var snum = 0;
+var talk = window.location.href.indexOf('_TALK') > -1 ? 1 : 0 ;
+var snumdiv = talk == 1 ? 2 : 1;
 var smax = 1;
 var slideIDs = new Array();
 var incpos = 0;
 var number = undef;
 var s5mode = true;
 var defaultView = 'slideshow';
-var controlVis = 'visible';
+//var controlVis = 'visible';
+var controlVis = 'hidden';
+
+
 
 var isIE = navigator.appName == 'Microsoft Internet Explorer' ? 1 : 0;
 var isOp = navigator.userAgent.indexOf('Opera') > -1 ? 1 : 0;
@@ -120,9 +128,9 @@ function currentSlide() {
 		cs = document.currentSlide;
 		footer = document.footer.childNodes;
 	}
-	cs.innerHTML = '<span id="csHere">' + snum + '<\/span> ' + 
-		'<span id="csSep">\/<\/span> ' + 
-		'<span id="csTotal">' + (smax-1) + '<\/span>';
+	cs.innerHTML = '<span id="csHere">' + Math.floor(snum/snumdiv) + '<\/span> ' + 
+		           '<span id="csSep">\/<\/span> ' + 
+		           '<span id="csTotal">' + Math.floor((smax-1)/snumdiv) + '<\/span>' ;
 	if (snum == 0) {
 		vis = 'hidden';
 	}
@@ -195,10 +203,47 @@ function subgo(step) {
 	}
 }
 
+
+function objToggle(obj, action)
+{
+    switch (action) {
+        case 's': obj.style.visibility = 'visible' ; break ;  
+        case 'h': obj.style.visibility = 'hidden'  ; break ;  
+        case 'k':
+                if (obj.style.visibility != 'visible' ) {
+                      obj.style.visibility = 'visible' ; 
+                } else {
+                      obj.style.visibility = 'hidden' ; 
+                }
+         break ; 
+    }
+}
+
+function toggleNavLinks(action) {
+    var obj = document.getElementById("navLinks") ;
+    if(!obj.style)
+    {
+       objToggle(obj,'s'); 
+    }
+    objToggle(obj, action); 
+}
+
+function toggleCurrentSlide(action) {
+    var obj = document.getElementById("currentSlide") ;
+    if(!obj.style)
+    {
+       objToggle(obj,'s'); 
+    }
+    objToggle(obj, action); 
+}
+
 function toggle() {
 	var slideColl = GetElementsWithClassName('*','slide');
 	var slides = document.getElementById('slideProj');
 	var outline = document.getElementById('outlineStyle');
+    var navLinks = document.getElementById("navLinks") ;
+
+
 	if (!slides.disabled) {
 		slides.disabled = true;
 		outline.disabled = false;
@@ -207,6 +252,7 @@ function toggle() {
 		for (var n = 0; n < smax; n++) {
 			var slide = slideColl[n];
 			slide.style.visibility = 'visible';
+            navLinks.style.visibility = 'hidden'; 
 		}
 	} else {
 		slides.disabled = false;
@@ -216,12 +262,15 @@ function toggle() {
 		for (var n = 0; n < smax; n++) {
 			var slide = slideColl[n];
 			slide.style.visibility = 'hidden';
+            navLinks.style.visibility = 'hidden'; 
 		}
 		slideColl[snum].style.visibility = 'visible';
+        navLinks.style.visibility = 'hidden'; 
 	}
 }
 
 function showHide(action) {
+    var navLinks = document.getElementById("navLinks") ;
 	var obj = GetElementsWithClassName('*','hideme')[0];
 	switch (action) {
 	case 's': obj.style.visibility = 'visible'; break;
@@ -234,9 +283,13 @@ function showHide(action) {
 		}
 	break;
 	}
+    navLinks.style.visibility = 'hidden'; 
 }
 
 // 'keys' code adapted from MozPoint (http://mozpoint.mozdev.org/)
+//  http://gcctech.org/csc/javascript/javascript_keycodes.htm
+//  9: tab  is nabbed by browser already 
+// 
 function keys(key) {
 	if (!key) {
 		key = event;
@@ -256,6 +309,17 @@ function keys(key) {
 					goTo(number);
 					break;
 				}
+			case 65: // a key 
+                   snumdiv=1 ; 
+                   //toggleNavLinks('h'); 
+                   //toggleCurrentSlide('h'); 
+                   break ; 
+			case 66: // b key 
+                   snumdiv=2 ; 
+                   //toggleNavLinks('s'); 
+                   //toggleCurrentSlide('s'); 
+                   break ; 
+
 			case 32: // spacebar
 			case 34: // page down
 			case 39: // rightkey
@@ -392,7 +456,7 @@ function createControls() {
 		hideList = hider;
 	}
 	controlsDiv.innerHTML = '<form action="#" id="controlForm"' + hideDiv + '>' +
-	'<div id="navLinks">' +
+	'<div id="navLinks"  style="visibility: hidden;" >' +
 	'<a accesskey="t" id="toggle" href="javascript:toggle();">&#216;<\/a>' +
 	'<a accesskey="z" id="prev" href="javascript:go(-1);">&laquo;<\/a>' +
 	'<a accesskey="x" id="next" href="javascript:go(1);">&raquo;<\/a>' +
@@ -563,6 +627,8 @@ function startup() {
     //
     var param = QUERY ; 
     var page = param.page || param.p || 0 ; 
+
+    //alert("Hello " + page );
     goTo(page);
 }
 
