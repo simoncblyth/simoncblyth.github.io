@@ -30,8 +30,12 @@
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">CerenkovMinimal</a><ul>
+<li><a class="reference internal" href="#review-sources">Review Sources</a></li>
 <li><a class="reference internal" href="#aligned-rng-stream">Aligned RNG stream</a></li>
 <li><a class="reference internal" href="#l4cerenkov">L4Cerenkov</a></li>
+<li><a class="reference internal" href="#following-logging-output">Following Logging Output</a></li>
+<li><a class="reference internal" href="#what-are-hits">What are hits ?</a></li>
+<li><a class="reference internal" href="#examining-hit-data">Examining Hit Data</a></li>
 </ul>
 </li>
 </ul>
@@ -65,6 +69,8 @@
             
   <div class="section" id="cerenkovminimal">
 <h1>CerenkovMinimal<a class="headerlink" href="#cerenkovminimal" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="review-sources">
+<h2>Review Sources<a class="headerlink" href="#review-sources" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt>CerenkovMinimal.cc</dt>
 <dd>main, includes only G4.hh</dd>
@@ -113,6 +119,7 @@ EndOfRunAction invokes G4Opticks::Finalize</dd>
 <dd>standard simple G4ParticleGun</dd>
 </dl>
 <p>OpHit</p>
+</div>
 <div class="section" id="aligned-rng-stream">
 <h2>Aligned RNG stream<a class="headerlink" href="#aligned-rng-stream" title="Permalink to this headline">¶</a></h2>
 <p>Notice the calls to G4Opticks::setAlignIndex, which invoke CAlignEngine::SetSequenceIndex</p>
@@ -243,6 +250,293 @@ random numbers within the photon generation loop</li>
 <span class="mi">488</span>
 <span class="mi">489</span>         <span class="k">return</span> <span class="n">pParticleChange</span><span class="p">;</span>
 <span class="mi">490</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="following-logging-output">
+<h2>Following Logging Output<a class="headerlink" href="#following-logging-output" title="Permalink to this headline">¶</a></h2>
+<p>The below is a selection of the logging output from CernkovMinimal
+with some explanations.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ oe-      # setup the environment
+epsilon:~ blyth$ CerenkovMinimal
+
+**************************************************************
+ Geant4 version Name: geant4-10-04-patch-02    (25-May-2018)
+                       Copyright : Geant4 Collaboration
+
+...
+2020-06-06 21:03:42.503 INFO  [61988576] [OpEngine::uploadEvent@136] .
+2020-06-06 21:03:42.512 INFO  [61988576] [OpEngine::propagate@145] [
+2020-06-06 21:03:42.512 INFO  [61988576] [OpSeeder::seedPhotonsFromGenstepsViaOptiX@173] SEEDING TO SEED BUF
+2020-06-06 21:03:42.524 INFO  [61988576] [OpEngine::propagate@155] ( propagator.launch
+2020-06-06 21:03:43.533 INFO  [61988576] [OPropagator::prelaunch@185] 1 : (0;221,1)
+
+     ## (221,1) are the (width,height) dimensions of the OptiX launch
+     ## the number of photons is always known ahead of time, coming from the
+     ## gensteps collected from Geant4
+
+2020-06-06 21:03:43.533 INFO  [61988576] [BTimes::dump@177] OPropagator::prelaunch
+              validate000                  2.4e-05
+               compile000                    2e-06
+             prelaunch000                 0.800931
+2020-06-06 21:03:43.533 INFO  [61988576] [OPropagator::launch@214] LAUNCH NOW -
+2020-06-06 21:03:43.535 INFO  [61988576] [OPropagator::launch@223] LAUNCH DONE
+2020-06-06 21:03:43.535 INFO  [61988576] [OPropagator::launch@225] 1 : (0;221,1)
+2020-06-06 21:03:43.535 INFO  [61988576] [BTimes::dump@177] OPropagator::launch
+                launch001                 0.001449
+
+     ## thats the time of the launch
+
+2020-06-06 21:03:43.535 INFO  [61988576] [OpEngine::propagate@157] ) propagator.launch
+2020-06-06 21:03:43.535 INFO  [61988576] [OpIndexer::indexSequenceCompute@237] OpIndexer::indexSequenceCompute
+2020-06-06 21:03:43.539 INFO  [61988576] [OpEngine::propagate@160] ]
+2020-06-06 21:03:43.539 INFO  [61988576] [OpEngine::downloadEvent@186] .
+2020-06-06 21:03:43.540 INFO  [61988576] [OEvent::downloadHits@396]  nhit 44 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+
+     ## the hitmask determines what is regarded as a hit, this can be changed with the &quot;--dbghitmask&quot; option
+
+2020-06-06 21:03:43.540 FATAL [61988576] [OpPropagator::propagate@78] evtId(0) DONE nhit: 44
+2020-06-06 21:03:43.540 INFO  [61988576] [OpticksEvent::saveHitData@1689]  num_hit 0 ht 0,4,4 tag -1
+
+      ## this num_hit 0 for sub-event tag -1 (4) is expected see notes below
+      ## This is because the Opticks &quot;G4&quot; event (with negated tag) m_g4evt in G4Opticks is not filled
+      ## that is only currently done with CFG4 fully instrumented running.
+
+2020-06-06 21:03:43.542 ERROR [61988576] [OpticksEvent::saveIndex@2382] SKIP as not indexed
+2020-06-06 21:03:43.543 INFO  [61988576] [OpticksEvent::makeReport@1773] tagdir /tmp/blyth/opticks/source/evt/g4live/natural/-1
+2020-06-06 21:03:43.554 INFO  [61988576] [OpticksEvent::saveHitData@1689]  num_hit 44 ht 44,4,4 tag 1
+
+      ## num_hit 44 for sub-event tag 1 (Opticks)
+
+2020-06-06 21:03:43.558 INFO  [61988576] [OpticksEvent::makeReport@1773] tagdir /tmp/blyth/opticks/source/evt/g4live/natural/1
+2020-06-06 21:03:43.570 ERROR [61988576] [GGeo::anaEvent@2069]  evt 0x7f9ce7ddfb50
+2020-06-06 21:03:43.570 INFO  [61988576] [OpticksAna::run@92]  anakey (null) enabled N
+...
+2020-06-06 21:03:43.577 INFO  [61988576] [Opticks::saveParameters@1185]  postpropagate save parameters.json into TagZeroDir /tmp/blyth/opticks/source/evt/g4live/natural/0
+2020-06-06 21:03:43.578 INFO  [61988576] [OpticksEvent::saveHitData@1689]  num_hit 148 ht 148,4,4 tag -1
+
+      ## these 148 hits from standard G4 are &quot;artificially&quot; stuffed into m_g4evt in order to
+
+
+EventAction::EndOfEventAction num_hits 44 hits 0x7f9cec9a47a0
+
+###] EventAction::EndOfEventAction G4Opticks.propagateOpticalPhotons
+
+EventAction::EndOfEventAction DumpHitCollections
+SensitiveDetector::DumpHitCollections query SD0/OpHitCollectionA hcid    0 hc 0x7f9ce990bcc0 hc.entries 118
+SensitiveDetector::DumpHitCollections query SD0/OpHitCollectionB hcid    1 hc 0x7f9ce990bd08 hc.entries 30
+
+
+###[ RunAction::EndOfRunAction G4Opticks.Finalize
+</pre></div>
+</div>
+<p>In the above logging there is a clear discrepancy with 44 hits from Opticks and 148 from Geant4.
+There are many possible causes of this.   Debugging to attain a match is almost impossible
+when the only information available is the hits obtained.  It is far easier when the
+full information of the optical photon propagation is recorded.
+The CFG4 package does full step-by-step recording Opticks and Geant4 propagations
+into two OpticksEvent instances.
+Due to its complexity this is not yet used for G4Opticks based running.</p>
+<p>Other tricks very useful to attain a match used in CFG4 running are:</p>
+<ul class="simple">
+<li>performing random aligned simulations that consume the same random numbers</li>
+<li>using common input photons generated on CPU</li>
+</ul>
+<p>Random aligned simulations mean that comparisons are not clouded by
+statistics, allowing direct comparison of positions, times, wavelengths, polarizations.</p>
+</div>
+<div class="section" id="what-are-hits">
+<h2>What are hits ?<a class="headerlink" href="#what-are-hits" title="Permalink to this headline">¶</a></h2>
+<p>The hitmask is used to select which photons are regarded as “hits” and then only
+these are downloaded from GPU to CPU.</p>
+<p>optixrap/OEvent.cc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">65</span> <span class="n">OEvent</span><span class="p">::</span><span class="n">OEvent</span><span class="p">(</span><span class="n">Opticks</span><span class="o">*</span> <span class="n">ok</span><span class="p">,</span> <span class="n">OContext</span><span class="o">*</span> <span class="n">ocontext</span><span class="p">)</span>
+<span class="mi">66</span>    <span class="p">:</span>
+<span class="mi">67</span>    <span class="n">m_log</span><span class="p">(</span><span class="n">new</span> <span class="n">SLog</span><span class="p">(</span><span class="s2">&quot;OEvent::OEvent&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">LEVEL</span><span class="p">)),</span>
+<span class="mi">68</span>    <span class="n">m_ok</span><span class="p">(</span><span class="n">ok</span><span class="p">),</span>
+<span class="mi">69</span>    <span class="o">//</span><span class="n">m_hitmask</span><span class="p">(</span><span class="n">SURFACE_DETECT</span><span class="p">),</span>
+<span class="mi">70</span>    <span class="o">//</span><span class="n">m_hitmask</span><span class="p">(</span><span class="n">TORCH</span> <span class="o">|</span> <span class="n">BULK_SCATTER</span> <span class="o">|</span> <span class="n">BOUNDARY_TRANSMIT</span> <span class="o">|</span> <span class="n">SURFACE_ABSORB</span><span class="p">),</span>
+<span class="mi">71</span>    <span class="n">m_hitmask</span><span class="p">(</span><span class="n">ok</span><span class="o">-&gt;</span><span class="n">getDbgHitMask</span><span class="p">()),</span>
+<span class="mi">72</span>    <span class="n">m_compute</span><span class="p">(</span><span class="n">ok</span><span class="o">-&gt;</span><span class="n">isCompute</span><span class="p">()),</span>
+<span class="mi">73</span>    <span class="n">m_dbghit</span><span class="p">(</span><span class="n">m_ok</span><span class="o">-&gt;</span><span class="n">isDbgHit</span><span class="p">()),</span>            <span class="o">//</span> <span class="o">--</span><span class="n">dbghit</span>
+</pre></div>
+</div>
+<p>The default “ok-&gt;getDbgHitMask()” is “SD” for SURFACE_DETECT which can be seen from, optickscore/OpticksCfg.cc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">87</span>        <span class="n">m_mask</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span>
+<span class="mi">88</span>        <span class="n">m_dbghitmask</span><span class="p">(</span><span class="s2">&quot;SD&quot;</span><span class="p">),</span>
+<span class="mi">89</span>        <span class="o">//</span><span class="n">m_dbghitmask</span><span class="p">(</span><span class="s2">&quot;TO,SC,BT,SA&quot;</span><span class="p">),</span>  <span class="o">//</span> <span class="n">see</span> <span class="n">OEvent</span><span class="p">::</span><span class="n">OEvent</span>
+<span class="mi">90</span>        <span class="n">m_x4polyskip</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span>
+<span class="mi">91</span>        <span class="n">m_csgskiplv</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span>
+</pre></div>
+</div>
+<p>The downloading is done in optixrap/OEvent.cc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">473</span> <span class="o">/**</span>
+<span class="mi">474</span> <span class="n">OEvent</span><span class="p">::</span><span class="n">downloadHits</span>
+<span class="mi">475</span> <span class="o">-------------------------</span>
+<span class="mi">476</span>
+<span class="mi">477</span> <span class="n">Downloading</span> <span class="n">hits</span> <span class="ow">is</span> <span class="n">special</span> <span class="n">because</span> <span class="n">a</span> <span class="n">selection</span> <span class="n">of</span> <span class="n">the</span>
+<span class="mi">478</span> <span class="n">photon</span> <span class="n">buffer</span> <span class="ow">is</span> <span class="n">required</span><span class="p">,</span> <span class="n">necessitating</span>
+<span class="mi">479</span> <span class="n">the</span> <span class="n">use</span> <span class="n">of</span> <span class="n">Thrust</span> <span class="n">stream</span> <span class="n">compaction</span><span class="o">.</span> <span class="n">This</span> <span class="n">avoids</span> <span class="n">allocating</span>
+<span class="mi">480</span> <span class="n">memory</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">photons</span> <span class="n">on</span> <span class="n">the</span> <span class="n">host</span><span class="p">,</span> <span class="n">just</span> <span class="n">need</span> <span class="n">to</span> <span class="n">allocate</span>
+<span class="mi">481</span> <span class="k">for</span> <span class="n">the</span> <span class="n">hits</span><span class="o">.</span>
+<span class="mi">482</span>
+<span class="mi">483</span> <span class="n">In</span> <span class="n">interop</span> <span class="n">need</span> <span class="n">CUDA</span><span class="o">/</span><span class="n">Thrust</span> <span class="n">access</span> <span class="n">to</span> <span class="n">underlying</span> <span class="n">OpenGL</span> <span class="n">buffer</span><span class="o">.</span>
+<span class="mi">484</span> <span class="n">In</span> <span class="n">compute</span> <span class="n">need</span> <span class="n">CUDA</span><span class="o">/</span><span class="n">Thrust</span> <span class="n">access</span> <span class="n">to</span> <span class="n">the</span> <span class="n">OptiX</span> <span class="n">buffer</span><span class="o">.</span>
+<span class="mi">485</span>
+<span class="mi">486</span> <span class="o">**/</span>
+<span class="mi">487</span>
+<span class="mi">488</span> <span class="n">unsigned</span> <span class="n">OEvent</span><span class="p">::</span><span class="n">downloadHitsCompute</span><span class="p">(</span><span class="n">OpticksEvent</span><span class="o">*</span> <span class="n">evt</span><span class="p">)</span>
+<span class="mi">489</span> <span class="p">{</span>
+<span class="mi">490</span>     <span class="n">OK_PROFILE</span><span class="p">(</span><span class="s2">&quot;_OEvent::downloadHitsCompute&quot;</span><span class="p">);</span>
+<span class="mi">491</span>
+<span class="mi">492</span>     <span class="n">NPY</span><span class="o">&lt;</span><span class="nb">float</span><span class="o">&gt;*</span> <span class="n">hit</span> <span class="o">=</span> <span class="n">evt</span><span class="o">-&gt;</span><span class="n">getHitData</span><span class="p">();</span>
+<span class="mi">493</span>
+<span class="mi">494</span>     <span class="n">CBufSpec</span> <span class="n">cpho</span> <span class="o">=</span> <span class="n">m_photon_buf</span><span class="o">-&gt;</span><span class="n">bufspec</span><span class="p">();</span>
+<span class="mi">495</span>     <span class="k">assert</span><span class="p">(</span> <span class="n">cpho</span><span class="o">.</span><span class="n">size</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">);</span>
+<span class="mi">496</span>     <span class="n">cpho</span><span class="o">.</span><span class="n">size</span> <span class="o">/=</span> <span class="mi">4</span> <span class="p">;</span>    <span class="o">//</span>  <span class="n">decrease</span> <span class="n">size</span> <span class="n">by</span> <span class="n">factor</span> <span class="n">of</span> <span class="mi">4</span><span class="p">,</span> <span class="n">increases</span> <span class="n">cpho</span> <span class="s2">&quot;item&quot;</span> <span class="kn">from</span> <span class="mi">1</span><span class="o">*</span><span class="n">float4</span> <span class="n">to</span> <span class="mi">4</span><span class="o">*</span><span class="n">float4</span>
+<span class="mi">497</span>
+<span class="mi">498</span>     <span class="nb">bool</span> <span class="n">verbose</span> <span class="o">=</span> <span class="n">m_dbghit</span> <span class="p">;</span>
+<span class="mi">499</span>     <span class="n">TBuf</span> <span class="n">tpho</span><span class="p">(</span><span class="s2">&quot;tpho&quot;</span><span class="p">,</span> <span class="n">cpho</span> <span class="p">);</span>
+<span class="mi">500</span>     <span class="n">unsigned</span> <span class="n">nhit</span> <span class="o">=</span> <span class="n">tpho</span><span class="o">.</span><span class="n">downloadSelection4x4</span><span class="p">(</span><span class="s2">&quot;OEvent::downloadHits&quot;</span><span class="p">,</span> <span class="n">hit</span><span class="p">,</span> <span class="n">m_hitmask</span><span class="p">,</span> <span class="n">verbose</span><span class="p">);</span>
+<span class="mi">501</span>     <span class="o">//</span> <span class="n">hit</span> <span class="n">buffer</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="n">resized</span> <span class="n">to</span> <span class="n">fit</span> <span class="n">downloaded</span> <span class="n">hits</span> <span class="p">(</span><span class="n">nhit</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="mi">502</span>     <span class="k">assert</span><span class="p">(</span><span class="n">hit</span><span class="o">-&gt;</span><span class="n">hasShape</span><span class="p">(</span><span class="n">nhit</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">));</span>
+<span class="mi">503</span>
+<span class="mi">504</span>     <span class="n">OK_PROFILE</span><span class="p">(</span><span class="s2">&quot;OEvent::downloadHitsCompute&quot;</span><span class="p">);</span>
+<span class="mi">505</span>
+<span class="mi">506</span>     <span class="n">LOG</span><span class="p">(</span><span class="n">LEVEL</span><span class="p">)</span>
+<span class="mi">507</span>          <span class="o">&lt;&lt;</span> <span class="s2">&quot; nhit &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">nhit</span>
+<span class="mi">508</span>          <span class="o">&lt;&lt;</span> <span class="s2">&quot; hit &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">hit</span><span class="o">-&gt;</span><span class="n">getShapeString</span><span class="p">()</span>
+<span class="mi">509</span>          <span class="p">;</span>
+<span class="mi">510</span>
+<span class="mi">511</span>     <span class="k">return</span> <span class="n">nhit</span> <span class="p">;</span>
+<span class="mi">512</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>The resulting (nhit,4,4) hits buffer contains all the items of the photon buffer matching the hitmask.
+The photon and hits buffers contain photon structs</p>
+<p>optixrap/cu/photon.h:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">41</span> <span class="n">struct</span> <span class="n">Photon</span>
+<span class="mi">42</span> <span class="p">{</span>
+<span class="mi">43</span>    <span class="n">float3</span> <span class="n">position</span> <span class="p">;</span>
+<span class="mi">44</span>    <span class="nb">float</span>  <span class="n">time</span> <span class="p">;</span>
+<span class="mi">45</span>
+<span class="mi">46</span>    <span class="n">float3</span> <span class="n">direction</span> <span class="p">;</span>
+<span class="mi">47</span>    <span class="nb">float</span>  <span class="n">weight</span> <span class="p">;</span>
+<span class="mi">48</span>
+<span class="mi">49</span>    <span class="n">float3</span> <span class="n">polarization</span> <span class="p">;</span>
+<span class="mi">50</span>    <span class="nb">float</span>  <span class="n">wavelength</span> <span class="p">;</span>
+<span class="mi">51</span>
+<span class="mi">52</span>    <span class="n">quad</span> <span class="n">flags</span> <span class="p">;</span>     <span class="o">//</span> <span class="n">x</span><span class="p">:</span><span class="n">boundary</span>  <span class="n">y</span><span class="p">:</span><span class="n">photon_id</span>   <span class="n">z</span><span class="p">:</span><span class="n">m1</span>   <span class="n">w</span><span class="p">:</span><span class="n">history</span>
+<span class="mi">53</span>                     <span class="o">//</span>             <span class="p">[</span><span class="n">debug</span><span class="o">-</span><span class="n">only</span><span class="p">]</span>
+<span class="mi">54</span> <span class="p">};</span>
+<span class="mi">55</span>
+<span class="mi">56</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="examining-hit-data">
+<h2>Examining Hit Data<a class="headerlink" href="#examining-hit-data" title="Permalink to this headline">¶</a></h2>
+<p>CerenkovMinimal persists OpticksEvent instances from both the Opticks and Geant4 simulations,
+the convention of using positive event tags for Opticks (1) and corresponding negated tags for Geant4 (-1) is used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:g4ok blyth$ l /tmp/blyth/opticks/source/evt/g4live/natural/1/*.npy
+-rw-r--r--  1 blyth  wheel    144 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileLisLabels.npy
+-rw-r--r--  1 blyth  wheel     88 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileLis.npy
+-rw-r--r--  1 blyth  wheel    144 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileAccLabels.npy
+-rw-r--r--  1 blyth  wheel     96 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileAcc.npy
+-rw-r--r--  1 blyth  wheel   5520 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileLabels.npy
+-rw-r--r--  1 blyth  wheel   1440 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfile.npy
+-rw-r--r--  1 blyth  wheel     96 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/idom.npy
+-rw-r--r--  1 blyth  wheel    128 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/fdom.npy
+-rw-r--r--  1 blyth  wheel   8920 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/rs.npy
+-rw-r--r--  1 blyth  wheel    964 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/ps.npy
+-rw-r--r--  1 blyth  wheel   3616 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/ph.npy
+-rw-r--r--  1 blyth  wheel  35440 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/rx.npy
+-rw-r--r--  1 blyth  wheel  14224 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/ox.npy
+-rw-r--r--  1 blyth  wheel    176 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/gs.npy
+-rw-r--r--  1 blyth  wheel   2896 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/1/ht.npy
+epsilon:g4ok blyth$
+
+epsilon:g4ok blyth$ l /tmp/blyth/opticks/source/evt/g4live/natural/-1/*.npy
+-rw-r--r--  1 blyth  wheel  14224 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/so.npy
+-rw-r--r--  1 blyth  wheel   9552 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/ht.npy
+-rw-r--r--  1 blyth  wheel    144 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/OpticksProfileLisLabels.npy
+-rw-r--r--  1 blyth  wheel     88 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/OpticksProfileLis.npy
+-rw-r--r--  1 blyth  wheel    144 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/OpticksProfileAccLabels.npy
+-rw-r--r--  1 blyth  wheel     96 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/OpticksProfileAcc.npy
+-rw-r--r--  1 blyth  wheel   5392 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/OpticksProfileLabels.npy
+-rw-r--r--  1 blyth  wheel   1408 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/OpticksProfile.npy
+-rw-r--r--  1 blyth  wheel     96 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/idom.npy
+-rw-r--r--  1 blyth  wheel    128 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/fdom.npy
+-rw-r--r--  1 blyth  wheel     80 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/ph.npy
+-rw-r--r--  1 blyth  wheel     80 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/rx.npy
+-rw-r--r--  1 blyth  wheel     80 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/ox.npy
+-rw-r--r--  1 blyth  wheel    176 Jun  7 14:53 /tmp/blyth/opticks/source/evt/g4live/natural/-1/gs.npy
+epsilon:g4ok blyth$
+</pre></div>
+</div>
+<p>The Geant4 OpticksEvent instance m_g4evt is mostly empty as full instrumentation is
+not used.  But the hit data in ht.npy is present.</p>
+<p>As the NPY (NumPy) serialization is used for binary array data the persisted
+arrays are easily examined from ipython using NumPy</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:bin blyth$ ipython
+
+# import numpy as np      # done within the ipython profile setup
+
+In [1]: ht = np.load(&quot;/tmp/blyth/opticks/source/evt/g4live/natural/1/ht.npy&quot;)
+
+In [2]: ht
+Out[2]:
+array([[[ 303.0482,  116.9195,   90.    ,    1.53  ],
+        [   0.899 ,    0.3471,    0.2671,    1.    ],
+        [  -0.4331,    0.7949,    0.4249,   64.7406],
+        [      nan,    0.    ,    0.    ,    0.    ]],
+
+       [[ 153.1065,   16.8344,   90.    ,    0.8098],
+        [   0.858 ,    0.0946,    0.5049,    1.    ],
+        [  -0.4882,    0.4558,    0.7442,  117.8821],
+        [      nan,    0.    ,    0.    ,    0.    ]],
+
+...
+
+In [3]: ht.shape
+Out[3]: (44, 4, 4)     ## (nhit, 4,4)
+
+
+In [2]: ht[:,0]    # row 0 : position, time
+Out[2]:
+array([[ 303.0482,  116.9195,   90.    ,    1.53  ],
+       [ 153.1065,   16.8344,   90.    ,    0.8098],
+       [ 128.8066,  -28.0179,   90.    ,    0.7245],
+       [ 132.6022,  -13.899 ,   90.    ,    0.7302],
+       [ 248.9373,   86.2949,   90.    ,    1.2638],
+       [ 210.6323,   62.5527,   90.    ,    1.0778],
+       [ 129.7702,  -21.9672,   90.    ,    0.7237],
+       ...
+       [ 127.8584,  -37.3653,   90.    ,    0.7297],
+       [ -29.2682,  152.4176,   90.    ,   13.2224],
+       [ 135.6495,   -6.84  ,   90.    ,    0.7396],
+       [ 128.1061,  -33.5526,   90.    ,    0.7268],
+       [ 127.9607,  -43.2016,   90.    ,    0.7367],
+       [ 328.9369, -337.5704,   90.    ,    2.1781],
+       [ 131.8775,  -65.5113,   90.    ,    0.7834],
+       [ 188.6135, -165.1583,   90.    ,    1.2091]], dtype=float32)
+
+In [3]: ht[:,0].shape
+Out[3]: (44, 4)
+
+
+## The nan and wierd values of the flags in the last row when viewed as floats are expected.
+## Viewing them as integers is needed, which is easily done with *view*
+
+In [4]: ht.view(np.int32)[:,3]
+Out[4]:
+array([[      -3,        0, 67305985,       65],
+       [      -3,        0, 67305985,       65],
+       [      -3,        0, 67305985,       65],
+       ...
+
+## There is also bit packing being done, so to make sense of the flags requires some code,
+## see ana/evt.py to learn more.
 </pre></div>
 </div>
 </div>

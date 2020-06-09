@@ -92,6 +92,7 @@
 </li>
 <li><a class="reference internal" href="#opengl-version-requirements">OpenGL Version Requirements</a></li>
 <li><a class="reference internal" href="#using-a-shared-opticks-installation">Using a Shared Opticks Installation</a></li>
+<li><a class="reference internal" href="#visualization-finding-geometry">Visualization Finding Geometry</a></li>
 </ul>
 </li>
 </ul>
@@ -1080,7 +1081,7 @@ opticks-ctest : use -V to show output
 <div class="section" id="creating-legacy-workflow-geocache">
 <h2>Creating Legacy Workflow Geocache<a class="headerlink" href="#creating-legacy-workflow-geocache" title="Permalink to this headline">¶</a></h2>
 <p>Some tests depend on the geometry cache being present. To create the legacy geometry cache:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">op</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">G</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">op</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">G</span>   <span class="c1">## NB this legacy approach is slated to be removed, instead try the below direct workflow approach</span>
 </pre></div>
 </div>
 </div>
@@ -1221,6 +1222,39 @@ Cannot create log file: LastTest.log
 Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>  <span class="m">48</span>.30 sec
 </pre></div>
 </div>
+</div>
+<div class="section" id="visualization-finding-geometry">
+<h2>Visualization Finding Geometry<a class="headerlink" href="#visualization-finding-geometry" title="Permalink to this headline">¶</a></h2>
+<p>Visualization:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OTracerTest</span> <span class="o">--</span><span class="n">target</span> <span class="mi">3153</span> <span class="o">--</span><span class="n">dbgaim</span>   <span class="c1"># just viz, fast start as does no simulation</span>
+<span class="n">OKTest</span> <span class="o">--</span><span class="n">target</span> <span class="mi">3153</span> <span class="o">--</span><span class="n">dbgaim</span>        <span class="c1"># does Opticks simulation before viz</span>
+<span class="n">OKG4Test</span> <span class="o">--</span><span class="n">target</span> <span class="mi">3153</span> <span class="o">--</span><span class="n">dbgaim</span>      <span class="c1"># does both Geant4 and Opticks simulations before viz</span>
+
+<span class="c1">## --target volume-index</span>
+<span class="c1">## --dbgaim : dump some logging about geometry volumes and targetting</span>
+</pre></div>
+</div>
+<p>To avoid having to use the target option use an envvar:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">OPTICKS_DEFAULT_TARGET</span><span class="o">=</span><span class="mi">3153</span>
+<span class="c1">## do this together setting the OPTICKS_KEY which picks the geocache</span>
+</pre></div>
+</div>
+<p>At startup things to try:</p>
+<ul class="simple">
+<li>press Q twice, this toggles the global (non-instanced) geometry on/off</li>
+<li>press B several times, this swiches the render style of the instanced geometry</li>
+<li>press V, this toggles rotation of the geometry</li>
+<li>press A, this starts the optical photon propagation animation</li>
+<li>press O, switches between OpenGL rasterized and OptiX ray trace rendering</li>
+</ul>
+<p>If after all that you still have a black screen, try:</p>
+<ul class="simple">
+<li>changing the target to a volume appropriate to your geometry,
+it defaults to 0 corresponding to the world volume. However
+maybe you have a very large world volume causing your detector to
+not be visible.</li>
+<li>press G, this brings up a GUI with help menus etc..</li>
+</ul>
 </div>
 </div>
 
