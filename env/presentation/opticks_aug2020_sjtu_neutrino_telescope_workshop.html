@@ -1,0 +1,3645 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</title>
+<meta content="Opticks : GPU photon simulation via NVIDIA OptiX + GPU/Computer Graphics Background + Mental Model for Effective Application of GPUs" name="title" />
+<meta content="Drastic... how is &gt; 1000x possible, Understanding GPU Graphical Origins, GPU optimizes throughput, CuPy, NP.hh, C Union Trick, GLSL Geom Shader, Photon History Indexing" name="description" />
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<script src="ui/my-small-white/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/my-small-white/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/my-small-white/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/my-small-white/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/my-small-white/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title"><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+<!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+<style type="text/css">
+
+    .strike { text-decoration: line-through; }
+    .center {text-align: center;}
+
+    span.alarm { color: red; }
+    span.blue { color: blue; }
+    span.warn { color: orange; }
+    span.ok { color: green; }
+    span.i { display: none; }
+    pre.sliteral { class:"literal-block small"; }
+    pre.mypre {
+         display: block;
+         font-family: monospace;
+         font-size: 20px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+    pre.mypretiny {
+         display: block;
+         font-family: monospace;
+         font-size: 15px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+    pre.myfoot {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: white;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+    a.mylink {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: black;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+
+    div.mytitle {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:0%; left:5%; width:90%; height:10% ;
+    }
+
+    div.mytitle2 {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:5%; left:5%; width:90%; height:10% ;
+    }
+
+
+
+    div.mycredit {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:90%; left:5%; width:80%; height:10% ;
+    }
+
+    div.mysidebar {
+        margin: 0 0 0.5em 1em;
+        border: medium outset;
+        padding: 1em;
+        background-color: #ffffee;
+        width: 20%;
+        float: right;
+        clear: right;
+    }
+
+    table.mytable th {
+         background-color: #ede;
+    }
+    table.mytable tr:nth-child(even) {
+        background-color: #F3F3FF;
+    }
+    table.mytable tr:nth-child(odd) {
+        background-color: #FFFFEE;
+    }
+
+
+</style>
+       <style type="text/css">
+
+          div.slide { 
+             background-clip: border-box;
+             background-repeat: no-repeat;
+             height: 100%;
+          }
+          div.slide#slide0{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-benefits{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#visualizing-an-optical-photon-simulation{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 640px 360px;
+             background-position: 600px 100px;
+             
+          }
+          div.slide#overview{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cerenkov-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115923.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cerenkov-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115935.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scintillation-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121444.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scintillation-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121435.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#standard-geant4-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.001.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#external-photon-simulation-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.002.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geant4opticksworkflow{
+             background-image: url(/env/Documents/Geant4OpticksWorkflow/Geant4OpticksWorkflow.001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-001.png);
+             background-size: 1047px 795px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview-m1-points{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-points-mat1.png);
+             background-size: 1435px 848px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview-flag-selection{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-flag-seq-select.png);
+             background-size: 1436px 842px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview-cerenkov-geom-m1{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-m1-geom.png);
+             background-size: 1416px 845px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-1{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-2{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-inside-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_half.png);
+             background-size: 1432px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-wide_half.png);
+             background-size: 1409px 836px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-headview{
+             background-image: url(/env/graphics/ggeoview/jpmt-headview_half.png);
+             background-size: 1308px 783px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-backview{
+             background-image: url(/env/graphics/ggeoview/jpmt-backview_half.png);
+             background-size: 1149px 794px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-approach{
+             background-image: url(/env/graphics/ggeoview/jpmt-approach_half.png);
+             background-size: 1431px 839px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-arrival{
+             background-image: url(/env/graphics/ggeoview/jpmt-arrival_half.png);
+             background-size: 1427px 841px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#optical-photon-simulation-problem{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-before-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-before-contact-2{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-before-contact-3{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-after-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-after-contact_half.png);
+             background-size: 1425px 840px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-inside-outside{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-outside_half.png);
+             background-size: 1401px 842px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-in-action{
+             background-image: url(/env/presentation/optix-in-action_half.png);
+             background-size: 966px 646px;
+             background-position: 100px 50px;
+             
+          }
+          div.slide#pmtinbox-approach-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#pmtinbox-approach-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#pmtinbox-after-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#pmtinbox-after-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-pmt-wall-photo-1{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-pmt-wall-photo-2{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-not-16-9{
+             background-image: url(/env/presentation/gtc2016/sk-PH20-water-withboat-apr23-wm.png);
+             background-size: 1181px 771px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-1{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-2{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-3{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-4{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#kamiokande-ii-1{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#kamiokande-ii-2{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#kamiokande-ii-3{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#fast-optical-photon-simulation{
+             background-image: url(/env/presentation/newtons-opticks.png);
+             background-size: 374px 684px;
+             background-position: 800px 0px;
+             
+          }
+          div.slide#photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#old-hamamatsu-photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#old-photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-juno{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-goals{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#dayabay-reactor-neutrino-expt-far-site{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-far-site-2{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-far-site-3{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit-generality{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#seeing-neutrinos-via-scintillation-cherenkov-light{
+             background-image: url(/env/presentation/cherenkov.png);
+             background-size: 316px 203px;
+             background-position: 850px 400px;
+             
+          }
+          div.slide#opticks-auto-instancing{
+             background-image: url(/env/graphics/ggeoview/ggv-juno-instancing.png);
+             background-size: 852px 592px;
+             background-position: 450px 80px;
+             
+          }
+          div.slide#nvidia-optix-1{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-2{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticksdocs{
+             background-image: url(/env/presentation/OpticksDocs.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-1{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-2{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-1{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-2{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-1{
+             background-image: url(/env/presentation/EnergyResponseModel.png);
+             background-size: 693px 504px;
+             background-position: 0px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-2{
+             background-image: url(/env/presentation/ConstrainingNonLinearity.png);
+             background-size: 761px 553px;
+             background-position: 0px 80px;
+             
+          }
+          div.slide#daya-bay-ngd-analysis-most-precise-theta13{
+             background-image: url(/env/presentation/DYBZheTaup2015Theta13OscillationAnalysis.png);
+             background-size: 1057px 625px;
+             background-position: 100px 60px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-3{
+             background-image: url(/env/presentation/op_full_raytrace_3.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-1{
+             background-image: url(/env/presentation/op_full_raytrace_1.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-0{
+             background-image: url(/env/presentation/op_full_raytrace_0.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-2{
+             background-image: url(/env/presentation/op_full_raytrace_2.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-juno-chimney-gpu-raytrace-0{
+             background-image: url(/env/presentation/j1707_chimney_analytic_raytrace.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-juno-pmt-snap-gpu-raytrace-1{
+             background-image: url(/env/presentation/j1707-okop-snap.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpu-instance-culling-with-level-of-detail{
+             background-image: url(/env/presentation/j1707_lod_oglrap_instcull.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-export-of-g4-geometry-to-gltf-2-0{
+             background-image: url(/env/yoctoglrap/dyb_near_venice_half.png);
+             background-size: 1020px 737px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#what-are-numpy-arrays{
+             background-image: url(/env/presentation/what_are_numpy_arrays.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#what-are-numpy-arrays-2{
+             background-image: url(/env/presentation/what_are_numpy_arrays.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bvh{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_029.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#spatial-index-acceleration-structure{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_029.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#rendering-five-decades-of-research-1{
+             background-image: url(/env/presentation/nvidia/rendering_five_decades_of_research.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#rendering-five-decades-of-research-2{
+             background-image: url(/env/presentation/nvidia/rendering_five_decades_of_research.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#path-tracing-in-production-1{
+             background-image: url(/env/presentation/sigraph/PathTracingInProduction_001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#path-tracing-in-production-2{
+             background-image: url(/env/presentation/sigraph/PathTracingInProduction_001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bvh-pascal{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_030.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bvh-turing{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_031.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hardware-traversal-of-bvh-spatial-index{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_031.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#siggraph-2018-announcing-worlds-first-ray-tracing-gpu{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2018_Announcing_Worlds_First_Ray_Tracing_GPU_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#siggraph-2019-eric-enderton-rt-cores{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2019_Eric_Enderton_RT_Cores.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-ai-denoiser-1{
+             background-image: url(/env/presentation/nvidia_demo/nvidia_optix_ai_denoiser.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-ai-denoiser-2{
+             background-image: url(/env/presentation/nvidia_demo/nvidia_optix_ai_denoiser.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#samples-per-pixel-1{
+             background-image: url(/env/presentation/nvidia/NVIDIA_samples_per_pixel_MDL_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#samples-per-pixel-2{
+             background-image: url(/env/presentation/nvidia/NVIDIA_samples_per_pixel_MDL_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#eric-haines-nvidia-ray-tracing-essentials-part-6-the-rendering-equation{
+             background-image: url(/env/presentation/nvidia/NVIDIA_Eric_Haines_Ray_Tracing_Essentials_Part_6_The_Rendering_Equation.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#physically-based-rendering-book-www-pbr-book-org{
+             background-image: url(/env/presentation/pbr/Physically_Based_Rendering_Book_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#the-rendering-equation-1{
+             background-image: url(/env/presentation/rendering_equation/TheRenderingEquation_001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#the-rendering-equation-2{
+             background-image: url(/env/presentation/rendering_equation/TheRenderingEquation_002.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#project-sol{
+             background-image: url(/env/presentation/nvidia_demo/project_sol_jacob_norris_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-turing-gpu-72-sm-4608-cuda-cores{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_009.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-turing-gpu-72-sm-4608-cuda-cores-spec{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_009.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#raytrace-vs-raster{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_132.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ray-tracing-vs-rasterization{
+             background-image: url(/env/presentation/nvidia/black.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#raytrace-diagram{
+             background-image: url(/env/presentation/graphics/1024px-ray_trace_diagram.svg.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#j1808-top-ogl{
+             background-image: url(/env/presentation/j1808/j1808_top_ogl.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#j1808-top-rtx{
+             background-image: url(/env/presentation/j1808/j1808_top_rtx.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#j1808-escapes{
+             background-image: url(/env/presentation/j1808/j1808_escapes.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geocache-360{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geocache-360-2{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-360-benchmark-with-optix-6-0-0-rtx-mode{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#absmry-1m{
+             background-image: url(/env/presentation/ana/absmry_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#absmry-1m-2{
+             background-image: url(/env/presentation/ana/absmry_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ta34-1m{
+             background-image: url(/env/presentation/ana/ta34_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ta34-1m-2{
+             background-image: url(/env/presentation/ana/ta34_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv34-1m-a{
+             background-image: url(/env/presentation/ana/tv34_1M_a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv34-1m-b{
+             background-image: url(/env/presentation/ana/tv34_1M_b.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv21-1m-a{
+             background-image: url(/env/presentation/ana/tv21_1M_a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv21-1m-a-2{
+             background-image: url(/env/presentation/ana/tv21_1M_a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv21-1m-c{
+             background-image: url(/env/presentation/ana/tv21_1M_c.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#rtx-speedup{
+             background-image: url(/env/presentation/ana/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#overheads{
+             background-image: url(/env/presentation/ana/Overheads.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-speedup{
+             background-image: url(/env/presentation/ana/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-vs-geant4{
+             background-image: url(/env/presentation/ana/Opticks_vs_Geant4.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-vs-geant4-2{
+             background-image: url(/env/presentation/ana/Opticks_vs_Geant4.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nhit{
+             background-image: url(/env/presentation/ana/NHit.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#interval-over-launch{
+             background-image: url(/env/presentation/ana/Interval_over_Launch.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#titan-rtx-72-raytrace-dedicated-rt-cores-4608-cuda-cores-24gb-vram-2500-usd{
+             background-image: url(/env/presentation/nvidia/TITAN_RTX.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-143808{
+             background-image: url(/env/presentation/ana/bench_20190526_143808.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-143808-2{
+             background-image: url(/env/presentation/ana/bench_20190526_143808.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-202537{
+             background-image: url(/env/presentation/ana/bench_20190526_202537.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-202537-2{
+             background-image: url(/env/presentation/ana/bench_20190526_202537.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv16-fastener{
+             background-image: url(/env/presentation/tv/tv16_Fastener.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv20-polycone-neck{
+             background-image: url(/env/presentation/tv/tv20_polycone_neck.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#inch-pmt-neck-cylinder-torus-polycone{
+             background-image: url(/env/presentation/tv/tv20_polycone_neck.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#genstep-interface{
+             background-image: url(/env/presentation/simulation/genstep_interface.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#introducing-optix-7{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#where-next-for-opticks{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 640px 360px;
+             background-position: 670px 300px;
+             
+          }
+          div.slide#turing-built-for-rtx{
+             background-image: url(/env/presentation/nvidia/TURING_Built_for_RTX_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#turing-built-for-rtx-2{
+             background-image: url(/env/presentation/nvidia/TURING_Built_for_RTX_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-rtx-metro-exodus{
+             background-image: url(/env/presentation/nvidia/NVIDIA_RTX_Metro_Exodus_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#modern-gpu-ray-tracing{
+             background-image: url(/env/presentation/nvidia/Modern_GPU_RAY_Tracing.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-programming-model-analogous-to-rasterization-apis-opengl-shaders{
+             background-image: url(/env/presentation/nvidia/Modern_GPU_RAY_Tracing.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-quadro-rtx-8000-48g{
+             background-image: url(/env/presentation/nvidia/NVIDIA_Quadro_RTX.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#siggraph-2010-optix-a-general-purpose-ray-tracing-engine{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2010_OptiX_A_General_Purpose_Ray_Tracing_Engine.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#useful-speedup-1500x-but-why-not-giga-rays-s-1-photon-10-rays{
+             background-image: url(/env/presentation/nvidia/dhart/dhart_siggraph_2019_RTX_traversal_custom_primitives.png);
+             background-size: 720px 405px;
+             background-position: 10px 210px;
+             
+          }
+          div.slide#juno-intro-1{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-2{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.002.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-3{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.003.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-4{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.004.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-5{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.005.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-6{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.006.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-7{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.007.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-8{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.008.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-9{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.009.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-10{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.010.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-multipurpose-pedro-nufact-2019{
+             background-image: url(/env/presentation/juno/JUNO_Multipurpose_Pedro_NuFact_2019.png);
+             background-size: 960px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#dhart-siggraph-2019-optix-5-traversal{
+             background-image: url(/env/presentation/nvidia/dhart_siggraph_2019_OptiX_5_traversal.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#dhart-siggraph-2019-optix-5-traversal{
+             background-image: url(/env/presentation/nvidia/dhart_siggraph_2019_OptiX_5_traversal.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-check-gui-to-bt5-sd{
+             background-image: url(/env/presentation/ana/scan-pf-1/scan-pf-check-GUI-TO-BT5-SD.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-check-gui-to-sc-bt5-sd{
+             background-image: url(/env/presentation/ana/scan-pf-1/scan-pf-check-GUI-TO-SC-BT5-SD.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-interval-over-launch{
+             background-image: url(/env/presentation/ana/scan-pf-0/Interval_over_Launch.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-nhit{
+             background-image: url(/env/presentation/ana/scan-pf-0/NHit.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-opticks-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-0/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-opticks-vs-geant4{
+             background-image: url(/env/presentation/ana/scan-pf-0/Opticks_vs_Geant4.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-overheads{
+             background-image: url(/env/presentation/ana/scan-pf-0/Overheads.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-rtx-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-0/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-rtx-speedup-2{
+             background-image: url(/env/presentation/ana/scan-pf-0/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-interval-over-launch{
+             background-image: url(/env/presentation/ana/scan-pf-1/Interval_over_Launch.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-nhit{
+             background-image: url(/env/presentation/ana/scan-pf-1/NHit.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-speedup-2{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-vs-geant4{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_vs_Geant4.png);
+             background-size: 1280px 720pxS;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-vs-geant4-2{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_vs_Geant4.png);
+             background-size: 1280px 720pxS;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-vs-geant4-with-html-table{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_vs_Geant4_with_HTML_Table.png);
+             background-size: 1280px 720pxS;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-overheads{
+             background-image: url(/env/presentation/ana/scan-pf-1/Overheads.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-rtx-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-1/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-translates-g4-geometry-to-gpu-without-approximation{
+             background-image: url(/env/presentation/face_view_PMTs.png);
+             background-size: 640px 360px;
+             background-position: 20px 340px;
+             
+          }
+          div.slide#cupy-numpy-api-some-of-scipy-accelerated-by-nvidia-cuda-curand-cublas-cusolver-cusparse-thrust-nccl{
+             background-image: url(/env/presentation/cupy/cupy_is2.png);
+             background-size: 1016px 377px;
+             background-position: 150px 150px;
+             
+          }
+          div.slide#cupy-easy-interface-to-nvidia-cuda-stack{
+             background-image: url(/env/presentation/cupy/cupy_stack.png);
+             background-size: 1075px 429px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#c-union-trick-common-with-cuda-mixed-type-arrays-simpler-faster{
+             background-image: url(/env/presentation/cuda/float_as_int.png);
+             background-size: 600px 89px;
+             background-position: 40px 570px;
+             
+          }
+          div.slide#neutrino-understanding{
+             background-image: url(/env/presentation/neutrino/understanding_universe_planet_sun.png);
+             background-size: 1111px 720px;
+             background-position: 0px 0px;
+             
+          } 
+
+       </style>
+    <!-- comment
+
+Navigate the HTML slides by entering a page number and pressing return -->
+<dl class="docutils">
+<dt>Opticks: GPU photon simulation via NVIDIA OptiX ;</dt>
+<dd>Applied to neutrino telescope simulations ?</dd>
+</dl>
+<div class="mytitle">
+<header>
+<h1 style="background-color:lightgrey">
+     <i>Opticks</i> : GPU photon simulation via NVIDIA® OptiX™
+     <br/> + GPU/Graphics background
+     <br/> + Application to neutrino telescope simulations ?
+    <h2 style="background-color:lightgrey;text-align:center"> Open source, https://bitbucket.org/simoncblyth/opticks </h2>
+</h1>
+</header>
+</div>
+
+<div class="mycredit">
+<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS &mdash; August 2020, SJTU, Neutrino Telescope Simulation Workshop </h2>
+</div>
+        <!--  s5talk  -->
+        <br/>
+    
+</div>
+<div class="slide" id="outline-opticks">
+<h1>Outline Opticks</h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<div class="small"><span>&nbsp;</span></div><ul class="small simple">
+<li>Context and Problem<ul>
+<li>Jiangmen Underground Neutrino Observatory (JUNO)</li>
+<li>Optical Photon Simulation Problem...</li>
+</ul>
+</li>
+<li>Tools to create Solution<ul>
+<li>Optical Photon Simulation ≈ Ray Traced Image Rendering</li>
+<li>Rasterization and Ray tracing</li>
+<li>Turing Built for RTX</li>
+<li>BVH : Bounding Volume Hierarchy</li>
+<li>NVIDIA OptiX Ray Tracing Engine</li>
+</ul>
+</li>
+<li>Opticks : The Solution<ul>
+<li>Geant4 + Opticks Hybrid Workflow : External Optical Photon Simulation</li>
+<li>Opticks : Translates G4 Optical Physics to CUDA/OptiX</li>
+<li>Opticks : Translates G4 Geometry to GPU, Without Approximation</li>
+<li>CUDA/OptiX Intersection Functions for ~10 Primitives</li>
+<li>CUDA/OptiX Intersection Functions for Arbitrarily Complex CSG Shapes</li>
+</ul>
+</li>
+<li>Validation and Performance<ul>
+<li>Random Aligned Bi-Simulation -&gt; Direct Array Comparison</li>
+<li>Perfomance Scanning from 1M to 400M Photons</li>
+</ul>
+</li>
+<li>Overview + Links</li>
+</ul>
+<div class="small"><hr/></div>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="outline-of-graphics-gpu-background-application-to-neutrino-telescopes">
+<h1><span class="small">Outline of Graphics/GPU background + Application to neutrino telescopes</span></h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<ul class="small simple">
+<li>GPU + Parallel Processing Background<ul>
+<li>Amdahls &quot;Law&quot; : Expected speedup limited by serial processing</li>
+<li>Understanding GPU Graphical Origins -&gt; Effective GPU Computation</li>
+<li>CPU Optimizes Latency, GPU Optimizes Throughput</li>
+<li>How to make effective use of GPUs ? Parallel/Simple/Uncoupled</li>
+<li>GPU Demands Simplicity (Arrays) -&gt; Big Benefits : NumPy + CuPy</li>
+<li>Survey of High Level General Purpose CUDA Packages</li>
+</ul>
+</li>
+<li>Graphics History/Background<ul>
+<li>50 years of rendering progress</li>
+<li>2018 : NVIDIA RTX : Project Sol Demo</li>
+<li>Monte Carlo Path Tracing in Movie Production</li>
+<li>Fundamental &quot;Rendering Equation&quot; of Computer Graphics</li>
+<li>Neumann Series solution of Rendering Equation</li>
+<li>Noise : Problem with Monte Carlo Path Tracing</li>
+<li>NVIDIA OptiX Denoiser</li>
+<li>Physically Based Rendering Book : Free Online</li>
+<li>Optical Simulations : Graphics vs Physics</li>
+</ul>
+</li>
+<li>Neutrino Telescope Optical simulations<ul>
+<li>Giga-photon propagations : Re-usable photon &quot;snapshots&quot;</li>
+<li>Opticks Rayleigh Scattering : CUDA line-by-line port of G4OpRayleigh</li>
+<li>Developing a photon &quot;snapshot&quot; cache</li>
+</ul>
+</li>
+<li>Summary</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="juno-intro-2">
+<h1><span class="i">JUNO_Intro_2</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="juno-intro-3">
+<h1><span class="i">JUNO_Intro_3</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/ShowDocument?docid=2058
+
+Jilei LLR Tutorial
+
+Muon average track length in CD LS is about 23 m,
+suppose 2 MeV/cm energy deposit,
+LS optical photon yield is 10k/MeV
+
+20k/cm
+2M/m
+
+23*2 = 46M
+35*2 = 70M -->
+</div>
+<div class="slide" id="geant4-monte-carlo-simulation-toolkit">
+<h1>Geant4 : Monte Carlo Simulation Toolkit</h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="geant4-monte-carlo-simulation-toolkit-generality">
+<h1>Geant4 : Monte Carlo Simulation Toolkit Generality</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Standard Simulation Tool of HEP</span></p>
+<p class="small"><strong>Geant4</strong> simulates particles travelling through matter</p>
+<ul class="small simple">
+<li>high energy, nuclear and accelerator physics</li>
+<li>medical physics : deciding radiotherapy doses/sources</li>
+<li>space engineering : satellites</li>
+</ul>
+<p class="small"><strong>Geant4 Approach</strong></p>
+<ul class="small simple">
+<li>geometry : <strong>tree of CSG solids</strong></li>
+<li>particles : track position and time etc..</li>
+<li>processes : nuclear, EM, weak, <strong>optical</strong></li>
+</ul>
+<p class="small"><strong>Very General and Capable Tool</strong></p>
+<ul class="small simple">
+<li><strong>mostly unused for optical photon propagation</strong></li>
+</ul>
+<p class="tiny last"><a class="reference external" href="https://geant4.web.cern.ch">https://geant4.web.cern.ch</a></p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="optical-photon-simulation-problem">
+<h1><span class="incremental">Optical Photon Simulation Problem...</span></h1>
+<pre>
+
+
+
+
+
+
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">Huge CPU Memory+Time Expense</span></p>
+<dl class="small last docutils">
+<dt><strong>JUNO Muon Simulation Bottleneck</strong></dt>
+<dd>~99% CPU time, memory constraints</dd>
+<dt><strong>Ray-Geometry intersection Dominates</strong></dt>
+<dd>simulation is not alone in this problem...</dd>
+<dt><strong>Optical photons : naturally parallel, simple :</strong></dt>
+<dd><ul class="first last simple">
+<li>produced by Cherenkov+Scintillation</li>
+<li>yield only Photomultiplier hits</li>
+</ul>
+</dd>
+</dl>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="optical-photon-simulation-ray-traced-image-rendering">
+<h1><span class="small">Optical Photon Simulation ≈ Ray Traced Image Rendering</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Not a Photo, a Calculation</p>
+<img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
+<p class="tiny last"><a class="reference external" href="http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf">http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf</a></p>
+</div>
+<p class="small"><strong>Much in common : geometry, light sources, optical physics</strong></p>
+<ul class="small simple">
+<li><span class="blue">simulation</span> : photon parameters at PMT detectors</li>
+<li><span class="blue">rendering</span> : pixel values at image plane</li>
+<li><span class="red">both limited by ray geometry intersection, aka ray tracing</span></li>
+</ul>
+<pre>
+
+</pre><p class="small"><strong>Many Applications of ray tracing</strong> :</p>
+<ul class="small simple">
+<li>advertising, design, architecture, films, games,...</li>
+<li>-&gt; huge efforts to improve hw+sw over 30 yrs</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- skip
+
+
+**August 2018 : Major Ray Tracing Advance**
+
+* NVIDIA RTX Platform, Turing GPU
+* :red:`ray trace dedicated hardware : RT cores`
+
+* SIGGRAPH 2018, announcing RTX
+* https://www.youtube.com/watch?v=LP6miCI6-h4 -->
+</div>
+<div class="slide" id="ray-tracing-vs-rasterization">
+<h1><span class="i">Ray-tracing vs Rasterization</span></h1>
+<img alt="/env/presentation/nvidia/nv_rasterization.png" class="align-left" src="/env/presentation/nvidia/nv_rasterization.png" style="width: 550px;" />
+<img alt="/env/presentation/nvidia/nv_raytrace.png" class="align-right" src="/env/presentation/nvidia/nv_raytrace.png" style="width: 550px;" />
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+https://www.youtube.com/watch?v=Mrixi27G9yM
+RTX Launch -->
+</div>
+<div class="slide" id="siggraph-2018-announcing-worlds-first-ray-tracing-gpu">
+<h1><span class="i">SIGGRAPH_2018_Announcing_Worlds_First_Ray_Tracing_GPU</span></h1>
+<pre>
+
+
+
+
+
+
+
+</pre><table border="1" class="huge docutils align-right">
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><span class="white">10 Giga Rays/s</span></td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="turing-built-for-rtx-2">
+<h1><span class="i">TURING BUILT FOR RTX 2</span></h1>
+<pre>
+
+
+
+
+
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">Offload Ray Trace to Dedicated HW</span></p>
+<ul class="small simple">
+<li>RT core : BVH traversal + ray tri. intersection</li>
+<li>frees up general purpose SM</li>
+</ul>
+<p class="tiny">SM : Streaming Multiprocessor</p>
+<p class="tiny last">BVH : Bounding Volume Hierarchy</p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="nvidia-rtx-metro-exodus">
+<h1><span class="i">NVIDIA RTX Metro Exodus</span></h1>
+<pre>
+
+
+
+
+
+
+
+
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">RTX Platform : Hybrid Rendering</span></p>
+<ul class="small simple">
+<li><span class="red">Ray trace (RT cores)</span></li>
+<li>AI inference (Tensor cores) -&gt; Denoising</li>
+<li>Rasterization (pipeline)</li>
+</ul>
+<ul class="small simple">
+<li>Compute (SM, CUDA cores)</li>
+</ul>
+<p class="small last">-&gt; <span class="red">real-time photoreal cinematic 3D rendering</span></p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="spatial-index-acceleration-structure">
+<h1><tt class="docutils literal">Spatial Index Acceleration Structure</tt></h1>
+<pre>
+
+
+
+
+
+
+
+
+
+
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">Tree of Bounding Boxes (bbox)</span></p>
+<ul class="small last simple">
+<li>aims to minimize bbox+primitive intersects</li>
+<li>accelerates ray-geometry intersection</li>
+</ul>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix">
+<h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- http://developer.nvidia.com/optix</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX Raytracing Pipeline</p>
+<p class="small">Analogous to OpenGL rasterization pipeline:</p>
+<img alt="/env/optix/docs/optix-model.png" class="last align-right" src="/env/optix/docs/optix-model.png" style="width: 450px;" />
+</div>
+<p class="small"><strong>OptiX makes GPU ray tracing accessible</strong></p>
+<ul class="small simple">
+<li><strong>accelerates</strong> ray-geometry intersections</li>
+<li>simple : single-ray programming model</li>
+<li>&quot;...free to use within any application...&quot;</li>
+<li><span class="red">access RT Cores[1] with OptiX 6.0.0+ via RTX™ mode</span></li>
+</ul>
+<p class="small"><strong>NVIDIA expertise:</strong></p>
+<ul class="small simple">
+<li><span class="red">~linear scaling up to 4 GPUs</span></li>
+<li>acceleration structure creation + traversal (Blue)</li>
+<li>instanced sharing of geometry + acceleration structures</li>
+<li>compiler optimized for GPU ray tracing</li>
+</ul>
+<p class="small"><strong>Opticks provides (Yellow):</strong></p>
+<ul class="small simple">
+<li>ray generation program</li>
+<li><span class="red">ray geometry intersection+bbox programs</span></li>
+</ul>
+<p class="tiny">[1] Turing RTX GPUs</p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- skip
+
+ * no need for fancy shading, so closest hit is simple, just collecting the normal
+   and ray trace distance
+
+* creating renderers is the most common use of OptiX, but it is a general
+   intersection API so works fine to do simulation -->
+</div>
+<div class="slide" id="geant4opticksworkflow">
+<h1><span class="i">Geant4OpticksWorkflow</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-translates-g4-optical-physics-to-cuda-optix">
+<h1><span class="small">Opticks : Translates G4 Optical Physics to CUDA/OptiX</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">GPU Resident Photons</p>
+<dl class="small docutils">
+<dt><strong>Seeded on GPU</strong></dt>
+<dd>associate photons -&gt; <em>gensteps</em> (via seed buffer)</dd>
+<dt><strong>Generated on GPU, using genstep param:</strong></dt>
+<dd><ul class="first last simple">
+<li>number of photons to generate</li>
+<li>start/end position of step</li>
+</ul>
+</dd>
+<dt><strong>Propagated on GPU</strong></dt>
+<dd><span class="red">Only photons hitting PMTs copied to CPU</span></dd>
+</dl>
+<p class="small">Thrust: <strong>high level C++ access to CUDA</strong></p>
+<div class="small figure align-right">
+<img alt="/env/numerics/thrust/thrust.png" src="/env/numerics/thrust/thrust.png" style="width: 300px;" />
+</div>
+<ul class="small last simple">
+<li><a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a></li>
+</ul>
+</div>
+<p class="small"><span class="blue">OptiX : single-ray programming model</span> -&gt; line-by-line translation</p>
+<dl class="small docutils">
+<dt><strong>CUDA Ports of Geant4 classes</strong></dt>
+<dd><ul class="first last simple">
+<li>G4Cerenkov (only generation loop)</li>
+<li>G4Scintillation (only generation loop)</li>
+<li>G4OpAbsorption</li>
+<li>G4OpRayleigh</li>
+<li>G4OpBoundaryProcess (only a few surface types)</li>
+</ul>
+</dd>
+<dt><strong>Modify Cherenkov + Scintillation Processes</strong></dt>
+<dd><ul class="first last simple">
+<li>collect <em>genstep</em>, copy to GPU for generation</li>
+<li><span class="red">avoids copying millions of photons to GPU</span></li>
+</ul>
+</dd>
+<dt><strong>Scintillator Reemission</strong></dt>
+<dd><ul class="first last simple">
+<li>fraction of bulk absorbed &quot;reborn&quot; within same thread</li>
+<li>wavelength generated by reemission texture lookup</li>
+</ul>
+</dd>
+<dt><strong>Opticks (OptiX/Thrust GPU interoperation)</strong></dt>
+<dd><ul class="first last simple">
+<li><strong>OptiX</strong> : upload gensteps</li>
+<li><strong>Thrust</strong> : seeding, distribute genstep indices to photons</li>
+<li><strong>OptiX</strong> : launch photon generation and propagation</li>
+<li><strong>Thrust</strong> : pullback photons that hit PMTs</li>
+<li><strong>Thrust</strong> : index photon step sequences (optional)</li>
+</ul>
+</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- skip
+
+Some further detail is on the reemissio and also
+use of CUDA Thrust : which provides a higher level way
+of using CUDA -->
+</div>
+<div class="slide" id="g4solid-cuda-intersect-functions-for-10-primitives">
+<h1><span class="small">G4Solid -&gt; CUDA Intersect Functions for ~10 Primitives</span></h1>
+<ul class="small simple">
+<li>3D parametric ray : <strong>ray(x,y,z;t) = rayOrigin  +  t * rayDirection</strong></li>
+<li>implicit equation of primitive : <strong>f(x,y,z) = 0</strong></li>
+<li>-&gt; polynomial in <strong>t</strong> , roots: <strong>t &gt; t_min</strong>  -&gt; intersection positions + surface normals</li>
+</ul>
+<div class="figure align-center">
+<img alt="/env/presentation/tboolean_parade_sep2017.png" src="/env/presentation/tboolean_parade_sep2017.png" style="width: 900px;" />
+<p class="caption">Sphere, Cylinder, Disc, Cone, Convex Polyhedron, Hyperboloid, <span class="red">Torus</span>, ...</p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="g4boolean-cuda-optix-intersection-program-implementing-csg">
+<h1><span class="small">G4Boolean -&gt; CUDA/OptiX Intersection Program Implementing CSG</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Outside/Inside Unions</p>
+<p class="small">dot(normal,rayDir) -&gt; Enter/Exit</p>
+<img alt="/env/presentation/kensler_union_of_two_spheres_from_outside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_outside.png" style="width: 300px;" />
+<img alt="/env/presentation/kensler_union_of_two_spheres_from_inside.png" class="align-center" src="/env/presentation/kensler_union_of_two_spheres_from_inside.png" style="width: 300px;" />
+<ul class="small last simple">
+<li><strong>A + B</strong> boundary not inside other</li>
+<li><strong>A * B</strong> boundary inside other</li>
+</ul>
+</div>
+<p class="small">Complete Binary Tree, pick between pairs of nearest intersects:</p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="37%" />
+<col width="17%" />
+<col width="24%" />
+<col width="22%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head"><em>UNION</em> tA &lt; tB</th>
+<th class="head">Enter B</th>
+<th class="head">Exit B</th>
+<th class="head">Miss B</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><strong>Enter A</strong></td>
+<td>ReturnA</td>
+<td><span class="blue">LoopA</span></td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Exit A</strong></td>
+<td>ReturnA</td>
+<td>ReturnB</td>
+<td>ReturnA</td>
+</tr>
+<tr><td><strong>Miss A</strong></td>
+<td>ReturnB</td>
+<td>ReturnB</td>
+<td>ReturnMiss</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><em>Nearest hit intersect algorithm</em> [1] avoids state<ul>
+<li>sometimes <span class="blue">Loop</span> : advance <strong>t_min</strong> , re-intersect both</li>
+<li>classification shows if inside/outside</li>
+</ul>
+</li>
+<li><em>Evaluative</em> [2] implementation emulates recursion:<ul>
+<li><span class="red">recursion not allowed</span> in OptiX intersect programs</li>
+<li>bit twiddle traversal of complete binary tree</li>
+<li>stacks of postorder slices and intersects</li>
+</ul>
+</li>
+<li><span class="red">Identical geometry to Geant4</span><ul>
+<li>solving the same polynomials</li>
+<li>near perfect intersection match</li>
+</ul>
+</li>
+</ul>
+<dl class="tiny docutils">
+<dt>[1] Ray Tracing CSG Objects Using Single Hit Intersections, Andrew Kensler (2006)</dt>
+<dd>with corrections by author of XRT Raytracer <a class="reference external" href="http://xrt.wikidot.com/doc:csg">http://xrt.wikidot.com/doc:csg</a></dd>
+<dt>[2] <a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/csg_intersect_boolean.h</a></dt>
+<dd>Similar to binary expression tree evaluation using postorder traverse.</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-translates-g4-geometry-to-gpu-without-approximation">
+<h1><span class="small">Opticks : Translates G4 Geometry to GPU, Without Approximation</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Materials/Surfaces -&gt; GPU Texture</span></p>
+<p class="small"><strong>Material/Surface/Scintillator properties</strong></p>
+<ul class="small simple">
+<li>interpolated to standard wavelength domain</li>
+<li>interleaved into &quot;boundary&quot; texture</li>
+<li>&quot;reemission&quot; texture for wavelength generation</li>
+</ul>
+<p class="small"><strong>Material/surface boundary : 4 indices</strong></p>
+<ul class="small simple">
+<li>outer material (parent)</li>
+<li>outer surface (inward photons, parent -&gt; self)</li>
+<li>inner surface (outward photons, self -&gt; parent)</li>
+<li>inner material (self)</li>
+</ul>
+<p class="small">Primitives labelled with unique boundary index</p>
+<ul class="small simple">
+<li>ray primitive intersection -&gt; boundary index</li>
+<li>texture lookup -&gt; material/surface properties</li>
+</ul>
+<p class="small last"><span class="red">simple/fast properties + reemission wavelength</span></p>
+</div>
+<p class="small"><strong>G4 Structure Tree -&gt; Instance+Global Arrays -&gt; OptiX</strong></p>
+<p class="small">Group structure into repeated instances + global remainder:</p>
+<ul class="small simple">
+<li>auto-identify repeated geometry with &quot;progeny digests&quot;<ul>
+<li>JUNO : 5 distinct instances + 1 global</li>
+</ul>
+</li>
+<li>instance transforms used in OptiX/OpenGL geometry</li>
+</ul>
+<p class="small"><span class="red">instancing -&gt; huge memory savings for JUNO PMTs</span></p>
+<pre>
+</pre><!-- comment
+
+**Automated : Geant4 "World" -> Opticks CSG -> CUDA/OptiX**
+
+**Solids : analytic CSG + triangulated**
+
+* intersection functions for ~10 primitives
+* intersection program for arbitrarily complex CSG shapes
+
+  * :red:`automated : G4 -> Opticks -> OptiX` -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="j1808-top-rtx">
+<h1><span class="i">j1808_top_rtx</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="j1808-top-ogl">
+<h1><span class="i">j1808_top_ogl</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="validation-of-opticks-simulation-by-comparison-with-geant4">
+<h1><span class="small">Validation of Opticks Simulation by Comparison with Geant4</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Random Aligned Bi-Simulation</span></p>
+<p class="small">Same inputs to <em>Opticks</em> and <em>Geant4</em>:</p>
+<ul class="small simple">
+<li>CPU generated photons</li>
+<li>GPU generated randoms, fed to <em>Geant4</em></li>
+</ul>
+<p class="small">Common recording into <em>OpticksEvents</em>:</p>
+<ul class="small simple">
+<li>compressed photon step record, up to 16 steps</li>
+<li>persisted as <em>NumPy</em> arrays for python analysis</li>
+</ul>
+<p class="small">Aligned random consumption, direct comparison:</p>
+<ul class="small last simple">
+<li>~every <strong>scatter, absorb, reflect, transmit</strong>
+at matched positions, times, polarization, wavlen</li>
+</ul>
+</div>
+<p class="small"><strong>Bi-simulations of all JUNO solids, with millions of photons</strong></p>
+<dl class="small docutils">
+<dt>mis-aligned histories</dt>
+<dd>mostly &lt; 0.25%, &lt; 0.50% for largest solids</dd>
+<dt>deviant photons within matched history</dt>
+<dd>&lt; 0.05% (500/1M)</dd>
+</dl>
+<p class="small"><strong>Primary sources of problems</strong></p>
+<ul class="small simple">
+<li>grazing incidence, edge skimmers</li>
+<li>incidence at constituent solid boundaries</li>
+</ul>
+<p class="small"><strong>Primary cause : float vs double</strong></p>
+<p class="small"><em>Geant4</em> uses <em>double</em> everywhere, <em>Opticks</em> only sparingly (observed <em>double</em> costing 10x slowdown with RTX)</p>
+<p class="small"><strong>Conclude</strong></p>
+<ul class="small simple">
+<li><span class="blue">neatly oriented photons more prone to issues than realistic ones</span></li>
+<li>perfect &quot;technical&quot; matching not feasible</li>
+<li>instead shift validation to more realistic full detector &quot;calibration&quot; situation</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="scan-pf-check-gui-to-sc-bt5-sd">
+<h1><span class="i">scan-pf-check-GUI-TO-SC-BT5-SD</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="recording-the-steps-of-millions-of-photons">
+<h1><span class="small">Recording the steps of Millions of Photons</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Compression Essential</p>
+<p class="small">Domain compression to fit in VRAM</p>
+<ul class="small simple">
+<li>16 step records per photon -&gt; 256 bytes/photon</li>
+<li>10M photons -&gt; 2.56 GB</li>
+</ul>
+<p class="small"><strong>4-bit History Flags at Each Step</strong></p>
+<pre class="mypretiny">
+BT : boundary
+BR : boundary reflect
+SC : bulk scatter
+AB : bulk absorb
+SD : surface detect
+SA : surface absorb
+</pre><dl class="small last docutils">
+<dt><strong>seqhis</strong></dt>
+<dd><span class="red">64-bit integer history sequence</span></dd>
+</dl>
+</div>
+<p class="small">Up to 16 steps of the photon propagation are recorded.</p>
+<p class="small"><strong>Photon Array</strong> : 4 * <em>float4</em> = 512 bits/photon</p>
+<ul class="small simple">
+<li><em>float4</em>: position, time  [32 * 4 = 128 bits]</li>
+<li><em>float4</em>: direction, weight</li>
+<li><em>float4</em>: polarization, wavelength</li>
+<li><em>float4</em>: flags: material, boundary, history</li>
+</ul>
+<p class="small"><strong>Step Record Array</strong> : 2 * <em>short4</em> = 2*16*4 = 128 bits/record</p>
+<ul class="small simple">
+<li><em>short4</em>: position, time (snorm compressed)  [4*16 = 64 bits]</li>
+<li><em>uchar4</em>: polarization, wavelength (uchar compressed) [4*8 = 32 bits]</li>
+<li><em>uchar4</em>: material, history flags [4*8 = 32 bits]</li>
+</ul>
+<p class="small">Compression uses known domains of position (geometry center, extent),
+time (0:200ns), wavelength, polarization.</p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="scan-pf-check-gui-to-bt5-sd">
+<h1><span class="i">scan-pf-check-GUI-TO-BT5-SD</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* DELL Precision 7920T Workstation
+* Intel Xeon Silver 4114, 2.2GHz, 40 cores, 65G
+* NVIDIA Quadro RTX 8000, 48G
+
+* DELL Precision 7920T Workstation
+* Intel Xeon Gold 5118, 2.3GHz, 48 cores, 65G
+* NVIDIA TITAN RTX, 24G
+* NVIDIA TITAN V, 12G -->
+</div>
+<div class="slide" id="performance-scanning-from-1m-to-400m-photons">
+<h1><span class="small">Performance : Scanning from 1M to 400M Photons</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Test Hardware + Software</span></p>
+<p class="small"><strong>Workstation</strong></p>
+<ul class="small simple">
+<li>DELL Precision 7920T Workstation</li>
+<li>Intel Xeon Gold 5118, 2.3GHz, 48 cores, 62G</li>
+<li>NVIDIA Quadro RTX 8000 (48G)</li>
+</ul>
+<p class="small"><strong>Software</strong></p>
+<ul class="small simple">
+<li>Opticks 0.0.0 Alpha</li>
+<li>Geant4 10.4p2</li>
+<li>NVIDIA OptiX 6.5.0</li>
+<li>NVIDIA Driver 435.21</li>
+<li>CUDA 10.1</li>
+</ul>
+<p class="small"><strong>IHEP GPU Cluster</strong></p>
+<ul class="small last simple">
+<li>10 nodes of 8x NVIDIA Tesla GV100 (32G)</li>
+</ul>
+</div>
+<p class="small"><strong>Full JUNO Analytic Geometry j1808v5</strong></p>
+<ul class="small simple">
+<li>&quot;calibration source&quot; genstep at center of scintillator</li>
+</ul>
+<p class="small"><strong>Production Mode : does the minimum</strong></p>
+<ul class="small simple">
+<li>only saves hits</li>
+<li>skips : genstep, photon, source, record, sequence, index, ..</li>
+<li>no <em>Geant4</em> propagation (other than at 1M for extrapolation)</li>
+</ul>
+<p class="small"><strong>Multi-Event Running, Measure:</strong></p>
+<dl class="small docutils">
+<dt><span class="red">interval</span></dt>
+<dd>avg time between successive launches, including overheads:
+(upload gensteps + <span class="blue">launch</span> + download hits)</dd>
+<dt><span class="blue">launch</span></dt>
+<dd>avg of 10 OptiX launches</dd>
+</dl>
+<ul class="small simple">
+<li>overheads &lt; 10% beyond 20M photons</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+.. sidebar:: :small:`Genstep/Hit Copying Overheads`
+
+     .. class:: small
+
+         **launch**
+           time of each OptiX launch (avg of 10)
+
+         **interval, including overhead**
+           time between subsequent launches (avg of 9)
+
+         :red:`Mostly < 10% Overhead beyond 20M photons` -->
+</div>
+<div class="slide" id="nvidia-quadro-rtx-8000-48g">
+<h1><tt class="docutils literal">NVIDIA Quadro RTX 8000 (48G)</tt></h1>
+<div class="mysidebar" style="position: absolute; top:15%; left:65%; width:22%; height:10% ;" >
+   <strong> 谢谢 NVIDIA China <br> for loaning the card </strong>
+</div>
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+update these profilesmry.py plots with::
+
+    scan-plot     ## on workstation
+    scan-pub      ## on laptop with simoncblyth.bitbucket.org clone
+    scan-pubrst   ## prepare RST for inclusion at tail -->
+</div>
+<div class="slide" id="scan-pf-1-nhit">
+<h1><span class="i">scan-pf-1_NHit</span></h1>
+<pre>
+
+
+
+
+
+
+
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">Photon Launch Size : VRAM Limited</span></p>
+<p class="small"><strong>NVIDIA Quadro RTX 8000 (48 GB)</strong></p>
+<ul class="small simple">
+<li>photon 4*4 floats : 64 bytes</li>
+<li>curandState       : 48 bytes</li>
+</ul>
+<p class="small last"><strong>400M photons</strong> x <span class="blue">112 bytes</span> ~ 45G</p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="scan-pf-1-opticks-vs-geant4-2">
+<h1><span class="i">scan-pf-1_Opticks_vs_Geant4 2</span></h1>
+<pre>
+
+
+
+
+</pre><table border="1" class="small docutils align-center">
+<colgroup>
+<col width="30%" />
+<col width="42%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head" colspan="2">JUNO analytic, 400M photons from center</th>
+<th class="head">Speedup</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Geant4 Extrap.</td>
+<td>95,600 s (26 hrs)</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>Opticks RTX ON (i)</td>
+<td>58 s</td>
+<td>1650x</td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="scan-pf-1-opticks-speedup-2">
+<h1><span class="i">scan-pf-1_Opticks_Speedup 2</span></h1>
+<pre>
+
+
+
+
+
+
+
+
+
+</pre><table border="1" class="small docutils align-center">
+<colgroup>
+<col width="41%" />
+<col width="30%" />
+<col width="30%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head" colspan="2">JUNO analytic, 400M photons from center</th>
+<th class="head">Speedup</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Opticks RTX ON (i)</td>
+<td>58s</td>
+<td>1650x</td>
+</tr>
+<tr><td>Opticks RTX OFF (i)</td>
+<td>275s</td>
+<td>350x</td>
+</tr>
+<tr><td>Geant4 Extrap.</td>
+<td>95,600s (26 hrs)</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="scan-pf-1-rtx-speedup">
+<h1><span class="i">scan-pf-1_RTX_Speedup</span></h1>
+<pre>
+
+
+
+
+
+
+
+
+
+
+
+</pre><table border="1" class="docutils align-center">
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><strong>5x Speedup from RTX with JUNO analytic geometry</strong></td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="useful-speedup-1500x-but-why-not-giga-rays-s-1-photon-10-rays">
+<h1><span class="small">Useful Speedup &gt; 1500x : But Why Not Giga Rays/s ? (1 Photon ~10 Rays)</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">100M photon RTX times, avg of 10</span></p>
+<table border="1" class="colwidths-given small docutils">
+<colgroup>
+<col width="43%" />
+<col width="14%" />
+<col width="14%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head" colspan="4">Launch times for various geometries</th>
+</tr>
+<tr><th class="head">Geometry</th>
+<th class="head">Launch (s)</th>
+<th class="head">Giga Rays/s</th>
+<th class="head">Relative
+to ana</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>JUNO ana</td>
+<td>13.2</td>
+<td>0.07</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>JUNO tri.sw</td>
+<td>6.9</td>
+<td>0.14</td>
+<td>1.9x</td>
+</tr>
+<tr><td>JUNO tri.hw</td>
+<td>2.2</td>
+<td>0.45</td>
+<td>6.0x</td>
+</tr>
+<tr><td colspan="4">&nbsp;</td>
+</tr>
+<tr><td>Boxtest ana</td>
+<td>0.59</td>
+<td>1.7</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>Boxtest tri.sw</td>
+<td>0.62</td>
+<td>1.6</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>Boxtest tri.hw</td>
+<td>0.30</td>
+<td>3.3</td>
+<td>1.9x</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li>ana : Opticks analytic CSG (SM)</li>
+<li>tri.sw : software triangle intersect (SM)</li>
+<li><span class="red">tri.hw : hardware triangle intersect (RT)</span></li>
+</ul>
+<p class="small">JUNO 15k triangles, 132M without instancing</p>
+<p class="small last"><strong>Simple Boxtest geometry gets into ballpark</strong></p>
+</div>
+<ul class="small simple">
+<li>NVIDIA claim : <span class="blue">10 Giga Rays/s with RT Core</span></li>
+<li>-&gt; <strong>1 Billion photons per second</strong></li>
+<li><strong>RT cores : built-in triangle intersect + 1-level of instancing</strong></li>
+<li>flatten scene model to avoid SM&lt;-&gt;RT roundtrips ?</li>
+</ul>
+<pre>
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><p class="small">OptiX Performance Tools and Tricks, David Hart, NVIDIA
+<a class="reference external" href="https://developer.nvidia.com/siggraph/2019/video/sig915-vid">https://developer.nvidia.com/siggraph/2019/video/sig915-vid</a></p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+    +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    |           RTX ON Launch times for 100M photons, (avg of 10)                                             |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    | Id  |  Geometry                   |  Launch Time (s) |  GigaRays/s      |  Speedup Relative to analytic |
+    +=====+=============================+==================+==================+===============================+
+    | pf1 | JUNO analytic CSG           |   13.2           |  0.07            |                               |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    | pt0 | JUNO triangulated SW        |    6.9           |  0.14            |   1.9x                        |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    | pt0 | JUNO triangulated HW        |    2.2           |  0.45            |   6.0x                        |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    |     |                             |                  |                  |                               |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    | ph11| Box-in-box analytic CSG     |    0.59          |  1.7             |                               |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    | ph13| Box-in-box tri(4k) SW       |    0.62          |  1.6             |                               |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+    | ph13| Box-in-box tri(4k) HW       |    0.30          |  3.3             |    1.9x                       |
+    +- - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+
+
+.. class:: tiny
+
+    JUNO: j1808v5, box-in-box: tboolean-box -->
+</div>
+<div class="slide" id="where-next-for-opticks">
+<h1><span class="small">Where Next for Opticks ?</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">NVIDIA OptiX 7 : Entirely new API</span></p>
+<ul class="small last simple">
+<li>introduced August 2019</li>
+<li>low-level CUDA-centric thin API</li>
+<li><span class="strike">near perfect scaling to 4 GPUs, for free</span></li>
+</ul>
+</div>
+<p class="small"><strong>JUNO+Opticks into Production</strong></p>
+<ul class="small simple">
+<li>optimize geometry modelling for RTX</li>
+<li>full JUNO geometry validation iteration</li>
+<li>JUNO offline integration</li>
+<li>optimize GPU cluster throughput:<ul>
+<li>split/join events to fit VRAM</li>
+<li>job/node/multi-GPU strategy</li>
+</ul>
+</li>
+<li>support OptiX 7, find multi-GPU load balancing approach</li>
+</ul>
+<pre>
+</pre><p class="small"><strong>Geant4+Opticks Integration : Work with Geant4 Collaboration</strong></p>
+<ul class="small simple">
+<li>finalize <em>Geant4+Opticks</em> extended example<ul>
+<li>aiming for <em>Geant4</em> distrib</li>
+</ul>
+</li>
+<li>prototype <em>Genstep</em> interface inside <em>Geant4</em><ul>
+<li>avoid customizing <em>G4Cerenkov</em> <em>G4Scintillation</em></li>
+</ul>
+</li>
+</ul>
+<pre>
+</pre><p class="small"><strong>Alpha Development ------&gt;-----------------&gt; Robust Tool</strong></p>
+<ul class="small simple">
+<li>many more users+developers required (current ~10+1)</li>
+<li>if you have an optical photon simulation problem ...<ul>
+<li>start by joining : <a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></li>
+</ul>
+</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* geometry translation help : NEXO, DUNE, LZ
+* interest -> usage : SABRE, Baikal GVD, KM3Net, MicroBooNE
+* expand interest : scintillator using medical imaging companies
+* automated geometry translation, but problems inevitable
+
+* now: sole-developer + ~10 exploratory users from ~5 detectors
+* needs users+developers, join https://groups.io/g/opticks -->
+</div>
+<div class="slide" id="drastically-improved-optical-photon-simulation-performance">
+<h1><span class="small">Drastically Improved Optical Photon Simulation Performance...</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">How is &gt;1500x possible ?</span></p>
+<p class="small"><strong>Progress over 30 yrs, Billions of Dollars</strong></p>
+<ul class="small simple">
+<li>industry funded : game, film, design, ...</li>
+<li>re-purposed by translating geometry to GPU<ul>
+<li>tree of C++ objects -&gt; arrays -&gt; BVH</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Photon Simulation ideally suited to GPU</strong></p>
+<ul class="small last simple">
+<li>millions of photons -&gt; abundantly parallel</li>
+<li>simple phys. -&gt; small stack -&gt; many in flight</li>
+<li>decoupled -&gt; no synchronization</li>
+</ul>
+</div>
+<p class="small"><strong>Three revolutions reinforcing each other:</strong></p>
+<ul class="small simple">
+<li>games -&gt; graphics revolution -&gt; GPU -&gt; cheap TFLOPS</li>
+<li>internet scale big datasets -&gt; ML revolution</li>
+<li>computer vision revolution for autonomous vehicles</li>
+</ul>
+<p class="small"><span class="blue">Deep rivers of development, ripe for re-purposing</span></p>
+<ul class="small simple">
+<li>analogous problems -&gt; solutions</li>
+<li><span class="red">experience across fields essential to find+act on analogies</span></li>
+</ul>
+<p class="small"><strong>Example : DL denoising for faster ray trace convergence</strong></p>
+<ul class="small simple">
+<li>analogous to hit aggregation</li>
+<li>skip the hits, jump straight to DL smoothed probabilities<ul>
+<li><span class="red">blurs the line between simulation and reconstruction</span></li>
+</ul>
+</li>
+</ul>
+<pre>
+</pre><p class="small"><strong>Re-evaluate long held practices in light of new realities:</strong></p>
+<ul class="small simple">
+<li>large ROOT format (C++ object) MC samples repeatedly converted+uploaded to GPU for DL training ... OR:</li>
+<li>small Genstep NumPy arrays uploaded, dynamically simulated into GPU hit arrays in fractions of a second</li>
+</ul>
+<!-- comment
+
+**Transformative Performance : But how to transform ?**
+
+* graphics : oldest user of GPUs -> rich palette of techniques
+* vision spherical CNN -> potential for reconstruction
+
+**Dynamically generated simulation feasible ?**
+
+* current reconstruction -> custom simulation
+* no more : limited MC stats in edge cases -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="overview-links">
+<h1><span class="small">Overview + Links</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Highlights</span></p>
+<ul class="small last simple">
+<li>Benefit from hardware accelerated ray tracing</li>
+<li><strong>Opticks &gt; 1500x Geant4</strong> (one Turing GPU)</li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> : state-of-the-art GPU ray tracing applied to optical photon simulation and
+integrated with <em>Geant4</em>, giving a leap in performance that eliminates memory and time bottlenecks.</p>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
+<ul class="simple">
+<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision<ul>
+<li><strong>any simulation limited by optical photons can benefit</strong></li>
+<li>more photon limited -&gt; more overall speedup (99% -&gt; 100x)</li>
+</ul>
+</li>
+</ul>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 10px;" />
+</blockquote>
+<table border="1" class="docutils align-center">
+<colgroup>
+<col width="53%" />
+<col width="47%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
+<td>code repository</td>
+</tr>
+<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
+<td>presentations and videos</td>
+</tr>
+<tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
+<td>forum/mailing list archive</td>
+</tr>
+<tr><td>email:opticks+subscribe&#64;groups.io</td>
+<td>subscribe to mailing list</td>
+</tr>
+</tbody>
+</table>
+<!-- comment
+
+*Opticks* uses hardware accelerated GPU ray tracing
+via NVIDIA OptiX to give **effectively zero time and zero CPU memory**
+optical photon simulation to *Geant4* applications. -->
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+
+http://www.ihep.cas.cn/xwdt/xshd/201911/t20191126_5443006.html
+
+
+NEXT
+
+
+* Amdahls Law -->
+</div>
+<div class="slide" id="geocache-360">
+<h1><span class="i">geocache_360</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="id1">
+<h1><span class="small">Outline of Graphics/GPU background + Application to neutrino telescopes</span></h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<ul class="small simple">
+<li>GPU + Parallel Processing Background<ul>
+<li>Amdahls &quot;Law&quot; : Expected speedup limited by serial processing</li>
+<li>Understanding GPU Graphical Origins -&gt; Effective GPU Computation</li>
+<li>CPU Optimizes Latency, GPU Optimizes Throughput</li>
+<li>How to make effective use of GPUs ? Parallel/Simple/Uncoupled</li>
+<li>GPU Demands Simplicity (Arrays) -&gt; Big Benefits : NumPy + CuPy</li>
+<li>Survey of High Level General Purpose CUDA Packages</li>
+</ul>
+</li>
+<li>Graphics History/Background<ul>
+<li>50 years of rendering progress</li>
+<li>2018 : NVIDIA RTX : Project Sol Demo</li>
+<li>Monte Carlo Path Tracing in Movie Production</li>
+<li>Fundamental &quot;Rendering Equation&quot; of Computer Graphics</li>
+<li>Neumann Series solution of Rendering Equation</li>
+<li>Noise : Problem with Monte Carlo Path Tracing</li>
+<li>NVIDIA OptiX Denoiser</li>
+<li>Physically Based Rendering Book : Free Online</li>
+<li>Optical Simulations : Graphics vs Physics</li>
+</ul>
+</li>
+<li>Neutrino Telescope Optical simulations<ul>
+<li>Giga-photon propagations : Re-usable photon &quot;snapshots&quot;</li>
+<li>Opticks Rayleigh Scattering : CUDA line-by-line port of G4OpRayleigh</li>
+<li>Developing a photon &quot;snapshot&quot; cache</li>
+</ul>
+</li>
+<li>Summary</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="amdahls-law-expected-speedup-limited-by-serial-processing">
+<h1><span class="small">Amdahls &quot;Law&quot; : Expected Speedup Limited by Serial Processing</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">S(n) Expected Speedup</span></p>
+<!-- comment
+
+:width: 1176px
+:height: 358px
+:width: 588px
+:height: 179px -->
+<img alt="/env/presentation/parallel/amdahl.png" class="align-center" src="/env/presentation/parallel/amdahl.png" style="width: 392px; height: 112px;" />
+<dl class="small last docutils">
+<dt><em>P</em></dt>
+<dd>parallelizable proportion</dd>
+<dt><em>1-P</em></dt>
+<dd>non-parallelizable portion</dd>
+<dt><em>n</em></dt>
+<dd>parallel speedup factor</dd>
+</dl>
+</div>
+<p>optical photon simulation, P ~ 99% of CPU time</p>
+<ul class="simple">
+<li>-&gt; potential overall speedup S(n) is 100x</li>
+<li>even with parallel speedup factor &gt;&gt; 1500x</li>
+</ul>
+<p><strong>Must consider processing &quot;big picture&quot;</strong></p>
+<ul class="simple">
+<li>remove bottlenecks one by one</li>
+<li>re-evaluate &quot;big picture&quot; after each</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="understanding-gpu-graphical-origins-effective-gpu-computation">
+<h1><span class="small">Understanding GPU Graphical Origins -&gt; Effective GPU Computation</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">OpenGL Rasterization Pipeline</span></p>
+<img alt="/env/presentation/opengl/rasterization_pipeline_rhs.png" class="last align-right" src="/env/presentation/opengl/rasterization_pipeline_rhs.png" style="width: 450px;" />
+</div>
+<p class="small"><strong>GPUs evolved to rasterize 3D graphics at 30/60 fps</strong></p>
+<ul class="small simple">
+<li>30/60 &quot;launches&quot; per second, each handling millions of items</li>
+<li><span class="red">literally billions of small &quot;shader&quot; programs run per second</span></li>
+</ul>
+<p class="small"><strong>Simple Array Data Structures (N-million,4)</strong></p>
+<ul class="small simple">
+<li>millions of vertices, millions of triangles</li>
+<li>vertex: <strong>(x y z w)</strong></li>
+<li>colors: <strong>(r g b a)</strong></li>
+</ul>
+<p class="small"><strong>Constant &quot;Uniform&quot; 4x4 matrices : scaling+rotation+translation</strong></p>
+<ul class="small simple">
+<li>4-component homogeneous coordinates -&gt; easy projection</li>
+</ul>
+<p class="small"><strong>Graphical Experience Informs Fast Computation on GPUs</strong></p>
+<ul class="small simple">
+<li>array shapes similar to graphics ones are faster<ul>
+<li>&quot;float4&quot; 4*float(32bit) = 128 bit memory reads are favored</li>
+<li>Opticks photons use &quot;float4x4&quot; just like 4x4 matrices</li>
+</ul>
+</li>
+<li>GPU Launch frequency &lt; ~30/60 per second<ul>
+<li>avoid copy+launch overheads becoming significant</li>
+<li>ideally : handle millions of items in each launch</li>
+</ul>
+</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cpu-optimizes-latency-gpu-optimizes-throughput">
+<h1><span class="small">CPU Optimizes Latency, GPU Optimizes Throughput</span></h1>
+<img alt="/env/presentation/nvidia/cpu_vs_gpu_architecture.png" class="small align-center" src="/env/presentation/nvidia/cpu_vs_gpu_architecture.png" style="width: 800px;" />
+<p class="small">Waiting for memory read/write, is major source of latency...</p>
+<dl class="small docutils">
+<dt><strong>CPU : latency-oriented : Minimize time to complete single task</strong> <span class="classifier-delimiter">:</span> <span class="classifier"><span class="red">avoid latency with caching</span></span></dt>
+<dd><ul class="first last simple">
+<li>complex : caching system, branch prediction, speculative execution, ...</li>
+</ul>
+</dd>
+<dt><strong>GPU : throughput-oriented : Maximize total work per unit time</strong> <span class="classifier-delimiter">:</span> <span class="classifier"><span class="red">hide latency with parallelism</span></span></dt>
+<dd><ul class="first last simple">
+<li>many simple processing cores, hardware multithreading, SIMD (single instruction multiple data)</li>
+<li>simpler : <span class="green">lots of compute (ALU)</span>, at expense of cache+control</li>
+<li>can tolerate latency, by <strong>assuming</strong> abundant other tasks to resume  : <strong>design assumes parallel workload</strong></li>
+</ul>
+</dd>
+<dt><strong>Totally different processor architecture</strong> -&gt; <span class="red">Total reorganization of data and computation</span></dt>
+<dd><ul class="first last simple">
+<li>major speedups typically require total rethink of data structures and computation</li>
+</ul>
+</dd>
+</dl>
+<!-- comment
+
+Understanding Throughput-oriented Architectures
+https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext
+
+Latency hiding works using hardware multi-threading, so when one group of threads is blocked
+waiting to read from global memory for example : other groups of thread and be resumed. This
+is only effective at hiding latency when there are enough other threads in flight at the same time.
+
+Porting CPU code to run on the GPU : is not a straightforward thing to do, because the archirecture is totally
+different.  To make effective use of GPUs requires a total reorganization of data and compute. -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="how-to-make-effective-use-of-gpus-parallel-simple-uncoupled">
+<h1><span class="small">How to Make Effective Use of GPUs ? Parallel / Simple / Uncoupled</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Optical Photon Simulation</span></p>
+<dl class="small docutils">
+<dt>Abundant parallelism</dt>
+<dd><ul class="first last simple">
+<li>Many millions of photons</li>
+</ul>
+</dd>
+<dt>Low register usage</dt>
+<dd><ul class="first last simple">
+<li>Simple optical physics, texture lookups</li>
+</ul>
+</dd>
+<dt>Little/No synchronization</dt>
+<dd><ul class="first last simple">
+<li>Independent photons -&gt; None</li>
+</ul>
+</dd>
+<dt>Minimize CPU&lt;-&gt;GPU copies</dt>
+<dd><ul class="first last simple">
+<li>geometry copied at initialization</li>
+<li>gensteps copied once per event</li>
+<li>only hits copied back</li>
+</ul>
+</dd>
+</dl>
+<p class="small last"><span class="blue">~perfect match for GPU acceleration</span></p>
+</div>
+<dl class="small docutils">
+<dt><strong>Abundant parallelism</strong></dt>
+<dd><ul class="first last simple">
+<li>many thousands of tasks (ideally millions)</li>
+</ul>
+</dd>
+<dt><strong>Low register usage : otherwise limits concurrent threads</strong></dt>
+<dd><ul class="first last simple">
+<li>simple kernels, avoid branching</li>
+</ul>
+</dd>
+<dt><strong>Little/No Synchronization</strong></dt>
+<dd><ul class="first last simple">
+<li>avoid waiting, avoid complex code/debugging</li>
+</ul>
+</dd>
+<dt><strong>Minimize CPU&lt;-&gt;GPU copies</strong></dt>
+<dd><ul class="first last simple">
+<li>reuse GPU buffers across multiple CUDA launches</li>
+</ul>
+</dd>
+</dl>
+<img alt="/env/presentation/1px.png" class="small" src="/env/presentation/1px.png" />
+<p class="small"><strong>How Many Threads to Launch ?</strong></p>
+<ul class="small simple">
+<li>can (and should) launch many millions of threads<ul>
+<li><span class="red">largest Opticks launch : 400M threads, at VRAM limit</span></li>
+</ul>
+</li>
+<li>maximum thread launch size : so large its irrelevant</li>
+<li>maximum threads inflight : #SM*2048 = 80*2048 ~ 160k<ul>
+<li>best latency hiding when launch &gt; ~10x this ~ 1M</li>
+</ul>
+</li>
+</ul>
+<p class="tiny">Understanding Throughput-oriented Architectures
+<a class="reference external" href="https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext">https://cacm.acm.org/magazines/2010/11/100622-understanding-throughput-oriented-architectures/fulltext</a></p>
+<p class="tiny">NVIDIA Titan V: 80 SM, 5120 CUDA cores</p>
+<!-- comment
+
+
+So how does optical photon simulation stand on these criteria...
+
+* parallelism and synchronization are perfect : with millions of independent photons
+  to simulation
+
+* low register usage : not so perfect, work required to fit into small stack size
+
+  * eg GPU textures for property access : does wavelength interpolation in hardware,
+    so avoids code and resource consumption -->
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+https://streamhpc.com/blog/2017-01-24/many-threads-can-run-gpu/
+
+https://devtalk.nvidia.com/default/topic/1028226/how-many-concurrent-threads-are-running-on-my-geforce-gtx-1080-ti-/
+
+The maximum number of threads in flight is 2048 * #SM -->
+</div>
+<div class="slide" id="gpu-demands-simplicity-arrays-big-benefits-numpy-cupy">
+<h1><span class="small">GPU Demands Simplicity (Arrays) -&gt; Big Benefits : NumPy + CuPy</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Array Serialization Benefits</span></p>
+<p class="small"><strong>Persist everything to file -&gt; fast development cycle</strong></p>
+<ul class="small simple">
+<li>data portability into any environment</li>
+<li>interactive debug/analysis : <em>NumPy,IPython</em></li>
+<li>flexible testing</li>
+</ul>
+<p class="small"><strong>Can transport everything across network:</strong></p>
+<ul class="small simple">
+<li>production flexibility : distributed compute</li>
+</ul>
+<p class="small"><strong>Arrays for Everything -&gt; direct access debug</strong></p>
+<ul class="small last simple">
+<li>(num_photons,4,4) <em>float32</em></li>
+<li>(num_photons,16,2,4) <em>int16</em> : step records</li>
+<li>(num_photons,2) <em>uint64</em> : history flags</li>
+<li>(num_gensteps,6,4) <em>float32</em></li>
+<li>(num_csgnodes,4,4) <em>float32</em></li>
+<li>(num_transforms,3,4,4) <em>float32</em></li>
+<li>(num_planes,4) <em>float32</em></li>
+<li>...</li>
+</ul>
+</div>
+<dl class="small docutils">
+<dt><strong>Separate address space -&gt; cudaMemcpy -&gt; Serialization</strong></dt>
+<dd><em>upload/download</em> : host(CPU)&lt;-&gt;device(GPU)</dd>
+</dl>
+<ul class="small simple">
+<li><span class="red">Serialize everything</span> -&gt; Arrays</li>
+<li>Many small tasks -&gt; Arrays</li>
+<li>Random Access/Order undefined -&gt; Arrays</li>
+</ul>
+<p class="small"><strong>Object-oriented : mixes data and compute</strong></p>
+<ul class="small simple">
+<li>complicated serialization</li>
+<li>good for complex systems, up to ~1000 objects</li>
+</ul>
+<p class="small"><strong>Array-oriented : separate data from compute</strong></p>
+<ul class="small simple">
+<li><span class="red">inherent serialization + simplicity</span></li>
+<li>good for millions of element systems</li>
+</ul>
+<p class="small"><strong>NumPy : standard array handling package</strong></p>
+<ul class="small simple">
+<li>simple .npy serialization</li>
+<li>read/write <em>NumPy</em> arrays from C++ <a class="reference external" href="https://github.com/simoncblyth/np/blob/master/NP.hh">https://github.com/simoncblyth/np/blob/master/NP.hh</a></li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://realpython.com/numpy-array-programming/">https://realpython.com/numpy-array-programming/</a></p>
+<!-- comment
+
+:small:`http://www.numpy.org/neps/nep-0001-npy-format.html`
+
+GPU and CPU have separate address spaces, that means
+everything copied between them needs serialization/deserialization
+
+Adopting an array-oriented design for all data both
+on CPU and GPU is a hugely simplifies work CPU+GPU work
+
+NumPy is leading array-oriented package, but that is a python extension ...
+YES : but the NumPy serialization format is very simple, so can easily
+read/write NumPy arrays from C++
+
+Benefits : random access to data from arrays -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="survey-of-high-level-general-purpose-cuda-packages">
+<h1><span class="small">Survey of High Level General Purpose CUDA Packages</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">CuPy : Simplest CUDA Interface</span></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://cupy.chainer.org/">https://cupy.chainer.org/</a></li>
+<li>NumPy API accelerated by CUDA stack</li>
+<li>plus some of SciPy API</li>
+</ul>
+<div class="figure align-center">
+<img alt="/env/presentation/cupy/cupy_logo_only.png" src="/env/presentation/cupy/cupy_logo_only.png" style="width: 300px;" />
+</div>
+<ul class="small simple">
+<li>develop processing with NumPy on CPU<ul>
+<li>switch <em>numpy-&gt;cupy</em> to test on GPU</li>
+<li><span class="red">great for prototyping</span></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>&quot;Production&quot; CuPy ? Depends on requirements:</strong></p>
+<ul class="small last simple">
+<li>integrations (eg Geant4, OpenGL, ...)</li>
+<li>control + performance</li>
+</ul>
+</div>
+<ul class="small simple">
+<li>Learn CUDA basics (kernels, thread+memory hierarchy, ...)<ul>
+<li><span class="red">BUT: base development on higher level libs -&gt; faster start</span></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>C++ Based Interfaces to CUDA</strong></p>
+<ul class="small simple">
+<li>Thrust : <a class="reference external" href="https://developer.nvidia.com/Thrust">https://developer.nvidia.com/Thrust</a><ul>
+<li>C++ interface to CUDA performance</li>
+<li>high-level abstraction : reduce, scan, sort</li>
+</ul>
+</li>
+<li>CUB : <a class="reference external" href="http://nvlabs.github.io/cub/">http://nvlabs.github.io/cub/</a><ul>
+<li>CUDA C++ specific, GPU less hidden</li>
+</ul>
+</li>
+<li>MGPU : <a class="reference external" href="https://github.com/moderngpu/moderngpu">https://github.com/moderngpu/moderngpu</a><ul>
+<li>teaching tool : examples of CUDA algorithms</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Mature NVIDIA Basis Libraries</strong></p>
+<ul class="small simple">
+<li>cuRAND, cuFFT, cuBLAS, cuSOLVER, cuTENSOR, ...<ul>
+<li><span class="blue">https://developer.nvidia.com/gpu-accelerated-libraries</span></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>RAPIDS : New NVIDIA &quot;Suite&quot; of open source data science libs</strong></p>
+<ul class="small simple">
+<li>GPU-accelerated open source data science suite<ul>
+<li>&quot;... end-to-end data science workflows...&quot;  <a class="reference external" href="http://rapids.ai/">http://rapids.ai/</a></li>
+<li>cuDF : GPU dataframe library, Pandas-on-GPU</li>
+</ul>
+</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+I highlight two: CuPy and Thrust
+
+* Thrust is part of every CUDA installation just include headers into
+  your C++ and compile with nvcc
+
+  * avoids many of the hassles of using CUDA, including memory heirarchy,
+    and deciding on block/grid sizes
+
+Its not an either/or, you can easily combine ordinary low level CUDA with Thrust.
+
+* Python interfaces to CUDA are a good way to prototype and get you started.
+* Once you gain experience from these, you may find it easier to adopt
+  other tools like Thrust for ease of integration
+
+
+ After hearing about the performance that CuPy can give you with very little
+ effort from the comfort of python :
+
+ * You might wonder if you can avoid developing your C/C++/CMake and CUDA skills ?
+   to benefit from GPU performance
+
+ That depends on:
+
+ * what your developments needs to integrate with ?
+ * how much control/performance do you need ?
+ * how expert do you want to become ?
+
+ Opticks, needs to integrate with Geant4 libraries and detector simulation
+ frameworks : so a standard approach of mostly C++ implemented libraries
+
+ * ~20 C++ libs
+ * CUDA/OptiX programs for geometry
+ * python NumPy analysis/debugging code -->
+</div>
+<div class="slide" id="rendering-five-decades-of-research-1">
+<h1>Rendering Five Decades of Research 1</h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="rendering-five-decades-of-research-2">
+<h1>Rendering Five Decades of Research 2</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Milestones over 50 years of CG</span></p>
+<p class="small"><strong>Improving image realism, speed</strong></p>
+<ul class="small simple">
+<li>1968 : Appel : ray casting</li>
+<li>1979 : Whitted : recursive ray tracing</li>
+<li>1986 : Kajiya : The Rendering Equation</li>
+<li>2018 : NVIDIA RTX : real-time cinematic path tracing with one GPU</li>
+</ul>
+<p class="small last"><span class="red">Image rendering : Applied photon simulation</span></p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="project-sol">
+<h1><span class="i">Project Sol</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">(2018) NVIDIA RTX</span></p>
+<p class="small"><strong>Project Sol : NVIDIA RTX Demo</strong></p>
+<p class="small last">real-time cinematic raytracing on single GPU ( NVIDIA RTX 2080Ti)</p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="path-tracing-in-production-1">
+<h1><span class="i">Path Tracing in Production 1</span></h1>
+<!-- comment
+
+* http://www.realtimerendering.com/raytracing/siggraph2019/Path_Tracing_in_Production_part_1.pdf
+
+* https://jo.dreggn.org/path-tracing-in-production/2019/ptp-part1.pdf
+
+* https://cs.dartmouth.edu/~wjarosz/publications/novak18monte.html -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="path-tracing-in-production-2">
+<h1><span class="i">Path Tracing in Production 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Monte Carlo Path Tracing</span></p>
+<ul class="small simple">
+<li>state-of-the-art rendering technique</li>
+<li>random sampling (Monte Carlo method)</li>
+<li>numerical solution of <strong>&quot;The Rendering Eqn.&quot;</strong></li>
+</ul>
+<p class="small last"><strong>Movies ≈ monte carlo optical photon simulations</strong></p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* "ground truth" render
+* numerical integration by recursive point-sampling
+* Russian roulette killing of rays
+* **ubiquitous** approach to solution to numerical solution of RE
+* includes indirect light (global illumination) -->
+<!-- comment
+
+Irradiance Caching and Derived Methods
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+   * https://cs.dartmouth.edu/~wjarosz/publications/dissertation/chapter3.pdf -->
+</div>
+<div class="slide" id="the-rendering-equation-1">
+<h1><span class="i">The Rendering Equation 1</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* outgoing radiance at some position in a scene is
+  equated with any emission from that point + an integral
+  sum of all reflection contributions at that point
+
+* the reflection term depends on the -->
+</div>
+<div class="slide" id="the-rendering-equation-2">
+<h1><span class="i">The Rendering Equation 2</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="samples-per-pixel-1">
+<h1><span class="i">Samples per Pixel 1</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="samples-per-pixel-2">
+<h1><span class="i">Samples per Pixel 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Monte Carlo Path Tracing</span></p>
+<ul class="last simple">
+<li>fantastically general : any geometry + lighting/surface effect</li>
+<li>BUT : slow convergence, 1/sqrt(N_samples)<ul>
+<li>many samples per pixel</li>
+<li>noise</li>
+</ul>
+</li>
+</ul>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="nvidia-optix-ai-denoiser-1">
+<h1><span class="i">NVIDIA OptiX AI Denoiser 1</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="nvidia-optix-ai-denoiser-2">
+<h1><span class="i">NVIDIA OptiX AI Denoiser 2</span></h1>
+<pre>
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">NVIDIA OptiX AI Denoiser</span></p>
+<ul class="small last simple">
+<li><a class="reference external" href="https://developer.nvidia.com/optix-denoiser">https://developer.nvidia.com/optix-denoiser</a></li>
+<li>reduce time to render quality image</li>
+<li>deep learning network trained on many thousands of images</li>
+<li>benefits from NVIDIA GPU : Tensor Cores</li>
+<li>key enabler of real-time cinematic raytracing</li>
+</ul>
+</div>
+<p class="small"><span class="white">https://research.nvidia.com/publication/interactive-reconstruction-monte-carlo-image-sequences-using-recurrent-denoising</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="physically-based-rendering-book-www-pbr-book-org">
+<h1><span class="white">Physically Based Rendering Book : www.pbr-book.org</span></h1>
+<pre>
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">Free Online Book</span></p>
+<ul class="last simple">
+<li>recommended introduction</li>
+<li>book awarded an Oscar (Film Academy Award)</li>
+</ul>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="optical-simulation-computer-graphics-vs-physics">
+<h1>Optical Simulation : Computer Graphics vs Physics</h1>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="43%" />
+<col width="57%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">CG Rendering &quot;Simulation&quot;</th>
+<th class="head">Particle Physics Simulation</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>simulates: image formation, vision</td>
+<td>simulates photons: generation, propagation, detection</td>
+</tr>
+<tr><td>(red, green, blue)</td>
+<td>wavelength range eg 400-700 nm</td>
+</tr>
+<tr><td>ignore polarization</td>
+<td>polarization vector propagated throughout</td>
+</tr>
+<tr><td>participating media: clouds,fog,fire [1]</td>
+<td>bulk scattering: Rayleigh, MIE</td>
+</tr>
+<tr><td>human exposure times</td>
+<td>nanosecond time scales</td>
+</tr>
+<tr><td>equilibrium assumption</td>
+<td>transient phenomena</td>
+</tr>
+<tr><td>ignores light speed, time</td>
+<td>arrival time crucial, speed of light : 30 cm/ns</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><strong>handling of time is the crucial difference</strong></li>
+</ul>
+<p class="small">Despite differences <span class="red">many techniques+hardware+software directly applicable to physics</span> eg:</p>
+<ul class="small simple">
+<li>GPU accelerated ray tracing (NVIDIA OptiX)</li>
+<li>GPU accelerated property interpolation via textures (NVIDIA CUDA)</li>
+<li>GPU acceleration structures (NVIDIA BVH)</li>
+</ul>
+<p class="small">Potentially Useful CG techniques for &quot;billion photon simulations&quot;</p>
+<ul class="small simple">
+<li>irradiance caching, photon mapping, progressive photon mapping</li>
+</ul>
+<p class="tiny">[1] search for: &quot;Volumetric Rendering Equation&quot;</p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="neutrino-telescope-optical-simulations-giga-photon-propagations">
+<h1><span class="small">Neutrino Telescope Optical Simulations : Giga-Photon Propagations</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Re-usable photon &quot;snapshots&quot; ?</span></p>
+<ol class="small arabic simple">
+<li>full simulation -&gt; photon &quot;snapshot&quot; cache<ul>
+<li>when crossing virtual segmented &quot;shells&quot; ?<ul>
+<li>collect direction,polarization onto positioned segments</li>
+<li>what shape/segmentation ?</li>
+<li><strong>lots of duplicated information</strong></li>
+</ul>
+</li>
+<li>when scattering (pre or post parameters)<ul>
+<li>collect position,direction,polarization</li>
+<li>no shells, more involved lookup</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>fast no-photon simulation<ul>
+<li>orient &quot;snapshot&quot; to the primary</li>
+</ul>
+</li>
+<li>&quot;snapshots&quot; near sensors -&gt; resume propagation<ul>
+<li>times, incidence angles at sensors -&gt; hits</li>
+</ul>
+</li>
+</ol>
+<p class="small">GPU &quot;snapshot&quot; cache data structure:</p>
+<ul class="small last simple">
+<li>photon lists, binned PDFs ?</li>
+<li>k-d tree (for nearest neighbor searches)</li>
+</ul>
+</div>
+<ul class="small simple">
+<li>Cherenkov light generation</li>
+<li>radioactive + biological backgrounds</li>
+<li><span class="red">propagation : scattering + absorption (billions)</span><ul>
+<li>direct light (unscattered) : fast</li>
+<li>indirect (scattered) : slow</li>
+</ul>
+</li>
+<li>detection on sparse sensors</li>
+</ul>
+<p class="small"><strong>Opticks as drop in fast replacement for Geant4</strong></p>
+<p class="small">Full+fast GPU accelerated simulation:</p>
+<ul class="small simple">
+<li>Cerenkov generation, Rayleigh scattering, absorption</li>
+<li>angle dependent sensor collection efficiency culling</li>
+<li>BUT: launch size, VRAM limited: 48G ≈ 400M photons</li>
+</ul>
+<p class="small"><strong>Re-usage is caching optimization, still need full propagation:</strong></p>
+<ul class="small simple">
+<li>populate the cache</li>
+<li>validate the trickery</li>
+<li>re-usage reduces need for expensive propagations</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+
+:small:`Potential Opticks Extensions for giga-photon propagations`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+.. class:: small
+
+   * auto-splitting launches to fit VRAM (straightforward)
+   * multi-GPU splitting (experimentation needed)
+   * re-usable photons : GPU snapshot/resumption
+
+     * lots of experimentation needed -->
+</div>
+<div class="slide" id="opticks-rayleigh-scattering-cuda-line-by-line-port-of-g4oprayleigh">
+<h1><span class="small">Opticks Rayleigh Scattering : CUDA line-by-line port of G4OpRayleigh</span></h1>
+<pre class="mypretiny">
+130 __device__ void rayleigh_scatter(Photon &p, curandState &rng)
+131 {
+137     float3 newDirection, newPolarization ;
+139     float cosTheta ;
+141     do {
+145         newDirection = uniform_sphere(&rng);
+146         rotateUz(newDirection, p.direction );
+151
+152         float constant = -dot(newDirection,p.polarization);
+153         newPolarization = p.polarization + constant*newDirection ;
+154
+<b><span class="alarm">155         // newPolarization
+156         // 1. transverse to newDirection (as that component is subtracted)
+157         // 2. same plane as old p.polarization and newDirection (by construction)
+158         // </span></b>
+...         ... corner case elided ...
+182         if(curand_uniform(&rng) < 0.5f) newPolarization = -newPolarization ;
+184
+185         newPolarization = normalize(newPolarization);
+189         cosTheta = dot(newPolarization,p.polarization) ;
+190
+191     } while ( cosTheta*cosTheta < curand_uniform(&rng)) ;
+192
+193     p.direction = newDirection ;
+194     p.polarization = newPolarization ;
+195 }
+</pre><p class="small"><strong>Have to persist the polarization vector, to truly resume a propagation</strong></p>
+<ul class="small simple">
+<li>could persist pre-scatter : polarization, direction</li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/cu/rayleigh.h">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/cu/rayleigh.h</a></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="developing-a-photon-snapshot-cache">
+<h1><span class="small">Developing a photon &quot;snapshot&quot; cache</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Virtual shell OR scatter-based ?</span></p>
+<p class="small"><strong>What is VRAM of available GPUs ?</strong></p>
+<ul class="small simple">
+<li>will constrain possibilities</li>
+</ul>
+<p class="small"><strong>Literature Search/Learning</strong></p>
+<ul class="small simple">
+<li>photon mapping (CG style)</li>
+<li>irradiance caching (CG style)</li>
+<li>Z-order curve, Morton codes</li>
+<li><span class="blue">kd-tree</span>, spatial hashing, ...</li>
+</ul>
+<p class="small"><strong>Gain Experience</strong></p>
+<ul class="small simple">
+<li>find/tryout open source CUDA implementations</li>
+<li>compare: size, convenience, speed</li>
+<li>try: domain compression, bit-squeezing</li>
+</ul>
+<p class="small last"><strong>-&gt; informed decisions</strong></p>
+</div>
+<p class="small"><strong>Where/when/what to collect ?</strong></p>
+<ul class="small simple">
+<li>tetrahedral volumetric meshes (tet-mesh)<ul>
+<li>inherent segmentation</li>
+<li>natural adaptive resolution</li>
+<li>triangle faces : Giga-rays/s intersection (RT Cores)[1]</li>
+<li>good for general light field capture</li>
+</ul>
+</li>
+<li>&quot;concentric&quot; spheres/cylinders/cones oriented to primary<ul>
+<li>natural for exploiting track axis rotational symmetry</li>
+</ul>
+</li>
+<li><span class="blue">at scatters</span> (<span class="blue">pre-scatter</span>/post-scatter parameters)<ul>
+<li>position, direction, polarization</li>
+<li>can generate post from pre, but not v.v.</li>
+</ul>
+</li>
+<li>collect photons OR aggregate binned PDFs ?<ul>
+<li>PDF-&gt;CDF-&gt;generate photons (like Opticks &quot;gensteps&quot;)</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Too many options: experimentation needed to iterate towards solution</strong></p>
+<p class="tiny">[1] RTX Beyond Ray Tracing: Exploring the Use of Hardware Ray Tracing Cores for Tet-Mesh Point Location
+<a class="reference external" href="https://www.willusher.io/publications/rtx-points">https://www.willusher.io/publications/rtx-points</a></p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+
+:small:`Stochastic Progressive Photon Mapping`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+    * http://www.pbr-book.org/3ed-2018/Light_Transport_III_Bidirectional_Methods/Stochastic_Progressive_Photon_Mapping.html -->
+</div>
+<div class="slide" id="conclusion">
+<h1><span class="small">Conclusion</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Highlights</span></p>
+<ul class="small last simple">
+<li>Benefit from hardware accelerated ray tracing</li>
+<li><strong>Opticks &gt; 1500x Geant4</strong> (one Turing GPU)</li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 50px;" />
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> : state-of-the-art GPU ray tracing applied to optical photon simulation and
+integrated with <em>Geant4</em>, eliminating memory and time bottlenecks.</p>
+<ul class="simple">
+<li><strong>neutrino telescope simulation can benefit drastically from Opticks</strong><ul>
+<li>Drastic speedup -&gt; better detector understanding -&gt; greater precision</li>
+<li>more photon limited -&gt; more overall speedup<ul>
+<li>99% -&gt; 100x, 99.9% -&gt; 1000x</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 10px;" />
+</blockquote>
+<table border="1" class="docutils align-center">
+<colgroup>
+<col width="53%" />
+<col width="47%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
+<td>code repository</td>
+</tr>
+<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
+<td>presentations and videos</td>
+</tr>
+<tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
+<td>forum/mailing list archive</td>
+</tr>
+<tr><td>email:opticks+subscribe&#64;groups.io</td>
+<td>subscribe to mailing list</td>
+</tr>
+</tbody>
+</table>
+<!-- comment
+
+*Opticks* uses hardware accelerated GPU ray tracing
+via NVIDIA OptiX to give **effectively zero time and zero CPU memory**
+optical photon simulation to *Geant4* applications. -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+</div>
+</body>
+</html>
