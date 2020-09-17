@@ -206,19 +206,24 @@ this is closest solution of the polynomial in t that fulfils the minimum t requi
 <dd>geometry identity information including GVolume/GNode index, mesh/solid index, boundary index, sensor index</dd>
 </dl>
 <p>ggeo/GVolume.cc:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">192</span> <span class="n">guint4</span> <span class="n">GVolume</span><span class="p">::</span><span class="n">getIdentity</span><span class="p">()</span>
-<span class="mi">193</span> <span class="p">{</span>
-<span class="mi">194</span>     <span class="k">return</span> <span class="n">guint4</span><span class="p">(</span>
-<span class="mi">195</span>                    <span class="n">m_index</span><span class="p">,</span>           <span class="o">//</span> <span class="mi">0</span><span class="o">-</span><span class="n">based</span> <span class="n">GVolume</span><span class="o">/</span><span class="n">GNode</span> <span class="n">index</span>
-<span class="mi">196</span>                    <span class="n">getMeshIndex</span><span class="p">(),</span>    <span class="o">//</span> <span class="mi">0</span><span class="o">-</span><span class="n">based</span> <span class="n">GMesh</span><span class="o">/</span><span class="n">solid</span> <span class="n">index</span>
-<span class="mi">197</span>                    <span class="n">m_boundary</span><span class="p">,</span>        <span class="o">//</span> <span class="mi">0</span><span class="o">-</span><span class="n">based</span> <span class="n">boundary</span> <span class="n">index</span>
-<span class="mi">198</span>                    <span class="n">getSensorSurfaceIndex</span><span class="p">()</span>
-<span class="mi">199</span>                  <span class="p">);</span>
-<span class="mi">200</span> <span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">201</span> <span class="n">guint4</span> <span class="n">GVolume</span><span class="p">::</span><span class="n">getIdentity</span><span class="p">()</span>
+<span class="mi">202</span> <span class="p">{</span>
+<span class="mi">203</span>     <span class="n">unsigned</span> <span class="n">node_index</span> <span class="o">=</span> <span class="n">m_index</span> <span class="p">;</span>
+<span class="mi">204</span>
+<span class="mi">205</span>     <span class="o">//</span><span class="n">unsigned</span> <span class="n">identity_index</span> <span class="o">=</span> <span class="n">getSensorSurfaceIndex</span><span class="p">()</span> <span class="p">;</span>
+<span class="mi">206</span>     <span class="n">unsigned</span> <span class="n">identity_index</span> <span class="o">=</span> <span class="n">m_copyNumber</span>  <span class="p">;</span>
+<span class="mi">207</span>
+<span class="mi">208</span>     <span class="k">return</span> <span class="n">guint4</span><span class="p">(</span>
+<span class="mi">209</span>                    <span class="n">node_index</span><span class="p">,</span>
+<span class="mi">210</span>                    <span class="n">getMeshIndex</span><span class="p">(),</span>
+<span class="mi">211</span>                    <span class="n">m_boundary</span><span class="p">,</span>
+<span class="mi">212</span>                    <span class="n">identity_index</span>
+<span class="mi">213</span>                  <span class="p">);</span>
+<span class="mi">214</span> <span class="p">}</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Opticks GVolume/GNode corresponds to Geant4 placed volumes (ie Physical Volume, PV).
+<li>Opticks GVolume/GNode corresponds to Geant4 placed volumes (ie Physical Volume, G4PVPlacement).
 There are often many tens of thousands of these in the detector geometry</li>
 <li>There are typically much fewer distinct GMesh in a geometry, these
 correspond to Geant4 solids that are associated with a logical volume.  Despite the “mesh”

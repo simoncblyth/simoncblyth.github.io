@@ -39,7 +39,9 @@
   <ul>
 <li><a class="reference internal" href="#">Opticks Install Instructions</a><ul>
 <li><a class="reference internal" href="#get-opticks">Get Opticks</a></li>
-<li><a class="reference internal" href="#bash-shell-setup-with-opticks-setup">Bash Shell Setup with .opticks_setup</a></li>
+<li><a class="reference internal" href="#update-an-existing-clone">Update an existing clone</a></li>
+<li><a class="reference internal" href="#bash-shell-setup-with-opticks-config">Bash Shell Setup with .opticks_config</a></li>
+<li><a class="reference internal" href="#three-type-of-externals-system-foreign-and-automated">Three type of externals : system, foreign and automated</a></li>
 <li><a class="reference internal" href="#recommended-bash-setup-arrangement">Recommended bash setup arrangement</a></li>
 <li><a class="reference internal" href="#check-your-bash-environment-setup">Check your bash environment setup</a><ul>
 <li><a class="reference internal" href="#bash-profile-or-bashrc-macos-and-linux">.bash_profile OR .bashrc, macOS and Linux</a></li>
@@ -67,13 +69,13 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#building-opticks-against-foreign-externals-such-as-geant4-boost">Building Opticks against “foreign” externals such as Geant4, Boost</a></li>
-<li><a class="reference internal" href="#testin-cuda-and-optix-installs-and-nvcc-toolchain">Testin CUDA and OptiX Installs and nvcc toolchain</a></li>
+<li><a class="reference internal" href="#testing-cuda-and-optix-installs-and-nvcc-toolchain">Testing CUDA and OptiX Installs and nvcc toolchain</a></li>
 <li><a class="reference internal" href="#testing-thrust">Testing Thrust</a></li>
 <li><a class="reference internal" href="#geant4">Geant4</a></li>
 <li><a class="reference internal" href="#building-opticks">Building Opticks</a><ul>
 <li><a class="reference internal" href="#externals">Externals</a></li>
 <li><a class="reference internal" href="#separate-installation-of-externals">Separate installation of externals</a></li>
-<li><a class="reference internal" href="#manually-configuring-opticks">Manually Configuring Opticks</a></li>
+<li><a class="reference internal" href="#compute-capability">Compute Capability</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#opticks-without-nvidia-optix-and-cuda">Opticks Without NVIDIA OptiX and CUDA ?</a></li>
@@ -141,75 +143,98 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="bash-shell-setup-with-opticks-setup">
-<h2>Bash Shell Setup with .opticks_setup<a class="headerlink" href="#bash-shell-setup-with-opticks-setup" title="Permalink to this headline">¶</a></h2>
-<p>Example <cite>~/.opticks_setup</cite>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .opticks_setup</span>
-
-<span class="nb">export</span> <span class="nv">LOCAL_BASE</span><span class="o">=</span><span class="nv">$HOME</span>/local
-<span class="nb">export</span> <span class="nv">OPTICKS_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/opticks
-<span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$HOME</span>
-
-opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
-opticks-     <span class="c1">##</span>
-
-o<span class="o">(){</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> git status <span class="p">;</span> <span class="o">}</span>
-op<span class="o">(){</span> op.sh <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
-
-<span class="nv">PATH</span><span class="o">=</span><span class="nv">$OPTICKS_HOME</span>/bin:<span class="nv">$OPTICKS_HOME</span>/ana:<span class="nv">$LOCAL_BASE</span>/opticks/lib:<span class="nv">$PATH</span>  <span class="c1">## easy access to scripts and executables</span>
-<span class="nb">export</span> PATH
-
-<span class="nb">export</span> <span class="nv">OPTICKS_KEY</span><span class="o">=</span>OKX4Test.X4PhysicalVolume.lWorld0x4bc2710_PV.f6cc352e44243f8fa536ab483ad390ce
-<span class="c1">## picking a geometry</span>
-
-
-<span class="nb">export</span> <span class="nv">TMP</span><span class="o">=</span>/home/blyth/local/opticks/tmp
-tmp<span class="o">(){</span> <span class="nb">cd</span> <span class="nv">$TMP</span> <span class="p">;</span> <span class="nb">pwd</span> <span class="p">;</span>  <span class="o">}</span>
-<span class="nb">export</span> <span class="nv">OPTICKS_EVENT_BASE</span><span class="o">=</span><span class="nv">$TMP</span>
-<span class="c1">## define a directory in which to store test events, used by integration tests</span>
+<div class="section" id="update-an-existing-clone">
+<h2>Update an existing clone<a class="headerlink" href="#update-an-existing-clone" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">opticks</span>
+<span class="n">git</span> <span class="n">remote</span> <span class="o">-</span><span class="n">v</span>   <span class="c1"># should list bitbucket.org urls</span>
+<span class="n">git</span> <span class="n">status</span>
+<span class="n">git</span> <span class="n">pull</span>
 </pre></div>
 </div>
-<p>Envvars:</p>
-<dl class="docutils">
-<dt>LOCAL_BASE</dt>
-<dd>configures the root of the install, canonically “/usr/local” but can be $HOME/local of you dont
-have permissions for “/usr/local”</dd>
-<dt>OPTICKS_HOME</dt>
-<dd>path to the “opticks” source directory</dd>
-<dt>PYTHONPATH</dt>
-<dd>directory containing the “opticks” source directory, allowing “import opticks”
-to work from python scripts</dd>
-<dt>OPTICKS_KEY</dt>
-<dd>picks a geometry geocache, created with the geocache-create function</dd>
-<dt>PATH</dt>
-<dd>Opticks executables including more than 400 tests are installed into $LOCAL_BASE/opticks/lib,
-setting the PATH as indicated gives easy access to these as well as many scripts</dd>
-<dt>TMP</dt>
-<dd>when undefined a default directory of /tmp/username/opticks is used as scratch space by unit tests</dd>
-<dt>OPTICKS_EVENT_BASE</dt>
-<dd><p class="first">The OPTICKS_EVENT_BASE envvar is used by both C++ boostrap/BOpticksEvent.cc and
-python ana/nload.py to define a directory beneath with events are stored.
-When undefined this defaults to the TMP envvar value or its default.</p>
-<p class="last">Some integration tests write photon propagation OpticksEvents which are loaded into
-python for analysis by scripts directly invoked from the C++ executable.
-OpticksEvents comprise several .npy arrays  necessitating the NumPy python module for loading.</p>
-</dd>
-</dl>
-<p>The most important lines of the setup are:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-(){ . $HOME/opticks/opticks.bash &amp;&amp; opticks-env $* ; }
+</div>
+<div class="section" id="bash-shell-setup-with-opticks-config">
+<h2>Bash Shell Setup with .opticks_config<a class="headerlink" href="#bash-shell-setup-with-opticks-config" title="Permalink to this headline">¶</a></h2>
+<p>Copy the <cite>example.opticks_config</cite> to your home directory and hook it up to your
+bash environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">opticks_config</span> <span class="o">~/.</span><span class="n">opticks_config</span>
+<span class="n">echo</span> <span class="s2">&quot;source ~/.opticks_config&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">~/.</span><span class="n">bashrc</span>
+</pre></div>
+</div>
+<p>Ensure that <cite>.bashrc</cite> is sourced from your <cite>~/.bash_profile</cite>.  The <cite>~/.opticks_config</cite>
+must be customized for your system, changing the PREFIX envvar paths and directory arguments to <cite>opticks-prepend-prefix</cite>.
+Extracts from the example <cite>~/.opticks_config</cite> are shown below.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .opticks_config</span>
+<span class="c1"># .bash_profile &gt; .bashrc &gt; .opticks_config</span>
+
+opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
 opticks-
+o<span class="o">(){</span> opticks- <span class="p">;</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> git status <span class="p">;</span> <span class="o">}</span>
+t<span class="o">(){</span> <span class="nb">typeset</span> -f <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
+
+<span class="c1"># PATH envvars control the externals that opticks/CMake or pkg-config will find</span>
+<span class="nb">unset</span> CMAKE_PREFIX_PATH
+<span class="nb">unset</span> PKG_CONFIG_PATH
+
+<span class="c1"># mandatory envvars in buildenv</span>
+<span class="nb">export</span> <span class="nv">OPTICKS_PREFIX</span><span class="o">=</span>/usr/local/opticks
+<span class="nb">export</span> <span class="nv">OPTICKS_CUDA_PREFIX</span><span class="o">=</span>/usr/local/cuda
+<span class="nb">export</span> <span class="nv">OPTICKS_OPTIX_PREFIX</span><span class="o">=</span>/usr/local/optix
+
+<span class="nb">export</span> <span class="nv">OPTICKS_COMPUTE_CAPABILITY</span><span class="o">=</span><span class="m">30</span>
+
+<span class="c1">## hookup paths to access &quot;foreign&quot; externals</span>
+opticks-prepend-prefix /usr/local/opticks_externals/clhep
+opticks-prepend-prefix /usr/local/opticks_externals/xercesc
+opticks-prepend-prefix /usr/local/opticks_externals/g4
+opticks-prepend-prefix /usr/local/opticks_externals/boost
+
+<span class="c1">## NB changing any directory paths demands an opticks-full rebuild</span>
+<span class="c1">## This is enforced by $OPTICKS_PREFIX/bin/opticks-setup.sh  which</span>
+<span class="c1">## is generated by opticks-full with opticks-setup-generate.</span>
 </pre></div>
 </div>
-<p>The first line defines the bash function <em>opticks-</em> that is termed a precursor function
-as running it will define other functions all starting with <em>opticks-</em> such as <em>opticks-vi</em>
-and <em>opticks-usage</em>.  The second line runs the function which defines further functions.</p>
+<p>What this <cite>.opticks_config</cite> script does:</p>
+<ol class="arabic simple">
+<li>defines the <cite>opticks-</cite> bash function, this is termed a precursor function as running it will define other functions all starting with <em>opticks-</em> such as <em>opticks-vi</em></li>
+<li>invokes the <cite>opticks-</cite> bash function which defines <cite>opticks-*</cite> functions as well as other precursor functions such as <cite>g4-</cite></li>
+<li>exports three mandatory PREFIX envvars identifying where to install Opticks and where CUDA and OptiX are installed.</li>
+<li>exports mandatory envvar OPTICKS_COMPUTE_CAPABILITY identifying the capability of the GPU</li>
+<li>invokes opticks-prepend-prefix for “foreign” externals, this
+prepends to path envvars including PATH, CMAKE_PREFIX_PATH, PKG_CONFIG_PATH and LD_LIBRARY_PATH</li>
+</ol>
+</div>
+<div class="section" id="three-type-of-externals-system-foreign-and-automated">
+<h2>Three type of externals : system, foreign and automated<a class="headerlink" href="#three-type-of-externals-system-foreign-and-automated" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first"><strong>system</strong> externals: NVIDIA GPU Driver, NVIDIA CUDA, NVIDIA OptiX must be installed
+following the instructions from NVIDIA and assistance from your system administrator.
+The envvars OPTICKS_CUDA_PREFIX and OPTICKS_OPTIX_PREFIX exported from <cite>~/.opticks_config</cite> communicate
+the install locations to Opticks.</p>
+</li>
+<li><p class="first"><strong>foreign</strong> externals are no longer automatically installed by <cite>opticks-full</cite> in order to facilitate integration of Opticks with detector
+simulation frameworks.</p>
+<p>The location of these foreign externals is communicated to the Opticks CMake machinery (<cite>om-cmake</cite> and <cite>om-cmake-okconf</cite>)
+via the CMAKE_PREFIX_PATH envvar. This envvar and other PATH envvars such as LD_LIBRARY_PATH are
+appended and exported by the <cite>~/.opticks_config</cite> lines starting <cite>opticks-prepend-prefix</cite></p>
+<p>These foreign externals can optionally be installed using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opticks</span><span class="o">-</span><span class="n">foreign</span>    <span class="c1"># list them, currently : boost, clhep, xercesc, g4</span>
+<span class="n">opticks</span><span class="o">-</span><span class="n">foreign</span><span class="o">-</span><span class="n">install</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>automated</strong> externals are automatically installed by <cite>opticks-full</cite>.  To list them:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opticks</span><span class="o">-</span><span class="n">externals</span>   <span class="c1"># currently:  bcm, glm, glfw, glew, gleq, imgui, assimp, openmesh, plog, opticksaux, ...</span>
+</pre></div>
+</div>
+</li>
+</ol>
 </div>
 <div class="section" id="recommended-bash-setup-arrangement">
 <h2>Recommended bash setup arrangement<a class="headerlink" href="#recommended-bash-setup-arrangement" title="Permalink to this headline">¶</a></h2>
 <p>The recommended arrangment of bash setup scripts:</p>
 <ul class="simple">
 <li><cite>~/.bash_profile</cite> should source <cite>~/.bashrc</cite></li>
-<li><cite>~/.bashrc</cite> should source <cite>~/.opticks_setup</cite> (PRIOR to any early exits)</li>
+<li><cite>~/.bashrc</cite> should source <cite>~/.opticks_config</cite> (PRIOR to any early exits)</li>
 </ul>
 <p>Using this approach succeeds to setup the opticks bash functions
 and exports with either “bash -l” or “bash -i” or from within
@@ -226,14 +251,14 @@ distros and macOS.</p>
 </pre></div>
 </div>
 <p>Some Linux distros (Ubuntu) have a default <cite>.bashrc</cite> which early exits.
-It is necessary to <em>source ~/.opticks_setup</em> prior to the early exit.
+It is necessary to <em>source ~/.opticks_config</em> prior to the early exit.
 Example <cite>~/.bashrc</cite>:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bashrc</span>
 
-vip<span class="o">(){</span> vim ~/.bash_profile ~/.bashrc ~/.opticks_setup <span class="p">;</span> <span class="o">}</span>
+vip<span class="o">(){</span> vim ~/.bash_profile ~/.bashrc ~/.opticks_config <span class="p">;</span> <span class="o">}</span>
 ini<span class="o">(){</span> <span class="nb">source</span> ~/.bashrc <span class="p">;</span> <span class="o">}</span>
 
-<span class="nb">source</span> ~/.opticks_setup
+<span class="nb">source</span> ~/.opticks_config
 
 <span class="c1">##### below from default Ubuntu .bashrc early exits if bash is not invoked with -i option</span>
 
@@ -248,7 +273,7 @@ ini<span class="o">(){</span> <span class="nb">source</span> ~/.bashrc <span cla
 </div>
 <div class="section" id="check-your-bash-environment-setup">
 <h2>Check your bash environment setup<a class="headerlink" href="#check-your-bash-environment-setup" title="Permalink to this headline">¶</a></h2>
-<p>If the below commandline gives errors, compare your <em>.bash_profile</em>  <em>.bashrc</em> and <em>.opticks_setup</em> with
+<p>If the below commandline gives errors, compare your <em>.bash_profile</em>  <em>.bashrc</em> and <em>.opticks_config</em> with
 the above examples.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ bash -lc &quot;opticks- ; opticks-info &quot;    ## RHEL, Centos (and Ubuntu too)
 
@@ -278,26 +303,36 @@ the same behaviour on both Linux and macOS.</p>
 <h2>Location Overrides by envvar<a class="headerlink" href="#location-overrides-by-envvar" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
+<col width="27%" />
 <col width="40%" />
-<col width="60%" />
+<col width="32%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">envvar</th>
 <th class="head">precursor-;funcname</th>
+<th class="head">Notes</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>OPTICKS_GEANT4_HOME</td>
-<td>g4-;g4-prefix</td>
+<tr class="row-even"><td>OPTICKS_PREFIX</td>
+<td>opticks-;opticks-prefix</td>
+<td>envvar input to opticks-full</td>
 </tr>
-<tr class="row-odd"><td>OPTICKS_OPTIX_HOME</td>
-<td>optix-;optix-fold</td>
+<tr class="row-odd"><td>OPTICKS_OPTIX_PREFIX</td>
+<td>opticks-;opticks-optix-prefix</td>
+<td>envvar input to opticks-full</td>
 </tr>
-<tr class="row-even"><td>OPTICKS_COMPUTE_CAPABILITY</td>
+<tr class="row-even"><td>OPTICKS_CUDA_PREFIX</td>
+<td>opticks-;opticks-cuda-prefix</td>
+<td>envvar input to opticks-full</td>
+</tr>
+<tr class="row-odd"><td>OPTICKS_COMPUTE_CAPABILITY</td>
 <td>opticks-;opticks-compute-capability</td>
+<td>envvar input to opticks-full</td>
 </tr>
-<tr class="row-odd"><td>OPTICKS_OPTIX_INSTALL_DIR</td>
-<td>opticks-;opticks-optix-install-dir</td>
+<tr class="row-even"><td>OPTICKS_GEANT4_PREFIX</td>
+<td>g4-;g4-prefix</td>
+<td>NO LONGER AN INPUT</td>
 </tr>
 </tbody>
 </table>
@@ -309,11 +344,12 @@ A list is provided at <a class="reference external" href="https://developer.nvid
 <p>Opticks installation requires:</p>
 <ul class="simple">
 <li>bash shell and build tools such as mercurial, git, curl, etc..</li>
-<li>recent cmake 3.8+</li>
+<li>recent cmake 3.12+</li>
 <li>Boost C++ libraries 1.59+</li>
 <li>installations of pre-requisites packages, see below for notes on versions<ul>
-<li>NVIDIA OptiX</li>
+<li>NVIDIA GPU and Driver</li>
 <li>NVIDIA CUDA</li>
+<li>NVIDIA OptiX</li>
 </ul>
 </li>
 </ul>
@@ -652,33 +688,12 @@ the CUDA version and the NVIDIA driver.</p>
 <p>Sometimes due to the suitable NVIDIA driver not yet being installed by
 your system admin it is necessary to use older OptiX+CUDA versions.
 Opticks aims to allow this for recent version combinations only.</p>
-<p>Extract from .opticks_setup:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># The location to look for OptiX libs defaults to $(opticks-prefix)/externals/OptiX
-# to override that while testing a non-standard OptiX version set the OPTICKS_OPTIX_INSTALL_DIR envvar
-# which overrides the default in bash function opticks-optix-install-dir
-#
-unset OPTICKS_OPTIX_INSTALL_DIR
-export OPTICKS_OPTIX_INSTALL_DIR=/usr/local/OptiX_511
-
-export CUDA_VERSION=10.1
-unset LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/usr/local/cuda-${CUDA_VERSION}/lib64
-
-# Normally Opticks executables find the OptiX libs via the RPATH
-#  &quot;$ORIGIN/../lib:$ORIGIN/../lib64:$ORIGIN/../externals/lib:$ORIGIN/../externals/lib64:$ORIGIN/../externals/OptiX/lib64&quot;
-#
-# when using a non-standard OptiX version (older or newer)
-# it is necessary to append to LD_LIBRARY_PATH as penance for being non-standard
-#
-[ -n &quot;$OPTICKS_OPTIX_INSTALL_DIR&quot; ] &amp;&amp; LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${OPTICKS_OPTIX_INSTALL_DIR}/lib64
-</pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="building-opticks-against-foreign-externals-such-as-geant4-boost">
 <h2>Building Opticks against “foreign” externals such as Geant4, Boost<a class="headerlink" href="#building-opticks-against-foreign-externals-such-as-geant4-boost" title="Permalink to this headline">¶</a></h2>
 <p>When integrating Opticks with a detector simulation framework
-it is important that externals that are incommon between Opticks and the framework
+it is important that externals that are in common between Opticks and the framework
 are one and the same to avoid symbol inconsistency between different versions of libraries.
 The most likely packages to be in common are:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Boost</span>
@@ -750,8 +765,8 @@ writing .pc files.</p>
 </li>
 </ol>
 </div>
-<div class="section" id="testin-cuda-and-optix-installs-and-nvcc-toolchain">
-<h2>Testin CUDA and OptiX Installs and nvcc toolchain<a class="headerlink" href="#testin-cuda-and-optix-installs-and-nvcc-toolchain" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="testing-cuda-and-optix-installs-and-nvcc-toolchain">
+<h2>Testing CUDA and OptiX Installs and nvcc toolchain<a class="headerlink" href="#testing-cuda-and-optix-installs-and-nvcc-toolchain" title="Permalink to this headline">¶</a></h2>
 <p>Before trying to install Opticks check your CUDA and OptiX installs:</p>
 <ol class="arabic simple">
 <li>run the precompiled CUDA and OptiX sample binaries</li>
@@ -771,7 +786,7 @@ You are recommended to try some of the Thrust examples to check your nvcc toolch
 </div>
 <div class="section" id="geant4">
 <h2>Geant4<a class="headerlink" href="#geant4" title="Permalink to this headline">¶</a></h2>
-<p>Geant4 installed as the last external in the <em>opticks-externals</em> list.
+<p>Geant4 is no longer automatically installed by <em>opticks-full</em> it can be installed with <em>g4–</em>.
 The <em>g4-</em> precursor selects a version of Geant4.  Currently a bit dated, this is intended to be brought uptodate sometime.
 The coupling between Opticks and Geant4 is intended to be weak : so a range of
 recent versions of Geant4 are intended to be supported.</p>
@@ -863,36 +878,59 @@ g4
 <td>PLog</td>
 <td>Header only logging, supporting multi dll logging on windows</td>
 </tr>
-<tr class="row-odd"><td>opticksdata-</td>
+<tr class="row-odd"><td>oimplicitmesher-</td>
+<td>ImplicitMesher</td>
+<td>Polygonization of implicitly defined shapes</td>
+</tr>
+<tr class="row-even"><td>odcs-</td>
+<td>DualContouringSample</td>
+<td>Alternate polygonization using Octree for multi-resolution, however its slow</td>
+</tr>
+<tr class="row-odd"><td>oyoctogl-</td>
+<td>YoctoGL</td>
+<td>Used for glTF geometry file format handling, parsing/serializing</td>
+</tr>
+<tr class="row-even"><td>ocsgbsp-</td>
+<td>CSGBSP</td>
+<td>Another BSP approach to polygonization under investigation</td>
+</tr>
+<tr class="row-odd"><td>xercesc</td>
+<td>XercesC</td>
+<td>XML handling dependency of Geant4, required for GDML parsing</td>
+</tr>
+<tr class="row-even"><td>g4</td>
+<td>Geant4</td>
+<td>The preeminent simulation toolkit</td>
+</tr>
+<tr class="row-odd"><td>optickaux-</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>Some GDML geometry files for testing Opticks</td>
+</tr>
+</tbody>
+</table>
+<p>Former externals that are no longer in use:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="18%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">precursor</th>
+<th class="head">pkg name</th>
+<th class="head">notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>opticksdata-</td>
 <td><ul class="first last simple">
 <li></li>
 </ul>
 </td>
 <td>Dayabay G4DAE and GDML geometry files for testing Opticks</td>
-</tr>
-<tr class="row-even"><td>oimplicitmesher-</td>
-<td>ImplicitMesher</td>
-<td>Polygonization of implicitly defined shapes</td>
-</tr>
-<tr class="row-odd"><td>odcs-</td>
-<td>DualContouringSample</td>
-<td>Alternate polygonization using Octree for multi-resolution, however its slow</td>
-</tr>
-<tr class="row-even"><td>oyoctogl-</td>
-<td>YoctoGL</td>
-<td>Used for glTF geometry file format handling, parsing/serializing</td>
-</tr>
-<tr class="row-odd"><td>ocsgbsp-</td>
-<td>CSGBSP</td>
-<td>Another BSP approach to polygonization under investigation</td>
-</tr>
-<tr class="row-even"><td>xercesc</td>
-<td>XercesC</td>
-<td>XML handling dependency of Geant4, required for GDML parsing</td>
-</tr>
-<tr class="row-odd"><td>g4</td>
-<td>Geant4</td>
-<td>The preeminent simulation toolkit</td>
 </tr>
 </tbody>
 </table>
@@ -909,32 +947,8 @@ the precursor function and then the installer function.</p>
 <p>After installation has been done rerunning <em>opticks-externals-install</em> completes quickly,
 and does no harm.</p>
 </div>
-<div class="section" id="manually-configuring-opticks">
-<h3>Manually Configuring Opticks<a class="headerlink" href="#manually-configuring-opticks" title="Permalink to this headline">¶</a></h3>
-<p>If the automated configuring done by <em>opticks-full</em> failed to find the
-pre-requisites you may need to specify some options to <em>opticks-configure</em>
-to help the build scripts.</p>
-<p>CMake is used to configure Opticks and generate Makefiles or Visual Studio solution files on Windows.
-For a visualization only build with system Boost
-the defaults should work OK and there is no need to explicitly configure.
-If a local Boost was required then:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-configure -DBOOST_ROOT=$(boost-prefix)
-</pre></div>
-</div>
-<p>For a full build with CUDA and OptiX configure with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opticks-configure -DCUDA_TOOLKIT_ROOT_DIR=/Developer/NVIDIA/CUDA-7.0 \
-                  -DOptiX_INSTALL_DIR=/Developer/OptiX \
-                  -DCOMPUTE_CAPABILITY=52 \
-                  -DBOOST_ROOT=$(boost-prefix)
-</pre></div>
-</div>
-<p>Another configure example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opticks</span><span class="o">-</span><span class="n">configure</span> <span class="o">-</span><span class="n">DCUDA_TOOLKIT_ROOT_DIR</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="mf">7.0</span> \
-                  <span class="o">-</span><span class="n">DOptiX_INSTALL_DIR</span><span class="o">=/</span><span class="n">home</span><span class="o">/</span><span class="n">gpu</span><span class="o">/</span><span class="n">NVIDIA</span><span class="o">-</span><span class="n">OptiX</span><span class="o">-</span><span class="n">SDK</span><span class="o">-</span><span class="mf">3.8</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">linux64</span><span class="o">/</span> \
-                  <span class="o">-</span><span class="n">DCOMPUTE_CAPABILITY</span><span class="o">=</span><span class="mi">52</span> \
-                  <span class="o">-</span><span class="n">DBOOST_ROOT</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span>
-</pre></div>
-</div>
+<div class="section" id="compute-capability">
+<h3>Compute Capability<a class="headerlink" href="#compute-capability" title="Permalink to this headline">¶</a></h3>
 <p>The argument <cite>-DCOMPUTE_CAPABILITY=52</cite> specifies to compile for compute capability 5.2 architectures
 corresponding to Maxwell 2nd generation GPUs.
 Lookup the appropriate capability for your GPU in the below short table.</p>
@@ -1021,15 +1035,14 @@ Only a few of the very highest level packages depend on Geant4.</p>
 in order to allow working with multiple G4 versions (within a certain version range),
 using version preprocessor macros to accommodate differences.
 So please send copy/paste reports of incompatibilities together with G4 versions.</p>
-<p>The weak G4 dependency allows you to test most of Opticks even
+<p>The weak G4 dependency allows testing of much of Opticks even
 without G4 installed.</p>
 </div>
 <div class="section" id="embedded-opticks-using-g4ok-package">
 <h2>Embedded Opticks using G4OK package<a class="headerlink" href="#embedded-opticks-using-g4ok-package" title="Permalink to this headline">¶</a></h2>
 <p>In production, Opticks is intended to be run in an embedded mode
-where, Geant4 and Opticks communicate via “gensteps” and “hits”
-without using any Geant4 headers. This works via some
-Geant4 dependant glue code within each detectors simulation framework
+where, Geant4 and Opticks communicate via “gensteps” and “hits”.
+This works via some Geant4 dependant glue code within each detectors simulation framework
 that does the below:</p>
 <ul class="simple">
 <li>inhibits CPU generation of optical photons from G4Scintillation and G4Cerenkov processes,

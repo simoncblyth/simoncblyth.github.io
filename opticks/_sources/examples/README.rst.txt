@@ -256,5 +256,73 @@ UseOptiX7GeometryInstanced
 
 
 
+Standalone-ish OptiX 5 or 6 Examples
+----------------------------------------
 
+UseOptiXTexture
+    C API 3D texture creation, with pullback test into out_buffer
+
+UseOptiXTextureLayered
+    Switch from 3D to layered 2D texture, *exfill* attempt to fill with MapEx failed 
+
+UseOptiXTextureLayeredPP
+    Convert to use OptiX 6 C++ API 
+
+UseOptiXTextureLayeredOK
+    Start encapsulation into Make2DLayeredTexture
+
+UseOptiXTextureLayeredOKImg
+    Use ImageNPY::LoadPPM to load images into textures 
+    First try at 2d layered tex failed, so reverted to 2d textures.
+
+UseOptiXTextureLayeredOKImgGeo
+    Ray-traced theta-phi texture mapping onto a sphere, when using an Earth texture this provides 
+    Earth view PPM images centered around any latitude-longitude position.
+    This example was used to develop the watertight OptiX OCtx wrapper (C opaque pointer style) 
+    which does not leak any optix types into its interface.
+
+    Intersects are highly instrumented with the position of each interesect recorded into a pos buffer.
+
+
+UseOptiXGeometryInstanced
+    start from UseOptiXGeometryInstancedStandalone, plan:
+    
+    1. DONE: Opticks packages to reduce the amount of code
+    2. DONE: adopt OCtx watertight wrapper, adding whats needed for instancing  
+    3. DONE: add optional switch from box to sphere 
+    4. DONE: generate PPM of thousands of textured Earths  
+
+    jumble of thousands of spheres gradient shaded with red/green/blue border/midline/quadline
+
+
+UseOptiXGeometryInstancedOCtx
+    start from UseOptiXGeometryInstanced, using just OCtx 
+
+    /tmp/octx.sh               : normal shaded assembly of boxes and spheres
+    /tmp/octx.sh global        : global shaded assembly of boxes and spheres
+    /tmp/octx.sh textured,tex1 : textured assembly of boxes and spheres, using tex1 green midline
+
+    /tmp/octx.sh single        : normal shaded single box and sphere
+    /tmp/octx.sh single,textured,tex1    : single box and sphere 
+
+    /tmp/octx.sh textest,tex0  : vertical gradient with red border 
+    /tmp/octx.sh textest,tex1  : vertical gradient with green midlines
+    /tmp/octx.sh textest,tex2  : vertical gradient with blue quadlines
+
+    ISSUE 
+
+    on Linux/OptiX 6.5 the spheres are appearing as big boxes but there 
+    is no problem with the sphere implementation when used not in an assembly.
+    Perhaps problem with the transforms/scaling/bbox ? 
+     
+
+
+
+
+UseOptiXGeometryOCtx
+    start from UseOptiXGeometry to investigate why getting problem with instanced spheres in OptiX 6.5
+    Creates PPM of a single normal-shaded sphere or box picked via argument sphere.cu or box.cu 
+
+UseOptiXGeometryInstancedStandalone
+    creates a jumble of thousands of randomly oriented boxes, colorfully normal-shaded  
 

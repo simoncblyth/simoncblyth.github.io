@@ -31,6 +31,7 @@
   <ul>
 <li><a class="reference internal" href="#">Examples of Opticks Usage, especially the CMake machinery</a><ul>
 <li><a class="reference internal" href="#standalone-ish-optix-7-examples">Standalone-ish OptiX 7 Examples</a></li>
+<li><a class="reference internal" href="#standalone-ish-optix-5-or-6-examples">Standalone-ish OptiX 5 or 6 Examples</a></li>
 </ul>
 </li>
 </ul>
@@ -276,6 +277,59 @@ viewpoint math.</dd>
 <dt>UseOptiX7GeometryInstanced</dt>
 <dd>Attempting to switch UseOptiX7GeometryModular to use an
 instanced custom geometry for lots of spheres.</dd>
+</dl>
+</div>
+<div class="section" id="standalone-ish-optix-5-or-6-examples">
+<h2>Standalone-ish OptiX 5 or 6 Examples<a class="headerlink" href="#standalone-ish-optix-5-or-6-examples" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>UseOptiXTexture</dt>
+<dd>C API 3D texture creation, with pullback test into out_buffer</dd>
+<dt>UseOptiXTextureLayered</dt>
+<dd>Switch from 3D to layered 2D texture, <em>exfill</em> attempt to fill with MapEx failed</dd>
+<dt>UseOptiXTextureLayeredPP</dt>
+<dd>Convert to use OptiX 6 C++ API</dd>
+<dt>UseOptiXTextureLayeredOK</dt>
+<dd>Start encapsulation into Make2DLayeredTexture</dd>
+<dt>UseOptiXTextureLayeredOKImg</dt>
+<dd>Use ImageNPY::LoadPPM to load images into textures
+First try at 2d layered tex failed, so reverted to 2d textures.</dd>
+<dt>UseOptiXTextureLayeredOKImgGeo</dt>
+<dd><p class="first">Ray-traced theta-phi texture mapping onto a sphere, when using an Earth texture this provides
+Earth view PPM images centered around any latitude-longitude position.
+This example was used to develop the watertight OptiX OCtx wrapper (C opaque pointer style)
+which does not leak any optix types into its interface.</p>
+<p class="last">Intersects are highly instrumented with the position of each interesect recorded into a pos buffer.</p>
+</dd>
+<dt>UseOptiXGeometryInstanced</dt>
+<dd><p class="first">start from UseOptiXGeometryInstancedStandalone, plan:</p>
+<ol class="arabic simple">
+<li>DONE: Opticks packages to reduce the amount of code</li>
+<li>DONE: adopt OCtx watertight wrapper, adding whats needed for instancing</li>
+<li>DONE: add optional switch from box to sphere</li>
+<li>DONE: generate PPM of thousands of textured Earths</li>
+</ol>
+<p class="last">jumble of thousands of spheres gradient shaded with red/green/blue border/midline/quadline</p>
+</dd>
+<dt>UseOptiXGeometryInstancedOCtx</dt>
+<dd><p class="first">start from UseOptiXGeometryInstanced, using just OCtx</p>
+<p>/tmp/octx.sh               : normal shaded assembly of boxes and spheres
+/tmp/octx.sh global        : global shaded assembly of boxes and spheres
+/tmp/octx.sh textured,tex1 : textured assembly of boxes and spheres, using tex1 green midline</p>
+<p>/tmp/octx.sh single        : normal shaded single box and sphere
+/tmp/octx.sh single,textured,tex1    : single box and sphere</p>
+<p>/tmp/octx.sh textest,tex0  : vertical gradient with red border
+/tmp/octx.sh textest,tex1  : vertical gradient with green midlines
+/tmp/octx.sh textest,tex2  : vertical gradient with blue quadlines</p>
+<p>ISSUE</p>
+<p class="last">on Linux/OptiX 6.5 the spheres are appearing as big boxes but there
+is no problem with the sphere implementation when used not in an assembly.
+Perhaps problem with the transforms/scaling/bbox ?</p>
+</dd>
+<dt>UseOptiXGeometryOCtx</dt>
+<dd>start from UseOptiXGeometry to investigate why getting problem with instanced spheres in OptiX 6.5
+Creates PPM of a single normal-shaded sphere or box picked via argument sphere.cu or box.cu</dd>
+<dt>UseOptiXGeometryInstancedStandalone</dt>
+<dd>creates a jumble of thousands of randomly oriented boxes, colorfully normal-shaded</dd>
 </dl>
 </div>
 </div>

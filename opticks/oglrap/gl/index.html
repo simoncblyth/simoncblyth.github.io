@@ -74,9 +74,19 @@
 <h2>Geometry<a class="headerlink" href="#geometry" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt>nrm</dt>
-<dd>steered by <em>Renderer</em></dd>
+<dd>steered by <em>Renderer</em> (Scene.m_global_renderer)
+simple vert+frag tri-shading</dd>
+<dt>inrm</dt>
+<dd>steered by <em>Renderer</em> (Scene.m_instance_renderer[i] and  m_bbox_renderer[i])
+simple vert+frag tri-shading but using InstanceTransform mat4 attribute to yield gl_Position</dd>
+<dt>nrmvec</dt>
+<dd>steered by <em>Renderer</em> (Scene.m_globalvec_renderer) : uses geometry shader to draw normals and triangle “axes”</dd>
 <dt>tex</dt>
-<dd>used for OptiX raycast renders, OptiX populates a texture that OpenGL presents</dd>
+<dd>steered by <em>Renderer</em> (Scene.m_raytrace_renderer)
+used for OptiX raycast renders, OptiX populates a texture that OpenGL presents</dd>
+<dt>inrmcull</dt>
+<dd>steered by <em>InstLODCull</em> (Scene.m_instlodcull[i])
+attempt to use instance culling using an objectVisible input array</dd>
 </dl>
 </div>
 <div class="section" id="gensteps">
@@ -96,7 +106,7 @@
 </div>
 <div class="section" id="records-corresponding-to-each-recorded-step-of-the-photon">
 <h2>Records : corresponding to each recorded step of the photon<a class="headerlink" href="#records-corresponding-to-each-recorded-step-of-the-photon" title="Permalink to this headline">¶</a></h2>
-<p>The records buffer of has shape (3M, 16, 2, 4) with each step point
+<p>The records buffer has shape (3M, 16, 2, 4) with each step point
 domain compressed into 2*4 shorts (16 bits) totalling 128 bits.</p>
 <p>Relevant sources:</p>
 <ul class="simple">
