@@ -314,10 +314,12 @@ UseOptiXGeometryInstancedOCtx
     on Linux/OptiX 6.5 the spheres are appearing as big boxes but there 
     is no problem with the sphere implementation when used not in an assembly.
     Perhaps problem with the transforms/scaling/bbox ? 
+
+    ISSUE HAS DISAPPEARED
+
+    Returning to this issue after implementing IntersectSDF to automatically 
+    test for such problems find that the problem is no longer happening. 
      
-
-
-
 
 UseOptiXGeometryOCtx
     start from UseOptiXGeometry to investigate why getting problem with instanced spheres in OptiX 6.5
@@ -325,4 +327,14 @@ UseOptiXGeometryOCtx
 
 UseOptiXGeometryInstancedStandalone
     creates a jumble of thousands of randomly oriented boxes, colorfully normal-shaded  
+
+
+UseG4NoOpticks
+    used to develop a new FindG4.cmake that works with both Geant4 1042 and 1062, 
+    does not use Opticks at all : requires BCM and Geant4 to be installed 
+    and provided on CMAKE_PREFIX_PATH 
+ 
+UseUseG4NoOpticks    
+    paired with UseG4NoOpticks, creating an executable that uses the lib from UseG4NoOpticks
+
 

@@ -27,6 +27,14 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Opticks : A GPU Accelerated Optical Photon Simulation using NVIDIA OptiX</a><ul>
+<li><a class="reference internal" href="#overview-of-opticks-installation-steps">Overview of Opticks installation steps</a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -67,7 +75,6 @@
 <p>Related repositories:</p>
 <ul class="simple">
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/env">https://bitbucket.org/simoncblyth/env</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></li>
 </ul>
 <p>Bitbucket and Github repositories</p>
 <ul class="simple">
@@ -80,9 +87,37 @@ being pushed to infrequently when making releases
 that are provided as github releases.
 The Github repo is usually several months behind bitbucket
 so you are advised NOT to use it.</p>
+<table border="1" class="docutils align-center">
+<colgroup>
+<col width="45%" />
+<col width="55%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
+<td>very latest code repository, unstable, breakage common</td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="https://github.com/simoncblyth/opticks">https://github.com/simoncblyth/opticks</a></td>
+<td>“releases” weeks/months behind, more stable</td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
+<td>presentations and videos</td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
+<td>forum/mailing list archive</td>
+</tr>
+<tr class="row-odd"><td>email:opticks+subscribe&#64;groups.io</td>
+<td>subscribe to mailing list</td>
+</tr>
+</tbody>
+</table>
 <p>Installation instructions start with a clone:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd $HOME
 git clone http://bitbucket.org/simoncblyth/opticks
+</pre></div>
+</div>
+<p>If you have commit access to <em>opticks</em>, you need to use SSH:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd $HOME ;
+git clone git@bitbucket.org:simoncblyth/opticks.git
 </pre></div>
 </div>
 <p>To update an existing clone:</p>
@@ -93,7 +128,7 @@ git clone http://bitbucket.org/simoncblyth/opticks
 </pre></div>
 </div>
 <p>Setup opticks by copying <em>~/opticks/example.opticks_config</em> to your
-HOME directory and customizing it as instructed therein:</p>
+HOME directory and customizing it as instructed by the links therein:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">opticks_config</span> <span class="o">~/.</span><span class="n">opticks_config</span>
 <span class="n">vi</span> <span class="o">~/.</span><span class="n">opticks_config</span>    <span class="c1"># adapt PREFIX paths</span>
 <span class="n">echo</span> <span class="s2">&quot;source ~/.opticks_config&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">.</span><span class="n">bashrc</span>
@@ -104,10 +139,42 @@ HOME directory and customizing it as instructed therein:</p>
 <span class="n">opticks</span><span class="o">-</span><span class="n">full</span>   <span class="c1"># download and build externals and opticks</span>
 </pre></div>
 </div>
-<p>If you have commit access to <em>opticks</em>, you need to use SSH:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd $HOME ;
-git clone git@bitbucket.org:simoncblyth/opticks.git
-</pre></div>
+<div class="section" id="overview-of-opticks-installation-steps">
+<h2>Overview of Opticks installation steps<a class="headerlink" href="#overview-of-opticks-installation-steps" title="Permalink to this headline">¶</a></h2>
+<p>A high level overview of the sequence of steps to install Opticks are listed below.
+For details see <a class="reference external" href="http://simoncblyth.bitbucket.io/opticks/">http://simoncblyth.bitbucket.io/opticks/</a></p>
+<ol class="arabic simple" start="0">
+<li>install “system” externals : NVIDIA GPU Driver, CUDA, OptiX 6.5
+following instructions from NVIDIA. Check they are working.</li>
+<li>use git to clone opticks bitbucket repository to your home directory, creating ~/opticks</li>
+<li>hookup the opticks bash functions to your bash shell<ul>
+<li>cp ~/opticks/example.opticks_config ~/.opticks_config</li>
+<li>ensure that your .bash_profile sources .bashrc</li>
+<li>add line to .bashrc “source ~/.opticks_config”</li>
+</ul>
+</li>
+<li>start a new session and check the bash functions are hooked up correctly with:<ul>
+<li>opticks-info</li>
+<li>bash -lc “opticks-info”</li>
+</ul>
+</li>
+<li>install the foreign externals OR use preexisting installs of boost,clhep,xercesc,g4<ul>
+<li>opticks-foreign     # lists them</li>
+<li>opticks-foreign-install    # installs them</li>
+</ul>
+</li>
+<li>edit ~/.opticks_config setting the paths appropriately for the
+prefixes of the “system” and “foreign” externals and setting
+the prefix for the opticks install (eg /usr/local/opticks)</li>
+<li>install the “automated” externals and opticks itself with<ul>
+<li>opticks-full</li>
+</ul>
+</li>
+<li>test the opticks build with<ul>
+<li>opticks-t</li>
+</ul>
+</li>
+</ol>
 </div>
 </div>
 

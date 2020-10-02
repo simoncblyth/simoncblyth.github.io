@@ -1,0 +1,348 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Opticks Integration with Geant4 Simulation &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tools : bash, python, numpy, ipython, matplotlib" href="../../ana/tools.html" />
+    <link rel="prev" title="Geometry Translation" href="../misc/geometry_translation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../ana/tools.html" title="Tools : bash, python, numpy, ipython, matplotlib"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../misc/geometry_translation.html" title="Geometry Translation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Opticks Integration with Geant4 Simulation</a><ul>
+<li><a class="reference internal" href="#geometry-overview">Geometry Overview</a></li>
+<li><a class="reference internal" href="#geometry-integration-exporting-geant4-geometry-into-g4dae-and-gdml-files">Geometry Integration : Exporting Geant4 geometry into G4DAE and GDML files</a><ul>
+<li><a class="reference internal" href="#future-of-opticks-geometry">Future of Opticks Geometry</a></li>
+<li><a class="reference internal" href="#simple-geometry-testing">Simple Geometry Testing</a></li>
+<li><a class="reference internal" href="#full-geometry-testing">Full Geometry Testing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#event-data-integration-getting-photons-into-opticks">Event Data Integration : Getting Photons into Opticks</a><ul>
+<li><a class="reference internal" href="#outdated-chroma-live-integration-example">Outdated Chroma Live Integration Example</a></li>
+<li><a class="reference internal" href="#planned-opticks-integration">Planned Opticks Integration</a></li>
+<li><a class="reference internal" href="#returning-photon-detector-hits-to-geant4-hit-collections">Returning Photon Detector Hits to Geant4 Hit Collections</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#integration-collaboration">Integration Collaboration</a></li>
+<li><a class="reference internal" href="#configuring-opticks-to-use-the-geometry">Configuring Opticks to use the Geometry</a></li>
+<li><a class="reference internal" href="#geocache">Geocache</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../misc/geometry_translation.html"
+                        title="previous chapter">Geometry Translation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../ana/tools.html"
+                        title="next chapter">Tools : bash, python, numpy, ipython, matplotlib</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/outdated/integration.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="opticks-integration-with-geant4-simulation">
+<h1>Opticks Integration with Geant4 Simulation<a class="headerlink" href="#opticks-integration-with-geant4-simulation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="geometry-overview">
+<h2>Geometry Overview<a class="headerlink" href="#geometry-overview" title="Permalink to this headline">¶</a></h2>
+<p>Opticks is intended to be run from geometry
+exported from Geant4, so that you can have a
+single geometry source definition that is
+auto converted into an Opticks geometry.</p>
+<p>For tests using simple geometries and photon sources
+it is also possible to define solids using a simple python CSG specification.</p>
+</div>
+<div class="section" id="geometry-integration-exporting-geant4-geometry-into-g4dae-and-gdml-files">
+<h2>Geometry Integration : Exporting Geant4 geometry into G4DAE and GDML files<a class="headerlink" href="#geometry-integration-exporting-geant4-geometry-into-g4dae-and-gdml-files" title="Permalink to this headline">¶</a></h2>
+<p>Opticks typically operates from geometries exported from
+Geant4 using the standard GDML format exporter as well
+as the G4DAE exporter which exports COLLADA format .dae files
+(an XML based industry standard 3D file format with triangulated mesh geometry)
+with extra information including all optical material and surface properties.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></li>
+</ul>
+<p>The code required to export G4DAE and GDML is very similar using
+the G4DAEParser from <em>g4dae</em> and the Geant4 standard G4GDMLParser.
+These exports should be done simultaneously (from the same process)
+so that memory address names match.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">G4VPhysicalVolume</span><span class="o">*</span> <span class="n">world_pv</span> <span class="o">=</span> <span class="n">m_detector</span><span class="o">-&gt;</span><span class="n">Construct</span><span class="p">();</span>
+<span class="n">G4DAEParser</span><span class="o">*</span> <span class="n">g4dae</span> <span class="o">=</span> <span class="n">new</span> <span class="n">G4DAEParser</span> <span class="p">;</span>
+<span class="n">G4bool</span> <span class="n">refs</span> <span class="o">=</span> <span class="n">true</span> <span class="p">;</span>
+<span class="n">G4bool</span> <span class="n">recreatePoly</span> <span class="o">=</span> <span class="n">false</span> <span class="p">;</span>
+<span class="n">G4int</span> <span class="n">nodeIndex</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="p">;</span>   <span class="o">//</span> <span class="n">so</span> <span class="n">World</span> <span class="ow">is</span> <span class="n">volume</span> <span class="mi">0</span>
+<span class="n">g4dae</span><span class="o">-&gt;</span><span class="n">Write</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">world_pv</span><span class="p">,</span> <span class="n">refs</span><span class="p">,</span> <span class="n">recreatePoly</span><span class="p">,</span> <span class="n">nodeIndex</span> <span class="p">);</span>
+</pre></div>
+</div>
+<div class="section" id="future-of-opticks-geometry">
+<h3>Future of Opticks Geometry<a class="headerlink" href="#future-of-opticks-geometry" title="Permalink to this headline">¶</a></h3>
+<p>The recent(mid 2017) addition of GPU CSG intersection capabilities to Opticks
+gives the possibility to operate from standard Geant4 GDML geometry files alone
+in future. However GDML files do not currently contain all the
+wavelength dependant material and surface optical properties, that
+are included within G4DAE files.
+The Geant4 polygonization included within G4DAE files is
+useful for OpenGL visualizations within Opticks, although
+Opticks has some nascent capabilities at generating polygonizations
+these are not yet reliable.</p>
+</div>
+<div class="section" id="simple-geometry-testing">
+<h3>Simple Geometry Testing<a class="headerlink" href="#simple-geometry-testing" title="Permalink to this headline">¶</a></h3>
+<p>For small scale Opticks debugging/testing it is convenient
+to define geometry using a python CSG input representation.
+On running the python scripts writes a serialization of the geometry
+to file which is read by Opticks.</p>
+<p>Many examples can be seen in the <cite>tboolean-</cite> tests</p>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/tests/tboolean.bash">https://bitbucket.org/simoncblyth/opticks/src/tip/tests/tboolean.bash</a></li>
+</ul>
+<p>You can also define simple optical photon sources via commandline <strong>torch</strong> config
+arguments. Following good experience with python defined test geometry it
+is planned to overhaul source configuation to use a similar approach.</p>
+</div>
+<div class="section" id="full-geometry-testing">
+<h3>Full Geometry Testing<a class="headerlink" href="#full-geometry-testing" title="Permalink to this headline">¶</a></h3>
+<p>Opticks has some functionality in the <cite>Cfg4</cite> package
+for comparing itself to a Geant4 simulation that it creates itself.
+This package however needs to revisited following Opticks recent
+move to fully analytic CSG geometries.</p>
+</div>
+</div>
+<div class="section" id="event-data-integration-getting-photons-into-opticks">
+<h2>Event Data Integration : Getting Photons into Opticks<a class="headerlink" href="#event-data-integration-getting-photons-into-opticks" title="Permalink to this headline">¶</a></h2>
+<p>The Geant4 processes <cite>G4Cerenkov</cite> and <cite>G4Scintillation</cite> generate large numbers
+of optical photons on the CPU. Opticks moves this optical photon generation
+to the GPU via modifications of the code for these processes.</p>
+<p>The photon generation loop of these processes is replaced by
+collection of so called <strong>genstep</strong> parameters of the generation.
+These gensteps are serialized into a buffer and copied to the GPU where
+ported versions of the inner photon generation loops are run</p>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/cerenkovstep.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/cerenkovstep.h</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/scintillationstep.h">https://bitbucket.org/simoncblyth/opticks/src/tip/optixrap/cu/scintillationstep.h</a></li>
+</ul>
+<p>In effect the inner loop of the photon generation is moved to the GPU.
+Although this generation is not time consuming, the copying of large numbers of photons
+from the CPU to the GPU and duplication of the photon memory allocation on
+CPU and GPU can be avoided by generating the photons on the GPU.</p>
+<div class="section" id="outdated-chroma-live-integration-example">
+<h3>Outdated Chroma Live Integration Example<a class="headerlink" href="#outdated-chroma-live-integration-example" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/chroma/G4DAEChroma/src/">https://bitbucket.org/simoncblyth/env/src/tip/chroma/G4DAEChroma/src/</a></li>
+</ul>
+<p>This stage was previously implemented in the context of
+the Chroma package.  As Chroma was implemented in python a
+ZeroMQ networking approach was used to effect the integration to Geant4,
+sending photons or <strong>gensteps</strong> over the network to be GPU propagated.</p>
+</div>
+<div class="section" id="planned-opticks-integration">
+<h3>Planned Opticks Integration<a class="headerlink" href="#planned-opticks-integration" title="Permalink to this headline">¶</a></h3>
+<p>As Opticks is implemented in C++ a simple single process
+approach to integration is planned to be implemented.
+Prior to live integration Opticks testing currently uses <strong>gensteps</strong>
+persisted to file from Geant4.</p>
+<p>Detailed instructions appropriate to
+current Opticks await these stages from being revisited.</p>
+</div>
+<div class="section" id="returning-photon-detector-hits-to-geant4-hit-collections">
+<h3>Returning Photon Detector Hits to Geant4 Hit Collections<a class="headerlink" href="#returning-photon-detector-hits-to-geant4-hit-collections" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/chroma/G4DAEChroma/src/">https://bitbucket.org/simoncblyth/env/src/tip/chroma/G4DAEChroma/src/</a></li>
+</ul>
+<p>Again this stage was previously implemented in the context of Chroma
+in a somewhat (Daya Bay) experiment specific manner.</p>
+</div>
+</div>
+<div class="section" id="integration-collaboration">
+<h2>Integration Collaboration<a class="headerlink" href="#integration-collaboration" title="Permalink to this headline">¶</a></h2>
+<p>Example Daya Bay and JUNO Experiment geometry and <strong>genstep</strong> files
+are included in the OpticksData repository.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticksdata/commits/all">https://bitbucket.org/simoncblyth/opticksdata/commits/all</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticksdata/src">https://bitbucket.org/simoncblyth/opticksdata/src</a></li>
+</ul>
+<p>A clone of this repository is done as part of the Opticks installation, eg</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>simon:~ blyth$ l /usr/local/opticks/opticksdata/
+total 8
+drwxr-xr-x  12 blyth  staff   408 Jul 22 10:07 export
+drwxr-xr-x   5 blyth  staff   170 Jul 22 10:07 gensteps
+drwxr-xr-x   3 blyth  staff   102 Jun 14 13:13 config
+-rw-r--r--   1 blyth  staff  1150 Jun 14 13:13 opticksdata.bash
+drwxr-xr-x   3 blyth  staff   102 Jun 14 13:13 refractiveindex
+drwxr-xr-x   4 blyth  staff   136 Jun 14 13:13 resource
+</pre></div>
+</div>
+<p>The easiest way to collaborate on getting new geometries operational
+within Opticks is to follow the above export instructions to produce
+the below two files and commit them into the <strong>opticksdata</strong> repository.
+If you do not yet have commit access a pull request can be made from
+a bitbucket fork of <strong>opticksdata</strong>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>simon:~ blyth$ du -h /usr/local/opticks/opticksdata/export/juno1707/g4_00.{dae,gdml}
+ 24M    /usr/local/opticks/opticksdata/export/juno1707/g4_00.dae
+ 20M    /usr/local/opticks/opticksdata/export/juno1707/g4_00.gdml
+</pre></div>
+</div>
+<p>Note that if your experiment has confidentiality concerns regarding
+sharing of an actual geometry you can collaborate/learn with an
+older/simplified demo version of your geometry.</p>
+</div>
+<div class="section" id="configuring-opticks-to-use-the-geometry">
+<h2>Configuring Opticks to use the Geometry<a class="headerlink" href="#configuring-opticks-to-use-the-geometry" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>op.sh</strong> script is the primary entry point to running Opticks executables,
+the specific executable to run and environment variables to setup specifying
+a geometry are configured by this script based on the command line arguments provided.
+This script together with <cite>$OPTICKS_HOME/externals/opticksdata.bash</cite> needs to be
+adapted for the new geometry.</p>
+<p>Note it is possible via geometry query strings to define multiple virtual geometries
+that all use the same input geometry files selecting different volumes sets.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>simon:opticks blyth$ op --help
+ubin /usr/local/opticks/lib/OKTest cfm cmdline --help
+=== op-export : OPTICKS_BINARY /usr/local/opticks/lib/OKTest
+
+op.sh : Opticks Launching Script
+===================================
+
+The **op.sh** script launches different Opticks executables
+or scripts depending on the arguments provided. It also
+sets environment variables picking a detector geometry
+and selecting volumes within the geometry.
+
+Most usage of Opticks should use this script.
+
+To see the options specific to particular scripts or
+executables use &quot;-h&quot; rather than the &quot;--help&quot;
+that provides this text.
+
+
+Profile Setup
+---------------
+
+To save typing add the below bash function to your .bash_profile::
+
+   op(){ op.sh $* ; }
+
+
+
+
+GEOMETRY SELECTION ARGUMENTS
+
+                --dyb :                       DYB : DayaBay Near Site
+               --dlin :                      DLIN : DayaBay LingAo Site
+               --dfar :                      DFAR : DayaBay Far Site
+               --dpib :                      DPIB : DayaBay PMT in Box of Mineral Oil Test Geometry
+               --dsst :                      DSST : DYB debugging SST rib impingement
+              --dsst2 :                     DSST2 : DYB debugging SST rib impingement
+              --dlv65 :                     DLV65 : DYB cycybobo lvid 65
+               --jpmt :                      JPMT : JUNO with PMTs
+              --j1707 :                     J1707 : JUNO with ~36k 3inch PMTs, ~18k 20inch PMTs, torus guide tube
+                --lxe :                       LXE : Geant4 LXe Liquid Xenon example
+
+
+
+BINARY SELECTION ARGUMENTS
+
+             --idpath :             OpticksIDPATH : Emit to stdout the path of the geocache directory for the geometry selected by arguments
+               --keys :            InteractorKeys : List key controls available in GGeoViewTest
+              --tcfg4 :                   CG4Test : Geant4 comparison simulation of simple test geometries
+               --okg4 :                  OKG4Test : Integrated Geant4/Opticks runing allowing G4GUN steps to be directly Opticks GPU propagated.
+             --tracer :               OTracerTest : Fast OpenGL viz and OptiX tracing, NO propagation. From ggeoview-/tests. Used for simple geometry/machinery checking
+          --gdml2gltf :              gdml2gltf.py : Once only geometry conversion of GDML input into GLTF file needed for analytic geocache creation
+                --mat :          GMaterialLibTest : Dump properties of material identified by 0-based index , eg op --mat 0
+               --cmat :          CMaterialLibTest :
+               --surf :           GSurfaceLibTest : Dump properties of surface identified by 0-based index , eg op --surf 0
+                --bnd :               GBndLibTest : Dump boundaries of a geometry, eg op --bnd --jpmt
+      --ctestdetector :         CTestDetectorTest : Test Geant4 simple detector construction using class cfg4-/CTestDetector
+      --cgdmldetector :         CGDMLDetectorTest : Test Geant4 GDML full detector construction using cfg4-/CGDMLDetector
+         --ngunconfig :            NGunConfigTest : Test Geant4 Gun configuration with npy-/NGunConfigTest
+...
+</pre></div>
+</div>
+</div>
+<div class="section" id="geocache">
+<h2>Geocache<a class="headerlink" href="#geocache" title="Permalink to this headline">¶</a></h2>
+<p>Opticks makes extensive use of geocaching to avoid repetition of geometry
+processing. Expensive parsing of XML and multiple traversals of large geometry trees
+are done once only and resulting serialized NPY format buffers are written to
+the geocache ready to be quickly loaded from file and then uploaded to the GPU.</p>
+<p>The geocache allows Opticks initialization even with huge geometries to be kept
+to a few seconds only, facilitating fast iteration.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../ana/tools.html" title="Tools : bash, python, numpy, ipython, matplotlib"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../misc/geometry_translation.html" title="Geometry Translation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

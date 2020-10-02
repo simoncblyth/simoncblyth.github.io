@@ -1,0 +1,335 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Material and Surface Properties &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Using a Shared Opticks Installation" href="shared.html" />
+    <link rel="prev" title="Opticks Event Data" href="../opticks_event_data.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="shared.html" title="Using a Shared Opticks Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../opticks_event_data.html" title="Opticks Event Data"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Material and Surface Properties</a><ul>
+<li><a class="reference internal" href="#gpu-texture-preparation">GPU texture preparation</a></li>
+<li><a class="reference internal" href="#gpu-texture-usage">GPU texture usage</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../opticks_event_data.html"
+                        title="previous chapter">Opticks Event Data</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="shared.html"
+                        title="next chapter">Using a Shared Opticks Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/misc/material_and_surface_properties.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="material-and-surface-properties">
+<h1>Material and Surface Properties<a class="headerlink" href="#material-and-surface-properties" title="Permalink to this headline">¶</a></h1>
+<p>Opticks handling of material and surface properties is all about
+preparing GPU textures : which means they have to be standardized
+to fit into arrays with specific properties and common
+wavelength domain.</p>
+<p>Materials must have a non-zero REEMISSIONPROB
+for it to be regarded as a scintillator and
+collected by GScintillatorLib.</p>
+<p>The below guide to the relevant classes is intended to
+show how material/surface properties get translated into
+GPU textures and how those are accessed GPU side.</p>
+<div class="section" id="gpu-texture-preparation">
+<h2>GPU texture preparation<a class="headerlink" href="#gpu-texture-preparation" title="Permalink to this headline">¶</a></h2>
+<p>ggeo/GScintillatorLib</p>
+<blockquote>
+<div><p>scintillator lib is populated by GGeo::prepareScintillatorLib  (invoked by GGeo::prepare)
+from raw materials with the 3 properties : SLOWCOMPONENT,FASTCOMPONENT,REEMISSIONPROB</p>
+<p>For a material to be regarded as a scintillator it must have all
+these three properties.</p>
+<p>Also GScintillatorLib prepares the reemission inverse CDF array.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>optixrap/OScintillatorLib</dt>
+<dd>Converts the GScintillatorLib array into the reemission GPU texture.
+Lookups on the reemission texture with uniform randoms generates wavelengths
+according to the desired distribution.</dd>
+</dl>
+<p>ggeo/GMaterialLib,GMaterial</p>
+<blockquote>
+<div><p>materials get standardized into
+8 properties and a common wavelength domain,
+as they are destined to get interleaved into the
+boundary GPU texture.</p>
+<p>For a material to be a scintillator must have non-zero “reemission_prob:REEMISSIONPROB,”</p>
+<p>The 8 material properties (3 are spare).</p>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">63</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GMaterialLib</span><span class="p">::</span><span class="n">keyspec</span> <span class="o">=</span>
+<span class="mi">64</span> <span class="s2">&quot;refractive_index:RINDEX,&quot;</span>
+<span class="mi">65</span> <span class="s2">&quot;absorption_length:ABSLENGTH,&quot;</span>
+<span class="mi">66</span> <span class="s2">&quot;scattering_length:RAYLEIGH,&quot;</span>
+<span class="mi">67</span> <span class="s2">&quot;reemission_prob:REEMISSIONPROB,&quot;</span>
+<span class="mi">68</span> <span class="s2">&quot;group_velocity:GROUPVEL,&quot;</span>
+<span class="mi">69</span> <span class="s2">&quot;extra_y:EXTRA_Y,&quot;</span>
+<span class="mi">70</span> <span class="s2">&quot;extra_z:EXTRA_Z,&quot;</span>
+<span class="mi">71</span> <span class="s2">&quot;extra_w:EXTRA_W,&quot;</span>
+</pre></div>
+</div>
+<p>ggeo/GSurfaceLib,GSurface</p>
+<blockquote>
+<div>surface properties are standardized into
+8 properties (4 are spare)</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">51</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">detect</span>            <span class="o">=</span> <span class="s2">&quot;detect&quot;</span> <span class="p">;</span>
+<span class="mi">52</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">absorb</span>            <span class="o">=</span> <span class="s2">&quot;absorb&quot;</span> <span class="p">;</span>
+<span class="mi">53</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">reflect_specular</span>  <span class="o">=</span> <span class="s2">&quot;reflect_specular&quot;</span> <span class="p">;</span>
+<span class="mi">54</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">reflect_diffuse</span>   <span class="o">=</span> <span class="s2">&quot;reflect_diffuse&quot;</span> <span class="p">;</span>
+<span class="mi">55</span>
+<span class="mi">56</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">extra_x</span>          <span class="o">=</span> <span class="s2">&quot;extra_x&quot;</span> <span class="p">;</span>
+<span class="mi">57</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">extra_y</span>          <span class="o">=</span> <span class="s2">&quot;extra_y&quot;</span> <span class="p">;</span>
+<span class="mi">58</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">extra_z</span>          <span class="o">=</span> <span class="s2">&quot;extra_z&quot;</span> <span class="p">;</span>
+<span class="mi">59</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">extra_w</span>          <span class="o">=</span> <span class="s2">&quot;extra_w&quot;</span> <span class="p">;</span>
+<span class="mi">60</span>
+
+<span class="mi">87</span> <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">GSurfaceLib</span><span class="p">::</span><span class="n">keyspec</span> <span class="o">=</span>
+<span class="mi">88</span> <span class="s2">&quot;detect:EFFICIENCY,&quot;</span>
+<span class="mi">89</span> <span class="s2">&quot;absorb:DUMMY,&quot;</span>
+<span class="mi">90</span> <span class="s2">&quot;reflect_specular:REFLECTIVITY,&quot;</span>
+<span class="mi">91</span> <span class="s2">&quot;reflect_diffuse:REFLECTIVITY,&quot;</span>
+<span class="mi">92</span> <span class="p">;</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>ggeo/GBnd</dt>
+<dd>A boundary is the 4 integers (omat,osur,isur,imat)
+representing materials and surfaces on either side
+of a transition been materials.</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">omat</span><span class="p">:</span><span class="n">outer</span><span class="o">-</span><span class="n">material</span>
+<span class="n">osur</span><span class="p">:</span><span class="n">outer</span><span class="o">-</span><span class="n">surface</span>
+<span class="n">isur</span><span class="p">:</span><span class="n">inner</span><span class="o">-</span><span class="n">surface</span>
+<span class="n">imat</span><span class="p">:</span><span class="n">inner</span><span class="o">-</span><span class="n">material</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>ggeo/GBndLib</dt>
+<dd><p class="first">collects all unique boundaries GBnd for the entire geometry,
+boundary indices for all bits of the geometry are stored with the geometry</p>
+<p class="last">interleaves the standardized material and surface property arrays
+from GMaterialLib and GSurfaceLib into the boundary dynamic array</p>
+</dd>
+</dl>
+<p>optixrap/OBndLib</p>
+<blockquote>
+<div>converts GBndLib into the GPU boundary texture and uploads its content to GPU</div></blockquote>
+</div>
+<div class="section" id="gpu-texture-usage">
+<h2>GPU texture usage<a class="headerlink" href="#gpu-texture-usage" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>optixrap/cu/boundary_lookup.h</dt>
+<dd>static __device__ __inline__ float4 boundary_lookup( float nm, unsigned int line, unsigned int k)</dd>
+</dl>
+<p>optixrap/cu/state.h</p>
+<blockquote>
+<div><p>fill_state does the boundary lookups</p>
+<p>All pieces of geometry have a boundary index assigned
+to it, which means that on intersection with a ray you get the
+boundary index which via offsets into the boundary texture
+enable you to access the material and surface properties
+omat/osur/isur/imat relevant to that intersect.</p>
+<p>This approach copies material and surface properties
+multiple times, but the boundary texture is very small compared
+to what GPUs are designed to handle so its not a problem and
+it simplifies property lookup.</p>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>23 struct State
+24 {
+25    unsigned int flag ;
+26    float4 material1 ;    // refractive_index/absorption_length/scattering_length/reemission_prob
+27    float4 m1group2  ;    // group_velocity/spare1/spare2/spare3
+28    float4 material2 ;
+29    float4 surface    ;   //  detect/absorb/reflect_specular/reflect_diffuse
+30    float3 surface_normal ;
+31    float cos_theta ;
+32    float distance_to_boundary ;
+33    uint4 optical ;   // x/y/z/w index/type/finish/value
+34    uint4 index ;     // indices of m1/m2/surf/sensor
+35    uint4 identity ;  //  node/mesh/boundary/sensor indices of last intersection
+36    float ureflectcheat ;
+37 };
+38
+..
+
+48 __device__ void fill_state( State&amp; s, int boundary, uint4 identity, float wavelength )
+49 {
+50     // boundary : 1 based code, signed by cos_theta of photon direction to outward geometric normal
+51     // &gt;0 outward going photon
+52     // &lt;0 inward going photon
+53     //
+54     // NB the line is above the details of the payload (ie how many float4 per matsur)
+55     //    it is just
+56     //                boundaryIndex*4  + 0/1/2/3     for OMAT/OSUR/ISUR/IMAT
+57     //
+58
+59     int line = boundary &gt; 0 ? (boundary - 1)*BOUNDARY_NUM_MATSUR : (-boundary - 1)*BOUNDARY_NUM_MATSUR  ;
+60
+61     // pick relevant lines depening on boundary sign, ie photon direction relative to normal
+62     //
+63     int m1_line = boundary &gt; 0 ? line + IMAT : line + OMAT ;
+64     int m2_line = boundary &gt; 0 ? line + OMAT : line + IMAT ;
+65     int su_line = boundary &gt; 0 ? line + ISUR : line + OSUR ;
+66
+67     //  consider photons arriving at PMT cathode surface
+68     //  geometry normals are expected to be out of the PMT
+69     //
+70     //  boundary sign will be -ve : so line+3 outer-surface is the relevant one
+71
+72     s.material1 = boundary_lookup( wavelength, m1_line, 0);
+73     s.m1group2  = boundary_lookup( wavelength, m1_line, 1);
+74
+75     s.material2 = boundary_lookup( wavelength, m2_line, 0);
+76     s.surface   = boundary_lookup( wavelength, su_line, 0);
+77
+78     s.optical = optical_buffer[su_line] ;   // index/type/finish/value
+79
+</pre></div>
+</div>
+<p>optixrap/cu/generate.cu</p>
+<blockquote>
+<div>fill_state is the first thing down after an OptiX ray trace intersection</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">564</span>         <span class="n">rtTrace</span><span class="p">(</span><span class="n">top_object</span><span class="p">,</span> <span class="n">optix</span><span class="p">::</span><span class="n">make_Ray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span> <span class="n">propagate_ray_type</span><span class="p">,</span> <span class="n">propagate_epsilon</span><span class="p">,</span> <span class="n">RT_DEFAULT_MAX</span><span class="p">),</span> <span class="n">prd</span> <span class="p">);</span>
+<span class="mi">565</span>
+<span class="mi">566</span>         <span class="k">if</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">boundary</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="mi">567</span>         <span class="p">{</span>
+<span class="mi">568</span>             <span class="n">s</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="n">MISS</span> <span class="p">;</span>  <span class="o">//</span> <span class="n">overwrite</span> <span class="n">CERENKOV</span><span class="o">/</span><span class="n">SCINTILLATION</span> <span class="k">for</span> <span class="n">the</span> <span class="n">no</span> <span class="n">hitters</span>
+<span class="mi">569</span>             <span class="o">//</span> <span class="n">zero</span> <span class="n">out</span> <span class="n">no</span><span class="o">-</span><span class="n">hitters</span> <span class="n">to</span> <span class="n">avoid</span> <span class="n">leftovers</span>
+<span class="mi">570</span>             <span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
+<span class="mi">571</span>             <span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
+<span class="mi">572</span>             <span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
+<span class="mi">573</span>             <span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
+<span class="mi">574</span>             <span class="k">break</span> <span class="p">;</span>
+<span class="mi">575</span>         <span class="p">}</span>
+<span class="mi">576</span>         <span class="o">//</span> <span class="n">initial</span> <span class="ow">and</span> <span class="n">CONTINUE</span><span class="o">-</span><span class="n">ing</span> <span class="n">records</span>
+<span class="mi">577</span>
+<span class="mi">578</span>         <span class="o">//</span> <span class="n">use</span> <span class="n">boundary</span> <span class="n">index</span> <span class="n">at</span> <span class="n">intersection</span> <span class="n">point</span> <span class="n">to</span> <span class="n">do</span> <span class="n">optical</span> <span class="n">constant</span> <span class="o">+</span> <span class="n">material</span><span class="o">/</span><span class="n">surface</span> <span class="nb">property</span> <span class="n">lookups</span>
+<span class="mi">579</span>         <span class="n">fill_state</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">prd</span><span class="o">.</span><span class="n">boundary</span><span class="p">,</span> <span class="n">prd</span><span class="o">.</span><span class="n">identity</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">wavelength</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>optixrap/cu/wavelength_lookup.h</p>
+<blockquote>
+<div>reemission_lookup is used depending on reemission_prob and a random throw,
+note use of the state  s.material1.w</div></blockquote>
+<p>optixrap/cu/propagate.h</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>122
+123     if (absorption_distance &lt;= scattering_distance)
+124     {
+125         if (absorption_distance &lt;= s.distance_to_boundary)
+126         {
+127             p.time += absorption_distance/speed ;
+128             p.position += absorption_distance*p.direction;
+129
+130             const float&amp; reemission_prob = s.material1.w ;
+131             float u_reemit = reemission_prob == 0.f ? 2.f : curand_uniform(&amp;rng);  // avoid consumption at absorption when not scintillator
+132
+133             if (u_reemit &lt; reemission_prob)
+134             {
+135                 // no materialIndex input to reemission_lookup as both scintillators share same CDF
+136                 // non-scintillators have zero reemission_prob
+137                 p.wavelength = reemission_lookup(curand_uniform(&amp;rng));
+138                 p.direction = uniform_sphere(&amp;rng);
+139                 p.polarization = normalize(cross(uniform_sphere(&amp;rng), p.direction));
+140                 p.flags.i.x = 0 ;   // no-boundary-yet for new direction
+141
+142                 s.flag = BULK_REEMIT ;
+143                 return CONTINUE;
+144             }
+145             else
+146             {
+147                 s.flag = BULK_ABSORB ;
+148                 return BREAK;
+149             }
+150         }
+151         //  otherwise sail to boundary
+152     }
+153     else
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="shared.html" title="Using a Shared Opticks Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../opticks_event_data.html" title="Opticks Event Data"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,490 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Opticks Event Data &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Generation and propagation" href="generation_and_propagation.html" />
+    <link rel="prev" title="Updating this documentation" href="../updating_this_documentation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="generation_and_propagation.html" title="Generation and propagation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../updating_this_documentation.html" title="Updating this documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Opticks Event Data</a><ul>
+<li><a class="reference internal" href="#array-components-of-opticks-events">Array components of Opticks Events</a></li>
+<li><a class="reference internal" href="#photons">Photons</a></li>
+<li><a class="reference internal" href="#photon-flags">Photon flags</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../updating_this_documentation.html"
+                        title="previous chapter">Updating this documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generation_and_propagation.html"
+                        title="next chapter">Generation and propagation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/misc/opticks_event_data.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="opticks-event-data">
+<h1>Opticks Event Data<a class="headerlink" href="#opticks-event-data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="array-components-of-opticks-events">
+<h2>Array components of Opticks Events<a class="headerlink" href="#array-components-of-opticks-events" title="Permalink to this headline">¶</a></h2>
+<p>Opticks Events (optickscore/OpticksEvent.hh) comprise multiple arrays.</p>
+<dl class="docutils">
+<dt>nopstep</dt>
+<dd>non-optical steps</dd>
+<dt>genstep</dt>
+<dd>scintillation or cerenkov or artificial “torch” gensteps</dd>
+<dt>records</dt>
+<dd>photon step records</dd>
+<dt>photons</dt>
+<dd>last photon step at absorption, detection, truncation</dd>
+<dt>sequence</dt>
+<dd>photon level material/flag sequence histories (seqmat/seqhis),
+64 bit ints holding up to 16 steps of 4-bit flags</dd>
+<dt>phosel</dt>
+<dd>photon history sequence indices, obtained by indexing <em>sequence</em></dd>
+<dt>recsel</dt>
+<dd>obtained by repeating <em>phosel</em> by maxrec</dd>
+<dt>hits</dt>
+<dd>same structure as photons array, the subset of
+the photons array that passes hitmask selection</dd>
+</dl>
+</div>
+<div class="section" id="photons">
+<h2>Photons<a class="headerlink" href="#photons" title="Permalink to this headline">¶</a></h2>
+<p>Optical photon generation and propagation through to absorption or
+detection or truncation after a configurable maximum number of bounces
+are performed on the GPU using the NVIDIA OptiX ray generation program,
+optixrap/cu/generate.cu.</p>
+<p>The Photon struct <em>p</em> is serialized into the photon_buffer with <em>psave</em>.</p>
+<p>optixrap/cu/generate.cu:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">654</span>     <span class="n">psave</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">photon_buffer</span><span class="p">,</span> <span class="n">photon_offset</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>optixrap/cu/photon.h:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">41</span> <span class="n">struct</span> <span class="n">Photon</span>
+<span class="mi">42</span> <span class="p">{</span>
+<span class="mi">43</span>    <span class="n">float3</span> <span class="n">position</span> <span class="p">;</span>
+<span class="mi">44</span>    <span class="nb">float</span>  <span class="n">time</span> <span class="p">;</span>
+<span class="mi">45</span>
+<span class="mi">46</span>    <span class="n">float3</span> <span class="n">direction</span> <span class="p">;</span>
+<span class="mi">47</span>    <span class="nb">float</span>  <span class="n">weight</span> <span class="p">;</span>
+<span class="mi">48</span>
+<span class="mi">49</span>    <span class="n">float3</span> <span class="n">polarization</span> <span class="p">;</span>
+<span class="mi">50</span>    <span class="nb">float</span>  <span class="n">wavelength</span> <span class="p">;</span>
+<span class="mi">51</span>
+<span class="mi">52</span>    <span class="n">quad</span> <span class="n">flags</span> <span class="p">;</span>
+<span class="mi">53</span>
+<span class="mi">54</span>    <span class="o">//</span> <span class="n">flags</span><span class="o">.</span><span class="n">i</span><span class="o">.</span><span class="n">x</span> <span class="p">:</span> <span class="mi">1</span><span class="o">-</span><span class="n">based</span> <span class="n">signed</span> <span class="n">boundary</span> <span class="n">index</span><span class="p">,</span> <span class="mi">0</span> <span class="n">means</span> <span class="n">no</span> <span class="n">intersect</span>
+<span class="mi">55</span>    <span class="o">//</span> <span class="n">flags</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">y</span> <span class="p">:</span> <span class="n">sensor</span> <span class="n">index</span> <span class="p">(</span><span class="n">TODO</span><span class="p">:</span> <span class="n">revive</span><span class="p">)</span>
+<span class="mi">56</span>    <span class="o">//</span> <span class="n">flags</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">z</span> <span class="p">:</span> <span class="mi">4</span> <span class="n">debug</span> <span class="nb">bytes</span>
+<span class="mi">57</span>    <span class="o">//</span> <span class="n">flags</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">w</span> <span class="p">:</span> <span class="n">history</span> <span class="n">mask</span> <span class="p">(</span><span class="n">bitwise</span> <span class="n">OR</span> <span class="n">of</span> <span class="nb">all</span> <span class="n">step</span> <span class="n">flags</span><span class="p">)</span>
+<span class="mi">58</span>
+<span class="mi">59</span> <span class="p">};</span>
+<span class="o">..</span>
+<span class="mi">90</span> <span class="n">__device__</span> <span class="n">void</span> <span class="n">psave</span><span class="p">(</span> <span class="n">Photon</span><span class="o">&amp;</span> <span class="n">p</span><span class="p">,</span> <span class="n">optix</span><span class="p">::</span><span class="n">buffer</span><span class="o">&lt;</span><span class="n">float4</span><span class="o">&gt;&amp;</span> <span class="n">pbuffer</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">photon_offset</span><span class="p">)</span>
+<span class="mi">91</span> <span class="p">{</span>
+<span class="mi">92</span>     <span class="n">pbuffer</span><span class="p">[</span><span class="n">photon_offset</span><span class="o">+</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_float4</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>    <span class="n">p</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>    <span class="n">p</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span><span class="p">,</span>     <span class="n">p</span><span class="o">.</span><span class="n">time</span> <span class="p">);</span>
+<span class="mi">93</span>     <span class="n">pbuffer</span><span class="p">[</span><span class="n">photon_offset</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_float4</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">direction</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>   <span class="n">p</span><span class="o">.</span><span class="n">direction</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>   <span class="n">p</span><span class="o">.</span><span class="n">direction</span><span class="o">.</span><span class="n">z</span><span class="p">,</span>    <span class="n">p</span><span class="o">.</span><span class="n">weight</span> <span class="p">);</span>
+<span class="mi">94</span>     <span class="n">pbuffer</span><span class="p">[</span><span class="n">photon_offset</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_float4</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">polarization</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">polarization</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">polarization</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">wavelength</span> <span class="p">);</span>
+<span class="mi">95</span>     <span class="n">pbuffer</span><span class="p">[</span><span class="n">photon_offset</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_float4</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>     <span class="n">p</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>     <span class="n">p</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">z</span><span class="p">,</span>      <span class="n">p</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">w</span><span class="p">);</span>
+<span class="mi">96</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>The quad type is a union of float4, uint4 and int4 types allowing integers or unsigned integers
+to be conveniently carried and persisted within the float buffer/array.</p>
+<p>Cerenkov and scintillation photons and artificial “torch” photons are generated by
+methods from the below headers. The 4 flags values are initialized to zero at generation.</p>
+<ul class="simple">
+<li>optixrap/cu/cerenkovstep.h</li>
+<li>optixrap/cu/scintillationstep.h</li>
+<li>optixrap/cu/torchstep.h</li>
+</ul>
+<p>Subsequent code that changes p.flags:</p>
+<ul class="simple">
+<li>optixrap/cu/generate.cu</li>
+<li>optixrap/cu/photon.h</li>
+<li>optixrap/cu/propagate.h</li>
+</ul>
+<p>optixrap/cu/generate.cu:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">201</span> <span class="o">/**</span>
+<span class="mi">202</span> <span class="n">FLAGS</span>
+<span class="mi">203</span> <span class="o">-------</span>
+<span class="mi">204</span>
+<span class="mi">205</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">photon</span> <span class="n">flags</span> <span class="n">p</span><span class="o">.</span><span class="n">flags</span> <span class="n">using</span> <span class="n">values</span> <span class="kn">from</span> <span class="nn">state</span> <span class="n">s</span> <span class="ow">and</span> <span class="n">per</span><span class="o">-</span><span class="n">ray</span><span class="o">-</span><span class="n">data</span> <span class="n">prd</span>
+<span class="mi">206</span>
+<span class="mi">207</span> <span class="o">**/</span>
+<span class="mi">208</span>
+<span class="mi">209</span> <span class="c1">#define FLAGS(p, s, prd) \</span>
+<span class="mi">210</span> <span class="p">{</span> \
+<span class="mi">211</span>     <span class="n">p</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">i</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">prd</span><span class="o">.</span><span class="n">boundary</span> <span class="p">;</span>  \
+<span class="mi">212</span>     <span class="n">p</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">identity</span><span class="o">.</span><span class="n">w</span> <span class="p">;</span>  \
+<span class="mi">213</span>     <span class="n">p</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">w</span> <span class="o">|=</span> <span class="n">s</span><span class="o">.</span><span class="n">flag</span> <span class="p">;</span> \
+<span class="mi">214</span> <span class="p">}</span> \
+<span class="o">...</span>
+<span class="mi">564</span>         <span class="n">rtTrace</span><span class="p">(</span><span class="n">top_object</span><span class="p">,</span> <span class="n">optix</span><span class="p">::</span><span class="n">make_Ray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span> <span class="n">propagate_ray_type</span><span class="p">,</span> <span class="n">propagate_epsilon</span><span class="p">,</span> <span class="n">RT_DEFAULT_MAX</span><span class="p">),</span> <span class="n">prd</span> <span class="p">);</span>
+<span class="mi">565</span>
+<span class="mi">566</span>         <span class="k">if</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">boundary</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="mi">567</span>         <span class="p">{</span>
+<span class="mi">568</span>             <span class="n">s</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="n">MISS</span> <span class="p">;</span>
+<span class="o">...</span>
+<span class="mi">574</span>             <span class="k">break</span> <span class="p">;</span>
+<span class="mi">575</span>         <span class="p">}</span>
+<span class="mi">577</span>
+<span class="mi">578</span>         <span class="o">//</span> <span class="n">use</span> <span class="n">boundary</span> <span class="n">index</span> <span class="n">at</span> <span class="n">intersection</span> <span class="n">point</span> <span class="n">to</span> <span class="n">do</span> <span class="n">optical</span> <span class="n">constant</span> <span class="o">+</span> <span class="n">material</span><span class="o">/</span><span class="n">surface</span> <span class="nb">property</span> <span class="n">lookups</span>
+<span class="mi">579</span>         <span class="n">fill_state</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">prd</span><span class="o">.</span><span class="n">boundary</span><span class="p">,</span> <span class="n">prd</span><span class="o">.</span><span class="n">identity</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">wavelength</span> <span class="p">);</span>
+<span class="mi">580</span>
+<span class="mi">581</span>         <span class="n">s</span><span class="o">.</span><span class="n">distance_to_boundary</span> <span class="o">=</span> <span class="n">prd</span><span class="o">.</span><span class="n">distance_to_boundary</span> <span class="p">;</span>
+<span class="mi">582</span>         <span class="n">s</span><span class="o">.</span><span class="n">surface_normal</span> <span class="o">=</span> <span class="n">prd</span><span class="o">.</span><span class="n">surface_normal</span> <span class="p">;</span>
+<span class="mi">583</span>         <span class="n">s</span><span class="o">.</span><span class="n">cos_theta</span> <span class="o">=</span> <span class="n">prd</span><span class="o">.</span><span class="n">cos_theta</span> <span class="p">;</span>
+<span class="mi">584</span>
+<span class="mi">585</span>         <span class="o">//</span> <span class="n">setting</span> <span class="n">p</span><span class="o">.</span><span class="n">flags</span> <span class="k">for</span> <span class="n">things</span> <span class="n">like</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">history</span> <span class="n">flags</span>
+<span class="mi">586</span>         <span class="n">FLAGS</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">prd</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The <em>closest hit</em> program <strong>closest_hit_propagate</strong> populates <em>prd</em> with
+information from the geometry. Including:</p>
+<dl class="docutils">
+<dt>prd.distance_to_boundary (float)</dt>
+<dd><strong>t</strong> distance in ray direction from ray origin to closest hit intersection point,
+this is closest solution of the polynomial in t that fulfils the minimum t requirement</dd>
+<dt>prd.identity (uint4)</dt>
+<dd>geometry identity information including GVolume/GNode index, mesh/solid index, boundary index, sensor index</dd>
+</dl>
+<p>ggeo/GVolume.cc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">201</span> <span class="n">guint4</span> <span class="n">GVolume</span><span class="p">::</span><span class="n">getIdentity</span><span class="p">()</span>
+<span class="mi">202</span> <span class="p">{</span>
+<span class="mi">203</span>     <span class="n">unsigned</span> <span class="n">node_index</span> <span class="o">=</span> <span class="n">m_index</span> <span class="p">;</span>
+<span class="mi">204</span>
+<span class="mi">205</span>     <span class="o">//</span><span class="n">unsigned</span> <span class="n">identity_index</span> <span class="o">=</span> <span class="n">getSensorSurfaceIndex</span><span class="p">()</span> <span class="p">;</span>
+<span class="mi">206</span>     <span class="n">unsigned</span> <span class="n">identity_index</span> <span class="o">=</span> <span class="n">m_copyNumber</span>  <span class="p">;</span>
+<span class="mi">207</span>
+<span class="mi">208</span>     <span class="k">return</span> <span class="n">guint4</span><span class="p">(</span>
+<span class="mi">209</span>                    <span class="n">node_index</span><span class="p">,</span>
+<span class="mi">210</span>                    <span class="n">getMeshIndex</span><span class="p">(),</span>
+<span class="mi">211</span>                    <span class="n">m_boundary</span><span class="p">,</span>
+<span class="mi">212</span>                    <span class="n">identity_index</span>
+<span class="mi">213</span>                  <span class="p">);</span>
+<span class="mi">214</span> <span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Opticks GVolume/GNode corresponds to Geant4 placed volumes (ie Physical Volume, G4PVPlacement).
+There are often many tens of thousands of these in the detector geometry</li>
+<li>There are typically much fewer distinct GMesh in a geometry, these
+correspond to Geant4 solids that are associated with a logical volume.  Despite the “mesh”
+name GMesh instances contain both triangulated and analytic geometry information.</li>
+</ul>
+<p>The NVIDIA OptiX ray tracing pipeline uses its acceleration structure to determine
+which geometry intersects to call. Subsequently the <em>closest hit program</em> is called.
+This populates the <em>PerRayData_propagate</em> <strong>prd</strong> struct in order to
+communicate geometry and material/surface information
+back to the <em>ray generation program</em>.</p>
+<p>optixrap/cu/material1_propagate.cu:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>20 #include &lt;optix.h&gt;
+21 #include &quot;PerRayData_propagate.h&quot;
+22 #include &quot;wavelength_lookup.h&quot;
+23
+//
+//  attributes set in the geometry specific intersect programs
+//
+26 rtDeclareVariable(float3,  geometricNormal, attribute geometric_normal, );
+27 rtDeclareVariable(uint4,  instanceIdentity, attribute instance_identity, );
+28
+29 rtDeclareVariable(PerRayData_propagate, prd, rtPayload, );
+30 rtDeclareVariable(optix::Ray,           ray, rtCurrentRay, );
+31 rtDeclareVariable(float,                  t, rtIntersectionDistance, );
+32
+33
+34 RT_PROGRAM void closest_hit_propagate()
+35 {
+36      const float3 n = normalize(rtTransformNormal(RT_OBJECT_TO_WORLD, geometricNormal)) ;
+37      float cos_theta = dot(n,ray.direction);
+38
+39      prd.cos_theta = cos_theta ;
+40      prd.distance_to_boundary = t ;   // huh: there is an standard attrib for this
+41      unsigned int boundaryIndex = instanceIdentity.z ;
+42      prd.boundary = cos_theta &lt; 0.f ? -(boundaryIndex + 1) : boundaryIndex + 1 ;
+43      prd.identity = instanceIdentity ;
+44      prd.surface_normal = cos_theta &gt; 0.f ? -n : n ;
+45 }
+</pre></div>
+</div>
+<p>optixrap/cu/intersect_analytic.cu:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">067</span> <span class="n">rtDeclareVariable</span><span class="p">(</span><span class="n">unsigned</span> <span class="nb">int</span><span class="p">,</span> <span class="n">instance_index</span><span class="p">,</span>  <span class="p">,);</span>
+ <span class="mi">68</span> <span class="o">//</span> <span class="n">optix</span><span class="p">::</span><span class="n">GeometryInstance</span> <span class="n">instance_index</span> <span class="n">into</span> <span class="n">the</span> <span class="n">identity</span> <span class="n">buffer</span><span class="p">,</span>
+ <span class="mi">69</span> <span class="o">//</span> <span class="nb">set</span> <span class="n">by</span> <span class="n">oxrap</span><span class="o">/</span><span class="n">OGeo</span><span class="o">.</span><span class="n">cc</span><span class="p">,</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">non</span><span class="o">-</span><span class="n">instanced</span>
+ <span class="o">...</span>
+ <span class="mi">74</span> <span class="n">rtBuffer</span><span class="o">&lt;</span><span class="n">Part</span><span class="o">&gt;</span> <span class="n">partBuffer</span><span class="p">;</span>
+ <span class="mi">75</span> <span class="n">rtBuffer</span><span class="o">&lt;</span><span class="n">Matrix4x4</span><span class="o">&gt;</span> <span class="n">tranBuffer</span><span class="p">;</span>
+ <span class="mi">76</span>
+ <span class="mi">77</span> <span class="n">rtBuffer</span><span class="o">&lt;</span><span class="n">Prim</span><span class="o">&gt;</span>  <span class="n">primBuffer</span><span class="p">;</span>
+ <span class="mi">78</span> <span class="n">rtBuffer</span><span class="o">&lt;</span><span class="n">uint4</span><span class="o">&gt;</span>  <span class="n">identityBuffer</span><span class="p">;</span>   <span class="o">//</span> <span class="kn">from</span> <span class="nn">GMergedMesh</span><span class="p">::</span><span class="n">getAnalyticInstanceIdentityBuffer</span><span class="p">()</span>
+ <span class="o">..</span>
+ <span class="mi">84</span> <span class="o">//</span> <span class="n">attributes</span> <span class="n">communicate</span> <span class="n">between</span> <span class="n">intersect</span> <span class="p">(</span><span class="n">which</span> <span class="ow">is</span> <span class="n">geometry</span> <span class="n">specific</span><span class="p">)</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">general</span> <span class="n">closest</span> <span class="n">hit</span> <span class="n">program</span><span class="p">,</span>
+ <span class="mi">85</span> <span class="o">//</span> <span class="n">the</span> <span class="n">attributes</span> <span class="n">must</span> <span class="n">be</span> <span class="nb">set</span> <span class="n">inbetween</span> <span class="n">rtPotentialIntersection</span> <span class="ow">and</span> <span class="n">rtReportIntersection</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">intersect</span> <span class="n">program</span>
+ <span class="mi">86</span>
+ <span class="mi">87</span> <span class="n">rtDeclareVariable</span><span class="p">(</span><span class="n">uint4</span><span class="p">,</span> <span class="n">instanceIdentity</span><span class="p">,</span>   <span class="n">attribute</span> <span class="n">instance_identity</span><span class="p">,);</span>
+ <span class="mi">88</span> <span class="n">rtDeclareVariable</span><span class="p">(</span><span class="n">float3</span><span class="p">,</span> <span class="n">geometric_normal</span><span class="p">,</span> <span class="n">attribute</span> <span class="n">geometric_normal</span><span class="p">,</span> <span class="p">);</span>
+ <span class="mi">89</span> <span class="n">rtDeclareVariable</span><span class="p">(</span><span class="n">float3</span><span class="p">,</span> <span class="n">shading_normal</span><span class="p">,</span> <span class="n">attribute</span> <span class="n">shading_normal</span><span class="p">,</span> <span class="p">);</span>
+ <span class="mi">90</span>
+<span class="o">...</span>
+<span class="mi">287</span> <span class="n">RT_PROGRAM</span> <span class="n">void</span> <span class="n">intersect</span><span class="p">(</span><span class="nb">int</span> <span class="n">primIdx</span><span class="p">)</span>
+<span class="mi">288</span> <span class="p">{</span>
+<span class="mi">289</span>     <span class="n">const</span> <span class="n">Prim</span><span class="o">&amp;</span> <span class="n">prim</span>    <span class="o">=</span> <span class="n">primBuffer</span><span class="p">[</span><span class="n">primIdx</span><span class="p">];</span>
+<span class="mi">290</span>
+<span class="mi">291</span>     <span class="n">unsigned</span> <span class="n">partOffset</span>  <span class="o">=</span> <span class="n">prim</span><span class="o">.</span><span class="n">partOffset</span><span class="p">()</span> <span class="p">;</span>
+<span class="mi">292</span>     <span class="n">unsigned</span> <span class="n">numParts</span>    <span class="o">=</span> <span class="n">prim</span><span class="o">.</span><span class="n">numParts</span><span class="p">()</span> <span class="p">;</span>
+<span class="mi">293</span>     <span class="n">unsigned</span> <span class="n">primFlag</span>    <span class="o">=</span> <span class="n">prim</span><span class="o">.</span><span class="n">primFlag</span><span class="p">()</span> <span class="p">;</span>
+<span class="mi">294</span>
+<span class="mi">295</span>     <span class="n">uint4</span> <span class="n">identity</span> <span class="o">=</span> <span class="n">identityBuffer</span><span class="p">[</span><span class="n">instance_index</span><span class="p">]</span> <span class="p">;</span>
+<span class="mi">296</span>
+<span class="mi">297</span>     <span class="k">if</span><span class="p">(</span><span class="n">primFlag</span> <span class="o">==</span> <span class="n">CSG_FLAGNODETREE</span><span class="p">)</span>
+<span class="mi">298</span>     <span class="p">{</span>
+<span class="mi">299</span>         <span class="n">Part</span> <span class="n">pt0</span> <span class="o">=</span> <span class="n">partBuffer</span><span class="p">[</span><span class="n">partOffset</span> <span class="o">+</span> <span class="mi">0</span><span class="p">]</span> <span class="p">;</span>
+<span class="mi">300</span>
+<span class="mi">301</span>         <span class="n">identity</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">pt0</span><span class="o">.</span><span class="n">boundary</span><span class="p">()</span> <span class="p">;</span>        <span class="o">//</span> <span class="n">replace</span> <span class="n">placeholder</span> <span class="n">zero</span> <span class="k">with</span> <span class="n">test</span> <span class="n">analytic</span> <span class="n">geometry</span> <span class="n">root</span> <span class="n">node</span> <span class="n">boundary</span>
+<span class="mi">302</span>
+<span class="mi">303</span>         <span class="n">evaluative_csg</span><span class="p">(</span> <span class="n">prim</span><span class="p">,</span> <span class="n">identity</span> <span class="p">);</span>
+<span class="mi">306</span>     <span class="p">}</span>
+</pre></div>
+</div>
+<p>optixrap/cu/csg_intersect_boolean.h:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">563</span> <span class="n">static</span> <span class="n">__device__</span>
+<span class="mi">564</span> <span class="n">void</span> <span class="n">evaluative_csg</span><span class="p">(</span> <span class="n">const</span> <span class="n">Prim</span><span class="o">&amp;</span> <span class="n">prim</span><span class="p">,</span> <span class="n">const</span> <span class="n">uint4</span><span class="o">&amp;</span> <span class="n">identity</span> <span class="p">)</span>
+<span class="mi">565</span> <span class="p">{</span>
+<span class="o">...</span>
+<span class="o">...</span>      <span class="n">CSG</span> <span class="n">boolean</span> <span class="n">intersection</span>
+<span class="o">...</span>
+<span class="mi">882</span>          <span class="k">if</span><span class="p">(</span><span class="n">rtPotentialIntersection</span><span class="p">(</span> <span class="n">fabsf</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">w</span><span class="p">)</span> <span class="p">))</span>
+<span class="mi">883</span>          <span class="p">{</span>
+<span class="mi">884</span>               <span class="n">shading_normal</span> <span class="o">=</span> <span class="n">geometric_normal</span> <span class="o">=</span> <span class="n">make_float3</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">z</span><span class="p">)</span> <span class="p">;</span>
+<span class="mi">885</span>               <span class="n">instanceIdentity</span> <span class="o">=</span> <span class="n">identity</span> <span class="p">;</span>
+<span class="o">...</span>
+<span class="mi">892</span>               <span class="n">rtReportIntersection</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="mi">893</span>          <span class="p">}</span>
+<span class="mi">894</span>     <span class="p">}</span>
+<span class="o">...</span>
+<span class="mi">928</span> <span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><em>identity</em> (uint4) for a specific geometry instance (eg a particular PMT) is obtained from the <strong>AnalyticInstanceIdentityBuffer</strong>
+with the <strong>instance_index</strong></li>
+<li>NVIDIA OptiX attributes are used to communicate between the intersect program (which is geometry specific) and
+the general closest hit program</li>
+</ul>
+<p>The FLAGS macro sets p.flags values obtained from from the <strong>s</strong> and <strong>prd</strong> structs.</p>
+<dl class="docutils">
+<dt><strong>prd : PerRayData_propagate struct</strong></dt>
+<dd>used to communicate between the ray trace intersect program and ray generation program</dd>
+<dt><strong>s : State struct</strong></dt>
+<dd>filled with geometry and material/surface information by optixrap/cu/state.h:fill_state</dd>
+</dl>
+</div>
+<div class="section" id="photon-flags">
+<h2>Photon flags<a class="headerlink" href="#photon-flags" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>p.flags.i.x</dt>
+<dd>1-based signed integer boundary index of last intersect, 0 means no intersect,
+sign encodes in/out direction relative to the surface normal of the geometry at the intersect</dd>
+<dt>p.flags.u.y</dt>
+<dd>(s.identity.w) sensor index (TODO: revive this)</dd>
+<dt>p.flags.u.z</dt>
+<dd>4 debugging bytes : 3 of which are currently spare</dd>
+<dt>p.flags.u.w</dt>
+<dd>history mask created from the bitwise-or of s.flag (state flags) for all steps of the propagation</dd>
+</dl>
+<p>Note that in addition to the <em>history mask</em> Opticks also records the <em>history sequence</em>
+into the sequence array.  The so called <em>seqhis</em> and <em>seqmat</em> record 4-bit flags
+from up to 16 steps of the photon being into a 64 bit integer providing the
+step by step flag and material history of the photon propagation.</p>
+<dl class="docutils">
+<dt>optickscore/OpticksPhoton.h</dt>
+<dd><p class="first">enum of possible flags:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">22</span> <span class="n">enum</span>
+<span class="mi">23</span> <span class="p">{</span>
+<span class="mi">24</span>     <span class="n">CERENKOV</span>          <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">0</span><span class="p">,</span>
+<span class="mi">25</span>     <span class="n">SCINTILLATION</span>     <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">1</span><span class="p">,</span>
+<span class="mi">26</span>     <span class="n">MISS</span>              <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">2</span><span class="p">,</span>
+<span class="mi">27</span>     <span class="n">BULK_ABSORB</span>       <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">3</span><span class="p">,</span>
+<span class="mi">28</span>     <span class="n">BULK_REEMIT</span>       <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">4</span><span class="p">,</span>
+<span class="mi">29</span>     <span class="n">BULK_SCATTER</span>      <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">5</span><span class="p">,</span>
+<span class="mi">30</span>     <span class="n">SURFACE_DETECT</span>    <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">6</span><span class="p">,</span>
+<span class="mi">31</span>     <span class="n">SURFACE_ABSORB</span>    <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">7</span><span class="p">,</span>
+<span class="mi">32</span>     <span class="n">SURFACE_DREFLECT</span>  <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">8</span><span class="p">,</span>
+<span class="mi">33</span>     <span class="n">SURFACE_SREFLECT</span>  <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span>  <span class="mi">9</span><span class="p">,</span>
+<span class="mi">34</span>     <span class="n">BOUNDARY_REFLECT</span>  <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">10</span><span class="p">,</span>
+<span class="mi">35</span>     <span class="n">BOUNDARY_TRANSMIT</span> <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">11</span><span class="p">,</span>
+<span class="mi">36</span>     <span class="n">TORCH</span>             <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span><span class="p">,</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</dd>
+<dt>optickscore/OpticksFlags.{hh,cc}</dt>
+<dd>flag manipulation/presentation methods</dd>
+<dt>ana/base.py ana/hismask.py</dt>
+<dd>python machinery for flag manipulation</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>In [1]: from opticks.ana.base import PhotonMaskFlags
+
+In [2]: flags = PhotonMaskFlags()
+[2020-06-17 12:38:14,608] p69482 {__init__            :enum.py   :37} INFO     - parsing $OPTICKS_PREFIX/include/OpticksCore/OpticksPhoton.h
+[2020-06-17 12:38:14,608] p69482 {__init__            :enum.py   :39} INFO     - path expands to /usr/local/opticks/include/OpticksCore/OpticksPhoton.h
+
+In [8]: flags.code2name
+Out[8]:
+{1: &#39;CERENKOV&#39;,
+ 2: &#39;SCINTILLATION&#39;,
+ 4: &#39;MISS&#39;,
+ 8: &#39;BULK_ABSORB&#39;,
+ 16: &#39;BULK_REEMIT&#39;,
+ 32: &#39;BULK_SCATTER&#39;,
+ 64: &#39;SURFACE_DETECT&#39;,
+ 128: &#39;SURFACE_ABSORB&#39;,
+ 256: &#39;SURFACE_DREFLECT&#39;,
+ 512: &#39;SURFACE_SREFLECT&#39;,
+ 1024: &#39;BOUNDARY_REFLECT&#39;,
+ 2048: &#39;BOUNDARY_TRANSMIT&#39;,
+ 4096: &#39;TORCH&#39;,
+ 8192: &#39;NAN_ABORT&#39;,
+ 16384: &#39;G4GUN&#39;,
+ 32768: &#39;FABRICATED&#39;,
+ 65536: &#39;NATURAL&#39;,
+ 131072: &#39;MACHINERY&#39;,
+ 262144: &#39;EMITSOURCE&#39;,
+ 524288: &#39;PRIMARYSOURCE&#39;,
+ 1048576: &#39;GENSTEPSOURCE&#39;}
+</pre></div>
+</div>
+<p>Higher level flag and abbreviation manipulations are provided by ana/hismask.py:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:ana blyth$ ipython
+
+In [1]: from opticks.ana.hismask import HisMask
+
+In [2]: hm = HisMask()
+[2020-06-17 12:53:07,046] p69692 {__init__            :enum.py   :37} INFO     - parsing $OPTICKS_PREFIX/include/OpticksCore/OpticksPhoton.h
+[2020-06-17 12:53:07,046] p69692 {__init__            :enum.py   :39} INFO     - path expands to /usr/local/opticks/include/OpticksCore/OpticksPhoton.h
+
+In [3]: hm.label(65)
+Out[3]: &#39;SD|CK&#39;
+
+In [4]: hm.label(129)
+Out[4]: &#39;SA|CK&#39;
+
+In [5]: hm.abbrev.abbr2name
+Out[5]:
+{&#39;/usr/local/opticks/include/OpticksCore/OpticksFlags_Abbrev.json&#39;: &#39;jsonLoadPath&#39;,
+ &#39;AB&#39;: &#39;BULK_ABSORB&#39;,
+ &#39;BR&#39;: &#39;BOUNDARY_REFLECT&#39;,
+ &#39;BT&#39;: &#39;BOUNDARY_TRANSMIT&#39;,
+ &#39;CK&#39;: &#39;CERENKOV&#39;,
+ &#39;DR&#39;: &#39;SURFACE_DREFLECT&#39;,
+ &#39;FD&#39;: &#39;FABRICATED&#39;,
+ &#39;GN&#39;: &#39;G4GUN&#39;,
+ &#39;GS&#39;: &#39;GENSTEPSOURCE&#39;,
+ &#39;MI&#39;: &#39;MISS&#39;,
+ &#39;MY&#39;: &#39;MACHINERY&#39;,
+ &#39;NA&#39;: &#39;NAN_ABORT&#39;,
+ &#39;NL&#39;: &#39;NATURAL&#39;,
+ &#39;PS&#39;: &#39;PRIMARYSOURCE&#39;,
+ &#39;RE&#39;: &#39;BULK_REEMIT&#39;,
+ &#39;SA&#39;: &#39;SURFACE_ABSORB&#39;,
+ &#39;SC&#39;: &#39;BULK_SCATTER&#39;,
+ &#39;SD&#39;: &#39;SURFACE_DETECT&#39;,
+ &#39;SI&#39;: &#39;SCINTILLATION&#39;,
+ &#39;SO&#39;: &#39;EMITSOURCE&#39;,
+ &#39;SR&#39;: &#39;SURFACE_SREFLECT&#39;,
+ &#39;TO&#39;: &#39;TORCH&#39;,
+ &#39;XX&#39;: &#39;BAD_FLAG&#39;}
+</pre></div>
+</div>
+<p>Opticks analysis and debugging is based on python and NumPy (plus matplotlib for plotting).
+You may need to set PYTHONPATH to load the opticks module, eg with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export PYTHONHOME=$HOME
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="generation_and_propagation.html" title="Generation and propagation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../updating_this_documentation.html" title="Updating this documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>
