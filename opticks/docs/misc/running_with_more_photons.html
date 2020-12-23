@@ -1,0 +1,271 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>running_with_more_photons &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">running_with_more_photons</a><ul>
+<li><a class="reference internal" href="#when-using-embedded-opticks-withing-g4opticks">When using embedded Opticks withing G4Opticks</a></li>
+<li><a class="reference internal" href="#what-is-the-maximum-number-of-photons-that-can-be-handled-at-once">What is the maximum number of photons that can be handled at once ?</a></li>
+<li><a class="reference internal" href="#oxrap-orng-populates-rng-states-in-the-optix-gpu-context">oxrap/ORng : populates rng_states in the OptiX GPU context</a></li>
+<li><a class="reference internal" href="#oxrap-opropagator-instanciates-orng">oxrap/OPropagator : instanciates ORng</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/misc/running_with_more_photons.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="running-with-more-photons">
+<h1>running_with_more_photons<a class="headerlink" href="#running-with-more-photons" title="Permalink to this headline">¶</a></h1>
+<p>Not Enough RNG issue:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>-------------------------
+Number of Scintillation Photons:  12177
+Number of Cerenkov Photons:  3543830
+
+--------&gt;Storing hits in the ROOT file: in this event there are 37929 hits in the tracker chambers:
+HC: volTPCActive_lArTPC_HC
+
+###[ EventAction::EndOfEventAction G4Opticks.propagateOpticalPhotons
+
+2020-11-19 09:41:50.832 FATAL [20312] [OpticksEvent::resize@1100] NOT ENOUGH RNG : USE OPTION --rngmax 3/10/100  num_photons 3556007 rng_max 3000000
+G4OpticksTest: /home/wenzel/gputest/opticks/optickscore/OpticksEvent.cc:1106: void OpticksEvent::resize(): Assertion `enoughRng &amp;&amp; &quot; need to prepare and persist more RNG states up to maximual per propagation number&quot;&#39; failed.
+Aborted (core dumped)
+--------------------------
+</pre></div>
+</div>
+<p>Initializing cuRAND requires a large GPU stack size so this is done in separate CUDA launches which
+are done during installation by <em>cudarap-prepare-installation</em></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:opticks blyth$ t opticks-prepare-installation
+opticks-prepare-installation ()
+{
+    local msg=&quot;=== $FUNCNAME :&quot;;
+    echo $msg generating RNG seeds into installcache;
+    cudarap-;
+    cudarap-prepare-installation
+}
+epsilon:opticks blyth$ cudarap-
+epsilon:opticks blyth$ t cudarap-prepare-installation
+cudarap-prepare-installation ()
+{
+    local size;
+    cudarap-prepare-sizes | while read size; do
+        CUDARAP_RNGMAX_M=$size cudarap-prepare-rng-;
+    done
+}
+epsilon:opticks blyth$ t cudarap-prepare-rng-
+cudarap-prepare-rng- ()
+{
+    local msg=&quot;=== $FUNCNAME :&quot;;
+    local path=$(cudarap-rngpath);
+    [ -f &quot;$path&quot; ] &amp;&amp; echo $msg path $path exists already &amp;&amp; return 0;
+    CUDARAP_RNG_DIR=$(cudarap-rngdir) CUDARAP_RNG_MAX=$(cudarap-rngmax) $(cudarap-ibin)
+}
+</pre></div>
+</div>
+<p>Running <em>cudarap-prepare-installation</em> again will just list the curandState files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[blyth@localhost ~]$ cudarap-
+[blyth@localhost ~]$ cudarap-prepare-installation
+=== cudarap-prepare-rng- : path /home/blyth/.opticks/rngcache/RNG/cuRANDWrapper_1000000_0_0.bin exists already
+=== cudarap-prepare-rng- : path /home/blyth/.opticks/rngcache/RNG/cuRANDWrapper_3000000_0_0.bin exists already
+=== cudarap-prepare-rng- : path /home/blyth/.opticks/rngcache/RNG/cuRANDWrapper_10000000_0_0.bin exists already
+[blyth@localhost ~]$
+</pre></div>
+</div>
+<p>Bash functions for creation of larger files are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">597</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span><span class="mi">400</span><span class="n">M</span><span class="p">(){</span> <span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">400</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span> <span class="p">;</span> <span class="p">}</span>
+<span class="mi">598</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span><span class="mi">200</span><span class="n">M</span><span class="p">(){</span> <span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">200</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span> <span class="p">;</span> <span class="p">}</span>
+<span class="mi">599</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span><span class="mi">100</span><span class="n">M</span><span class="p">(){</span> <span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">100</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span> <span class="p">;</span> <span class="p">}</span>
+<span class="mi">600</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span><span class="mi">10</span><span class="n">M</span><span class="p">(){</span>  <span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">10</span>  <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span> <span class="p">;</span> <span class="p">}</span>
+<span class="mi">601</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span><span class="mi">2</span><span class="n">M</span><span class="p">(){</span>   <span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">2</span>   <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span> <span class="p">;</span> <span class="p">}</span>
+<span class="mi">602</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span><span class="mi">1</span><span class="n">M</span><span class="p">(){</span>   <span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">1</span>   <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span> <span class="p">;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>The curandState file that is used depends on the <strong>–rngmax</strong> option, from okc/OpticksCfg.cc it is apparent
+that the default <strong>rngmax</strong> is 3M:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">113</span>     <span class="n">m_rngmax</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+<span class="mi">114</span>     <span class="n">m_rngmaxscale</span><span class="p">(</span><span class="mi">1000000</span><span class="p">),</span>
+</pre></div>
+</div>
+<p>Assuming you have the 10M already saved you can increase the maximum number of photons Opticks can handle with, eg:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">rngmax</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>It is also possible to change the seed and offset from their defaults of zero with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">rngseed</span> <span class="mi">1</span>
+<span class="o">--</span><span class="n">rngoffset</span> <span class="mi">42</span>
+</pre></div>
+</div>
+<p>If 10M photons is insufficient use the below to initialize more curandState slots, eg for 100M:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">100</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span>
+</pre></div>
+</div>
+<div class="section" id="when-using-embedded-opticks-withing-g4opticks">
+<h2>When using embedded Opticks withing G4Opticks<a class="headerlink" href="#when-using-embedded-opticks-withing-g4opticks" title="Permalink to this headline">¶</a></h2>
+<p>Typically the executables command line is not parsed by Opticks when using an
+embedded Opticks as when using G4Opticks.
+Opticks is instanciated when the <em>G4Opticks::setGeometry</em> method is called,
+thus to change config of Opticks invoke <em>G4Opticks::setEmbeddedCommandlineExtra</em>
+prior to calling <em>G4Opticks::setGeometry</em> for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;--rngmax 10 --rngseed 1 --rngoffset 42&quot;</span> <span class="p">;</span>
+<span class="n">m_g4ok</span><span class="o">-&gt;</span><span class="n">setEmbeddedCommandlineExtra</span><span class="p">(</span><span class="n">extra</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="what-is-the-maximum-number-of-photons-that-can-be-handled-at-once">
+<h2>What is the maximum number of photons that can be handled at once ?<a class="headerlink" href="#what-is-the-maximum-number-of-photons-that-can-be-handled-at-once" title="Permalink to this headline">¶</a></h2>
+<p>The maximum is limited by GPU VRAM. Each photon takes 112 bytes:</p>
+<ul class="simple">
+<li>64 bytes (4*4*4 bytes for 16 32-bit floats/ints) of parameters</li>
+<li>48 bytes of curandState.</li>
+</ul>
+<p>400M photons corresponding to about 45G has been found to be close to the maximum possible
+when using a 48G VRAM GPU (NVIDIA Quadro RTX 8000).</p>
+</div>
+<div class="section" id="oxrap-orng-populates-rng-states-in-the-optix-gpu-context">
+<h2>oxrap/ORng : populates rng_states in the OptiX GPU context<a class="headerlink" href="#oxrap-orng-populates-rng-states-in-the-optix-gpu-context" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>032 /**
+ 33 ORng
+ 34 ====
+ 35
+ 36 Uploads persisted curand rng_states to GPU.
+ 37 Canonical instance m_orng is ctor resident of OPropagator.
+ 38
+ 39 Work is mainly done by cudarap-/cuRANDWrapper
+ 40
+ 41 TODO: investigate Thrust based alternatives for curand initialization
+ 42       potential for eliminating cudawrap-
+ 43
+ 44 **/
+...
+073 void ORng::init()
+ 74 {
+ 75     unsigned rng_max = m_ok-&gt;getRngMax();
+...
+
+110     // OptiX owned RNG states buffer (not CUDA owned)
+111     m_rng_states = m_context-&gt;createBuffer( RT_BUFFER_INPUT, RT_FORMAT_USER);
+112
+113     m_rng_states-&gt;setElementSize(sizeof(curandState));
+114
+115     if(num_mask == 0)
+116     {
+117         m_rng_states-&gt;setSize(rng_max);
+118
+119         curandState* host_rng_states = static_cast&lt;curandState*&gt;( m_rng_states-&gt;map() );
+120
+121         m_rng_wrapper-&gt;setItems(rng_max); // why ? to identify which cache file to load i suppose
+122
+123         m_rng_wrapper-&gt;LoadIntoHostBuffer(host_rng_states, rng_max );
+124
+125         m_rng_states-&gt;unmap();
+126     }
+127     else
+128     {
+129         m_rng_states-&gt;setSize(num_mask);
+130
+131         curandState* host_rng_states = static_cast&lt;curandState*&gt;( m_rng_states-&gt;map() );
+132
+133         m_rng_wrapper-&gt;setItems(rng_max); // still need to load the full cache
+134
+135         m_rng_wrapper-&gt;LoadIntoHostBufferMasked(host_rng_states, m_mask ) ; // but make partial copy
+136
+137         m_rng_states-&gt;unmap();
+138     }
+139
+140     m_context[&quot;rng_states&quot;]-&gt;setBuffer(m_rng_states);
+141 }
+142
+</pre></div>
+</div>
+</div>
+<div class="section" id="oxrap-opropagator-instanciates-orng">
+<h2>oxrap/OPropagator : instanciates ORng<a class="headerlink" href="#oxrap-opropagator-instanciates-orng" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">65</span> <span class="n">OPropagator</span><span class="p">::</span><span class="n">OPropagator</span><span class="p">(</span><span class="n">Opticks</span><span class="o">*</span> <span class="n">ok</span><span class="p">,</span> <span class="n">OEvent</span><span class="o">*</span> <span class="n">oevt</span><span class="p">,</span> <span class="n">OpticksEntry</span><span class="o">*</span> <span class="n">entry</span><span class="p">)</span>
+<span class="mi">66</span>     <span class="p">:</span>
+<span class="mi">67</span>     <span class="n">m_log</span><span class="p">(</span><span class="n">new</span> <span class="n">SLog</span><span class="p">(</span><span class="s2">&quot;OPropagator::OPropagator&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">LEVEL</span><span class="p">)),</span>
+<span class="mi">68</span>     <span class="n">m_ok</span><span class="p">(</span><span class="n">ok</span><span class="p">),</span>
+<span class="mi">69</span>     <span class="n">m_oevt</span><span class="p">(</span><span class="n">oevt</span><span class="p">),</span>
+<span class="mi">70</span>     <span class="n">m_ocontext</span><span class="p">(</span><span class="n">m_oevt</span><span class="o">-&gt;</span><span class="n">getOContext</span><span class="p">()),</span>
+<span class="mi">71</span>     <span class="n">m_context</span><span class="p">(</span><span class="n">m_ocontext</span><span class="o">-&gt;</span><span class="n">getContext</span><span class="p">()),</span>
+<span class="mi">72</span>     <span class="n">m_orng</span><span class="p">(</span><span class="n">new</span> <span class="n">ORng</span><span class="p">(</span><span class="n">m_ok</span><span class="p">,</span> <span class="n">m_ocontext</span><span class="p">)),</span>
+<span class="mi">73</span>     <span class="n">m_propagateoverride</span><span class="p">(</span><span class="n">m_ok</span><span class="o">-&gt;</span><span class="n">getPropagateOverride</span><span class="p">()),</span>
+<span class="mi">74</span>     <span class="n">m_nopropagate</span><span class="p">(</span><span class="n">false</span><span class="p">),</span>
+<span class="mi">75</span>     <span class="n">m_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">),</span>
+<span class="mi">76</span>     <span class="n">m_entry_index</span><span class="p">(</span><span class="n">entry</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">()),</span>
+<span class="mi">77</span>     <span class="n">m_prelaunch</span><span class="p">(</span><span class="n">false</span><span class="p">),</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

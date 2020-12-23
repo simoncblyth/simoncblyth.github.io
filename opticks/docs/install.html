@@ -61,6 +61,8 @@
 <li><a class="reference internal" href="#externals">Externals</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#environment-setup-for-usage-of-opticks-executables">Environment setup for usage of Opticks Executables</a></li>
+<li><a class="reference internal" href="#moving-externals">Moving Externals</a></li>
 </ul>
 </li>
 </ul>
@@ -113,6 +115,8 @@
 <li><a class="reference internal" href="#opticks-installation-build-tools" id="id8">Opticks Installation Build Tools</a></li>
 <li><a class="reference internal" href="#version-requirements" id="id9">Version Requirements</a></li>
 <li><a class="reference internal" href="#building-opticks-with-opticks-full" id="id10">Building Opticks with <strong>opticks-full</strong></a></li>
+<li><a class="reference internal" href="#environment-setup-for-usage-of-opticks-executables" id="id11">Environment setup for usage of Opticks Executables</a></li>
+<li><a class="reference internal" href="#moving-externals" id="id12">Moving Externals</a></li>
 </ul>
 </li>
 </ul>
@@ -208,7 +212,7 @@ t<span class="o">(){</span> <span class="nb">typeset</span> -f <span class="nv">
 <span class="c1">## hookup paths to access &quot;foreign&quot; externals</span>
 opticks-prepend-prefix /usr/local/opticks_externals/clhep
 opticks-prepend-prefix /usr/local/opticks_externals/xercesc
-opticks-prepend-prefix /usr/local/opticks_externals/g4
+opticks-prepend-prefix /usr/local/opticks_externals/g4_1042
 opticks-prepend-prefix /usr/local/opticks_externals/boost
 
 <span class="c1">## NB changing any directory paths demands an opticks-full rebuild</span>
@@ -361,6 +365,42 @@ and run again from scratch.</p>
 <h3>Externals<a class="headerlink" href="#externals" title="Permalink to this headline">¶</a></h3>
 <p>The <em>opticks-full</em> command automatically downloads and installs the <strong>automated</strong>
 external packages into the places required by Opticks.  See <a class="reference internal" href="externals.html"><span class="doc">Opticks Externals</span></a>.</p>
+</div>
+</div>
+<div class="section" id="environment-setup-for-usage-of-opticks-executables">
+<h2><a class="toc-backref" href="#id11">Environment setup for usage of Opticks Executables</a><a class="headerlink" href="#environment-setup-for-usage-of-opticks-executables" title="Permalink to this headline">¶</a></h2>
+<p>During installation an opticks-setup.sh script is generated
+at path $OPTICKS_PREFIX/bin/opticks-setup.sh.
+Sourcing this script sets up the paths to allow usage of Opticks executables.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>source $OPTICKS_PREFIX/bin/opticks-setup.sh
+</pre></div>
+</div>
+<p>Once the setup is working for you, avoid the output on starting each
+session by redirecting the stdout:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>source $OPTICKS_PREFIX/bin/opticks-setup.sh 1&gt; /dev/null
+</pre></div>
+</div>
+<p>The <em>example.opticks_config</em> includes these lines already.</p>
+</div>
+<div class="section" id="moving-externals">
+<h2><a class="toc-backref" href="#id12">Moving Externals</a><a class="headerlink" href="#moving-externals" title="Permalink to this headline">¶</a></h2>
+<p>The opticks-setup.sh script complains regarding BUILD_CMAKE_PREFIX_PATH / BUILD_PKG_CONFIG_PATH
+captured at generation not matching the current envvars then the script
+can be regenerated with “opticks-setup-generate”.</p>
+<p>When moving around externals, it is necessary to change the build environment
+using opticks-prepend-prefix eg:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">## hookup paths to access &quot;foreign&quot; externals</span>
+<span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">clhep</span>
+<span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">xercesc</span>
+<span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">g4</span>
+<span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">boost</span>
+</pre></div>
+</div>
+<p>After that it is necessary to cleaninstall Opticks with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">o</span>
+<span class="n">om</span><span class="o">-</span>
+<span class="n">om</span><span class="o">-</span><span class="n">cleaninstall</span>
+</pre></div>
 </div>
 </div>
 </div>
