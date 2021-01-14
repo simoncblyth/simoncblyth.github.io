@@ -1,0 +1,142 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>deciding_to_develop_a_gpu_accelerated_simulation &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/misc/deciding_to_develop_a_gpu_accelerated_simulation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="deciding-to-develop-a-gpu-accelerated-simulation">
+<h1>deciding_to_develop_a_gpu_accelerated_simulation<a class="headerlink" href="#deciding-to-develop-a-gpu-accelerated-simulation" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt; I&#39;m ... from .... I&#39;m intrested in the GPU accelerate for
+&gt; the tranditional programing.I have a requirements to accelerate the avalanche
+&gt; for gaseous detector taken from Garfield++. I have attached part of the code
+&gt; for the avalanche. The source code is here. Do you think it&#39;s possible and
+&gt; worthy to implement an GPU version?
+&gt;
+&gt; Looking forward for your reply. Thank you very much!
+</pre></div>
+</div>
+<p>To determine if something is worthwhile to attempt GPU parallelization
+requires prototype development and performance measurements with
+realistically sized problem sets.</p>
+<p>Also the bigger picture of how important something is to accelerate and
+how that fits in with other processing are inputs to how much effort it is
+worthwhile to expend on acceleration.</p>
+<p>Moving things to the GPU requires you to understand and port
+everything that is happening down to first principals you do not have
+the luxury of bringing in libraries and hiding details.</p>
+<p>There are however some shortcuts available by using GPU textures
+to capture CPU side processing into 1/2/3d data structures with hardware
+accelerated interpolated look ups. This for example can be used to
+lookup field values/vectors or material properties as a function of energy.</p>
+<p>The code that you pointed at:</p>
+<p><a class="reference external" href="https://gitlab.cern.ch/garfield/garfieldpp/-/blob/master/Source/AvalancheMicroscopic.cc#L485">https://gitlab.cern.ch/garfield/garfieldpp/-/blob/master/Source/AvalancheMicroscopic.cc#L485</a></p>
+<p>uses many helper objects and uses shuffling between stacks.  This kind of
+thing does not translate easily to the GPU. Thus as is typically the case
+it will be necessary to totally reimplement both data structures and algorithm
+to benefit from GPU parallelism.</p>
+<p>It is necessary to think in terms of fixed size arrays that GPU kernels
+operate upon. Changing float values for positions, times etc.. and bitfield flags
+to indicate the state of the particles represented.
+As there is no control over the order of GPU thread processing it is necessary
+for each GPU thread to only write to its own “slots” in the arrays.</p>
+<p>For example modelling an avalanche or shower with secondaries requires the fixed array
+size to start with many empty slots.
+For example if each particle could only ever yield a maximum of two additional
+particles at each iteration then the fixed array size for a “stack” that starts with
+N particles would need 3*N entries with threads i=0,1,2,..,N-1 being for example
+owner of slots i,i+N,i+2*N in the fixed array. Where the last 2/3 of the
+array starts empty.</p>
+<p>At each iteration the technique of stream compaction can be used
+to reposition the non-dead particles together down into the first third
+by copying back and forth between two GPU buffers (A and B) that keep getting
+resized.</p>
+<p>The skeleton of the steps of the approach could be:</p>
+<ol class="arabic simple" start="0">
+<li>load/generate initial particles</li>
+<li>perform transport iteration, some slots will die and change flags
+to reflect that, some slots will yield secondaries writing into i+N, i+N*2</li>
+<li>scan GPU buffer A counting particles that are still alive (CUDA Thrust can conveniently do this)</li>
+<li>resize GPU buffer B with the appropriate multiplier of spare slots to hold future secondaries</li>
+<li>use CUDA thrust copy_if (or something similar) to copy from A-&gt;B filling the first third of B</li>
+<li>check for some termination condition</li>
+<li>repeat 1-6 with buffers A and B interchanged</li>
+</ol>
+<p>This approach seems like it can be a workable way to simulate particle
+showers however to prevent thread divergence killing performance it
+will probably be necessary to use binning approaches in particle type,
+energy, position, or combinations of those to try to make
+the processing of each thread as similar as possible.</p>
+<p>Simon</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

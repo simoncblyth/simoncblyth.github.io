@@ -30,6 +30,9 @@
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">CerenkovMinimal</a><ul>
+<li><a class="reference internal" href="#objective">Objective</a></li>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#full-opticks-usage-via-geocache">Full Opticks usage, via geocache</a></li>
 <li><a class="reference internal" href="#review-sources">Review Sources</a></li>
 <li><a class="reference internal" href="#aligned-rng-stream">Aligned RNG stream</a></li>
 <li><a class="reference internal" href="#l4cerenkov">L4Cerenkov</a></li>
@@ -74,6 +77,23 @@
             
   <div class="section" id="cerenkovminimal">
 <h1>CerenkovMinimal<a class="headerlink" href="#cerenkovminimal" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="objective">
+<h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
+<p>CerenkovMinimal aims to show minimal use of embedded Opticks
+to act as an starting point for users familiar with Geant4 examples.</p>
+</div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The idea is to simplify Opticks usage by everything going
+through the G4Opticks interface. This intentionally constrains
+Opticks functionality and flexibility.</p>
+</div>
+<div class="section" id="full-opticks-usage-via-geocache">
+<h2>Full Opticks usage, via geocache<a class="headerlink" href="#full-opticks-usage-via-geocache" title="Permalink to this headline">¶</a></h2>
+<p>The geocache and gensteps created from the simple CerenkovMinimal
+Geant4 geometry can be used from full unconstrained Opticks executables
+by setting the OPTICKS_KEY reported by CerenkovMinimal.</p>
+</div>
 <div class="section" id="review-sources">
 <h2>Review Sources<a class="headerlink" href="#review-sources" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
@@ -102,15 +122,23 @@ reimplemented for easy prodding</dd>
 <dd>processHits invokes G4Opticks::collectHit</dd>
 <dt>Ctx</dt>
 <dd><p class="first">instance is resident of G4 and is passed as only argument to
-all the action ctors. Nexus.</p>
+all the action ctors.</p>
+<p>Context struct used via setEvent setTrack setStep etc..
+to maintain convenient state access</p>
 <p>Ctx::setTrack currently kills non-optical tracks after the first
 genstep has been collected : for debugging with a single genstep</p>
 <p class="last">Ctx::setTrackOptical invokes G4Opticks::setAlignIndex(photon_record_id)
 Ctx::postTrackOptical invokes G4Opticks::setAlignIndex(-1)</p>
 </dd>
 <dt>TrackInfo</dt>
-<dd>used to pass the photon_record_id from the L4Cerenkov photon generation
-loop to subsequent propagation.</dd>
+<dd><p class="first">used to pass the photon_record_id from the L4Cerenkov photon generation
+loop to subsequent propagation.</p>
+<p class="last">G4VUserTrackInformation subclass that holds a photon_record_id, this
+is convenient for example when multiple Geant4 events correspond
+to a single Opticks event and also when doing reemission continuation :
+ie maintaining the original identity of a photon through a reemission in
+Geant4 to allow comparison with Opticks that does this naturally</p>
+</dd>
 <dt>RunAction</dt>
 <dd>BeginOfRunAction passes world volume with G4Opticks::setGeometry
 EndOfRunAction invokes G4Opticks::Finalize</dd>
@@ -122,8 +150,20 @@ EndOfRunAction invokes G4Opticks::Finalize</dd>
 <dd>handoff G4Step to Ctx::setStep</dd>
 <dt>PrimaryGeneratorAction</dt>
 <dd>standard simple G4ParticleGun</dd>
+<dt>Cerenkov.hh</dt>
+<dd>shim on top of G4Cerenkov for debug dumping only</dd>
+<dt>L4Cerenkov.hh</dt>
+<dd>G4VProcess subclass based on G4Cerenkov that collects Cerenkov gensteps
+using G4Opticks. Currently the CPU photon generation loop is still being
+done for comparison purposes.</dd>
+<dt>PhysicsList.hh</dt>
+<dd>EM and Optical physics, ConstructOp is templated, currently using
+L4Cerenkov</dd>
+<dt>SensitiveDetector.hh</dt>
+<dd>SensitiveDetector::ProcessHits is for standard Geant4 hits not ones from GPU.
+Fairly undeveloped, needs machinery to shovel GPU hits in bulk into
+collections.</dd>
 </dl>
-<p>OpHit</p>
 </div>
 <div class="section" id="aligned-rng-stream">
 <h2>Aligned RNG stream<a class="headerlink" href="#aligned-rng-stream" title="Permalink to this headline">¶</a></h2>
