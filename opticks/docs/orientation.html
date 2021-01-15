@@ -43,7 +43,8 @@
 <li><a class="reference internal" href="#links">Links</a></li>
 <li><a class="reference internal" href="#geant4-opticks-nvidia-optix-workflow">Geant4-Opticks-NVIDIA_OptiX workflow</a></li>
 <li><a class="reference internal" href="#g4opticks-geant4-opticks-interface-class">G4Opticks : Geant4-Opticks interface class</a></li>
-<li><a class="reference internal" href="#geometry-translation-geant4-opticks-ggeo-optix-green-arrows">Geometry translation : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a></li>
+<li><a class="reference internal" href="#geometry-translation-overview-geant4-opticks-ggeo-optix-green-arrows">Geometry translation Overview : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a></li>
+<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry">Primary Packages and Classes for geometry</a></li>
 <li><a class="reference internal" href="#geant4-links">Geant4 Links</a></li>
 <li><a class="reference internal" href="#gensteps-blue-arrows-and-hits-red-arrows">Gensteps (blue arrows) and hits (red arrows)</a><ul>
 <li><a class="reference internal" href="#optix-gpu-use-of-gensteps-to-generate-photons">OptiX GPU use of gensteps to generate photons</a></li>
@@ -103,14 +104,15 @@
 <li><a class="reference internal" href="#links" id="id4">Links</a></li>
 <li><a class="reference internal" href="#geant4-opticks-nvidia-optix-workflow" id="id5">Geant4-Opticks-NVIDIA_OptiX workflow</a></li>
 <li><a class="reference internal" href="#g4opticks-geant4-opticks-interface-class" id="id6">G4Opticks : Geant4-Opticks interface class</a></li>
-<li><a class="reference internal" href="#geometry-translation-geant4-opticks-ggeo-optix-green-arrows" id="id7">Geometry translation : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a></li>
-<li><a class="reference internal" href="#geant4-links" id="id8">Geant4 Links</a></li>
-<li><a class="reference internal" href="#gensteps-blue-arrows-and-hits-red-arrows" id="id9">Gensteps (blue arrows) and hits (red arrows)</a></li>
-<li><a class="reference internal" href="#physics-background" id="id10">Physics Background</a></li>
-<li><a class="reference internal" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" id="id11">Geant4 classes which are partially ported to CUDA/OptiX</a></li>
-<li><a class="reference internal" href="#cmake-structure" id="id12">CMake Structure</a></li>
-<li><a class="reference internal" href="#bash-functions" id="id13">Bash Functions</a></li>
-<li><a class="reference internal" href="#roles-of-the-opticks-sub-projects" id="id14">Roles of the Opticks sub-projects</a></li>
+<li><a class="reference internal" href="#geometry-translation-overview-geant4-opticks-ggeo-optix-green-arrows" id="id7">Geometry translation Overview : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a></li>
+<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry" id="id8">Primary Packages and Classes for geometry</a></li>
+<li><a class="reference internal" href="#geant4-links" id="id9">Geant4 Links</a></li>
+<li><a class="reference internal" href="#gensteps-blue-arrows-and-hits-red-arrows" id="id10">Gensteps (blue arrows) and hits (red arrows)</a></li>
+<li><a class="reference internal" href="#physics-background" id="id11">Physics Background</a></li>
+<li><a class="reference internal" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" id="id12">Geant4 classes which are partially ported to CUDA/OptiX</a></li>
+<li><a class="reference internal" href="#cmake-structure" id="id13">CMake Structure</a></li>
+<li><a class="reference internal" href="#bash-functions" id="id14">Bash Functions</a></li>
+<li><a class="reference internal" href="#roles-of-the-opticks-sub-projects" id="id15">Roles of the Opticks sub-projects</a></li>
 </ul>
 </li>
 </ul>
@@ -163,27 +165,35 @@ the Geant4 simulation of all other particles</li>
 <div class="section" id="g4opticks-geant4-opticks-interface-class">
 <h2><a class="toc-backref" href="#id6">G4Opticks : Geant4-Opticks interface class</a><a class="headerlink" href="#g4opticks-geant4-opticks-interface-class" title="Permalink to this headline">¶</a></h2>
 <p>G4Opticks provides a minimal interface to using embedded Opticks. It is
-intended to be integrated with the simulation framework of an experiment.</p>
+intended to be integrated with the Geant4 based simulation framework
+of an experiment.</p>
 <ul class="simple">
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/g4ok/G4Opticks.hh">https://bitbucket.org/simoncblyth/opticks/src/master/g4ok/G4Opticks.hh</a></li>
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/g4ok/G4Opticks.cc">https://bitbucket.org/simoncblyth/opticks/src/master/g4ok/G4Opticks.cc</a></li>
 </ul>
 </div>
-<div class="section" id="geometry-translation-geant4-opticks-ggeo-optix-green-arrows">
-<h2><a class="toc-backref" href="#id7">Geometry translation : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a><a class="headerlink" href="#geometry-translation-geant4-opticks-ggeo-optix-green-arrows" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="geometry-translation-overview-geant4-opticks-ggeo-optix-green-arrows">
+<h2><a class="toc-backref" href="#id7">Geometry translation Overview : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a><a class="headerlink" href="#geometry-translation-overview-geant4-opticks-ggeo-optix-green-arrows" title="Permalink to this headline">¶</a></h2>
 <p>The green lines in the above workflow diagram represent the translation of geometry information
 that happens at initialization.  As this translation can be take minutes for large geometries
 the Opticks(GGeo) geometry model is persisted to binary <em>.npy</em> files which act as a <strong>geocache</strong>.</p>
 <p>Geometry translation is steered by <em>G4Opticks::translateGeometry</em> with <em>X4PhysicalVolume</em>
 taking the leading role.</p>
+</div>
+<div class="section" id="primary-packages-and-classes-for-geometry">
+<h2><a class="toc-backref" href="#id8">Primary Packages and Classes for geometry</a><a class="headerlink" href="#primary-packages-and-classes-for-geometry" title="Permalink to this headline">¶</a></h2>
+<p>The below linked orientation pages for the sub projects
+highlight a few of the more important classes.
+The quoted names correspond to utility bash functions.</p>
 <dl class="docutils">
 <dt>extg4 “x4”</dt>
-<dd>translates Geant4-&gt;GGeo only</dd>
+<dd><a class="reference internal" href="../extg4/orientation.html"><span class="doc">ExtG4 Orientation : Translates Geant4-&gt;GGeo only</span></a></dd>
 <dt>ggeo “ggeo”</dt>
-<dd>model the geometry : GMaterialLib, GSurfaceLib, GBndLib, GNodeLib, GGeoLib, …
-provide binary persistency in <em>.npy</em> arrays</dd>
+<dd><a class="reference internal" href="../ggeo/orientation.html"><span class="doc">GGeo Orientation : Geometry Modelling and Persisting</span></a></dd>
 <dt>optixrap “oxrap”</dt>
-<dd>translates GGeo-&gt;OptiX</dd>
+<dd>translates GGeo-&gt;OptiX, <a class="reference internal" href="../optixrap/orientation.html"><span class="doc">OptiXRap Orientation</span></a></dd>
+<dt>npy “npy”</dt>
+<dd>array creation, updating and persisting, <a class="reference internal" href="../npy/orientation.html"><span class="doc">NPY Orientation</span></a></dd>
 </dl>
 <ul class="simple">
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/</a></li>
@@ -192,10 +202,13 @@ provide binary persistency in <em>.npy</em> arrays</dd>
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GGeo.cc</a></li>
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/</a></li>
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/">https://bitbucket.org/simoncblyth/opticks/src/master/npy/</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp">https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp</a></li>
 </ul>
+<p>Descriptions of all ~20 packages : <a class="reference internal" href="misc/packages.html"><span class="doc">Opticks Packages Overview</span></a></p>
 </div>
 <div class="section" id="geant4-links">
-<h2><a class="toc-backref" href="#id8">Geant4 Links</a><a class="headerlink" href="#geant4-links" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id9">Geant4 Links</a><a class="headerlink" href="#geant4-links" title="Permalink to this headline">¶</a></h2>
 <p>Some familiarity with the Geant4 geometry model is required to understand Opticks
 as the bulk of Opticks code is concerned with the automated translation of Geant4
 geometries into Opticks(GGeo) geometries and subsequently OptiX geometries.</p>
@@ -206,7 +219,7 @@ geometries into Opticks(GGeo) geometries and subsequently OptiX geometries.</p>
 </ul>
 </div>
 <div class="section" id="gensteps-blue-arrows-and-hits-red-arrows">
-<h2><a class="toc-backref" href="#id9">Gensteps (blue arrows) and hits (red arrows)</a><a class="headerlink" href="#gensteps-blue-arrows-and-hits-red-arrows" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id10">Gensteps (blue arrows) and hits (red arrows)</a><a class="headerlink" href="#gensteps-blue-arrows-and-hits-red-arrows" title="Permalink to this headline">¶</a></h2>
 <p>Gensteps (blue arrows in the above workflow diagram) are small arrays of shape <cite>(num_gensteps,6,4)</cite>
 which act to carry the parameters of the Cerenkov and Scintillation photon generation from
 their origin in the modified Geant4 process classes to the CUDA ports
@@ -241,7 +254,7 @@ allocation (see red arrows in the above workflow diagram)</li>
 </div>
 </div>
 <div class="section" id="physics-background">
-<h2><a class="toc-backref" href="#id10">Physics Background</a><a class="headerlink" href="#physics-background" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">Physics Background</a><a class="headerlink" href="#physics-background" title="Permalink to this headline">¶</a></h2>
 <p>Scintillation and Cerenkov are the two physical processes which are the principal sources
 of light relevant to neutrino and dark matter experiments.</p>
 <ul class="simple">
@@ -259,11 +272,13 @@ form a better understanding of the physics of interest such as neutrinos coming
 from nuclear reactors or from the sun or from distant galaxies.</p>
 </div>
 <div class="section" id="geant4-classes-which-are-partially-ported-to-cuda-optix">
-<h2><a class="toc-backref" href="#id11">Geant4 classes which are partially ported to CUDA/OptiX</a><a class="headerlink" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id12">Geant4 classes which are partially ported to CUDA/OptiX</a><a class="headerlink" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>G4Cerenkov (only generation loop)</li>
 <li>G4Scintillation (only generation loop)</li>
-<li>G4OpBoundaryProcess</li>
+<li>G4OpRayleigh (bulk scattering)</li>
+<li>G4OpAbsorption (bulk absorption)</li>
+<li>G4OpBoundaryProcess (only a few surface types)</li>
 </ul>
 <p>To quickly view the sources of any Geant4 classes use the opticks bash function g4-cls:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g4</span><span class="o">-</span><span class="p">;</span><span class="n">g4</span><span class="o">-</span><span class="bp">cls</span> <span class="n">G4Cerenkov</span>
@@ -271,18 +286,18 @@ from nuclear reactors or from the sun or from distant galaxies.</p>
 </div>
 </div>
 <div class="section" id="cmake-structure">
-<h2><a class="toc-backref" href="#id12">CMake Structure</a><a class="headerlink" href="#cmake-structure" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id13">CMake Structure</a><a class="headerlink" href="#cmake-structure" title="Permalink to this headline">¶</a></h2>
 <p>Opticks is structured as a collection of ~20 modular CMake sub-projects organized by
 their dependencies. The sub-projects are hooked together into a tree using the CMake <em>find_package</em> mechanism
 which uses <em>BCM</em> (Boost CMake Modules) to reduce CMake boilerplate.  The upshot is that
 you only need to worry about one level of dependencires</p>
 </div>
 <div class="section" id="bash-functions">
-<h2><a class="toc-backref" href="#id13">Bash Functions</a><a class="headerlink" href="#bash-functions" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id14">Bash Functions</a><a class="headerlink" href="#bash-functions" title="Permalink to this headline">¶</a></h2>
 <p>Bash functions are used for building the tree of CMake projects, see <em>om.bash</em></p>
 </div>
 <div class="section" id="roles-of-the-opticks-sub-projects">
-<h2><a class="toc-backref" href="#id14">Roles of the Opticks sub-projects</a><a class="headerlink" href="#roles-of-the-opticks-sub-projects" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id15">Roles of the Opticks sub-projects</a><a class="headerlink" href="#roles-of-the-opticks-sub-projects" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
