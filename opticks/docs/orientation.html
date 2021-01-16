@@ -44,7 +44,6 @@
 <li><a class="reference internal" href="#geant4-opticks-nvidia-optix-workflow">Geant4-Opticks-NVIDIA_OptiX workflow</a></li>
 <li><a class="reference internal" href="#g4opticks-geant4-opticks-interface-class">G4Opticks : Geant4-Opticks interface class</a></li>
 <li><a class="reference internal" href="#geometry-translation-overview-geant4-opticks-ggeo-optix-green-arrows">Geometry translation Overview : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a></li>
-<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry">Primary Packages and Classes for geometry</a></li>
 <li><a class="reference internal" href="#geant4-links">Geant4 Links</a></li>
 <li><a class="reference internal" href="#gensteps-blue-arrows-and-hits-red-arrows">Gensteps (blue arrows) and hits (red arrows)</a><ul>
 <li><a class="reference internal" href="#optix-gpu-use-of-gensteps-to-generate-photons">OptiX GPU use of gensteps to generate photons</a></li>
@@ -53,9 +52,18 @@
 </li>
 <li><a class="reference internal" href="#physics-background">Physics Background</a></li>
 <li><a class="reference internal" href="#geant4-classes-which-are-partially-ported-to-cuda-optix">Geant4 classes which are partially ported to CUDA/OptiX</a></li>
+<li><a class="reference internal" href="#relevant-geant4-geometry-classes-and-how-they-are-translated">Relevant Geant4 geometry classes and how they are translated</a><ul>
+<li><a class="reference internal" href="#material-and-surface-property-classes">Material and Surface property classes</a></li>
+<li><a class="reference internal" href="#solid-shapes-geant4-classes-and-opticks-optix-translations">Solid Shapes : Geant4 classes and Opticks + OptiX translations</a></li>
+<li><a class="reference internal" href="#volume-structure-in-geant4-and-opticks-ggeo">Volume Structure in Geant4 and Opticks/GGeo</a></li>
+<li><a class="reference internal" href="#critical-role-of-ggeo-ginstancer-gvolume-tree-gmergedmesh">Critical Role of ggeo/GInstancer : GVolume tree -&gt; GMergedMesh</a></li>
+<li><a class="reference internal" href="#gmergedmesh-optix-geometry">GMergedMesh -&gt; OptiX geometry</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#cmake-structure">CMake Structure</a></li>
 <li><a class="reference internal" href="#bash-functions">Bash Functions</a></li>
-<li><a class="reference internal" href="#roles-of-the-opticks-sub-projects">Roles of the Opticks sub-projects</a></li>
+<li><a class="reference internal" href="#opticks-usage-of-nvidia-optix">Opticks Usage of NVIDIA OptiX</a></li>
+<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry">Primary Packages and Classes for geometry</a></li>
 </ul>
 </li>
 </ul>
@@ -105,14 +113,15 @@
 <li><a class="reference internal" href="#geant4-opticks-nvidia-optix-workflow" id="id5">Geant4-Opticks-NVIDIA_OptiX workflow</a></li>
 <li><a class="reference internal" href="#g4opticks-geant4-opticks-interface-class" id="id6">G4Opticks : Geant4-Opticks interface class</a></li>
 <li><a class="reference internal" href="#geometry-translation-overview-geant4-opticks-ggeo-optix-green-arrows" id="id7">Geometry translation Overview : Geant4-&gt;Opticks(GGeo)-&gt;OptiX (green arrows)</a></li>
-<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry" id="id8">Primary Packages and Classes for geometry</a></li>
-<li><a class="reference internal" href="#geant4-links" id="id9">Geant4 Links</a></li>
-<li><a class="reference internal" href="#gensteps-blue-arrows-and-hits-red-arrows" id="id10">Gensteps (blue arrows) and hits (red arrows)</a></li>
-<li><a class="reference internal" href="#physics-background" id="id11">Physics Background</a></li>
-<li><a class="reference internal" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" id="id12">Geant4 classes which are partially ported to CUDA/OptiX</a></li>
+<li><a class="reference internal" href="#geant4-links" id="id8">Geant4 Links</a></li>
+<li><a class="reference internal" href="#gensteps-blue-arrows-and-hits-red-arrows" id="id9">Gensteps (blue arrows) and hits (red arrows)</a></li>
+<li><a class="reference internal" href="#physics-background" id="id10">Physics Background</a></li>
+<li><a class="reference internal" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" id="id11">Geant4 classes which are partially ported to CUDA/OptiX</a></li>
+<li><a class="reference internal" href="#relevant-geant4-geometry-classes-and-how-they-are-translated" id="id12">Relevant Geant4 geometry classes and how they are translated</a></li>
 <li><a class="reference internal" href="#cmake-structure" id="id13">CMake Structure</a></li>
 <li><a class="reference internal" href="#bash-functions" id="id14">Bash Functions</a></li>
-<li><a class="reference internal" href="#roles-of-the-opticks-sub-projects" id="id15">Roles of the Opticks sub-projects</a></li>
+<li><a class="reference internal" href="#opticks-usage-of-nvidia-optix" id="id15">Opticks Usage of NVIDIA OptiX</a></li>
+<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry" id="id16">Primary Packages and Classes for geometry</a></li>
 </ul>
 </li>
 </ul>
@@ -180,35 +189,8 @@ the Opticks(GGeo) geometry model is persisted to binary <em>.npy</em> files whic
 <p>Geometry translation is steered by <em>G4Opticks::translateGeometry</em> with <em>X4PhysicalVolume</em>
 taking the leading role.</p>
 </div>
-<div class="section" id="primary-packages-and-classes-for-geometry">
-<h2><a class="toc-backref" href="#id8">Primary Packages and Classes for geometry</a><a class="headerlink" href="#primary-packages-and-classes-for-geometry" title="Permalink to this headline">¶</a></h2>
-<p>The below linked orientation pages for the sub projects
-highlight a few of the more important classes.
-The quoted names correspond to utility bash functions.</p>
-<dl class="docutils">
-<dt>extg4 “x4”</dt>
-<dd><a class="reference internal" href="../extg4/orientation.html"><span class="doc">ExtG4 Orientation : Translates Geant4-&gt;GGeo only</span></a></dd>
-<dt>ggeo “ggeo”</dt>
-<dd><a class="reference internal" href="../ggeo/orientation.html"><span class="doc">GGeo Orientation : Geometry Modelling and Persisting</span></a></dd>
-<dt>optixrap “oxrap”</dt>
-<dd>translates GGeo-&gt;OptiX, <a class="reference internal" href="../optixrap/orientation.html"><span class="doc">OptiXRap Orientation</span></a></dd>
-<dt>npy “npy”</dt>
-<dd>array creation, updating and persisting, <a class="reference internal" href="../npy/orientation.html"><span class="doc">NPY Orientation</span></a></dd>
-</dl>
-<ul class="simple">
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/X4PhysicalVolume.cc">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/X4PhysicalVolume.cc</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GGeo.cc</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/">https://bitbucket.org/simoncblyth/opticks/src/master/npy/</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp">https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp</a></li>
-</ul>
-<p>Descriptions of all ~20 packages : <a class="reference internal" href="misc/packages.html"><span class="doc">Opticks Packages Overview</span></a></p>
-</div>
 <div class="section" id="geant4-links">
-<h2><a class="toc-backref" href="#id9">Geant4 Links</a><a class="headerlink" href="#geant4-links" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id8">Geant4 Links</a><a class="headerlink" href="#geant4-links" title="Permalink to this headline">¶</a></h2>
 <p>Some familiarity with the Geant4 geometry model is required to understand Opticks
 as the bulk of Opticks code is concerned with the automated translation of Geant4
 geometries into Opticks(GGeo) geometries and subsequently OptiX geometries.</p>
@@ -219,7 +201,7 @@ geometries into Opticks(GGeo) geometries and subsequently OptiX geometries.</p>
 </ul>
 </div>
 <div class="section" id="gensteps-blue-arrows-and-hits-red-arrows">
-<h2><a class="toc-backref" href="#id10">Gensteps (blue arrows) and hits (red arrows)</a><a class="headerlink" href="#gensteps-blue-arrows-and-hits-red-arrows" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id9">Gensteps (blue arrows) and hits (red arrows)</a><a class="headerlink" href="#gensteps-blue-arrows-and-hits-red-arrows" title="Permalink to this headline">¶</a></h2>
 <p>Gensteps (blue arrows in the above workflow diagram) are small arrays of shape <cite>(num_gensteps,6,4)</cite>
 which act to carry the parameters of the Cerenkov and Scintillation photon generation from
 their origin in the modified Geant4 process classes to the CUDA ports
@@ -254,7 +236,7 @@ allocation (see red arrows in the above workflow diagram)</li>
 </div>
 </div>
 <div class="section" id="physics-background">
-<h2><a class="toc-backref" href="#id11">Physics Background</a><a class="headerlink" href="#physics-background" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id10">Physics Background</a><a class="headerlink" href="#physics-background" title="Permalink to this headline">¶</a></h2>
 <p>Scintillation and Cerenkov are the two physical processes which are the principal sources
 of light relevant to neutrino and dark matter experiments.</p>
 <ul class="simple">
@@ -272,7 +254,7 @@ form a better understanding of the physics of interest such as neutrinos coming
 from nuclear reactors or from the sun or from distant galaxies.</p>
 </div>
 <div class="section" id="geant4-classes-which-are-partially-ported-to-cuda-optix">
-<h2><a class="toc-backref" href="#id12">Geant4 classes which are partially ported to CUDA/OptiX</a><a class="headerlink" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">Geant4 classes which are partially ported to CUDA/OptiX</a><a class="headerlink" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>G4Cerenkov (only generation loop)</li>
 <li>G4Scintillation (only generation loop)</li>
@@ -283,6 +265,137 @@ from nuclear reactors or from the sun or from distant galaxies.</p>
 <p>To quickly view the sources of any Geant4 classes use the opticks bash function g4-cls:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g4</span><span class="o">-</span><span class="p">;</span><span class="n">g4</span><span class="o">-</span><span class="bp">cls</span> <span class="n">G4Cerenkov</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="relevant-geant4-geometry-classes-and-how-they-are-translated">
+<h2><a class="toc-backref" href="#id12">Relevant Geant4 geometry classes and how they are translated</a><a class="headerlink" href="#relevant-geant4-geometry-classes-and-how-they-are-translated" title="Permalink to this headline">¶</a></h2>
+<p>To understand Opticks some level of familiarity with Geant4 is necessary.
+Opticks provides some simple bash functions to viewing Geant4 source, eg:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g4</span><span class="o">-</span>   <span class="c1"># precursor bash function</span>
+<span class="n">g4</span><span class="o">-</span><span class="bp">cls</span> <span class="n">G4VSolid</span>
+</pre></div>
+</div>
+<p>Geometry classes can be split into three aspects:</p>
+<ol class="arabic simple">
+<li>material and surface properties</li>
+<li>solid shapes (sometimes Geant4 primitives become trees in Opticks)</li>
+<li>volume structure</li>
+</ol>
+<div class="section" id="material-and-surface-property-classes">
+<h3>Material and Surface property classes<a class="headerlink" href="#material-and-surface-property-classes" title="Permalink to this headline">¶</a></h3>
+<p><strong>Geant4 property classes:</strong></p>
+<dl class="docutils">
+<dt>G4MaterialPropertiesTable</dt>
+<dd>holds properties such as RINDEX (refractive index), ABSLENGTH (absorption length), RAYLEIGH (scattering length)</dd>
+<dt>G4Material</dt>
+<dd>name with properties as a function of energy.</dd>
+<dt>G4LogicalBorderSurface</dt>
+<dd>surface properties associated with the interface between two placed volumes (PV)</dd>
+<dt>G4LogicalSkinSurface</dt>
+<dd>surface properties associates with all placements of a logical volume (LV)</dd>
+</dl>
+<p><strong>Opticks GGeo classes:</strong></p>
+<p>Material and surface properties from Geant4
+are interpolated onto a common wavelength domain
+and stored within instances of the below <em>ggeo</em> classes</p>
+<dl class="docutils">
+<dt>GMaterial GSurface</dt>
+<dd>GPropertyMap subclasses</dd>
+<dt>GMaterialLib GSurfaceLib</dt>
+<dd>vectors of GMaterial and GSurface with ability to serialize into NPY arrays</dd>
+<dt>GBndLib</dt>
+<dd><p class="first">holds vector of int4 where the integers are indices pointing at surfaces and materials
+inner-material/inner-surface/outer-surface/outer-material</p>
+<p>This boundary lib is converted by oxrap/OBndLib into the GPU boundary texture</p>
+<ul class="last simple">
+<li>all volumes are assigned a boundary index which is available GPU side
+to make wavelength interpolated lookups into the boundary texture yielding float4
+of material and surface properties</li>
+</ul>
+</dd>
+</dl>
+<ul class="simple">
+<li><a class="reference internal" href="../ggeo/orientation.html"><span class="doc">GGeo Orientation : Geometry Modelling and Persisting</span></a></li>
+<li><a class="reference internal" href="../optixrap/orientation.html"><span class="doc">OptiXRap Orientation : translates GGeo-&gt;OptiX</span></a></li>
+</ul>
+</div>
+<div class="section" id="solid-shapes-geant4-classes-and-opticks-optix-translations">
+<h3>Solid Shapes : Geant4 classes and Opticks + OptiX translations<a class="headerlink" href="#solid-shapes-geant4-classes-and-opticks-optix-translations" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>G4VSolid</dt>
+<dd>abstract base class for solids such as G4Sphere, G4Cons (cone), …
+Translated into NCSG containing trees of nnode (npy)</dd>
+<dt>npy/nnode</dt>
+<dd>constituent of CSG trees held in NCSG</dd>
+<dt>ggeo/GParts</dt>
+<dd>holder of NCSG nnode trees, with concatenation capability</dd>
+<dt>ggeo/GMesh</dt>
+<dd>despite the name this encompasses both triangulated mesh and analytic CSG geometry
+of distinct solid shapes</dd>
+<dt>ggeo/GMergedMesh</dt>
+<dd>merged mesh contain merges of both triangulated and analytic geometry representations
+from multiple GMesh</dd>
+<dt>ggeo/GGeoLib</dt>
+<dd>holds the GMergedMesh and handles persisting</dd>
+</dl>
+<ul class="simple">
+<li><a class="reference internal" href="../npy/orientation.html"><span class="doc">NPY Orientation : array creation, updating and persisting</span></a></li>
+<li><a class="reference internal" href="../ggeo/orientation.html"><span class="doc">GGeo Orientation : Geometry Modelling and Persisting</span></a></li>
+</ul>
+</div>
+<div class="section" id="volume-structure-in-geant4-and-opticks-ggeo">
+<h3>Volume Structure in Geant4 and Opticks/GGeo<a class="headerlink" href="#volume-structure-in-geant4-and-opticks-ggeo" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>G4LogicalVolume “LV”</dt>
+<dd>unplaced volume having a solid and material</dd>
+<dt>G4VPhysicalVolume “PV”</dt>
+<dd>placed volume positioning the G4LogicalVolume within a hierarchy</dd>
+<dt>ggeo/GVolume</dt>
+<dd>converted from Geant4 physical and logical volume, has GMesh and transform constituents</dd>
+<dt>ggeo/GGeo</dt>
+<dd>top level geometry object holding instances of GNodeLib, GMeshLib, GBndLib, GMaterialLib, GSurfaceLib, …</dd>
+<dt>ggeo/GMergedMesh</dt>
+<dd>as GMergedMesh holds identity arrays and transform arrays across the entire geometry it straddles both
+shape and structure geometry categories</dd>
+<dt>optixrap/OGeo</dt>
+<dd>converts the GGeo instance into optix Geometry.
+The approach taken was chosen because it allows instances to
+have variables assigned as allowing instance indices to
+be associated and thus providing identity information for all intersects.
+Details in <a class="reference internal" href="../optixrap/OGeo.html"><span class="doc">OGeo</span></a></dd>
+</dl>
+</div>
+<div class="section" id="critical-role-of-ggeo-ginstancer-gvolume-tree-gmergedmesh">
+<h3>Critical Role of ggeo/GInstancer : GVolume tree -&gt; GMergedMesh<a class="headerlink" href="#critical-role-of-ggeo-ginstancer-gvolume-tree-gmergedmesh" title="Permalink to this headline">¶</a></h3>
+<p>The Geant4 to GGeo conversion first recreates the full
+volume hierarchy in a tree of GVolume.  As detector geometries generally
+have large numbers of identical assemblies of multiple volumes it is
+important to fully exploit instancing to allow the geometry to fit
+into available memory.</p>
+<p>For example the JUNO photomultipler tubes of various types are each
+modelled in geant4 with small tree of less than 10 volumes each.  These
+assemblies are then repeated many thousands of times forming the full geometry.
+Other pieces of geometry such as very large acrylic spheres and support structures
+are not sufficiently repeated to warrant instancing.</p>
+<p>The ggeo/GInstancer automatically identifies repeated assemblies of volumes
+using a so called progeny digest for every node of the geometry that incorporates
+the shapes of the children of a node and their relative transforms.
+Looking for repetitions of the progeny digest and disallowing repeats that
+are contained within other repeats allow all nodes of the geometry to
+be assigned with a repeat index (<em>ridx</em>). Remainder volumes which
+do not pass instancing criteria such as the number of repeats are assigned
+repeat index zero.</p>
+<p>The JUNO geometry contains only about 10 distinct repeated assemblies of volumes,
+including 4 or 5 different types of photomultipler tubes, various support structures
+as well as the remainder miscellaneous non-repeated volumes.
+Traversals allow the global transforms of each of these repeated assemblies to be
+collected into arrays. The remainder volumes of course only have one transform : the identity matrix.</p>
+<p>The subtree of GVolumes of the first occurrence of each repeated assembly are combined
+together into GMergedMesh instances.  Thus the full JUNO geometry “factors” into
+about 10 GMergedMesh instances with arrays in up to 30,000 4x4 transforms.</p>
+</div>
+<div class="section" id="gmergedmesh-optix-geometry">
+<h3>GMergedMesh -&gt; OptiX geometry<a class="headerlink" href="#gmergedmesh-optix-geometry" title="Permalink to this headline">¶</a></h3>
 </div>
 </div>
 <div class="section" id="cmake-structure">
@@ -296,8 +409,36 @@ you only need to worry about one level of dependencires</p>
 <h2><a class="toc-backref" href="#id14">Bash Functions</a><a class="headerlink" href="#bash-functions" title="Permalink to this headline">¶</a></h2>
 <p>Bash functions are used for building the tree of CMake projects, see <em>om.bash</em></p>
 </div>
-<div class="section" id="roles-of-the-opticks-sub-projects">
-<h2><a class="toc-backref" href="#id15">Roles of the Opticks sub-projects</a><a class="headerlink" href="#roles-of-the-opticks-sub-projects" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="opticks-usage-of-nvidia-optix">
+<h2><a class="toc-backref" href="#id15">Opticks Usage of NVIDIA OptiX</a><a class="headerlink" href="#opticks-usage-of-nvidia-optix" title="Permalink to this headline">¶</a></h2>
+<p>Direct use of OptiX is primarily in the optixrap subproject <a class="reference internal" href="../optixrap/orientation.html"><span class="doc">OptiXRap Orientation : translates GGeo-&gt;OptiX</span></a>
+however the most of the rest of Opticks is involved with the conversion of the
+Geant4 geometry into a form that can become an OptiX geometry.</p>
+</div>
+<div class="section" id="primary-packages-and-classes-for-geometry">
+<h2><a class="toc-backref" href="#id16">Primary Packages and Classes for geometry</a><a class="headerlink" href="#primary-packages-and-classes-for-geometry" title="Permalink to this headline">¶</a></h2>
+<p>The below linked orientation pages for the sub projects
+highlight a few of the more important classes.
+The quoted names correspond to utility bash functions.</p>
+<dl class="docutils">
+<dt>extg4 “x4”</dt>
+<dd><a class="reference internal" href="../extg4/orientation.html"><span class="doc">ExtG4 Orientation : Translates Geant4-&gt;GGeo only</span></a></dd>
+<dt>ggeo “ggeo”</dt>
+<dd><a class="reference internal" href="../ggeo/orientation.html"><span class="doc">GGeo Orientation : Geometry Modelling and Persisting</span></a></dd>
+<dt>optixrap “oxrap”</dt>
+<dd><a class="reference internal" href="../optixrap/orientation.html"><span class="doc">OptiXRap Orientation : translates GGeo-&gt;OptiX</span></a></dd>
+<dt>npy “npy”</dt>
+<dd><a class="reference internal" href="../npy/orientation.html"><span class="doc">NPY Orientation : array creation, updating and persisting</span></a></dd>
+</dl>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GGeo.cc</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/">https://bitbucket.org/simoncblyth/opticks/src/master/npy/</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp">https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp</a></li>
+</ul>
+<p>Descriptions of all ~20 packages : <a class="reference internal" href="misc/packages.html"><span class="doc">Opticks Packages Overview</span></a></p>
 </div>
 </div>
 
