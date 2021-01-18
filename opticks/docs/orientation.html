@@ -57,9 +57,12 @@
 <li><a class="reference internal" href="#solid-shapes-geant4-classes-and-opticks-optix-translations">Solid Shapes : Geant4 classes and Opticks + OptiX translations</a></li>
 <li><a class="reference internal" href="#volume-structure-in-geant4-and-opticks-ggeo">Volume Structure in Geant4 and Opticks/GGeo</a></li>
 <li><a class="reference internal" href="#critical-role-of-ggeo-ginstancer-gvolume-tree-gmergedmesh">Critical Role of ggeo/GInstancer : GVolume tree -&gt; GMergedMesh</a></li>
-<li><a class="reference internal" href="#gmergedmesh-optix-geometry">GMergedMesh -&gt; OptiX geometry</a></li>
+<li><a class="reference internal" href="#gmergedmesh-optix-group-or-optix-geometrygroup">GMergedMesh -&gt; optix::Group OR optix::GeometryGroup</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#optix-generate-functions-for-simulation">OptiX generate functions for simulation</a></li>
+<li><a class="reference internal" href="#optix-closest-hit-functions">OptiX closest hit functions</a></li>
+<li><a class="reference internal" href="#optix-ray-geometry-intersect-and-bounds-functions">OptiX ray-geometry intersect and bounds functions</a></li>
 <li><a class="reference internal" href="#cmake-structure">CMake Structure</a></li>
 <li><a class="reference internal" href="#bash-functions">Bash Functions</a></li>
 <li><a class="reference internal" href="#opticks-usage-of-nvidia-optix">Opticks Usage of NVIDIA OptiX</a></li>
@@ -118,10 +121,13 @@
 <li><a class="reference internal" href="#physics-background" id="id10">Physics Background</a></li>
 <li><a class="reference internal" href="#geant4-classes-which-are-partially-ported-to-cuda-optix" id="id11">Geant4 classes which are partially ported to CUDA/OptiX</a></li>
 <li><a class="reference internal" href="#relevant-geant4-geometry-classes-and-how-they-are-translated" id="id12">Relevant Geant4 geometry classes and how they are translated</a></li>
-<li><a class="reference internal" href="#cmake-structure" id="id13">CMake Structure</a></li>
-<li><a class="reference internal" href="#bash-functions" id="id14">Bash Functions</a></li>
-<li><a class="reference internal" href="#opticks-usage-of-nvidia-optix" id="id15">Opticks Usage of NVIDIA OptiX</a></li>
-<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry" id="id16">Primary Packages and Classes for geometry</a></li>
+<li><a class="reference internal" href="#optix-generate-functions-for-simulation" id="id13">OptiX generate functions for simulation</a></li>
+<li><a class="reference internal" href="#optix-closest-hit-functions" id="id14">OptiX closest hit functions</a></li>
+<li><a class="reference internal" href="#optix-ray-geometry-intersect-and-bounds-functions" id="id15">OptiX ray-geometry intersect and bounds functions</a></li>
+<li><a class="reference internal" href="#cmake-structure" id="id16">CMake Structure</a></li>
+<li><a class="reference internal" href="#bash-functions" id="id17">Bash Functions</a></li>
+<li><a class="reference internal" href="#opticks-usage-of-nvidia-optix" id="id18">Opticks Usage of NVIDIA OptiX</a></li>
+<li><a class="reference internal" href="#primary-packages-and-classes-for-geometry" id="id19">Primary Packages and Classes for geometry</a></li>
 </ul>
 </li>
 </ul>
@@ -188,6 +194,13 @@ that happens at initialization.  As this translation can be take minutes for lar
 the Opticks(GGeo) geometry model is persisted to binary <em>.npy</em> files which act as a <strong>geocache</strong>.</p>
 <p>Geometry translation is steered by <em>G4Opticks::translateGeometry</em> with <em>X4PhysicalVolume</em>
 taking the leading role.</p>
+<p>The translation entails the serialization of Geant4 C++ geometry objects for materials, surfaces
+and solid shapes into arrays and the upload of those into GPU buffers and textures.</p>
+<p>Structural geometry volumes are translated into the NVIDIA OptiX geometry model using a very small
+and flat heirarchy by effectively “factorizing” the structural geometry in a way that exploits
+the large degree of repetition present in typical detector geometries such as JUNO,
+with many thousands of photomultiplier tubes of various types. This “factorization” is
+done with the <strong>GInstancer</strong> as detailed below.</p>
 </div>
 <div class="section" id="geant4-links">
 <h2><a class="toc-backref" href="#id8">Geant4 Links</a><a class="headerlink" href="#geant4-links" title="Permalink to this headline">¶</a></h2>
@@ -292,7 +305,7 @@ Opticks provides some simple bash functions to viewing Geant4 source, eg:</p>
 <dt>G4LogicalBorderSurface</dt>
 <dd>surface properties associated with the interface between two placed volumes (PV)</dd>
 <dt>G4LogicalSkinSurface</dt>
-<dd>surface properties associates with all placements of a logical volume (LV)</dd>
+<dd>surface properties associates with all placements of an unplaced logical volume (LV)</dd>
 </dl>
 <p><strong>Opticks GGeo classes:</strong></p>
 <p>Material and surface properties from Geant4
@@ -333,8 +346,8 @@ Translated into NCSG containing trees of nnode (npy)</dd>
 <dd>despite the name this encompasses both triangulated mesh and analytic CSG geometry
 of distinct solid shapes</dd>
 <dt>ggeo/GMergedMesh</dt>
-<dd>merged mesh contain merges of both triangulated and analytic geometry representations
-from multiple GMesh</dd>
+<dd>merged mesh containing merges of both triangulated and analytic geometry representations
+from multiple GMesh.</dd>
 <dt>ggeo/GGeoLib</dt>
 <dd>holds the GMergedMesh and handles persisting</dd>
 </dl>
@@ -351,14 +364,17 @@ from multiple GMesh</dd>
 <dt>G4VPhysicalVolume “PV”</dt>
 <dd>placed volume positioning the G4LogicalVolume within a hierarchy</dd>
 <dt>ggeo/GVolume</dt>
-<dd>converted from Geant4 physical and logical volume, has GMesh and transform constituents</dd>
+<dd>converted from Geant4 physical+logical volume, has GMesh and transform constituents</dd>
+<dt>ggeo/GMergedMesh</dt>
+<dd><p class="first">as GMergedMesh holds identity and transform arrays across the entire geometry it straddles both
+shape and structure geometry categories</p>
+<p class="last">GMergedMesh are Translated into optix::Group OR optix::GeometryGroup underneath
+a top level <em>m_top</em> optix::Group by optixrap/OGeo.</p>
+</dd>
 <dt>ggeo/GGeo</dt>
 <dd>top level geometry object holding instances of GNodeLib, GMeshLib, GBndLib, GMaterialLib, GSurfaceLib, …</dd>
-<dt>ggeo/GMergedMesh</dt>
-<dd>as GMergedMesh holds identity arrays and transform arrays across the entire geometry it straddles both
-shape and structure geometry categories</dd>
 <dt>optixrap/OGeo</dt>
-<dd>converts the GGeo instance into optix Geometry.
+<dd>converts the GGeo/GGeoLib/GMergedMesh into shallow optix::Group optix::GeometryGroup tree.
 The approach taken was chosen because it allows instances to
 have variables assigned as allowing instance indices to
 be associated and thus providing identity information for all intersects.
@@ -391,32 +407,105 @@ as well as the remainder miscellaneous non-repeated volumes.
 Traversals allow the global transforms of each of these repeated assemblies to be
 collected into arrays. The remainder volumes of course only have one transform : the identity matrix.</p>
 <p>The subtree of GVolumes of the first occurrence of each repeated assembly are combined
-together into GMergedMesh instances.  Thus the full JUNO geometry “factors” into
-about 10 GMergedMesh instances with arrays in up to 30,000 4x4 transforms.</p>
+together into GMergedMesh instances. Thus the full JUNO geometry “factorizes” into
+about 10 GMergedMesh instances with each having arrays of up to 30,000 4x4 transforms.</p>
 </div>
-<div class="section" id="gmergedmesh-optix-geometry">
-<h3>GMergedMesh -&gt; OptiX geometry<a class="headerlink" href="#gmergedmesh-optix-geometry" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="gmergedmesh-optix-group-or-optix-geometrygroup">
+<h3>GMergedMesh -&gt; optix::Group OR optix::GeometryGroup<a class="headerlink" href="#gmergedmesh-optix-group-or-optix-geometrygroup" title="Permalink to this headline">¶</a></h3>
+<p>The details of the OptiX geometry structure are documented in</p>
+<ul class="simple">
+<li><a class="reference internal" href="../optixrap/orientation.html"><span class="doc">OptiXRap Orientation : translates GGeo-&gt;OptiX</span></a></li>
+<li><a class="reference internal" href="../optixrap/OGeo.html"><span class="doc">OGeo</span></a></li>
+</ul>
+<p>With simulation it is necessary to know the identity of the instance for every geometry intersect
+as different instances can have different efficiencies and as it is expensive to reconstruct
+identity just from position.</p>
+<p>The need to assign an index to the instances is the reason behind the choice of
+NVIDIA OptiX geometry structure.</p>
 </div>
+</div>
+<div class="section" id="optix-generate-functions-for-simulation">
+<h2><a class="toc-backref" href="#id13">OptiX generate functions for simulation</a><a class="headerlink" href="#optix-generate-functions-for-simulation" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>optixrap/cu/generate.cu</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/generate.cu.html"><span class="doc">generate.cu</span></a></p>
+<p class="last">Steers photon generation and propagation from input Scintillation/Cerenkov/Torch gensteps</p>
+</dd>
+<dt>optixrap/cu/propagate.h</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/propagate.h.html"><span class="doc">propagate.h : propagate_to_boundary / propagate_at_boundary_geant4_style</span></a></p>
+<p class="last">Included into generate.cu, provides a CUDA port of Geant4 optical physics.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="optix-closest-hit-functions">
+<h2><a class="toc-backref" href="#id14">OptiX closest hit functions</a><a class="headerlink" href="#optix-closest-hit-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>optixrap/cu/material1_propagate.cu</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/material1_propagate.cu.html"><span class="doc">material1_propagate.cu:closest_hit_propagate</span></a></p>
+<p class="last">Used for photon simulation, populating PerRayData_propagate.h</p>
+</dd>
+<dt>optixrap/cu/material1_radiance.cu</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/material1_radiance.cu.html"><span class="doc">material1_radiance.cu:closest_hit_radiance</span></a></p>
+<p class="last">Used for creation of ray trace images of geometry, populating PerRayData_radiance.h</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="optix-ray-geometry-intersect-and-bounds-functions">
+<h2><a class="toc-backref" href="#id15">OptiX ray-geometry intersect and bounds functions</a><a class="headerlink" href="#optix-ray-geometry-intersect-and-bounds-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>optixrap/cu/intersect_analytic.cu</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/intersect_analytic.cu.html"><span class="doc">intersect_analytic.cu : General Analytic CSG intersection</span></a></p>
+<p>CUDA/OptiX bounds and intersect functions for general CSG shapes created into OptiX RTprogram by:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">optix</span><span class="p">::</span><span class="n">Geometry</span> <span class="n">OGeo</span><span class="p">::</span><span class="n">makeAnalyticGeometry</span><span class="p">(</span><span class="n">GMergedMesh</span><span class="o">*</span> <span class="n">mm</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>optixrap/cu/csg_intersect_boolean.h</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/csg_intersect_boolean.h.html"><span class="doc">csg_intersect_boolean.h : General CSG intersection using evaluative_csg approach</span></a></p>
+<p class="last">Evaluative CSG : iterative implementation of recursive algorithm</p>
+</dd>
+<dt>optixrap/cu/csg_intersect_part.h</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/csg_intersect_part.h.html"><span class="doc">csg_intersect_part.h : csg_bounds_prim / csg_intersect_part</span></a></p>
+<p class="last">Large switch statements using the bounds and intersect functions from <em>cu/csg_intersect_primitive.h</em></p>
+</dd>
+<dt>optixrap/cu/csg_intersect_primitive.h</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/csg_intersect_primitive.h.html"><span class="doc">csg_intersect_primitive.h :  Intersections with ~10 different primitives</span></a></p>
+<p>Bounds and intersect functions for of order 10 primitive shapes:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">csg_bounds_convexpolyhedron</span><span class="p">,</span> <span class="n">csg_intersect_convexpolyhedron</span>
+<span class="n">csg_bounds_cone</span><span class="p">,</span>             <span class="n">csg_intersect_cone</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</dd>
+<dt>optixrap/cu/pack.h</dt>
+<dd><p class="first"><a class="reference internal" href="../optixrap/cu/pack.h.html"><span class="doc">pack.h</span></a></p>
+<p class="last">PACK4 UNPACK4_0/1/2/3 macros</p>
+</dd>
+<dt>../dev/csg/index</dt>
+<dd><p class="first"><a class="reference internal" href="../dev/csg/index.html"><span class="doc">CSG Algorithm Prototyping</span></a></p>
+<p class="last">CSG algorithm development notes, including “slavish” python of the CSG implementation</p>
+</dd>
+</dl>
 </div>
 <div class="section" id="cmake-structure">
-<h2><a class="toc-backref" href="#id13">CMake Structure</a><a class="headerlink" href="#cmake-structure" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id16">CMake Structure</a><a class="headerlink" href="#cmake-structure" title="Permalink to this headline">¶</a></h2>
 <p>Opticks is structured as a collection of ~20 modular CMake sub-projects organized by
 their dependencies. The sub-projects are hooked together into a tree using the CMake <em>find_package</em> mechanism
 which uses <em>BCM</em> (Boost CMake Modules) to reduce CMake boilerplate.  The upshot is that
 you only need to worry about one level of dependencires</p>
 </div>
 <div class="section" id="bash-functions">
-<h2><a class="toc-backref" href="#id14">Bash Functions</a><a class="headerlink" href="#bash-functions" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id17">Bash Functions</a><a class="headerlink" href="#bash-functions" title="Permalink to this headline">¶</a></h2>
 <p>Bash functions are used for building the tree of CMake projects, see <em>om.bash</em></p>
 </div>
 <div class="section" id="opticks-usage-of-nvidia-optix">
-<h2><a class="toc-backref" href="#id15">Opticks Usage of NVIDIA OptiX</a><a class="headerlink" href="#opticks-usage-of-nvidia-optix" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id18">Opticks Usage of NVIDIA OptiX</a><a class="headerlink" href="#opticks-usage-of-nvidia-optix" title="Permalink to this headline">¶</a></h2>
 <p>Direct use of OptiX is primarily in the optixrap subproject <a class="reference internal" href="../optixrap/orientation.html"><span class="doc">OptiXRap Orientation : translates GGeo-&gt;OptiX</span></a>
 however the most of the rest of Opticks is involved with the conversion of the
 Geant4 geometry into a form that can become an OptiX geometry.</p>
 </div>
 <div class="section" id="primary-packages-and-classes-for-geometry">
-<h2><a class="toc-backref" href="#id16">Primary Packages and Classes for geometry</a><a class="headerlink" href="#primary-packages-and-classes-for-geometry" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id19">Primary Packages and Classes for geometry</a><a class="headerlink" href="#primary-packages-and-classes-for-geometry" title="Permalink to this headline">¶</a></h2>
 <p>The below linked orientation pages for the sub projects
 highlight a few of the more important classes.
 The quoted names correspond to utility bash functions.</p>

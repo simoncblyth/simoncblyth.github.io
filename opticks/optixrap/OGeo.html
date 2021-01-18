@@ -40,6 +40,8 @@
 <li><a class="reference internal" href="#where-to-put-the-raylod-selector-raylod-is-not-currently-in-use">Where to put the RayLOD Selector ? RAYLOD IS NOT CURRENTLY IN USE</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#ogeo-convert">OGeo::convert</a></li>
+<li><a class="reference internal" href="#ogeo-makeanalyticgeometry">OGeo::makeAnalyticGeometry</a></li>
 </ul>
 </li>
 </ul>
@@ -73,14 +75,16 @@
             
   <div class="section" id="ogeo">
 <h1>OGeo<a class="headerlink" href="#ogeo" title="Permalink to this headline">¶</a></h1>
-<p>Canonical OGeo instance resides in OScene and is
-instanciated and has its <em>convert</em> called from OScene::init.
-OScene::convert loops over the GMergedMesh within GGeo
-converting them into OptiX geometry groups. The first
-GMergedMesh is assumed to be non-instanced, the remainder
-are expected to be instanced with appropriate
-transform and identity buffers.</p>
-<p>Details of geometry tree are documented with the OGeo::convert method.</p>
+<p>The canonical OGeo instance resides in OScene and is
+instanciated and has <em>OGeo::convert</em> called from <em>OScene::init</em>.
+<em>OGeo::convert</em> loops over the GMergedMesh within GGeo/GGeoLib
+converting them into optix::Group or optix::GeometryGroup
+and adds them to m_top(optix::Group).</p>
+<p>The first ridx 0 GMergedMesh is non-instanced,
+the rest are instanced and hold the necessary transform
+and identity buffers.</p>
+<p>Details of geometry tree are documented with
+the OGeo::convert method.</p>
 <div class="section" id="ogeo-details">
 <h2>OGeo Details<a class="headerlink" href="#ogeo-details" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="table-2-optix-manual">
@@ -248,6 +252,22 @@ Investigate if container groups might be better as “pass through”
 NoAccel as the geometryGroup and groups they contain have all the
 geometry.</p>
 </div>
+</div>
+<div class="section" id="ogeo-convert">
+<h2>OGeo::convert<a class="headerlink" href="#ogeo-convert" title="Permalink to this headline">¶</a></h2>
+<p>Converts the GMergedMesh instances from (m_geolib)GGeoLib
+into optix::Group and optix::GeometryGroup and adds them
+to m_top(optix::Group).</p>
+</div>
+<div class="section" id="ogeo-makeanalyticgeometry">
+<h2>OGeo::makeAnalyticGeometry<a class="headerlink" href="#ogeo-makeanalyticgeometry" title="Permalink to this headline">¶</a></h2>
+<p>The GParts instance that this operates from will usually
+have been concatenated from multiple other GParts instances,
+one for each NCSG solid.  GParts concatenation happens during
+GMergedMesh formation in GMergedMesh::mergeVolumeAnalytic.</p>
+<p>For repeated geometry note how all bar one of the geometry buffers
+are small. Only the idBuf is large and usage GPU side requires
+use of the instance_index.</p>
 </div>
 </div>
 
