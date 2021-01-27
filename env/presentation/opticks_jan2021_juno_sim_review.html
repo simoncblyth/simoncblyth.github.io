@@ -407,7 +407,24 @@ https://docutils.sourceforge.io/docutils/parsers/rst/include/isogrk1.txt
 
 .. raw:: html
 
-   <hr/> -->
+   <hr/>
+
+.. class:: small
+
+
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | Header 1     Header 2     Header 3  |
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | Header 1   | Header 2   | Header 3  |
+    +============+============+===========+
+    | body row 1 | column 2   | column 3  |
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | body row 2 | Cells may span columns.|
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | body row 3 | Cells may  | - Cells   |
+    +- - - - - - - - - - - -+ span rows. | - contain |
+    | body row 4 |            | - blocks. |
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+ -->
 <!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
 <!-- This data file has been placed in the public domain. -->
 <!-- Colours
@@ -2418,11 +2435,66 @@ https://bitbucket.org/simoncblyth/opticks/src/master/optickscore/tests/MockSenso
 
 https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/tests/OSensorLibGeoTest.cc -->
 </div>
-<div class="slide" id="completing-juno-hits-how-to-handle-boundary-pos">
-<h1><span class="small">Completing JUNO Hits : How to handle boundary_pos ?</span></h1>
-<p class="small">Hits include:</p>
-<ul class="small simple">
-<li>pAcrylic/pInnerWater boundary_pos[1] : <span class="red">is this essential ?</span></li>
+<div class="slide" id="completing-juno-hits-g4optickshit-4-4-g4optickshitextra-2-4">
+<h1><span class="small">Completing JUNO Hits : G4OpticksHit (4,4) + G4OpticksHitExtra (2,4)</span></h1>
+<p class="small"><em>void G4Opticks::getHit(unsigned i, G4OpticksHit* hit, G4OpticksHitExtra* hit_extra ) const</em></p>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">G4OpticksHit + G4OpticksHitExtra</span></p>
+<div class="last"><pre class="mypretiny">
+struct G4OpticksHit // from photon->hit buffers
+{
+    G4ThreeVector local_position ;
+    G4ThreeVector global_position ;
+    G4double      time ;
+    G4ThreeVector local_direction ;
+    G4ThreeVector global_direction ;
+    G4double      weight ;
+    G4ThreeVector local_polarization ;
+    G4ThreeVector global_polarization ;
+    G4double      wavelength ;
+    G4int         boundary ;
+    G4int         sensorIndex ;
+    G4int         nodeIndex ;
+    G4int         photonIndex ;
+    G4int         flag_mask ;
+    G4int         sensor_identifier ;
+    G4bool        is_cerenkov ;
+    G4bool        is_reemission ;
+};
+struct G4OpticksHitExtra // from way->hiy buffers
+{
+    G4ThreeVector boundary_pos ;
+    G4double      boundary_time ;
+    G4double      origin_time ;
+    G4int         origin_trackID ;
+};
+</pre></div></div>
+<pre class="mypretiny">// Simulation/DetSimV2/PMTSim/src/junoSD_PMT_v2.cc
+467         junoHit_PMT* hit_photon = new junoHit_PMT();
+468         hit_photon->SetPMTID(pmtid);
+469         hit_photon->SetWeight(1.0);
+470         hit_photon->SetTime(hittime);
+471         hit_photon->SetWavelength(wavelength);
+472         hit_photon->SetKineticEnergy(edep);
+473         hit_photon->SetPosition(local_pos);
+474         hit_photon->SetTheta(local_pos.theta());
+475         hit_photon->SetPhi(local_pos.phi());
+476         hit_photon->SetMomentum(local_dir);
+477         hit_photon->SetPolarization(local_pol);
+479         hit_photon->SetGlobalPosition(global_pos);
+480         hit_photon->SetGlobalMomentum(track->GetMomentum());
+481         hit_photon->SetGlobalPolarization(track->GetPolarization());
+...         // optional extras from  NormalTrackInfo/NormalAnaMgr
+485         hit_photon->SetProducerID(producerID);
+486         hit_photon->SetFromCerenkov(is_from_cerenkov);
+487         hit_photon->SetReemission(is_reemission);
+488         hit_photon->SetOriginalOP(is_original_op);
+489         hit_photon->SetOriginalOPStartT(t_start);
+490         hit_photon->SetBoundaryPosition(boundary_pos);  //
+</pre><ul class="small simple">
+<li>pAcrylic/pInnerWater boundary_pos[1]</li>
+<li>split: <span class="blue">(4,4) + (2,4)</span>  OR combine: <span class="blue">(6,4)</span></li>
+<li>Using <strong>split</strong> assuming <span class="red">extras switched off in large productions ?</span></li>
 </ul>
 <p class="tiny">[1] set in NormalTrackInfo by <tt class="docutils literal"><span class="pre">NormalAnaMgr::UserSteppingAction</span></tt></p>
 
@@ -2469,54 +2541,151 @@ with many hundreds or thousands of production jobs orchestrated with a batch sys
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="juno-opticks-completing-the-hits">
-<h1><span class="small">JUNO + Opticks : Completing the hits</span></h1>
-<pre class="mypretiny">
-// Simulation/DetSimV2/PMTSim/src/junoSD_PMT_v2.cc
+<div class="slide" id="releases-for-opticks-juno-validation-comparing-g4-opticks-vs-g4">
+<h1><span class="small">Releases for Opticks+JUNO validation comparing G4+Opticks vs G4</span></h1>
+<!-- comment
 
-467         junoHit_PMT* hit_photon = new junoHit_PMT();
-468         hit_photon->SetPMTID(pmtid);
-469         hit_photon->SetWeight(1.0);
-470         hit_photon->SetTime(hittime);
-471         hit_photon->SetWavelength(wavelength);
-472         hit_photon->SetKineticEnergy(edep);
-
-473         hit_photon->SetPosition(local_pos);
-474         hit_photon->SetTheta(local_pos.theta());
-475         hit_photon->SetPhi(local_pos.phi());
-476         hit_photon->SetMomentum(local_dir);
-477         hit_photon->SetPolarization(local_pol);
-478
-479         hit_photon->SetGlobalPosition(global_pos);
-480         hit_photon->SetGlobalMomentum(track->GetMomentum());
-481         hit_photon->SetGlobalPolarization(track->GetPolarization());
-...
-...        // optional extras from  NormalTrackInfo/NormalAnaMgr
-485         hit_photon->SetProducerID(producerID);
-486         hit_photon->SetFromCerenkov(is_from_cerenkov);
-487         hit_photon->SetReemission(is_reemission);
-488         hit_photon->SetOriginalOP(is_original_op);
-489         hit_photon->SetOriginalOPStartT(t_start);
-490         hit_photon->SetBoundaryPosition(boundary_pos);
-
-</pre></div>
-<div class="slide" id="juno-offline-opticks-release-plan">
-<h1><span class="small">JUNO Offline + Opticks : Release Plan</span></h1>
-<p class="small"><strong>(During Feb)</strong></p>
-<ul class="small simple">
-<li>Opticks 0.1.0 release including<ul>
-<li>global+local</li>
-<li>extra info</li>
+* use REPLACE mode (shift-R) in vim to edit the table
+* RST blank lines in some places have no impact on html output, use this to decouple column editing
+* unfortunately replace directive may contain a single paragraph only -->
+<table border="1" class="small docutils">
+<colgroup>
+<col width="48%" />
+<col width="52%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head" colspan="2"><strong>0.1.0 : &quot;Basic Validation&quot; Release</strong>  : <span class="blue">Enabling Statistical hit comparison</span> : <span class="red">Estimate : During February</span></th>
+</tr>
+<tr><th class="head">Completed:</th>
+<th class="head">Remaining:</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><ul class="first last simple">
+<li>full JUNO hits      :<ul>
+<li><em>G4OpticksHit</em> : global+local</li>
+<li><em>G4OpticksHitExtra</em> : boundary_pos, origin_time, ..</li>
+</ul>
+</li>
+<li>GPU collection angular efficiency culling<ul>
+<li>ε [θ, φ] -&gt; <em>G4Opticks</em> -&gt; GPU &quot;angular&quot; texture</li>
+<li><em>G4Opticks::setSensorData</em></li>
+<li>reduces CPU hit memory by :  ε . ε [θ, φ]</li>
 </ul>
 </li>
 </ul>
+</td>
+<td><ul class="first last simple">
+<li>angular efficiency culling : make <strong>run-time</strong> controllable</li>
+<li><em>G4OpticksHitExtra</em> : make <strong>run-time optional</strong><ul>
+<li>photon size: (4,4)+(2,4) -&gt; (4,4)</li>
+<li>half GPU-&gt;CPU hit copies</li>
+</ul>
+</li>
+<li>JUNO Offline+Opticks Bridge updates<ul>
+<li>adapt to new <em>G4Opticks</em> API</li>
+<li>improve python commandline control of <em>G4Opticks</em></li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr><td colspan="2"><p class="center first last"><span class="blue">students/postdocs with Geant4 geometry experience can assist with &quot;Basic Validation&quot; distribution comparison</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<pre>
+
+</pre><table border="1" class="small docutils">
+<colgroup>
+<col width="48%" />
+<col width="52%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head" colspan="2"><strong>0.2.0 : &quot;Full Validation&quot;</strong> Release : <span class="blue">Enabling Random Aligned step-by-step comparison</span> : <span class="red">Estimate March-April</span></th>
+</tr>
+<tr><th class="head">Completed:</th>
+<th class="head">Remaining:</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><ul class="first last simple">
+<li><em>cfg4</em> : <em>CRandomEngine</em> control random stream<ul>
+<li>-&gt; random aligned bi-simulation</li>
+</ul>
+</li>
+<li><em>cfg4</em> : <em>Geant4</em> SteppingAction emulates <em>Opticks</em><ul>
+<li>-&gt; <em>OpticksEvent</em> arrays -&gt; direct <em>NumPy</em> compare</li>
+</ul>
+</li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li>Integrate <em>cfg4</em> random control with <em>G4Opticks</em><ul>
+<li>adapt to general <em>G4</em> environment (prev: optical only)</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr><td colspan="2"><p class="center first last"><span class="blue">students/postdocs with NumPy + Geant4 geometry experience can assist with &quot;Full Validation&quot; step-by-step comparison</span></p>
+</td>
+</tr>
+</tbody>
+</table>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="juno-offline-opticks-organization">
-<h1><span class="small">JUNO Offline + Opticks : Organization</span></h1>
-<p class="small"><strong>Organization</strong></p>
+<div class="slide" id="primary-features-for-further-opticks-releases">
+<h1><span class="small">Primary Features for Further Opticks Releases</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Cluster Level Optimization</span></p>
+<p class="small"><strong>Maximize flexibility of resource utilization</strong></p>
+<ul class="small last simple">
+<li><em>OpticksClient.hh</em> : anywhere (CPU only nodes)<ul>
+<li>proto-experiments <a class="reference external" href="https://github.com/simoncblyth/np">https://github.com/simoncblyth/np</a></li>
+</ul>
+</li>
+<li><em>OpticksServer</em><ul>
+<li>load balancer over GPU cluster workers</li>
+<li>avoids GPU starvation</li>
+</ul>
+</li>
+</ul>
+</div>
+<p class="small"><strong>Adapt Opticks to all new NVIDIA OptiX 7 API</strong></p>
+<ul class="small simple">
+<li><strong>necessary</strong> : otherwise forever stuck at <em>OptiX 6.5</em> (2019)<ul>
+<li>pre-requisite to <em>OpticksServer</em></li>
+</ul>
+</li>
+<li>re-implement <em>optixrap</em> (<em>OptiX</em> wrapper) package</li>
+<li>first: single-GPU only, expect no change to <em>G4Opticks</em> API</li>
+<li><span class="red">prototyping in February, with LZ/NERSC/NVIDIA experts</span><ul>
+<li><span class="blue">uncertain timeline : aiming for May</span></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Distributed Opticks : Server + Lightweight Clients</strong></p>
+<p class="small">Send/receive/queue/reply <em>NumPy</em> arrays (eg gensteps, hits) over TCP</p>
+<ul class="small simple">
+<li>Compute Server : research/experimentation/learning needed<ul>
+<li>load balancer, proxy, message queue(MQ)</li>
+<li>find/evaluate open source basis projects<ul>
+<li>HAProxy, Squid, ..., Apache Qpid, Apache ActiveMQ, ZeroMQ, ...</li>
+</ul>
+</li>
+<li>keep as general as practical : <em>NumPy</em> array messages, metadata context match (eg matched geometry)<ul>
+<li>decoupled computation, eg optical simulation : <em>fSIM[JUNO Offline+Geant4+Opticks+OptiX](gensteps) -&gt; hits</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="red">too undefined a target to set timeline</span> : <span class="red">priority depends on experience with single node Opticks in production</span></li>
+</ul>
+<p class="small"><span class="blue">computing student/postdoc/.. with network/MQ/proxy/server development experience/interest welcome to assist</span></p>
 
         <!--  s5talk  -->
         <br/>
@@ -2526,9 +2695,9 @@ with many hundreds or thousands of production jobs orchestrated with a batch sys
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Next Steps</span></p>
 <ul class="small last simple">
-<li>Theta dependant CE -&gt; GPU</li>
-<li>validation : in-situ random aligned bi-simulation</li>
-<li>validation : apply full step-by-step recording</li>
+<li>basic validation release</li>
+<li>migrate to NVIDIA OptiX 7</li>
+<li>full validation release</li>
 </ul>
 </div>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 20px;" />
@@ -2578,6 +2747,12 @@ optical photon simulation to *Geant4* applications.
 .. image:: /env/presentation/1px.png
    :width: 1000px
    :height: 10px -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="geocache-360">
+<h1><span class="i">geocache_360</span></h1>
 
         <!--  s5talk  -->
         <br/>
@@ -2724,40 +2899,49 @@ tds(){ tds- --opticks-mode 1 --no-guide_tube --pmt20inch-polycone-neck --evtmax 
 
         <!--  s5talk  -->
         <br/>
-    </div>
-<div class="slide" id="scan-pf-1-opticks-vs-geant4-2">
-<h1><span class="i">scan-pf-1_Opticks_vs_Geant4 2</span></h1>
-<pre>
+    <!-- comment
+
+
+:i:`scan-pf-1_Opticks_vs_Geant4 2`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. raw:: html
+
+    <pre>
 
 
 
 
-</pre><table border="1" class="small docutils align-center">
-<colgroup>
-<col width="30%" />
-<col width="42%" />
-<col width="27%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head" colspan="2">JUNO analytic, 400M photons from center</th>
-<th class="head">Speedup</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>Geant4 Extrap.</td>
-<td>95,600 s (26 hrs)</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>Opticks RTX ON (i)</td>
-<td>58 s</td>
-<td>1650x</td>
-</tr>
-</tbody>
-</table>
+    </pre>
 
-        <!--  s5talk  -->
-        <br/>
-    </div>
+
+.. class:: small
+
+    .. table::
+        :align: center
+
+        +- - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+
+        | JUNO analytic, 400M photons from center         |  Speedup         |
+        +====================+============================+==================+
+        | Geant4 Extrap.     | 95,600 s (26 hrs)          |                  |
+        +- - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+
+        | Opticks RTX ON (i) | 58 s                       |   1650x          |
+        +- - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - -+
+
+
+.. s5_talk::
+
+
+   The GPU used for these tests is the Quadro RTX 8000 with 48GB VRAM.
+
+   This compares the extrapolated Geant4 propagation time with the Opticks launch
+   interval with RTX on.   The speedup is more than a factor of 1000.   Need to
+   use a log scale to make them both visible.
+
+   For 400M photons, Geant4 takes more than a day, Opticks takes less than a minute.
+
+   This is with analytic geometry. Speedup is a lot more with triangles. -->
+</div>
 </div>
 </body>
 </html>
