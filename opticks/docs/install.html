@@ -189,46 +189,117 @@ bash environment:</p>
 </div>
 <p>Ensure that <cite>.bashrc</cite> is sourced from your <cite>~/.bash_profile</cite>.  The <cite>~/.opticks_config</cite>
 must be customized for your system, changing the PREFIX envvar paths and directory arguments to <cite>opticks-prepend-prefix</cite>.
-Extracts from the example <cite>~/.opticks_config</cite> are shown below.</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .opticks_config</span>
-<span class="c1"># .bash_profile &gt; .bashrc &gt; .opticks_config</span>
+The lines of <cite>~/.opticks_config</cite> that will typically need to be customized for your system are highlighted
+in the below literal include of <cite>~/opticks/example.opticks_config</cite>.</p>
+<div class="highlight-sh notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># ~/.opticks_config</span>
+<span class="c1"># ~/.bash_profile &gt; ~/.bashrc &gt; ~/.opticks_config</span>
+<span class="c1"># https://simoncblyth.bitbucket.io/opticks/docs/opticks.html#bash-shell-setup-with-opticks-config</span>
 
-opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$HOME</span>/opticks/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
+<span class="nb">export</span> <span class="nv">OPTICKS_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/opticks
+
+opticks-<span class="o">(){</span>  <span class="o">[</span> -r <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">]</span> <span class="o">&amp;&amp;</span> . <span class="nv">$OPTICKS_HOME</span>/opticks.bash <span class="o">&amp;&amp;</span> opticks-env <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
 opticks-
+
 o<span class="o">(){</span> opticks- <span class="p">;</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> git status <span class="p">;</span> <span class="o">}</span>
+oo<span class="o">(){</span> opticks- <span class="p">;</span> <span class="nb">cd</span> <span class="k">$(</span>opticks-home<span class="k">)</span> <span class="p">;</span> om- <span class="p">;</span> om-- <span class="p">;</span>  <span class="o">}</span>
 t<span class="o">(){</span> <span class="nb">typeset</span> -f <span class="nv">$*</span> <span class="p">;</span> <span class="o">}</span>
 
-<span class="c1"># PATH envvars control the externals that opticks/CMake or pkg-config will find</span>
+oed<span class="o">(){</span> vi <span class="nv">$BASH_SOURCE</span> <span class="o">&amp;&amp;</span> ofu <span class="p">;</span> <span class="o">}</span>  <span class="c1"># edit this file</span>
+ofu<span class="o">(){</span> <span class="nb">source</span> <span class="nv">$BASH_SOURCE</span> <span class="p">;</span> <span class="o">}</span>  <span class="c1"># source this file</span>
+
+<span class="c1"># PATH envvars control the externals that opticks/CMake or pkg-config will find  </span>
 <span class="nb">unset</span> CMAKE_PREFIX_PATH
 <span class="nb">unset</span> PKG_CONFIG_PATH
 
-<span class="c1"># mandatory envvars in buildenv</span>
-<span class="nb">export</span> <span class="nv">OPTICKS_PREFIX</span><span class="o">=</span>/usr/local/opticks
-<span class="nb">export</span> <span class="nv">OPTICKS_CUDA_PREFIX</span><span class="o">=</span>/usr/local/cuda
-<span class="nb">export</span> <span class="nv">OPTICKS_OPTIX_PREFIX</span><span class="o">=</span>/usr/local/optix
-
-<span class="nb">export</span> <span class="nv">OPTICKS_COMPUTE_CAPABILITY</span><span class="o">=</span><span class="m">30</span>
-
-<span class="c1">## hookup paths to access &quot;foreign&quot; externals</span>
-opticks-prepend-prefix /usr/local/opticks_externals/clhep
-opticks-prepend-prefix /usr/local/opticks_externals/xercesc
-opticks-prepend-prefix /usr/local/opticks_externals/g4_1042
-opticks-prepend-prefix /usr/local/opticks_externals/boost
-
-<span class="c1">## NB changing any directory paths demands an opticks-full rebuild</span>
-<span class="c1">## This is enforced by $OPTICKS_PREFIX/bin/opticks-setup.sh  which</span>
+<span class="c1"># mandatory envvars in buildenv </span>
+<span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_PREFIX</span><span class="o">=</span>/usr/local/opticks
+</span><span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_CUDA_PREFIX</span><span class="o">=</span>/usr/local/cuda
+</span><span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_OPTIX_PREFIX</span><span class="o">=</span>/usr/local/optix
+</span>
+<span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_COMPUTE_CAPABILITY</span><span class="o">=</span><span class="m">70</span>
+</span>
+<span class="c1">## hookup paths to access &quot;foreign&quot; externals, not yet existing dirs just give warnings</span>
+<span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/clhep_2440
+</span><span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/xercesc
+</span><span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/g4_1042
+</span><span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/boost
+</span>
+<span class="c1">## NB these directory paths are examples, you need to change them to suit your foreign </span>
+<span class="c1">## installs. The paths do however correspond to the defaults used by the </span>
+<span class="c1">## opticks-foreign-install bash function with the directories defined underneath </span>
+<span class="c1">## ${OPTICKS_PREFIX}_externals.</span>
+<span class="c1">##</span>
+<span class="c1">## NB changing any directory paths demands an opticks-full rebuild </span>
+<span class="c1">## This is enforced by $OPTICKS_PREFIX/bin/opticks-setup.sh  which </span>
 <span class="c1">## is generated by opticks-full with opticks-setup-generate.</span>
 
 opticks-check-prefix
 <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> ABORT <span class="o">&amp;&amp;</span> sleep <span class="m">1000000000</span>
 
-<span class="c1"># opticks-setup sets the path envvars for using Opticks executables.</span>
+<span class="c1"># opticks-setup sets the path envvars for using Opticks executables.  </span>
 <span class="c1"># To avoid output on starting every terminal session the output is redirected to  /dev/null</span>
 <span class="c1"># Remove this redirection to see any error messages.</span>
 opticks-setup &gt; /dev/null
 <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> ERROR running opticks-setup <span class="o">&amp;&amp;</span> sleep <span class="m">1000000000</span>
+
+<span class="c1"># PYTHONPATH is needed to allow python scripts to &quot;import opticks&quot;</span>
+<span class="c1"># without this some of the opticks-t tests will fail</span>
+<span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="k">$(</span>dirname <span class="nv">$OPTICKS_HOME</span><span class="k">)</span>    
 </pre></div>
-</div>
+</td></tr></table></div>
 <p>See the latest <strong>example.opticks_config</strong> in the repository:</p>
 <ul class="simple">
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/example.opticks_config">https://bitbucket.org/simoncblyth/opticks/src/master/example.opticks_config</a></li>
