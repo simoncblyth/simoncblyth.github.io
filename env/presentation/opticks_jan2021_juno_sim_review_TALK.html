@@ -1806,9 +1806,11 @@ p19: Improve task titles, shortening if possible + add (progress summary or esti
 <div class="mycredit">
 <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS &mdash; JUNO Collaboration Meeting, Jan/Feb 2021, Virtual</h2>
 </div>
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="review-opticks-juno-talk">
+<h1><span class="i">Review Opticks + JUNO</span>  Talk</h1>
+<p class="normal">This talk will review progress with Opticks and with its use in JUNO.</p>
+<!-- comment
 
 00:Title Page
 01:Outline
@@ -1862,7 +1864,6 @@ Extras
     27:Integration of Offline + Opticks : Where WITH_G4OPTICKS used ?
     28:Integration of Offline + Opticks : tut_detsim.py options
     29:JUNO Geometry : Remove Torus to enable translation to GPU -->
-
 </div>
 <div class="slide" id="outline">
 <h1>Outline</h1>
@@ -1904,10 +1905,17 @@ Title marker needs to be long for rst2rst.py matching -->
 </li>
 <li><span class="blue">Summary and Links (p24)</span></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="outline-talk">
+<h1>Outline Talk</h1>
+<p class="normal">After a brief introduction I will cover:</p>
+<ul class="normal simple">
+<li>integration of Opticks with Geant4,</li>
+<li>its increasingly widespread usage</li>
+<li>progress on integration of Opticks with JUNO Offline</li>
+<li>and the next steps.</li>
+</ul>
+</div>
 <div class="slide" id="juno-optical-photon-simulation-problem">
 <h1><span class="incremental">JUNO Optical Photon Simulation Problem...</span></h1>
 <pre>
@@ -1933,10 +1941,16 @@ Title marker needs to be long for rst2rst.py matching -->
 </dd>
 </dl>
 </div>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="juno-optical-photon-simulation-problem-talk">
+<h1><span class="incremental">JUNO Optical Photon Simulation Problem...</span> Talk</h1>
+<ul class="normal simple">
+<li>I am sure your are all painfully familiar with the optical photon simulation problem,
+not just in processing time but also the memory for all those millions of photons</li>
+<li>Most of the time is taken finding intersections between photons and geometry.</li>
+<li>This ray tracing bottleneck is exactly the same as faced by ray trace image rendering in computer graphics.</li>
+</ul>
+</div>
 <div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix">
 <h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- http://developer.nvidia.com/optix</span></h1>
 <div class="sidebar">
@@ -1965,10 +1979,15 @@ Title marker needs to be long for rst2rst.py matching -->
 <li>geometry bounding box, intersects</li>
 </ul>
 <p class="tiny">[1] Turing+ GPUs eg NVIDIA TITAN RTX</p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix-talk">
+<h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- http://developer.nvidia.com/optix</span> Talk</h1>
+<ul class="normal simple">
+<li>NVIDIA OptiX provides GPUs accelerated ray-geometry intersection</li>
+<li>but to benefit from it the geometry must be translated into
+GPU appropriate forms totally different to the Geant4 geometry model</li>
+</ul>
+</div>
 <div class="slide" id="nvidia-optix-7-entirely-new-thin-api">
 <h1><span class="small">NVIDIA OptiX 7 : Entirely new thin API</span></h1>
 <div class="sidebar">
@@ -2002,16 +2021,40 @@ Title marker needs to be long for rst2rst.py matching -->
 </ul>
 </dd>
 </dl>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="nvidia-optix-7-entirely-new-thin-api-talk">
+<h1><span class="small">NVIDIA OptiX 7 : Entirely new thin API</span> Talk</h1>
+<ul class="normal simple">
+<li>Opticks current works with NVIDIA OptiX 6</li>
+<li>OptiX 7 is an entirely new (and much slimmer) API</li>
+<li>migration is unavoidable</li>
+</ul>
+</div>
 <div class="slide" id="geant4opticksworkflow">
 <h1><span class="i">Geant4OpticksWorkflow</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="geant4opticksworkflow-talk">
+<h1><span class="i">Geant4OpticksWorkflow</span> Talk</h1>
+<p class="small">SMALL
+This compares the standard workflow on the left to the hybrid approach on the right</p>
+<p class="small">In the hybrid workflow, the generation of photons is moved
+from the CPU to the GPU using &quot;Gensteps&quot; as a bridge.
+The Genstep parameters include a number of photons, and the line segment
+along which to generate them and anything else needed in the generation loop.</p>
+<p class="small">Of course a port of the generation loop to CUDA is needed too.</p>
+<p class="small">The hybrid approach means:</p>
+<ul class="small simple">
+<li>the optical photon simulation is entirely offloaded to the GPU</li>
+<li>only PMT hits need CPU memory</li>
+<li>actually I have recently taken this further, reducing the CPU memory
+by a factor of the collection efficiency by making the collection
+efficiency decision on the GPU</li>
+<li>the green arrows represent the geometry translation<ul>
+<li>most of the work and problems of Opticks are with the geometry translation</li>
+</ul>
+</li>
+</ul>
+</div>
 <div class="slide" id="opticks-translates-g4-geometry-to-gpu-without-approximation">
 <h1><span class="small">Opticks : Translates G4 Geometry to GPU, Without Approximation</span></h1>
 <div class="sidebar">
@@ -2057,16 +2100,30 @@ Title marker needs to be long for rst2rst.py matching -->
 * intersection program for arbitrarily complex CSG shapes
 
   * :red:`automated : G4 -> Opticks -> OptiX` -->
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="opticks-translates-g4-geometry-to-gpu-without-approximation-talk">
+<h1><span class="small">Opticks : Translates G4 Geometry to GPU, Without Approximation</span> Talk</h1>
+<p class="normal">The translation of geometry structure starts by
+identifying repeated geometry and its transforms using
+geometry tree digests for every node.</p>
+<p class="normal">Effectively the original JUNO geometry of hundreds of thousands of
+volumes is factorised down to only a handful of repeated assemblies of volumes
+with arrays of thousands of 4x4 transforms representing the position and orientation
+of each assembly.</p>
+<p class="normal">This factorisation of the geoometry allows the use of <strong>instancing</strong>
+with OptiX and OpenGL which leads to a huge memory savings
+and performance improvement for simulation and visualization.</p>
+</div>
 <div class="slide" id="j1808-top-rtx">
 <h1><span class="i">j1808_top_rtx</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="j1808-top-rtx-talk">
+<h1><span class="i">j1808_top_rtx</span> Talk</h1>
+<p class="normal">The upshot is that full Geant4 detector geometries
+can be automatically translated into NVIDIA OptiX geometries.</p>
+<p class="normal">This is an OptiX ray trace image from the chimney region at the
+top of the JUNO scintillator.</p>
+</div>
 <div class="slide" id="leap-in-opticks-awareness-meetings-publications-new-users">
 <h1><span class="small">2020 : Leap in Opticks Awareness : Meetings, Publications &gt;&gt;&gt; New Users</span></h1>
 <p class="small"><strong>(Feb 2020) Workshop on Efficient Computing for HEP, Edinburgh</strong></p>
@@ -2095,10 +2152,21 @@ Title marker needs to be long for rst2rst.py matching -->
 <li>&quot;G4Opticks for liquid Argon TPCs&quot;, Fermilab Geant4 Team, Hans Wenzel</li>
 <li>&quot;<a class="reference external" href="mailto:VecGeom&#64;GPU">VecGeom&#64;GPU</a>&quot;, CERN Geant4 Team, Andrei Gheata</li>
 </ol>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="leap-in-opticks-awareness-meetings-publications-new-users-talk">
+<h1><span class="small">2020 : Leap in Opticks Awareness : Meetings, Publications &gt;&gt;&gt; New Users</span> Talk</h1>
+<p class="normal">There has been quite a leap in Opticks awareness over the past year.</p>
+<ul class="normal simple">
+<li>a few of the talks and publications discussing Opticks are listed here.</li>
+<li>it is being actively evaluated by an increasing number of groups</li>
+</ul>
+<p class="normal">Why the leap ?</p>
+<ul class="normal simple">
+<li>i guess my plenary presentation at the CHEP conference at the end of 2019 is the main cause</li>
+<li>also using GPUs with Geant4 has become a hot topic over the past year, with
+several high profile projects (Celeritas, AdePT) getting started</li>
+</ul>
+</div>
 <div class="slide" id="leap-in-opticks-awareness-some-users-getting-serious">
 <h1><span class="small">2020 : Leap in Opticks Awareness &gt;&gt;&gt; Some Users Getting Serious</span></h1>
 <p class="small"><strong>(Aug 2020) Shanghai SJTU : Next-gen Neutrino Telescope Simulation Workshop</strong></p>
@@ -2122,10 +2190,15 @@ Title marker needs to be long for rst2rst.py matching -->
 <li>Perlmutter : &gt; 6000 NVIDIA A100 (Ampere Architecture GPU)</li>
 </ul>
 <p class="tiny"><a class="reference external" href="https://insidehpc.com/2020/05/perlmutter-supercomputer-to-include-more-than-6000-nvidia-a100-processors/">https://insidehpc.com/2020/05/perlmutter-supercomputer-to-include-more-than-6000-nvidia-a100-processors/</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="leap-in-opticks-awareness-some-users-getting-serious-talk">
+<h1><span class="small">2020 : Leap in Opticks Awareness &gt;&gt;&gt; Some Users Getting Serious</span>  Talk</h1>
+<p class="normal">Several groups that have been evaluating Opticks for years are now starting to get serious.</p>
+<p class="normal">The LZ(LUX-Zepelin) dark matter experiment is the most advanced</p>
+<ul class="normal simple">
+<li>they aim to get Opticks going on the new Perlmutter supercomputer at NERSC</li>
+</ul>
+</div>
 <div class="slide" id="groups-io-1">
 <h1><span class="i">GROUPS_IO_1</span></h1>
 <pre>
@@ -2164,10 +2237,15 @@ Title marker needs to be long for rst2rst.py matching -->
 <li><tt class="docutils literal">opticks+subscribe&#64;groups.io</tt></li>
 </ul>
 </div>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="groups-io-1-talk">
+<h1><span class="i">GROUPS_IO_1</span> Talk</h1>
+<p class="normal">The Opticks Forum and email list is the main way that I support users.</p>
+<ul class="normal simple">
+<li>there are now 25 members</li>
+<li>unfortunately some users still tend to email me directly</li>
+</ul>
+</div>
 <div class="slide" id="g4optickstest-demonstrates-geant4-opticks-hybrid-workflow">
 <h1><span class="small">G4OpticksTest : Demonstrates Geant4 + Opticks hybrid workflow</span></h1>
 <div class="sidebar">
@@ -2186,10 +2264,16 @@ Title marker needs to be long for rst2rst.py matching -->
 <li>Developed Geant4-Opticks integration API <strong>G4Opticks</strong></li>
 <li>Recently reported two Geant4 optical surface issues #2305 #2311</li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="g4optickstest-demonstrates-geant4-opticks-hybrid-workflow-talk">
+<h1><span class="small">G4OpticksTest : Demonstrates Geant4 + Opticks hybrid workflow</span> Talk</h1>
+<p class="normal">The Fermilab Geant4 Team has been active for several years now with Opticks.</p>
+<ul class="normal simple">
+<li>the inset slides are from Hans Wenzel</li>
+<li>my work with them has shaped the development of the G4Opticks interface.</li>
+<li>also attempts to work with recent Geant4 releases have revealed some Geant4 optical bugs</li>
+</ul>
+</div>
 <div class="slide" id="geant4-bug-2305">
 <h1><span class="i">Geant4_Bug_2305</span></h1>
 <pre>
@@ -2222,10 +2306,21 @@ five releases of Geant4.</strong></p>
 <li>avoids : surprises, excluded releases</li>
 <li>ease future &quot;official&quot; updating</li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="geant4-bug-2305-talk">
+<h1><span class="i">Geant4_Bug_2305</span> Talk</h1>
+<p class="normal">If you use GDML and have more than 1 optical surface then I would suggest
+you should not use these five releases.</p>
+<p class="normal">It is unfortuate that I did not test Opticks with these Geant4 releases until recently.
+This optical surface bug tripped a consistency assert in the Opticks geometry translation,
+so it is immediately apparent when testing Opticks with the Geant4 release.</p>
+<p class="normal">I would have been able to catch the problem much sooner.</p>
+<p class="normal">It really demonstrates the importance of testing the latest version
+of critical externals even when you have no intention to officially updating
+to them in the near future.</p>
+<p class="normal">Plus it is a natural way to contribute to your externals and ensures
+that they will be ready for you when you do need to update.</p>
+</div>
 <div class="slide" id="geant4-bug-2311">
 <h1><span class="i">Geant4_Bug_2311</span></h1>
 <pre>
@@ -2251,10 +2346,14 @@ five releases of Geant4.</strong></p>
 </pre><p class="small"><span class="red">Problem noticed in first release</span></p>
 <p class="small">Geant4 team seem willing to follow my suggestion
 that will avoid any lasting impact.</p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="geant4-bug-2311-talk">
+<h1><span class="i">Geant4_Bug_2311</span> Talk</h1>
+<p class="normal">This bug is actually a change in API.</p>
+<p class="normal">This Geant4 change in 10.7 was noticed at the first release, and fortunately
+an Opticks workaround is possible and it looks likely that the next Geant4 release 1071
+will be free of both this workaround and the optical surface bug too.</p>
+</div>
 <div class="slide" id="uk-swift-hep-grant-software-infrastructure-and-technology-for-hep">
 <h1><span class="small">UK SWIFT-HEP grant : SoftWare InFrastructure and Technology for HEP</span></h1>
 <div class="sidebar">
@@ -2276,10 +2375,16 @@ that will avoid any lasting impact.</p>
 <ul class="small simple">
 <li><a class="reference external" href="https://indico.cern.ch/event/976081/">https://indico.cern.ch/event/976081/</a></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="uk-swift-hep-grant-software-infrastructure-and-technology-for-hep-talk">
+<h1><span class="small">UK SWIFT-HEP grant : SoftWare InFrastructure and Technology for HEP</span> Talk</h1>
+<p class="normal">There is some other news on Geant4+Opticks integration.</p>
+<p class="normal">A group from Manchester and Warwick in the UK has got some
+funding part of which they want to dedicate to improving and
+extending the use of Opticks.</p>
+<p class="normal">So it looks like a few more people will be working on
+Geant4+Opticks integration this year.</p>
+<!-- comment
 
 Contribution is of course excellent : but it it going to
 take time to train up the people supported by this grant
@@ -2301,10 +2406,15 @@ and payback is far from certain. -->
 <li>Standard Geant4 costs ~30% CPU time for optical photons</li>
 <li><span class="red">successful validations</span></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="lhcb-rich-ring-imaging-cherenkov-with-opticks-sajan-easo-talk">
+<h1><span class="small">LHCb RICH (Ring Imaging Cherenkov) with Opticks : Sajan Easo</span> Talk</h1>
+<p class="normal">Opticks is not restricted to neutrino and dark matter experiments.</p>
+<p class="normal">Several people from LHCb have been using it for simulation of
+RICH detectors (that is Ring Imaging Cherenkov)</p>
+<p class="normal">These slides are from Sajan Easo who has done some simple validations
+with the RICH geometry.</p>
+</div>
 <div class="slide" id="opticks-corsika8-for-next-generation-neutrino-telescope-optimization">
 <h1><span class="small">Opticks+CORSIKA8 for next-generation neutrino telescope optimization ?</span></h1>
 <p class="small"><strong>(Aug 2020) Shanghai SJTU : Next-gen Neutrino Telescope Simulation Workshop</strong></p>
@@ -2319,10 +2429,13 @@ and payback is far from certain. -->
 </ul>
 </li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="opticks-corsika8-for-next-generation-neutrino-telescope-optimization-talk">
+<h1><span class="small">Opticks+CORSIKA8 for next-generation neutrino telescope optimization ?</span> Talk</h1>
+<p class="normal">Another idea for using Opticks is to try to integrate it with CORSIKA for
+optimization of enormous deep sea neutrino telescopes.</p>
+<p class="normal">The visualization shows a string of pods geometry set up by a student of Donglian, Fan Hu.</p>
+</div>
 <div class="slide" id="lz-opticks-history-2018-2021-contacts-with-5-lz-people">
 <h1><span class="small">LZ+Opticks history : 2018-2021 : contacts with &gt;5 LZ people</span></h1>
 <ul class="small simple">
@@ -2341,10 +2454,18 @@ and payback is far from certain. -->
 <li><a class="reference external" href="https://www.nersc.gov/users/NUG/annual-meetings/nug-2020/">https://www.nersc.gov/users/NUG/annual-meetings/nug-2020/</a></li>
 <li>&quot;Opticks on CoriGPU&quot;, O.Creaner, 5 authors from : NERSC/LBL/LZ/Stanford/Bristol</li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="lz-opticks-history-2018-2021-contacts-with-5-lz-people-talk">
+<h1><span class="small">LZ+Opticks history : 2018-2021 : contacts with &gt;5 LZ people</span> Talk</h1>
+<p class="normal">LZ has been evaluating Opticks over the past three years and it is now
+keep to scale up its usage to profit from the new NERSC Perlmutter supercomputer,
+with more than 6000 NVIDIA A100 GPUs</p>
+<p class="normal">They proposed a Hackathon to optimize LZ+Opticks simulation.</p>
+<ul class="normal simple">
+<li>but there is little point optimizing prior to migrating to the OptiX 7 API</li>
+<li>after I pointed this out they indicated they could help with the migration</li>
+</ul>
+</div>
 <div class="slide" id="lz-opticks-simulation-on-perlmutter-6000-nvidia-a100">
 <h1><span class="small">2021 : LZ+Opticks simulation on Perlmutter (&gt;6000 NVIDIA A100)</span></h1>
 <div class="sidebar">
@@ -2386,10 +2507,17 @@ and payback is far from certain. -->
 <li>first: single-GPU only</li>
 <li>expect no change to <em>G4Opticks</em> API</li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="lz-opticks-simulation-on-perlmutter-6000-nvidia-a100-talk">
+<h1><span class="small">2021 : LZ+Opticks simulation on Perlmutter (&gt;6000 NVIDIA A100)</span> Talk</h1>
+<p class="normal">I was a little surprised by the number of people from NERSC and NVIDIA
+in the Zoom meeting. I guess NERSC wants its users to rapidly
+see the benefits from the hundreds of millions of dollars spent on Perlmutter.</p>
+<p class="normal">Having NVIDIA aware in detail of how OptiX is being used for optical photon simulation
+could be extremely beneficial down the road.</p>
+<p class="normal">Also it make a good story for NVIDIA to be helping with something more than making
+games look pretty. Plus widens the market for its GPUs.</p>
+<!-- comment
 
 :small:`Opticks Tasks List`
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2452,10 +2580,20 @@ and payback is far from certain. -->
 </ul>
 <p class="tiny"><a class="reference external" href="https://simoncblyth.bitbucket.io/opticks/optixrap/tests/OSensorLibGeoTest.cc.html">https://simoncblyth.bitbucket.io/opticks/optixrap/tests/OSensorLibGeoTest.cc.html</a></p>
 <p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst">https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="opticks-juno-progress-efficiency-hit-culling-on-gpu-talk">
+<h1><span class="small">Opticks + JUNO Progress : Efficiency Hit Culling on GPU</span> Talk</h1>
+<ul class="normal simple">
+<li>Doing efficiency culling on GPU reduces CPU memory for hits by a factor of the efficiency</li>
+<li>only the collected hits needed by the electronics simulation have to use CPU memory</li>
+<li>BUT : it means you have to translate the efficiency information and upload it to the GPU<ul>
+<li>i did this with angular textures for each sensor type and efficiency buffers</li>
+</ul>
+</li>
+<li>the culling decision on GPU leads to one of these flags being set, then
+you can copy back just the EFFICIENCY_COLLECT photons to go into the hit collection</li>
+</ul>
+<!-- comment
 
 https://bitbucket.org/simoncblyth/opticks/src/master/optickscore/tests/MockSensorLibTest.cc
 
@@ -2523,10 +2661,24 @@ hit->SetBoundaryPosition(boundary_pos); // pAcrylic/pInnerWater[1] </span></b>
 <li>Using <strong>split</strong> assuming <span class="red">extras switched off in large productions ?</span></li>
 </ul>
 <p class="tiny">[1] set in NormalTrackInfo by <tt class="docutils literal"><span class="pre">NormalAnaMgr::UserSteppingAction</span></tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="completing-juno-hits-g4optickshit-4-4-g4optickshitextra-2-4-talk">
+<h1><span class="small">Completing JUNO Hits : G4OpticksHit (4,4) + G4OpticksHitExtra (2,4)</span> Talk</h1>
+<p class="normal">The (4,4) and (2,4) are dimensions of the buffer items.
+On the GPU it is more efficient to handle quad elements
+like float4 so Opticks does everything in quads.</p>
+<p class="normal">One obvious way to provide the global+local information would
+be to double the size of the photon element. That would have
+halved the number of photons that can be simulated at once.
+So transforms are used to convert global into local on the CPU
+using identity information to get the right transform.</p>
+<p class="normal">All of the <em>G4OpticksHit</em> comes from a (4,4) photon item.</p>
+<p class="normal">Hit information is split into standard+extra to avoid paying the price for the
+extra info when it is not needed.</p>
+<p class="normal">The price is a 50% increase in VRAM and a doubling of GPU to CPU copies.</p>
+<p class="normal">If the extra info were regarded as essential then increasing the
+size of the photon item from (4,4) to (6,4) would be appropriate.</p>
+<!-- comment
 
 .. class:: small
 
@@ -2584,10 +2736,25 @@ hit->SetBoundaryPosition(boundary_pos); // pAcrylic/pInnerWater[1] </span></b>
 <li>limited numbers of NVIDIA GPUs</li>
 <li>GPU starvation : difficult to keep them busy</li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="opticks-three-levels-of-performance-talk">
+<h1><span class="small">Opticks : Three Levels of Performance</span> Talk</h1>
+<p class="small">SMALL</p>
+<p class="small">Performance must be considered at three levels because choices
+optimum for one level will not be the optimum at other levels.</p>
+<p class="small">For example dedicating 4 GPUs to 1 CPU would give the
+best <strong>optical</strong> performance but at <strong>node</strong> level
+the performance might not be different to that with
+1 GPU per node and at  <strong>cluster</strong> level you would be limiting
+the number of concurrent batch jobs hence killing your overall throughput.</p>
+<p class="small">Finding the optimum approach requires experimentation.</p>
+<p class="small">Opticks has only optimized at <strong>optical</strong> level.</p>
+<p class="small">Optimizing at cluster level is expected to give large gains,
+by maximimizing the use of resources</p>
+<p class="small">A big problem at <strong>cluster</strong> level is that there is a limited number
+of GPU nodes</p>
+<p class="small">Developing a distributed Opticks is</p>
+<!-- comment
 
 **Async Opticks Server ?**
 
@@ -2638,10 +2805,14 @@ hit->SetBoundaryPosition(boundary_pos); // pAcrylic/pInnerWater[1] </span></b>
 
 
 </pre><p class="tiny"><strong>[1] OKOP package</strong> : no Geant4, OpenGL : (Opticks structured as tree of ~20 packages according to external dependencies, only the four highest level packages depend on Geant4)</p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="opticksserver-lightweight-opticksclients-talk">
+<h1><span class="small">OpticksServer + Lightweight OpticksClients</span> Talk</h1>
+<p class="normal">Called <em>OpticksServer</em> for the name-recognition</p>
+<ul class="normal simple">
+<li>develop as general GPU compute</li>
+</ul>
+</div>
 <div class="slide" id="releases-for-opticks-juno-validation-comparing-g4-opticks-vs-g4">
 <h1><span class="small">Releases for Opticks+JUNO validation comparing G4+Opticks vs G4</span></h1>
 <!-- comment
@@ -2735,10 +2906,19 @@ hit->SetBoundaryPosition(boundary_pos); // pAcrylic/pInnerWater[1] </span></b>
 </tr>
 </tbody>
 </table>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="releases-for-opticks-juno-validation-comparing-g4-opticks-vs-g4-talk">
+<h1><span class="small">Releases for Opticks+JUNO validation comparing G4+Opticks vs G4</span> Talk</h1>
+<p class="normal">The plan is to make a &quot;Basic Validation&quot; release during February
+with the features I have described already. There is little remaining to do,
+so I am confident have the release during Febrary.
+This will allow basic statistical comparison of hit distributions.</p>
+<p class="normal">The &quot;Full Validation&quot; release aims to provide random aligned step-by-step
+comparisons. Validating like this is very good at finding problems as
+the comparison is not clouded by statistics.</p>
+<p class="normal">Problems with Opticks are mostly geometry problems, so experience
+with Geant4 geometry is important.</p>
+</div>
 <div class="slide" id="summary-and-links">
 <h1><span class="small">Summary and Links</span></h1>
 <div class="sidebar">
@@ -2784,10 +2964,13 @@ integrated with <em>Geant4</em>. <span class="red">Now integrated with JUNO Offl
 </tr>
 </tbody>
 </table>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="summary-and-links-talk">
+<h1><span class="small">Summary and Links</span> Talk</h1>
+<p class="normal">While it is great that Opticks is gaining many new users with lots
+of interest and activity from Geant4 and also now NVIDIA
+the downside of is that it takes times to support them all.</p>
+<!-- comment
 
 * Drastic speedup -> better detector understanding -> greater precision
 
@@ -2808,10 +2991,11 @@ optical photon simulation to *Geant4* applications.
 </div>
 <div class="slide" id="geocache-360">
 <h1><span class="i">geocache_360</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="geocache-360-talk">
+<h1><span class="i">geocache_360</span> Talk</h1>
+<p class="normal">Background slides start from here</p>
+</div>
 <div class="slide" id="integration-of-juno-opticks-opticks-is-a-junoenv-external">
 <h1><span class="small">Integration of JUNO + Opticks : Opticks is a JunoENV External</span></h1>
 <div class="sidebar">
@@ -2854,10 +3038,27 @@ jlibs(){
 </pre><ul class="small simple">
 <li><a class="reference external" href="https://juno.ihep.ac.cn/mediawiki/index.php/Offline:Installation#Install_Opticks_using_JunoENV">https://juno.ihep.ac.cn/mediawiki/index.php/Offline:Installation#Install_Opticks_using_JunoENV</a></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="integration-of-juno-opticks-opticks-is-a-junoenv-external-talk">
+<h1><span class="small">Integration of JUNO + Opticks : Opticks is a JunoENV External</span> Talk</h1>
+<p class="normal">Now I transition to progress with integrating Opticks with the Offline.</p>
+<ul class="normal simple">
+<li><strong>Opticks is now a JunoENV external</strong></li>
+<li>that means you can install Opticks with that one line</li>
+<li>actually to install all Offline externals you
+can use the bash function below</li>
+</ul>
+<p class="normal">Opticks has pre-requisites : CUDA, OptiX and the NVIDIA GPU Driver
+that need to be separately installed.
+It is not appropriate to automate this, as low level system drivers are involved
+users need to follow NVIDIA instructions for your system.</p>
+<p class="normal">Where these are installed are communicated via envvars.</p>
+<p class="normal">As Opticks is an optional external, it is necessary to
+switch it on somehow. The CMTEXTRATAGS envvar is used to do this,
+when that contains the string &quot;opticks&quot; it signals JUNOEnv and
+CMT to enable Opticks in the builds.</p>
+<p class="normal">More details are in the wiki at this link.</p>
+</div>
 <div class="slide" id="integration-of-offline-opticks-where-with-g4opticks-used">
 <h1><span class="small">Integration of Offline + Opticks : Where WITH_G4OPTICKS used ?</span></h1>
 <p class="small">Offline Opticks : <tt class="docutils literal">#ifdef WITH_G4OPTICKS ... #endif</tt> + <tt class="docutils literal">if(m_opticksMode &gt; 0){ ... }</tt></p>
@@ -2889,10 +3090,34 @@ cd $JUNOTOP/offline/Simulation/DetSimV2 ; find . -type f -exec grep -l WITH_G4OP
 <ul class="small simple">
 <li><a class="reference external" href="https://juno.ihep.ac.cn/mediawiki/index.php/Offline:Installation#building_the_offline_-DWITH_G4OPTICKS">https://juno.ihep.ac.cn/mediawiki/index.php/Offline:Installation#building_the_offline_-DWITH_G4OPTICKS</a></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="integration-of-offline-opticks-where-with-g4opticks-used-talk">
+<h1><span class="small">Integration of Offline + Opticks : Where WITH_G4OPTICKS used ?</span> Talk</h1>
+<p class="normal">Not everyone has an NVIDIA GPU, so Opticks is optional.</p>
+<p class="normal">Because of this all usage is &quot;hidden&quot; behind:</p>
+<ol class="normal arabic simple">
+<li>WITH_G4OPTICKS compilation macro</li>
+<li>opticksMode runtime switch</li>
+</ol>
+<p class="normal">The Opticks integration changes code in 3 packages</p>
+<ul class="normal simple">
+<li>DetSimOptions</li>
+<li>PhysiSim</li>
+<li>PMTSim</li>
+</ul>
+<dl class="normal docutils">
+<dt>DetSimOptions</dt>
+<dd>handles lifecycle + passing the geometry world pointer to Opticks for translation</dd>
+<dt>PhysiSim</dt>
+<dd>collects Gensteps from Scintillation and Cerenkov processes</dd>
+<dt>PMTSim</dt>
+<dd><blockquote class="first">
+invokes the GPU opticalPhotonSimulation and populates the hit collection in bulk,
+at the end of the event</blockquote>
+<p class="last">Again, more details are in the wiki at that link.</p>
+</dd>
+</dl>
+</div>
 <div class="slide" id="integration-of-offline-opticks-tut-detsim-py-options">
 <h1><span class="small">Integration of Offline + Opticks : tut_detsim.py options</span></h1>
 <p class="small"><em>tut_detsim.py</em> options relevant to Opticks usage : <span class="red">TODO: user friendly Opticks control interface</span></p>
@@ -2914,10 +3139,20 @@ tds(){ tds- --opticks-mode 1 --no-guide_tube --pmt20inch-polycone-neck --evtmax 
 </pre><ul class="small simple">
 <li><a class="reference external" href="https://juno.ihep.ac.cn/mediawiki/index.php/Offline:Detsimuserguide/UsingOpticks">https://juno.ihep.ac.cn/mediawiki/index.php/Offline:Detsimuserguide/UsingOpticks</a></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="integration-of-offline-opticks-tut-detsim-py-options-talk">
+<h1><span class="small">Integration of Offline + Opticks : tut_detsim.py options</span> Talk</h1>
+<p class="normal">tut_detsim.py options relevant to using Opticks are collected here</p>
+<p class="normal"><strong>--opticks-mode</strong> is the main control</p>
+<p class="normal">Currently both CPU and GPU simulations are done, with GPU hits going into
+a separate hit collection.</p>
+<ul class="normal simple">
+<li>Trying to use standard geometry with torus exits at Opticks geometry translation.</li>
+<li>Trying to use non-zero opticks-mode with code not compiled WITH_G4OPTICKS
+exits at initialization.</li>
+</ul>
+<p class="normal">More details in the wiki</p>
+</div>
 <div class="slide" id="juno-geometry-remove-torus-to-enable-translation-to-gpu">
 <h1><span class="small">JUNO Geometry : Remove Torus to enable translation to GPU</span></h1>
 <div class="sidebar">
@@ -2952,10 +3187,14 @@ tds(){ tds- --opticks-mode 1 --no-guide_tube --pmt20inch-polycone-neck --evtmax 
 </ul>
 </dd>
 </dl>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="juno-geometry-remove-torus-to-enable-translation-to-gpu-talk">
+<h1><span class="small">JUNO Geometry : Remove Torus to enable translation to GPU</span> Talk</h1>
+<p class="normal">Torus intersection is such a problem, that the best solution is
+to avoid torus : I think it is perfectly acceptable to do so, because
+the guide tube is not important for optical photons and the torus
+based PMT neck is cosmetic only in my opinion.</p>
+<!-- comment
 
 
 :i:`scan-pf-1_Opticks_vs_Geant4 2`
