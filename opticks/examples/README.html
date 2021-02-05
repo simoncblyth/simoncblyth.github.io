@@ -30,8 +30,15 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Examples of Opticks Usage, especially the CMake machinery</a><ul>
-<li><a class="reference internal" href="#standalone-ish-optix-7-examples">Standalone-ish OptiX 7 Examples</a></li>
+<li><a class="reference internal" href="#testing-cmake-finding-externals-and-minimal-usage">Testing CMake finding externals and minimal usage</a></li>
+<li><a class="reference internal" href="#cmake-finding-opticks-sub-packages">CMake finding Opticks sub-packages</a></li>
+<li><a class="reference internal" href="#examples-directly-using-nvidia-optix">Examples Directly Using NVIDIA OptiX</a><ul>
+<li><a class="reference internal" href="#optix-pre7-usage-examples">OptiX pre7 usage examples</a></li>
 <li><a class="reference internal" href="#standalone-ish-optix-5-or-6-examples">Standalone-ish OptiX 5 or 6 Examples</a></li>
+<li><a class="reference internal" href="#experimental-pre7-and-7-machinery">Experimental pre7 and 7 machinery</a></li>
+<li><a class="reference internal" href="#standalone-ish-optix-7-examples">Standalone-ish OptiX 7 Examples</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -64,10 +71,29 @@
           <div class="body" role="main">
             
   <div class="section" id="examples-of-opticks-usage-especially-the-cmake-machinery">
-<h1>Examples of Opticks Usage, especially the CMake machinery<a class="headerlink" href="#examples-of-opticks-usage-especially-the-cmake-machinery" title="Permalink to this headline">¶</a></h1>
+<h1><a class="toc-backref" href="#id1">Examples of Opticks Usage, especially the CMake machinery</a><a class="headerlink" href="#examples-of-opticks-usage-especially-the-cmake-machinery" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#examples-of-opticks-usage-especially-the-cmake-machinery" id="id1">Examples of Opticks Usage, especially the CMake machinery</a><ul>
+<li><a class="reference internal" href="#testing-cmake-finding-externals-and-minimal-usage" id="id2">Testing CMake finding externals and minimal usage</a></li>
+<li><a class="reference internal" href="#cmake-finding-opticks-sub-packages" id="id3">CMake finding Opticks sub-packages</a></li>
+<li><a class="reference internal" href="#examples-directly-using-nvidia-optix" id="id4">Examples Directly Using NVIDIA OptiX</a><ul>
+<li><a class="reference internal" href="#optix-pre7-usage-examples" id="id5">OptiX pre7 usage examples</a></li>
+<li><a class="reference internal" href="#standalone-ish-optix-5-or-6-examples" id="id6">Standalone-ish OptiX 5 or 6 Examples</a></li>
+<li><a class="reference internal" href="#experimental-pre7-and-7-machinery" id="id7">Experimental pre7 and 7 machinery</a></li>
+<li><a class="reference internal" href="#standalone-ish-optix-7-examples" id="id8">Standalone-ish OptiX 7 Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
 <p>The examples have go.sh scripts which perform the normal
 config, make, install using a fresh build dir every time.
 This is a convenient when the focus is on the CMake machinery.</p>
+<div class="section" id="testing-cmake-finding-externals-and-minimal-usage">
+<h2><a class="toc-backref" href="#id2">Testing CMake finding externals and minimal usage</a><a class="headerlink" href="#testing-cmake-finding-externals-and-minimal-usage" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt>UsePLog</dt>
 <dd>simple executable using PLog via imported interface target
@@ -113,11 +139,6 @@ THE HASSLE OF SEPARATE include DIR for sources</li>
 </ul>
 </div></blockquote>
 <dl class="docutils">
-<dt>UseSysRap</dt>
-<dd>vends a library that uses the SysRap target exported by sysrap/CMakeLists.txt</dd>
-<dt>UseUseSysRap</dt>
-<dd>uses the UseSysRap exported library, succeeds to auto-find the dependencies (SysRap)
-of its direct dependent UseSysRap</dd>
 <dt>UseOpticksBoost</dt>
 <dd>no longer operational exercise for the old variable-centric approach to Boost hookup</dd>
 <dt>UseBoost</dt>
@@ -149,10 +170,26 @@ automatically does the necessary:</p>
 </pre></div>
 </div>
 </dd>
-<dt>UseBoostRap</dt>
-<dd>testing dependency isolation of BoostRap</dd>
 <dt>UseOpenMesh</dt>
 <dd>check consumption of BCM exported targets done by cmake/Modules/FindOpenMesh.cmake</dd>
+<dt>UseG4NoOpticks</dt>
+<dd>used to develop a new FindG4.cmake that works with both Geant4 1042 and 1062,
+does not use Opticks at all : requires BCM and Geant4 to be installed
+and provided on CMAKE_PREFIX_PATH</dd>
+<dt>UseUseG4NoOpticks</dt>
+<dd>paired with UseG4NoOpticks, creating an executable that uses the lib from UseG4NoOpticks</dd>
+</dl>
+</div>
+<div class="section" id="cmake-finding-opticks-sub-packages">
+<h2><a class="toc-backref" href="#id3">CMake finding Opticks sub-packages</a><a class="headerlink" href="#cmake-finding-opticks-sub-packages" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>UseSysRap</dt>
+<dd>vends a library that uses the SysRap target exported by sysrap/CMakeLists.txt</dd>
+<dt>UseUseSysRap</dt>
+<dd>uses the UseSysRap exported library, succeeds to auto-find the dependencies (SysRap)
+of its direct dependent UseSysRap</dd>
+<dt>UseBoostRap</dt>
+<dd>testing dependency isolation of BoostRap</dd>
 <dt>UseNPY(needs-revisit)</dt>
 <dd><p class="first">old first attempt using raw inclusion of exported targets with
 the non-standard approach of cmake -DOPTICKS_CONFIG_DIR=/usr/local/opticks/config
@@ -162,49 +199,6 @@ rather than using the standard find_package mechanism</p>
 BUT: this approach is jumping into the thicket of the dependency tree.  Better to
 get experience out in the leaves, before tackling the interior of the bush.</li>
 </ul>
-</dd>
-<dt>UseOptiX</dt>
-<dd>really minimal usage of OptiX C API, checking creation of context and buffer,
-no kernel launching</dd>
-<dt>UseOptiXProgram</dt>
-<dd>OptiX C API creates raygen program and launches it, just dumping launch index</dd>
-<dt>UseOptiXProgramPP</dt>
-<dd>OptiX C++ API variant of the above : provides a command line interface to quickly run
-simple OptiX code (no buffers in context).</dd>
-<dt>UseOptiXBuffer</dt>
-<dd>OptiX C API creates raygen program that just writes constant values to a buffer</dd>
-<dt>UseOptiXBufferPP</dt>
-<dd>OptiX C++ API : creates in and out buffers from NPY arrays and launches a program that
-simply copies from in to out.  Provides a command line interface to quickly run variants
-of the buffer accessing GPU code.</dd>
-<dt>UseOptiXGeometry</dt>
-<dd>Minimally demonstrate OptiX geometry without using OXRAP, performs a “standalone” raytrace
-of a box with normal shader coloring.</dd>
-<dt>UseOptiXGeometryTriangles</dt>
-<dd><p class="first">Minimally demonstrate the use of optix::GeometryTriangles introduced in OptiX 6.0.0.
-Raytraces an octahedron writing a PPM file.
-Based on NPY and SYSRAP for buffer and PPM handling. No OXRAP.</p>
-<ul class="last simple">
-<li><a class="reference external" href="https://raytracing-docs.nvidia.com/optix/api/html/group___geometry_triangles.html">https://raytracing-docs.nvidia.com/optix/api/html/group___geometry_triangles.html</a></li>
-</ul>
-</dd>
-<dt>UseOContextBufferPP</dt>
-<dd>Use the OptiXRap.OContext to reimplement UseOptiXBufferPP in a higher level style,
-hoping to approach close enough to UseOptiXRap for the problem to manifest.
-But it hasnt.</dd>
-<dt>UseOptiXRap</dt>
-<dd><p class="first">Uses Opticks higher level OptiXRap API to test changing the sizes of buffers.</p>
-<p>Issue with OptiX 6.0.0 : the buffer manipulations seem to work but the rtPrintf
-output does not appear unless the buffer writing is commented out.</p>
-<p>Huh, now rtPrintf seems to be working without any clear fix.
-Now not working.
-Now working again, immediately after an oxrap–</p>
-<p>Perhaps a problem of host code being updated and PTX not, because the
-PTX is from oxrap ?</p>
-<p>Can change the progname via envvar:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">USEOPTIXRAP_PROGNAME</span><span class="o">=</span><span class="s2">&quot;bufferTest_2&quot;</span> <span class="n">UseOptiXRap</span>
-</pre></div>
-</div>
 </dd>
 <dt>UseOpticksGLFW</dt>
 <dd>minimal use of OpenGL via GLFW, pops up a window and renders a colorful rotating triangle.
@@ -252,35 +246,69 @@ following a Linux kernel and driver update and OptiX update.</p>
 <dt>UseOpticksGLEW</dt>
 <dd>Just dumping version numbers from header. CMake machinery test.</dd>
 </dl>
-<div class="section" id="standalone-ish-optix-7-examples">
-<h2>Standalone-ish OptiX 7 Examples<a class="headerlink" href="#standalone-ish-optix-7-examples" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="examples-directly-using-nvidia-optix">
+<h2><a class="toc-backref" href="#id4">Examples Directly Using NVIDIA OptiX</a><a class="headerlink" href="#examples-directly-using-nvidia-optix" title="Permalink to this headline">¶</a></h2>
+<p>The below sections list examples using OptiX, named after directory names.
+Many of the examples are standalone in nature, not depending on an Opticks install.
+The steps to build (and sometimes run) are often simply:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">UseOptiX</span>
+<span class="o">./</span><span class="n">go</span><span class="o">.</span><span class="n">sh</span>
+
+<span class="n">cd</span> <span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">UseOptiX7GeometryInstanced</span>
+<span class="o">./</span><span class="n">go</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<div class="section" id="optix-pre7-usage-examples">
+<h3><a class="toc-backref" href="#id5">OptiX pre7 usage examples</a><a class="headerlink" href="#optix-pre7-usage-examples" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
-<dt>UseOptiX7</dt>
-<dd>Basic check of CMake machinery, finding OptiX 7</dd>
-<dt>UseOptiX7GeometryStandalone</dt>
-<dd>Start from the SDK optixSphere example, which uses custom(aka analytic) geometry.
-Follows the monolithic layout of optixSphere, just adapting to use glm for
-viewpoint math.</dd>
-<dt>UseOptiX7GeometryModular</dt>
-<dd><p class="first">Apply wrecking ball to the monolith, splitting into:</p>
-<dl class="last docutils">
-<dt>Engine</dt>
-<dd>context, control</dd>
-<dt>Binding</dt>
-<dd>common types between CPU and GPU</dd>
-<dt>PIP</dt>
-<dd>pipeline of programs creation and updating</dd>
-<dt>GAS</dt>
-<dd>geometry acceleration structure building</dd>
-</dl>
+<dt>UseOptiX</dt>
+<dd>really minimal usage of OptiX C API, checking creation of context and buffer,
+no kernel launching</dd>
+<dt>UseOptiXProgram</dt>
+<dd>OptiX C API creates raygen program and launches it, just dumping launch index</dd>
+<dt>UseOptiXProgramPP</dt>
+<dd>OptiX C++ API variant of the above : provides a command line interface to quickly run
+simple OptiX code (no buffers in context).</dd>
+<dt>UseOptiXBuffer</dt>
+<dd>OptiX C API creates raygen program that just writes constant values to a buffer</dd>
+<dt>UseOptiXBufferPP</dt>
+<dd>OptiX C++ API : creates in and out buffers from NPY arrays and launches a program that
+simply copies from in to out.  Provides a command line interface to quickly run variants
+of the buffer accessing GPU code.</dd>
+<dt>UseOptiXGeometry</dt>
+<dd>Minimally demonstrate OptiX geometry without using OXRAP, performs a “standalone” raytrace
+of a box with normal shader coloring.</dd>
+<dt>UseOptiXGeometryTriangles</dt>
+<dd><p class="first">Minimally demonstrate the use of optix::GeometryTriangles introduced in OptiX 6.0.0.
+Raytraces an octahedron writing a PPM file.
+Based on NPY and SYSRAP for buffer and PPM handling. No OXRAP.</p>
+<ul class="last simple">
+<li><a class="reference external" href="https://raytracing-docs.nvidia.com/optix/api/html/group___geometry_triangles.html">https://raytracing-docs.nvidia.com/optix/api/html/group___geometry_triangles.html</a></li>
+</ul>
 </dd>
-<dt>UseOptiX7GeometryInstanced</dt>
-<dd>Attempting to switch UseOptiX7GeometryModular to use an
-instanced custom geometry for lots of spheres.</dd>
+<dt>UseOContextBufferPP</dt>
+<dd>Use the OptiXRap.OContext to reimplement UseOptiXBufferPP in a higher level style,
+hoping to approach close enough to UseOptiXRap for the problem to manifest.
+But it hasnt.</dd>
+<dt>UseOptiXRap</dt>
+<dd><p class="first">Uses Opticks higher level OptiXRap API to test changing the sizes of buffers.</p>
+<p>Issue with OptiX 6.0.0 : the buffer manipulations seem to work but the rtPrintf
+output does not appear unless the buffer writing is commented out.</p>
+<p>Huh, now rtPrintf seems to be working without any clear fix.
+Now not working.
+Now working again, immediately after an oxrap–</p>
+<p>Perhaps a problem of host code being updated and PTX not, because the
+PTX is from oxrap ?</p>
+<p>Can change the progname via envvar:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">USEOPTIXRAP_PROGNAME</span><span class="o">=</span><span class="s2">&quot;bufferTest_2&quot;</span> <span class="n">UseOptiXRap</span>
+</pre></div>
+</div>
+</dd>
 </dl>
 </div>
 <div class="section" id="standalone-ish-optix-5-or-6-examples">
-<h2>Standalone-ish OptiX 5 or 6 Examples<a class="headerlink" href="#standalone-ish-optix-5-or-6-examples" title="Permalink to this headline">¶</a></h2>
+<h3><a class="toc-backref" href="#id6">Standalone-ish OptiX 5 or 6 Examples</a><a class="headerlink" href="#standalone-ish-optix-5-or-6-examples" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt>UseOptiXTexture</dt>
 <dd>C API 3D texture creation, with pullback test into out_buffer</dd>
@@ -333,13 +361,52 @@ test for such problems find that the problem is no longer happening.</p>
 Creates PPM of a single normal-shaded sphere or box picked via argument sphere.cu or box.cu</dd>
 <dt>UseOptiXGeometryInstancedStandalone</dt>
 <dd>creates a jumble of thousands of randomly oriented boxes, colorfully normal-shaded</dd>
-<dt>UseG4NoOpticks</dt>
-<dd>used to develop a new FindG4.cmake that works with both Geant4 1042 and 1062,
-does not use Opticks at all : requires BCM and Geant4 to be installed
-and provided on CMAKE_PREFIX_PATH</dd>
-<dt>UseUseG4NoOpticks</dt>
-<dd>paired with UseG4NoOpticks, creating an executable that uses the lib from UseG4NoOpticks</dd>
 </dl>
+</div>
+<div class="section" id="experimental-pre7-and-7-machinery">
+<h3><a class="toc-backref" href="#id7">Experimental pre7 and 7 machinery</a><a class="headerlink" href="#experimental-pre7-and-7-machinery" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>UseOpticksOptiX</dt>
+<dd>checking FindOpticksOptiX.cmake can be made to work with 5,6 and 7</dd>
+</dl>
+</div>
+<div class="section" id="standalone-ish-optix-7-examples">
+<h3><a class="toc-backref" href="#id8">Standalone-ish OptiX 7 Examples</a><a class="headerlink" href="#standalone-ish-optix-7-examples" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>UseOptiX7</dt>
+<dd>Basic check of CMake machinery, finding OptiX 7</dd>
+<dt>UseOptiX7GeometryStandalone</dt>
+<dd>Start from the SDK optixSphere example
+This example uses custom(aka analytic or non-triangulated) geometry.
+Follows the monolithic main layout of optixSphere, just adapting to use glm for
+viewpoint math.</dd>
+<dt>UseOptiX7GeometryModular</dt>
+<dd><p class="first">Start from UseOptiX7GeometryStandalone
+Apply wrecking ball to the monolith, splitting into:</p>
+<dl class="docutils">
+<dt>Engine</dt>
+<dd>context, control</dd>
+<dt>Binding</dt>
+<dd>common types between CPU and GPU</dd>
+<dt>PIP</dt>
+<dd>pipeline of programs creation and updating</dd>
+<dt>GAS</dt>
+<dd>geometry acceleration structure building</dd>
+</dl>
+<p class="last">Revisited this, tidying up the headers aiming to
+eliminate optix types from high levels in order to hide the version.</p>
+</dd>
+<dt>UseOptiX7GeometryInstanced</dt>
+<dd><p class="first">Attempting to switch UseOptiX7GeometryModular to use an
+instanced custom geometry for lots of spheres.</p>
+<p>TODO:</p>
+<ol class="last arabic simple">
+<li>split geometry from engine</li>
+<li>hide optix types for version flexibility</li>
+</ol>
+</dd>
+</dl>
+</div>
 </div>
 </div>
 
