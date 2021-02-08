@@ -390,11 +390,24 @@ UseOptiX7GeometryInstanced
     Attempting to switch UseOptiX7GeometryModular to use an
     instanced custom geometry for lots of spheres.
 
-    TODO:
+UseOptiX7GeometryInstancedGAS
+    Started from UseOptiX7GeometryInstanced.
 
-    1. split geometry from engine 
-    2. hide optix types for version flexibility 
+    1. pulled out the higher level geometry setup into Geo
+    2. uses a single IAS with multiple GAS
+    2. create big sphere containing a cube grid of two radii, 
+       where the intersect program gets its sphere radius from 
+       Sbt record
+
+UseOptiX7GeometryInstancedGASComp
+    Started from UseOptiX7GeometryInstancedGAS.
+
+    * compound GAS, still not working 
+    
  
+    
+
+
 
 
 .. comment OPTIX_END

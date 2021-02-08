@@ -67,3 +67,68 @@ OptiX CUDA Sources
    tests/OSensorLibGeoTest.cc
 
 
+
+Thoughts about migrating to OptiX 7
+-------------------------------------
+
+optixTrace Payload Restricted to 8*32b, no more PerRayData struct
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* moving from uint4 identity to a single identity int (nodeIndex or tripletIdentity) 
+  that allows lookups into identity buffers 
+  would just allow all of cu/PerRayData_propagate.h  to squeeze into 8 slots.
+
+* should the identity buffers for all GMergedMesh be combined into one 
+  (with offsets being done to the indices) and a global identity index used ?
+ 
+
+
+How much in SBT and how much in buffers ?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SBT is like laying down inputs to shader programs. What is the 
+benefit of access from there as opposed to access from general global memory ? 
+
+With CSG trees vary in size greatly ? 
+
+
+Hmm all the geometry intersect examples getting their data from SBT : optixGetSbtDataPointer() 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+primIdx
+~~~~~~~~~~~
+
+700pdf p19
+
+Primitives inside a build input are indexed starting from zero. This primitive
+index is accessible inside the IS, AH and CH program. The application can
+choose to offset this index for all primitives in a build input with no
+overhead at runtime. This can be particularly useful when data for consecutive
+build inputs is stored consecutively in device memory. The primitiveIndexOffset
+is only used when reporting the intersection primitive.
+
+
+IAS can reference multiple GAS handles
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* is it advantageous to have separate IAS for each GAS ?
+* or one IAS for the entire geometry ?
+
+GAS
+~~~~~
+
+Opticks GParts is generally concatenation of multiple GParts each from single solids.
+Each solid being a CSG node tree.
+
+In OptiX < 7 used rtBuffer at geometry context with primBuffer, partBuffer, tranBuffer, ...
+
+
+
+
+
+
+
+
+
+

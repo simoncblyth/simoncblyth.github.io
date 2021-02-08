@@ -31,6 +31,15 @@
   <ul>
 <li><a class="reference internal" href="#">OptiXRap Orientation : translates GGeo-&gt;OptiX</a><ul>
 <li><a class="reference internal" href="#optix-cuda-sources">OptiX CUDA Sources</a></li>
+<li><a class="reference internal" href="#thoughts-about-migrating-to-optix-7">Thoughts about migrating to OptiX 7</a><ul>
+<li><a class="reference internal" href="#optixtrace-payload-restricted-to-8-32b-no-more-perraydata-struct">optixTrace Payload Restricted to 8*32b, no more PerRayData struct</a></li>
+<li><a class="reference internal" href="#how-much-in-sbt-and-how-much-in-buffers">How much in SBT and how much in buffers ?</a></li>
+<li><a class="reference internal" href="#hmm-all-the-geometry-intersect-examples-getting-their-data-from-sbt-optixgetsbtdatapointer">Hmm all the geometry intersect examples getting their data from SBT : optixGetSbtDataPointer()</a></li>
+<li><a class="reference internal" href="#primidx">primIdx</a></li>
+<li><a class="reference internal" href="#ias-can-reference-multiple-gas-handles">IAS can reference multiple GAS handles</a></li>
+<li><a class="reference internal" href="#gas">GAS</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -123,6 +132,51 @@ exposes no OptiX types in its interface</dd>
 <li class="toctree-l1"><a class="reference internal" href="cu/material1_propagate.cu.html">material1_propagate.cu:closest_hit_propagate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests/OSensorLibGeoTest.cc.html">OSensorLibGeoTest</a></li>
 </ul>
+</div>
+</div>
+<div class="section" id="thoughts-about-migrating-to-optix-7">
+<h2>Thoughts about migrating to OptiX 7<a class="headerlink" href="#thoughts-about-migrating-to-optix-7" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="optixtrace-payload-restricted-to-8-32b-no-more-perraydata-struct">
+<h3>optixTrace Payload Restricted to 8*32b, no more PerRayData struct<a class="headerlink" href="#optixtrace-payload-restricted-to-8-32b-no-more-perraydata-struct" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>moving from uint4 identity to a single identity int (nodeIndex or tripletIdentity)
+that allows lookups into identity buffers
+would just allow all of cu/PerRayData_propagate.h  to squeeze into 8 slots.</li>
+<li>should the identity buffers for all GMergedMesh be combined into one
+(with offsets being done to the indices) and a global identity index used ?</li>
+</ul>
+</div>
+<div class="section" id="how-much-in-sbt-and-how-much-in-buffers">
+<h3>How much in SBT and how much in buffers ?<a class="headerlink" href="#how-much-in-sbt-and-how-much-in-buffers" title="Permalink to this headline">¶</a></h3>
+<p>SBT is like laying down inputs to shader programs. What is the
+benefit of access from there as opposed to access from general global memory ?</p>
+<p>With CSG trees vary in size greatly ?</p>
+</div>
+<div class="section" id="hmm-all-the-geometry-intersect-examples-getting-their-data-from-sbt-optixgetsbtdatapointer">
+<h3>Hmm all the geometry intersect examples getting their data from SBT : optixGetSbtDataPointer()<a class="headerlink" href="#hmm-all-the-geometry-intersect-examples-getting-their-data-from-sbt-optixgetsbtdatapointer" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="primidx">
+<h3>primIdx<a class="headerlink" href="#primidx" title="Permalink to this headline">¶</a></h3>
+<p>700pdf p19</p>
+<p>Primitives inside a build input are indexed starting from zero. This primitive
+index is accessible inside the IS, AH and CH program. The application can
+choose to offset this index for all primitives in a build input with no
+overhead at runtime. This can be particularly useful when data for consecutive
+build inputs is stored consecutively in device memory. The primitiveIndexOffset
+is only used when reporting the intersection primitive.</p>
+</div>
+<div class="section" id="ias-can-reference-multiple-gas-handles">
+<h3>IAS can reference multiple GAS handles<a class="headerlink" href="#ias-can-reference-multiple-gas-handles" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>is it advantageous to have separate IAS for each GAS ?</li>
+<li>or one IAS for the entire geometry ?</li>
+</ul>
+</div>
+<div class="section" id="gas">
+<h3>GAS<a class="headerlink" href="#gas" title="Permalink to this headline">¶</a></h3>
+<p>Opticks GParts is generally concatenation of multiple GParts each from single solids.
+Each solid being a CSG node tree.</p>
+<p>In OptiX &lt; 7 used rtBuffer at geometry context with primBuffer, partBuffer, tranBuffer, …</p>
 </div>
 </div>
 </div>

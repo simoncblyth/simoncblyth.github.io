@@ -1,0 +1,398 @@
+.. include:: <s5defs.txt>
+
+.. raw:: html
+
+    <style type="text/css">
+        span.alarm { color: red; }
+        span.warn { color: orange; }
+        span.ok { color: green; }
+        span.i { display: none; }
+        pre.sliteral { class:"literal-block small"; }
+        pre.mypre {
+             display: block;
+             font-family: monospace;
+             font-size: 20px;
+             white-space: pre;
+             margin: 1em 0;
+        }
+        pre.mypre_tiny {
+             display: block;
+             font-family: monospace;
+             font-size: 15px;
+             white-space: pre;
+             margin: 1em 0;
+        }
+
+
+
+    </style>
+
+
+===================================================================================
+LZ-Opticks-NVIDIA OptiX 6->7 : Notes
+===================================================================================
+
+.. class:: small
+
+   **Orientation docs:**
+
+   *  https://simoncblyth.bitbucket.io/opticks/docs/orientation.html
+   *  https://simoncblyth.bitbucket.io/opticks/docs/orientation.html#examples-directly-using-nvidia-optix
+
+   **OptiX 7 Experiments**
+
+   * https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/
+
+   **Overview of Migration Task**
+
+   * material/surface properties as function of wavelength
+
+     * not yet tried : hope it proves simple move to plain CUDA textures ?
+
+   * high level structure (instance transforms, identity, ... )
+
+     * :red:`first attempt suggests easier in 7 : single IAS can reference multiple GAS` 
+     * **NEXT:** check per-instance identity info (eg color them)
+
+   * assemblies of CSG solids 
+
+     * **NOW:** first experiments with compound (multiple bbox) GAS 
+     * not yet tried : CSG nodes/planes/transforms -> fixed size SBTRecord type (?)
+
+
+.. raw:: html
+
+   <pre>
+
+
+   </pre> 
+
+
+.. class:: small
+
+   |  Simon C Blyth,  Feb 8 2021 
+
+
+
+:small:`Translate : Geant4 -> Opticks/GGeo  (eg JUNO geometry)`
+----------------------------------------------------------------------------
+
+
+.. class:: small
+
+   * ~300,000 G4VPhysicalVolume -> GVolume  : direct tree translation  
+
+     * GVolume : (tri:GMesh + ana:GParts) **tri/ana constituents concatenate**
+
+   * GInstancer : label GVolumes with *progeny digests* 
+   * identify repeats, label GVolume with repeat index **ridx**  
+
+     * order ~10 distinct repeated assemblies 
+
+   * repeated volumes, 1st placement  (**ridx 1-~10**) 
+
+     * ~(1-8) * GVolume 
+     * -> GMergedMesh [concatenated] 
+     * examples: multi-volume assemblies for Photomultipliers, supports, etc..  
+
+   * non-repeated remainder volumes  (**ridx 0**) 
+
+     * ~100 * GVolume 
+     * -> GMergedMesh    
+
+
+   * GMergedMesh
+
+     * instance transform arrays (1-30k) 
+     * identity arrays (
+
+   :red:`Effectively re-factors ~300k G4VPhysicalVolume  to ~10 GMergedMesh (with thousands of instance transforms)`
+
+
+.. class:: tiny
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GInstancer.cc
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GMergedMesh.cc
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GParts.cc
+
+
+
+:small:`Translate : Opticks/GGeo -> OptiX 6+7 : instances structure`
+------------------------------------------------------------------------------------
+
+.. class:: tiny
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc
+
+.. raw:: html 
+
+    <pre class="mypre_tiny">
+    m_top                  (Group)             m_top_accel
+       ggg                 (GeometryGroup)        m_ggg_accel           global non-instanced geometry from merged mesh 0  
+          ggi              (GeometryInstance)        
+
+       assembly.0          (Group)                m_assembly_accel      1:1 with instanced merged mesh (~6 of these for JUNO)
+
+             xform.0       (Transform)                                  (at most 20k/36k different transforms)
+               perxform    (GeometryGroup)
+                  accel[0]                            m_instance_accel  common accel within each assembly 
+                  pergi    (GeometryInstance)                           distinct pergi for every instance, with instance_index assigned  
+                     omm   (Geometry)                                   the same omm and mat are child of all xform/perxform/pergi
+                     mat   (Material) 
+
+             xform.1       (Transform)
+               perxform    (GeometryGroup)
+                  pergi    (GeometryInstance)      
+                  accel[0]
+                     omm   (Geometry)
+                     mat   (Material) 
+
+             ... for all the many thousands of instances of repeated geometry ...
+
+       assembly.1          (Group)                  (order ~6 repeated assemblies for JUNO)
+            xform.0      ... just like above ...
+     </pre>
+
+.. class:: small
+
+     * **OptiX 6 rules -> this layout : to give identity to instances**
+     * OptiX 7 : **IAS** can reference multiple **GAS** + has ``optixGetInstanceIndex()`` (CH)   
+     * OptiX 7 : :red:`maybe entire JUNO(LZ) geometry with 1 IAS referencing ~10(?) GAS` 
+
+
+
+:small:`OptiX 7 Example : 1 IAS <= 3 GAS spheres`
+----------------------------------------------------------------------------------------
+
+.. class:: tiny 
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/IAS_Builder.cc
+
+.. sidebar:: :small:`UseOptiX7GeometryInstancedGASComp`
+
+    .. raw:: html
+
+        <pre class="mypre_tiny">
+        export OPTIX_PREFIX=/usr/local/OptiX_700
+        git clone https://bitbucket.org/simoncblyth/opticks
+        cd opticks/examples/UseOptiX7GeometryInstancedGASComp
+        ./go.sh # gets glm, builds, runs -> ppm image file 
+        </pre>
+
+
+    .. image:: /env/presentation/optix7/UseOptiX7GeometryInstancedGASComp_half.png
+       :width: 510px
+       :height: 380px   
+       :align: right
+     
+
+
+.. class:: small
+
+   * 1 IAS referencing 3 GAS (large, medium, small radii)
+   * ``__intersection__is`` : customize radii with SbtRecords 
+
+.. raw:: html 
+
+    <pre class="mypre_tiny">
+ 61     std::vector&lt;OptixInstance&gt; instances ;
+ 62     for(unsigned i=0 ; i < num_tr ; i++)
+ 63     {
+ ...        grab glm::uvec4 idv from "spare" slots of the 4x4 transform
+ 69         glm::mat4 imat = glm::transpose(mat);
+ 74         unsigned instanceId = idv.x ;
+ 75         unsigned gasIdx = idv.y ;
+ 76 
+ 77         const GAS& gas = geo->getGAS(gasIdx);
+ 78 
+ 79         OptixInstance instance = {} ;
+ 80         instance.flags = flags ;
+ 81 
+ 82         instance.instanceId = instanceId ;
+ 83         <b><span class="alarm">instance.sbtOffset = gasIdx ;</span></b>
+ 84 
+ 85         instance.visibilityMask = 255;
+ 86         <b><span class="alarm">instance.traversableHandle = gas.handle ;</span></b>
+ 87 
+ 88         memcpy( instance.transform, glm::value_ptr(imat), 
+              12*sizeof( float ) );
+ 90         instances.push_back(instance);
+ 91     }
+     </pre>
+
+
+
+:small:`OptiX 7 Example : 1 IAS <= 3 GAS spheres : NEXT : Instance Identity`
+----------------------------------------------------------------------------------------
+
+
+.. class:: tiny 
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/UseOptiX7GeometryInstancedGASComp.cu
+
+ 
+.. class:: small
+
+
+   OptiX 7 programs customized(eg different radii) with **SbtData** ``CUdeviceptr optixGetSbtDataPointer();``
+
+.. raw:: html 
+
+    <pre class="mypre_tiny">
+    226 extern "C" __global__ void __intersection__is()
+    227 {
+    228     HitGroupData* hg_data  = reinterpret_cast<HitGroupData*>( optixGetSbtDataPointer() );
+    234     const float  radius = hg_data->radius;
+    </pre>
+
+
+.. class:: small
+
+   **700p43 (OptiX 700 Guide p43)** 
+
+::
+
+     sbt-index = 
+        sbt-instance-offset
+     + (sbt-GAS-index * sbt-stride-from-trace-call) +  sbt-offset-from-trace-call
+
+.. class:: small
+
+    ``sbt-index`` 
+         instance.sbtOffset (see OptixInstance::sbtOffset)
+
+    ``sbt-GAS-index``
+          first SBT GAS index for each GAS build input is the prefix sum of the number of SBT records  
+
+
+
+
+.. class:: small
+
+   **NEXT Exercise : instance identity, Sbt entries and indexing for per-instance colors (visual standin for efficiency)** 
+   
+   * 1 IAS <= 3 GAS (each GAS has fixed bounding box) **so cannot have per-instance radii**
+
+
+
+
+
+
+
+
+
+:small:`Geometry Conversion : Opticks/GGeo -> OptiX 6 (1)`
+------------------------------------------------------------
+
+.. class:: tiny
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/cu/intersect_analytic.cu
+
+
+.. raw:: html 
+
+    <pre class="mypre_tiny">
+
+     717 optix::Geometry OGeo::makeAnalyticGeometry(GMergedMesh* mm)
+     718 {
+     732     GParts* pts = mm->getParts();  // <b><span class="alarm"> geometry defined with six arrays </span></b>
+     ...
+     761     NPY<float>*     partBuf = pts->getPartBuffer(); assert(partBuf && partBuf->hasShape(-1,4,4));    // node buffer
+     762     NPY<float>*     tranBuf = pts->getTranBuffer(); assert(tranBuf && tranBuf->hasShape(-1,3,4,4));  // transform triples (t,v,q) 
+     763     NPY<float>*     planBuf = pts->getPlanBuffer(); assert(planBuf && planBuf->hasShape(-1,4));      // planes used for convex polyhedra such as trapezoid
+     764     NPY<int>*       primBuf = pts->getPrimBuffer(); assert(primBuf && primBuf->hasShape(-1,4));      // prim
+     ...
+     766     // <b><span class="alarm">NB these buffers are concatenations of the corresponding buffers for multiple prim </span></b>
+     767     unsigned numPrim = primBuf->getNumItems();
+     768 
+     769     NPY<float>* itransforms = mm->getITransformsBuffer(); assert(itransforms && itransforms->hasShape(-1,4,4) ) ;
+     770     unsigned numInstances = itransforms->getNumItems();
+     771     NPY<unsigned>*  idBuf = mm->getInstancedIdentityBuffer();   assert(idBuf);
+
+     828     optix::Geometry geometry = m_context->createGeometry();
+     845     geometry->setPrimitiveCount( numPrim );         
+
+     849     geometry["primitive_count"]->setUint( numPrim );       // needed GPU side, for instanced offset into buffers 
+     850     geometry["repeat_index"]->setUint( mm->getIndex() );  // ridx
+     852 
+             // <b><span class="alarm"> intersect_analytic.cu handles all CSG solids </span></b>
+     853     optix::Program intersectProg = m_ocontext->createProgram("intersect_analytic.cu", "intersect") ;
+     854     optix::Program boundsProg  =  m_ocontext->createProgram("intersect_analytic.cu", "bounds") ;
+     855 
+     856     geometry->setIntersectionProgram(intersectProg );
+     857     geometry->setBoundingBoxProgram( boundsProg );
+    </pre> 
+
+
+
+
+Geometry Conversion : Opticks/GGeo -> OptiX 6 (2)
+--------------------------------------------------
+
+.. raw:: html 
+
+    <pre class="mypre_tiny">
+     ...
+     860     optix::Buffer primBuffer = createInputUserBuffer<int>( primBuf,  4*4, "primBuffer");
+     861     geometry["primBuffer"]->setBuffer(primBuffer);
+     863 
+     865     optix::Buffer partBuffer = createInputUserBuffer<float>( partBuf,  4*4*4, "partBuffer");
+     866     geometry["partBuffer"]->setBuffer(partBuffer);
+     867 
+     869     optix::Buffer tranBuffer = createInputUserBuffer<float>( tranBuf,  sizeof(optix::Matrix4x4), "tranBuffer");
+     870     geometry["tranBuffer"]->setBuffer(tranBuffer);
+     871 
+     872     optix::Buffer identityBuffer = createInputBuffer<optix::uint4, unsigned int>( idBuf, RT_FORMAT_UNSIGNED_INT4, 1 , "identityBuffer");
+     873     geometry["identityBuffer"]->setBuffer(identityBuffer);
+     874 
+     875     optix::Buffer planBuffer = createInputUserBuffer<float>( planBuf,  4*4, "planBuffer");
+     876     geometry["planBuffer"]->setBuffer(planBuffer);
+
+     891     return geometry ;
+     892 }
+    </pre> 
+
+
+Geometry Conversion : Opticks/GGeo -> OptiX 6 (2)
+--------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+.. comment
+
+    Progess Summary
+    -----------------
+
+    .. class:: large
+
+       Aiming for small unit(ie low level) testing at both C++ and Python level 
+
+       **Sniper**
+
+       * fully migrated to CMake, some tests
+
+       **Offline**
+
+       * partially migrated to CMake, handful of tests only, **many more needed** 
+
+       **Conclusion**
+
+       * small unit testing challenging due to tight coupling (especially for Offline) 
+
+       * need to gain more experience with Sniper/Offline to find workable approach
+     
+
+
+
+
+
