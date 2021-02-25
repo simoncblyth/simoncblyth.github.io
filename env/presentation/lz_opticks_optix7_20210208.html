@@ -1,0 +1,796 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>LZ-Opticks-NVIDIA OptiX 6-&gt;7 : Notes</title>
+<meta content="LZ-Opticks-NVIDIA OptiX 6-&gt;7 : Notes" name="title" />
+<meta content="(Feb 2021)" name="description" />
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<script src="ui/my-small-white/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/my-small-white/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/my-small-white/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/my-small-white/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/my-small-white/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1>LZ-Opticks-NVIDIA OptiX 6-&gt;7 : Notes</h1>
+
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title">LZ-Opticks-NVIDIA OptiX 6-&gt;7 : Notes</h1>
+
+<!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+<style type="text/css">
+    span.alarm { color: red; }
+    span.warn { color: orange; }
+    span.ok { color: green; }
+    span.i { display: none; }
+    pre.sliteral { class:"literal-block small"; }
+    pre.mypre {
+         display: block;
+         font-family: monospace;
+         font-size: 20px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+    pre.mypre_tiny {
+         display: block;
+         font-family: monospace;
+         font-size: 15px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+
+
+</style><p class="small"><strong>Links</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://simoncblyth.bitbucket.io/env/presentation/lz_opticks_optix7_20210208.html">https://simoncblyth.bitbucket.io/env/presentation/lz_opticks_optix7_20210208.html</a>  (these slides)</li>
+<li><a class="reference external" href="https://simoncblyth.bitbucket.io/opticks/docs/orientation.html">https://simoncblyth.bitbucket.io/opticks/docs/orientation.html</a>  (docs)</li>
+</ul>
+<p class="small"><strong>OptiX 7 Experiments</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://simoncblyth.bitbucket.io/opticks/docs/orientation.html#standalone-ish-optix-7-examples">https://simoncblyth.bitbucket.io/opticks/docs/orientation.html#standalone-ish-optix-7-examples</a></li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/">https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/</a></li>
+</ul>
+<p class="small"><strong>Overview of Migration Task</strong></p>
+<ul class="small simple">
+<li>material/surface properties as function of wavelength<ul>
+<li>not yet tried : hope it proves simple move to plain CUDA textures ?</li>
+</ul>
+</li>
+<li>high level structure (instance transforms, identity, ... )<ul>
+<li><span class="red">first attempt suggests easier in 7 : single IAS can reference multiple GAS</span></li>
+<li><strong>NEXT:</strong> check per-instance identity info (eg color them)</li>
+</ul>
+</li>
+<li>assemblies of CSG solids<ul>
+<li><strong>NOW:</strong> first experiments with compound (multiple bbox) GAS</li>
+<li>not yet tried : CSG nodes/planes/transforms -&gt; fixed size SBTRecord type (?)</li>
+</ul>
+</li>
+</ul>
+<div class="small line-block">
+<div class="line">Simon C Blyth,  Feb 8 2021</div>
+</div>
+
+</div>
+<div class="slide" id="translate-geant4-opticks-ggeo-eg-juno-geometry">
+<h1><span class="small">Translate : Geant4 -&gt; Opticks/GGeo  (eg JUNO geometry)</span></h1>
+<ul class="small simple">
+<li>~300,000 G4VPhysicalVolume -&gt; GVolume  : direct tree translation<ul>
+<li>GVolume : (tri:GMesh + ana:GParts) <strong>tri/ana constituents concatenate</strong></li>
+</ul>
+</li>
+<li>GInstancer : label GVolumes with <em>progeny digests</em></li>
+<li>identify repeats, label GVolume with repeat index <strong>ridx</strong><ul>
+<li>order ~10 distinct repeated assemblies</li>
+</ul>
+</li>
+<li>repeated volumes, 1st placement  (<strong>ridx 1-~10</strong>)<ul>
+<li>~(1-8) * GVolume</li>
+<li>-&gt; GMergedMesh [concatenated]</li>
+<li>examples: multi-volume assemblies for Photomultipliers, supports, etc..</li>
+</ul>
+</li>
+<li>non-repeated remainder volumes  (<strong>ridx 0</strong>)<ul>
+<li>~100 * GVolume</li>
+<li>-&gt; GMergedMesh</li>
+</ul>
+</li>
+<li>GMergedMesh<ul>
+<li>instance transform arrays (1-30k)</li>
+<li>identity arrays</li>
+</ul>
+</li>
+</ul>
+<p class="small"><span class="red">Effectively re-factors ~300k G4VPhysicalVolume  to ~10 GMergedMesh (with thousands of instance transforms)</span></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GInstancer.cc">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GInstancer.cc</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GMergedMesh.cc">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GMergedMesh.cc</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GParts.cc">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/GParts.cc</a></p>
+</div>
+<div class="slide" id="translate-opticks-ggeo-optix-6-7-instances-structure">
+<h1><span class="small">Translate : Opticks/GGeo -&gt; OptiX 6+7 : instances structure</span></h1>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc</a></p>
+<pre class="mypre_tiny">
+m_top                  (Group)             m_top_accel
+   ggg                 (GeometryGroup)        m_ggg_accel           global non-instanced geometry from merged mesh 0
+      ggi              (GeometryInstance)
+
+   assembly.0          (Group)                m_assembly_accel      1:1 with instanced merged mesh (~6 of these for JUNO)
+
+         xform.0       (Transform)                                  (at most 20k/36k different transforms)
+           perxform    (GeometryGroup)
+              accel[0]                            m_instance_accel  common accel within each assembly
+              pergi    (GeometryInstance)                           distinct pergi for every instance, with instance_index assigned
+                 omm   (Geometry)                                   the same omm and mat are child of all xform/perxform/pergi
+                 mat   (Material)
+
+         xform.1       (Transform)
+           perxform    (GeometryGroup)
+              pergi    (GeometryInstance)
+              accel[0]
+                 omm   (Geometry)
+                 mat   (Material)
+
+         ... for all the many thousands of instances of repeated geometry ...
+
+   assembly.1          (Group)                  (order ~6 repeated assemblies for JUNO)
+        xform.0      ... just like above ...
+ </pre><ul class="small simple">
+<li><strong>OptiX 6 rules -&gt; this layout : to give identity to instances</strong></li>
+<li>OptiX 7 : <strong>IAS</strong> can reference multiple <strong>GAS</strong> + has <tt class="docutils literal">optixGetInstanceIndex()</tt> (CH)</li>
+<li>OptiX 7 : <span class="red">maybe entire JUNO(LZ) geometry with 1 IAS referencing ~10(?) GAS</span></li>
+</ul>
+</div>
+<div class="slide" id="optix-7-example-1-ias-3-gas-spheres">
+<h1><span class="small">OptiX 7 Example : 1 IAS &lt;= 3 GAS spheres</span></h1>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/IAS_Builder.cc">https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/IAS_Builder.cc</a></p>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">UseOptiX7GeometryInstancedGASComp</span></p>
+<pre class="mypre_tiny">
+export OPTIX_PREFIX=/usr/local/OptiX_700
+git clone https://bitbucket.org/simoncblyth/opticks
+cd opticks/examples/UseOptiX7GeometryInstancedGASComp
+./go.sh # gets glm, builds, runs -> ppm image file
+</pre><img alt="/env/presentation/optix7/UseOptiX7GeometryInstancedGASComp_half.png" class="last align-right" src="/env/presentation/optix7/UseOptiX7GeometryInstancedGASComp_half.png" style="width: 510px; height: 380px;" />
+</div>
+<ul class="small simple">
+<li>1 IAS referencing 3 GAS (large, medium, small radii)</li>
+<li>CustomPrimitive GAS: just bbox(s)</li>
+</ul>
+   <pre class="mypre_tiny">
+61     std::vector&lt;OptixInstance&gt; instances ;
+62     for(unsigned i=0 ; i < num_tr ; i++)
+63     {
+...        grab glm::uvec4 idv from "spare" slots of the 4x4 transform
+69         glm::mat4 imat = glm::transpose(mat);
+74         unsigned instanceId = idv.x ;
+75         unsigned gasIdx = idv.y ;
+76
+77         const GAS& gas = geo->getGAS(gasIdx);
+78
+79         OptixInstance instance = {} ;
+80         instance.flags = flags ;
+81
+82         instance.instanceId = instanceId ;
+83         <b><span class="alarm">instance.sbtOffset = gasIdx ;</span></b>
+84
+85         instance.visibilityMask = 255;
+86         <b><span class="alarm">instance.traversableHandle = gas.handle ;</span></b>
+87
+88         memcpy( instance.transform, glm::value_ptr(imat),
+             12*sizeof( float ) );
+90         instances.push_back(instance);
+91     }
+    </pre></div>
+<div class="slide" id="optix-7-example-1-ias-3-gas-spheres-next-instance-identity">
+<h1><span class="small">OptiX 7 Example : 1 IAS &lt;= 3 GAS spheres : NEXT : Instance Identity</span></h1>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/UseOptiX7GeometryInstancedGASComp.cu">https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/UseOptiX7GeometryInstancedGASComp.cu</a></p>
+<p class="small">OptiX 7 programs customized(eg different radii) with <strong>SbtData</strong> <tt class="docutils literal">CUdeviceptr <span class="pre">optixGetSbtDataPointer();</span></tt></p>
+<pre class="mypre_tiny">
+226 extern "C" __global__ void __intersection__is()
+227 {
+228     HitGroupData* hg_data  = reinterpret_cast&lt;HitGroupData*&gt;( optixGetSbtDataPointer() );
+234     const float  radius = hg_data->radius;
+</pre><p class="small"><strong>700p43 (OptiX 700 Guide p43)</strong></p>
+<pre class="literal-block">
+sbt-index =
+   sbt-instance-offset
++ (sbt-GAS-index * sbt-stride-from-trace-call) +  sbt-offset-from-trace-call
+</pre>
+<dl class="small docutils">
+<dt><tt class="docutils literal"><span class="pre">sbt-index</span></tt></dt>
+<dd>instance.sbtOffset (see OptixInstance::sbtOffset)</dd>
+<dt><tt class="docutils literal"><span class="pre">sbt-GAS-index</span></tt></dt>
+<dd>first SBT GAS index for each GAS build input is the prefix sum of the number of SBT records</dd>
+</dl>
+<p class="small"><strong>NEXT Exercise : instance identity, Sbt entries and indexing for per-instance colors (visual standin for efficiency)</strong></p>
+<ul class="small simple">
+<li>1 IAS &lt;= 3 GAS (each GAS has fixed bounding box) <strong>so cannot have per-instance radii</strong></li>
+</ul>
+</div>
+<div class="slide" id="optix-6-consume-geometry-context-in-intersect-bounds-programs">
+<h1><span class="small">OptiX 6 : Consume Geometry Context in intersect/bounds programs</span></h1>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/cu/intersect_analytic.cu">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/cu/intersect_analytic.cu</a></p>
+<pre class="mypre_tiny">
+087 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
+089 rtDeclareVariable(uint2, launch_index, rtLaunchIndex, );
+090 rtDeclareVariable(float, t_parameter, rtIntersectionDistance, );
+091 rtDeclareVariable(float, propagate_epsilon, , );
+094 rtDeclareVariable(unsigned int, instance_index,  ,);
+098 rtDeclareVariable(unsigned int, primitive_count, ,);
+099 rtDeclareVariable(unsigned int, repeat_index, ,);
+...
+<b><span class="alarm">102 rtBuffer&lt;Part&gt; partBuffer;  // nodes of the CSG tree (both operators and primitives)
+104 rtBuffer&lt;Matrix4x4&gt; tranBuffer;
+106 rtBuffer&lt;Prim&gt;  primBuffer;  // offsets into part,tran,plan buffers
+108 rtBuffer&lt;uint4&gt;  identityBuffer //  lookups with instance_index*primitive_count+primIdx  </span></b>
+...
+164 // attributes communicate to closest hit program,
+167 rtDeclareVariable(uint4, instanceIdentity,   attribute instance_identity,);
+168 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
+169 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
+170
+229 RT_PROGRAM void bounds (int primIdx, float result[6]){
+271     const Prim& prim    = primBuffer[primIdx];
+...
+385 }
+425 RT_PROGRAM void intersect(int primIdx){
+427     const Prim& prim    = primBuffer[primIdx];
+...
+474 }
+</pre><ul class="small simple">
+<li>OptiX 6 : serves up a geometry context for use by <strong>bounds</strong> and <strong>intersect</strong></li>
+<li>OptiX 7 : place that context into SbtRecord ?</li>
+</ul>
+</div>
+<div class="slide" id="optix-6-populate-geometry-context-from-gmergedmesh-gparts">
+<h1><span class="small">OptiX 6 : Populate Geometry Context from GMergedMesh/GParts</span></h1>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc">https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/OGeo.cc</a></p>
+<pre class="mypre_tiny">
+
+ 717 optix::Geometry OGeo::makeAnalyticGeometry(GMergedMesh* mm)
+ 718 {
+ 732     GParts* pts = mm->getParts();  // <b><span class="alarm"> geometry defined with six arrays </span></b>
+ ...
+ 761     NPY<float>*     partBuf = pts->getPartBuffer(); assert(partBuf && partBuf->hasShape(-1,4,4));    // node buffer
+ 762     NPY<float>*     tranBuf = pts->getTranBuffer(); assert(tranBuf && tranBuf->hasShape(-1,3,4,4));  // transform triples (t,v,q)
+ 763     NPY<float>*     planBuf = pts->getPlanBuffer(); assert(planBuf && planBuf->hasShape(-1,4));      // planes used for convex polyhedra such as trapezoid
+ 764     NPY<int>*       primBuf = pts->getPrimBuffer(); assert(primBuf && primBuf->hasShape(-1,4));      // prim
+ ...
+ 766     // <b><span class="alarm">NB these buffers are concatenations of the corresponding buffers for multiple prim </span></b>
+ 767     unsigned numPrim = primBuf->getNumItems();
+ 768
+ 769     NPY<float>* itransforms = mm->getITransformsBuffer(); assert(itransforms && itransforms->hasShape(-1,4,4) ) ;
+ 770     unsigned numInstances = itransforms->getNumItems();
+ 771     NPY<unsigned>*  idBuf = mm->getInstancedIdentityBuffer();   assert(idBuf);
+
+ 828     optix::Geometry geometry = m_context->createGeometry();
+ 845     geometry->setPrimitiveCount( numPrim );
+
+ 849     geometry["primitive_count"]->setUint( numPrim );       // needed GPU side, for instanced offset into buffers
+ 850     geometry["repeat_index"]->setUint( mm->getIndex() );  // ridx
+ 852
+         // <b><span class="alarm"> intersect_analytic.cu handles all CSG solids </span></b>
+ 853     optix::Program intersectProg = m_ocontext->createProgram("intersect_analytic.cu", "intersect") ;
+ 854     optix::Program boundsProg  =  m_ocontext->createProgram("intersect_analytic.cu", "bounds") ;
+ 855
+ 856     geometry->setIntersectionProgram(intersectProg );
+ 857     geometry->setBoundingBoxProgram( boundsProg );
+</pre></div>
+<div class="slide" id="id1">
+<h1><span class="small">OptiX 6 : Populate Geometry Context from GMergedMesh/GParts</span></h1>
+<pre class="mypre_tiny">
+ ...
+ 860     optix::Buffer primBuffer = createInputUserBuffer<int>( primBuf,  4*4, "primBuffer");
+ 861     geometry["primBuffer"]->setBuffer(primBuffer);
+ 863
+ 865     optix::Buffer partBuffer = createInputUserBuffer<float>( partBuf,  4*4*4, "partBuffer");
+ 866     geometry["partBuffer"]->setBuffer(partBuffer);
+ 867
+ 869     optix::Buffer tranBuffer = createInputUserBuffer<float>( tranBuf,  sizeof(optix::Matrix4x4), "tranBuffer");
+ 870     geometry["tranBuffer"]->setBuffer(tranBuffer);
+ 871
+ 872     optix::Buffer identityBuffer = createInputBuffer<optix::uint4, unsigned int>( idBuf, RT_FORMAT_UNSIGNED_INT4, 1 , "identityBuffer");
+ 873     geometry["identityBuffer"]->setBuffer(identityBuffer);
+ 874
+ 875     optix::Buffer planBuffer = createInputUserBuffer<float>( planBuf,  4*4, "planBuffer");
+ 876     geometry["planBuffer"]->setBuffer(planBuffer);
+
+ 891     return geometry ;
+ 892 }
+</pre><ul class="simple">
+<li>Loading up the geometry context from GParts buffers</li>
+</ul>
+</div>
+<div class="slide" id="optix-7-gmergedmesh-gparts-hitgroup-csg-sbtrecord">
+<h1><span class="small">OptiX 7 : GMergedMesh/GParts -&gt; HitGroup_CSG_SbtRecord ?</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">SbtRecord Choices ?</span></p>
+<ul class="small last simple">
+<li>any size constraints on SbtRecord ?</li>
+<li>alternative would be small SbtRecord referencing global memory<ul>
+<li><strong>Is that possible ?</strong></li>
+<li><strong>How bad for performance?</strong></li>
+</ul>
+</li>
+</ul>
+</div>
+<pre class="mypre_tiny">
+template &lt;typename T&gt;
+struct SbtRecord
+{
+    __align__( OPTIX_SBT_RECORD_ALIGNMENT )
+    char header[OPTIX_SBT_RECORD_HEADER_SIZE];
+    T data;
+};
+
+struct HitGroupData   // simple example
+{
+    float radius;
+};
+typedef SbtRecord&lt;HitGroupData&gt;   HitGroupSbtRecord;
+
+<b><span class="alarm">&#35;define MAX_CSG_DATA_VALUES 4096 // (guess) compile time constant
+struct HitGroup_CSG_Data
+{
+    float values[MAX_CSG_DATA_VALUES] ;
+};
+typedef SbtRecord&lt;HitGroup_CSG_Data&gt;   HitGroup_CSG_SbtRecord;</span></b>
+</pre><pre class="literal-block">
+prim : (num_prim, 4)      num_prim &gt; 1 for concatenated solids
+part : (num_parts,4,4)    CSG nodes, num_parts ~ 1,3,7,15,31,63,127,255
+tran : (num_tran, 3,4,4)  num_tran = num_parts, every node has transform
+plan : (num_plan, 4 )     planes needed for convexpolyhedron, trapezoid
+
+size &lt;- num_prim,num_tran,num_parts,num_plan
+</pre>
+</div>
+<div class="slide" id="optix-7-compound-custom-primitive-gas">
+<h1><span class="small">OptiX 7 Compound Custom Primitive GAS</span></h1>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/GAS_Builder.cc">https://bitbucket.org/simoncblyth/opticks/src/master/examples/UseOptiX7GeometryInstancedGASComp/GAS_Builder.cc</a></p>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">GAS OptixBuildInput:bbox 1:N ? 1:1</span></p>
+<p class="small">Followed OptiX_700/SDK/optixWhitted/optixWhitted.cpp</p>
+<ul class="small last simple">
+<li>1 OptixBuildInput &lt;= 3 aabb ?</li>
+<li>perhaps 1:1 simpler for Sbt indexing simplicity ?</li>
+<li>NEXT: try with 1:1</li>
+</ul>
+</div>
+<pre class="mypre_tiny">
+
+078 GAS GAS_Builder::Build(const std::vector&lt;float&gt;& bb )  // static
+079 {
+080     unsigned num_val = bb.size() ;
+081     assert( num_val % 6 == 0 );
+082     unsigned num_bb = num_val / 6 ;
+094     OptixBuildInput build_input = {};
+095     build_input.type = OPTIX_BUILD_INPUT_TYPE_CUSTOM_PRIMITIVES;
+096
+097     OptixBuildInputCustomPrimitiveArray& aabbArray
+              = build_input.aabbArray ;
+098
+099     aabbArray.aabbBuffers   = &d_aabb_buffer;
+100     aabbArray.numPrimitives = num_bb ;
+<b><span class="alarm">101     aabbArray.numSbtRecords = num_bb ; // ? </span></b>
+102
+107     unsigned flag = OPTIX_GEOMETRY_FLAG_DISABLE_ANYHIT ;
+108     unsigned* flags = new unsigned[num_bb];
+109     unsigned* sbt_index = new unsigned[num_bb];
+110     for(unsigned i=0 ; i < num_bb ; i++)
+111     {
+112         flags[i] = flag ; sbt_index[i] = i ;
+114     }
+116     aabbArray.numSbtRecords = num_bb ;
+117     aabbArray.flags         = flags;
+122     if(num_bb > 1)
+123     {
+124         unsigned sbt_index_size = sizeof(unsigned)*num_bb ;
+125         CUdeviceptr    d_sbt_index ;
+126         CUDA_CHECK( cudaMalloc( reinterpret_cast<void**>( &d_sbt_index ), sbt_index_size ) );
+127         CUDA_CHECK( cudaMemcpy( reinterpret_cast<void*>( d_sbt_index ),
+128                        sbt_index, sbt_index_size,
+129                         cudaMemcpyHostToDevice ) );
+130
+131         aabbArray.sbtIndexOffsetBuffer  = d_sbt_index ;
+132         aabbArray.sbtIndexOffsetSizeInBytes  = sizeof(unsigned);
+133         aabbArray.sbtIndexOffsetStrideInBytes = sizeof(unsigned);
+134     }
+136     GAS gas = Build(build_input);
+137
+138     delete[] flags ;
+139     CUDA_CHECK( cudaFree( (void*)d_aabb_buffer ) );
+
+</pre></div>
+</div>
+</body>
+</html>

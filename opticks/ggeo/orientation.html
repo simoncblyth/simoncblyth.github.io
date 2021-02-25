@@ -27,6 +27,27 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GGeo Orientation : Geometry Modelling and Persisting</a></li>
+<li><a class="reference internal" href="#analytic-geometry-overview-gpt-gpts-gparts">Analytic Geometry Overview : GPt, GPts, GParts</a></li>
+<li><a class="reference internal" href="#gpt">GPt</a></li>
+<li><a class="reference internal" href="#gpts">GPts</a></li>
+<li><a class="reference internal" href="#gparts">GParts</a><ul>
+<li><a class="reference internal" href="#lifecycle-summary">Lifecycle Summary</a></li>
+<li><a class="reference internal" href="#details-on-where-gparts-is-used">Details on where GParts is used</a></li>
+<li><a class="reference internal" href="#mesh-type-or-node-type">Mesh-type or node-type</a><ul>
+<li><a class="reference internal" href="#persisted-structure-detailed-in-gparts-rst">persisted structure detailed in GParts.rst</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ggeo">GGeo</a><ul>
+<li><a class="reference internal" href="#ggeo-deferredcreategparts"><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -55,7 +76,29 @@
           <div class="body" role="main">
             
   <div class="section" id="ggeo-orientation-geometry-modelling-and-persisting">
-<h1>GGeo Orientation : Geometry Modelling and Persisting<a class="headerlink" href="#ggeo-orientation-geometry-modelling-and-persisting" title="Permalink to this headline">¶</a></h1>
+<h1><a class="toc-backref" href="#id1">GGeo Orientation : Geometry Modelling and Persisting</a><a class="headerlink" href="#ggeo-orientation-geometry-modelling-and-persisting" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#ggeo-orientation-geometry-modelling-and-persisting" id="id1">GGeo Orientation : Geometry Modelling and Persisting</a></li>
+<li><a class="reference internal" href="#analytic-geometry-overview-gpt-gpts-gparts" id="id2">Analytic Geometry Overview : GPt, GPts, GParts</a></li>
+<li><a class="reference internal" href="#gpt" id="id3">GPt</a></li>
+<li><a class="reference internal" href="#gpts" id="id4">GPts</a></li>
+<li><a class="reference internal" href="#gparts" id="id5">GParts</a><ul>
+<li><a class="reference internal" href="#lifecycle-summary" id="id6">Lifecycle Summary</a></li>
+<li><a class="reference internal" href="#details-on-where-gparts-is-used" id="id7">Details on where GParts is used</a></li>
+<li><a class="reference internal" href="#mesh-type-or-node-type" id="id8">Mesh-type or node-type</a><ul>
+<li><a class="reference internal" href="#persisted-structure-detailed-in-gparts-rst" id="id9">persisted structure detailed in GParts.rst</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ggeo" id="id10">GGeo</a><ul>
+<li><a class="reference internal" href="#ggeo-deferredcreategparts" id="id11"><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
 <ul class="simple">
 <li><a class="reference internal" href="../docs/orientation.html"><span class="doc">orientation : Opticks Codebase Orientation for Developers</span></a></li>
 <li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/">https://bitbucket.org/simoncblyth/opticks/src/master/ggeo/</a></li>
@@ -68,8 +111,6 @@
 <dd>created from G4VPhysicalVolume by X4PhysicalVolume::convertNode</dd>
 <dt>GNodeLib</dt>
 <dd>collects GVolume instances <em>GNodeLib::addVolume</em></dd>
-<dt>GParts</dt>
-<dd>analytic geometry holding npy/NCSG <a class="reference internal" href="../npy/orientation.html"><span class="doc">NPY Orientation : array creation, updating and persisting</span></a></dd>
 <dt>GInstancer</dt>
 <dd><p class="first">Does multiple traversals over full GVolume tree, identifying
 repeated geometry and labelling the tree nodes with the repeat index (<em>ridx</em>).
@@ -81,6 +122,212 @@ is left with repeat index zero.</p>
 </ul>
 </dd>
 </dl>
+</div>
+<div class="section" id="analytic-geometry-overview-gpt-gpts-gparts">
+<h1><a class="toc-backref" href="#id2">Analytic Geometry Overview : GPt, GPts, GParts</a><a class="headerlink" href="#analytic-geometry-overview-gpt-gpts-gparts" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">GPt</span></code></dt>
+<dd>minimally captures node(ndIdx) to solid(lvIdx,csgIdx) association and boundaryName,
+can also hold placement transforms</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">X4PhysicalVolume::convertNode</span></code></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">GPt</span></code> structs instanciated and associated with GVolume
+(NB <code class="docutils literal notranslate"><span class="pre">GParts</span></code> instanciation now deferred )</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GMergedMesh::mergeVolumeAnalytic</span></code></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">GPt</span></code> instances are collected into <code class="docutils literal notranslate"><span class="pre">GPts</span></code> after <code class="docutils literal notranslate"><span class="pre">GPt::setPlacement</span></code>
+with the appropriate <code class="docutils literal notranslate"><span class="pre">GVolume</span></code> (base relative or global) transform
+during <code class="docutils literal notranslate"><span class="pre">GMergedMesh::mergeVolume</span></code>.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GPts</span></code></dt>
+<dd>collects <code class="docutils literal notranslate"><span class="pre">GPt</span></code> struct and handles their persisting to/from two transport buffers
+(ipt and plc) and one <code class="docutils literal notranslate"><span class="pre">GItemList</span></code> of boundary spec</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></dt>
+<dd>invoked from <code class="docutils literal notranslate"><span class="pre">GGeo::postLoadFromCache</span></code> or <code class="docutils literal notranslate"><span class="pre">GGeo::postDirectTranslation</span></code>.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GParts</span></code></dt>
+<dd>analytic geometry holding <code class="docutils literal notranslate"><span class="pre">npy/NCSG</span></code> <a class="reference internal" href="../npy/orientation.html"><span class="doc">NPY Orientation : array creation, updating and persisting</span></a></dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GParts::Create</span></code></dt>
+<dd>from from the volume combined <code class="docutils literal notranslate"><span class="pre">GPts</span></code> and <code class="docutils literal notranslate"><span class="pre">std::vector&lt;NCSG*&gt;</span></code> from <code class="docutils literal notranslate"><span class="pre">m_meshlib</span></code></dd>
+</dl>
+</div>
+<div class="section" id="gpt">
+<h1><a class="toc-backref" href="#id3">GPt</a><a class="headerlink" href="#gpt" title="Permalink to this headline">¶</a></h1>
+<p>GPt captures node placement of a solid within the
+full geometry tree in a minimal way, holding only:</p>
+<dl class="docutils">
+<dt>placement</dt>
+<dd>global transform</dd>
+<dt>lvIdx, csgIdx</dt>
+<dd>indices referencing the solid shape</dd>
+<dt>ndIdx</dt>
+<dd>index of the node in the full tree</dd>
+<dt>spec</dt>
+<dd>string representing the boundary of this node in the tree
+(material and surface  omat/osur/isur/imat)</dd>
+</dl>
+<p>GPt are canonically instanciated in X4PhysicalVolume::convertNode
+where instances are associated with the GVolume of the
+structural tree.</p>
+<p>vectors of GPt instances are collected into GPts m_pts within GMergedMesh.
+The GPts are persisted into the geocache which allows GParts creation
+to be deferred postcache.</p>
+</div>
+<div class="section" id="gpts">
+<h1><a class="toc-backref" href="#id4">GPts</a><a class="headerlink" href="#gpts" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">GPts::export_</span></code> serializes a vector of <code class="docutils literal notranslate"><span class="pre">GPt</span></code> into transport arrays</p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">m_ipt_buffer(n,4;int)</span></code></dt>
+<dd>four indices from <code class="docutils literal notranslate"><span class="pre">GPt</span></code> struct referencing the solid and the node</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">m_plc_buffer(n,4,4;float)</span></code></dt>
+<dd>placement transforms</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">m_specs(GItemList)</span></code></dt>
+<dd>list of boundary spec strings</dd>
+</dl>
+<p>Canonical m_pts instances are residents of GMergedMesh and
+are instanciated by GMergedMesh::GMergedMesh with GPts::Make.</p>
+<p>GPt instances are created in X4PhysicalVolume::convertNode
+and associated with the GVolume which are also instanciated there.</p>
+<p>Motivation for GPts is to allow postcache deferred creation of
+merged GParts instances.  This capability is needed in order
+to reconcile the different Opticks/Geant4 requirements
+regarding balanced/unbalanced CSG trees, see notes/issues/x016.rst</p>
+<p>Can think of GPts as gathering and persisting the arguments needed
+for deferred GParts creation and merging.</p>
+<p>This GParts creation is done in GGeo::deferredCreateGParts
+which is invoked from on high in OpticksHub::init after
+GGeo is loaded or adopted.</p>
+</div>
+<div class="section" id="gparts">
+<h1><a class="toc-backref" href="#id5">GParts</a><a class="headerlink" href="#gparts" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first">handles the concatenation of analytic geometry, by combination
+of GParts instances</p>
+</li>
+<li><p class="first">creates <em>primitive</em> buffer from the <em>parts</em> buffer</p>
+</li>
+<li><p class="first">holds boundary specifications as lists of strings
+that are only converted into actual boundaries with indices pointing
+at materials and surface by GParts::registerBoundaries which
+is invoked by GParts::close which happens late
+(typically within oxrap just before upload to GPU).</p>
+<p>This approach was adopted to allow dynamic addition of geometry and
+boundaries, which is convenient for testing.</p>
+</li>
+<li><p class="first">the GParts name derives from the history of being used to hold single primitive
+parts of Daya Bay PMT which were created by detdesc partitioning
+from python (pmt-/tree.py)</p>
+</li>
+</ul>
+<div class="section" id="lifecycle-summary">
+<h2><a class="toc-backref" href="#id6">Lifecycle Summary</a><a class="headerlink" href="#lifecycle-summary" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>single tree(ie single solid) GParts created from NCSG by X4PhysicalVolume::convertNode
+on first encountering an lvIdx, where they get attached to a GVolume</li>
+<li>single tree GParts are merged together into combination GParts by GMergedMesh::mergeVolumeAnalytic
+where placement transforms are applied with GParts::applyPlacementTransform</li>
+<li>combinend GParts are uses by OGeo::makeAnalyticGeometry to GParts::close and upload the GParts
+buffers into the OptiX context on GPU</li>
+</ul>
+</div>
+<div class="section" id="details-on-where-gparts-is-used">
+<h2><a class="toc-backref" href="#id7">Details on where GParts is used</a><a class="headerlink" href="#details-on-where-gparts-is-used" title="Permalink to this headline">¶</a></h2>
+<p>Based on <em>opticks-fl GParts.hh</em></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>./ggeo/CMakeLists.txt
+./ggeo/GParts.cc
+     setup
+
+./ggeo/GPmt.cc
+./ggeo/tests/GPmtTest.cc
+./ggeo/GScene.cc
+     near dead code : to be removed
+
+./extg4/tests/X4PhysicalVolume2Test.cc
+./extg4/tests/X4SolidTest.cc
+./ggeo/tests/GPartsTest.cc
+     tests
+
+./extg4/X4PhysicalVolume.cc
+
+     X4PhysicalVolume::convertNode
+         within the visit of X4PhysicalVolume::convertStructure_r
+         GParts::Make creates GParts instance from the NCSG
+         associated to the GMesh for the lvIdx solid.  The GParts
+         are associated with the GVolume nodes of the tree.
+
+./ggeo/GMergedMesh.cc
+     NB for full(not test?) geometry GMergedMesh is orchestrated
+     from GGeo::prepare by the GInstancer, but most action is in GMergedMesh
+
+     GMergedMesh::mergeMergedMesh
+         GParts::add the pts from an &quot;other&quot; GMergedMesh into m_parts
+
+     GMergedMesh::mergeVolume
+         invokes GMergedMesh::mergeVolumeAnalytic with the pts
+         and transform associated to the GVolume.
+         The transform is the base or root relative flobal transform
+
+     GMergedMesh::mergeVolumeAnalytic
+         GParts::add the pts argument after GParts::applyPlacementTransform
+         is applied to them, using transform argument
+
+./ggeo/GGeoLib.cc
+
+      GGeoLib::loadConstituents
+          GParts::Load and associates them with corresponding GMergedMesh also loaded
+
+      GGeoLib::saveConstituents
+          GParts::save
+
+
+./ggeo/GGeoTest.cc
+
+     GGeoTest::importCSG
+          GParts::setIndex to the collected m_meshes index
+
+./ggeo/GMaker.cc
+
+     GMaker::makeFromMesh
+          GParts::Make from NCSG instance and spec : used
+          from GGeoTest
+
+     GMaker::make
+     GMaker::makePrism
+          GParts::Make from parameters, type and spec : used for
+          creation of simple geometries
+
+
+./optixrap/OGeo.cc
+
+      OGeo::makeAnalyticGeometry
+          GParts::close constructs the primBuffer, also uploads the
+          various buffers prim/tran/part/identity into OptiX context on GPU
+</pre></div>
+</div>
+</div>
+<div class="section" id="mesh-type-or-node-type">
+<h2><a class="toc-backref" href="#id8">Mesh-type or node-type</a><a class="headerlink" href="#mesh-type-or-node-type" title="Permalink to this headline">¶</a></h2>
+<p>Boundary spec is a node-type-qty, not a mesh-type-qty
+so it does not belong inside GParts (a mesh-type-qty)
+… there are relatively few mesh-type-qty for
+each distinct shape (~249 DYB), but much more node-type-qty (~12k DYB)</p>
+<p>BUT: GParts combination means that it kinda transitions
+between mesh-type when just for a single unplaced shape
+into node-type once applyPlacementTransform is used by GMergedMesh::mergeVolumeAnalytic</p>
+<div class="section" id="persisted-structure-detailed-in-gparts-rst">
+<h3><a class="toc-backref" href="#id9">persisted structure detailed in GParts.rst</a><a class="headerlink" href="#persisted-structure-detailed-in-gparts-rst" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>for examination of structure of multi-complete tree buffers see GParts.rst</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="ggeo">
+<h1><a class="toc-backref" href="#id10">GGeo</a><a class="headerlink" href="#ggeo" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="ggeo-deferredcreategparts">
+<h2><a class="toc-backref" href="#id11"><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></a><a class="headerlink" href="#ggeo-deferredcreategparts" title="Permalink to this headline">¶</a></h2>
+<p>Canonically invoked from <code class="docutils literal notranslate"><span class="pre">GGeo::postLoadFromCache</span></code> and <code class="docutils literal notranslate"><span class="pre">GGeo::postDirectTranslation</span></code>.</p>
+<p>This is needed prior to GPU upload of analytic geometry by OGeo,
+it requires the GMergedMesh from GGeoLib and the NCSG solids from GMeshLib.
+Thus it can be done postcache, as all the ingredients are loaded from cache.</p>
+<p>See <span class="xref std std-doc">../notes/issues/GPts_GParts_optimization</span></p>
+</div>
 </div>
 
 
