@@ -6,7 +6,7 @@
    :event: Compute Accelerator Forum
    :url: https://indico.cern.ch/event/975008/
    :date: 10 March 2021
-   :time: Wednesday 10 March at 16h30 CERN time
+   :time: Wednesday 10 March at 16h30 CERN time, 15:30 UK time 
    :length: 20+10 minutes
 
 .. include:: my_s5defs.txt
@@ -38,11 +38,8 @@
 
 .. s5_talk:: 
 
-    This talk will review progress with Opticks and with its use in JUNO. 
+    This talk will review the Detector Geometry Approach used by Opticks 
 
-
-
-#pragma GCC diagnostic ignored "-Winvalid-pp-token"
 
 
 Outline
@@ -86,8 +83,8 @@ Outline
       * (CSG details relegated to "Extras") 
 
     * Opticks Material/Surface Properties : Boundary Texture
-    * Opticks vs Geant4 : Extrapolated G4 times compared to Opticks with RTX ON/OFF
 
+    * Opticks vs Geant4 : Extrapolated G4 times compared to Opticks with RTX ON/OFF
     * Overview + Links 
 
     .. raw:: html
@@ -824,7 +821,65 @@ Outline Extras
 
 .. s5_talk::
 
-    2nd step of the translation is a factorization into geometry instances 
+    2nd step of the translation is a factorization into geometry instances.
+    The GMergedMesh combines structural info in the form of instance transforms 
+    together with concatenated solids. 
+
+
+
+
+:small:`Optimizing Geometry : Split BLAS to avoid overlapping bbox`
+-------------------------------------------------------------------------------
+
+.. figure:: /env/presentation/nvidia/optimize/split_blas_half.png
+    :width: 700px
+    :align: center
+
+.. class:: normal
+
+   Optimization : :redbold:`deciding where to draw lines between:` 
+
+   1. structure and solid (**IAS** and **GAS**)
+   2. solids within **GAS**   (bbox choice to minimize traversal intersection tests)
+
+   Where those lines are drawn :bluebold:`defines the AS`
+
+
+.. class:: small
+
+    https://developer.nvidia.com/blog/best-practices-using-nvidia-rtx-ray-tracing/
+
+
+.. s5_talk::
+
+   Optimization is all about deciding Where to draw the lines.
+
+   Currently Opticks clumps together all the remainder non-repeated geometry.
+   Possibly splitting that up might improve performance.
+
+
+
+:small:`Optimizing Geometry : Merge BLAS when lots of overlaps`
+-------------------------------------------------------------------------------
+
+.. figure:: /env/presentation/nvidia/optimize/merge_blas_half.png
+    :width: 900px
+    :align: center
+
+.. class:: normal
+
+   * lots of overlapping forces lots of intersections to find closest 
+   * but too few bbox means the **AS** cannot help to avoid intersect tests
+   * balance required : :redbold:`needs experimentation and measurement to optimize` 
+
+.. class:: small
+
+    https://developer.nvidia.com/blog/best-practices-using-nvidia-rtx-ray-tracing/
+
+.. s5_talk::
+
+   Where to draw lines
+
 
 
 
@@ -906,7 +961,10 @@ Outline Extras
 .. s5_talk::
 
     This is an OpenGL rasterized render of Dayabay geometry, which is 
-    using OpenGL mesh instancing 
+    using OpenGL mesh instancing.
+
+    The rendering is done with one OpenGL draw call for each **GMergedMesh**
+ 
 
         
 :i:`OptiX Instancing`
@@ -924,12 +982,15 @@ Outline Extras
 
 .. s5_talk::
 
-    This is an OptiX ray traced render of JUNO geometry
+    This is an OptiX6 ray traced render of JUNO geometry
     showing all the central detector PMTs in one image using 
     an equirectangular or latitude/longitude projection.  
     The geometry and acceleration structures use OptiX instancing.
 
-
+    With OptiX6 this is using only about 10 IAS and GAS
+    (IAS and GAS are terms from OptiX7, but its easier to describe that way : 
+    and is probably happening underneath anyhow)
+ 
 
 
 :small:`G4VSolid -> CUDA Intersect Functions for ~10 Primitives`
@@ -1230,6 +1291,8 @@ Outline Extras
 
 
 
+
+
 :i:`scan-pf-1_Opticks_vs_Geant4 2`
 ------------------------------------
 
@@ -1360,6 +1423,9 @@ Outline Extras
 
 
  
+
+
+
 
 
 
