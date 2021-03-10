@@ -94,9 +94,8 @@ Outline
 
 .. s5_talk::
 
-   Outline
-
-
+   The focus of this talk is on how Opticks translates the a Geant4 
+   geometry into a performant GPU geometry.
 
 Outline Extras
 ----------------------------------------------------
@@ -131,8 +130,8 @@ Outline Extras
 
 .. s5_talk::
 
-   Outline Extras : CSG is relegated to backup unless I talk faster than expected.
-   But you are welcome to ask questions about that.
+   CSG details are relegated to "Extras" : you are welcome 
+   to ask questions about those if you like.
 
 
 
@@ -168,12 +167,14 @@ Outline Extras
 
 .. s5_talk::
 
-   * With millions of photons its the ray geometry intersection time
-     that dominates the performance 
+   JUNO optical photon simulation is the motivation for Opticks
+
+   * With millions of photons the ray geometry intersection time
+     dominates performance 
 
    * Most of the time is taken finding intersections between photons and geometry.
 
-   * CPU Memory for all the photons is a biug problem too 
+   * Memory for all the photons is a big problem too 
 
    * This ray tracing bottleneck is exactly the same as faced by ray trace image rendering in computer graphics.
 
@@ -187,9 +188,6 @@ Outline Extras
 
    This is a recent NVIDIA RTX demo from its launch 
    of 2nd generation RTX
-
-   Consider how many ray-geometry intersections it takes 
-   to create a scene like this. 
 
    That can now be done in 1440p at 30 fps on a single Ampere GPU.
 
@@ -229,6 +227,12 @@ Outline Extras
 
 .. s5_talk::
 
+    Consider how many ray-geometry intersections are being done per second, 
+    its probably in the hundreds of millions 
+
+    It is not so easy to estimate as AI trickery is used to reduce
+    the number of rays needed by super sampling with DLSS and de-noising.
+
     Its all ray traced, there is no rasterization being done.
     Everything is dynamic. 
 
@@ -252,8 +256,16 @@ Outline Extras
 
 .. s5_talk::
 
-    Ray Tracing performance continues to improve rapidly 
+    Ray Tracing performance continues to improve rapidly.
+    These slides are from NVIDIAs recent launch of 2nd Generation RTX
+    in Ampere.  The big difference is a move from 12nm to 8nm process
+    that has given them more space on the chip.  There is a big 
+    increase in the numbers of CUDA cores at the same price points. 
 
+    They claim triple double in performane across the SM, RT cores and 
+    tensor cores.  The tensor cores do not help Opticks but 
+    improved SM and RT cores should improve Opticks performance.
+    
 
 
 :small:`GPU Ray Tracing (RT) APIs Converging`
@@ -315,22 +327,20 @@ Outline Extras
 
 
 
-
 .. class:: tiny 
 
    [1] https://developer.apple.com/videos/play/wwdc2020/10012/
 
 .. s5_talk::
 
-    Similarities of first three APIs, not surprising : as they are 
-    just different interfaces over the NVIDIA Driver
+    These three APIs give access to RTX. 
+    With OptiX 7 the APIs are converging. 
 
-    TLAS IAS
+    The similarities are not surprising : as they are 
+    just different interfaces over the same tech from the NVIDIA Driver
 
-    BLAS GAS
-
-    Low level convergence suggests
-
+    There is also a recent addition to GPU ray tracing APIs 
+    from apple.  Despite apples GPUs being very different 
 
 
 
@@ -418,17 +428,13 @@ Outline Extras
 
 .. s5_talk::
 
-   The principal technique to accelerate ray geometry intersection 
-   is an acceleration structure called a bounding volume hierarchy 
-   
-   This divides space into progressively smaller boxes which forms
-   a spatial index.
+   The acceleration structure is a spatial index. 
+   It recursively partitions space. Which allows
+   the search to find an intersect to avoid making 
+   lots of intersection tests.    
 
-   Traversing the tree of bounds allows to minimize tests
-   needed to find an intersect.
+   Some of this traversal benefits from the RT cores. 
 
-   With some geometry it is possible for the traversal 
-   to be done on the dedicated RT cores.
 
 
 
@@ -482,7 +488,13 @@ Outline Extras
 
 .. s5_talk::
 
+   OptiX uses the terms : IAS and GAS for instance and geometry acceleratiom structures.
+   The other APIs use terms: TLAS and BLAS for top level and bottom level acceleration structures
+   This is because OptiX supports multiple instance levels. 
+   But the simple two level is faster as that can be done on the RT cores.
+
    Simple two-level hierarchy : **just one set of instances with transforms and references to geometry**  
+
 
 
 :i:`Geant4OpticksWorkflow`
@@ -570,13 +582,7 @@ Outline Extras
 
 .. s5_talk::
 
-   To understand the Opticks Geometry model you need to 
-   known a bit about some basis classes.  In particular 
-   the serialization used.  
-
-   The serialization is not just a convenience it is fundamental 
-   to how Opticks works.
-
+   Serialization is fundamental to Opticks geometry.
    GPU and CPU have separate address spaces, that means 
    everything copied between them needs serialization/deserialization 
 
@@ -673,13 +679,10 @@ Outline Extras
 
     NPY is a very simple file format : about as minimal as possible
 
-    * small and easy to parse header
-    * it is the standard used by NumPy 
+    * small and easy to parse header is shown in red 
+    * small price to pay for very convenient access to arrays from python
     
     
-
-
-
 
 
 :small:`Translation 1st Step : Geant4 -> Opticks/GGeo : 1->1 conversions`
@@ -706,8 +709,6 @@ Outline Extras
 
         **OptiX** 
             "IAS", "GAS", ... 
-
-
 
 
 .. class:: small
@@ -821,11 +822,12 @@ Outline Extras
 
 .. s5_talk::
 
-    2nd step of the translation is a factorization into geometry instances.
-    The GMergedMesh combines structural info in the form of instance transforms 
-    together with concatenated solids. 
+    * 2nd step of the translation is a factorization into geometry instances.
 
+    * (GO THRU)
 
+    * The GMergedMesh combines structural info in the form of instance transforms 
+      together with concatenated solids. 
 
 
 :small:`Optimizing Geometry : Split BLAS to avoid overlapping bbox`
@@ -879,7 +881,6 @@ Outline Extras
 .. s5_talk::
 
    Where to draw lines
-
 
 
 
@@ -940,8 +941,13 @@ Outline Extras
 
 .. s5_talk::
 
-    Thinking about ray intersection with transformed geometry, 
-    it is a natural step to adopting geometry instancing. 
+    The basis for instancing is the equivalence of intersects in two spaces.
+
+    For example a ray-ellipsoid intersect is equivalent to in inverse 
+    transformed ray intersect with a sphere.
+
+    Local frame intersects advantages...
+
 
 
 
@@ -1092,7 +1098,8 @@ Outline Extras
 
 .. s5_talk::
 
-    All primitives (1-node) trees and CSG shapes use same CUDA intersect_analytic.cu program 
+    All primitives, shapes and concatenated shapes use the same CUDA intersect program.
+    The shapes are distinguished by the content of the buffers. 
 
 
 
@@ -1165,6 +1172,8 @@ Outline Extras
 
     So G4Boolean trees can be translated into Opticks without 
     any approximation.
+
+    Pseudo code of the CSG implementation is in the Extras.
  
 
 
@@ -1238,15 +1247,10 @@ Outline Extras
 
 .. s5_talk::
 
-   Bringing optical physics to the GPU was straightforward, 
-   because a direct translation could be used.
-
-   Geant4 geometry model is vastly different to the 
-   whats needed on the GPU : making geometry translation
-   the most challenging aspect of Opticks.
-
-   And everything needs to be serialized to be copied to the GPU.
-     
+   Connection between the geometry and the material/surface 
+   properties is done by labelling all the the volumes with a 
+   boundary index which allows you to look up properties
+   in the boundary texture.     
 
 
 :i:`j1808_top_rtx`
