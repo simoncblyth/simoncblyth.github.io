@@ -38,6 +38,8 @@
 <li><a class="reference internal" href="#l4cerenkov">L4Cerenkov</a></li>
 <li><a class="reference internal" href="#following-logging-output">Following Logging Output</a></li>
 <li><a class="reference internal" href="#what-are-hits">What are hits ?</a></li>
+<li><a class="reference internal" href="#controlling-the-embedded-opticks">Controlling the embedded Opticks</a></li>
+<li><a class="reference internal" href="#examining-full-event-data">Examining Full Event Data</a></li>
 <li><a class="reference internal" href="#examining-hit-data">Examining Hit Data</a></li>
 <li><a class="reference internal" href="#meanings-of-the-photon-flags">Meanings of the photon flags</a><ul>
 <li><a class="reference internal" href="#p-flags-u-z-4-debug-bytes">p.flags.u.z : 4 debug bytes</a></li>
@@ -478,6 +480,159 @@ The photon and hits buffers contain photon structs</p>
 <span class="mi">56</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="controlling-the-embedded-opticks">
+<h2>Controlling the embedded Opticks<a class="headerlink" href="#controlling-the-embedded-opticks" title="Permalink to this headline">¶</a></h2>
+<p>G4Opticks uses an embedded Opticks instance which has its own commandline.
+Some of the first logging output from G4Opticks details the commandline that is in use.
+For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2021</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">16</span> <span class="mi">15</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mf">01.049</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">33575005</span><span class="p">]</span> <span class="p">[</span><span class="n">G4Opticks</span><span class="p">::</span><span class="n">EmbeddedCommandLine</span><span class="nd">@130</span><span class="p">]</span> <span class="n">Using</span> <span class="n">ecl</span> <span class="p">:[</span> <span class="o">--</span><span class="n">compute</span> <span class="o">--</span><span class="n">embedded</span> <span class="o">--</span><span class="n">xanalytic</span> <span class="o">--</span><span class="n">production</span> <span class="o">--</span><span class="n">nosave</span><span class="p">]</span> <span class="n">OPTICKS_EMBEDDED_COMMANDLINE</span>
+<span class="mi">2021</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">16</span> <span class="mi">15</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mf">01.049</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">33575005</span><span class="p">]</span> <span class="p">[</span><span class="n">G4Opticks</span><span class="p">::</span><span class="n">EmbeddedCommandLine</span><span class="nd">@131</span><span class="p">]</span>  <span class="n">mode</span><span class="p">(</span><span class="n">Pro</span><span class="o">/</span><span class="n">Dev</span><span class="o">/</span><span class="n">Asis</span><span class="p">)</span> <span class="n">P</span> <span class="n">using</span> <span class="s2">&quot;pro&quot;</span> <span class="p">(</span><span class="n">production</span><span class="p">)</span> <span class="n">commandline</span> <span class="n">without</span> <span class="n">event</span> <span class="n">saving</span>
+<span class="mi">2021</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">16</span> <span class="mi">15</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mf">01.049</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">33575005</span><span class="p">]</span> <span class="p">[</span><span class="n">G4Opticks</span><span class="p">::</span><span class="n">EmbeddedCommandLine</span><span class="nd">@136</span><span class="p">]</span> <span class="n">Using</span> <span class="n">extra1</span> <span class="n">argument</span> <span class="p">:[</span><span class="o">--</span><span class="n">skipaheadstep</span> <span class="mi">1000</span><span class="p">]</span>
+<span class="mi">2021</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">16</span> <span class="mi">15</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mf">01.049</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">33575005</span><span class="p">]</span> <span class="p">[</span><span class="n">G4Opticks</span><span class="p">::</span><span class="n">EmbeddedCommandLine</span><span class="nd">@146</span><span class="p">]</span> <span class="n">Using</span> <span class="n">eclx</span> <span class="n">envvar</span> <span class="p">:[]</span> <span class="n">OPTICKS_EMBEDDED_COMMANDLINE_EXTRA</span>
+<span class="mi">2021</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">16</span> <span class="mi">15</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mf">01.049</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">33575005</span><span class="p">]</span> <span class="p">[</span><span class="o">*</span><span class="n">G4Opticks</span><span class="p">::</span><span class="n">InitOpticks</span><span class="nd">@231</span><span class="p">]</span> <span class="n">instanciate</span> <span class="n">Opticks</span> <span class="n">using</span> <span class="n">embedded</span> <span class="n">commandline</span> <span class="n">only</span>
+ <span class="o">--</span><span class="n">compute</span> <span class="o">--</span><span class="n">embedded</span> <span class="o">--</span><span class="n">xanalytic</span> <span class="o">--</span><span class="n">production</span> <span class="o">--</span><span class="n">nosave</span>  <span class="o">--</span><span class="n">skipaheadstep</span> <span class="mi">1000</span>
+</pre></div>
+</div>
+<p>Two envvars can be used to control this commandline.</p>
+<dl class="docutils">
+<dt>OPTICKS_EMBEDDED_COMMANDLINE</dt>
+<dd><p class="first">Two special values “pro” and “dev” correspond to standard commandlines that are
+expected to be appropriate for production and development.  Note that the “dev” mode
+has saving enabled and will save large numbers of event files. The “pro” mode should
+save very few files.</p>
+<p class="last">The default “pro” mode corresponds to actual commandline “–compute –embedded –xanalytic –production –nosave”
+The “dev” mode corresponds to ” –compute –embedded –xanalytic –save –natural –printenabled –pindex 0”</p>
+</dd>
+<dt>OPTICKS_EMBEDDED_COMMANDLINE_EXTRA</dt>
+<dd>This envvar (for expert use only) can be used to add some additional options to the commandline.
+Duplicated commandline options will trip asserts.</dd>
+</dl>
+<p>Typically when you wish to enable full event saving for debugging and analysis simply:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">OPTICKS_EMBEDDED_COMMANDLINE</span><span class="o">=</span><span class="n">dev</span>
+<span class="n">CerenkovMinimal</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="examining-full-event-data">
+<h2>Examining Full Event Data<a class="headerlink" href="#examining-full-event-data" title="Permalink to this headline">¶</a></h2>
+<p>When saving is enabled around 20 NumPy arrays are written for every event.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ ls -l  /tmp/blyth/opticks/source/evt/g4live/natural/1/*.npy
+-rw-r--r--  1 blyth  wheel    144 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileLisLabels.npy
+-rw-r--r--  1 blyth  wheel     88 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileLis.npy
+-rw-r--r--  1 blyth  wheel    144 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileAccLabels.npy
+-rw-r--r--  1 blyth  wheel     96 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileAcc.npy
+-rw-r--r--  1 blyth  wheel     80 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfileLabels.npy
+-rw-r--r--  1 blyth  wheel     80 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/OpticksProfile.npy
+-rw-r--r--  1 blyth  wheel     96 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/idom.npy
+-rw-r--r--  1 blyth  wheel    128 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/fdom.npy
+-rw-r--r--  1 blyth  wheel   2680 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/rs.npy
+-rw-r--r--  1 blyth  wheel    340 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/ps.npy
+-rw-r--r--  1 blyth  wheel     80 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/wy.npy
+-rw-r--r--  1 blyth  wheel     80 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/dg.npy
+-rw-r--r--  1 blyth  wheel   1120 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/ph.npy
+-rw-r--r--  1 blyth  wheel  10480 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/rx.npy
+-rw-r--r--  1 blyth  wheel   4240 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/ox.npy
+-rw-r--r--  1 blyth  wheel    368 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/gs.npy
+-rw-r--r--  1 blyth  wheel     80 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/hy.npy
+-rw-r--r--  1 blyth  wheel    528 Mar 16 15:15 /tmp/blyth/opticks/source/evt/g4live/natural/1/ht.npy
+epsilon:~ blyth$
+</pre></div>
+</div>
+<p>The np.py script can be used to dump the shapes of the arrays:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ np.py /tmp/blyth/opticks/source/evt/g4live/natural/1/*.npy
+a :        /tmp/blyth/opticks/source/evt/g4live/natural/1/ox.npy :           (65, 4, 4) : 664a09f7c9df20fd7d7dd2b0f81ba924 : 20210316-1515
+b :        /tmp/blyth/opticks/source/evt/g4live/natural/1/ph.npy :           (65, 1, 2) : 34e62cf02f2704c8dfd4416af0669462 : 20210316-1515
+c :        /tmp/blyth/opticks/source/evt/g4live/natural/1/ps.npy :           (65, 1, 4) : 9001be6559eaf49850fe8f2f3f327001 : 20210316-1515
+d :        /tmp/blyth/opticks/source/evt/g4live/natural/1/rs.npy :       (65, 10, 1, 4) : b97c5cc9f518cfcb77dc0e4d8194fecc : 20210316-1515
+e :        /tmp/blyth/opticks/source/evt/g4live/natural/1/rx.npy :       (65, 10, 2, 4) : a4878228712f585f46567e59bde95655 : 20210316-1515
+f :        /tmp/blyth/opticks/source/evt/g4live/natural/1/ht.npy :            (7, 4, 4) : be3c6de10d2e706f03a416508cfca316 : 20210316-1515
+g :      /tmp/blyth/opticks/source/evt/g4live/natural/1/fdom.npy :            (3, 1, 4) : 098ac4cd701409d36788edcea0d51a31 : 20210316-1515
+h :        /tmp/blyth/opticks/source/evt/g4live/natural/1/gs.npy :            (3, 6, 4) : eb7c1b49d19a09e5886b6468a398269f : 20210316-1515
+</pre></div>
+</div>
+<p>These are persisted OpticksEvent. See optickscore/OpticksEvent.cc to follow the details of what everything is.
+Opticks has many python analysis scripts that use NumPy to interpret these arrays. However initially
+it is useful to use a manual approach to examine the arrays.</p>
+<p>Loading photon arrays for first three events:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> <span class="p">;</span> <span class="kn">from</span> <span class="nn">glob</span> <span class="k">import</span> <span class="n">glob</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">ox_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;/tmp/blyth/opticks/source/evt/g4live/natural/?/ox.npy&quot;</span><span class="p">))</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">ox_paths</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+<span class="p">[</span><span class="s1">&#39;/tmp/blyth/opticks/source/evt/g4live/natural/1/ox.npy&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;/tmp/blyth/opticks/source/evt/g4live/natural/2/ox.npy&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;/tmp/blyth/opticks/source/evt/g4live/natural/3/ox.npy&#39;</span><span class="p">]</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">ox_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">ox_paths</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">ox_paths</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">ox_paths</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="n">a</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="p">(</span><span class="mi">71</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">10</span><span class="p">]:</span> <span class="n">c</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">10</span><span class="p">]:</span> <span class="p">(</span><span class="mi">67</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Dumping the first photon from each event:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">11</span><span class="p">]:</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">11</span><span class="p">]:</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">127.661</span><span class="p">,</span> <span class="o">-</span><span class="mf">35.996</span><span class="p">,</span>  <span class="mf">90.</span>   <span class="p">,</span>   <span class="mf">0.728</span><span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">0.796</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.225</span><span class="p">,</span>   <span class="mf">0.562</span><span class="p">,</span>   <span class="mf">1.</span>   <span class="p">],</span>
+       <span class="p">[</span> <span class="o">-</span><span class="mf">0.571</span><span class="p">,</span>   <span class="mf">0.027</span><span class="p">,</span>   <span class="mf">0.82</span> <span class="p">,</span>  <span class="mf">79.028</span><span class="p">],</span>
+       <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>   <span class="mf">0.</span>   <span class="p">,</span>   <span class="mf">0.</span>   <span class="p">,</span>   <span class="mf">0.</span>   <span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">12</span><span class="p">]:</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">12</span><span class="p">]:</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">136.877</span><span class="p">,</span>  <span class="o">-</span><span class="mf">9.657</span><span class="p">,</span>  <span class="mf">90.</span>   <span class="p">,</span>   <span class="mf">0.745</span><span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">0.834</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.059</span><span class="p">,</span>   <span class="mf">0.549</span><span class="p">,</span>   <span class="mf">1.</span>   <span class="p">],</span>
+       <span class="p">[</span> <span class="o">-</span><span class="mf">0.552</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.089</span><span class="p">,</span>   <span class="mf">0.829</span><span class="p">,</span>  <span class="mf">79.028</span><span class="p">],</span>
+       <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>   <span class="mf">0.</span>   <span class="p">,</span>   <span class="mf">0.</span>   <span class="p">,</span>   <span class="mf">0.</span>   <span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">13</span><span class="p">]:</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">13</span><span class="p">]:</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">131.949</span><span class="p">,</span>  <span class="o">-</span><span class="mf">9.657</span><span class="p">,</span>  <span class="mf">90.</span>   <span class="p">,</span>   <span class="mf">0.727</span><span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">0.824</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.06</span> <span class="p">,</span>   <span class="mf">0.563</span><span class="p">,</span>   <span class="mf">1.</span>   <span class="p">],</span>
+       <span class="p">[</span> <span class="o">-</span><span class="mf">0.566</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.088</span><span class="p">,</span>   <span class="mf">0.819</span><span class="p">,</span>  <span class="mf">79.028</span><span class="p">],</span>
+       <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>   <span class="mf">0.</span>   <span class="p">,</span>   <span class="mf">0.</span>   <span class="p">,</span>   <span class="mf">0.</span>   <span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notice that the last lines contains int32 or uint32 so when viewed as float
+will often appear as nan.  The array can be viewed as a different type to see the values of the flags:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">14</span><span class="p">]:</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">14</span><span class="p">]:</span>
+<span class="n">array</span><span class="p">([[</span> <span class="mi">1124029005</span><span class="p">,</span> <span class="o">-</span><span class="mi">1039139963</span><span class="p">,</span>  <span class="mi">1119092736</span><span class="p">,</span>  <span class="mi">1060782814</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">1061935996</span><span class="p">,</span> <span class="o">-</span><span class="mi">1100614914</span><span class="p">,</span>  <span class="mi">1057998924</span><span class="p">,</span>  <span class="mi">1065353216</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mi">1089327308</span><span class="p">,</span>  <span class="mi">1021211713</span><span class="p">,</span>  <span class="mi">1062341336</span><span class="p">,</span>  <span class="mi">1117654571</span><span class="p">],</span>
+       <span class="p">[</span>    <span class="o">-</span><span class="mi">196607</span><span class="p">,</span>           <span class="mi">2</span><span class="p">,</span>           <span class="mi">0</span><span class="p">,</span>         <span class="mi">129</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int32</span><span class="p">)</span>
+
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">23</span><span class="p">]:</span> <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     <span class="c1">## control number fomatting</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">24</span><span class="p">]:</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">24</span><span class="p">]:</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">127.66074</span>   <span class="p">,</span> <span class="o">-</span><span class="mf">35.995625</span>  <span class="p">,</span>  <span class="mf">90.</span>        <span class="p">,</span>   <span class="mf">0.7275828</span> <span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">0.7963178</span> <span class="p">,</span>  <span class="o">-</span><span class="mf">0.22455975</span><span class="p">,</span>   <span class="mf">0.56165004</span><span class="p">,</span>   <span class="mf">1.</span>        <span class="p">],</span>
+       <span class="p">[</span> <span class="o">-</span><span class="mf">0.57103276</span><span class="p">,</span>   <span class="mf">0.02715504</span><span class="p">,</span>   <span class="mf">0.82047796</span><span class="p">,</span>  <span class="mf">79.02767</span>   <span class="p">],</span>
+       <span class="p">[</span>         <span class="n">nan</span><span class="p">,</span>   <span class="mf">0.</span>        <span class="p">,</span>   <span class="mf">0.</span>        <span class="p">,</span>   <span class="mf">0.</span>        <span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">25</span><span class="p">]:</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">25</span><span class="p">]:</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">303.0482</span>    <span class="p">,</span> <span class="mf">116.91953</span>   <span class="p">,</span>  <span class="mf">90.</span>        <span class="p">,</span>   <span class="mf">1.5299634</span> <span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">0.89899653</span><span class="p">,</span>   <span class="mf">0.34706625</span><span class="p">,</span>   <span class="mf">0.26711446</span><span class="p">,</span>   <span class="mf">1.</span>        <span class="p">],</span>
+       <span class="p">[</span> <span class="o">-</span><span class="mf">0.43312532</span><span class="p">,</span>   <span class="mf">0.794904</span>  <span class="p">,</span>   <span class="mf">0.42488822</span><span class="p">,</span>  <span class="mf">64.74065</span>   <span class="p">],</span>
+       <span class="p">[</span>         <span class="n">nan</span><span class="p">,</span>   <span class="mf">0.</span>        <span class="p">,</span>   <span class="mf">0.</span>        <span class="p">,</span>   <span class="mf">0.</span>        <span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For plotting of the data use matplotlib for 2d histograms or pyvista for GPU
+accelerated plots of 3d data.</p>
 </div>
 <div class="section" id="examining-hit-data">
 <h2>Examining Hit Data<a class="headerlink" href="#examining-hit-data" title="Permalink to this headline">¶</a></h2>
