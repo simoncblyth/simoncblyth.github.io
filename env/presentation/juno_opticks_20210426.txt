@@ -18,26 +18,30 @@ JUNO-Opticks Notes
 
    * Infrastructure
 
-     * bash junoenv opticks 
+     * p1: bash junoenv opticks 
 
-   * ``--gdmlkludge`` Opticks option : fixing broken JUNO GDML export
-   * PMTEfficiencyCheck 
+   * p2: ``--gdmlkludge`` Opticks option : fixing broken JUNO GDML export
+   * p3: PMTEfficiencyCheck 
 
-     * 1-in-a-million hit      
+     * p4: 1-in-a-million hit      
 
    * Current JUNO Geometry
 
-     * Auto-Factorization by progeny digest
-     * Ray Trace Times : TITAN RTX (RTX ON, 24GB)
-     * 22 Ray trace renders : from same viewpoint : varying included geometry
-     * Ray Trace Movies 1920x1080 (~2M pixels) Fly Around Fastener
-     * Double Greek Temple
+     * p5 : Auto-Factorization by progeny digest
+     * p6 : Ray Trace Times : TITAN RTX (RTX ON, 24GB)
+     * p7 : 22 Ray trace renders : from same viewpoint : varying included geometry
+     * p29: Ray Trace Movies 1920x1080 (~2M pixels) Fly Around Fastener
+     * p30: Double Greek Temple
+
+   * tds-mu (tds : tut_detsim.py)
+
+     * p32 : first runs with current geometry : usinge ``-e ~8,``
 
    * OptiX 7 
 
-     * "Foundry" based CSG geometry model : Solid/Prim/Node
-     * Intersect Prim (numNode, nodeOffset) ~ HitGroupData
-
+     * p33 : "Foundry" based CSG geometry model : Solid/Prim/Node
+     * p34 : Intersect Prim (numNode, nodeOffset) ~ HitGroupData
+     * p35,36 : CSG in OptiX 7 
 
 
 .. class:: small
@@ -506,6 +510,83 @@ JUNO-Opticks Notes
 
     * lots of coincident surface speckle 
     * dark columns : indicate inside surface (subtracted Greek Temple)
+
+
+
+:small:`tds-mu   (tds : tut_detsim.py)`
+------------------------------------------
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    tds-mu () 
+    { 
+        tds --particles mu- --momentums 215000
+    }
+    tds () 
+    { 
+        local opts="--opticks-mode 1 --no-guide_tube --pmt20inch-polycone-neck --pmt20inch-simplify-csg --evtmax 2";
+        tds-elog-1;
+        tds-ectrl;
+        tds- $opts gun $*
+    }
+    tds-ectrl () 
+    { 
+        local msg="=== $FUNCNAME :";
+        local extra;
+        <span class="redbold">extra="--rngmax 100 --skipsolidname NNVTMCPPMTsMask_virtual,HamamatsuR12860sMask_virtual,mask_PMT_20inch_vetosMask_virtual -e ~8, --rtx 1 --cvd 1"; </span>
+        unset OPTICKS_EMBEDDED_COMMANDLINE_EXTRA;
+        if [ -n "$extra" ]; then
+            export OPTICKS_EMBEDDED_COMMANDLINE_EXTRA="$extra";
+            echo $msg OPTICKS_EMBEDDED_COMMANDLINE_EXTRA ${OPTICKS_EMBEDDED_COMMANDLINE_EXTRA};
+        fi;
+        ...
+    }
+    </pre>
+
+
+:small:`tds-mu : first runs with current geometry : usinge -e ~8,`
+---------------------------------------------------------------------
+
+
+.. class:: small
+
+   * using ``-e ~8,`` : disabling the slow **uni_acrylic**
+   * TODO: avoid changing fastener, just remove interior of fastener
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    tds-mu
+    ... 
+    2021-04-26 04:24:16.509 INFO  [198647] [OPropagator::launch@287] 0 : (0;52694115,1)  launch time 41.0858
+    2021-04-26 04:24:17.348 INFO  [198647] [OEvent::downloadHits@485]  nhit 15288267 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+    2021-04-26 04:24:17.807 INFO  [198647] [OEvent::downloadHiys@519]  nhiy 15288267 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+    2021-04-26 04:24:19.115 FATAL [198647] [G4Opticks::propagateOpticalPhotons@1152]  m_way_enabled num_hiys 15288267
+     junoSD_PMT_v2_Opticks::EndOfEvent.propagateOpticalPhotons  eventID 0 num_gensteps 108871 num_photons 52694115 num_hit 15288267 way_enabled 1 waymask 3
+    0      gp.x 14847.53   gp.y -1223.14   gp.z -12286.16  gp.R 19310.49   pmt 14494   CK|RE|SD|BT|EC       otk 1      oti0.00     bti 92.76    bp.x 13701.00   bp.y -1128.36   bp.z -11338.51  bp.R 17820.00  
+    1      gp.x -14271.81  gp.y 8741.88    gp.z 9608.44    gp.R 19298.38   pmt 4434    CK|RE|SD|BT|EX       otk 1      oti0.00     bti 91.83    bp.x -13178.16  bp.y 8072.09    bp.z 8872.99    bp.R 17820.00  
+
+
+    2021-04-26 04:26:25.326 INFO  [198647] [OPropagator::launch@287] 0 : (0;53856062,1)  launch time 46.6679
+    2021-04-26 04:26:26.188 INFO  [198647] [OEvent::downloadHits@485]  nhit 15959722 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+    2021-04-26 04:26:26.628 INFO  [198647] [OEvent::downloadHiys@519]  nhiy 15959722 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+    2021-04-26 04:26:27.899 FATAL [198647] [G4Opticks::propagateOpticalPhotons@1152]  m_way_enabled num_hiys 15959722
+     junoSD_PMT_v2_Opticks::EndOfEvent.propagateOpticalPhotons  eventID 1 num_gensteps 111694 num_photons 53856062 num_hit 15959722 way_enabled 1 waymask 3
+    0      gp.x 14847.53   gp.y -1223.22   gp.z -12285.85  gp.R 19310.30   pmt 14494   CK|RE|SD|BT|EC       otk 1      oti0.00     bti 92.76    bp.x 13701.15   bp.y -1128.45   bp.z -11338.31  bp.R 17820.00  
+    1      gp.x -14271.85  gp.y 8741.84    gp.z 9609.04    gp.R 19298.69   pmt 4434    CK|RE|SD|BT|EX       otk 1      oti0.00     bti 91.83    bp.x -13177.96  bp.y 8071.91    bp.z 8873.44    bp.R 17820.00  
+    </pre>
+
+.. class:: small
+
+    * 215 GeV muon giving : 52 - 54M photons,  ~15 M hits, GPU launch 41-46 s, 
+    * BUT > 2min between launches ?  How much is Geant4 ? GPU overhead ?
+    * NEXT: 
+
+      * profile whats happening between launches
+      * make connection between Opticks hits and hit collections 
+      * hit validations
+
 
 
 :small:`OptiX7 : "Foundry" based CSG geometry model : Solid/Prim/Node`
