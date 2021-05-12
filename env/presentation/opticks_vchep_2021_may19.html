@@ -1,0 +1,2854 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</title>
+<meta content="Opticks vCHEP 2021" name="title" />
+<meta content="JUNO, OptiX, Opticks" name="description" />
+<meta content="Only 8 min talk" name="note" />
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<script src="ui/my-small-white/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/my-small-white/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/my-small-white/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/my-small-white/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/my-small-white/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title"><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+
+<!-- comment
+
+https://docutils.sourceforge.io/docutils/parsers/rst/include/
+
+https://docutils.sourceforge.io/docutils/parsers/rst/include/isogrk1.txt
+
+.. raw:: html
+
+   <span>&nbsp;</span>
+
+.. raw:: html
+
+   <hr/>
+
+.. class:: small
+
+
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | Header 1     Header 2     Header 3  |
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | Header 1   | Header 2   | Header 3  |
+    +============+============+===========+
+    | body row 1 | column 2   | column 3  |
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | body row 2 | Cells may span columns.|
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+
+    | body row 3 | Cells may  | - Cells   |
+    +- - - - - - - - - - - -+ span rows. | - contain |
+    | body row 4 |            | - blocks. |
+    +- - - - - - - - - - - -+- - - - - - - - - - - -+- - - - - - - - - - -+ -->
+<!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Derived from the Unicode character mappings available from
+<http://www.w3.org/2003/entities/xml/>.
+Processed by unicode2rstsubs.py, part of Docutils:
+<http://docutils.sourceforge.net>. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Derived from the Unicode character mappings available from
+<http://www.w3.org/2003/entities/xml/>.
+Processed by unicode2rstsubs.py, part of Docutils:
+<http://docutils.sourceforge.net>. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Derived from the Unicode character mappings available from
+<http://www.w3.org/2003/entities/xml/>.
+Processed by unicode2rstsubs.py, part of Docutils:
+<http://docutils.sourceforge.net>. -->
+
+       <style type="text/css">
+
+          div.slide { 
+             background-clip: border-box;
+             background-repeat: no-repeat;
+             height: 100%;
+          }
+          div.slide#slide0{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#detector-geometry-in-opticks{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-benefits{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#visualizing-an-optical-photon-simulation{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 640px 360px;
+             background-position: 600px 100px;
+             
+          }
+          div.slide#overview{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#g4daeview-py-fast-opengl-3d-viewer-for-g4dae-files{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20140419-170713.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cerenkov-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115923.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cerenkov-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-115935.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scintillation-photons-simulation-top-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121444.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scintillation-photons-simulation-side-view{
+             background-image: url(/env/geant4/geometry/collada/g4daeview/20141224-121435.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#standard-geant4-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.001.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#external-photon-simulation-workflow{
+             background-image: url(/env/keynotefigs/G4DAEChroma/G4DAEChroma.002.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geant4opticksworkflow{
+             background-image: url(/env/Documents/Geant4OpticksWorkflow/Geant4OpticksWorkflow.001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geant4opticksworkflow-2{
+             background-image: url(/env/Documents/Geant4OpticksWorkflow/Geant4OpticksWorkflow.001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-001.png);
+             background-size: 1047px 795px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview-m1-points{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-points-mat1.png);
+             background-size: 1435px 848px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview-flag-selection{
+             background-image: url(/env/graphics/ggeoview/ggeoview-scintillation-flag-seq-select.png);
+             background-size: 1436px 842px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ggeoview-cerenkov-geom-m1{
+             background-image: url(/env/graphics/ggeoview/ggeoview-cerenkov-m1-geom.png);
+             background-size: 1416px 845px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-1{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#detecting-neutrinos-via-optical-photons-2{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opengl-instancing{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opengl-instancing-2{
+             background-image: url(/env/presentation/dayabay-principal_half.png);
+             background-size: 1417px 830px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-inside-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_half.png);
+             background-size: 1432px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-wide{
+             background-image: url(/env/graphics/ggeoview/jpmt-wide_half.png);
+             background-size: 1409px 836px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-headview{
+             background-image: url(/env/graphics/ggeoview/jpmt-headview_half.png);
+             background-size: 1308px 783px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-backview{
+             background-image: url(/env/graphics/ggeoview/jpmt-backview_half.png);
+             background-size: 1149px 794px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-approach{
+             background-image: url(/env/graphics/ggeoview/jpmt-approach_half.png);
+             background-size: 1431px 839px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-arrival{
+             background-image: url(/env/graphics/ggeoview/jpmt-arrival_half.png);
+             background-size: 1427px 841px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#optical-photon-simulation-problem{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-optical-photon-simulation-problem{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-before-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-before-contact-2{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-before-contact-3{
+             background-image: url(/env/graphics/ggeoview/jpmt-before-contact_half.png);
+             background-size: 1430px 844px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-after-contact{
+             background-image: url(/env/graphics/ggeoview/jpmt-after-contact_half.png);
+             background-size: 1425px 840px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jpmt-inside-outside{
+             background-image: url(/env/graphics/ggeoview/jpmt-inside-outside_half.png);
+             background-size: 1401px 842px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-in-action{
+             background-image: url(/env/presentation/optix-in-action_half.png);
+             background-size: 966px 646px;
+             background-position: 100px 50px;
+             
+          }
+          div.slide#pmtinbox-approach-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#pmtinbox-approach-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-approach.png);
+             background-size: 1069px 769px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#pmtinbox-after-1{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#pmtinbox-after-2{
+             background-image: url(/env/graphics/ggeoview/PmtInBox-after.png);
+             background-size: 1057px 760px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-pmt-wall-photo-1{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-pmt-wall-photo-2{
+             background-image: url(/env/presentation/gtc2016/dyb-pmt-wall-photo.png);
+             background-size: 1329px 798px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-not-16-9{
+             background-image: url(/env/presentation/gtc2016/sk-PH20-water-withboat-apr23-wm.png);
+             background-size: 1181px 771px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-1{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-2{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-3{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#super-kamiokande-pmts-4{
+             background-image: url(/env/presentation/PH20-water-withboat-apr23-wm_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#kamiokande-ii-1{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#kamiokande-ii-2{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#kamiokande-ii-3{
+             background-image: url(/env/presentation/1987a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#fast-optical-photon-simulation{
+             background-image: url(/env/presentation/newtons-opticks.png);
+             background-size: 374px 684px;
+             background-position: 800px 0px;
+             
+          }
+          div.slide#photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt-16x9.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#old-hamamatsu-photomultiplier-tubes-pmts{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#old-photomultiplier-tube-operation{
+             background-image: url(/env/presentation/hamamatsu-pmt.png);
+             background-size: 1099px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-juno{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#jiangmen-underground-neutrino-observatory-goals{
+             background-image: url(/env/presentation/juno-schematic-5.png);
+             background-size: 1391px 734px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#dayabay-reactor-neutrino-expt-far-site{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-far-site-2{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-far-site-3{
+             background-image: url(/env/presentation/DybFar_crop.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#geant4-monte-carlo-simulation-toolkit-generality{
+             background-image: url(/env/presentation/g4-hep.png);
+             background-size: 1025px 621px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#seeing-neutrinos-via-scintillation-cherenkov-light{
+             background-image: url(/env/presentation/cherenkov.png);
+             background-size: 316px 203px;
+             background-position: 850px 400px;
+             
+          }
+          div.slide#opticks-auto-instancing{
+             background-image: url(/env/graphics/ggeoview/ggv-juno-instancing.png);
+             background-size: 852px 592px;
+             background-position: 450px 80px;
+             
+          }
+          div.slide#nvidia-optix-1{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-2{
+             background-image: url(/env/presentation/NVIDIAOptiXWebsite_Oct2016.png);
+             background-size: 1280px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticksdocs{
+             background-image: url(/env/presentation/OpticksDocs.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-1{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-antineutrino-detection-via-inverse-beta-decay-2{
+             background-image: url(/env/presentation/AntineutrinoDetectionViaIBDJetterSept2014.png);
+             background-size: 809px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-1{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-2{
+             background-image: url(/env/presentation/ZheTaupDetectorResponseModel.png);
+             background-size: 968px 576px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-1{
+             background-image: url(/env/presentation/EnergyResponseModel.png);
+             background-size: 693px 504px;
+             background-position: 0px 100px;
+             
+          }
+          div.slide#daya-bay-energy-response-model-fit-to-calibration-data-2{
+             background-image: url(/env/presentation/ConstrainingNonLinearity.png);
+             background-size: 761px 553px;
+             background-position: 0px 80px;
+             
+          }
+          div.slide#daya-bay-ngd-analysis-most-precise-theta13{
+             background-image: url(/env/presentation/DYBZheTaup2015Theta13OscillationAnalysis.png);
+             background-size: 1057px 625px;
+             background-position: 100px 60px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-3{
+             background-image: url(/env/presentation/op_full_raytrace_3.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-1{
+             background-image: url(/env/presentation/op_full_raytrace_1.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-0{
+             background-image: url(/env/presentation/op_full_raytrace_0.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-daya-bay-near-site-gpu-raytrace-2{
+             background-image: url(/env/presentation/op_full_raytrace_2.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-juno-chimney-gpu-raytrace-0{
+             background-image: url(/env/presentation/j1707_chimney_analytic_raytrace.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-analytic-juno-pmt-snap-gpu-raytrace-1{
+             background-image: url(/env/presentation/j1707-okop-snap.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpu-instance-culling-with-level-of-detail{
+             background-image: url(/env/presentation/j1707_lod_oglrap_instcull.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-export-of-g4-geometry-to-gltf-2-0{
+             background-image: url(/env/yoctoglrap/dyb_near_venice_half.png);
+             background-size: 1020px 737px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#what-are-numpy-arrays{
+             background-image: url(/env/presentation/what_are_numpy_arrays.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#what-are-numpy-arrays-2{
+             background-image: url(/env/presentation/what_are_numpy_arrays.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bvh{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_029.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#spatial-index-acceleration-structure{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_029.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#rendering-five-decades-of-research-1{
+             background-image: url(/env/presentation/nvidia/rendering_five_decades_of_research.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#rendering-five-decades-of-research-2{
+             background-image: url(/env/presentation/nvidia/rendering_five_decades_of_research.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#path-tracing-in-production-1{
+             background-image: url(/env/presentation/sigraph/PathTracingInProduction_001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#path-tracing-in-production-2{
+             background-image: url(/env/presentation/sigraph/PathTracingInProduction_001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bvh-pascal{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_030.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bvh-turing{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_031.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hardware-traversal-of-bvh-spatial-index{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_031.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#siggraph-2018-announcing-worlds-first-ray-tracing-gpu{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2018_Announcing_Worlds_First_Ray_Tracing_GPU_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#siggraph-2019-eric-enderton-rt-cores{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2019_Eric_Enderton_RT_Cores.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-ai-denoiser-1{
+             background-image: url(/env/presentation/nvidia_demo/nvidia_optix_ai_denoiser.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-ai-denoiser-2{
+             background-image: url(/env/presentation/nvidia_demo/nvidia_optix_ai_denoiser.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#samples-per-pixel-1{
+             background-image: url(/env/presentation/nvidia/NVIDIA_samples_per_pixel_MDL_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#samples-per-pixel-2{
+             background-image: url(/env/presentation/nvidia/NVIDIA_samples_per_pixel_MDL_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#photon-mapping-1{
+             background-image: url(/env/presentation/photon_mapping/PhotonMapping_001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#photon-mapping-2{
+             background-image: url(/env/presentation/photon_mapping/PhotonMapping_002.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#eric-haines-nvidia-ray-tracing-essentials-part-6-the-rendering-equation{
+             background-image: url(/env/presentation/nvidia/NVIDIA_Eric_Haines_Ray_Tracing_Essentials_Part_6_The_Rendering_Equation.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#physically-based-rendering-book-www-pbr-book-org{
+             background-image: url(/env/presentation/pbr/Physically_Based_Rendering_Book_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#the-rendering-equation-1{
+             background-image: url(/env/presentation/rendering_equation/TheRenderingEquation_001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#the-rendering-equation-2{
+             background-image: url(/env/presentation/rendering_equation/TheRenderingEquation_002.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#project-sol{
+             background-image: url(/env/presentation/nvidia_demo/project_sol_jacob_norris_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-turing-gpu-72-sm-4608-cuda-cores{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_009.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-turing-gpu-72-sm-4608-cuda-cores-spec{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_009.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#raytrace-vs-raster{
+             background-image: url(/env/presentation/nvidia/NV_Turing_Editors_Day_132.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ray-tracing-vs-rasterization{
+             background-image: url(/env/presentation/nvidia/black.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#raytrace-diagram{
+             background-image: url(/env/presentation/graphics/1024px-ray_trace_diagram.svg.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#j1808-top-ogl{
+             background-image: url(/env/presentation/j1808/j1808_top_ogl.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#j1808-top-rtx{
+             background-image: url(/env/presentation/j1808/j1808_top_rtx.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#j1808-escapes{
+             background-image: url(/env/presentation/j1808/j1808_escapes.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geocache-360{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geocache-360-2{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-360-benchmark-with-optix-6-0-0-rtx-mode{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#optix-instancing{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#optix-instancing-2{
+             background-image: url(/env/presentation/geocache_360.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#absmry-1m{
+             background-image: url(/env/presentation/ana/absmry_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#absmry-1m-2{
+             background-image: url(/env/presentation/ana/absmry_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ta34-1m{
+             background-image: url(/env/presentation/ana/ta34_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ta34-1m-2{
+             background-image: url(/env/presentation/ana/ta34_1M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv34-1m-a{
+             background-image: url(/env/presentation/ana/tv34_1M_a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv34-1m-b{
+             background-image: url(/env/presentation/ana/tv34_1M_b.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv21-1m-a{
+             background-image: url(/env/presentation/ana/tv21_1M_a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv21-1m-a-2{
+             background-image: url(/env/presentation/ana/tv21_1M_a.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv21-1m-c{
+             background-image: url(/env/presentation/ana/tv21_1M_c.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#rtx-speedup{
+             background-image: url(/env/presentation/ana/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#overheads{
+             background-image: url(/env/presentation/ana/Overheads.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-speedup{
+             background-image: url(/env/presentation/ana/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-vs-geant4{
+             background-image: url(/env/presentation/ana/Opticks_vs_Geant4.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-vs-geant4-2{
+             background-image: url(/env/presentation/ana/Opticks_vs_Geant4.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nhit{
+             background-image: url(/env/presentation/ana/NHit.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#interval-over-launch{
+             background-image: url(/env/presentation/ana/Interval_over_Launch.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#titan-rtx-72-raytrace-dedicated-rt-cores-4608-cuda-cores-24gb-vram-2500-usd{
+             background-image: url(/env/presentation/nvidia/TITAN_RTX.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-143808{
+             background-image: url(/env/presentation/ana/bench_20190526_143808.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-143808-2{
+             background-image: url(/env/presentation/ana/bench_20190526_143808.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-202537{
+             background-image: url(/env/presentation/ana/bench_20190526_202537.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#bench-20190526-202537-2{
+             background-image: url(/env/presentation/ana/bench_20190526_202537.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv16-fastener{
+             background-image: url(/env/presentation/tv/tv16_Fastener.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tv20-polycone-neck{
+             background-image: url(/env/presentation/tv/tv20_polycone_neck.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#tubs-torus-polycone-pmt20inch-polycone-neck{
+             background-image: url(/env/presentation/tv/tv20_polycone_neck.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#inch-pmt-neck-cylinder-torus-polycone{
+             background-image: url(/env/presentation/tv/tv20_polycone_neck.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#genstep-interface{
+             background-image: url(/env/presentation/simulation/genstep_interface.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#introducing-optix-7{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#where-next-for-opticks{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 640px 360px;
+             background-position: 670px 300px;
+             
+          }
+          div.slide#opticks-experience-problems-with-using-nvidia-optix{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 640px 360px;
+             background-position: 670px 300px;
+             
+          }
+          div.slide#nvidia-optix-7-entirely-new-thin-api{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 640px 360px;
+             background-position: 670px 300px;
+             
+          }
+          div.slide#nvidia-optix-7-entirely-new-thin-api-opticks-migration-in-progress{
+             background-image: url(/env/presentation/nvidia/Introducing_OptiX_7.png);
+             background-size: 640px 360px;
+             background-position: 670px 300px;
+             
+          }
+          div.slide#turing-built-for-rtx{
+             background-image: url(/env/presentation/nvidia/TURING_Built_for_RTX_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#turing-built-for-rtx-2{
+             background-image: url(/env/presentation/nvidia/TURING_Built_for_RTX_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-rtx-metro-exodus{
+             background-image: url(/env/presentation/nvidia/NVIDIA_RTX_Metro_Exodus_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#modern-gpu-ray-tracing{
+             background-image: url(/env/presentation/nvidia/Modern_GPU_RAY_Tracing.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-optix-programming-model-analogous-to-rasterization-apis-opengl-shaders{
+             background-image: url(/env/presentation/nvidia/Modern_GPU_RAY_Tracing.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-quadro-rtx-8000-48g{
+             background-image: url(/env/presentation/nvidia/NVIDIA_Quadro_RTX.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#siggraph-2010-optix-a-general-purpose-ray-tracing-engine{
+             background-image: url(/env/presentation/nvidia/SIGGRAPH_2010_OptiX_A_General_Purpose_Ray_Tracing_Engine.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#useful-speedup-1500x-but-why-not-giga-rays-s-1-photon-10-rays{
+             background-image: url(/env/presentation/nvidia/dhart/dhart_siggraph_2019_RTX_traversal_custom_primitives.png);
+             background-size: 720px 405px;
+             background-position: 10px 210px;
+             
+          }
+          div.slide#juno-intro-1{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.001.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-2{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.002.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-3{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.003.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-4{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.004.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-5{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.005.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-6{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.006.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-7{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.007.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-8{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.008.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-9{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.009.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-intro-10{
+             background-image: url(/env/Documents/JUNOIntro/JUNOIntro.010.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#juno-multipurpose-pedro-nufact-2019{
+             background-image: url(/env/presentation/juno/JUNO_Multipurpose_Pedro_NuFact_2019.png);
+             background-size: 960px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#dhart-siggraph-2019-optix-5-traversal{
+             background-image: url(/env/presentation/nvidia/dhart_siggraph_2019_OptiX_5_traversal.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#dhart-siggraph-2019-optix-5-traversal{
+             background-image: url(/env/presentation/nvidia/dhart_siggraph_2019_OptiX_5_traversal.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-check-gui-to-bt5-sd{
+             background-image: url(/env/presentation/ana/scan-pf-1/scan-pf-check-GUI-TO-BT5-SD.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-check-gui-to-sc-bt5-sd{
+             background-image: url(/env/presentation/ana/scan-pf-1/scan-pf-check-GUI-TO-SC-BT5-SD.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-interval-over-launch{
+             background-image: url(/env/presentation/ana/scan-pf-0/Interval_over_Launch.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-nhit{
+             background-image: url(/env/presentation/ana/scan-pf-0/NHit.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-opticks-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-0/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-opticks-vs-geant4{
+             background-image: url(/env/presentation/ana/scan-pf-0/Opticks_vs_Geant4.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-overheads{
+             background-image: url(/env/presentation/ana/scan-pf-0/Overheads.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-rtx-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-0/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-0-rtx-speedup-2{
+             background-image: url(/env/presentation/ana/scan-pf-0/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-interval-over-launch{
+             background-image: url(/env/presentation/ana/scan-pf-1/Interval_over_Launch.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-nhit{
+             background-image: url(/env/presentation/ana/scan-pf-1/NHit.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-speedup-2{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-vs-geant4{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_vs_Geant4.png);
+             background-size: 1280px 720pxS;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-vs-geant4-2{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_vs_Geant4.png);
+             background-size: 1280px 720pxS;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-opticks-vs-geant4-with-html-table{
+             background-image: url(/env/presentation/ana/scan-pf-1/Opticks_vs_Geant4_with_HTML_Table.png);
+             background-size: 1280px 720pxS;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-overheads{
+             background-image: url(/env/presentation/ana/scan-pf-1/Overheads.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#scan-pf-1-rtx-speedup{
+             background-image: url(/env/presentation/ana/scan-pf-1/RTX_Speedup.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-translates-g4-geometry-to-gpu-without-approximation{
+             background-image: url(/env/presentation/face_view_PMTs.png);
+             background-size: 640px 360px;
+             background-position: 20px 340px;
+             
+          }
+          div.slide#cupy-numpy-api-some-of-scipy-accelerated-by-nvidia-cuda-curand-cublas-cusolver-cusparse-thrust-nccl{
+             background-image: url(/env/presentation/cupy/cupy_is2.png);
+             background-size: 1016px 377px;
+             background-position: 150px 150px;
+             
+          }
+          div.slide#cupy-easy-interface-to-nvidia-cuda-stack{
+             background-image: url(/env/presentation/cupy/cupy_stack.png);
+             background-size: 1075px 429px;
+             background-position: 100px 100px;
+             
+          }
+          div.slide#c-union-trick-common-with-cuda-mixed-type-arrays-simpler-faster{
+             background-image: url(/env/presentation/cuda/float_as_int.png);
+             background-size: 600px 89px;
+             background-position: 40px 570px;
+             
+          }
+          div.slide#neutrino-understanding{
+             background-image: url(/env/presentation/neutrino/understanding_universe_planet_sun.png);
+             background-size: 1111px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpltcf-hamamatsur12860lmaskvirtual-subplotsfig{
+             background-image: url(/env/presentation/ana/PolyconeNeck/gpltcf_HamamatsuR12860lMaskVirtual_SubPlotsFig.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpltcf-hamamatsur12860lmaskvirtual-subplotsfig-zoom{
+             background-image: url(/env/presentation/ana/PolyconeNeck/gpltcf_HamamatsuR12860lMaskVirtual_SubPlotsFig_Zoom.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpltcf-hamamatsur12860lmaskvirtual-combizoom-subplotsfig{
+             background-image: url(/env/presentation/ana/PolyconeNeck/gpltcf_HamamatsuR12860lMaskVirtual_combiZoom_SubPlotsFig.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpltcf-nnvtmcppmtlmaskvirtual-subplotsfig{
+             background-image: url(/env/presentation/ana/PolyconeNeck/gpltcf_NNVTMCPPMTlMaskVirtual_SubPlotsFig.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpltcf-nnvtmcppmtlmaskvirtual-subplotsfig-zoom{
+             background-image: url(/env/presentation/ana/PolyconeNeck/gpltcf_NNVTMCPPMTlMaskVirtual_SubPlotsFig_Zoom.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpltcf-nnvtmcppmtlmaskvirtual-combizoom-subplotsfig{
+             background-image: url(/env/presentation/ana/PolyconeNeck/gpltcf_NNVTMCPPMTlMaskVirtual_combiZoom_SubPlotsFig.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#g4optickstest-demonstrates-geant4-opticks-hybrid-workflow{
+             background-image: url(/env/presentation/fermilab_geant4_team/hans_nov2020_lar_tpc_p1_half.png),url(/env/presentation/fermilab_geant4_team/hans_nov2020_lar_tpc_p13_half.png);
+             background-size: 640px 360px,640px 360px;
+             background-position: 0px 360px,640px 360px;
+              
+          }
+          div.slide#geant4-bug-2305{
+             background-image: url(/env/presentation/fermilab_geant4_team/geant4_bugzilla_2305_half.png);
+             background-size: 1180px 310px;
+             background-position: 50px 10px;
+             
+          }
+          div.slide#geant4-bug-2311{
+             background-image: url(/env/presentation/fermilab_geant4_team/geant4_bugzilla_2311_half.png);
+             background-size: 1180px 310px;
+             background-position: 50px 10px;
+             
+          }
+          div.slide#lhcb-rich-ring-imaging-cherenkov-with-opticks-sajan-easo{
+             background-image: url(/env/presentation/lhcb_rich_sajan_easo/sajan_easo_prospects_june_2020_p3_half.png),url(/env/presentation/lhcb_rich_sajan_easo/sajan_easo_prospects_june_2020_p8_half.png);
+             background-size: 640px 360px,640px 360px;
+             background-position: 0px 360px,640px 360px;
+              
+          }
+          div.slide#groups-io-1{
+             background-image: url(/env/presentation/groups_io/groups_io_jan_2021_25_members_33_topics_half.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#groups-io-2{
+             background-image: url(/env/presentation/groups_io/groups_io_jan_2021_message_history_table_half.png);
+             background-size: auto auto;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-corsika8-for-next-generation-neutrino-telescope-optimization{
+             background-image: url(/env/presentation/sjtu_fan_hu_oceanic/fan_hu_pod_strings_geometry_half.png);
+             background-size: 640px 360px;
+             background-position: 640px 360px;
+             
+          }
+          div.slide#uk-swift-hep-grant-software-infrastructure-and-technology-for-hep{
+             background-image: url(/env/presentation/ben_morgan_SwiftHEP_jan_2021/detector_simulation_swiftHEP_p1_half.png),url(/env/presentation/ben_morgan_SwiftHEP_jan_2021/detector_simulation_swiftHEP_p19_half.png);
+             background-size: 640px 360px,640px 360px;
+             background-position: 0px 360px,640px 360px;
+              
+          }
+          div.slide#lz-opticks-history-2018-2021-contacts-with-5-lz-people{
+             background-image: url(/env/presentation/nersc_creaner/optical_sims_using_gpus_half.png),url(/env/presentation/nersc_creaner/lz_motivation_to_gpus_half.png);
+             background-size: 640px 360px,640px 360px;
+             background-position: 0px 360px,640px 360px;
+              
+          }
+          div.slide#lz-opticks-simulation-on-perlmutter-6000-nvidia-a100{
+             background-image: url(/env/presentation/nersc_creaner/perlmutter_half.png);
+             background-size: 640px 360px;
+             background-position: 640px 360px;
+             
+          }
+          div.slide#opticks-juno-progress-efficiency-hit-culling-on-gpu{
+             background-image: url(/env/presentation/optixrap/OSensorLibGeoTest_half.png);
+             background-size: 640px 360px;
+             background-position: 640px 360px;
+             
+          }
+          div.slide#nvidia-marbles-at-night-rtx-demo{
+             background-image: url(/env/presentation/nvidia/nvidia_marbles_at_night_rtx_demo_1080p_capture_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-marbles-at-night-rtx-demo-2{
+             background-image: url(/env/presentation/nvidia/nvidia_marbles_at_night_rtx_demo_1080p_capture_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-rtx-dlss-deep-learning-super-sampling{
+             background-image: url(/env/presentation/nvidia/dlss_20_deep_learning_super_sampling_rtx30series_launch_event_1434_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#nvidia-rtx-dlss-deep-learning-super-sampling-2{
+             background-image: url(/env/presentation/nvidia/dlss_20_deep_learning_super_sampling_rtx30series_launch_event_1434_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#ampere-2nd-generation-rtx{
+             background-image: url(/env/presentation/nvidia/nvidia_ampere_architecture_half.png),url(/env/presentation/nvidia/2nd_generation_rtx_half.png),url(/env/presentation/nvidia/2nd_generation_rt_core_half.png);
+             background-size: 640px 360px,640px 360px,640px 360px;
+             background-position: 0px 360px,640px 0px,640px 360px;
+               
+          }
+          div.slide#csg-examples{
+             background-image: url(/env/presentation/csg/dyb-radial-shield.png),url(/env/presentation/csg/dyb_space_station_complement.png),url(/env/presentation/csg/dyb-cylinder-union-coincidence-speckle.png),url(/env/presentation/csg/dyb-esr-deep-tree-holes.png);
+             background-size: 640px 360px,640px 360px,640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px,0px 0px,640px 0px;
+                
+          }
+          div.slide#csg-parade-grid-1{
+             background-image: url(/env/presentation/OptiXTest/parade_grid_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#csg-parade-grid-2{
+             background-image: url(/env/presentation/OptiXTest/parade_zsphere_grid_half.png),url(/env/presentation/OptiXTest/parade_hyperboloid_grid_half.png);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csg-working{
+             background-image: url(/env/presentation/OptiXTest/csg_ubsp_half.png),url(/env/presentation/OptiXTest/csg_dbsp_half.png),url(/env/presentation/OptiXTest/csg_ibsp_half.png);
+             background-size: 640px 360px,640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px,640px 0px;
+               
+          }
+          div.slide#csg-boolean-parade-grid{
+             background-image: url(/env/presentation/OptiXTest/boolean_parade_grid_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-5-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__5,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-7-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__7,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-9-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__9,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-4-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__4,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-6-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__6,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-3-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__3,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-1-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__1,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-2-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__2,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-1-2-3-4-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__1,2,3,4__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-0-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__0,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t8-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t8,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-8-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__8,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t0-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t0,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t5-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t5,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t6-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t6,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t7-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t7,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t4-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t4,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-all-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys_all_00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t3-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t3,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t9-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t9,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t2-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t2,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#llowerchimney-phys-t1-00000{
+             background-image: url(/env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__t1,__00000.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#double-greek-temple{
+             background-image: url(/env/presentation/flight/double_greek_temple_half.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#csgoptixggeo-0{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/0/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/0/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-1{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/1/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/1/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-2{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/2/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/2/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-3{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/3/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/3/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-4{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/4/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/4/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-5{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/5/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/5/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-6{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/6/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/6/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-7{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/7/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/7/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-8{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/8/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/8/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#csgoptixggeo-9{
+             background-image: url(/env/presentation/CSGOptiXGGeo/70000/9/pixels.jpg),url(/env/presentation/CSGOptiXGGeo/50001/9/pixels.jpg);
+             background-size: 640px 360px,640px 360px;
+             background-position: 640px 360px,0px 360px;
+              
+          }
+          div.slide#juno-optix-7-foundry-geometry-scan{
+             background-image: url(/env/presentation/cxr/cxr_overview/cxr_i0_4,_-1.jpg),url(/env/presentation/cxr/cxr_overview/cxr_i0_2,_-1.jpg),url(/env/presentation/cxr/cxr_overview/cxr_i0_1,2,3,4_-1.jpg),url(/env/presentation/cxr/cxr_overview/cxr_i0_0,_-1.jpg);
+             background-size: 640px 360px,640px 360px,640px 360px,640px 360px;
+             background-position: 0px 360px,640px 0px,0px 0px,640px 360px;
+                
+          }
+          div.slide#cxr-i0-2-1-only-nnvt-pmts{
+             background-image: url(/env/presentation/cxr/cxr_overview/cxr_i0_2,_-1.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cxr-i0-1-2-3-4-1-all-pmts{
+             background-image: url(/env/presentation/cxr/cxr_overview/cxr_i0_1,2,3,4_-1.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cxr-i0-0-1-only-global-remainder{
+             background-image: url(/env/presentation/cxr/cxr_overview/cxr_i0_0,_-1.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cxr-i0-t8-1-exclude-slowest{
+             background-image: url(/env/presentation/cxr/cxr_overview/cxr_i0_t8,_-1.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#cxr-i0-t8-1-exclude-slowest-2{
+             background-image: url(/env/presentation/cxr/cxr_overview/cxr_i0_t8,_-1.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          } 
+
+       </style>
+    <!-- comment
+
+1280px_720px
+640px_360px
+
+NVIDIA
+                    Memory    Bandwidth     CUDA(RT) Cores
+TITAN V             12 GB       651 GB/s    5120(0)
+Tesla V100          32 GB       900 GB/s    5120(0)
+TITAN RTX           24 GB       672 GB/s    4608(72)
+Quadro RTX 8000     48 GB       672 GB/s    4608(72)
+
+SM*64 gives cores
+
+https://www.techpowerup.com/gpu-specs/titan-v.c3051
+https://www.techpowerup.com/gpu-specs/titan-rtx.c3311
+https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
+<style type="text/css">
+
+    .strike { text-decoration: line-through; }
+    .center {text-align: center;}
+
+    span.redbold { color: red; font-weight:bold ; }
+    span.bluebold { color: blue; font-weight:bold ; }
+    span.greenbold { color: green; font-weight:bold ; }
+
+    span.r { color: red; font-weight:bold ; }
+    span.b { color: blue; font-weight:bold ; }
+    span.g { color: green; font-weight:bold ; }
+
+    span.alarm { color: red; }
+    span.blue { color: blue; }
+    span.warn { color: orange; }
+    span.ok { color: green; }
+    span.i { display: none; }
+    pre.sliteral { class:"literal-block small"; }
+    pre.mypre {
+         display: block;
+         font-family: monospace;
+         font-size: 20px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+    pre.mypretiny {
+         display: block;
+         font-family: monospace;
+         font-size: 15px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+    pre.myfoot {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: white;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+    a.mylink {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         color: black;
+         position: absolute; top:86%; left:4%; width:50%; height:10% ;
+    }
+
+
+    div.mytitle {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:0%; left:5%; width:90%; height:10% ;
+    }
+
+    div.mytitle2 {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:5%; left:5%; width:90%; height:10% ;
+    }
+
+
+
+    div.mycredit {
+         font-size: 20px;
+         color: black;
+         position: absolute; top:90%; left:5%; width:80%; height:10% ;
+    }
+
+    div.mysidebar {
+        margin: 0 0 0.5em 1em;
+        border: medium outset;
+        padding: 1em;
+        background-color: #ffffee;
+        width: 20%;
+        float: right;
+        clear: right;
+    }
+
+    table.mytable th {
+         background-color: #ede;
+    }
+    table.mytable tr:nth-child(even) {
+        background-color: #F3F3FF;
+    }
+    table.mytable tr:nth-child(odd) {
+        background-color: #FFFFEE;
+    }
+
+
+</style><!-- comment
+
+ITEMS TO COVER, AS ADVERTISED IN ABSTRACT :
+
+* G4Opticks
+* on-GPU efficiency culling : avoids detector specific assumptions in G4Opticks sensor interface
+* Migration to OptiX 7 -->
+<!-- comment
+
+Navigate the HTML slides by entering a page number and pressing return
+
+reps-talk opticks-oct2019-dance    # NB underscores to hyphens for latex
+
+   ## slide titles and s5_text directive content are written to /tmp/opticks-oct2019-dance.rst
+   ## reps-talk converts that into a PDF document : as an aid to thinking about what to say -->
+<div class="mytitle">
+<header>
+<h1 style="background-color:lightgrey">
+      Integration of JUNO simulation framework with <i>Opticks</i> : GPU accelerated optical propagation via NVIDIA® OptiX™
+    <h2 style="background-color:lightgrey;text-align:center"> Open source, https://bitbucket.org/simoncblyth/opticks </h2>
+</h1>
+</header>
+</div>
+
+<img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="/env/presentation/juno/JUNO_logo.png"  />
+<div class="mycredit">
+<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS &mdash; On behalf of the JUNO Collaboration &mdash; vCHEP, 19 May 2021</h2>
+</div>
+        <!--  s5talk  -->
+        <br/>
+    
+</div>
+<div class="slide" id="outline">
+<h1>Outline</h1>
+<img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
+<div class="small"><span>&nbsp;</span></div><ul class="small simple">
+<li>Context and Problem<ul>
+<li>p2: Jiangmen Underground Neutrino Observatory (JUNO)</li>
+<li>p3: JUNO Optical Photon Simulation Problem...</li>
+<li>p4: Optical Photon Simulation ≈ Ray Traced Image Rendering</li>
+</ul>
+</li>
+<li>NVIDIA Tools to create Solution<ul>
+<li>p5: NVIDIA Ampere : 2nd Generation RTX</li>
+<li>p6: NVIDIA OptiX Ray Tracing Engine</li>
+<li>p7: NVIDIA OptiX 7 : Entirely new thin API</li>
+</ul>
+</li>
+<li>Opticks : Introduction + New Features<ul>
+<li>p8,9: Geant4 + Opticks Hybrid Workflow : External Optical Photon Simulation</li>
+<li>p10: New : Collection Efficiency Culling on GPU</li>
+<li>p11: New : <em>CSGFoundry</em> Geometry Model</li>
+</ul>
+</li>
+<li>Opticks : First JUNO Renders with OptiX 7<ul>
+<li>p12-13:Ray trace renders</li>
+<li>p14:Geometry variation ray-trace times</li>
+</ul>
+</li>
+<li>Overview + Links</li>
+</ul>
+<div class="small"><hr/></div>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="juno-intro-2">
+<h1><span class="i">JUNO_Intro_2</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+:i:`JUNO_Intro_3`
+- - - - - - - - - - - - - - - - - -
+
+.. s5_talk::
+
+    JUNO will be able to detect neutrinos from many terrestrial and extra-terrestrial
+    sources including : solar, atmospheric, geo-neutrinos.
+
+    Despite 700 m of overburden the largest backgrounds to these neutrino signals
+    will be from cosmic muon induced processes.
+
+    A muon veto is used to control the backgrounds.
+
+    However to minimize the time and volume vetoed, which cuts into
+    it is necessary to have a good muon reconstruction which means
+    that we need large samples of cosmic muons. -->
+</div>
+<div class="slide" id="optical-photon-simulation-problem">
+<h1><span class="incremental">Optical Photon Simulation Problem...</span></h1>
+<pre>
+
+
+
+
+
+
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">Huge CPU Memory+Time Expense</span></p>
+<dl class="small last docutils">
+<dt><strong>JUNO Muon Simulation Bottleneck</strong></dt>
+<dd>~99% CPU time, memory constraints</dd>
+<dt><strong>Ray-Geometry intersection Dominates</strong></dt>
+<dd>simulation is not alone in this problem...</dd>
+<dt><strong>Optical photons : naturally parallel, simple :</strong></dt>
+<dd><ul class="first last simple">
+<li>produced by Cherenkov+Scintillation</li>
+<li>yield only Photomultiplier hits</li>
+</ul>
+</dd>
+</dl>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="optical-photon-simulation-ray-traced-image-rendering">
+<h1><span class="small">Optical Photon Simulation ≈ Ray Traced Image Rendering</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Not a Photo, a Calculation</p>
+<img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
+<p class="tiny last"><a class="reference external" href="http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf">http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf</a></p>
+</div>
+<dl class="small docutils">
+<dt><span class="bluebold">simulation</span></dt>
+<dd>photon parameters at sensors (PMTs)</dd>
+<dt><span class="bluebold">rendering</span></dt>
+<dd>pixel values at image plane</dd>
+</dl>
+<pre>
+
+</pre><p class="small"><strong>Much in common : geometry, light sources, optical physics</strong></p>
+<ul class="small simple">
+<li><span class="redbold">both limited by ray geometry intersection, aka ray tracing</span></li>
+</ul>
+<pre>
+
+</pre><p class="small"><strong>Many Applications of ray tracing</strong> :</p>
+<ul class="small simple">
+<li>advertising, design, architecture, films, games,...</li>
+<li>-&gt; huge efforts to improve hw+sw over 30 yrs</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- skip
+
+
+**August 2018 : Major Ray Tracing Advance**
+
+* NVIDIA RTX Platform, Turing GPU
+* :red:`ray trace dedicated hardware : RT cores`
+
+* SIGGRAPH 2018, announcing RTX
+* https://www.youtube.com/watch?v=LP6miCI6-h4 -->
+<!-- comment
+
+:i:`SIGGRAPH_2018_Announcing_Worlds_First_Ray_Tracing_GPU`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. raw:: html
+
+    <pre>
+
+
+
+
+
+
+
+    </pre>
+
+
+.. class:: huge
+
+    .. table::
+       :align: right
+
+
+       +- - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+       |  :white:`10 Giga Rays/s`   |
+       +- - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+
+
+.. s5_talk::
+
+    Three years ago NVIDIA announced a leap in ray tracing performance
+    with the NVIDIA Turing architecture GPU.
+
+    Turing Architecture GPUs have hardware dedicated to accelerating ray tracing,
+    which NVIDIA claims can reach 10 billion ray geometry intersections per second
+    with a single GPU.
+
+    Assuming each photon costs 10 rays, that means the upper limit per GPU is
+    1 billion photons/second. -->
+</div>
+<div class="slide" id="ampere-2nd-generation-rtx">
+<h1><span class="small">Ampere : 2nd Generation RTX</span></h1>
+<dl class="small docutils">
+<dt>NVIDIA Ampere (2020):</dt>
+<dd>&quot;...triple double over Turing (2018, 10 GigaRays/s)...&quot;</dd>
+</dl>
+<ul class="small simple">
+<li><strong>RT Core</strong> : ray trace dedicated GPU hardware</li>
+<li><strong>NVIDIA GeForce RTX 3090</strong><ul>
+<li>10,496 CUDA Cores, 28GB VRAM, USD 1499</li>
+</ul>
+</li>
+<li><span class="redbold">ray trace performance continues rapid improvement</span></li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* Samsung 8nm (from TSMC 12nm) -->
+<!-- comment
+
+``Spatial Index Acceleration Structure``
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+.. raw:: html
+
+    <pre>
+
+
+
+
+
+
+
+
+
+
+
+    </pre>
+
+.. sidebar:: :small:`Tree of Bounding Boxes (bbox)`
+
+    .. class:: small
+
+       * aims to minimize bbox+primitive intersects
+       * :red:`recursively partitions space`
+
+
+.. s5_talk::
+
+   The acceleration structure is a spatial index.
+   It recursively partitions space. Which allows
+   the search to find an intersect to avoid making
+   lots of intersection tests.
+
+   Some of this traversal benefits from the RT cores. -->
+</div>
+<div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix">
+<h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- http://developer.nvidia.com/optix</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">OptiX Raytracing Pipeline</p>
+<p class="small">Analogous to OpenGL rasterization pipeline:</p>
+<img alt="/env/optix/docs/optix-model.png" class="last align-right" src="/env/optix/docs/optix-model.png" style="width: 450px;" />
+</div>
+<p class="small"><strong>OptiX makes GPU ray tracing accessible</strong></p>
+<ul class="small simple">
+<li><strong>accelerates</strong> ray-geometry intersections</li>
+<li>simple : single-ray programming model</li>
+<li>&quot;...free to use within any application...&quot;</li>
+<li><span class="red">access RT Cores[1] with OptiX 6+ via RTX™ mode</span></li>
+</ul>
+<p class="small"><strong>NVIDIA expertise:</strong></p>
+<ul class="small simple">
+<li>OptiX pre-7 : <span class="redbold">~linear scaling up to 4 GPUs</span></li>
+<li>acceleration structure creation + traversal (Blue)</li>
+<li>instanced sharing of geometry + acceleration structures</li>
+<li>compiler optimized for GPU ray tracing</li>
+</ul>
+<p class="tiny"><tt class="docutils literal"><span class="pre">https://developer.nvidia.com/rtx</span></tt></p>
+<p class="small"><strong>User provides (Yellow):</strong></p>
+<ul class="small simple">
+<li>ray generation</li>
+<li>geometry bounding box, intersects</li>
+</ul>
+<p class="tiny">[1] Turing+ GPUs eg NVIDIA TITAN RTX</p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="nvidia-optix-7-entirely-new-thin-api">
+<h1><span class="small">NVIDIA OptiX 7 : Entirely new thin API</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">NVIDIA OptiX 7 : Entirely new API</span></p>
+<ul class="small last simple">
+<li>introduced August 2019</li>
+<li>low-level CUDA-centric thin API (Vulkan-ized)</li>
+<li><span class="strike">near perfect scaling to 4 GPUs, for free</span></li>
+<li><span class="redbold">Major Opticks re-implementation required</span></li>
+</ul>
+</div>
+<p class="small"><strong>NVIDIA OptiX 7 Features</strong></p>
+<ul class="small simple">
+<li>Minimal host state,  <span class="red">All host functions are thread-safe</span></li>
+<li>GPU memory <em>managed by application</em></li>
+<li>GPU launches : explicit, asynchronous (CUDA streams)</li>
+<li>Multi-GPU <em>managed by application</em></li>
+</ul>
+<dl class="small docutils">
+<dt><strong>Disadvantage</strong></dt>
+<dd>Demands much more developer effort than OptiX 6</dd>
+<dt><strong>Advantage</strong></dt>
+<dd>More control/flexibility over everything.</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="geant4opticksworkflow">
+<h1><span class="i">Geant4OpticksWorkflow</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="geant4opticksworkflow-2">
+<h1><span class="i">Geant4OpticksWorkflow 2</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Opticks : GPU Optical Photons</span></p>
+<ul class="small last simple">
+<li>CUDA port of G4 generation+propagation</li>
+<li><span class="redbold">auto-translate G4 geometry to OptiX GPU</span></li>
+<li>offloads optical simulation to GPU</li>
+</ul>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-juno-progress-efficiency-hit-culling-on-gpu">
+<h1><span class="small">Opticks + JUNO Progress : Efficiency Hit Culling on GPU</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">ε, ε [θ, φ]  -&gt; GPU Tex</p>
+<p class="small"><strong>Separate Textures for each sensor type</strong></p>
+<dl class="small last docutils">
+<dt><tt class="docutils literal">G4Opticks::</tt></dt>
+<dd><tt class="docutils literal">setSensorData</tt>
+<tt class="docutils literal">setSensorAngularEfficiency</tt></dd>
+</dl>
+</div>
+<ul class="small simple">
+<li><span class="red">Reduce CPU memory for hits by a factor of the efficiency</span></li>
+<li>only <strong>collected hits</strong> consume CPU memory</li>
+</ul>
+<p class="small">Culling result photon flags set on GPU:</p>
+<ul class="small simple">
+<li><tt class="docutils literal">EFFICIENCY_COLLECT</tt></li>
+<li><tt class="docutils literal">EFFICIENCY_CULL</tt></li>
+</ul>
+<pre>
+
+
+</pre><p class="small"><strong>Testing angular efficiency GPU texture machinery</strong></p>
+<ul class="small simple">
+<li>Mock striped theta efficiency, two random categories</li>
+<li>cosine phi efficiency variation for one category</li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://simoncblyth.bitbucket.io/opticks/optixrap/tests/OSensorLibGeoTest.cc.html">https://simoncblyth.bitbucket.io/opticks/optixrap/tests/OSensorLibGeoTest.cc.html</a></p>
+<p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst">https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst</a></p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+https://bitbucket.org/simoncblyth/opticks/src/master/optickscore/tests/MockSensorLibTest.cc
+
+https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/tests/OSensorLibGeoTest.cc -->
+</div>
+<div class="slide" id="new-foundry-model-shared-cpu-gpu-geometry-context">
+<h1><span class="small">New &quot;Foundry&quot; Model : Shared CPU/GPU Geometry Context</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Solid+Instances created via Foundry</span></p>
+<pre class="mypretiny">
+struct CSGFoundry
+{
+   void upload(); <span class="redbold">// to GPU </span>
+...
+   std::vector&lt;CSGSolid&gt;  solid ; // compounds (eg PMT)
+   std::vector&lt;CSGPrim&gt;   prim ;
+   std::vector&lt;CSGNode&gt;   node ; // shapes, operators
+
+   std::vector&lt;float4&gt; plan ; // planes
+   std::vector&lt;qat4&gt;   tran ; // CSG transforms
+   std::vector&lt;qat4&gt;   itra ; // inverse CSG transforms
+   std::vector&lt;qat4&gt;   inst ; // instance transforms
+
+   <span class="redbold">// entire geometry in four GPU allocations</span>
+   CSGPrim*    d_prim ;
+   CSGNode*    d_node ;
+   float4*     d_plan ;
+   qat4*       d_itra ;
+ };
+</pre><ul class="small simple">
+<li><strong>Solid</strong> : 1 or more <strong>Prim</strong>  : ( <strong>Solid</strong> -&gt; <strong>GAS</strong> )</li>
+<li><strong>Prim</strong> : 1,3,7,15,31,... <strong>Node</strong>  : (<strong>Prim</strong> ~ <em>G4VSolid</em>)</li>
+<li><strong>Inst</strong> -&gt; <strong>IAS</strong></li>
+</ul>
+<p class="small last"><span class="bluebold">Reference ranges by offset, count</span></p>
+</div>
+<p class="small"><span class="redbold">Provides feature dropped in NVIDIA OptiX 7 API</span></p>
+<pre>
+
+
+</pre><dl class="small docutils">
+<dt><span class="bluebold">https://github.com/simoncblyth/CSG</span> &quot;Foundry&quot; model</dt>
+<dd><dl class="first last docutils">
+<dt><strong>csg_intersect_tree.h/csg_intersect_node.h/...</strong></dt>
+<dd><span class="redbold">simple headers common to pre-7/7/CPU-testing</span></dd>
+</dl>
+</dd>
+<dt><span class="bluebold">https://github.com/simoncblyth/CSG_GGeo</span></dt>
+<dd>Convert <em>Opticks/GGeo</em> -&gt; <em>CSGFoundry</em></dd>
+<dt><span class="bluebold">https://github.com/simoncblyth/CSGOptiX</span></dt>
+<dd>OptiX 7 + pre-7 rendering</dd>
+</dl>
+<pre>
+
+</pre><p class="small"><strong>Simple headers, common CPU/GPU types</strong></p>
+<ul class="small simple">
+<li>arrange API to allow : pre-7, 7, CPU testing</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cxr-i0-t8-1-exclude-slowest">
+<h1><span class="i">[9]cxr_i0_t8,_-1 : EXCLUDE SLOWEST</span></h1>
+<pre>
+
+
+
+</pre><div class="sidebar">
+<p class="first sidebar-title"><span class="small">First JUNO OptiX 7 Ray-trace</span></p>
+<p class="small">Very New CSG &quot;Foundry&quot; Geometry Model</p>
+<ul class="small last simple">
+<li><span class="redbold">purely analytic CSG, no triangles</span></li>
+<li>everything at default, no optimization</li>
+<li>TODO: BVH + stack size &quot;tuning&quot;</li>
+</ul>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="juno-optix-7-foundry-geometry-scan">
+<h1><span class="i">JUNO OptiX 7 : &quot;Foundry&quot; Geometry Scan</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Vary Geom. Compare Render Times</span></p>
+<p class="small last">Fast render -&gt; Fast simulation</p>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="juno-geometry-optix-7-ray-trace-times-2m-pixels-titan-rtx">
+<h1><span class="small">JUNO Geometry : OptiX 7 Ray Trace Times ~2M pixels : TITAN RTX</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Same viewpoint, vary GPU geometry</span></p>
+<ul class="small simple">
+<li>1920x1080 render times (~2M pixels)</li>
+<li>Geometry &quot;factored&quot; into 10 instances</li>
+<li><strong>3084:sWorld</strong> is the &quot;remainder&quot; geometry</li>
+<li><tt class="docutils literal"><span class="pre">-e</span></tt> option controls components</li>
+<li>t=tilde: <tt class="docutils literal"><span class="pre">-e</span> t8,</tt>  <strong>excludes</strong> listed</li>
+<li><strong>relative</strong> compares to &quot;ONLY PMT&quot;</li>
+</ul>
+<ul class="small last simple">
+<li>very large range of times</li>
+<li>with <strong>1:uni_acrylic</strong> : 65-100x slower</li>
+<li>next offender is <strong>3084:sWorld</strong></li>
+</ul>
+</div>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="3%" />
+<col width="9%" />
+<col width="10%" />
+<col width="9%" />
+<col width="69%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">idx</th>
+<th class="head">-e</th>
+<th class="head">time(s)</th>
+<th class="head">relative</th>
+<th class="head">enabled geometry description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>0</td>
+<td>7,</td>
+<td>0.0017</td>
+<td>0.1042</td>
+<td>ONLY: 1:base_steel0x35a1810</td>
+</tr>
+<tr><td>1</td>
+<td>5,</td>
+<td>0.0017</td>
+<td>0.1049</td>
+<td>ONLY: 1:sStrutBallhead0x34be280</td>
+</tr>
+<tr><td>2</td>
+<td>9,</td>
+<td>0.0018</td>
+<td>0.1135</td>
+<td>ONLY: 130:sPanel0x4e71750</td>
+</tr>
+<tr><td>3</td>
+<td>1,</td>
+<td>0.0021</td>
+<td>0.1292</td>
+<td>ONLY: 5:PMT_3inch_pmt_solid0x43c0a40</td>
+</tr>
+<tr><td>4</td>
+<td>6,</td>
+<td>0.0029</td>
+<td>0.1824</td>
+<td>ONLY: 1:uni10x3461bd0</td>
+</tr>
+<tr><td>5</td>
+<td>3,</td>
+<td>0.0082</td>
+<td>0.5075</td>
+<td>ONLY: 5:HamamatsuR12860sMask0x3c39130</td>
+</tr>
+<tr><td>6</td>
+<td>4,</td>
+<td>0.0082</td>
+<td>0.5084</td>
+<td>ONLY: 5:mask_PMT_20inch_vetosMask0x3c2e7c0</td>
+</tr>
+<tr><td>7</td>
+<td>2,</td>
+<td><span class="b">0.0104</span></td>
+<td>0.6408</td>
+<td><span class="bluebold">ONLY: 5:NNVTMCPPMTsMask0x3c2c750</span></td>
+</tr>
+<tr><td>8</td>
+<td>1,2,3,4</td>
+<td><span class="r">0.0162</span></td>
+<td>1.0000</td>
+<td><span class="redbold">ONLY PMT : ACTS AS BASELINE</span></td>
+</tr>
+<tr><td>9</td>
+<td>t8,</td>
+<td><span class="b">0.1053</span></td>
+<td>6.5126</td>
+<td><span class="bluebold">EXCL: 1:uni_acrylic30x35932f0</span></td>
+</tr>
+<tr><td>10</td>
+<td>0,</td>
+<td><span class="b">0.1163</span></td>
+<td>7.1935</td>
+<td><span class="bluebold">ONLY: 3084:sWorld0x33e3370</span></td>
+</tr>
+<tr><td>11</td>
+<td>t8,</td>
+<td>0.1203</td>
+<td>7.4401</td>
+<td>EXCL: 1:uni_acrylic30x35932f0</td>
+</tr>
+<tr><td>12</td>
+<td>8,</td>
+<td>0.5373</td>
+<td>33.2399</td>
+<td>ONLY: 1:uni_acrylic30x35932f0</td>
+</tr>
+<tr><td>13</td>
+<td>t0,</td>
+<td>0.5530</td>
+<td>34.2133</td>
+<td>EXCL: 3084:sWorld0x33e3370</td>
+</tr>
+<tr><td>14</td>
+<td>t1,</td>
+<td>0.6060</td>
+<td>37.4915</td>
+<td>EXCL: 5:PMT_3inch_pmt_solid0x43c0a40</td>
+</tr>
+<tr><td>15</td>
+<td>t7,</td>
+<td>0.6151</td>
+<td>38.0565</td>
+<td>EXCL: 1:base_steel0x35a1810</td>
+</tr>
+<tr><td>16</td>
+<td>t2,</td>
+<td>0.6168</td>
+<td>38.1601</td>
+<td>EXCL: 5:NNVTMCPPMTsMask0x3c2c750</td>
+</tr>
+<tr><td>17</td>
+<td>t6,</td>
+<td>0.6253</td>
+<td>38.6862</td>
+<td>EXCL: 1:uni10x3461bd0</td>
+</tr>
+<tr><td>18</td>
+<td>t3,</td>
+<td>0.6279</td>
+<td>38.8472</td>
+<td>EXCL: 5:HamamatsuR12860sMask0x3c39130</td>
+</tr>
+<tr><td>19</td>
+<td>t0</td>
+<td>0.6334</td>
+<td>39.1866</td>
+<td>3084:sWorld0x33e3370</td>
+</tr>
+<tr><td>20</td>
+<td>t4,</td>
+<td>0.6371</td>
+<td>39.4137</td>
+<td>EXCL: 5:mask_PMT_20inch_vetosMask0x3c2e7c0</td>
+</tr>
+<tr><td>21</td>
+<td>t5,</td>
+<td>0.6470</td>
+<td>40.0268</td>
+<td>EXCL: 1:sStrutBallhead0x34be280</td>
+</tr>
+<tr><td>22</td>
+<td>t9,</td>
+<td>0.6471</td>
+<td>40.0361</td>
+<td>EXCL: 130:sPanel0x4e71750</td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="summary-and-links">
+<h1><span class="small">Summary and Links</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Next Steps</span></p>
+<ul class="small last simple">
+<li>Foundry JUNO geometry validation</li>
+<li>migrate optical physics to NVIDIA OptiX 7</li>
+<li>JUNO Production validation</li>
+</ul>
+</div>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 20px;" />
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> : state-of-the-art GPU ray traced optical simulation integrated with <em>Geant4</em>.
+Geometry progress with OptiX 7 suggests integration during 2021 is achievable.</p>
+<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
+<ul class="simple">
+<li>Efficiency culling decision moved to GPU, reducing CPU hit memory</li>
+<li>&quot;Foundry&quot; geometry model implemented to support NVIDIA OptiX 7 API.</li>
+<li><span class="redbold">First JUNO OptiX 7 renders achieved.</span></li>
+</ul>
+</blockquote>
+<table border="1" class="docutils align-center">
+<colgroup>
+<col width="55%" />
+<col width="45%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
+<td>code repository</td>
+</tr>
+<tr><td><a class="reference external" href="https://github.com/simoncblyth/opticks/releases">https://github.com/simoncblyth/opticks/releases</a></td>
+<td>.zip .tar.gz  archives</td>
+</tr>
+<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
+<td>presentations and videos</td>
+</tr>
+<tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
+<td>forum/mailing list archive</td>
+</tr>
+<tr><td>email:opticks+subscribe&#64;groups.io</td>
+<td>subscribe to mailing list</td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cxr-i0-2-1-only-nnvt-pmts">
+<h1><span class="white">[7]cxr_i0_2,_-1 : ONLY NNVT PMTs</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cxr-i0-1-2-3-4-1-all-pmts">
+<h1><span class="white">[8]cxr_i0_1,2,3,4_-1 : ALL PMTS</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cxr-i0-0-1-only-global-remainder">
+<h1><span class="white">[10]cxr_i0_0,_-1 : ONLY GLOBAL &quot;REMAINDER&quot;</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cxr-i0-t8-1-exclude-slowest-2">
+<h1><span class="white">[9]cxr_i0_t8,_-1 : EXCLUDE SLOWEST : 2</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+</div>
+</body>
+</html>
