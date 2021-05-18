@@ -1969,6 +1969,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-position: 0px 0px;
              
           }
+          div.slide#cxr-i0-t8-1-exclude-slowest-1{
+             background-image: url(/env/presentation/CSGOptiXRender/CSG_GGeo/cvd1/70000/cxr_overview/cam_0_tmin_0.4/cxr_overview_emm_t8,_moi_-1.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
           div.slide#cxr-i0-t8-1-exclude-slowest-2{
              background-image: url(/env/presentation/cxr/cxr_overview/cxr_i0_t8,_-1.jpg);
              background-size: 1280px 720px;
@@ -2252,8 +2258,7 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 
 
 </style><ul class="small simple">
-<li><a class="reference external" href="https://github.com/simoncblyth/CSG/commits">https://github.com/simoncblyth/CSG/commits</a></li>
-<li><a class="reference external" href="https://github.com/simoncblyth/CSGOptiX/commits">https://github.com/simoncblyth/CSGOptiX/commits</a></li>
+<li><a class="reference external" href="https://github.com/simoncblyth/CSG/commits">https://github.com/simoncblyth/CSG/commits</a> <a class="reference external" href="https://github.com/simoncblyth/CSGOptiX/commits">https://github.com/simoncblyth/CSGOptiX/commits</a></li>
 <li><a class="reference external" href="https://github.com/simoncblyth/CSG_GGeo/commits">https://github.com/simoncblyth/CSG_GGeo/commits</a></li>
 </ul>
 <p class="small"><strong>PROGRESS</strong> : OptiXTest -&gt; <em>CSG</em> + <em>CSGOptiX</em>, added <em>CSG_GGeo</em></p>
@@ -2264,14 +2269,15 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 </ul>
 <p class="small"><strong>NEXT STEPS:</strong></p>
 <ul class="small simple">
-<li>investigate some slow solids in JUNO geometry, try different modelling</li>
-<li>integrate packages with Opticks</li>
-<li>optixrap/cu/generate.cu : photon generation + propagation : expts<ul>
-<li><span class="redbold">pull out simple headers common to: pre-7, 7, CPU testing</span></li>
-<li>minimize code difference between : pre-7, 7, CPU-testing</li>
+<li>investigate 2 slow solids in JUNO geometry, try different instance criteria, modelling</li>
+<li>systematic comparison of render times with 6 and 7 : <strong>stack size tuning</strong></li>
+<li>reduce <em>CSGOptiX</em> code ~duplicated between pre-7:Six.cc, 7:SBT.cc : <strong>unify code in common</strong></li>
+<li>bring over event handling (photon generation + propagation)<ul>
+<li><span class="redbold">pull out simple headers common to: pre-7, 7, CPU testing</span> (minimize code difference between envs)</li>
 <li>trickery/mocking needed for CURAND on CPU? (templating?)</li>
 </ul>
 </li>
+<li>integrate packages with Opticks</li>
 </ul>
 <p class="small"><strong>LONGTERM POSSIBILITY</strong> : Populate <strong>CSGFoundry</strong> model direct from Geant4 geometry ? [<span class="redbold">Disruptive</span>]</p>
 <div class="small line-block">
@@ -2800,7 +2806,412 @@ grouped as siblings
 
         <!--  s5talk  -->
         <br/>
-    </div>
+    <!-- comment
+
+[7]cxr_i0_2,_-1 ONLY NNVT PMTs
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /env/presentation/cxr/cxr_overview/cxr_i0_2,_-1.jpg 1280px_720px -->
+</div>
+<div class="slide" id="cxr-i0-1-2-3-4-1-all-pmts">
+<h1>[8]cxr_i0_1,2,3,4_-1 ALL PMTs</h1>
+<p class="tiny">/env/presentation/cxr/cxr_overview/cxr_i0_1,2,3,4_-1.jpg 1280px_720px</p>
+<p class="huge"><span class="white">&quot;Flat&quot; look is a bug</span></p>
+<p class="huge"><span class="white">Was only rendering the last Prim for GAS after the 1st</span></p>
+<p class="huge"><span class="white">CAUSE: using globalPrimIdx for SBTIndexOffset : needs to be GAS local</span></p>
+</div>
+<div class="slide" id="cxr-i0-0-1-only-global-remainder">
+<h1>[10]cxr_i0_0,_-1 ONLY GLOBAL &quot;REMAINDER&quot;</h1>
+<p class="tiny">/env/presentation/cxr/cxr_overview/cxr_i0_0,_-1.jpg 1280px_720px</p>
+<p class="huge"><span class="white">3084 &quot;remainder&quot; non-instance volumes : is far too many</span></p>
+<p class="huge"><span class="white">Looks to be obvious repetitions missed by the auto-instancer</span></p>
+</div>
+<div class="slide" id="cxr-i0-t8-1-exclude-slowest-1">
+<h1>[9]cxr_i0_t8,_-1 EXCLUDE SLOWEST 1</h1>
+<p class="tiny">/CSG_GGeo/cvd1/70000/cxr_overview/cam_0_tmin_0.4/cxr_overview_emm_t8,_moi_-1.jpg 1280px_720px</p>
+<p class="huge"><span class="white">Flipping between this and the next, shows the missing Prim bug effect</span></p>
+</div>
+<div class="slide" id="cxr-i0-t8-1-exclude-slowest-2">
+<h1>[9]cxr_i0_t8,_-1 EXCLUDE SLOWEST 2</h1>
+<p class="tiny">/env/presentation/cxr/cxr_overview/cxr_i0_t8,_-1.jpg 1280px_720px</p>
+<p class="huge"><span class="white">Flipping between this and the prev, shows the missing Prim bug effect</span></p>
+</div>
+<div class="slide" id="cxr-view-0">
+<h1>cxr_view_0</h1>
+<!-- comment
+
+/CSG_GGeo/cvd0/50001/cxr_view/cam_0_0,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+/CSG_GGeo/cvd1/60500/cxr_view/cam_0_0,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+/CSG_GGeo/cvd1/70000/cxr_view/cam_0_0,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px -->
+<p class="small"><strong>Inside View with only global remainder geometry</strong></p>
+<p class="small">Same viewpoint in OptiX 5,6 and 7</p>
+<ul class="small simple">
+<li>launch time (s) at bottom left</li>
+<li>OptiX 5 : NVIDIA Geforce 750M (2013 Macbook Pro)</li>
+<li>OptiX 6, 7 : NVIDIA TITAN RTX</li>
+</ul>
+</div>
+<div class="slide" id="cxr-view-1">
+<h1>cxr_view_1</h1>
+<p class="tiny">/CSG_GGeo/cvd0/50001/cxr_view/cam_0_1,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px</p>
+<p class="tiny">/CSG_GGeo/cvd1/60500/cxr_view/cam_0_1,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px</p>
+<p class="tiny">/CSG_GGeo/cvd1/70000/cxr_view/cam_0_1,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px</p>
+<ul class="small simple">
+<li>OptiX 7 to bottom right, with grey background<ul>
+<li>missing Prim bug visible, just get the cylinder Prim</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="cxr-solid-r1p">
+<h1>cxr_solid_r1p</h1>
+<!-- comment
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r1p_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r1p_.jpg 640px_360px 640px_360px -->
+<p class="small">These renders use ONE_PRIM_SOLID envvar with the Converter
+to add <em>CSGFoundry</em> solids containing a single Prim only.</p>
+<p class="small">Example solid names: r1p0 r1p1 r1p2 r1p3 r1p4</p>
+<p class="small">Then can plot them all using:</p>
+<pre class="small literal-block">
+./cxr_solid.sh r1p
+</pre>
+<p class="small">The argument selects 5 single prim solids and puts
+them into an IAS with Y-translations.</p>
+</div>
+<div class="slide" id="cxr-view-2">
+<h1>cxr_view_2</h1>
+<p class="tiny">/CSG_GGeo/cvd0/50001/cxr_view/cam_0_2,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px</p>
+<p class="tiny">/CSG_GGeo/cvd1/60500/cxr_view/cam_0_2,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px</p>
+<p class="tiny">/CSG_GGeo/cvd1/70000/cxr_view/cam_0_2,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px</p>
+<p class="small">OptiX 5,6,7</p>
+<p class="small">Last Prim SBT bug apparent with 7</p>
+</div>
+<div class="slide" id="cxr-solid-r2p">
+<h1>cxr_solid_r2p</h1>
+<p class="tiny">/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/<a class="reference internal" href="#cxr-solid-r2p">cxr_solid_r2p</a>.jpg 640px_360px 0px_360px</p>
+<p class="tiny">/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/<a class="reference internal" href="#cxr-solid-r2p">cxr_solid_r2p</a>.jpg 640px_360px 640px_360px</p>
+<p class="small">Five of the debug single Prim solids selected with:</p>
+<pre class="small literal-block">
+./cxr_solid.sh r2p
+</pre>
+<!-- comment
+
+cxr_view_3
+- - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_3,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_3,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_3,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+cxr_solid_r3p
+- - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r3p_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r3p_.jpg 640px_360px 640px_360px
+
+cxr_view_4
+- - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_4,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_4,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_4,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+cxr_solid_r4p
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r4p_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r4p_.jpg 640px_360px 640px_360px
+
+
+cxr_view_5
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_5,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_5,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_5,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+cxr_view_6
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_6,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_6,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_6,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+cxr_view_7
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_7,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_7,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_7,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px -->
+</div>
+<div class="slide" id="cxr-view-9">
+<h1>cxr_view_9</h1>
+<p class="tiny">/CSG_GGeo/cvd0/50001/cxr_view/cam_0_9,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px</p>
+<p class="tiny">/CSG_GGeo/cvd1/60500/cxr_view/cam_0_9,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px</p>
+<p class="tiny">/CSG_GGeo/cvd1/70000/cxr_view/cam_0_9,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px</p>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="5%" />
+<col width="7%" />
+<col width="6%" />
+<col width="51%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">ridx</th>
+<th class="head">plc</th>
+<th class="head">prim</th>
+<th class="head">component</th>
+<th class="head">note</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>9</td>
+<td>504</td>
+<td>130</td>
+<td>130:sPanel</td>
+<td>repeated parts of TT</td>
+</tr>
+</tbody>
+</table>
+<p class="small">Only last of 130 Prim appears (OptiX 7), again due to globalPrimIdx bug</p>
+</div>
+<div class="slide" id="cxr-view-8">
+<h1>cxr_view_8</h1>
+<p class="tiny">/CSG_GGeo/cvd0/50001/cxr_view/cam_0_8,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px</p>
+<p class="tiny">/CSG_GGeo/cvd1/60500/cxr_view/cam_0_8,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px</p>
+<p class="tiny">/CSG_GGeo/cvd1/70000/cxr_view/cam_0_8,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px</p>
+<p class="small">Blank render for <strong>solid 8</strong> in OptiX 5,6 and 7</p>
+</div>
+<div class="slide" id="llowerchimney-phys-t5-00000">
+<h1><span class="blue">[13]lLowerChimney_phys__t5,__00000</span></h1>
+<p class="huge"><strong>Solid 8</strong> &quot;1:uni_acrylic3&quot; is the &quot;plunger&quot; cup that holds the acrylic 35m diameter sphere</p>
+</div>
+<div class="slide" id="llowerchimney-phys-t0-00000">
+<h1><span class="blue">[12]lLowerChimney_phys__t0,__00000</span></h1>
+<p class="huge">Currently the shape does a CSG subtraction with the huge sphere</p>
+<ul class="huge simple">
+<li>enormous Prim BBox ?</li>
+</ul>
+</div>
+<div class="slide" id="llowerchimney-phys-8-00000">
+<h1><span class="blue">[11]lLowerChimney_phys__8,__00000</span></h1>
+<table border="1" class="huge docutils">
+<colgroup>
+<col width="5%" />
+<col width="7%" />
+<col width="6%" />
+<col width="51%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">ridx</th>
+<th class="head">plc</th>
+<th class="head">prim</th>
+<th class="head">component</th>
+<th class="head">note</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>8</td>
+<td>590</td>
+<td>1</td>
+<td>1:uni_acrylic3</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p class="huge">590 of these all around the 35m diameter sphere</p>
+</div>
+<div class="slide" id="llowerchimney-phys-t8-00000">
+<h1><span class="blue">[10]lLowerChimney_phys__t8,__00000</span></h1>
+<p class="huge">Has complicated CSG insides too, subtracting the 8 column &quot;greek temple&quot;</p>
+<!-- comment
+
+:blue:`[0]lLowerChimney_phys__5,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[1]lLowerChimney_phys__7,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[2]lLowerChimney_phys__9,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[3]lLowerChimney_phys__4,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[4]lLowerChimney_phys__6,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[5]lLowerChimney_phys__3,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[6]lLowerChimney_phys__1,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[7]lLowerChimney_phys__2,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[8]lLowerChimney_phys__1,2,3,4__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[9]lLowerChimney_phys__0,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!-- comment
+
+:blue:`[14]lLowerChimney_phys__t6,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[15]lLowerChimney_phys__t7,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[16]lLowerChimney_phys__t4,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[17]lLowerChimney_phys_all_00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[18]lLowerChimney_phys__t3,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[19]lLowerChimney_phys__t9,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[20]lLowerChimney_phys__t2,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:blue:`[21]lLowerChimney_phys__t1,__00000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+</div>
+<div class="slide" id="cxr-solid-r0">
+<h1>cxr_solid_r0&#64;</h1>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r0&#64;_.jpg">/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r0&#64;_.jpg</a> 640px_360px 640px_0px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r0&#64;_.jpg">/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r0&#64;_.jpg</a> 640px_360px 0px_360px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r0&#64;_.jpg">/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r0&#64;_.jpg</a> 640px_360px 640px_360px</p>
+<p class="small">Argument <strong>r0&#64;</strong> matches only solid named &quot;r0&quot;</p>
+<blockquote class="small">
+<tt class="docutils literal"><span class="pre">EYE=0,-1,0</span> TMIN=1 CAM=1 ./cxr_solid.sh r0&#64;</tt></blockquote>
+<p class="small">EYE and TMIN in units of selected solid extent, CAM:0/1 perspective/orthographic</p>
+</div>
+<div class="slide" id="cxr-solid-r1">
+<h1>cxr_solid_r1&#64;</h1>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r1&#64;_.jpg">/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r1&#64;_.jpg</a> 640px_360px 640px_0px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r1&#64;_.jpg">/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r1&#64;_.jpg</a> 640px_360px 0px_360px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r1&#64;_.jpg">/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r1&#64;_.jpg</a> 640px_360px 640px_360px</p>
+<p class="small">Argument <strong>r1&#64;</strong> matches only solid named &quot;r1&quot;</p>
+<blockquote class="small">
+<tt class="docutils literal"><span class="pre">EYE=0,-1,0</span> TMIN=1 CAM=1 ./cxr_solid.sh r1&#64;</tt></blockquote>
+</div>
+<div class="slide" id="cxr-solid-r2">
+<h1>cxr_solid_r2&#64;</h1>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r2&#64;_.jpg">/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r2&#64;_.jpg</a> 640px_360px 640px_0px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r2&#64;_.jpg">/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r2&#64;_.jpg</a> 640px_360px 0px_360px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r2&#64;_.jpg">/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r2&#64;_.jpg</a> 640px_360px 640px_360px</p>
+<p class="small"><tt class="docutils literal"><span class="pre">EYE=0,-1,0</span> TMIN=1 CAM=1 ./cxr_solid.sh r1&#64;</tt></p>
+</div>
+<div class="slide" id="cxr-solid-r3">
+<h1>cxr_solid_r3&#64;</h1>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r3&#64;_.jpg">/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r3&#64;_.jpg</a> 640px_360px 640px_0px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r3&#64;_.jpg">/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r3&#64;_.jpg</a> 640px_360px 0px_360px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r3&#64;_.jpg">/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r3&#64;_.jpg</a> 640px_360px 640px_360px</p>
+</div>
+<div class="slide" id="cxr-solid-r4">
+<h1>cxr_solid_r4&#64;</h1>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r4&#64;_.jpg">/CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r4&#64;_.jpg</a> 640px_360px 640px_0px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r4&#64;_.jpg">/CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r4&#64;_.jpg</a> 640px_360px 0px_360px</p>
+<p class="tiny"><a class="reference external" href="mailto:/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r4&#64;_.jpg">/CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r4&#64;_.jpg</a> 640px_360px 640px_360px</p>
+<p class="huge">TODO: investigate this difference</p>
+<!-- comment
+
+cxr_solid_r5@
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r5@_.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r5@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r5@_.jpg 640px_360px 640px_360px
+
+cxr_solid_r6@
+- - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r6@_.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r6@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r6@_.jpg 640px_360px 640px_360px
+
+cxr_solid_r7@
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r7@_.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r7@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r7@_.jpg 640px_360px 640px_360px
+
+cxr_solid_r8@
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r8@_.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r8@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r8@_.jpg 640px_360px 640px_360px
+
+cxr_solid_r9@
+- - - - - - - - - - - - - - - -
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r9@_.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r9@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r9@_.jpg 640px_360px 640px_360px -->
+</div>
 <div class="slide" id="extra-background-slides-follow">
 <h1>&quot;Extra&quot; Background Slides Follow</h1>
 </div>

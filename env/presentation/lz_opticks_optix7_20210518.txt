@@ -15,8 +15,7 @@ LZ-Opticks-NVIDIA OptiX 6->7 : Notes
 
 .. class:: small
 
-   * https://github.com/simoncblyth/CSG/commits 
-   * https://github.com/simoncblyth/CSGOptiX/commits
+   * https://github.com/simoncblyth/CSG/commits https://github.com/simoncblyth/CSGOptiX/commits
    * https://github.com/simoncblyth/CSG_GGeo/commits
 
    **PROGRESS** : OptiXTest -> *CSG* + *CSGOptiX*, added *CSG_GGeo* 
@@ -30,15 +29,18 @@ LZ-Opticks-NVIDIA OptiX 6->7 : Notes
 
    **NEXT STEPS:**
 
-   * investigate some slow solids in JUNO geometry, try different modelling  
+   * investigate 2 slow solids in JUNO geometry, try different instance criteria, modelling  
+
+   * systematic comparison of render times with 6 and 7 : **stack size tuning**  
+
+   * reduce *CSGOptiX* code ~duplicated between pre-7:Six.cc, 7:SBT.cc : **unify code in common**
+
+   * bring over event handling (photon generation + propagation) 
+    
+     * :redbold:`pull out simple headers common to: pre-7, 7, CPU testing` (minimize code difference between envs)
+     * trickery/mocking needed for CURAND on CPU? (templating?)
 
    * integrate packages with Opticks 
-
-   * optixrap/cu/generate.cu : photon generation + propagation : expts
-    
-     * :redbold:`pull out simple headers common to: pre-7, 7, CPU testing`
-     * minimize code difference between : pre-7, 7, CPU-testing 
-     * trickery/mocking needed for CURAND on CPU? (templating?)
 
    **LONGTERM POSSIBILITY** : Populate **CSGFoundry** model direct from Geant4 geometry ? [:redbold:`Disruptive`]
 
@@ -537,6 +539,581 @@ LZ-Opticks-NVIDIA OptiX 6->7 : Notes
 .. s5_talk::
 
     Almost 50 thousand PMT instances ray trace rendered in a 0.01 seconds    
+
+
+.. comment
+
+    [7]cxr_i0_2,_-1 ONLY NNVT PMTs
+    ---------------------------------
+
+    .. class:: tiny
+
+        /env/presentation/cxr/cxr_overview/cxr_i0_2,_-1.jpg 1280px_720px
+
+
+
+[8]cxr_i0_1,2,3,4_-1 ALL PMTs
+--------------------------------
+
+.. class:: tiny
+
+    /env/presentation/cxr/cxr_overview/cxr_i0_1,2,3,4_-1.jpg 1280px_720px
+
+
+.. class:: huge
+
+    :white:`"Flat" look is a bug`
+
+    :white:`Was only rendering the last Prim for GAS after the 1st`
+
+    :white:`CAUSE: using globalPrimIdx for SBTIndexOffset : needs to be GAS local` 
+
+
+
+[10]cxr_i0_0,_-1 ONLY GLOBAL "REMAINDER"
+-------------------------------------------
+
+.. class:: tiny
+
+    /env/presentation/cxr/cxr_overview/cxr_i0_0,_-1.jpg 1280px_720px
+
+
+.. class:: huge
+
+    :white:`3084 "remainder" non-instance volumes : is far too many`
+
+    :white:`Looks to be obvious repetitions missed by the auto-instancer`
+
+
+
+
+[9]cxr_i0_t8,_-1 EXCLUDE SLOWEST 1
+-------------------------------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd1/70000/cxr_overview/cam_0_tmin_0.4/cxr_overview_emm_t8,_moi_-1.jpg 1280px_720px
+
+
+.. class:: huge
+
+    :white:`Flipping between this and the next, shows the missing Prim bug effect` 
+
+
+
+
+[9]cxr_i0_t8,_-1 EXCLUDE SLOWEST 2
+------------------------------------
+
+.. class:: tiny
+
+    /env/presentation/cxr/cxr_overview/cxr_i0_t8,_-1.jpg 1280px_720px
+
+
+.. class:: huge
+
+    :white:`Flipping between this and the prev, shows the missing Prim bug effect` 
+
+
+
+
+
+
+
+
+cxr_view_0
+------------
+
+.. comment
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_0,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_0,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_0,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+.. class:: small
+
+   **Inside View with only global remainder geometry**
+
+   Same viewpoint in OptiX 5,6 and 7 
+
+   * launch time (s) at bottom left
+
+   * OptiX 5 : NVIDIA Geforce 750M (2013 Macbook Pro)
+   * OptiX 6, 7 : NVIDIA TITAN RTX 
+
+
+cxr_view_1
+------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_1,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_1,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_1,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+
+.. class:: small
+
+   * OptiX 7 to bottom right, with grey background
+
+     * missing Prim bug visible, just get the cylinder Prim  
+
+
+cxr_solid_r1p
+----------------
+
+.. comment
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r1p_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r1p_.jpg 640px_360px 640px_360px
+
+
+.. class:: small
+
+    These renders use ONE_PRIM_SOLID envvar with the Converter
+    to add *CSGFoundry* solids containing a single Prim only.
+    
+    Example solid names: r1p0 r1p1 r1p2 r1p3 r1p4
+
+    Then can plot them all using::
+
+        ./cxr_solid.sh r1p 
+    
+    The argument selects 5 single prim solids and puts 
+    them into an IAS with Y-translations. 
+  
+
+
+
+cxr_view_2
+------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_2,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_2,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_2,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+
+.. class:: small
+
+    OptiX 5,6,7
+
+    Last Prim SBT bug apparent with 7 
+
+ 
+
+
+
+cxr_solid_r2p
+---------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r2p_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r2p_.jpg 640px_360px 640px_360px
+
+
+.. class:: small
+
+    Five of the debug single Prim solids selected with::
+
+        ./cxr_solid.sh r2p 
+ 
+
+
+
+.. comment
+
+    cxr_view_3
+    ------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_view/cam_0_3,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+        /CSG_GGeo/cvd1/60500/cxr_view/cam_0_3,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_view/cam_0_3,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+    cxr_solid_r3p
+    ---------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r3p_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r3p_.jpg 640px_360px 640px_360px
+
+    cxr_view_4
+    -------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_view/cam_0_4,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+        /CSG_GGeo/cvd1/60500/cxr_view/cam_0_4,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_view/cam_0_4,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+    cxr_solid_r4p
+    ----------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r4p_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r4p_.jpg 640px_360px 640px_360px
+
+
+    cxr_view_5
+    ----------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_view/cam_0_5,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+        /CSG_GGeo/cvd1/60500/cxr_view/cam_0_5,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_view/cam_0_5,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+    cxr_view_6
+    ----------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_view/cam_0_6,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+        /CSG_GGeo/cvd1/60500/cxr_view/cam_0_6,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_view/cam_0_6,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+    cxr_view_7
+    ----------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_view/cam_0_7,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+        /CSG_GGeo/cvd1/60500/cxr_view/cam_0_7,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_view/cam_0_7,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+
+
+
+
+cxr_view_9
+----------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_9,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_9,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_9,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+
+
+.. class:: tiny
+
+    +----+------+-----+-------------------------------------------+---------------------------+
+    |ridx|   plc| prim|   component                               |  note                     |
+    +====+======+=====+===========================================+===========================+
+    |   9|   504|  130|   130:sPanel                              |  repeated parts of TT     |
+    +----+------+-----+-------------------------------------------+---------------------------+
+
+
+.. class:: small 
+
+    Only last of 130 Prim appears (OptiX 7), again due to globalPrimIdx bug 
+
+
+
+
+cxr_view_8
+----------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_view/cam_0_8,/cxr_view_sWaterTube.jpg 640px_360px 640px_0px
+
+    /CSG_GGeo/cvd1/60500/cxr_view/cam_0_8,/cxr_view_sWaterTube.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_view/cam_0_8,/cxr_view_sWaterTube.jpg 640px_360px 640px_360px
+
+
+.. class:: small 
+
+    Blank render for **solid 8** in OptiX 5,6 and 7
+
+
+
+:blue:`[13]lLowerChimney_phys__t5,__00000`
+------------------------------------------
+
+.. class:: huge 
+
+    **Solid 8** "1:uni_acrylic3" is the "plunger" cup that holds the acrylic 35m diameter sphere   
+
+
+:blue:`[12]lLowerChimney_phys__t0,__00000`
+------------------------------------------
+
+.. class:: huge 
+
+    Currently the shape does a CSG subtraction with the huge sphere 
+
+    * enormous Prim BBox ?
+
+
+:blue:`[11]lLowerChimney_phys__8,__00000`
+-----------------------------------------
+
+.. class:: huge
+
+    +----+------+-----+-------------------------------------------+---------------------------+
+    |ridx|   plc| prim|   component                               |  note                     |
+    +====+======+=====+===========================================+===========================+
+    |   8|   590|    1|   1:uni_acrylic3                          |                           |
+    +----+------+-----+-------------------------------------------+---------------------------+
+
+
+.. class:: huge
+
+    590 of these all around the 35m diameter sphere  
+
+
+
+:blue:`[10]lLowerChimney_phys__t8,__00000`
+------------------------------------------
+
+
+.. class:: huge
+
+    Has complicated CSG insides too, subtracting the 8 column "greek temple" 
+
+
+
+.. comment
+
+    :blue:`[0]lLowerChimney_phys__5,__00000`
+    ----------------------------------------
+
+    :blue:`[1]lLowerChimney_phys__7,__00000`
+    ----------------------------------------
+
+    :blue:`[2]lLowerChimney_phys__9,__00000`
+    ----------------------------------------
+
+    :blue:`[3]lLowerChimney_phys__4,__00000`
+    ----------------------------------------
+
+    :blue:`[4]lLowerChimney_phys__6,__00000`
+    ----------------------------------------
+
+    :blue:`[5]lLowerChimney_phys__3,__00000`
+    ----------------------------------------
+
+    :blue:`[6]lLowerChimney_phys__1,__00000`
+    ----------------------------------------
+
+    :blue:`[7]lLowerChimney_phys__2,__00000`
+    ----------------------------------------
+
+    :blue:`[8]lLowerChimney_phys__1,2,3,4__00000`
+    ---------------------------------------------
+
+    :blue:`[9]lLowerChimney_phys__0,__00000`
+    ----------------------------------------
+
+
+.. comment
+
+    :blue:`[14]lLowerChimney_phys__t6,__00000`
+    ------------------------------------------
+
+    :blue:`[15]lLowerChimney_phys__t7,__00000`
+    ------------------------------------------
+
+    :blue:`[16]lLowerChimney_phys__t4,__00000`
+    ------------------------------------------
+
+    :blue:`[17]lLowerChimney_phys_all_00000`
+    ----------------------------------------
+
+    :blue:`[18]lLowerChimney_phys__t3,__00000`
+    ------------------------------------------
+
+    :blue:`[19]lLowerChimney_phys__t9,__00000`
+    ------------------------------------------
+
+    :blue:`[20]lLowerChimney_phys__t2,__00000`
+    ------------------------------------------
+
+    :blue:`[21]lLowerChimney_phys__t1,__00000`
+    ------------------------------------------
+
+
+
+
+
+cxr_solid_r0@
+----------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r0@_.jpg 640px_360px 640px_0px   
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r0@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r0@_.jpg 640px_360px 640px_360px
+
+
+.. class:: small
+
+    Argument **r0@** matches only solid named "r0"
+
+        ``EYE=0,-1,0 TMIN=1 CAM=1 ./cxr_solid.sh r0@``
+
+    EYE and TMIN in units of selected solid extent, CAM:0/1 perspective/orthographic
+
+
+cxr_solid_r1@
+----------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r1@_.jpg 640px_360px 640px_0px   
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r1@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r1@_.jpg 640px_360px 640px_360px
+
+
+.. class:: small
+
+    Argument **r1@** matches only solid named "r1"
+
+       ``EYE=0,-1,0 TMIN=1 CAM=1 ./cxr_solid.sh r1@``
+
+
+cxr_solid_r2@
+----------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r2@_.jpg 640px_360px 640px_0px   
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r2@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r2@_.jpg 640px_360px 640px_360px
+
+
+.. class:: small
+
+    ``EYE=0,-1,0 TMIN=1 CAM=1 ./cxr_solid.sh r1@``
+
+
+
+
+cxr_solid_r3@
+----------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r3@_.jpg 640px_360px 640px_0px   
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r3@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r3@_.jpg 640px_360px 640px_360px
+
+cxr_solid_r4@
+----------------
+
+.. class:: tiny
+
+    /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r4@_.jpg 640px_360px 640px_0px   
+
+    /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r4@_.jpg 640px_360px 0px_360px
+
+    /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r4@_.jpg 640px_360px 640px_360px
+
+
+.. class:: huge
+
+    TODO: investigate this difference 
+
+
+.. comment
+
+    cxr_solid_r5@
+    ----------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r5@_.jpg 640px_360px 640px_0px   
+
+        /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r5@_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r5@_.jpg 640px_360px 640px_360px
+
+    cxr_solid_r6@
+    ---------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r6@_.jpg 640px_360px 640px_0px   
+
+        /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r6@_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r6@_.jpg 640px_360px 640px_360px
+
+    cxr_solid_r7@
+    ----------------
+
+    .. class:: tiny
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r7@_.jpg 640px_360px 640px_0px   
+
+        /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r7@_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r7@_.jpg 640px_360px 640px_360px
+
+    cxr_solid_r8@
+    ----------------
+
+    .. class:: tiny 
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r8@_.jpg 640px_360px 640px_0px   
+
+        /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r8@_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r8@_.jpg 640px_360px 640px_360px
+
+    cxr_solid_r9@
+    ----------------
+
+    .. class:: tiny 
+
+        /CSG_GGeo/cvd0/50001/cxr_solid/cam_1/cxr_solid_r9@_.jpg 640px_360px 640px_0px   
+
+        /CSG_GGeo/cvd1/60500/cxr_solid/cam_1/cxr_solid_r9@_.jpg 640px_360px 0px_360px
+
+        /CSG_GGeo/cvd1/70000/cxr_solid/cam_1/cxr_solid_r9@_.jpg 640px_360px 640px_360px
+
+
 
 
 
