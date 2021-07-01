@@ -5,10 +5,12 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</title>
-<meta content="Opticks vCHEP 2021" name="title" />
-<meta content="JUNO, OptiX, Opticks" name="description" />
-<meta content="8+5 min : 19 May 2021 from 16:40 to 16:53 (London Time)" name="note" />
+<title>JUNO Opticks/Geant4 Optical Photon Simulation Matching</title>
+<meta content="Navigate the HTML slides by entering a page number and pressing return" name="note" />
+<meta content="JUNO Geant4/Opticks Optical Simulation Matching" name="title" />
+<meta content="(Jul 12 2021)" name="description" />
+<meta content="https://simoncblyth.bitbucket.io/env/presentation/juno_opticks_20210712.html" name="url" />
+<meta content="12 July 2021" name="date" />
 <style type="text/css">
 
 /*
@@ -384,13 +386,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+<h1>JUNO Opticks/Geant4 Optical Photon Simulation Matching</h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">Opticks : GPU Optical Photon Simulation for Particle Physics with NVIDIA OptiX</span></h1>
+<h1 class="title">JUNO Opticks/Geant4 Optical Photon Simulation Matching</h1>
 
 <!-- comment
 
@@ -461,7 +463,7 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-repeat: no-repeat;
              height: 100%;
           }
-          div.slide#slide0{
+          div.slide#slide0-disabled{
              background-image: url(/env/graphics/ggeoview/jpmt-inside-wide_crop.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
@@ -2140,6 +2142,18 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-size: 508px 572px,580px 551px;
              background-position: 100px 100px,640px 100px;
               
+          }
+          div.slide#gpmt-hamamatsu-jun28{
+             background-image: url(/env/presentation/ana/gpmt/PolyconeNeckSplitFig_origin_CGDMLKludge_jun28_HamamatsuR12860_.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#gpmt-nnvt-jun28{
+             background-image: url(/env/presentation/ana/gpmt/PolyconeNeckSplitFig_origin_CGDMLKludge_jun28_NNVTMCPPMT_.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
           } 
 
        </style>
@@ -2257,49 +2271,52 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 
 </style><!-- comment
 
-Navigate the HTML slides by entering a page number and pressing return
+Day 1 (Monday, July 12, 2021, 8:30–12:50 CEST/14:30–18:50 Beijing time): Simulation review
 
-reps-talk opticks-oct2019-dance    # NB underscores to hyphens for latex
-
-   ## slide titles and s5_text directive content are written to /tmp/opticks-oct2019-dance.rst
-   ## reps-talk converts that into a PDF document : as an aid to thinking about what to say -->
-<div class="mytitle">
-<header>
-<h1 style="background-color:lightgrey">
-      Integration of JUNO simulation framework with <i>Opticks</i> : GPU accelerated optical propagation via NVIDIA® OptiX™
-    <h2 style="background-color:lightgrey;text-align:center"> Open source, https://bitbucket.org/simoncblyth/opticks </h2>
-</h1>
-</header>
+30+10 min -->
+<!--  -->
+<blockquote>
+<p><em>Opticks</em> replaces <em>Geant4</em> optical photon simulation with an <strong>equivalent implementation</strong>
+that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX.
+All optically relevant aspects of <em>Geant4</em> context must be translated+copied to GPU:</p>
+<ul class="simple">
+<li>geometry : solids, structure, material+surface properties</li>
+<li>generation : Cerenkov + Scintillation (using <strong>Gensteps</strong> from <em>Geant4</em>)</li>
+<li>propagation : Rayleigh scattering, absorption, reemission, boundary</li>
+</ul>
+<p>Achieving+maintaining <strong>equivalence</strong> is time consuming, BUT:</p>
+<ul class="simple">
+<li><span class="red">transformative performance benefits &gt;1000x Geant4</span></li>
+</ul>
+</blockquote>
+<div class="small line-block">
+<div class="line">Simon C Blyth,  July 12, 2021</div>
 </div>
 
-<img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="/env/presentation/juno/JUNO_logo.png"  />
-<div class="mycredit">
-<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS &mdash; On behalf of the JUNO Collaboration &mdash; vCHEP, 19 May 2021</h2>
-</div>
         <!--  s5talk  -->
         <br/>
     
 </div>
+<div class="slide" id="geant4opticksworkflow">
+<h1><span class="i">Geant4OpticksWorkflow</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="outline">
 <h1>Outline</h1>
 <img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
 <div class="small"><span>&nbsp;</span></div><ul class="small simple">
-<li>Context and Problem<ul>
-<li>p2: Jiangmen Underground Neutrino Observatory (JUNO)</li>
-<li>p3: JUNO Optical Photon Simulation Problem...</li>
-<li>p4: Optical Photon Simulation ≈ Ray Traced Image Rendering</li>
+<li>Simulation Matching Machinery<ul>
+<li>JUNO-Offline : Tools for Optical Photon Simulation Matching</li>
+<li>Opticks : Tools for Optical Matching, Reemission Bookkeeping</li>
+<li>G4OpticksRecorder : full details of Geant4 simulation passed to Opticks</li>
+<li>JUNO Offline DsG4Scintillation : Reemission Bookkeeping</li>
+<li>Comparing OK/G4 photon history counts for &quot;tut_detsim.py gun&quot; event</li>
 </ul>
 </li>
-<li>NVIDIA Tools to create Solution<ul>
-<li>p5: NVIDIA Ampere : 2nd Generation RTX</li>
-<li>p6: NVIDIA OptiX Ray Tracing Engine</li>
-<li>p7: NVIDIA OptiX 7 : Entirely new thin API</li>
-</ul>
-</li>
-<li>Opticks : Introduction + New Features<ul>
-<li>p8,9: Geant4 + Opticks Hybrid Workflow : External Optical Photon Simulation</li>
-<li>p10: New : Collection Efficiency Culling on GPU</li>
-<li>p11: New : <em>CSGFoundry</em> Geometry Model</li>
+<li>Examples of recently fixed issues<ul>
+<li>OK:Photons not stopping at Tyvek, FIXED by adding explicit surfaces</li>
 </ul>
 </li>
 <li>Opticks : 1st JUNO Renders with NVIDIA OptiX 7<ul>
@@ -2308,333 +2325,417 @@ reps-talk opticks-oct2019-dance    # NB underscores to hyphens for latex
 <li>p15:Ray trace times for various geometries</li>
 </ul>
 </li>
-<li>p17: Summary + Links</li>
-<li>p18: Acknowledgement : Opticks &quot;Hackathon&quot; Series for NVIDIA OptiX 6-&gt;7</li>
-<li>p19: LZ with Opticks</li>
 </ul>
 <div class="small"><hr/></div>
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="juno-intro-2">
-<h1><span class="i">JUNO_Intro_2</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="optical-photon-simulation-problem">
-<h1><span class="incremental">Optical Photon Simulation Problem...</span></h1>
-<pre>
-
-
-
-
-
-
-
-</pre><div class="sidebar">
-<p class="first sidebar-title"><span class="small">Huge CPU Memory+Time Expense</span></p>
-<dl class="small last docutils">
-<dt><strong>JUNO Muon Simulation Bottleneck</strong></dt>
-<dd>~99% CPU time, memory constraints</dd>
-<dt><strong>Ray-Geometry intersection Dominates</strong></dt>
-<dd>simulation is not alone in this problem...</dd>
-<dt><strong>Optical photons : naturally parallel, simple :</strong></dt>
-<dd><ul class="first last simple">
-<li>produced by Cherenkov+Scintillation</li>
-<li>yield only Photomultiplier hits</li>
-</ul>
-</dd>
-</dl>
-</div>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
-
-Optical photons are naturally parallel : they can be considered
-to be produced only by two processes : Cherenkov and Scintillation and we
-are interested in photons that hit the PMTs.
-
-These characteristics make it straightforward integrate an external optical
-simulation. -->
-</div>
-<div class="slide" id="optical-photon-simulation-ray-traced-image-rendering">
-<h1><span class="small">Optical Photon Simulation ≈ Ray Traced Image Rendering</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Not a Photo, a Calculation</p>
-<img alt="/env/optix/samples/optix-ray-tracing-glasses.png" class="align-right" src="/env/optix/samples/optix-ray-tracing-glasses.png" style="width: 450px;" />
-<p class="tiny last"><a class="reference external" href="http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf">http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf</a></p>
-</div>
-<dl class="small docutils">
-<dt><span class="bluebold">simulation</span></dt>
-<dd>photon parameters at sensors (PMTs)</dd>
-<dt><span class="bluebold">rendering</span></dt>
-<dd>pixel values at image plane</dd>
-</dl>
-<pre>
-
-</pre><p class="small"><strong>Much in common : geometry, light sources, optical physics</strong></p>
+<div class="slide" id="juno-offline-tools-for-optical-photon-simulation-matching">
+<h1><span class="small">JUNO Offline : Tools for Optical Photon Simulation Matching</span></h1>
+<p class="small"><tt class="docutils literal">tut_detsim.py</tt> options:</p>
 <ul class="small simple">
-<li><span class="redbold">both limited by ray geometry intersection, aka ray tracing</span></li>
+<li><tt class="docutils literal"><span class="pre">--opticks-mode</span> 1</tt> : Opticks optical simulation only</li>
+<li><tt class="docutils literal"><span class="pre">--opticks-mode</span> 2</tt> : Geant4 optical simulation only</li>
+<li><tt class="docutils literal"><span class="pre">--opticks-mode</span> 3</tt> : both OK+G4 -&gt; writes paired <em>OpticksEvent</em>, OK:1,2,.. G4:-1,-2,..</li>
+<li><tt class="docutils literal"><span class="pre">--opticks-anamgr</span></tt> : pass all <em>G4Track</em> <em>G4Step</em> to <tt class="docutils literal">G4OpticksRecorder</tt></li>
 </ul>
-<pre>
-
-</pre><p class="small"><strong>Many Applications of ray tracing</strong> :</p>
+<p class="small">Using <strong>GtOpticksTool</strong> GenTool to run from input photons : NumPy arrays (num_photons,4,4):</p>
+<pre class="small literal-block">
+tut_detsim.py ...
+   --opticks-mode 3 ... opticks
+   --input-photon-path /path/to/input_photons.npy
+   --input-photon-repeat 10000                         ## repeat photons
+   --input-photon-wavelength 360,380,400,420,440,460   ## override
+</pre>
 <ul class="small simple">
-<li>advertising, design, architecture, films, games,...</li>
-<li>-&gt; huge efforts to improve hw+sw over 30 yrs</li>
+<li>create photon arrays : <tt class="docutils literal">~/opticks/ana/input_photons.py,parallel_input_photons.py</tt></li>
+<li><span class="red">focus on an issue by repeating a single photon</span></li>
+<li><span class="red">create parallel beam of offset photons to probe problem geometry</span></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="ampere-2nd-generation-rtx">
-<h1><span class="small">Ampere : 2nd Generation RTX</span></h1>
-<dl class="small docutils">
-<dt>NVIDIA Ampere (2020):</dt>
-<dd>&quot;...triple double over Turing (2018, 10 GigaRays/s)...&quot;</dd>
-</dl>
+</div>
+<div class="slide" id="opticks-tools-for-optical-photon-simulation-matching">
+<h1><span class="small">Opticks : Tools for Optical Photon Simulation Matching</span></h1>
+<p class="small"><tt class="docutils literal">G4OpticksRecorder/CManager/CRecorder/CWriter</tt></p>
 <ul class="small simple">
-<li><strong>RT Core</strong> : ray trace dedicated GPU hardware</li>
-<li><strong>NVIDIA GeForce RTX 3090</strong><ul>
-<li>10,496 CUDA Cores, 28GB VRAM, USD 1499</li>
+<li>records Geant4 propagations into <em>OpticksEvent</em> data structures</li>
+<li><em>OpticksEvent</em> are persisted to <em>NumPy</em> <tt class="docutils literal">.npy</tt> files</li>
+</ul>
+<p class="small"><tt class="docutils literal">~/opticks/ana/evt.py ab.py ...</tt>  <em>NumPy</em> based analysis machinery</p>
+<ul class="small simple">
+<li><tt class="docutils literal">ab.py</tt> : load and compare paired events<ul>
+<li><tt class="docutils literal">a:OK <span class="pre">tags:1,2,3,..</span></tt></li>
+<li><tt class="docutils literal">b:G4 <span class="pre">tags:-1,-2,-3,...</span></tt></li>
 </ul>
 </li>
-<li><span class="redbold">ray trace performance continues rapid improvement</span></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="nvidia-optix-ray-tracing-engine-http-developer-nvidia-com-optix">
-<h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- http://developer.nvidia.com/optix</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">OptiX Raytracing Pipeline</p>
-<p class="small">Analogous to OpenGL rasterization pipeline:</p>
-<img alt="/env/optix/docs/optix-model.png" class="last align-right" src="/env/optix/docs/optix-model.png" style="width: 450px;" />
-</div>
-<p class="small"><strong>OptiX makes GPU ray tracing accessible</strong></p>
+<p class="small"><strong>C+S Gensteps : Geant4 -&gt; Opticks</strong></p>
 <ul class="small simple">
-<li><strong>accelerates</strong> ray-geometry intersections</li>
-<li>simple : single-ray programming model</li>
-<li>&quot;...free to use within any application...&quot;</li>
-<li><span class="red">access RT Cores[1] with OptiX 6+ via RTX™ mode</span></li>
+<li>number of photons to generate, line segment to generate them along, any other parameters needed</li>
+<li>-&gt; number of photons <strong>always equal</strong> in OK and G4</li>
+<li><em>Opticks</em> bookkeeping treats reemission as &quot;rebirth&quot; of a fraction of the absorbed<ul>
+<li><strong>not treated as separate photons</strong></li>
 </ul>
-<p class="small"><strong>NVIDIA expertise:</strong></p>
-<ul class="small simple">
-<li>OptiX pre-7 : <span class="redbold">~linear scaling up to 4 GPUs</span></li>
-<li>acceleration structure creation + traversal (Blue)</li>
-<li>instanced sharing of geometry + acceleration structures</li>
-<li>compiler optimized for GPU ray tracing</li>
-</ul>
-<p class="tiny"><tt class="docutils literal"><span class="pre">https://developer.nvidia.com/rtx</span></tt></p>
-<p class="small"><strong>User provides (Yellow):</strong></p>
-<ul class="small simple">
-<li>ray generation</li>
-<li>geometry bounding box, intersects</li>
-</ul>
-<p class="tiny">[1] Turing+ GPUs eg NVIDIA TITAN RTX</p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="nvidia-optix-7-entirely-new-thin-api-introduced-aug-2019">
-<h1><span class="small">NVIDIA OptiX 7 : Entirely new thin API (Introduced Aug 2019)</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">GPU Ray Tracing APIs Converged</span></p>
-<ul class="small last simple">
-<li>3 APIs (DXR,VKRay,OptiX7) over RTX</li>
-<li>Driver updates <span class="r">independent of application</span></li>
-<li>Support new GPUs, performance improvements</li>
+</li>
 </ul>
 </div>
-<p class="small"><strong>NVIDIA OptiX 6-&gt;7</strong> : <span class="b">drastically slimmed down</span></p>
+<div class="slide" id="g4opticksrecorder-full-details-of-geant4-simulation-passed-to-opticks">
+<h1><span class="small">G4OpticksRecorder : full details of Geant4 simulation passed to Opticks</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Interface to Opticks CFG4 Package</span></p>
+<p class="small"><strong>G4OpticksRecorder/CManager/CRecorder/CWriter</strong></p>
 <ul class="small simple">
-<li>headers only (no library, just Driver)</li>
-<li>low-level CUDA-centric thin API (Vulkan-ized)</li>
-<li>Minimal host state,  <span class="red">All host functions are thread-safe</span></li>
-<li>GPU launches : explicit, asynchronous (CUDA streams)</li>
-<li><span class="strike">near perfect scaling to 4 GPUs, for free</span></li>
-<li><span class="strike">Shared CPU/GPU geometry context</span></li>
-<li><span class="strike">GPU memory management</span></li>
-<li><span class="strike">Multi-GPU support</span></li>
+<li>every G4Track+G4Step -&gt; <em>OpticksEvent</em><ul>
+<li>emulates GPU recording</li>
 </ul>
-<dl class="small docutils">
-<dt><strong>Advantages</strong></dt>
-<dd><p class="first">More control/flexibility over everything.</p>
-<ul class="last simple">
-<li>Fully benefit from future GPUs</li>
-<li><span class="b">Keep pace with state-of-the-art GPU ray tracing</span></li>
+</li>
+<li>CPhotonInfo : G4VUserTrackInformation<ul>
+<li><strong>photon_id</strong> retained across reemission generations</li>
 </ul>
-</dd>
-<dt><strong>Disadvantages</strong></dt>
-<dd><p class="first">Demands much more developer effort than OptiX 6</p>
-<ul class="last simple">
-<li><span class="r">Major re-implementation of Opticks required</span></li>
+</li>
 </ul>
-</dd>
-</dl>
-<p class="small"><span class="b">NEWS: Major Progress on 6-&gt;7 (p11,..)</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="geant4opticksworkflow">
-<h1><span class="i">Geant4OpticksWorkflow</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="geant4opticksworkflow-2">
-<h1><span class="i">Geant4OpticksWorkflow 2</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Opticks : GPU Optical Photons</span></p>
-<ul class="small last simple">
-<li>CUDA port of G4 generation+propagation</li>
-<li><span class="redbold">auto-translate G4 geometry to OptiX GPU</span></li>
-<li>offloads optical simulation to GPU</li>
-</ul>
-</div>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="opticks-juno-progress-efficiency-hit-culling-on-gpu">
-<h1><span class="small">Opticks + JUNO Progress : Efficiency Hit Culling on GPU</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">ε, ε [θ, φ]  -&gt; GPU Tex</p>
-<p class="small"><strong>Separate Textures for each sensor type</strong></p>
 <dl class="small last docutils">
-<dt><tt class="docutils literal">G4Opticks::</tt></dt>
-<dd><tt class="docutils literal">setSensorData</tt>
-<tt class="docutils literal">setSensorAngularEfficiency</tt></dd>
+<dt><tt class="docutils literal">tut_detsim.py <span class="pre">--opticks-mode</span> 3</tt></dt>
+<dd>Do both GPU and CPU optical generation+propagations</dd>
 </dl>
 </div>
-<p class="small"><strong>On GPU Efficiency Culling</strong></p>
-<ul class="small simple">
-<li>upload sensor angular efficiencies</li>
-<li>-&gt; <tt class="docutils literal">COLLECT</tt> OR <tt class="docutils literal">CULL</tt> hit flags</li>
-</ul>
-<p class="small">CUDA Thrust <strong>stream compaction</strong></p>
-<ul class="small simple">
-<li><tt class="docutils literal"><span class="pre">thrust::count_if</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">thrust::copy_if</span></tt></li>
-<li>Download hits with : <tt class="docutils literal">hitmask = COLLECT</tt></li>
-</ul>
-<ul class="small simple">
-<li><span class="r">Reduces hit CPU memory by factor of the efficiency</span></li>
-<li>reduce size of GPU-&gt;CPU downloads by factor of efficiency</li>
-<li><strong>all</strong> downloaded hits -&gt; electronics simulation</li>
-</ul>
-<pre>
+<pre class="mypretiny">
 
-</pre><p class="small"><strong>Mock angular efficiency test of GPU texture machinery :</strong></p>
+ 34 struct G4OK_API G4OpticksRecorder
+ 35 {
+ ...
+ 47     G4OpticksRecorder();
+ 48     virtual ~G4OpticksRecorder();
+ 49
+ 50     void setGeometry(const GGeo* ggeo);
+ 51
+ 52     virtual void BeginOfRunAction(const G4Run*);
+ 53     virtual void EndOfRunAction(const G4Run*);
+ 54
+ 55     virtual void BeginOfEventAction(const G4Event*);
+ 56     virtual void EndOfEventAction(const G4Event*);
+ 57
+ 58     virtual void PreUserTrackingAction(const G4Track*);
+ 59     virtual void PostUserTrackingAction(const G4Track*);
+ 60
+ 61     virtual void UserSteppingAction(const G4Step*);
+ 62
+ 63     void ProcessHits( const G4Step* step, bool efficiency_collect );
+ 64
+ 65     static G4OpticksRecorder*  fInstance;
+ 66
+ 67 private:
+ 68     void TerminateEvent();
+ 69
+ 70 };
+
+</pre></div>
+<div class="slide" id="juno-offline-dsg4scintillation-reemission-bookkeeping">
+<h1><span class="small">JUNO Offline DsG4Scintillation : Reemission Bookkeeping</span></h1>
 <ul class="small simple">
-<li>texturing sensor surfaces with the efficiency</li>
-<li>mockup striped theta efficiency, two random categories</li>
-<li>cosine phi efficiency variation for one category</li>
-</ul>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
-
-https://bitbucket.org/simoncblyth/opticks/src/master/optickscore/tests/MockSensorLibTest.cc
-
-https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/tests/OSensorLibGeoTest.cc -->
-</div>
-<div class="slide" id="new-foundry-model-shared-cpu-gpu-geometry-context">
-<h1><span class="small">New &quot;Foundry&quot; Model : Shared CPU/GPU Geometry Context</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">IAS &lt; Inst &lt; Solid &lt; Prim &lt; Node</span></p>
-<ul class="small simple">
-<li><strong>Inst</strong> : 4x4 tran. + <strong>Solid</strong> ref. ( <strong>Inst</strong> -&gt; 1 <strong>IAS</strong> )</li>
-<li><strong>Solid</strong> : 1 or more <strong>Prim</strong>  : ( <strong>Solid</strong> -&gt; <strong>GAS</strong> )</li>
-<li><strong>Prim</strong> : 1,3,7,15,31,... <strong>Node</strong>  : (<strong>Prim</strong> ~ <em>G4VSolid</em>)</li>
+<li>Both simulations using same <strong>REEMISSIONPROB</strong> but different mechanics</li>
 </ul>
 <pre class="mypretiny">
-struct CSGFoundry
-{
-   void upload(); <span class="redbold">// to GPU </span>
-...
-   std::vector&lt;CSGSolid&gt;  solid ; // compounds (eg PMT)
-   std::vector&lt;CSGPrim&gt;   prim ;
-   std::vector&lt;CSGNode&gt;   node ; // shapes, operators
-
-   std::vector&lt;float4&gt; plan ; // planes
-   std::vector&lt;qat4&gt;   tran ; // CSG transforms
-   std::vector&lt;qat4&gt;   itra ; // inverse CSG transforms
-   std::vector&lt;qat4&gt;   inst ; // instance transforms
-
-   <span class="redbold">// entire geometry in four GPU allocations</span>
-   CSGPrim*    d_prim ;
-   CSGNode*    d_node ;
-   float4*     d_plan ;
-   qat4*       d_itra ;
- };
-</pre><p class="small last"><span class="bluebold">referencing by offset, count</span></p>
+ 200 G4VParticleChange*
+ 201 DsG4Scintillation::PostStepDoIt(const G4Track& aTrack, const G4Step& aStep)
+ ...
+ 235             flagReemission= doReemission
+ 236                 && aTrack.GetTrackStatus() == fStopAndKill
+ 237                 && aStep.GetPostStepPoint()->GetStepStatus() != fGeomBoundary;
+</pre><ul class="small simple">
+<li><em>Geant4</em> : bulk absorbed <em>G4Track</em> yield 0/1 reemission photon as <strong>secondary G4Track</strong></li>
+<li><em>Opticks</em> : fraction of BULK_ABSORB (AB) photons <strong>reborn</strong> in the same CUDA thread, no &quot;secondary&quot; to handle</li>
+</ul>
+<p class="small"><strong>Geant4 WITH_G4OPTICKS photon_id</strong></p>
+<ul class="small simple">
+<li><tt class="docutils literal">photon_id</tt> assigned at first S + C generation (attached to G4Track with G4VUserTrackInformation)</li>
+<li><tt class="docutils literal">photon_id</tt> retained thru reemission generations</li>
+</ul>
+<p class="small"><strong>CRecorder/CWriter : REJOIN reemission secondary tracks with ancestors</strong></p>
+<ul class="small simple">
+<li>continue writing reemission secondary G4Track steps to original <tt class="docutils literal">photon_id</tt> record</li>
+</ul>
 </div>
-<ul class="small simple">
-<li><span class="r">replaces geometry context dropped in OptiX 6-&gt;7</span></li>
-<li>array-based -&gt; simple, inherent serialization + persisting</li>
-<li>entire geometry in 4 GPU allocations</li>
-</ul>
-<p class="small"><strong>Simple intersect headers, common CPU/GPU types</strong></p>
-<ul class="small simple">
-<li>use with : pre-7, 7 + testing on CPU</li>
-</ul>
-<pre>
-</pre><dl class="small docutils">
-<dt><span class="bluebold">https://github.com/simoncblyth/CSG</span> &quot;Foundry&quot; model</dt>
-<dd><dl class="first last docutils">
-<dt><strong>csg_intersect_tree.h/csg_intersect_node.h/...</strong></dt>
-<dd><span class="redbold">simple headers common to pre-7/7/CPU-testing</span></dd>
-</dl>
-</dd>
-<dt><span class="bluebold">https://github.com/simoncblyth/CSG_GGeo</span></dt>
-<dd>Convert <em>Opticks/GGeo</em> -&gt; <em>CSGFoundry</em></dd>
-<dt><span class="bluebold">https://github.com/simoncblyth/CSGOptiX</span></dt>
-<dd>OptiX 7 + pre-7 rendering</dd>
-</dl>
-<pre>
+<div class="slide" id="comparing-ok-g4-photon-history-counts-for-tut-detsim-py-gun-event">
+<h1><span class="small">Comparing OK/G4 photon history counts for &quot;tut_detsim.py gun&quot; event</span></h1>
+ <pre class="mypretiny">
+ epsilon:ana blyth$ tds3gun.sh 1    ## <b>seqhis: 64bit uint : 16x4bit step flags for each photon</b>
+ In [1]: ab.his[:20]   ##  OK:1    G4:-1     OK-G4   "c2" deviation
 
-</pre><p class="tiny"><strong>GAS</strong> : Geometry Acceleration Structure</p>
-<p class="tiny"><strong>IAS</strong> : Instance Acceleration Structure</p>
-<p class="tiny"><strong>CSG</strong> : Constructive Solid Geometry</p>
+ .  n           seqhis        a        b      a-b     (a-b)^2/(a+b)   label                ## optickscore/OpticksPhoton.h enum
+           ## hexstring
+ 0000               42     1822     1721      101            2.88     SI AB                ## <b>AB : BULK_ABSORB </b>
+ 0001            7ccc2     1446     1406       40            0.56     SI BT BT BT SD       ## <b>SD : SURFACE_DETECT </b>
+ 0002           7ccc62      672      666        6            0.03     SI SC BT BT BT SD    ## <b>SC : BULK_SCATTER </b>
+ 0003            8ccc2      649      597       52            2.17     SI BT BT BT SA       ## <b>BT : BOUNDARY_TRANSMIT </b>
+ 0004             8cc2      606      615       -9            0.07     SI BT BT SA          ## <b>SI : SCINTILLATION </b>
+ 0005              452      538      536        2            0.00     SI RE AB             ## <b>RE : BULK_REEMIT </b>
+ 0006           7ccc52      433      438       -5            0.03     SI RE BT BT BT SD
+ 0007              462      397      405       -8            0.08     SI SC AB
+ 0008           8ccc62      269      262        7            0.09     SI SC BT BT BT SA
+ 0009          7ccc662      242      222       20            0.86     SI SC SC BT BT BT SD
+ 0010            8cc62      217      212        5            0.06     SI SC BT BT SA
+ 0011          7ccc652      211      205        6            0.09     SI RE SC BT BT BT SD
+ 0012           8ccc52      200      201       -1            0.00     SI RE BT BT BT SA
+ 0013            8cc52      158      192      -34            3.30     SI RE BT BT SA
+ 0014             4552      181      165       16            0.74     SI RE RE AB
+ 0015               41      164      145       19            1.17     CK AB                ## <b>CK : CERENKOV</b>
+ 0016          7ccc552      135      160      -25            2.12     SI RE RE BT BT BT SD
+ 0017             4cc2      130      115       15            0.92     SI BT BT AB
+ 0018             4652      120      117        3            0.04     SI RE SC AB
+
+ .             TOTALS:    11684    11684                    52.92     52.92/63 =  0.84   pvalue:P[C2>]:0.814  1-pvalue:P[C2<]:0.186
+
+ In [2]: ab.his.ss[ab.his.c2 > 2.7]       ## <b><span class="alarm">largest chi-squared contributors -> next issue to look into  <span></b>
+ Out[2]:
+ array(['0000               42     1822     1721      101            2.88     SI AB',
+        '0013            8cc52      158      192      -34            3.30     SI RE BT BT SA',
+        '0020          8ccc662       75      108      -33            5.95     SI SC SC BT BT BT SA',
+        '0027           8cc552       49       70      -21            3.71     SI RE RE BT BT SA',
+        '0029             4562       39       66      -27            6.94     SI SC RE AB'],
+</pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="overview-of-issues-and-fixes">
+<h1><span class="small">Overview of issues and fixes</span></h1>
+<ul class="small simple">
+<li>Opticks : excess BULK_ABSORB (AB), lack SURFACE_ABSORB (SA) in innerWater<ul>
+<li>FIX: skip near degenerate(-0.0001 mm) pointless Pyrex///Pyrex PMT solids from GPU geometry</li>
+</ul>
+</li>
+<li>Opticks : photons not stopping at Tyvek<ul>
+<li>FIX: add explicit surfaces to GPU geometry corresponding to Geant4 implicit RINDEX-NoRINDEX boundaries</li>
+</ul>
+</li>
+<li>Opticks : much less scattering in the Water<ul>
+<li>FIX: get Geant4 calculated <strong>RAYLEIGH</strong> property for &quot;Water&quot; into <em>G4Material</em> so Opticks can use it</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="opticks-excess-ab-lack-sa-in-innerwater-fix-remove-degenerates">
+<h1><span class="small">Opticks : excess AB, lack SA in innerWater (FIX: remove degenerates)</span></h1>
+<pre class="mypretiny">
+In [2]: ab.his
+Out[2]:
+ab.his
+.       seqhis_ana  cfo:sum  1:g4live:tds3gun   -1:g4live:tds3gun        c2        ab        ba
+.                         11142     11142                  616.50/66 =  9.34
+   n             iseq         a         b    a-b               c2    [ns] label
+0000               42      1666      1621     45             0.62    [2 ] SI AB
+0001            7ccc2      1264      1258      6             0.01    [5 ] SI BT BT BT SD
+<b><span class="redbold">0002            8ccc2       581       766   -185            25.41    [5 ] SI BT BT BT SA</span></b>
+0003           7ccc62       579       543     36             1.16    [6 ] SI SC BT BT BT SD
+0004             8cc2       570       496     74             5.14    [4 ] SI BT BT SA
+0005              452       408       495    -87             8.38    [3 ] SI RE AB
+0006              462       399       351     48             3.07    [3 ] SI SC AB
+0007           7ccc52       360       385    -25             0.84    [6 ] SI RE BT BT BT SD
+0008           8ccc62       239       258    -19             0.73    [6 ] SI SC BT BT BT SA
+0009          7ccc662       218       195     23             1.28    [7 ] SI SC SC BT BT BT SD
+0010            8cc62       195       180     15             0.60    [5 ] SI SC BT BT SA
+<b><span class="redbold">0011             4cc2       268       104    164            72.30    [4 ] SI BT BT AB</span></b>
+0012           8ccc52       160       191    -31             2.74    [6 ] SI RE BT BT BT SA
+0013          7ccc652       163       165     -2             0.01    [7 ] SI RE SC BT BT BT SD
+0014               41       156       160     -4             0.05    [2 ] CK AB
+0015             4552       118       152    -34             4.28    [4 ] SI RE RE AB
+0016            8cc52       136       133      3             0.03    [5 ] SI RE BT BT SA
+0017             4662       125       114     11             0.51    [4 ] SI SC SC AB
+<b><span class="redbold">0018            4cc62       189        40    149            96.95    [5 ] SI SC BT BT AB</span></b>
+.                         11142     11142                  616.50/66 =  9.34
+</pre></div>
+<div class="slide" id="id1">
+<h1><span class="small">Opticks : excess AB, lack SA in innerWater (FIX: remove degenerates)</span></h1>
+<ul class="small simple">
+<li><span class="r">wrong boundary means Opticks using Pyrex properties, not Water, for a fraction of photons (5%)</span></li>
+</ul>
+<pre class="mypretiny">
+In [3]: a.sel = "SI BT BT BT SA"      <span class="bluebold">## select photons with this history</span>
+In [15]: a.bn.reshape(-1,4).view(np.int8)[:20]     <b>## signed boundary at up to 16 steps of the photon </b>
+Out[15]:
+A([[ 18,  17, -23, -25,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+   [ 18,  17, -23, -27,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+   ...
+   [ 18,  17, -23, -27,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+   [ 18,  17, <span class="redbold">-24</span>, -25,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=int8)
+
+In [17]: print(a.blib.format(a.bn.reshape(-1,4).view(np.int8)[0]))   ## 16*char(int8) packed into uint4 4*32bit
+ 18 : Acrylic///LS            <span class="bluebold">##  boundary : outer-material/outer-surface/inner-surface/inner-material  </span>
+ 17 : Water///Acrylic         <span class="bluebold">## +ve boundary : photon direction is with the normal, exiting the shape  </span>
+-23 : Water///Pyrex           <span class="bluebold">## -ve boundary : photon direction against the normal, entering the shape </span>
+-25 : Pyrex/NNVTMCPPMT_photocathode_logsurf2/NNVTMCPPMT_photocathode_logsurf1/Vacuum
+
+In [18]: print(a.blib.format(a.bn.reshape(-1,4).view(np.int8)[1]))
+ 18 : Acrylic///LS
+ 17 : Water///Acrylic
+-23 : Water///Pyrex
+-27 : Pyrex/HamamatsuR12860_photocathode_logsurf2/HamamatsuR12860_photocathode_logsurf1/Vacuum
+
+In [19]: print(a.blib.format(a.bn.reshape(-1,4).view(np.int8)[19]))
+ 18 : Acrylic///LS
+ 17 : Water///Acrylic
+<span class="redbold">-24 : Pyrex///Pyrex   ## expect Water///Pyrex --> GEOMETRY PROBLEM </span>
+-25 : Pyrex/NNVTMCPPMT_photocathode_logsurf2/NNVTMCPPMT_photocathode_logsurf1/Vacuum
+</pre><ul class="small simple">
+<li><span class="b">All LPMTs : near degenerate Water///Pyrex and &quot;pointless&quot; same material Pyrex///Pyrex borders offset: 0.001mm</span></li>
+</ul>
+</div>
+<div class="slide" id="gpmt-hamamatsu-jun28">
+<h1><span class="i">gpmt Hamamatsu jun28</span></h1>
+</div>
+<div class="slide" id="gpmt-nnvt-jun28">
+<h1><span class="i">gpmt NNVT jun28</span></h1>
+</div>
+<div class="slide" id="opticks-excess-ab-lack-sa-in-innerwater-fix-options">
+<h1><span class="small">Opticks : excess AB, lack SA in innerWater : FIX Options</span></h1>
+<blockquote class="small">
+<ol class="arabic simple">
+<li>fix source geometry removing the pointless Pyrex///Pyrex -0.001mm boundary<ul>
+<li>seems to cause no problem for Geant4 : get &quot;microStep&quot; of ~0.001-0.002mm<ul>
+<li>eg <tt class="docutils literal"><span class="pre">--dbgseqhis</span> 0x7ccccd</tt> dumps Geant4 details for photons in category</li>
+</ul>
+</li>
+<li>experience shows is time consuming to get agreement on geometry change</li>
+</ul>
+</li>
+<li>runtime workaround trying to notice inconsistency by maintaining state of which material are in<ul>
+<li>need very strong reasons to add complexity to GPU code, so disqualify this</li>
+</ul>
+</li>
+<li>skip the near degenerate inner Pyrex solids in the translated GPU geometry<ul>
+<li>easy, causing no problems because are removing a pointless Pyrex///Pyrex border</li>
+<li>BUT: requires suppression of Geant4 &quot;microSteps&quot; in <em>CRecorder</em> to facilitate history comparison</li>
+</ul>
+</li>
+</ol>
+<p><strong>Currently using 3, with Opticks commandline option:</strong></p>
+</blockquote>
+<pre class="small literal-block">
+--skipsolidname
+    NNVTMCPPMT_body_solid,
+    HamamatsuR12860_body_solid_1_9,
+    PMT_20inch_veto_body_solid_1_2
+</pre>
+<!-- comment
+
+notes/issues/ok_less_SA_more_AB.rst -->
+</div>
+<div class="slide" id="ok-photons-not-stopping-at-tyvek-fixed-by-adding-explicit-surfaces">
+<h1><span class="small">OK:Photons not stopping at Tyvek, FIXED by adding explicit surfaces</span></h1>
+<ul class="small simple">
+<li>Major problems -&gt; huge chi2, from zeros in history table</li>
+<li>G4: implicit RINDEX-NoRINDEX surface at Tyvek///Water boundary</li>
+<li>OK: FIX with explicit surface <strong>Tyvek//Implicit_RINDEX_NoRINDEX_pInnerWater_pCentralDetector/Water</strong></li>
+</ul>
+<pre class="mypretiny">
+In [7]: ab.a.seqhis_ana.table.compare(ab.b.seqhis_ana.table, ordering="sum")
+Out[7]:
+.                   cfo:sum  1:g4live:tds3gun   -1:g4live:tds3gun
+.                         11278     11278                  <span class="r">1766.28/69 = 25.60</span>  (pval:0.000 prob:1.000)
+0000               42      1653      1665    -12             0.04    [2 ] SI AB
+0001            7ccc2      1292      1230     62             1.52    [5 ] SI BT BT BT SD
+0002            8ccc2       590       674    -84             5.58    [5 ] SI BT BT BT SA
+0003           7ccc62       581       552     29             0.74    [6 ] SI SC BT BT BT SD
+0004              452       422       534   -112            13.12    [3 ] SI RE AB
+0005           7ccc52       380       397    -17             0.37    [6 ] SI RE BT BT BT SD
+0006              462       392       367     25             0.82    [3 ] SI SC AB
+0007           8ccc62       251       267    -16             0.49    [6 ] SI SC BT BT BT SA
+<b><span class="redbold">0008             8cc2         0       464   -464           464.00    [4 ] SI BT BT SA</span></b>
+0009          7ccc662       219       213      6             0.08    [7 ] SI SC SC BT BT BT SD
+0010             4cc2       278       127    151            56.30    [4 ] SI BT BT AB
+0011           8ccc52       154       188    -34             3.38    [6 ] SI RE BT BT BT SA
+0012          7ccc652       157       159     -2             0.01    [7 ] SI RE SC BT BT BT SD
+0013               41       142       144     -2             0.01    [2 ] CK AB
+0014            4cc62       197        71    126            59.24    [5 ] SI SC BT BT AB
+0015             4552       124       142    -18             1.22    [4 ] SI RE RE AB
+0016             4662       137       121     16             0.99    [4 ] SI SC SC AB
+0017             4652       121       112      9             0.35    [4 ] SI RE SC AB
+0018          7ccc552       102       124    -22             2.14    [7 ] SI RE RE BT BT BT SD
+0019           7cccc2        53       154   -101            49.28    [6 ] SI BT BT BT BT SD
+<b><span class="redbold">0020            8cc62         0       186   -186           186.00    [5 ] SI SC BT BT SA</span></b>
+0021          8ccc662        69       107    -38             8.20    [7 ] SI SC SC BT BT BT SA
+</pre></div>
+<div class="slide" id="prepare-an-input-photon-that-misses-pmts-for-checking-the-water">
+<h1><span class="small">Prepare an input photon that misses PMTs for checking the Water</span></h1>
+<pre class="mypretiny">
+epsilon:ana blyth$ tds3gun.sh 1
+
+In [1]: b.sel = "SI BT BT SA"    <b># selecting G4 photons that go direct to Tyvek</b>
+
+In [2]: b.ox.shape               <b># ox : final photons array honours the selection</b>
+Out[2]: (464, 4, 4)
+
+In [3]: p = b.ox[0:1] ; p        <b># first photon</b>
+Out[3]:
+A([[[ 14210.083 ,   5228.8896, -13142.859 ,    110.41  ],        <b># position, time</b>
+    [     0.7191,      0.2595,     -0.6447,      1.    ],        <b># direction, weight</b>
+    [    -0.4468,     -0.538 ,     -0.7148,    415.3976],        <b># polarization, wavelength </b>
+    [     0.    ,      0.    ,      0.    ,      0.    ]]],      <b># uint flags: not visible as float</b>
+    dtype=float32)
+
+In [4]: p[0,0,:3] -= p[0,1,:3]*2220.   <b># back up the photon by 2220mm to position 10mm into the water</b>
+
+In [5]: np.save("/tmp/check_innerwater.npy", p )
+</pre><p class="small"><strong>Perform both Geant4 and Opticks simulations with 100k repeats of the input photon</strong></p>
+<pre class="literal-block">
+tut_detsim.py ...
+    --opticks-mode 3     ## enable Geant4 + Opticks simulations
+    --opticks-anamgr     ## G4Track, G4Step --&gt; G4OpticksRecorder
+    opticks              ## GtOpticksTool input photon &quot;GenTool&quot;
+    --input-photon-path /tmp/check_innerwater.npy
+    --input-photon-repeat 100000
+</pre>
+</div>
+<div class="slide" id="ok-sc-with-the-100k-input-photons-in-water-fix-x4materialwater">
+<h1><span class="small">&lt;&lt; OK:SC with the 100k input photons in Water, FIX: X4MaterialWater</span></h1>
+<pre class="mypretiny">
+epsilon:ana blyth$ tds3ip.sh 1
+In [1]: ab.his[:15]
+Out[1]:
+ab.his
+.       seqhis_ana  cfo:sum  1:g4live:tds3ip   -1:g4live:tds3ip
+.                        100000    100000                  739.41/9 = 82.16  (pval:0.000 prob:1.000)
+0000               8d     93766     92777    989             5.24   [2 ] TO SA
+0001               4d      6031      5918    113             1.07   [2 ] TO AB
+<b><span class="redbold">0002             7c6d        38       311   -273           213.55   [4 ] TO SC BT SD
+0003              86d        33       236   -203           153.19   [3 ] TO SC SA
+0004            4cc6d        10       212   -202           183.80   [5 ] TO SC BT BT AB
+0005             8c6d        13        80    -67            48.27   [4 ] TO SC BT SA
+0006              46d        20        63    -43            22.28   [3 ] TO SC AB
+0007          8ccac6d         0        72    -72            72.00   [7 ] TO SC BT SR BT BT SA
+0008           46cc6d         1        39    -38            36.10   [6 ] TO SC BT BT SC AB
+0009             4c6d        10        21    -11             3.90   [4 ] TO SC BT AB
+0010            7cc6d         2        27    -25             0.00   [5 ] TO SC BT BT SD
+0011       ccacccac6d         0        26    -26             0.00   [10] TO SC BT SR BT BT BT SR BT BT
+0012           4ccc6d         0        19    -19             0.00   [6 ] TO SC BT BT BT AB</span></b>
+0013         7ccccc6d         9         9      0             0.00   [8 ] TO SC BT BT BT BT BT SD
+0014          466cc6d         1        17    -16             0.00   [7 ] TO SC BT BT SC SC AB
+.                        100000    100000                  739.41/9 = 82.16  (pval:0.000 prob:1.000)
+</pre><ul class="small simple">
+<li>JUNO &quot;Water&quot; material has no <strong>RAYLEIGH</strong> scattering length property</li>
+<li><em>G4OpRayleigh</em> calculates <strong>RAYLEIGH</strong> for materials named &quot;Water&quot; with <strong>RINDEX</strong> and no <strong>RAYLEIGH</strong><ul>
+<li>BUT: <em>G4Material</em> is unchanged, only <tt class="docutils literal"><span class="pre">G4OpRayleigh::thePhysicsTable</span></tt></li>
+<li><em>Opticks</em> converts materials, not process physics tables</li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/X4MaterialWater.cc">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/X4MaterialWater.cc</a><ul>
+<li>use G4OpRayleigh to calculate <strong>RAYLEIGH</strong> and add it to the <em>G4Material</em> so <em>Opticks</em> sees it</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="cxr-i0-t8-1-exclude-slowest">
-<h1><span class="i">[9]cxr_i0_t8,_-1 : EXCLUDE SLOWEST</span></h1>
-<pre>
-
-
-
-</pre><div class="sidebar">
-<p class="first sidebar-title"><span class="small">1st JUNO Opticks OptiX 7 Ray-trace</span></p>
-<p class="small">Very New CSG &quot;Foundry&quot; CPU/GPU Geometry</p>
-<ul class="small last simple">
-<li><span class="redbold">purely analytic CSG, no triangles</span></li>
-<li>everything at default, no optimization</li>
-</ul>
-</div>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="current-juno-geometry-auto-factorized-by-progeny-digest">
-<h1><span class="small">Current JUNO Geometry : Auto-Factorized by &quot;progeny digest&quot;</span></h1>
+<div class="slide" id="current-juno-geometry-auto-factorization-by-progeny-digest">
+<h1><span class="small">Current JUNO Geometry : Auto-Factorization by progeny digest</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Factorize ~300,000 vol -&gt; 10 comp</span></p>
-<ul class="small simple">
+<ul class="small last simple">
 <li><strong>ridx</strong>: repeat index</li>
 <li><strong>plc</strong>: number of placements of the instance</li>
-<li><strong>prim</strong>: number of Prim/volumes in the instance</li>
-<li><strong>component</strong>: numPrim:outerPrimName</li>
+<li><strong>vol</strong>: number of volumes in the instance</li>
+<li><strong>name</strong>: named after outer solid</li>
 </ul>
-<p class="small last"><span class="r">&quot;progeny digest&quot;</span> characterizes subtree of every volume-node</p>
 </div>
 <table border="1" class="tiny docutils">
 <colgroup>
@@ -2647,8 +2748,8 @@ struct CSGFoundry
 <thead valign="bottom">
 <tr><th class="head">ridx</th>
 <th class="head">plc</th>
-<th class="head">prim</th>
-<th class="head">component</th>
+<th class="head">vol</th>
+<th class="head">component name</th>
 <th class="head">note</th>
 </tr>
 </thead>
@@ -2656,34 +2757,34 @@ struct CSGFoundry
 <tr><td>0</td>
 <td>1</td>
 <td>3084</td>
-<td>3084:sWorld</td>
+<td>3084:sWorld0x33e3370</td>
 <td>non-repeated remainder</td>
 </tr>
 <tr><td>1</td>
 <td>25600</td>
 <td>5</td>
-<td>5:PMT_3inch_pmt_solid</td>
+<td>5:PMT_3inch_pmt_solid0x43c0a40</td>
 <td rowspan="4">4 types of PMT</td>
 </tr>
 <tr><td>2</td>
 <td>12612</td>
 <td>5</td>
-<td>5:NNVTMCPPMTsMask</td>
+<td>5:NNVTMCPPMTsMask0x3c2c750</td>
 </tr>
 <tr><td>3</td>
 <td>5000</td>
 <td>5</td>
-<td>5:HamamatsuR12860sMask</td>
+<td>5:HamamatsuR12860sMask0x3c39130</td>
 </tr>
 <tr><td>4</td>
 <td>2400</td>
 <td>5</td>
-<td>5:mask_PMT_20inch_vetosMask</td>
+<td>5:mask_PMT_20inch_vetosMask0x3c2e7c0</td>
 </tr>
 <tr><td>5</td>
 <td>590</td>
 <td>1</td>
-<td>1:sStrutBallhead</td>
+<td>1:sStrutBallhead0x34be280</td>
 <td rowspan="4">4 parts of same
 assembly, BUT not
 grouped as siblings
@@ -2692,84 +2793,77 @@ grouped as siblings
 <tr><td>6</td>
 <td>590</td>
 <td>1</td>
-<td>1:uni1</td>
+<td>1:uni10x3461bd0</td>
 </tr>
 <tr><td>7</td>
 <td>590</td>
 <td>1</td>
-<td>1:base_steel</td>
+<td>1:base_steel0x35a1810</td>
 </tr>
 <tr><td>8</td>
 <td>590</td>
 <td>1</td>
-<td>1:uni_acrylic3</td>
+<td>1:uni_acrylic30x35932f0</td>
 </tr>
 <tr><td>9</td>
 <td>504</td>
 <td>130</td>
-<td>130:sPanel</td>
+<td>130:sPanel0x4e71750</td>
 <td>repeated parts of TT</td>
 </tr>
 </tbody>
 </table>
+<p class="small">Geom excludes &quot;virtual&quot; solids, via <span class="small">--skipsolidname NNVTMCPPMTsMask_virtual, HamamatsuR12860sMask_virtual, mask_PMT_20inch_vetosMask_virtual</span></p>
 <ul class="small simple">
-<li><strong>ridx:0</strong> &quot;remainder&quot; Prim<ul>
-<li>Prim that did not pass instancing criteria, on number of repeats + complexity</li>
-<li>TODO: tune criteria to instance more, reducing remainder Prim (Expect: 3084-&gt;~ 84)</li>
-</ul>
-</li>
-<li><strong>ridx:1,2,3,4</strong><ul>
-<li>four types of PMT, all with 5 Prim</li>
+<li><strong>ridx:0</strong> ~3000 of 3084 remainder volumes are repeated<ul>
+<li><tt class="docutils literal">(HBeam|ixture|anchor|Steel2|Plane|Wall|Receiver|Strut0x|sBar0x)</tt></li>
+<li>TODO: modify instancing criteria to get more instanced, reducing remainder volumes</li>
 </ul>
 </li>
 <li><strong>ridx:5,6,7,8</strong><ul>
-<li>same 590x assembly <span class="redbold">but not grouped together</span> : as siblings (not parent-child like PMTs)</li>
-<li>TODO: implement instancing of siblings, combining 4 -&gt; 1</li>
+<li>same assembly <span class="redbold">but not grouped together</span> : as siblings (not parent-child like PMTs)</li>
+<li>TODO: implement grouping of siblings : 4 -&gt; 1</li>
 </ul>
 </li>
 </ul>
-<p class="small"><span class="redbold">Increasing instancing : reduces memory for geometry -&gt; improved performance</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="juno-optix-7-foundry-geometry-scan">
-<h1><span class="i">JUNO OptiX 7 : &quot;Foundry&quot; Geometry Scan</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Vary Geom. Compare Render Times</span></p>
-<p class="small last">Fast render -&gt; Fast simulation</p>
+<p class="small"><span class="redbold">Increasing instancing : reduces memory for geometry + improves performance</span></p>
 </div>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="juno-geometry-optix-7-ray-trace-times-2m-pixels-titan-rtx">
-<h1><span class="small">JUNO Geometry : OptiX 7 Ray Trace Times ~2M pixels : TITAN RTX</span></h1>
+<div class="slide" id="notes-on-how-the-renders-and-tables-were-created">
+<h1><span class="small">Notes on how the renders and tables were created</span></h1>
+<ul class="small simple">
+<li>~/opticks/notes/misc/snapscan-varying-enabledmergedmesh-option.rst</li>
+</ul>
+<p class="small">In summary:</p>
+<pre class="mypretiny">
+snapscan.sh --cvd 1 --rtx 1     # on P, create jpg snaps and metadata json
+snap.sh                         # on G, grab them
+snap.py --rst                   # dump RST table
+</pre></div>
+<div class="slide" id="current-juno-geometry-ray-trace-times-titan-rtx-rtx-on-24gb">
+<h1><span class="small">Current JUNO Geometry : Ray Trace Times : TITAN RTX (RTX ON, 24GB)</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Same viewpoint, vary GPU geometry</span></p>
 <ul class="small simple">
-<li><strong>-e</strong> : controls components : &quot;t&quot; means ~ (NOT)</li>
-<li><strong>time(s)</strong> : GPU ray trace CUDA launch time</li>
-<li><strong>relative</strong> : compares to &quot;ONLY PMT&quot; baseline</li>
+<li>1920x1080 render times (~2M pixels)</li>
+<li>Geometry &quot;factored&quot; into 10 instances</li>
+<li><strong>3084:sWorld</strong> is the &quot;remainder&quot; geometry</li>
+<li><tt class="docutils literal"><span class="pre">-e</span></tt> option controls components</li>
+<li>tilde: <tt class="docutils literal"><span class="pre">-e</span> ~8,</tt>  <strong>excludes</strong> listed</li>
+<li><strong>relative</strong> compares to &quot;ONLY PMT&quot;</li>
 </ul>
-<p class="small">Very large range of times 1:600</p>
-<p class="small"><span class="r">Table identifies slow geometry to fix :</span></p>
-<ul class="small simple">
-<li><strong>3084:sWorld</strong> (too many non-instanced Prim)</li>
-<li><strong>1:uni_acrylic</strong> (CSG sub. 35m diam. sphere)</li>
-</ul>
-<p class="small">Good performance for <span class="b">ONLY PMTs</span> :</p>
 <ul class="small last simple">
-<li><span class="b">45,612 PMT instances handled without issue</span></li>
+<li>very large range of times</li>
+<li>with <strong>1:uni_acrylic</strong> : 65-100x slower</li>
+<li>next offender is <strong>3084:sWorld</strong></li>
 </ul>
 </div>
 <table border="1" class="tiny docutils">
 <colgroup>
-<col width="2%" />
+<col width="3%" />
 <col width="9%" />
-<col width="14%" />
-<col width="14%" />
-<col width="60%" />
+<col width="9%" />
+<col width="9%" />
+<col width="69%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">idx</th>
@@ -2781,355 +2875,548 @@ grouped as siblings
 </thead>
 <tbody valign="top">
 <tr><td>0</td>
-<td>9,</td>
-<td>0.0017</td>
-<td>0.1702</td>
-<td>ONLY: 130:sPanel</td>
+<td>5,</td>
+<td>0.0020</td>
+<td>0.1162</td>
+<td>ONLY: 1:sStrutBallhead0x34be280</td>
 </tr>
 <tr><td>1</td>
 <td>7,</td>
-<td>0.0017</td>
-<td>0.1714</td>
-<td>ONLY: 1:base_steel</td>
+<td>0.0030</td>
+<td>0.1766</td>
+<td>ONLY: 1:base_steel0x35a1810</td>
 </tr>
 <tr><td>2</td>
-<td>6,</td>
-<td>0.0019</td>
-<td>0.1923</td>
-<td>ONLY: 1:uni1</td>
+<td>9,</td>
+<td>0.0038</td>
+<td>0.2233</td>
+<td>ONLY: 130:sPanel0x4e71750</td>
 </tr>
 <tr><td>3</td>
-<td>5,</td>
-<td>0.0027</td>
-<td>0.2780</td>
-<td>ONLY: 1:sStrutBallhead</td>
+<td>4,</td>
+<td>0.0044</td>
+<td>0.2578</td>
+<td>ONLY: 5:mask_PMT_20inch_vetosMask0x3c2e7c0</td>
 </tr>
 <tr><td>4</td>
-<td>4,</td>
-<td>0.0032</td>
-<td>0.3268</td>
-<td>ONLY: 5:mask_PMT_20inch_vetosMask</td>
+<td>6,</td>
+<td>0.0056</td>
+<td>0.3250</td>
+<td>ONLY: 1:uni10x3461bd0</td>
 </tr>
 <tr><td>5</td>
-<td>1,</td>
-<td>0.0032</td>
-<td>0.3287</td>
-<td>ONLY: 5:PMT_3inch_pmt_solid</td>
+<td>3,</td>
+<td>0.0068</td>
+<td>0.3957</td>
+<td>ONLY: 5:HamamatsuR12860sMask0x3c39130</td>
 </tr>
 <tr><td>6</td>
-<td>2,</td>
-<td>0.0055</td>
-<td>0.5669</td>
-<td>ONLY: 5:NNVTMCPPMTsMask</td>
+<td>1,</td>
+<td>0.0073</td>
+<td>0.4288</td>
+<td>ONLY: 5:PMT_3inch_pmt_solid0x43c0a40</td>
 </tr>
 <tr><td>7</td>
-<td>3,</td>
+<td>2,</td>
 <td>0.0074</td>
-<td>0.7582</td>
-<td>ONLY: 5:HamamatsuR12860sMask</td>
+<td>0.4345</td>
+<td>ONLY: 5:NNVTMCPPMTsMask0x3c2c750</td>
 </tr>
 <tr><td>8</td>
-<td><span class="b">1,2,3,4</span></td>
-<td><span class="b">0.0097</span></td>
-<td><span class="b">1.0000</span></td>
-<td><span class="b">ONLY PMT</span></td>
+<td>1,2,3,4</td>
+<td>0.0171</td>
+<td>1.0000</td>
+<td>ONLY PMT</td>
 </tr>
 <tr><td>9</td>
-<td>t8,0</td>
-<td>0.0099</td>
-<td>1.0179</td>
-<td>EXCL: 1:uni_acrylic3 3084:sWorld</td>
+<td>0,</td>
+<td>0.0511</td>
+<td>2.9827</td>
+<td>ONLY: 3084:sWorld0x33e3370</td>
 </tr>
 <tr><td>10</td>
-<td><span class="r">0,</span></td>
-<td><span class="r">0.1171</span></td>
-<td><span class="r">12.0293</span></td>
-<td><span class="r">ONLY: 3084:sWorld</span></td>
+<td>~8,</td>
+<td>0.0882</td>
+<td>5.1466</td>
+<td>EXCL: 1:uni_acrylic30x35932f0</td>
 </tr>
 <tr><td>11</td>
-<td><span class="r">t8,</span></td>
-<td><span class="r">0.1186</span></td>
-<td><span class="r">12.1769</span></td>
-<td><span class="r">EXCL: 1:uni_acrylic3</span></td>
+<td>8,</td>
+<td>1.1154</td>
+<td>65.1113</td>
+<td>ONLY: 1:uni_acrylic30x35932f0</td>
 </tr>
 <tr><td>12</td>
-<td><span class="r">t0,</span></td>
-<td><span class="r">0.5278</span></td>
-<td><span class="r">54.2066</span></td>
-<td><span class="r">EXCL: 3084:sWorld</span></td>
+<td>~0,</td>
+<td>1.3928</td>
+<td>81.3006</td>
+<td>EXCL: 3084:sWorld0x33e3370</td>
 </tr>
 <tr><td>13</td>
-<td><span class="r">8,</span></td>
-<td><span class="r">0.5310</span></td>
-<td><span class="r">54.5298</span></td>
-<td><span class="r">ONLY: 1:uni_acrylic3</span></td>
+<td>~5,</td>
+<td>1.6898</td>
+<td>98.6400</td>
+<td>EXCL: 1:sStrutBallhead0x34be280</td>
 </tr>
 <tr><td>14</td>
-<td>t3,</td>
-<td>0.6017</td>
-<td>61.7954</td>
-<td>EXCL: 5:HamamatsuR12860sMask</td>
+<td>~6,</td>
+<td>1.6900</td>
+<td>98.6520</td>
+<td>EXCL: 1:uni10x3461bd0</td>
 </tr>
 <tr><td>15</td>
-<td>t2,</td>
-<td>0.6043</td>
-<td>62.0620</td>
-<td>EXCL: 5:NNVTMCPPMTsMask</td>
+<td>~7,</td>
+<td>1.6942</td>
+<td>98.8969</td>
+<td>EXCL: 1:base_steel0x35a1810</td>
 </tr>
 <tr><td>16</td>
-<td>t5,</td>
-<td>0.6171</td>
-<td>63.3787</td>
-<td>EXCL: 1:sStrutBallhead</td>
+<td>~4,</td>
+<td>1.6949</td>
+<td>98.9376</td>
+<td>EXCL: 5:mask_PMT_20inch_vetosMask0x3c2e7c0</td>
 </tr>
 <tr><td>17</td>
-<td>t6,</td>
-<td>0.6196</td>
-<td>63.6301</td>
-<td>EXCL: 1:uni1</td>
+<td>~0</td>
+<td>1.7078</td>
+<td>99.6925</td>
+<td>ALL</td>
 </tr>
 <tr><td>18</td>
-<td>t7,</td>
-<td>0.6226</td>
-<td>63.9458</td>
-<td>EXCL: 1:base_steel</td>
+<td>~3,</td>
+<td>1.7103</td>
+<td>99.8371</td>
+<td>EXCL: 5:HamamatsuR12860sMask0x3c39130</td>
 </tr>
 <tr><td>19</td>
-<td>t0</td>
-<td>0.6240</td>
-<td>64.0879</td>
-<td>3084:sWorld</td>
+<td>~9,</td>
+<td>1.7157</td>
+<td>100.1534</td>
+<td>EXCL: 130:sPanel0x4e71750</td>
 </tr>
 <tr><td>20</td>
-<td>t4,</td>
-<td>0.6243</td>
-<td>64.1169</td>
-<td>EXCL: 5:mask_PMT_20inch_vetosMask</td>
+<td>~2,</td>
+<td>1.7285</td>
+<td>100.8994</td>
+<td>EXCL: 5:NNVTMCPPMTsMask0x3c2c750</td>
 </tr>
 <tr><td>21</td>
-<td>t9,</td>
-<td>0.6335</td>
-<td>65.0636</td>
-<td>EXCL: 130:sPanel</td>
-</tr>
-<tr><td>22</td>
-<td>t1,</td>
-<td>0.6391</td>
-<td>65.6384</td>
-<td>EXCL: 5:PMT_3inch_pmt_solid</td>
+<td>~1,</td>
+<td>1.7457</td>
+<td>101.9019</td>
+<td>EXCL: 5:PMT_3inch_pmt_solid0x43c0a40</td>
 </tr>
 </tbody>
 </table>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="juno-all-pmts-2m-ray-traced-pixels-in-0-0097-s-nvidia-titan-rtx-nvidia-optix-7-0-0-opticks">
-<h1><span class="white">JUNO ALL PMTs : 2M ray traced pixels in 0.0097 s : NVIDIA TITAN RTX, NVIDIA OptiX 7.0.0, Opticks</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
-
-:white:`[8]cxr_i0_1,2,3,4_-1 : ALL PMTS`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   8 : ALL PMTS -->
-</div>
-<div class="slide" id="summary-and-links">
-<h1><span class="small">Summary and Links</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Next Steps</span></p>
-<ul class="small last simple">
-<li>Foundry JUNO geometry validation</li>
-<li>migrate optical physics to NVIDIA OptiX 7</li>
-<li>JUNO Production validation</li>
-</ul>
-</div>
-<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 20px;" />
-<!--  -->
-<blockquote>
-<p><em>Opticks</em> : state-of-the-art GPU ray traced optical simulation integrated with <em>Geant4</em>.
-Geometry progress with OptiX 7 suggests integration within months is achievable.</p>
-<img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
-<ul class="simple">
-<li>Efficiency culling decision moved to GPU, reducing CPU hit memory</li>
-<li>&quot;Foundry&quot; geometry model implemented to support NVIDIA OptiX 7 API.</li>
-<li><span class="redbold">First JUNO OptiX 7 renders achieved.</span></li>
-</ul>
-</blockquote>
-<table border="1" class="docutils align-center">
-<colgroup>
-<col width="55%" />
-<col width="45%" />
-</colgroup>
-<tbody valign="top">
-<tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
-<td>code repository</td>
-</tr>
-<tr><td><a class="reference external" href="https://github.com/simoncblyth/opticks/releases">https://github.com/simoncblyth/opticks/releases</a></td>
-<td>.zip .tar.gz  archives</td>
-</tr>
-<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
-<td>presentations and videos</td>
-</tr>
-<tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
-<td>forum/mailing list archive</td>
-</tr>
-<tr><td>email:opticks+subscribe&#64;groups.io</td>
-<td>subscribe to mailing list</td>
-</tr>
-</tbody>
-</table>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="acknowledgement-opticks-hackathon-series-for-nvidia-optix-6-7">
-<h1><span class="small">Acknowledgement : Opticks &quot;Hackathon&quot; Series for NVIDIA OptiX 6-&gt;7</span></h1>
-<ul class="simple">
-<li>Suggested and organized by LZ, LBNL, NERSC</li>
-<li>~fortnightly meetings since Feb 2021</li>
-<li><span class="r">Valuable advice from NVIDIA engineers</span></li>
-<li>see next talk by Oisin Creaner, <strong>LZ with Opticks</strong></li>
-</ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="lz-with-opticks-images-from-sam-eriksen-university-of-bristol">
-<h1><span class="small">LZ with Opticks (Images from Sam Eriksen, University of Bristol)</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
-
-
-:white:`[7]cxr_i0_2,_-1 : ONLY NNVT PMTs`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   7
-
-
-:white:`[10]cxr_i0_0,_-1 : ONLY GLOBAL "REMAINDER"`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   10 : REMAINDER ONLY : 0,
-
-
-:white:`[9]cxr_i0_t8,_-1 : EXCLUDE SLOWEST : 2`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   9 : EXCLUDE THE SLOW : t8 -->
+<p class="tiny"><strong>eg:</strong> OpSnapTest --targetpvn lLowerChimney_phys --eye -1,-1,-1 -e 1,2,3,4 --nameprefix lLowerChimney_phys__1,2,3,4__ --rtx 1 --cvd 1 --tracer</p>
 <!-- comment
 
-cxr_view
-- - - - - - - - - - - -
-
-
-
-cxr_view_0
-- - - - - - - - - - - -
-
-cxr_solid_r0@
-- - - - - - - - - - - - - - -
-
-
-
-cxr_view_1
-- - - - - - - - - - - -
-
-cxr_solid_r1@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r1p
-- - - - - - - - - - - - -
-
-
-
-cxr_view_2
-- - - - - - - - - - - -
-
-cxr_solid_r2@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r2p
-- - - - - - - - - - - - -
-
-
-
-cxr_view_3
-- - - - - - - - - - - -
-
-cxr_solid_r3@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r3p
-- - - - - - - - - - - - -
-
-
-
-cxr_view_4
-- - - - - - - - - - - -
-
-cxr_solid_r4@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r4p
-- - - - - - - - - - - - -
-
-
-
-
-cxr_view_5
-- - - - - - - - - - - -
-
-cxr_solid_r5@
-- - - - - - - - - - - - - - -
-
-
-
-
-
-cxr_view_6
-- - - - - - - - - - - -
-
-cxr_solid_r6@
-- - - - - - - - - - - - - - -
-
-
-
-
-cxr_view_7
-- - - - - - - - - - - -
-
-cxr_solid_r7@
-- - - - - - - - - - - - - - -
-
-
-
-cxr_view_8
-- - - - - - - - - - - -
-
-cxr_solid_r8@
-- - - - - - - - - - - - - - -
-
-
-
-cxr_view_9
-- - - - - - - - - - - -
-
-cxr_solid_r9@
-- - - - - - - - - - - - - - - -->
+snap.py - -pagejpg
+snap.py - -refjpg -->
 </div>
+<div class="slide" id="llowerchimney-phys-5-00000">
+<h1><span class="blue">[0]lLowerChimney_phys__5,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-7-00000">
+<h1><span class="blue">[1]lLowerChimney_phys__7,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-9-00000">
+<h1><span class="blue">[2]lLowerChimney_phys__9,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-4-00000">
+<h1><span class="blue">[3]lLowerChimney_phys__4,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-6-00000">
+<h1><span class="blue">[4]lLowerChimney_phys__6,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-3-00000">
+<h1><span class="blue">[5]lLowerChimney_phys__3,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-1-00000">
+<h1><span class="blue">[6]lLowerChimney_phys__1,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-2-00000">
+<h1><span class="blue">[7]lLowerChimney_phys__2,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-1-2-3-4-00000">
+<h1><span class="blue">[8]lLowerChimney_phys__1,2,3,4__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-0-00000">
+<h1><span class="blue">[9]lLowerChimney_phys__0,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t8-00000">
+<h1><span class="blue">[10]lLowerChimney_phys__t8,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-8-00000">
+<h1><span class="blue">[11]lLowerChimney_phys__8,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t0-00000">
+<h1><span class="blue">[12]lLowerChimney_phys__t0,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t5-00000">
+<h1><span class="blue">[13]lLowerChimney_phys__t5,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t6-00000">
+<h1><span class="blue">[14]lLowerChimney_phys__t6,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t7-00000">
+<h1><span class="blue">[15]lLowerChimney_phys__t7,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t4-00000">
+<h1><span class="blue">[16]lLowerChimney_phys__t4,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-all-00000">
+<h1><span class="blue">[17]lLowerChimney_phys_all_00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t3-00000">
+<h1><span class="blue">[18]lLowerChimney_phys__t3,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t9-00000">
+<h1><span class="blue">[19]lLowerChimney_phys__t9,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t2-00000">
+<h1><span class="blue">[20]lLowerChimney_phys__t2,__00000</span></h1>
+</div>
+<div class="slide" id="llowerchimney-phys-t1-00000">
+<h1><span class="blue">[21]lLowerChimney_phys__t1,__00000</span></h1>
+</div>
+<div class="slide" id="ray-trace-movies-1920x1080-2m-pixels-fly-around-fastener">
+<h1><span class="small">Ray Trace Movies 1920x1080 (~2M pixels) Fly Around Fastener</span></h1>
+<p class="tiny">/afs/ihep.ac.cn/users/b/blyth/flight/RoundaboutXY_XZ__lFasteners_phys__~0__8__/RoundaboutXY_XZ__lFasteners_phys__~0__8__.mp4  (56M)</p>
+<p class="small">Fly around fastener: <tt class="docutils literal"><span class="pre">-e</span> ~0</tt> (ALL GEOMETRY)</p>
+<ul class="small simple">
+<li>frame times 1.68-1.71s</li>
+<li>lots of coincident surface speckle inside <strong>uni_acrylic3</strong> (large file size: 56M for 20s, 512 frames)</li>
+<li><strong>uni_acrylic3</strong> : polycone with complemented (subtracted) 8 column &quot;Greek Temple&quot;</li>
+<li><strong>uni1</strong> : 8 column &quot;Greek Temple&quot;</li>
+</ul>
+<hr/><p class="tiny">/afs/ihep.ac.cn/users/b/blyth/flight/RoundaboutXY_XZ__lFasteners_phys__~8,__8__/RoundaboutXY_XZ__lFasteners_phys__~8,__8__.mp4  (15M)</p>
+<p class="small">Same flight as above but using option <tt class="docutils literal"><span class="pre">-e</span> ~8,</tt> (EXCLUDE <strong>uni_acrylic3</strong>)</p>
+<ul class="small simple">
+<li>frame times 0.07-0.09s (small file size: 15M for 20s) <span class="redbold">&gt; 20x faster with exclusion</span></li>
+<li><strong>interior of the fastener is irrelevant for optical photons</strong> (<span class="redbold">do you agree ?</span>)</li>
+<li><span class="bluebold">TODO : implement a exterior only version of the fastener</span>, with <strong>tut_detsim.py</strong> option</li>
+</ul>
+<hr/><pre class="mypretiny">
+epsilon:blyth$ ggeo.py 5:9/ --names      ##  PV, LV and Solid names for volumes in ridx 5,6,7,8
+nrpo(  68488     5     0     0 )     lSteel_phys0x34c07b0       lSteel0x34c0680       93 sStrutBallhead0x34be280
+nrpo(  69078     6     0     0 )     lFasteners_phys0x3461f60   lFasteners0x3461e20   94 uni10x3461bd0
+nrpo(  69668     7     0     0 )     lUpper_phys0x35499e0       lUpper0x3549920       95 base_steel0x35a1810
+<span class="redbold">nrpo(  70258     8     0     0 )     lAddition_phys0x3593690    lAddition0x3593510    96 uni_acrylic30x35932f0</span>
+</pre><ul class="tiny simple">
+<li>Movies created by <tt class="docutils literal">opticks/bin/flight.sh</tt> using <tt class="docutils literal">OpFlightPathTest</tt> and <tt class="docutils literal">ffmpeg</tt></li>
+</ul>
+<!-- comment
+
+* **~0**  : ALL GEOMETRY (twiddle of zero gives all bits set)  **~0,** : EXCLUDE ridx:0  (comma indicates positional bit setting)
+
+/Users/blyth/Movies/flight/RoundaboutXY_XZ__lFasteners_phys__~0__8__/RoundaboutXY_XZ__lFasteners_phys__~0__8__.mp4
+/Users/blyth/Movies/flight/RoundaboutXY_XZ__lFasteners_phys__~8,__8__/RoundaboutXY_XZ__lFasteners_phys__~8,__8__.mp4 -->
+</div>
+<div class="slide" id="double-greek-temple">
+<h1><span class="small">Double Greek Temple</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Inside Greek Temple</span></p>
+<ul class="last simple">
+<li>lots of coincident surface speckle</li>
+<li>dark columns : indicate inside surface (subtracted Greek Temple)</li>
+</ul>
+</div>
+</div>
+<div class="slide" id="tds-mu-tds-tut-detsim-py">
+<h1><span class="small">tds-mu   (tds : tut_detsim.py)</span></h1>
+<pre class="mypretiny">
+tds-mu ()
+{
+    tds --particles mu- --momentums 215000
+}
+tds ()
+{
+    local opts="--opticks-mode 1 --no-guide_tube --pmt20inch-polycone-neck --pmt20inch-simplify-csg --evtmax 2";
+    tds-elog-1;
+    tds-ectrl;
+    tds- $opts gun $*
+}
+tds-ectrl ()
+{
+    local msg="=== $FUNCNAME :";
+    local extra;
+    <span class="redbold">extra="--rngmax 100 --skipsolidname NNVTMCPPMTsMask_virtual,HamamatsuR12860sMask_virtual,mask_PMT_20inch_vetosMask_virtual -e ~8, --rtx 1 --cvd 1"; </span>
+    unset OPTICKS_EMBEDDED_COMMANDLINE_EXTRA;
+    if [ -n "$extra" ]; then
+        export OPTICKS_EMBEDDED_COMMANDLINE_EXTRA="$extra";
+        echo $msg OPTICKS_EMBEDDED_COMMANDLINE_EXTRA ${OPTICKS_EMBEDDED_COMMANDLINE_EXTRA};
+    fi;
+    ...
+}
+</pre></div>
+<div class="slide" id="tds-mu-first-runs-with-current-geometry-usinge-e-8">
+<h1><span class="small">tds-mu : first runs with current geometry : usinge -e ~8,</span></h1>
+<ul class="small simple">
+<li>using <tt class="docutils literal"><span class="pre">-e</span> ~8,</tt> : disabling the slow <strong>uni_acrylic</strong></li>
+<li>TODO: avoid changing fastener, just remove interior of fastener</li>
+</ul>
+<pre class="mypretiny">
+tds-mu
+...
+2021-04-26 04:24:16.509 INFO  [198647] [OPropagator::launch@287] 0 : (0;52694115,1)  launch time 41.0858
+2021-04-26 04:24:17.348 INFO  [198647] [OEvent::downloadHits@485]  nhit 15288267 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+2021-04-26 04:24:17.807 INFO  [198647] [OEvent::downloadHiys@519]  nhiy 15288267 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+2021-04-26 04:24:19.115 FATAL [198647] [G4Opticks::propagateOpticalPhotons@1152]  m_way_enabled num_hiys 15288267
+ junoSD_PMT_v2_Opticks::EndOfEvent.propagateOpticalPhotons  eventID 0 num_gensteps 108871 num_photons 52694115 num_hit 15288267 way_enabled 1 waymask 3
+0      gp.x 14847.53   gp.y -1223.14   gp.z -12286.16  gp.R 19310.49   pmt 14494   CK|RE|SD|BT|EC       otk 1      oti0.00     bti 92.76    bp.x 13701.00   bp.y -1128.36   bp.z -11338.51  bp.R 17820.00
+1      gp.x -14271.81  gp.y 8741.88    gp.z 9608.44    gp.R 19298.38   pmt 4434    CK|RE|SD|BT|EX       otk 1      oti0.00     bti 91.83    bp.x -13178.16  bp.y 8072.09    bp.z 8872.99    bp.R 17820.00
+
+
+2021-04-26 04:26:25.326 INFO  [198647] [OPropagator::launch@287] 0 : (0;53856062,1)  launch time 46.6679
+2021-04-26 04:26:26.188 INFO  [198647] [OEvent::downloadHits@485]  nhit 15959722 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+2021-04-26 04:26:26.628 INFO  [198647] [OEvent::downloadHiys@519]  nhiy 15959722 --dbghit N hitmask 0x40 SD SURFACE_DETECT
+2021-04-26 04:26:27.899 FATAL [198647] [G4Opticks::propagateOpticalPhotons@1152]  m_way_enabled num_hiys 15959722
+ junoSD_PMT_v2_Opticks::EndOfEvent.propagateOpticalPhotons  eventID 1 num_gensteps 111694 num_photons 53856062 num_hit 15959722 way_enabled 1 waymask 3
+0      gp.x 14847.53   gp.y -1223.22   gp.z -12285.85  gp.R 19310.30   pmt 14494   CK|RE|SD|BT|EC       otk 1      oti0.00     bti 92.76    bp.x 13701.15   bp.y -1128.45   bp.z -11338.31  bp.R 17820.00
+1      gp.x -14271.85  gp.y 8741.84    gp.z 9609.04    gp.R 19298.69   pmt 4434    CK|RE|SD|BT|EX       otk 1      oti0.00     bti 91.83    bp.x -13177.96  bp.y 8071.91    bp.z 8873.44    bp.R 17820.00
+</pre><ul class="small simple">
+<li>215 GeV muon giving : 52 - 54M photons,  ~15 M hits, GPU launch 41-46 s,</li>
+<li>BUT &gt; 2min between launches ?  How much is Geant4 ? GPU overhead ?</li>
+<li>NEXT:<ul>
+<li>profile whats happening between launches</li>
+<li>make connection between Opticks hits and hit collections</li>
+<li>hit validations</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="optix7-foundry-based-csg-geometry-model-solid-prim-node">
+<h1><span class="small">OptiX7 : &quot;Foundry&quot; based CSG geometry model : Solid/Prim/Node</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Foundry : Solids + constituents</span></p>
+<div class="last"><pre class="mypretiny">
+ 23 struct Foundry
+ 24 {
+...
+ 97     void upload();
+...
+101     std::vector&lt;Solid&gt;  solid ;
+102     std::vector&lt;Prim&gt;   prim ;
+103     std::vector&lt;Node&gt;   node ;
+104     std::vector&lt;float4&gt; plan ;
+105     std::vector&lt;qat4&gt;   tran ;
+106     std::vector&lt;qat4&gt;   itra ;
+107
+108     Solid*   d_solid ;
+109     <span class="redbold">Prim*    d_prim ; </span>
+110     <span class="redbold">Node*    d_node ; </span>
+111     <span class="redbold">float4*  d_plan ; </span>
+112     qat4*    d_tran ;
+113     <span class="redbold">qat4*    d_itra ; </span>
+114 };
+</pre></div></div>
+<p class="small"><strong>All solids+constituents created via Foundry (ref by index)</strong></p>
+<ul class="small simple">
+<li><strong>Solid</strong> : 1 or more <strong>Prim</strong>  : ( <strong>Solid</strong> -&gt; <strong>GAS</strong> )</li>
+<li><strong>Prim</strong> : 1 or more <strong>Node</strong>  : (<strong>Prim</strong> ~ <em>G4VSolid</em>)<ul>
+<li>(<em>nodeOffset</em>, <em>numNode</em>) -&gt; SBT HitGroup record</li>
+</ul>
+</li>
+<li><strong>Node</strong> : CSG constituents<ul>
+<li>basis shapes : sphere, box3, cone, cylinder, ...</li>
+<li>boolean operators : union, intersection, difference</li>
+</ul>
+</li>
+<li><strong>qat4</strong> : scale-rotate-translate transform</li>
+<li><strong>float4</strong> : planes (normal + distance to origin)</li>
+</ul>
+<p class="small"><strong>Node</strong> Examples:</p>
+<ul class="small simple">
+<li><em>Ellipsoid</em> : sphere with scale transform</li>
+<li><em>ConvexPolyhedron_Tetrahedron</em> : (<em>planeIdx</em>, <em>numPlanes</em>)</li>
+</ul>
+<dl class="small docutils">
+<dt><em>Foundry::upload</em></dt>
+<dd><p class="first"><span class="redbold">all solids in geometry -&gt; only four GPU allocations</span></p>
+<ul class="last simple">
+<li><em>d_prim</em>, <em>d_node</em>, <em>d_plan</em>, <em>d_itra</em></li>
+</ul>
+</dd>
+</dl>
+<p class="tiny"><a class="reference external" href="https://github.com/simoncblyth/OptiXTest/blob/main/Foundry.h">https://github.com/simoncblyth/OptiXTest/blob/main/Foundry.h</a>
+<a class="reference external" href="https://github.com/simoncblyth/OptiXTest/blob/main/qat4.h">https://github.com/simoncblyth/OptiXTest/blob/main/qat4.h</a></p>
+</div>
+<div class="slide" id="optix-7-intersect-prim-numnode-nodeoffset-hitgroupdata">
+<h1><span class="small">OptiX 7 Intersect Prim (numNode, nodeOffset) ~ HitGroupData</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">CSG Node : 4 quads</span></p>
+<div class="last"><pre class="mypretiny">
+union quad  // cross-type convenience
+{
+   float4 f ;
+   int4   i ;
+   uint4  u ;
+};
+
+struct Node
+{
+    quad q0 ;
+    quad q1 ;
+    quad q2 ;
+    quad q3 ;
+
+    __device__
+   unsigned typecode() const { return q2.u.w ; }
+};
+
+
+struct HitGroupData   // effectively Prim
+{
+    int numNode ;
+    int nodeOffset ;
+};
+
+</pre></div></div>
+<pre class="mypretiny">
+
+150 extern "C" __global__ void __intersection__is()
+151 {
+152     HitGroupData* hg = (HitGroupData*)optixGetSbtDataPointer();
+153     int numNode = hg->numNode ;
+154     int nodeOffset = hg->nodeOffset ;
+155
+156     <span class="redbold">const Node* node = params.node + nodeOffset ;</span>
+157     const float4* plan = params.plan ;
+158     const qat4*   itra = params.itra ;
+159
+160     const float  t_min = optixGetRayTmin() ;
+161     const float3 ray_origin = optixGetObjectRayOrigin();
+162     const float3 ray_direction = optixGetObjectRayDirection();
+163
+164     float4 isect ;
+165     if(intersect_prim(isect, numNode, node, plan, itra,
+             t_min , ray_origin, ray_direction ))
+166     {
+167         const unsigned hitKind = 0u ;
+168         unsigned a0, a1, a2, a3;
+169
+170         a0 = float_as_uint( isect.x );
+171         a1 = float_as_uint( isect.y );
+172         a2 = float_as_uint( isect.z );
+173         a3 = float_as_uint( isect.w ) ;
+174
+175         optixReportIntersection( isect.w, hitKind, a0, a1, a2, a3 );
+176     }
+177 }
+</pre><ul class="small simple">
+<li><strong>nodeOffset : points to first Node in tree of numNode</strong></li>
+</ul>
+</div>
+<div class="slide" id="csg-parade-grid-1">
+<h1><span class="small">CSG Parade Grid 1</span></h1>
+</div>
+<div class="slide" id="csg-boolean-parade-grid">
+<h1><span class="small">CSG Boolean Parade Grid</span></h1>
+</div>
+<div class="slide" id="extra-background-slides-follow">
+<h1>&quot;Extra&quot; Background Slides Follow</h1>
+</div>
+<div class="slide" id="csg-complete-binary-tree-serialization-simplifies-gpu-side">
+<h1><span class="small">CSG Complete Binary Tree Serialization -&gt; simplifies GPU side</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Bit Twiddling Navigation</p>
+<ul class="small last simple">
+<li>parent(i) = i/2 = i &gt;&gt; 1</li>
+<li>leftchild(i) = 2*i = i &lt;&lt; 1</li>
+<li>rightchild(i) = 2*i + 1 = (i &lt;&lt; 1) + 1</li>
+<li>leftmost(height)  =  1 &lt;&lt; height</li>
+</ul>
+</div>
+<p class="small">Geant4 solid -&gt; CSG binary tree (leaf primitives, non-leaf operators, 4x4 transforms on any node)</p>
+<p class="small">Serialize to <strong>complete binary tree</strong> buffer:</p>
+<ul class="small simple">
+<li>no need to deserialize, no child/parent pointers</li>
+<li>bit twiddling navigation <span class="red">avoids recursion</span></li>
+<li>simple approach profits from small size of binary trees</li>
+<li>BUT: very inefficient when unbalanced</li>
+</ul>
+<p class="small"><strong>Height 3 complete binary tree with level order indices:</strong></p>
+<pre class="mypre">
+                                                   depth     elevation
+
+                     1                               0           3
+
+          10                   11                    1           2
+
+     100       101        110        111             2           1
+
+ 1000 1001  1010 1011  1100 1101  1110  1111         3           0
+</pre>
+<hr/><p class="small"><strong>postorder_next(i,elevation) = i &amp; 1 ? i &gt;&gt; 1 : (i &lt;&lt; elevation) + (1 &lt;&lt; elevation) ;</strong>   // from pattern of bits</p>
+<p class="tiny">Postorder tree traverse visits all nodes, starting from leftmost, such that children
+are visited prior to their parents.</p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="csg-deep-tree-positivize-tree-using-de-morgan-s-laws">
+<h1><span class="small">CSG Deep Tree : Positivize tree using De Morgan's laws</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Positive form CSG Trees</p>
+<p class="small">Apply deMorgan pushing negations down tree</p>
+<ul class="small simple">
+<li><strong>A - B -&gt; A * !B</strong></li>
+<li><strong>!(A*B) -&gt; !A + !B</strong></li>
+<li><strong>!(A+B) -&gt; !A * !B</strong></li>
+<li><strong>!(A - B) -&gt; !(A*!B) -&gt; !A + B</strong></li>
+</ul>
+<p class="small">End with only UNION, INTERSECT operators,
+and some complemented leaves.</p>
+<p class="small last"><span class="red">COMMUTATIVE -&gt; easily rearranged</span></p>
+</div>
+<p class="small">1st step to allow balancing : <strong>Positivize</strong> : remove CSG difference <strong>di</strong> operators</p>
+<pre class="mypretiny">
+                                                     ...    ...
+
+                                               un          cy
+
+                                       un          cy
+
+                               un          cy
+
+                       un          cy
+
+               un          cy
+
+       di          cy
+
+   cy      cy
+
+</pre>
+
+<pre class="mypretiny">
+                                                     ...    ...
+
+                                               un          cy
+
+                                       un          cy
+
+                               un          cy
+
+                       un          cy
+
+               un          cy
+
+       in          cy
+
+   cy      !cy
+
+</pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="csg-examples">
+<h1><span class="i">CSG Examples</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 </div>
 </body>
 </html>
