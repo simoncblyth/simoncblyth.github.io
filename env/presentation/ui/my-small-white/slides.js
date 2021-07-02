@@ -120,7 +120,10 @@ function slideLabel() {
 function currentSlide() {
 	var cs;
 	var footer_nodes;
-	var vis = 'visible';
+
+	var pageNum_vis = 'visible';
+	var title_vis = 'hidden';
+
 	if (document.getElementById) {
 		cs = document.getElementById('currentSlide');
 		footer_nodes = document.getElementById('footer').childNodes;
@@ -132,12 +135,15 @@ function currentSlide() {
 		           '<span id="csSep">\/<\/span> ' + 
 		           '<span id="csTotal">' + Math.floor((smax-1)/snumdiv) + '<\/span>' ;
 	if (snum == 0) {
-		vis = 'hidden';
+		pageNum_vis = 'hidden';
+        title_vis = 'hidden' ;
 	}
-	cs.style.visibility = vis;
+
+	cs.style.visibility = pageNum_vis;
+
 	for (var i = 0; i < footer_nodes.length; i++) {
-		if (footer_nodes[i].nodeType == 1) {
-			footer_nodes[i].style.visibility = vis;
+		if (footer_nodes[i].nodeType == 1) {          // nodeType 1 are elements 
+			footer_nodes[i].style.visibility = title_vis;
 		}
 	}		
 }
