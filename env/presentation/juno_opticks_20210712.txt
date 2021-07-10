@@ -1,4 +1,3 @@
-
 .. meta::
    :note: Navigate the HTML slides by entering a page number and pressing return 
    :title: JUNO Geant4/Opticks Optical Simulation Matching
@@ -7,7 +6,6 @@
    :date: 12 July 2021
 
 .. include:: my_s5defs.txt
-
 
 
 .. comment
@@ -21,8 +19,6 @@
    * reemission wavelength cfplot with chi2 lower panel
    * reemission wavelength distrib on same plot at abslen, scatlen, reemprob 
    * comparison of RE/SC/AB/BT fractions as a function of wavelength for diameter photons
-
-
 
 ===================================================================================
 JUNO Opticks/Geant4 Optical Photon Simulation Matching
@@ -145,6 +141,11 @@ Outline
    * :red:`focus on an issue by repeating a single photon` 
    * :red:`create parallel beam of offset photons to probe problem geometry` 
 
+
+.. s5_talk::
+
+   Offline Tools for matching 
+
  
 :small:`Opticks : Tools for Optical Photon Simulation Matching`
 ------------------------------------------------------------------------
@@ -171,6 +172,11 @@ Outline
    * *Opticks* bookkeeping treats reemission as "rebirth" of a fraction of the absorbed
 
      * **not treated as separate photons**
+
+.. s5_talk::
+
+   Opticks Tools for matching 
+
 
 
 :small:`G4OpticksRecorder : full details of Geant4 simulation passed to Opticks`
@@ -229,6 +235,14 @@ Outline
     </pre>
 
 
+.. s5_talk::
+
+   The G4OpticksRecorder passes Geant4 objects to Opticks  
+
+
+
+
+
 
 :small:`JUNO Offline DsG4Scintillation : Reemission Bookkeeping`
 ---------------------------------------------------------------------
@@ -261,6 +275,12 @@ Outline
    **CRecorder/CWriter : REJOIN reemission secondary tracks with ancestors** 
 
    * continue writing reemission secondary G4Track steps to original ``photon_id`` record 
+
+
+.. s5_talk::
+
+   Bookkeeping reconciles very different ways to implement reemission 
+
 
 
 :small:`Comparing OK/G4 photon history counts for "tut_detsim.py gun" event`
@@ -334,6 +354,11 @@ Outline
      * FIX: adopt "multi-resolution" GPU texture to 20x resolution for tails
 
 
+.. s5_talk::
+
+   Some of the issues encountered
+
+
 
 :small:`OK:Photons not stopping at Tyvek, FIXED by adding explicit surfaces` 
 -------------------------------------------------------------------------------------------------------
@@ -376,6 +401,12 @@ Outline
     </pre>
 
 
+.. s5_talk::
+
+    making the implicit explicit  
+
+
+
 :small:`Prepare an input photon that misses PMTs for checking the Water` 
 ---------------------------------------------------------------------------------------------
 
@@ -415,6 +446,11 @@ Outline
        --input-photon-path /tmp/check_innerwater.npy
        --input-photon-repeat 100000
 
+
+
+.. s5_talk::
+
+    input photon generator good for targeting issues with particular histories or geometry 
 
 
 
@@ -462,6 +498,12 @@ Outline
         *LS -> Acrylic -> Water -> Pyrex* where they are (SA) SURFACE_ABSORB-ed on Pyrex/Vacuum boundary 
 
 
+.. s5_talk::
+
+   Degenerate geometry is too close to be consistently distinguished  
+
+
+
 
 :small:`Opticks : excess AB, lack SA in innerWater (FIX: remove degenerates)` 
 -----------------------------------------------------------------------------------------------------
@@ -507,13 +549,27 @@ Outline
     * :b:`All LPMTs : near degenerate Water///Pyrex and "pointless" same material Pyrex///Pyrex borders offset: 0.001mm`
 
 
+.. s5_talk::
+
+   Boundaries are where Opticks hangs material and surface info, so its vital for them to be consistent.  
+   Coincidenced/degeneracy can break the geometry. 
+
 
 :i:`gpmt Hamamatsu jun28` 
 ---------------------------
 
+.. s5_talk::
+
+    Two Pyrex solids differ only by a thickness of 0.001mm
+
+
 :i:`gpmt NNVT jun28`
 ------------------------
  
+.. s5_talk::
+
+    Two Pyrex solids differ only by a thickness of 0.001mm
+
 
 
 :small:`Opticks : excess AB, lack SA in innerWater : FIX remove degenerates` 
@@ -555,6 +611,10 @@ Outline
 
    notes/issues/ok_less_SA_more_AB.rst
 
+
+.. s5_talk::
+
+    Avoiding the degenerate
 
 
 
@@ -622,25 +682,59 @@ Outline
    ana/wavelength_plt.py  
 
 
+.. s5_talk::
+
+    Lots of variation over a small wavelength range 
+
+
+
+
 
 :i:`1M Wavelength Sample comparison hd0`
 -------------------------------------------
 
+.. s5_talk::
+
+    With standard 4096 bins
+
+
 
 :i:`1M Wavelength Sample comparison hd0 no interpolation`
 ------------------------------------------------------------
+
+.. s5_talk::
+
+    With standard 4096 bins, interpolation off
+
+
 
 
 :i:`1M Wavelength Sample comparison hd20`
 -------------------------------------------
 
 
+.. s5_talk::
+
+    hd20 effectively increases resolution by a factor of 20 for the first and last five percent of the probability range  
+
+
 :i:`1M Wavelength Sample comparison hd20 no interpolation`
 ------------------------------------------------------------
 
 
+.. s5_talk::
+
+    with interpolation switched off
+
+
+
 :i:`GScintillatorLib ICDF`
 ---------------------------- 
+
+.. s5_talk::
+
+    ICDF 
+
 
 
 
@@ -721,6 +815,364 @@ Outline
 
 
 
+.. s5_talk::
+
+   Simple way to improve matching by putting the bins just where they are needed 
+
+
+
+
+
+
+:small:`G4Cerenkov_modifiedTest`
+------------------------------------
+
+.. sidebar:: :small:`Spot the bug`
+
+    .. class:: small 
+
+        **continue**-ing a **do-while** loop jumps to condition.
+
+        * -> :r:`stale or undefined sin2Theta used` 
+        
+        Result:
+
+        * repeated Cerenkov cone angle
+        * Cerenkov photons at disallowed wavelength 
+
+        ``sampleRI < BetaInverse`` :
+
+        * ``cosTheta > 1.``
+        *  ``sin2Theta < 0.`` 
+
+        **do-while looping continues** as: 
+
+        ``rand*maxSin2 > sin2Theta``  
+
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    168 G4VParticleChange*
+    169 G4Cerenkov_modified::PostStepDoIt(
+          const G4Track& aTrack, const G4Step& aStep)
+    ...
+    252   G4double Pmin = Rindex->GetMinLowEdgeEnergy();
+    253   G4double Pmax = Rindex->GetMaxLowEdgeEnergy();
+    254   G4double dp = Pmax - Pmin;
+    ...
+    315   for (G4int i = 0; i < fNumPhotons; i++) {
+    317 
+    318       G4double rand;
+    319       G4double sampledEnergy, sampledRI;
+    320       G4double cosTheta, sin2Theta;
+    ...
+    324       do {
+    325          rand = G4UniformRand();
+    326          sampledEnergy = Pmin + rand * dp;
+    327          sampledRI = Rindex->Value(sampledEnergy);
+    328 
+    <span class="redbold">329          // check if n(E) > 1/beta
+    330          if (sampledRI < BetaInverse) {
+    331              continue;
+    332          }</span>
+    333 
+    <span class="bluebold">334          cosTheta = BetaInverse / sampledRI;
+    341 
+    342          sin2Theta = (1.0 - cosTheta)*(1.0 + cosTheta);
+    343          rand = G4UniformRand();</span>
+    344 
+    346       } while (rand*maxSin2 > sin2Theta);
+    </pre>
+
+.. class:: small
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/examples/Geant4/CerenkovStandalone/G4Cerenkov_modifiedTest.cc
+
+
+.. s5_talk::
+
+    Bug 
+
+
+
+
+
+
+:small:`Cerenkov reminder`
+------------------------------------
+
+
+.. raw:: html
+
+    <pre class="mypretiny">
+                        
+                  \    B    /                        
+              \    .   |   .    /                            AC     ct / n          1         i       BetaInverse 
+          \    C       |       C    /             cos th =  ---- =  --------   =  ------ =   ---  =  -------------
+      \    .    \      |      /    .     /                   AB       bct           b n       n        sampledRI
+       .         \    bct    /          .
+                  \    |    /                                  BetaInverse
+                   \   |   /  ct                  maxCos  =  ----------------- 
+                    \  |th/  ----                                nMax                                                
+                     \ | /    n
+                      \|/
+                       A
+
+    Particle travels AB, light travels AC,  ACB is right angle 
+
+
+     Only get Cerenkov radiation when   
+
+            cos th <= 1 , 
+
+            beta >= beta_min = 1/n        BetaInverse <= BetaInverse_max = n 
+
+
+     At the small beta threshold AB = AC,   beta = beta_min = 1/n     eg for n = 1.333, beta_min = 0.75  
+
+            cos th = 1,  th = 0         light is in direction of the particle 
+
+
+     For ultra relativistic particle beta = 1, there is a maximum angle 
+
+            th = arccos( 1/n )      
+
+    </pre>
+
+
+.. s5_talk::
+
+    Reminder
+
+
+
+:i:`G4Cerenkov_modifiedTest_ASIS`
+--------------------------------------------
+
+.. s5_talk::
+
+    ASIS
+
+
+:i:`G4Cerenkov_modifiedTest_SKIP_CONTINUE`
+--------------------------------------------
+
+.. s5_talk::
+
+    SKIP CONTINUE
+
+
+
+
+
+
+
+
+
+
+
+:small:`NVIDIA OptiX 7 : Entirely new thin API (Introduced Aug 2019)`
+---------------------------------------------------------------------------------
+
+.. sidebar:: :small:`GPU Ray Tracing APIs Converged`
+
+    .. class:: small
+
+        * 3 APIs (DXR,VKRay,OptiX7) over RTX 
+        * Driver updates :r:`independent of application`  
+        * Support new GPUs, performance improvements 
+
+.. class:: small
+
+    **NVIDIA OptiX 6->7** : :b:`drastically slimmed down`
+
+    * headers only (no library, just Driver) 
+    * low-level CUDA-centric thin API (Vulkan-ized)
+    * Minimal host state,  :red:`All host functions are thread-safe`
+    * GPU launches : explicit, asynchronous (CUDA streams)
+    * :strike:`near perfect scaling to 4 GPUs, for free` 
+    * :strike:`Shared CPU/GPU geometry context`
+    * :strike:`GPU memory management`
+    * :strike:`Multi-GPU support`
+
+
+.. class:: small
+
+    **Advantages**
+        More control/flexibility over everything. 
+
+        * Fully benefit from future GPUs
+        * :b:`Keep pace with state-of-the-art GPU ray tracing` 
+
+    **Disadvantages**
+        Demands much more developer effort than OptiX 6 
+
+        * :r:`Major re-implementation of Opticks required`
+
+
+.. s5_talk::
+
+   * OptiX 7 is an entirely new API, dropping many features used by Opticks
+   * re-implementation of large parts of Opticks is necessary
+   * i will cover recent progress on this shortly
+
+
+:small:`New "Foundry" Model : Shared CPU/GPU Geometry Context`
+-----------------------------------------------------------------------------------------------------
+
+.. sidebar:: :small:`IAS < Inst < Solid < Prim < Node`
+
+    .. class:: small
+
+        * **Inst** : 4x4 tran. + **Solid** ref. ( **Inst** -> 1 **IAS** )
+        * **Solid** : 1 or more **Prim**  : ( **Solid** -> **GAS** )
+        * **Prim** : 1,3,7,15,31,... **Node**  : (**Prim** ~ *G4VSolid*) 
+
+    .. raw:: html
+
+        <pre class="mypretiny">
+        struct CSGFoundry
+        {
+           void upload(); <span class="redbold">// to GPU </span> 
+        ...
+           std::vector&lt;CSGSolid&gt;  solid ; // compounds (eg PMT)
+           std::vector&lt;CSGPrim&gt;   prim ;
+           std::vector&lt;CSGNode&gt;   node ; // shapes, operators
+
+           std::vector&lt;float4&gt; plan ; // planes
+           std::vector&lt;qat4&gt;   tran ; // CSG transforms
+           std::vector&lt;qat4&gt;   itra ; // inverse CSG transforms
+           std::vector&lt;qat4&gt;   inst ; // instance transforms
+
+           <span class="redbold">// entire geometry in four GPU allocations</span>
+           CSGPrim*    d_prim ; 
+           CSGNode*    d_node ; 
+           float4*     d_plan ; 
+           qat4*       d_itra ;    
+         };
+        </pre>
+
+    .. class:: small
+
+        :bluebold:`referencing by offset, count`  
+
+.. class:: small
+
+    * :r:`replaces geometry context dropped in OptiX 6->7` 
+    * array-based -> simple, inherent serialization + persisting 
+    * entire geometry in 4 GPU allocations 
+
+    **Simple intersect headers, common CPU/GPU types** 
+
+    * use with : pre-7, 7 + testing on CPU 
+
+
+
+.. raw:: html
+
+    <pre>
+    </pre>
+
+.. class:: small
+
+    :bluebold:`https://github.com/simoncblyth/CSG` "Foundry" model 
+        **csg_intersect_tree.h/csg_intersect_node.h/...**
+          :redbold:`simple headers common to pre-7/7/CPU-testing`
+
+    :bluebold:`https://github.com/simoncblyth/CSG_GGeo` 
+      Convert *Opticks/GGeo* -> *CSGFoundry*  
+
+    :bluebold:`https://github.com/simoncblyth/CSGOptiX` 
+      OptiX 7 + pre-7 rendering 
+
+
+.. raw:: html
+
+    <pre>
+
+    </pre>
+
+.. class:: tiny
+
+   **GAS** : Geometry Acceleration Structure
+
+   **IAS** : Instance Acceleration Structure
+   
+   **CSG** : Constructive Solid Geometry 
+
+
+.. s5_talk::
+
+   SMALL 
+   The Foundry geometry model comprises : Inst, Solid, Prim and Node
+
+   Starting from the bottom:
+
+   * the Node are CSG constituent shapes or operators
+   * the Prim reference a range of Node forming serialized complete binary trees
+   * the Solid reference one or more Prim
+   * the Inst reference one or more Solid 
+
+   **Prim:** are equivalent to G4VSolid
+
+   **Solid:** are compound Prim, each type of PMT corresponds to a Solid 
+
+   **Inst:** are 4x4 transforms with index refererences to Solid 
+
+   The model is designed to work with the OptiX 7 acceleration structures:
+
+   * Solid -> GAS (Geometry Acceleration Structure)
+   * Inst  -> IAS (Instance Acceleration Structure)
+
+   The JUNO geometry of 300,000 volumes is factorized into 10 Solid which 
+   are referenced from a single instance acceleration structure. 
+    
+   The array-based simplicity makes it fast to upload to GPU, 
+   with the entire geometry in 4 GPU allocations. 
+
+
+
+
+
+:i:`[9]cxr_i0_t8,_-1 : EXCLUDE SLOWEST`
+-----------------------------------------
+
+.. raw:: html
+
+    <pre>
+
+
+
+    </pre>
+
+
+.. sidebar:: :small:`1st JUNO Opticks OptiX 7 Ray-trace`
+
+    .. class:: small
+
+        Very New CSG "Foundry" CPU/GPU Geometry 
+
+        * :redbold:`purely analytic CSG, no triangles` 
+        * everything at default, no optimization
+
+
+.. s5_talk::
+
+   Here is one of the first JUNO renders with the OptiX 7 using the Foundry model.
+
+   Note that there are no triangles here, this is a purely analytic ray trace with 
+   the geometry that the simulation will use.
+
+
+
+
+
+
+
+
+
+
 :small:`Current JUNO Geometry : Auto-Factorization by progeny digest`
 ------------------------------------------------------------------------
 
@@ -784,23 +1236,11 @@ Outline
    :redbold:`Increasing instancing : reduces memory for geometry + improves performance`
 
 
+.. s5_talk::
 
-:small:`Notes on how the renders and tables were created`
-------------------------------------------------------------
+    THIS IS THE OLD ONE ?
 
-.. class:: small
 
-    * ~/opticks/notes/misc/snapscan-varying-enabledmergedmesh-option.rst 
-
-    In summary:
-
-.. raw:: html
-
-    <pre class="mypretiny">
-    snapscan.sh --cvd 1 --rtx 1     # on P, create jpg snaps and metadata json 
-    snap.sh                         # on G, grab them
-    snap.py --rst                   # dump RST table 
-    </pre>
 
 
 :small:`Current JUNO Geometry : Ray Trace Times : TITAN RTX (RTX ON, 24GB)`
@@ -885,134 +1325,10 @@ Outline
     snap.py --refjpg 
 
 
-:blue:`[0]lLowerChimney_phys__5,__00000`
-----------------------------------------
+.. s5_talk::
 
-:blue:`[1]lLowerChimney_phys__7,__00000`
-----------------------------------------
+    Geometry scan, OLD ONE ?
 
-:blue:`[2]lLowerChimney_phys__9,__00000`
-----------------------------------------
-
-:blue:`[3]lLowerChimney_phys__4,__00000`
-----------------------------------------
-
-:blue:`[4]lLowerChimney_phys__6,__00000`
-----------------------------------------
-
-:blue:`[5]lLowerChimney_phys__3,__00000`
-----------------------------------------
-
-:blue:`[6]lLowerChimney_phys__1,__00000`
-----------------------------------------
-
-:blue:`[7]lLowerChimney_phys__2,__00000`
-----------------------------------------
-
-:blue:`[8]lLowerChimney_phys__1,2,3,4__00000`
----------------------------------------------
-
-:blue:`[9]lLowerChimney_phys__0,__00000`
-----------------------------------------
-
-:blue:`[10]lLowerChimney_phys__t8,__00000`
-------------------------------------------
-
-:blue:`[11]lLowerChimney_phys__8,__00000`
------------------------------------------
-
-:blue:`[12]lLowerChimney_phys__t0,__00000`
-------------------------------------------
-
-:blue:`[13]lLowerChimney_phys__t5,__00000`
-------------------------------------------
-
-:blue:`[14]lLowerChimney_phys__t6,__00000`
-------------------------------------------
-
-:blue:`[15]lLowerChimney_phys__t7,__00000`
-------------------------------------------
-
-:blue:`[16]lLowerChimney_phys__t4,__00000`
-------------------------------------------
-
-:blue:`[17]lLowerChimney_phys_all_00000`
-----------------------------------------
-
-:blue:`[18]lLowerChimney_phys__t3,__00000`
-------------------------------------------
-
-:blue:`[19]lLowerChimney_phys__t9,__00000`
-------------------------------------------
-
-:blue:`[20]lLowerChimney_phys__t2,__00000`
-------------------------------------------
-
-:blue:`[21]lLowerChimney_phys__t1,__00000`
-------------------------------------------
-
-
-
-
-:small:`Ray Trace Movies 1920x1080 (~2M pixels) Fly Around Fastener`
------------------------------------------------------------------------------------
-
-.. class:: tiny
-
-    /afs/ihep.ac.cn/users/b/blyth/flight/RoundaboutXY_XZ__lFasteners_phys__~0__8__/RoundaboutXY_XZ__lFasteners_phys__~0__8__.mp4  (56M) 
-
-.. class:: small
-
-    Fly around fastener: ``-e ~0`` (ALL GEOMETRY)   
-
-    * frame times 1.68-1.71s 
-    * lots of coincident surface speckle inside **uni_acrylic3** (large file size: 56M for 20s, 512 frames)
-    * **uni_acrylic3** : polycone with complemented (subtracted) 8 column "Greek Temple" 
-    * **uni1** : 8 column "Greek Temple" 
-
-.. raw:: html
-
-    <hr/>
-
-
-.. class:: tiny
-
-    /afs/ihep.ac.cn/users/b/blyth/flight/RoundaboutXY_XZ__lFasteners_phys__~8,__8__/RoundaboutXY_XZ__lFasteners_phys__~8,__8__.mp4  (15M)
-
-.. class:: small
-
-    Same flight as above but using option ``-e ~8,`` (EXCLUDE **uni_acrylic3**) 
-
-    * frame times 0.07-0.09s (small file size: 15M for 20s) :redbold:`> 20x faster with exclusion` 
-    * **interior of the fastener is irrelevant for optical photons** (:redbold:`do you agree ?`) 
-
-    * :bluebold:`TODO : implement a exterior only version of the fastener`, with **tut_detsim.py** option  
-
-.. raw:: html
-
-    <hr/>
-
-.. raw:: html
-
-    <pre class="mypretiny">
-    epsilon:blyth$ ggeo.py 5:9/ --names      ##  PV, LV and Solid names for volumes in ridx 5,6,7,8 
-    nrpo(  68488     5     0     0 )     lSteel_phys0x34c07b0       lSteel0x34c0680       93 sStrutBallhead0x34be280 
-    nrpo(  69078     6     0     0 )     lFasteners_phys0x3461f60   lFasteners0x3461e20   94 uni10x3461bd0 
-    nrpo(  69668     7     0     0 )     lUpper_phys0x35499e0       lUpper0x3549920       95 base_steel0x35a1810 
-    <span class="redbold">nrpo(  70258     8     0     0 )     lAddition_phys0x3593690    lAddition0x3593510    96 uni_acrylic30x35932f0</span> 
-    </pre>
-
-.. class:: tiny
-
-    * Movies created by ``opticks/bin/flight.sh`` using ``OpFlightPathTest`` and ``ffmpeg``
-
-
-.. comment
-
-    * **~0**  : ALL GEOMETRY (twiddle of zero gives all bits set)  **~0,** : EXCLUDE ridx:0  (comma indicates positional bit setting)
-
-    /Users/blyth/Movies/flight/RoundaboutXY_XZ__lFasteners_phys__~0__8__/RoundaboutXY_XZ__lFasteners_phys__~0__8__.mp4
-    /Users/blyth/Movies/flight/RoundaboutXY_XZ__lFasteners_phys__~8,__8__/RoundaboutXY_XZ__lFasteners_phys__~8,__8__.mp4
 
 
 :small:`Double Greek Temple`
@@ -1023,6 +1339,10 @@ Outline
     * lots of coincident surface speckle 
     * dark columns : indicate inside surface (subtracted Greek Temple)
 
+
+.. s5_talk::
+
+    Complex  
 
 
 :small:`tds-mu   (tds : tut_detsim.py)`
@@ -1055,6 +1375,12 @@ Outline
         ...
     }
     </pre>
+
+
+.. s5_talk::
+
+    tds-mu
+
 
 
 :small:`tds-mu : first runs with current geometry : usinge -e ~8,`
@@ -1100,316 +1426,19 @@ Outline
       * hit validations
 
 
+.. s5_talk::
 
-:small:`OptiX7 : "Foundry" based CSG geometry model : Solid/Prim/Node`
-------------------------------------------------------------------------
+    tds-mu
 
-.. sidebar:: :small:`Foundry : Solids + constituents`
-
-    .. raw:: html
-
-        <pre class="mypretiny">
-         23 struct Foundry
-         24 {
-        ...
-         97     void upload();  
-        ...
-        101     std::vector&lt;Solid&gt;  solid ;
-        102     std::vector&lt;Prim&gt;   prim ;
-        103     std::vector&lt;Node&gt;   node ;
-        104     std::vector&lt;float4&gt; plan ;
-        105     std::vector&lt;qat4&gt;   tran ;
-        106     std::vector&lt;qat4&gt;   itra ;
-        107 
-        108     Solid*   d_solid ;
-        109     <span class="redbold">Prim*    d_prim ; </span>
-        110     <span class="redbold">Node*    d_node ; </span>
-        111     <span class="redbold">float4*  d_plan ; </span>
-        112     qat4*    d_tran ;
-        113     <span class="redbold">qat4*    d_itra ; </span>
-        114 };
-        </pre>
-
-
-.. class:: small
-
-    **All solids+constituents created via Foundry (ref by index)**
-
-    * **Solid** : 1 or more **Prim**  : ( **Solid** -> **GAS** )
-    * **Prim** : 1 or more **Node**  : (**Prim** ~ *G4VSolid*) 
-
-      * (*nodeOffset*, *numNode*) -> SBT HitGroup record
-
-    * **Node** : CSG constituents 
-
-      * basis shapes : sphere, box3, cone, cylinder, ...
-      * boolean operators : union, intersection, difference
-
-    * **qat4** : scale-rotate-translate transform
-    * **float4** : planes (normal + distance to origin)
-
-    **Node** Examples:
-
-    * *Ellipsoid* : sphere with scale transform 
-    * *ConvexPolyhedron_Tetrahedron* : (*planeIdx*, *numPlanes*)
-
-    *Foundry::upload* 
-         :redbold:`all solids in geometry -> only four GPU allocations` 
-
-         * *d_prim*, *d_node*, *d_plan*, *d_itra*
-
-
-.. class:: tiny 
-
-    https://github.com/simoncblyth/OptiXTest/blob/main/Foundry.h
-    https://github.com/simoncblyth/OptiXTest/blob/main/qat4.h
-
-
-:small:`OptiX 7 Intersect Prim (numNode, nodeOffset) ~ HitGroupData`
------------------------------------------------------------------------
-
-.. sidebar:: :small:`CSG Node : 4 quads`
-
-    .. raw:: html 
-
-        <pre class="mypretiny">
-        union quad  // cross-type convenience
-        {
-           float4 f ;
-           int4   i ;
-           uint4  u ; 
-        };  
-
-        struct Node
-        {
-            quad q0 ;
-            quad q1 ; 
-            quad q2 ; 
-            quad q3 ; 
-
-            __device__ 
-           unsigned typecode() const { return q2.u.w ; } 
-        };
-
-
-        struct HitGroupData   // effectively Prim 
-        {
-            int numNode ;   
-            int nodeOffset ; 
-        };
-
-        </pre>
-
-
-.. raw:: html
-
-    <pre class="mypretiny">
-
-    150 extern "C" __global__ void __intersection__is()
-    151 {
-    152     HitGroupData* hg = (HitGroupData*)optixGetSbtDataPointer();
-    153     int numNode = hg->numNode ;
-    154     int nodeOffset = hg->nodeOffset ;
-    155 
-    156     <span class="redbold">const Node* node = params.node + nodeOffset ;</span>
-    157     const float4* plan = params.plan ;
-    158     const qat4*   itra = params.itra ;
-    159 
-    160     const float  t_min = optixGetRayTmin() ;
-    161     const float3 ray_origin = optixGetObjectRayOrigin();
-    162     const float3 ray_direction = optixGetObjectRayDirection();
-    163 
-    164     float4 isect ;
-    165     if(intersect_prim(isect, numNode, node, plan, itra, 
-                 t_min , ray_origin, ray_direction ))
-    166     {
-    167         const unsigned hitKind = 0u ;
-    168         unsigned a0, a1, a2, a3;
-    169 
-    170         a0 = float_as_uint( isect.x );
-    171         a1 = float_as_uint( isect.y );
-    172         a2 = float_as_uint( isect.z );
-    173         a3 = float_as_uint( isect.w ) ;
-    174 
-    175         optixReportIntersection( isect.w, hitKind, a0, a1, a2, a3 );
-    176     }
-    177 }
-    </pre>
-
-.. class:: small 
-
-   * **nodeOffset : points to first Node in tree of numNode** 
-
-
-
-
-
-:small:`CSG Parade Grid 1`
----------------------------
-
-
-:small:`CSG Boolean Parade Grid`
-----------------------------------
 
 
 
 "Extra" Background Slides Follow 
 ------------------------------------
 
-
-:small:`CSG Complete Binary Tree Serialization -> simplifies GPU side`
----------------------------------------------------------------------------------
-
-.. sidebar:: Bit Twiddling Navigation
-
-    .. class:: small
-
-        * parent(i) = i/2 = i >> 1 
-
-        * leftchild(i) = 2*i = i << 1
-
-        * rightchild(i) = 2*i + 1 = (i << 1) + 1
-
-        * leftmost(height)  =  1 << height
-
-
-.. class:: small
-
-    Geant4 solid -> CSG binary tree (leaf primitives, non-leaf operators, 4x4 transforms on any node)
-
-    Serialize to **complete binary tree** buffer:
- 
-    * no need to deserialize, no child/parent pointers
-    * bit twiddling navigation :red:`avoids recursion`
-    * simple approach profits from small size of binary trees 
-    * BUT: very inefficient when unbalanced 
-
-    **Height 3 complete binary tree with level order indices:**
-.. raw:: html
-
-    <pre class="mypre">
-                                                       depth     elevation
-
-                         1                               0           3   
-
-              10                   11                    1           2   
-
-         100       101        110        111             2           1   
-                        
-     1000 1001  1010 1011  1100 1101  1110  1111         3           0   
-    </pre>
-    <hr/>
-
-.. class:: small
-
-    **postorder_next(i,elevation) = i & 1 ? i >> 1 : (i << elevation) + (1 << elevation) ;**   // from pattern of bits
- 
-.. class:: tiny
-
-   Postorder tree traverse visits all nodes, starting from leftmost, such that children 
-   are visited prior to their parents.
-
-
 .. s5_talk::
 
-    CSG implementation is greatly simplified by 
-    use of complete binary tree serialization.  
-
-    Boolean solids with large numbers of constituents cause a 
-    problem, because complete binary tree serialization is
-    very inefficient for unbalanced trees.
-
-    Tree balancing helps, but still there is a complexity limit.
-    G4Boolean abuse solids with hundreds of constituents would be 
-    better implemented with custom primitives.
-
-
-
-
-:small:`CSG Deep Tree : Positivize tree using De Morgan's laws`
-------------------------------------------------------------------------------------
-
-.. sidebar:: Positive form CSG Trees
-
-   .. class:: small
-
-       Apply deMorgan pushing negations down tree 
-
-       * **A - B -> A * !B**
-       * **!(A*B) -> !A + !B**
-       * **!(A+B) -> !A * !B**
-       * **!(A - B) -> !(A*!B) -> !A + B**
-
-       End with only UNION, INTERSECT operators, 
-       and some complemented leaves.
-
-       :red:`COMMUTATIVE -> easily rearranged`
-
-
-.. class:: small
-
-    1st step to allow balancing : **Positivize** : remove CSG difference **di** operators 
-
-
-.. raw:: html
-
-   <pre class="mypretiny">
-                                                        ...    ...
-
-                                                  un          cy                                        
-
-                                          un          cy                                                
-
-                                  un          cy                                                        
-
-                          un          cy                                                                
-
-                  un          cy                                                                        
-
-          di          cy                                                                                
-
-      cy      cy                                                 
-
-   </pre>
-
-   <pre class="mypretiny">
-                                                        ...    ...
-
-                                                  un          cy                                        
-
-                                          un          cy                                                
-
-                                  un          cy                                                        
-
-                          un          cy                                                                
-
-                  un          cy                                                                        
-
-          in          cy                                                                                
-
-      cy      !cy                                                 
-
-   </pre>
-
-
-
-.. s5_talk::
-
-   Positivized tree easier to work with 
-
-
-
-
-:i:`CSG Examples`
---------------------------
-
-
-.. s5_talk::
-
-    Some examples of CSG.
-
-    You might be able to see a problem in the top left. CSG modelling 
-    must avoid coincident surfaces in subtractions, otherwise you get spurious intersects.
+    extras
 
 
 
