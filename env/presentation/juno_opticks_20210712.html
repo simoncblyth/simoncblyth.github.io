@@ -2185,6 +2185,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-position: 0px 0px;
              
           }
+          div.slide#m-sample-cerenkov-wavelength-comparison{
+             background-image: url(/env/presentation/ana/wavelength_cfplot/G4Cerenkov_modified_SKIP_CONTINUE_ck_photon.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
           div.slide#gscintillatorlib-icdf{
              background-image: url(/env/presentation/ana/GScintillatorLib/icdf.png);
              background-size: 1280px 720px;
@@ -2440,7 +2446,7 @@ All optically relevant aspects of <em>Geant4</em> context must be translated+cop
 <div class="slide" id="outline-2-scintillation-cerenkov-geometry">
 <h1>Outline 2 : Scintillation + Cerenkov + Geometry</h1>
 <img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
-<div class="small"><span>&nbsp;</span></div><ul class="small simple">
+<ul class="small simple">
 <li>Scintillation Wavelength Matching<ul>
 <li>p20: Compare Geant4 and Opticks implementations</li>
 <li>p21: Explanations of following plots</li>
@@ -2455,16 +2461,18 @@ All optically relevant aspects of <em>Geant4</em> context must be translated+cop
 <li>p28: JUNO Offline G4Cerenkov_modified BUG FIX</li>
 <li>p29: Cerenkov Cone Angle + Beta Requirements reminder</li>
 <li>p30,31: Cerenkov distributions ASIS and SKIP_CONTINUE</li>
+<li>p32: Cerenkov wavelength comparison : First Look after bug fix</li>
+<li>p33: Poor Chi2 Match : Few bins + interpolation difference ?</li>
 </ul>
 </li>
 </ul>
 <div class="small"><span>&nbsp;</span></div><ul class="small simple">
 <li>Remaining JUNO-Opticks Issues + Summary<ul>
-<li>p32: Remaining JUNO-Opticks Issues, TODO List</li>
-<li>p33-39: Look into slow geometry</li>
-<li>p40: Back to OK/G4 photon history counts : small LS absorption excess ?</li>
-<li>p41: LS properties as function of wavelength</li>
-<li>p42: Summary and Links</li>
+<li>p34: Remaining JUNO-Opticks Issues, TODO List</li>
+<li>p35-41: Look into slow geometry</li>
+<li>p42: Back to OK/G4 photon history counts : small LS absorption excess ?</li>
+<li>p43: LS properties as function of wavelength</li>
+<li>p44: Summary and Links</li>
 </ul>
 </li>
 </ul>
@@ -3260,6 +3268,47 @@ Particle travels AB, light travels AC,  ACB is right angle
     </div>
 <div class="slide" id="g4cerenkov-modifiedtest-skip-continue">
 <h1><span class="i">G4Cerenkov_modifiedTest_SKIP_CONTINUE</span></h1>
+<p class="small"><tt class="docutils literal">1.5/1.8 = .83, 1.5/1.62 = 0.92</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="m-sample-cerenkov-wavelength-comparison">
+<h1><span class="i">2.82M Sample Cerenkov Wavelength comparison</span></h1>
+<p class="small"><tt class="docutils literal">FIRST LOOK, AFTER BUG FIX.&nbsp; Fixed BetaInverse = 1.50</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="poor-cerenkov-chi2-match-few-bins-interpolation-difference">
+<h1><span class="small">Poor Cerenkov Chi2 Match : Few Bins + Interpolation difference ?</span></h1>
+ <pre class="mypre">
+ In [1]: ri = np.load(os.path.join(kd, "GScintillatorLib/LS_ori/RINDEX.npy")) ; ri[:,0] *= 1e6
+ In [2]: ri_w = ri.copy() ; ri_w[:,0] = 1240./ri_w[:,0] ;
+ In [2]: np.c_[ri, ri_w]
+ Out[2]:
+ array([[  1.55  ,   1.4781, 800.    ,   1.4781],
+        [  1.7951,   1.48  , 690.7886,   1.48  ],
+        [  2.105 ,   1.4842, 589.0764,   1.4842],
+        [  2.2708,   1.4861, 546.0703,   1.4861],
+        [  2.5511,   1.4915, 486.0629,   1.4915],
+        [  2.845 ,   1.4955, 435.8554,   1.4955],
+        [  3.0636,   1.4988, 404.7513,   1.4988],
+        [  4.1328,   1.5264, 300.038 ,   1.5264],
+        [  6.2   ,   1.6185, 200.    ,   1.6185],
+        [  6.526 ,   1.6176, 190.0092,   1.6176],
+        [  6.889 ,   1.527 , 179.9971,   1.527 ],
+        [  7.294 ,   1.5545, 170.0027,   1.5545],
+        [  7.75  ,   1.793 , 160.    ,   1.793 ],
+        [  8.267 ,   1.7826, 149.994 ,   1.7826],
+        [  8.857 ,   1.6642, 140.0023,   1.6642],
+        [  9.538 ,   1.5545, 130.0063,   1.5545],
+        [ 10.33  ,   1.4536, 120.0387,   1.4536],
+        [ 15.5   ,   1.4536,  80.    ,   1.4536]])
+</pre><ul class="small simple">
+<li>GPU and CPU code very similar</li>
+<li>RINDEX interpolation details likely to be cause of difference</li>
+</ul>
 
         <!--  s5talk  -->
         <br/>
@@ -3784,7 +3833,7 @@ grouped as siblings
 <p class="small"><span class="r">Table identifies slow geometry to fix :</span></p>
 <ul class="small simple">
 <li><strong>3084:sWorld</strong> (too many non-instanced Prim)</li>
-<li><strong>1:uni_acrylic</strong> (CSG sub. 35m diam. sphere)</li>
+<li><strong>1:uni_acrylic3</strong> (CSG sub. 35m diam. sphere)</li>
 </ul>
 <p class="small">Good performance for <span class="b">ONLY PMTs</span> :</p>
 <ul class="small last simple">
