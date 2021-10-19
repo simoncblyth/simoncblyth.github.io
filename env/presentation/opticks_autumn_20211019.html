@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>Opticks Autumn</title>
+<title>Opticks Autumn Progress</title>
 <meta content="Navigate the HTML slides by entering a page number and pressing return" name="note" />
 <meta content="Opticks Autum" name="title" />
 <meta content="(Oct 2021)" name="description" />
@@ -386,13 +386,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1>Opticks Autumn</h1>
+<h1>Opticks Autumn Progress</h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title">Opticks Autumn</h1>
+<h1 class="title">Opticks Autumn Progress</h1>
 
 <!-- comment
 
@@ -2341,6 +2341,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-position: 0px 0px;
              
           }
+          div.slide#figs-positions-pvplt-0-1-2-3-csgsubsubbug-png{
+             background-image: url(/env/presentation/CSGOptiXSimulateTest/20/figs/positions_pvplt_0,1,2,3_csgsubsubbug.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
           div.slide#test-makeicdf-splitbin-qcktest-s2cn-plot-png{
              background-image: url(/env/presentation/QCerenkovIntegralTest/test_makeICDF_SplitBin/QCKTest/s2cn_plot.png);
              background-size: 1280px 720px;
@@ -2445,6 +2451,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
           }
           div.slide#qcktest-1-7920-en-plot-png{
              background-image: url(/env/presentation/QCerenkovIntegralTest/test_makeICDF_SplitBin/QCKTest/1.7920/en_plot.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#qeventtest-planar-gensteps-png{
+             background-image: url(/env/presentation/QEventTest/planar_gensteps.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
@@ -2564,34 +2576,34 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 
 
 </style><!-- comment -->
+<!--  -->
+<blockquote>
 <ul class="simple">
-<li>Issue G4Cerenkov_modified::GetAverageNumberOfPhotons : slightly -ve<ul>
-<li><span class="bluebold">Alternative &quot;S2&quot; implementation developed</span></li>
+<li>Cerenkov energy sampling via ICDF lookups ?<ul>
+<li>workaround poor float/double matching with rejection sampling</li>
+<li><span class="bluebold">ICDF lookup working on CPU, good enough chi2 match to rejection</span></li>
+<li><span class="redbold">TODO: bring over to 2d GPU float texture</span></li>
 </ul>
 </li>
-<li>PMTSimParamSvc::get_pmt_ce  : angular efficiency &gt; 1.<ul>
-<li><span class="bluebold">after MiaoYu bugfix, now NNVT+NNVT_HighQE &gt; 1. at low angle</span></li>
+<li>Opticks updates for Geant4 11 API changes, G4 bugs<ul>
+<li><span class="redbold">Unclear how many more API changes coming, ongoing work</span></li>
 </ul>
 </li>
-<li>Geant4 Meeting + Recent Opticks &quot;Snapshot&quot; tags<ul>
-<li><span class="bluebold">Started tagging to assist Geant4 Opticks example development</span></li>
+<li>2D planar ray tracing to create cross-section views from intersects<ul>
+<li><span class="bluebold">Useful technique to investigate geometry issues</span></li>
 </ul>
 </li>
-<li>Yuxiang progress on simulation matching<ul>
-<li><span class="bluebold">Problems seem focussed at front of CD sticks</span></li>
+<li>possible CSG bug found : <strong>A-(B-C)</strong> yielding spurious intersects<ul>
+<li><span class="redbold">TODO: confirm with simpler solids (elim. tree balancing)</span></li>
+<li><span class="bluebold">specific case fixable by simpler modelling</span>, <span class="redbold">general fix unclear</span></li>
 </ul>
 </li>
-<li><strong>QUDARap/QCerenkov</strong><ul>
-<li><span class="bluebold">Wavelength agreement achieved using double precision</span></li>
-<li><span class="bluebold">Single precision technique using ICDF under testing</span></li>
-</ul>
-</li>
-<li><strong>CSGOptiX</strong><ul>
-<li><span class="bluebold">started integrating OptiX 7 geometry with QUDARap simulation</span></li>
+<li>integrate QUDARap simulation(no-OptiX dep.) with CSGOptiX(7) geom<ul>
+<li><span class="bluebold">modular approach : fine grained testing, easier updating, collab.</span></li>
 </ul>
 </li>
 </ul>
-<p><span class="redbold">For sanity need to make the leap to OptiX 7 ASAP : avoid dividing time</span></p>
+</blockquote>
 <div class="small line-block">
 <div class="line">Simon C Blyth,  October, 2021</div>
 </div>
@@ -2615,101 +2627,56 @@ Achieving+maintaining equivalence is time consuming, however this
 makes transformative performance benefits >1000x Geant4 ripe for the picking. -->
 
 </div>
-<div class="slide" id="quicktime-2-laddition-uni-acrylic3">
-<h1><span class="i">quicktime 2 lAddition_uni_acrylic3</span></h1>
+<div class="slide" id="monte-carlo-rejection-sampling-vs-inverse-transform-sampling">
+<h1><span class="small">Monte Carlo &quot;Rejection Sampling&quot; VS &quot;Inverse Transform Sampling&quot;</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title">uni_acrylic3</p>
+<p class="first sidebar-title"><span class="small">Cerenkov Photons Energy Distrib</span></p>
+<ul class="small simple">
+<li>Particle velocity, <strong>Beta=v/c</strong> <strong>BetaInv=1/Beta</strong></li>
+<li><strong>n(E)</strong> : refractive index <strong>n = c/v</strong><ul>
+<li>Air~1.0003, Water:1.33-1.34, Glass:1.5-1.9</li>
+</ul>
+</li>
+<li><strong>BetaInv &gt; n(E)_max</strong> : CK disallowed, too slow</li>
+<li><strong>n(E)_min &lt; BetaInv &lt; n(E)_max</strong><ul>
+<li>allowed energy depends on <strong>n(E)</strong> shape</li>
+</ul>
+</li>
+<li><span class="redbold">ICDF(BetaInv)</span> =&gt; 2d lookup <strong>(u, BetaInv)</strong></li>
+</ul>
+<p class="small">New approach : Cerenkov ICDF sampling ?</p>
 <ul class="small last simple">
-<li>Dark columns : &quot;inner&quot; surface from subtraction</li>
-<li>&quot;Double Greek Temple&quot; : complex CSG tree</li>
+<li><span class="bluebold">can it be done ?</span></li>
+<li><span class="redbold">PRO: &quot;free&quot; (GPU texture lookup) sampling</span></li>
 </ul>
 </div>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="gplt-laddition-uni-acrylic3">
-<h1><span class="i">gplt lAddition_uni_acrylic3</span></h1>
-<ul class="normal simple">
-<li>LV : lAddition,  Solid : <strong>uni_acrylic3</strong>, Class : AdditionAcrylicConstruction</li>
+<p class="small"><strong>Sampling</strong> : generate <strong>(x0,x1,x2,... )</strong> that follow distribution <strong>f(x)</strong></p>
+<p class="small"><span class="bluebold">Rejection Sampling (used by current G4Cerenkov)</span></p>
+<ul class="small simple">
+<li>throw 2 random numbers <strong>(x,y)</strong> in (domain, value) range</li>
+<li>reject <strong>x</strong>  when <strong>y &gt; f(x)</strong></li>
+<li>Pros : simple, no integration or lookup tables</li>
+<li>Cons :<ul>
+<li>poor efficiency for some <strong>f(x)</strong> : many candidates rejected</li>
+<li><span class="redbold">observed float/double sensitivity</span> : <strong>problem on GPU</strong></li>
 </ul>
-<pre>
-</pre><ul class="normal simple">
-<li><span class="redbold">Suspect : subtracting spherical segment, sagitta 5.68mm, is performance killer.</span></li>
-<li>also complicated interior of Fastener irrelevant to optical photons</li>
+</li>
 </ul>
-<pre></div>
-<div class="slide" id="stickmpl-all">
-<h1><span class="i">StickMPL_all</span></h1>
-</div>
-<div class="slide" id="stickmpl-skip-steel">
-<h1><span class="i">StickMPL_skip_steel</span></h1>
-</div>
-<div class="slide" id="stickmpl-skip-acrylic">
-<h1><span class="i">StickMPL_skip_acrylic</span></h1>
-</div>
-<div class="slide" id="stickpv-all">
-<h1><span class="i">StickPV_all</span></h1>
-</div>
-<div class="slide" id="stickpv-skip-steel">
-<h1><span class="i">StickPV_skip_steel</span></h1>
-</div>
-<div class="slide" id="stickpv-skip-acrylic">
-<h1><span class="i">StickPV_skip_acrylic</span></h1>
-</div>
-<div class="slide" id="test-makeicdf-splitbin-qcktest-s2cn-plot-png">
-<h1><span class="i">test_makeICDF_SplitBin_QCKTest_s2cn_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-0000-en-plot-png">
-<h1><span class="i">QCKTest_1.0000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-0500-en-plot-png">
-<h1><span class="i">QCKTest_1.0500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-1000-en-plot-png">
-<h1><span class="i">QCKTest_1.1000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-1500-en-plot-png">
-<h1><span class="i">QCKTest_1.1500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-2000-en-plot-png">
-<h1><span class="i">QCKTest_1.2000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-2500-en-plot-png">
-<h1><span class="i">QCKTest_1.2500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-3000-en-plot-png">
-<h1><span class="i">QCKTest_1.3000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-3500-en-plot-png">
-<h1><span class="i">QCKTest_1.3500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-4000-en-plot-png">
-<h1><span class="i">QCKTest_1.4000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-4500-en-plot-png">
-<h1><span class="i">QCKTest_1.4500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-5000-en-plot-png">
-<h1><span class="i">QCKTest_1.5000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-5500-en-plot-png">
-<h1><span class="i">QCKTest_1.5500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-6000-en-plot-png">
-<h1><span class="i">QCKTest_1.6000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-6500-en-plot-png">
-<h1><span class="i">QCKTest_1.6500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-7000-en-plot-png">
-<h1><span class="i">QCKTest_1.7000_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-7500-en-plot-png">
-<h1><span class="i">QCKTest_1.7500_en_plot.png</span></h1>
-</div>
-<div class="slide" id="qcktest-1-7920-en-plot-png">
-<h1><span class="i">QCKTest_1.7920_en_plot.png</span></h1>
+<p class="small"><span class="bluebold">Inverse Transform (ICDF) Sampling</span></p>
+<ul class="small simple">
+<li>compute CDF Cumulative Distribution Function, <strong>CDF(x)</strong> : integrals of <strong>f(x)</strong> across domain</li>
+<li>normalize : <strong>CDF(xmin) = 0, CDF(xmax) = 1</strong></li>
+<li>domain <strong>x</strong> and <strong>CDF(x)</strong> monotonic -&gt; invert (swap <strong>y&lt;-&gt;x</strong>)</li>
+<li>equate random <strong>u(0-&gt;1)</strong> to <strong>y</strong> enables to lookup sample <strong>x</strong></li>
+<li>Cons : requires computation of large ICDF lookup tables</li>
+<li>Pros :<ul>
+<li>simple sampling : <strong>one random lookup</strong> (eg GPU texture lookup)</li>
+<li>ICDF lookups tables can be created once for a geometry
+(often depending only on constant properties of materials)</li>
+</ul>
+</li>
+</ul>
+<p class="tiny">Cerenkov radiation is electromagnetic equivalent of sonic boom in air or bow waves in water</p>
 </div>
 <div class="slide" id="frank-tamm-formula-cerenkov-photon-yield-mm-at-betainverse">
 <h1><span class="small">Frank-Tamm Formula : Cerenkov Photon Yield /mm  at BetaInverse</span></h1>
@@ -2724,7 +2691,12 @@ makes transformative performance benefits >1000x Geant4 ripe for the picking. --
 <ul class="small simple">
 <li><tt class="docutils literal">Integral[ 1/ri^2 ] dE</tt>  cumulative trapezoidal approx. integral over RINDEX[E] of material</li>
 </ul>
-<p class="small"><strong>G4Cerenkov::GetAverageNumberOfPhotons</strong> assumes monotonic RINDEX + only one permitted energy region</p>
+<p class="small"><span class="redbold">Problems with G4Cerenkov::GetAverageNumberOfPhotons integration</span></p>
+<ul class="small simple">
+<li>assumes monotonic RINDEX : only one permitted energy range</li>
+<li>putting together the split integral leads to -ve NumPhotons when close to RINDEX peak</li>
+<li><tt class="docutils literal"><span class="pre">G4PhysicsVector::GetValue</span></tt> applies <strong>linear interpolation</strong> to cumulative integral of 1/ri^2  <span class="redbold">&lt;-- POOR APPROX</span></li>
+</ul>
 <pre class="mypretiny">
 636   G4double CAImax = CerenkovAngleIntegrals->GetMaxValue();
 637
@@ -2740,11 +2712,7 @@ makes transformative performance benefits >1000x Geant4 ripe for the picking. --
 668      ge = CAImax - CAImin;
 674   }
 677   G4double NumPhotons = Rfact * charge/eplus * charge/eplus * (dp - ge * BetaInverse*BetaInverse);
-</pre><ul class="small simple">
-<li>putting together the split integral leads to -ve NumPhotons when close to RINDEX peak</li>
-<li><tt class="docutils literal"><span class="pre">G4PhysicsVector::Value</span></tt> applies <strong>linear interpolation</strong> to cumulative integral of 1/ri^2  <span class="redbold">&lt;-- POOR APPROX</span></li>
-</ul>
-</div>
+</pre></div>
 <div class="slide" id="alternative-s2-integral-approach-more-precise-simpler-faster">
 <h1><span class="small">Alternative &quot;s2&quot; integral approach : more precise, simpler, faster</span></h1>
 <div class="sidebar">
@@ -2889,127 +2857,720 @@ G4double G4Cerenkov_modified::GetAverageNumberOfPhotons_s2(
     const G4double Rfact = 369.81/(eV * cm);
     return Rfact * charge/eplus * charge/eplus * s2integral ;
 }
-</pre></div>
-<div class="slide" id="scan-getaveragenumberofphotons-cputime">
-<h1><span class="i">scan_GetAverageNumberOfPhotons_cputime</span></h1>
+</pre><!-- comment
+
+
+:i:`scan_GetAverageNumberOfPhotons_cputime`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+
+:i:`scan_GetAverageNumberOfPhotons_plot_1.0000_2.0000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+:i:`scan_GetAverageNumberOfPhotons_plot_1.4536_1.7930`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+:i:`scan_GetAverageNumberOfPhotons_plot_1.7000_1.8000`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+:i:`scan_GetAverageNumberOfPhotons_difference_plot`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 </div>
 <div class="slide" id="test-getaveragenumberofphotons-plot">
 <h1><span class="i">test_GetAverageNumberOfPhotons_plot</span></h1>
 </div>
-<div class="slide" id="scan-getaveragenumberofphotons-plot-1-0000-2-0000">
-<h1><span class="i">scan_GetAverageNumberOfPhotons_plot_1.0000_2.0000</span></h1>
+<div class="slide" id="test-makeicdf-splitbin-qcktest-s2cn-plot-png">
+<h1><span class="i">test_makeICDF_SplitBin_QCKTest_s2cn_plot.png</span></h1>
 </div>
-<div class="slide" id="scan-getaveragenumberofphotons-plot-1-4536-1-7930">
-<h1><span class="i">scan_GetAverageNumberOfPhotons_plot_1.4536_1.7930</span></h1>
-</div>
-<div class="slide" id="scan-getaveragenumberofphotons-plot-1-7000-1-8000">
-<h1><span class="i">scan_GetAverageNumberOfPhotons_plot_1.7000_1.8000</span></h1>
-</div>
-<div class="slide" id="scan-getaveragenumberofphotons-difference-plot">
-<h1><span class="i">scan_GetAverageNumberOfPhotons_difference_plot</span></h1>
-</div>
-<div class="slide" id="pmtsimparamsvc-get-pmt-ce">
-<h1>PMTSimParamSvc::get_pmt_ce</h1>
-<p class="small">Angular scan/plot code to check efficiency as function of theta</p>
-<ul class="small simple">
-<li><a class="reference external" href="https://github.com/simoncblyth/j/blob/main/PMTAngular/PMTAngular.py">https://github.com/simoncblyth/j/blob/main/PMTAngular/PMTAngular.py</a></li>
-<li><a class="reference external" href="https://github.com/simoncblyth/j/blob/main/PMTAngular/PMTAngular.sh">https://github.com/simoncblyth/j/blob/main/PMTAngular/PMTAngular.sh</a></li>
+<div class="slide" id="chi2-comparison-of-rejection-and-icdf-lookup-cerenkov-energy-samples">
+<h1><span class="small">Chi2 comparison of Rejection and ICDF Lookup Cerenkov energy samples</span></h1>
+<p class="normal">Created with:</p>
+<pre class="normal literal-block">
+cd ~/opticks/qudarap
+QCerenkovIntegralTest   # create ICDF lookups for many BetaInverse
+QCKTest                 # load ICDF, create lookup+rejection samples
+ipython -i tests/QCKTest.py   # chi2 comparisons on energy distribs
+</pre>
+<p class="normal">Plots show:</p>
+<ul class="normal simple">
+<li>histogram of energy distrib from ICDF lookup sample</li>
+<li>histogram of energy distrib from rejection sample</li>
+<li>&quot;s2(E)&quot; sin^2(cerenkov_cone_angle)[E]  : <span class="redbold">distribution the samples seek to follow</span></li>
+<li>ICDF : cumulative integral curve</li>
+<li>relative chi2 contribution for each energy bin</li>
 </ul>
-<p class="small">Following Miaoyu bug fix, efficiencies &gt; 1. for NNVT and NNVT_HighQE</p>
-<ul class="small simple">
-<li><span class="redbold">a good problem to have !</span></li>
-<li>trivial kludge fix ? :  <tt class="docutils literal"><span class="pre">std::min(</span> 1.0 , ce )</tt></li>
+<p class="normal"><span class="bluebold">Note: ICDF becomes flat in disallowed energy regions</span></p>
+</div>
+<div class="slide" id="qcktest-1-0000-en-plot-png">
+<h1><span class="i">QCKTest_1.0000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-0500-en-plot-png">
+<h1><span class="i">QCKTest_1.0500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-1000-en-plot-png">
+<h1><span class="i">QCKTest_1.1000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-1500-en-plot-png">
+<h1><span class="i">QCKTest_1.1500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-2000-en-plot-png">
+<h1><span class="i">QCKTest_1.2000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-2500-en-plot-png">
+<h1><span class="i">QCKTest_1.2500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-3000-en-plot-png">
+<h1><span class="i">QCKTest_1.3000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-3500-en-plot-png">
+<h1><span class="i">QCKTest_1.3500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-4000-en-plot-png">
+<h1><span class="i">QCKTest_1.4000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-4500-en-plot-png">
+<h1><span class="i">QCKTest_1.4500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-5000-en-plot-png">
+<h1><span class="i">QCKTest_1.5000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-5500-en-plot-png">
+<h1><span class="i">QCKTest_1.5500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-6000-en-plot-png">
+<h1><span class="i">QCKTest_1.6000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-6500-en-plot-png">
+<h1><span class="i">QCKTest_1.6500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-7000-en-plot-png">
+<h1><span class="i">QCKTest_1.7000_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-7500-en-plot-png">
+<h1><span class="i">QCKTest_1.7500_en_plot.png</span></h1>
+</div>
+<div class="slide" id="qcktest-1-7920-en-plot-png">
+<h1><span class="i">QCKTest_1.7920_en_plot.png</span></h1>
+</div>
+<div class="slide" id="cerenkov-energy-sample-chi2-compare-rejection-vs-lookup">
+<h1><span class="small">Cerenkov Energy Sample : chi2 compare Rejection vs Lookup</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">chi2 comparison</span></p>
+<p class="small"><strong>bi</strong> : BetaInverse of particle</p>
+<p class="small"><strong>c2p</strong> : chi2 per degree of freedom</p>
+<p class="small"><strong>emn/emx</strong> : photon energy range (eV)</p>
+<p class="small"><strong>avp</strong> : average number of photons per mm</p>
+<p class="small"><span class="redbold">Most discrepancy from edge regions</span></p>
+<ul class="small last simple">
+<li>where CDF(E) flat, ICDF(u) is steep -&gt; poor agreement</li>
 </ul>
 </div>
-<div class="slide" id="pmtangular-fig1">
-<h1><span class="i">PMTAngular_fig1</span></h1>
-</div>
-<div class="slide" id="pmtangular-fig2">
-<h1><span class="i">PMTAngular_fig2</span></h1>
-</div>
-<div class="slide" id="geant4-meeting-recent-opticks-snapshot-tags">
-<h1>Geant4 Meeting + Recent Opticks &quot;Snapshot&quot; tags</h1>
-<p class="small"><strong>Aug 20 : meeting with Geant4 : Fermilab + Warwick(Ben Morgan, Software Management)</strong></p>
-<ul class="small simple">
-<li>regarding what is needed for Opticks advanced example in next Geant4</li>
-<li>requested Opticks to start providing regular snapshot tags</li>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">bi</th>
+<th class="head">c2sum</th>
+<th class="head">ndf</th>
+<th class="head">c2p</th>
+<th class="head">emn</th>
+<th class="head">emx</th>
+<th class="head">avp</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>1.0000</td>
+<td>82.0388</td>
+<td>99.0000</td>
+<td>0.8287</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>293.2454</td>
+</tr>
+<tr><td>1.0500</td>
+<td>91.5019</td>
+<td>99.0000</td>
+<td>0.9243</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>270.4207</td>
+</tr>
+<tr><td>1.1000</td>
+<td>92.9688</td>
+<td>99.0000</td>
+<td>0.9391</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>246.4823</td>
+</tr>
+<tr><td>1.1500</td>
+<td>79.5928</td>
+<td>99.0000</td>
+<td>0.8040</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>221.4304</td>
+</tr>
+<tr><td>1.2000</td>
+<td>100.4855</td>
+<td>99.0000</td>
+<td>1.0150</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>195.2648</td>
+</tr>
+<tr><td>1.2500</td>
+<td>116.2938</td>
+<td>99.0000</td>
+<td>1.1747</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>167.9857</td>
+</tr>
+<tr><td>1.3000</td>
+<td>110.0716</td>
+<td>99.0000</td>
+<td>1.1118</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>139.5929</td>
+</tr>
+<tr><td>1.3500</td>
+<td>84.7895</td>
+<td>99.0000</td>
+<td>0.8565</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>110.0865</td>
+</tr>
+<tr><td>1.4000</td>
+<td>90.6946</td>
+<td>99.0000</td>
+<td>0.9161</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>79.4666</td>
+</tr>
+<tr><td>1.4500</td>
+<td>374.1477</td>
+<td>99.0000</td>
+<td>3.7793</td>
+<td>1.5500</td>
+<td>15.5000</td>
+<td>47.7330</td>
+</tr>
+<tr><td>1.5000</td>
+<td>147.4192</td>
+<td>99.0000</td>
+<td>1.4891</td>
+<td>3.1136</td>
+<td>9.9651</td>
+<td>28.7508</td>
+</tr>
+<tr><td>1.5500</td>
+<td>222.8197</td>
+<td>92.0000</td>
+<td>2.4220</td>
+<td>4.6647</td>
+<td>9.5725</td>
+<td>16.5258</td>
+</tr>
+<tr><td>1.6000</td>
+<td>254.6680</td>
+<td>78.0000</td>
+<td>3.2650</td>
+<td>5.7872</td>
+<td>9.2549</td>
+<td>9.1571</td>
+</tr>
+<tr><td>1.6500</td>
+<td>156.4206</td>
+<td>99.0000</td>
+<td>1.5800</td>
+<td>7.4768</td>
+<td>8.9444</td>
+<td>5.3764</td>
+</tr>
+<tr><td>1.7000</td>
+<td>209.5865</td>
+<td>100.0000</td>
+<td>2.0959</td>
+<td>7.5724</td>
+<td>8.6780</td>
+<td>2.8470</td>
+</tr>
+<tr><td>1.7500</td>
+<td>401.4795</td>
+<td>101.0000</td>
+<td>3.9750</td>
+<td>7.6680</td>
+<td>8.4288</td>
+<td>0.9762</td>
+</tr>
+<tr><td>1.7920</td>
+<td>54036.1523</td>
+<td>101.0000</td>
+<td>535.0114</td>
+<td>7.7485</td>
+<td>7.7895</td>
+<td>0.0007</td>
+</tr>
+</tbody>
+</table>
+<ul class="tiny simple">
+<li>/tmp/blyth/opticks/QCerenkovIntegralTest/test_makeICDF_SplitBin/QCKTest use_icdf:False</li>
 </ul>
-<p class="small"><strong>Recent Tags</strong></p>
+</div>
+<div class="slide" id="opticks-updates-for-geant4-11-beta-1100">
+<h1><span class="small">Opticks Updates for Geant4 11.beta (1100)</span></h1>
+<p class="small"><strong>Aiming to include Opticks example in Geant4 11 Distribution</strong></p>
+<p class="small">Geant4 Fermilab Group (Hans Wentzel, Soon Yung Jun) working on this</p>
+<p class="small">My role : <span class="bluebold">Opticks updates to cope with API changes</span></p>
 <ul class="small simple">
+<li>keep &gt; 500 unittests passing</li>
+<li>frequent snapshots bumping OPTICKS_VERSION_NUMBER (OpticksVersionNumber.hh)<ul>
 <li><a class="reference external" href="https://github.com/simoncblyth/opticks/tags">https://github.com/simoncblyth/opticks/tags</a></li>
-<li>PLANNED : <a class="reference external" href="https://github.com/simoncblyth/opticks/releases/tag/v0.1.3">https://github.com/simoncblyth/opticks/releases/tag/v0.1.3</a><ul>
-<li>Sept 2nd 2021</li>
-<li>OPTICKS_VERSION_NUMBER 13</li>
-<li>CManager FIX</li>
 </ul>
 </li>
-<li><a class="reference external" href="https://github.com/simoncblyth/opticks/releases/tag/v0.1.2">https://github.com/simoncblyth/opticks/releases/tag/v0.1.2</a><ul>
-<li>Aug 30 2021</li>
-<li>OPTICKS_VERSION_NUMBER 12</li>
-<li>fixed Cerenkov wavelenth bug : reported by Yuxiang</li>
+</ul>
+<p class="small"><span class="redbold">Geant4 11 API+behavior changes causing problems</span></p>
+<ul class="small simple">
+<li>Geant4 11 forces c++17 : Opticks follows (c++14-&gt;c++17)<ul>
+<li>requires: <strong>om-cleaninstall</strong></li>
 </ul>
 </li>
-<li><a class="reference external" href="https://github.com/simoncblyth/opticks/releases/tag/v0.1.1">https://github.com/simoncblyth/opticks/releases/tag/v0.1.1</a><ul>
-<li>Aug 28 2021</li>
-<li>OPTICKS_VERSION_NUMBER 11</li>
-<li>requested by Fermilab Geant4 team</li>
+<li><strong>G4PhysicsOrderedFreeVector</strong> removed, consolidated to <strong>G4PhysicsFreeVector</strong></li>
+<li><strong>G4MaterialPropertiesTable</strong> changes caused several Opticks unittest FAILs<ul>
+<li><strong>G4GDMLReadMaterials</strong> unable to read GDML with custom properties</li>
+<li>GetProperty returning bad pointer <strong>fMP[-1]</strong> when expect nullptr</li>
+<li>unintended(?) removal of introspection</li>
+<li>attempt to access a non-existing property/const-property throws fatal exceptions</li>
+<li>ConstPropertyExists method never able to return false, as fatal exception</li>
 </ul>
 </li>
+</ul>
+<p class="small"><span class="redbold">From last tarball tried : all tests passing BUT notable slowdown, suspect G4VSolid::CalculateExtent</span></p>
+</div>
+<div class="slide" id="opticks-t-results-with-geant4-1042-and-1100-geant4-master100721-tar">
+<h1><span class="small">opticks-t : results with Geant4 1042 and 1100 (geant4.master100721.tar)</span></h1>
+<p class="small">1042 : all pass, no slow</p>
+<p class="small">1100, Soon 2nd tarball geant4.master100721.tar:</p>
+<pre class="small literal-block">
+SLOW: tests taking longer that 15 seconds
+  3  /45  Test #3  : CFG4Test.CTestDetectorTest   Passed   35.47
+  5  /45  Test #5  : CFG4Test.CGDMLDetectorTest   Passed   35.54
+  7  /45  Test #7  : CFG4Test.CGeometryTest       Passed   35.34
+  27 /45  Test #27 : CFG4Test.CInterpolationTest  Passed   37.76
+
+FAILS:  0   / 501   :  Sat Oct  9 04:57:42 2021
+(base) [simon&#64;localhost opticks]$
+</pre>
+<p class="small"><strong>CTraverser::AncestorTraverse</strong> finding extents of 300k solids</p>
+<ul class="small simple">
+<li>1042 : 3s, 1100 : 30s</li>
+<li>Suspected culprit <strong>G4VSolid::CalculateExtent</strong></li>
+<li>No longer used in mainline Opticks, just slows the 4 tests.</li>
 </ul>
 </div>
-<div class="slide" id="yuxiang-progress-on-simulation-matching">
-<h1>Yuxiang Progress on Simulation Matching</h1>
+<div class="slide" id="planar-2d-ray-tracing-to-create-csg-geometry-cross-sections">
+<h1><span class="small">Planar 2d ray tracing to create CSG geometry cross-sections</span></h1>
+<img alt="/env/presentation/QEventTest/planar_gensteps.png" class="align-right" src="/env/presentation/QEventTest/planar_gensteps.png" style="width: 500px;" />
+<p class="small"><strong>qudarap/QEvent.cc/QEvent::MakeCenterExtentGensteps</strong></p>
 <ul class="small simple">
-<li>noticed Cerenkov wavelength bug, now fixed</li>
-<li>confirmed suspicion of CD Sticks geometry problem<ul>
-<li>removing &quot;setupCD_sticks&quot; gives agreement in history categories</li>
+<li>genstep arrays : <strong>(num_gs,6,4)</strong> 6*float4 per genstep</li>
+<li>NEW: transform enabled <strong>TORCH</strong> gensteps<ul>
+<li>1*int4 : config enums etc.., number of photons to generate</li>
+<li>1*float4 : local center position</li>
+<li>4*float4 : 4x4 transform</li>
 </ul>
 </li>
-<li>found history category &quot;SI BT BT BT BT AB&quot; 0x4cccc2 with strong Opticks excess
-when &quot;setupCD_sticks&quot; is present</li>
 </ul>
-<p class="small">NEXT:</p>
+<p class="small">Transform local frame photon source positions (eg XZ plane, XYZ grid)
+into global frame using instance transforms of any piece of geometry.</p>
 <ul class="small simple">
-<li>shine light on the discrepant geometry using <strong>input photons</strong> to see nature of problem</li>
+<li><span class="redbold">local targetting global geometry</span></li>
+<li>used GPU side with : <strong>quadarap/qsim.h/qsim::generate_photon_torch</strong></li>
 </ul>
-</div>
-<div class="slide" id="opticks-packages-optix-6-5">
-<h1>Opticks Packages (OptiX &lt;= 6.5)</h1>
 <pre class="mypretiny">
-epsilon:~ blyth$ opticks-deps
-[2021-09-01 18:17:04,496] p10852 {/Users/blyth/opticks/bin/CMakeLists.py:165} INFO - home /Users/blyth/opticks
-      API_TAG :        reldir :         bash- :     Proj.name : dep Proj.names
-10        OKCONF :        okconf :        okconf :        OKConf : OpticksCUDA OptiX G4
-20        SYSRAP :        sysrap :        sysrap :        SysRap : OKConf NLJSON PLog
-30          BRAP :      boostrap :          brap :      BoostRap : Boost BoostAsio NLJSON PLog SysRap Threads
-40           NPY :           npy :           npy :           NPY : PLog GLM BoostRap
-50        OKCORE :   optickscore :           okc :   OpticksCore : NPY
-60          GGEO :          ggeo :          ggeo :          GGeo : OpticksCore
-90         OKGEO :    opticksgeo :           okg :    OpticksGeo : OpticksCore GGeo
+671 template &lt;typename T&gt; inline QSIM_METHOD void qsim&lt;T&gt;::generate_photon_torch(quad4& p, curandStateXORWOW& rng, const quad6& gs)
+672 {
+673     p.q0.f = gs.q1.f ;  // start with local frame position, eg (0,0,0)
+674
+675     float u = curand_uniform(&rng);
+676     float sinPhi, cosPhi;
+677     sincosf(2.f*M_PIf*u,&sinPhi,&cosPhi);
+678
+679     //  local frame XZ plane directions
+680     p.q1.f.x = cosPhi ;  p.q1.f.y = 0.f    ;  p.q1.f.z = sinPhi ;  p.q1.f.w = 0.f ;
+681
+682     qat4 qt(gs) ; // copy 4x4 transform from last 4 quads of genstep
+683     qt.right_multiply_inplace( p.q0.f, 1.f );   // position            <span class="redbold">transform local->global</span>
+684     qt.right_multiply_inplace( p.q1.f, 0.f );   // direction
+685 }
+</pre></div>
+<div class="slide" id="planar-2d-ray-tracing-to-create-csg-geometry-cross-sections-code">
+<h1><span class="small">Planar 2d ray tracing to create CSG geometry cross-sections : code</span></h1>
+<p class="small"><strong>CSGOptiX/cxs.sh</strong></p>
+<ul class="small simple">
+<li>control via envvars</li>
+</ul>
+<p class="small"><strong>CSGOptiX/tests/CSGOptiXSimulateTest.cc</strong></p>
+<ul class="small simple">
+<li>generates TORCH photons from gensteps</li>
+<li>collects <strong>quad4</strong> : 4*union(float4,uint4,int4) at first intersect</li>
+<li>saves array of quad4 intersects with relevant transforms</li>
+</ul>
+<p class="small"><strong>CSGOptiX/tests/CSGOptiXSimulateTest.py</strong></p>
+<ul class="small simple">
+<li>loads photons and transforms</li>
+<li>presents intersects using matplotlib (2d) OR pyvista (3d)</li>
+<li>identity info (eg boundary material pairs) used to color intersects</li>
+</ul>
+</div>
+<div class="slide" id="csgoptix-cxs-sh-planar-2d-ray-tracing-csg-geometry-cross-sections">
+<h1><span class="small">CSGOptiX/cxs.sh : Planar 2d ray tracing, CSG geometry cross-sections</span></h1>
+<pre class="mypretiny">
+##!/bin/bash -l
+cxs=${CXS:-20}   # collect sets of config underneath CXS
 
-<span class="redbold">
-100       CUDARAP :       cudarap :       cudarap :       CUDARap : SysRap OpticksCUDA
-110         THRAP :     thrustrap :         thrap :     ThrustRap : OpticksCore CUDARap
-120         OXRAP :      optixrap :         oxrap :      OptiXRap : OKConf OptiX OpticksGeo ThrustRap
-130          OKOP :          okop :          okop :          OKOP : OptiXRap
-</span>
+if [ "$cxs" == "1" ]; then
+    moi=Hama
+    ##cegs=16:0:9:1000:18700:0:0:100
+    cegs=16:0:9:500
+    gridscale=0.05
+elif [ "$cxs" == "2" ]; then
+    moi=uni_acrylic3
+    cegs=16:0:9:100
+    ##cegs=0:0:0:1000
+    ##cegs=16:4:9:100
+    gridscale=0.05
+elif [ "$cxs" == "20" ]; then
+    note="very tight grid to get into close corners"
+    moi=uni_acrylic3
+    cegs=16:0:9:100
+    gridscale=0.025
+fi
+export MOI=${MOI:-$moi}
+export CEGS=${CEGS:-$cegs}
+export GRIDSCALE=${GRIDSCALE:-$gridscale}
+export CXS=${CXS:-$cxs}
+export TOPLINE="cxs.sh CSGOptiXSimulateTest CXS $CXS MOI $MOI CEGS $CEGS GRIDSCALE $GRIDSCALE ISEL $ISEL ZZ $ZZ"
+export BOTLINE="ZOOM $ZOOM LOOK $LOOK"
 
-140        OGLRAP :        oglrap :        oglrap :        OGLRap : ImGui OpticksGLEW BoostAsio OpticksGLFW OpticksGeo
-150          OKGL :     opticksgl :          okgl :     OpticksGL : OGLRap OKOP
-160            OK :            ok :            ok :            OK : OpticksGL
-165            X4 :         extg4 :            x4 :         ExtG4 : G4 GGeo OpticksXercesC CLHEP
-170          CFG4 :          cfg4 :          cfg4 :          CFG4 : G4 ExtG4 OpticksXercesC OpticksGeo ThrustRap
-180          OKG4 :          okg4 :          okg4 :          OKG4 : OK CFG4
-190          G4OK :          g4ok :          g4ok :          G4OK : CFG4 ExtG4 OKOP
-200          None :   integration :   integration :   Integration :
-epsilon:~ blyth$
+if [ "$1" == "py" ]; then
+    ipython --pdb -i tests/CSGOptiXSimulateTest.py
+else
+    CSGOptiXSimulateTest
+fi
+</pre></div>
+<div class="slide" id="stickmpl-all">
+<h1><span class="i">StickMPL_all</span></h1>
+</div>
+<div class="slide" id="stickmpl-skip-steel">
+<h1><span class="i">StickMPL_skip_steel</span></h1>
+<pre>
+
+
+
+
+
 </pre><ul class="small simple">
-<li>new GPU/CPU geometry model required : <strong>CSGFoundry</strong></li>
-<li>All GPU code needed to be replaced for OptiX 7<ul>
-<li>-&gt; Four packages need to be almost entirely relaced (large fraction of Opticks)</li>
+<li><tt class="docutils literal">cylinder with inner removed + cylinder rods are subtracted from cone</tt></li>
+<li><tt class="docutils literal">two horizontal green lines just below (0,0) should not be there</tt></li>
 </ul>
-</li>
+<!-- comment
+
+:i:`StickMPL_skip_acrylic`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+</div>
+<div class="slide" id="stickpv-all">
+<h1><span class="i">StickPV_all</span></h1>
+<pre>
+
+
+
+
+
+</pre><ul class="small simple">
+<li><tt class="docutils literal">blue/green speckle below is from coincident face issue</tt></li>
+<li><tt class="docutils literal">as Opticks geometry is surface based coincident faces must be avoided</tt></li>
 </ul>
+</div>
+<div class="slide" id="stickpv-skip-steel">
+<h1><span class="i">StickPV_skip_steel</span></h1>
+<!-- comment
+
+:i:`StickPV_skip_acrylic`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+</div>
+<div class="slide" id="quicktime-2-laddition-uni-acrylic3">
+<h1><span class="i">quicktime 2 lAddition_uni_acrylic3</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">uni_acrylic3</p>
+<ul class="small last simple">
+<li>Dark columns : &quot;inner&quot; surface from subtraction</li>
+<li>&quot;Double Greek Temple&quot; : complex CSG tree</li>
+</ul>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="gplt-laddition-uni-acrylic3">
+<h1><span class="i">gplt lAddition_uni_acrylic3</span></h1>
+<ul class="normal simple">
+<li>LV : lAddition,  Solid : <strong>uni_acrylic3</strong>, Class : AdditionAcrylicConstruction</li>
+</ul>
+<pre>
+</pre><ul class="normal simple">
+<li><span class="redbold">Suspect : subtracting spherical segment, sagitta 5.68mm, is performance killer.</span></li>
+<li>also complicated interior of Fastener irrelevant to optical photons</li>
+</ul>
+<pre></div>
+<div class="slide" id="csg-sub-sub-bug-subtracted-subtraction-yielding-spurious-intersects">
+<h1><span class="small">CSG sub sub bug ? Subtracted subtraction yielding spurious intersects</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Pipe Cylinder with inner removed</span></p>
+<p class="small"><strong>G4Tubs with rmin &gt; 0</strong></p>
+<p class="small">Opticks implements as CSG subtraction:</p>
+<ul class="small simple">
+<li><strong>extg4/X4Solid::convertTubs_cylinder</strong></li>
+<li><strong>B(rmax cylinder) - C(rmin cylinder)</strong></li>
+<li>avoid coincident endcaps by &quot;nudge&quot; expanding <strong>C</strong> 1% in hz</li>
+<li>increasing hz of subtracted cylinder does not change <strong>B-C</strong> geometry</li>
+</ul>
+<p class="small">BUT WHEN SUBTRACT AGAIN: <strong>A - (B - C)</strong></p>
+<ul class="small last simple">
+<li>subtracting <strong>(B - C)</strong> from another shape <strong>A</strong></li>
+<li>intersects onto the enlarged inner cylinder appear</li>
+</ul>
+</div>
+<p class="small">solidAddition_down (GPolycone)  Z: 5.7, 0.0, -140.0</p>
+<p class="small">solidAddition_up  (G4Sphere)</p>
+<dl class="small docutils">
+<dt>uni_acrylic1  (G4SubtractionSolid)</dt>
+<dd>solidAddition_down - solidAddition_up    [ Z : +17820.0 ] <strong>subtract sagitta cap</strong></dd>
+</dl>
+<p class="small">solidAddition_up1 (G4Tubs)  rmin/rmax 120/208  hz 15.2</p>
+<dl class="small docutils">
+<dt>uni_acrylic2 (G4SubtractionSolid)</dt>
+<dd><p class="first">uni_acrylic1  -  solidAddition_up1       [ Z : -20  ]</p>
+<ul class="last simple">
+<li>[15.2, -15.2] -20. = [-4.8, -35.2]</li>
+<li>[15.2, -15.2]*1.01 - 20.0  = [ -4.648, -35.352]   <strong>1% expand subtracted</strong></li>
+</ul>
+</dd>
+</dl>
+<p class="small">solidAddition_up2 (G4Tubs)  rmin/rmax  0/14   hz 52.5</p>
+<dl class="small docutils">
+<dt>8 x uni_acrylic3 (G4SubtractionSolid)</dt>
+<dd><p class="first">uni_acrylic2  -  solidAddition_up2   [ Z : -87.5 ]</p>
+<ul class="last simple">
+<li>[ 52.5, -52.5] - 87.5 =  [ -35., -140.]</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="slide" id="figs-positions-pvplt-0-1-2-3-csgsubsubbug-png">
+<h1><span class="i">20_figs_positions_pvplt_0,1,2,3_csgsubsubbug.png</span></h1>
+<ul class="simple">
+<li>.</li>
+<li><tt class="docutils literal">close look at intersect Z positions : see jump <span class="pre">---&gt;</span></tt></li>
+<li><tt class="docutils literal">show enlarged C, Z positions&nbsp;&nbsp; A - (B - C)</tt></li>
+</ul>
+</div>
+<div class="slide" id="csg-deep-tree-positivize-tree-using-de-morgans-laws">
+<h1><span class="small">CSG Deep Tree : Positivize tree using De Morgans laws</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">Positive form CSG Trees</p>
+<p class="small">Apply deMorgan pushing negations down tree</p>
+<ul class="small simple">
+<li><strong>A - B -&gt; A * !B</strong></li>
+<li><strong>!(A*B) -&gt; !A + !B</strong></li>
+<li><strong>!(A+B) -&gt; !A * !B</strong></li>
+<li><strong>!(A - B) -&gt; !(A*!B) -&gt; !A + B</strong></li>
+</ul>
+<p class="small">End with only UNION, INTERSECT operators,
+and some complemented leaves.</p>
+<p class="small last"><span class="red">COMMUTATIVE -&gt; easily rearranged</span></p>
+</div>
+<p class="small">1st step to allow balancing : <strong>Positivize</strong> : remove CSG difference <strong>di</strong> operators</p>
+<pre class="mypretiny">
+                                                     ...    ...
+
+                                               un          cy
+
+                                       un          cy
+
+                               un          cy
+
+                       un          cy
+
+               un          cy
+
+       di          cy
+
+   cy      cy
+
+</pre>
+
+<pre class="mypretiny">
+                                                     ...    ...
+
+                                               un          cy
+
+                                       un          cy
+
+                               un          cy
+
+                       un          cy
+
+               un          cy
+
+       in          cy
+
+   cy      !cy
+
+</pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="csg-examples">
+<h1><span class="i">CSG Examples</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+PMTSimParamSvc::get_pmt_ce
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+    Angular scan/plot code to check efficiency as function of theta
+
+    * https://github.com/simoncblyth/j/blob/main/PMTAngular/PMTAngular.py
+    * https://github.com/simoncblyth/j/blob/main/PMTAngular/PMTAngular.sh
+
+    Following Miaoyu bug fix, efficiencies > 1. for NNVT and NNVT_HighQE
+
+    * :redbold:`a good problem to have !`
+    * trivial kludge fix ? :  ``std::min( 1.0 , ce )``
+
+
+
+:i:`PMTAngular_fig1`
+- - - - - - - - - - - - - - - - - - - - - - -
+
+
+:i:`PMTAngular_fig2`
+- - - - - - - - - - - - - - - - - - - - - - -
+
+
+Geant4 Meeting + Recent Opticks "Snapshot" tags
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+
+   **Aug 20 : meeting with Geant4 : Fermilab + Warwick(Ben Morgan, Software Management)**
+
+   * regarding what is needed for Opticks advanced example in next Geant4
+   * requested Opticks to start providing regular snapshot tags
+
+   **Recent Tags**
+
+   * https://github.com/simoncblyth/opticks/tags
+
+   * PLANNED : https://github.com/simoncblyth/opticks/releases/tag/v0.1.3
+
+     * Sept 2nd 2021
+     * OPTICKS_VERSION_NUMBER 13
+     * CManager FIX
+
+   * https://github.com/simoncblyth/opticks/releases/tag/v0.1.2
+
+     * Aug 30 2021
+     * OPTICKS_VERSION_NUMBER 12
+     * fixed Cerenkov wavelenth bug : reported by Yuxiang
+
+   * https://github.com/simoncblyth/opticks/releases/tag/v0.1.1
+
+     * Aug 28 2021
+     * OPTICKS_VERSION_NUMBER 11
+     * requested by Fermilab Geant4 team
+
+
+Yuxiang Progress on Simulation Matching
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+    * noticed Cerenkov wavelength bug, now fixed
+    * confirmed suspicion of CD Sticks geometry problem
+
+      * removing "setupCD_sticks" gives agreement in history categories
+
+    * found history category "SI BT BT BT BT AB" 0x4cccc2 with strong Opticks excess
+      when "setupCD_sticks" is present
+
+    NEXT:
+
+    * shine light on the discrepant geometry using **input photons** to see nature of problem
+
+
+Opticks Packages (OptiX <= 6.5)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    epsilon:~ blyth$ opticks-deps
+    [2021-09-01 18:17:04,496] p10852 {/Users/blyth/opticks/bin/CMakeLists.py:165} INFO - home /Users/blyth/opticks
+          API_TAG :        reldir :         bash- :     Proj.name : dep Proj.names
+    10        OKCONF :        okconf :        okconf :        OKConf : OpticksCUDA OptiX G4
+    20        SYSRAP :        sysrap :        sysrap :        SysRap : OKConf NLJSON PLog
+    30          BRAP :      boostrap :          brap :      BoostRap : Boost BoostAsio NLJSON PLog SysRap Threads
+    40           NPY :           npy :           npy :           NPY : PLog GLM BoostRap
+    50        OKCORE :   optickscore :           okc :   OpticksCore : NPY
+    60          GGEO :          ggeo :          ggeo :          GGeo : OpticksCore
+    90         OKGEO :    opticksgeo :           okg :    OpticksGeo : OpticksCore GGeo
+
+    <span class="redbold">
+    100       CUDARAP :       cudarap :       cudarap :       CUDARap : SysRap OpticksCUDA
+    110         THRAP :     thrustrap :         thrap :     ThrustRap : OpticksCore CUDARap
+    120         OXRAP :      optixrap :         oxrap :      OptiXRap : OKConf OptiX OpticksGeo ThrustRap
+    130          OKOP :          okop :          okop :          OKOP : OptiXRap
+    </span>
+
+    140        OGLRAP :        oglrap :        oglrap :        OGLRap : ImGui OpticksGLEW BoostAsio OpticksGLFW OpticksGeo
+    150          OKGL :     opticksgl :          okgl :     OpticksGL : OGLRap OKOP
+    160            OK :            ok :            ok :            OK : OpticksGL
+    165            X4 :         extg4 :            x4 :         ExtG4 : G4 GGeo OpticksXercesC CLHEP
+    170          CFG4 :          cfg4 :          cfg4 :          CFG4 : G4 ExtG4 OpticksXercesC OpticksGeo ThrustRap
+    180          OKG4 :          okg4 :          okg4 :          OKG4 : OK CFG4
+    190          G4OK :          g4ok :          g4ok :          G4OK : CFG4 ExtG4 OKOP
+    200          None :   integration :   integration :   Integration :
+    epsilon:~ blyth$
+    </pre>
+
+.. class:: small
+
+   * new GPU/CPU geometry model required : **CSGFoundry**
+   * All GPU code needed to be replaced for OptiX 7
+
+     * -> Four packages need to be almost entirely relaced (large fraction of Opticks) -->
 </div>
 <div class="slide" id="new-opticks-packages-optix-7-0">
 <h1>New Opticks Packages (OptiX &gt;= 7.0)</h1>
@@ -3093,28 +3654,27 @@ epsilon:~ blyth$
 <li>keep bulk of GPU code in simple to test headers (some can be tested on CPU)</li>
 <li><em>QUDARap</em> does not depend on OptiX -&gt; more flexible -&gt; simpler testing</li>
 </ul>
-</div>
-<div class="slide" id="qudarap-qcerenkov-progress-single-precision-solution">
-<h1>QUDARap/QCerenkov Progress : single precision solution ?</h1>
-<ul class="small simple">
-<li>Cerenkov wavelength discrepancy<ul>
-<li>generally correct shape, but poor chi2</li>
-<li>achieved good chi2, <span class="redbold">but only by using double precision</span><ul>
-<li>having to use double precision is a performance problem</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Single precision approach, using ~1000 x inverse-CDF for each BetaInverse<ul>
-<li>python prototype works (ana/rindex.py)</li>
-<li>C++ CPU implementation done, currently testing<ul>
-<li>QUDARap/QCerenkov + NP::pdomain</li>
-<li><a class="reference external" href="https://github.com/simoncblyth/np/">https://github.com/simoncblyth/np/</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<!-- comment
+
+QUDARap/QCerenkov Progress : single precision solution ?
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+   * Cerenkov wavelength discrepancy
+
+     * generally correct shape, but poor chi2
+     * achieved good chi2, :redbold:`but only by using double precision`
+
+       * having to use double precision is a performance problem
+
+   * Single precision approach, using ~1000 x inverse-CDF for each BetaInverse
+
+     * python prototype works (ana/rindex.py)
+     * C++ CPU implementation done, currently testing
+
+       * QUDARap/QCerenkov + NP::pdomain
+       * https://github.com/simoncblyth/np/ -->
 </div>
 <div class="slide" id="qudarap-csgoptix-integration">
 <h1>QUDARap-CSGOptiX integration</h1>
@@ -3124,156 +3684,204 @@ epsilon:~ blyth$
 <li>high level simulation, details from <em>QUDARap</em> via CUDA headers <em>qsim.h</em> etc..</li>
 </ul>
 <p class="small">Minimimize non-geometry code here, as OptiX dependency demands a very specific organization.</p>
-</div>
-<div class="slide" id="csgoptixsimulation-cross-section-from-planar-gensteps">
-<h1><span class="small">CSGOptiXSimulation : cross-section from planar gensteps</span></h1>
-<img alt="/env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_py_half.png" class="align-center" src="/env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_py_half.png" style="width: 750px;" />
-<ul class="small simple">
-<li>test OptiX 7 geometry (CSGFoundry) + QUDARap genstep handling using 2d planar gensteps</li>
-<li>geometry x-z plane cross-section from thousands of intersects, <span class="bluebold">acrylic + PMTs + Tyvek</span> visible</li>
-<li>colors from boundary index of intersected geometry</li>
-</ul>
-</div>
-<div class="slide" id="csgoptixsimulation-cross-section-from-planar-gensteps-closeup">
-<h1><span class="small">CSGOptiXSimulation : cross-section from planar gensteps : closeup</span></h1>
-<img alt="/env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_closeup_py_half.png" class="align-center" src="/env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_closeup_py_half.png" style="width: 700px;" />
-<ul class="small simple">
-<li>zooming in you can see gaps between intersects</li>
-<li>grid of points are starting points of the 2d planar gensteps : inner surfaces may be missed if no rays can get to them</li>
-<li>geometry x-z plane cross-section from thousands of intersects</li>
-</ul>
-</div>
-<div class="slide" id="csgoptixsimulation-pmt-geometry-overlap-coincidence-problems">
-<h1><span class="small">CSGOptiXSimulation : PMT geometry overlap+coincidence problems ?</span></h1>
-<img alt="/env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_overlap_py_half.png" class="align-center" src="/env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_overlap_py_half.png" style="width: 700px;" />
-<ul class="small simple">
-<li>zooming closer : definitely looks like a geometry overlap problem<ul>
-<li>OR perhaps Opticks geometry translation bug</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="slide" id="g4cerenkov-photon-energy-wavelength-cone-angle-generation">
-<h1><span class="small">G4Cerenkov : Photon Energy/Wavelength + Cone angle generation</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">Rejection Sampling</p>
-<p class="small">Start from flat energy distrib</p>
-<ul class="small simple">
-<li>reject Cerenkov disallowed energy/wavelength</li>
-</ul>
-<p class="small"><tt class="docutils literal">sampleRI &lt; BetaInverse</tt> :</p>
-<ul class="small last simple">
-<li>=&gt; <tt class="docutils literal">cosTheta &gt; 1.</tt>  (too slow for Č)</li>
-<li><tt class="docutils literal">sin2Theta &lt; 0.</tt> =&gt; rejection</li>
-</ul>
-</div>
-<pre class="mypretiny">
-168 G4VParticleChange*
-169 G4Cerenkov_modified::PostStepDoIt(
-      const G4Track& aTrack, const G4Step& aStep)
-...
-252   G4double Pmin = Rindex->GetMinLowEdgeEnergy();
-253   G4double Pmax = Rindex->GetMaxLowEdgeEnergy();
-254   G4double dp = Pmax - Pmin;
-...
-268   G4double maxCos = BetaInverse / nMax;
-270   G4double maxSin2 = (1.0 - maxCos) * (1.0 + maxCos);
-...
-315   for (G4int i = 0; i < fNumPhotons; i++) {
-317
-318       G4double rand;
-319       G4double sampledEnergy, sampledRI;
-320       G4double cosTheta, sin2Theta;
-...
-324       do {
-325          rand = G4UniformRand();
-326          sampledEnergy = Pmin + rand * dp;
-327          sampledRI = Rindex->Value(sampledEnergy);
-334          cosTheta = BetaInverse / sampledRI;
-342          sin2Theta = (1.0 - cosTheta)*(1.0 + cosTheta);
-343          rand = G4UniformRand();
-344
-346       } while (rand*maxSin2 > sin2Theta);
-</pre><p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/examples/Geant4/CerenkovStandalone/G4Cerenkov_modifiedTest.cc">https://bitbucket.org/simoncblyth/opticks/src/master/examples/Geant4/CerenkovStandalone/G4Cerenkov_modifiedTest.cc</a></p>
+<!-- comment
 
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="g4cerenkov-modifiedtest-skip-continue">
-<h1><span class="i">G4Cerenkov_modifiedTest_SKIP_CONTINUE</span></h1>
-<p class="small"><tt class="docutils literal">1.5/1.8 = .83, 1.5/1.62 = 0.92</tt></p>
+:small:`CSGOptiXSimulation : cross-section from planar gensteps`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="ana-ck-py-rejection-sampling">
-<h1><span class="i">ana/ck.py rejection sampling</span></h1>
-</div>
-<div class="slide" id="cerenkov-energy-cone-angle-sample-resorting-to-double-precision">
-<h1><span class="small">Cerenkov energy/cone angle sample : resorting to double precision</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Poor chi2 match investigations</span></p>
-<p class="small"><strong>random aligned comparison</strong></p>
-<p class="small">256M curand_uniform floats -&gt; Geant4</p>
-<ul class="small simple">
-<li>gives ~exact match (~100/1M deviants)</li>
-<li>deviant: &gt; 1e-5 nm wavelength difference</li>
-<li>change QTex -&gt; QProp/qprop, now: 0/1M deviants</li>
-</ul>
-<p class="small"><strong>BUT statistical comparison still grotty chi2/ndf</strong></p>
-<p class="small">Resorting to double precision rejection sampling</p>
-<ul class="small simple">
-<li>gives match : chi2/ndf ~ 1</li>
-</ul>
-<p class="small"><strong>QUESTIONS</strong></p>
-<ul class="small last simple">
-<li>why so sensitive to float/double ?</li>
-<li>how does float manage to give big excursions ?</li>
-</ul>
-</div>
-<pre class="mypretiny">
-574 template &lt;typename T&gt;
-575 inline QCTX_METHOD void qctx&lt;T&gt;::cerenkov_photon_expt(
-        quad4& p, unsigned id, curandStateXORWOW& rng, int print_id )
-576 {
-577     double BetaInverse = 1.5 ;
-578     double Pmin = 1.55 ;
-579     double Pmax = 15.5 ;
-580     double nMax = 1.793 ;
-581     double maxCos = BetaInverse / nMax;
-582     double maxSin2 = ( 1. - maxCos )*( 1. + maxCos );
-583
-584     double u0 ;
-585     double u1 ;
-586     double energy ;
-587     double sampledRI ;
-588     double cosTheta ;
-589     double sin2Theta ;
-590     double u_mxs2_s2 ;
-592     unsigned loop = 0u ;
-593
-594     do {
-596         u0 = curand_uniform_double(&rng) ;
-598         energy = Pmin + u0*(Pmax - Pmin) ;
-600         sampledRI = prop->interpolate( 0u, energy );
-602         cosTheta = BetaInverse / sampledRI ;
-604         sin2Theta = (1. - cosTheta)*(1. + cosTheta);
-606         u1 = curand_uniform_double(&rng) ;
-608         u_mxs2_s2 = u1*maxSin2 - sin2Theta ;
-610         loop += 1 ;
-612     } while ( u_mxs2_s2 > 0. );
-</pre></div>
-<div class="slide" id="ck-photon-enprop-100-very-poor-chi2">
-<h1>ck_photon_enprop 100 very poor chi2</h1>
-</div>
-<div class="slide" id="ck-photon-expt-100-matched">
-<h1>ck_photon_expt 100 matched</h1>
-</div>
-<div class="slide" id="ck-photon-enprop-1001-better-but-still-poor-chi2">
-<h1>ck_photon_enprop 1001 better but still poor chi2</h1>
-</div>
-<div class="slide" id="ck-photon-expt-1001-matched">
-<h1>ck_photon_expt 1001 matched</h1>
+.. image:: /env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_py_half.png
+   :width: 750px
+   :align: center
+
+.. class:: small
+
+   * test OptiX 7 geometry (CSGFoundry) + QUDARap genstep handling using 2d planar gensteps
+   * geometry x-z plane cross-section from thousands of intersects, :bluebold:`acrylic + PMTs + Tyvek` visible
+   * colors from boundary index of intersected geometry
+
+
+:small:`CSGOptiXSimulation : cross-section from planar gensteps : closeup`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. image:: /env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_closeup_py_half.png
+   :width: 700px
+   :align: center
+
+.. class:: small
+
+   * zooming in you can see gaps between intersects
+   * grid of points are starting points of the 2d planar gensteps : inner surfaces may be missed if no rays can get to them
+   * geometry x-z plane cross-section from thousands of intersects
+
+
+:small:`CSGOptiXSimulation : PMT geometry overlap+coincidence problems ?`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. image:: /env/presentation/CSGOptiXSimulate/CSGOpticksSimulate_overlap_py_half.png
+   :width: 700px
+   :align: center
+
+.. class:: small
+
+   * zooming closer : definitely looks like a geometry overlap problem
+
+     * OR perhaps Opticks geometry translation bug
+
+
+
+:small:`G4Cerenkov : Photon Energy/Wavelength + Cone angle generation`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. sidebar:: Rejection Sampling
+
+    .. class:: small
+
+        Start from flat energy distrib
+
+        * reject Cerenkov disallowed energy/wavelength
+
+        ``sampleRI < BetaInverse`` :
+
+        * => ``cosTheta > 1.``  (too slow for |CK|)
+        *  ``sin2Theta < 0.`` => rejection
+
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    168 G4VParticleChange*
+    169 G4Cerenkov_modified::PostStepDoIt(
+          const G4Track& aTrack, const G4Step& aStep)
+    ...
+    252   G4double Pmin = Rindex->GetMinLowEdgeEnergy();
+    253   G4double Pmax = Rindex->GetMaxLowEdgeEnergy();
+    254   G4double dp = Pmax - Pmin;
+    ...
+    268   G4double maxCos = BetaInverse / nMax;
+    270   G4double maxSin2 = (1.0 - maxCos) * (1.0 + maxCos);
+    ...
+    315   for (G4int i = 0; i < fNumPhotons; i++) {
+    317
+    318       G4double rand;
+    319       G4double sampledEnergy, sampledRI;
+    320       G4double cosTheta, sin2Theta;
+    ...
+    324       do {
+    325          rand = G4UniformRand();
+    326          sampledEnergy = Pmin + rand * dp;
+    327          sampledRI = Rindex->Value(sampledEnergy);
+    334          cosTheta = BetaInverse / sampledRI;
+    342          sin2Theta = (1.0 - cosTheta)*(1.0 + cosTheta);
+    343          rand = G4UniformRand();
+    344
+    346       } while (rand*maxSin2 > sin2Theta);
+    </pre>
+
+.. class:: small
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/examples/Geant4/CerenkovStandalone/G4Cerenkov_modifiedTest.cc
+
+.. s5_talk::
+
+    Bug
+
+
+
+:i:`G4Cerenkov_modifiedTest_SKIP_CONTINUE`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+    ``1.5/1.8 = .83, 1.5/1.62 = 0.92``
+
+
+.. s5_talk::
+
+    SKIP CONTINUE
+
+
+
+
+:i:`ana/ck.py rejection sampling`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+
+:small:`Cerenkov energy/cone angle sample : resorting to double precision`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+.. sidebar:: :small:`Poor chi2 match investigations`
+
+    .. class:: small
+
+        **random aligned comparison**
+
+        256M curand_uniform floats -> Geant4
+
+        * gives ~exact match (~100/1M deviants)
+        * deviant: > 1e-5 nm wavelength difference
+        * change QTex -> QProp/qprop, now: 0/1M deviants
+
+        **BUT statistical comparison still grotty chi2/ndf**
+
+        Resorting to double precision rejection sampling
+
+        * gives match : chi2/ndf ~ 1
+
+        **QUESTIONS**
+
+        * why so sensitive to float/double ?
+        * how does float manage to give big excursions ?
+
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    574 template &lt;typename T&gt;
+    575 inline QCTX_METHOD void qctx&lt;T&gt;::cerenkov_photon_expt(
+            quad4& p, unsigned id, curandStateXORWOW& rng, int print_id )
+    576 {
+    577     double BetaInverse = 1.5 ;
+    578     double Pmin = 1.55 ;
+    579     double Pmax = 15.5 ;
+    580     double nMax = 1.793 ;
+    581     double maxCos = BetaInverse / nMax;
+    582     double maxSin2 = ( 1. - maxCos )*( 1. + maxCos );
+    583
+    584     double u0 ;
+    585     double u1 ;
+    586     double energy ;
+    587     double sampledRI ;
+    588     double cosTheta ;
+    589     double sin2Theta ;
+    590     double u_mxs2_s2 ;
+    592     unsigned loop = 0u ;
+    593
+    594     do {
+    596         u0 = curand_uniform_double(&rng) ;
+    598         energy = Pmin + u0*(Pmax - Pmin) ;
+    600         sampledRI = prop->interpolate( 0u, energy );
+    602         cosTheta = BetaInverse / sampledRI ;
+    604         sin2Theta = (1. - cosTheta)*(1. + cosTheta);
+    606         u1 = curand_uniform_double(&rng) ;
+    608         u_mxs2_s2 = u1*maxSin2 - sin2Theta ;
+    610         loop += 1 ;
+    612     } while ( u_mxs2_s2 > 0. );
+    </pre>
+
+
+ck_photon_enprop 100 very poor chi2
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ck_photon_expt 100 matched
+- - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ck_photon_enprop 1001 better but still poor chi2
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ck_photon_expt 1001 matched
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 </div>
 </div>
 </body>
