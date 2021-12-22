@@ -1,9 +1,9 @@
 .. meta::
    :note: Navigate the HTML slides by entering a page number and pressing return 
    :title: Opticks Winter
-   :description: (Dec 2021) JUNO PMT Modelling, G4IntersectionSolid makes PMT tree too deep, ZSolid fix actually cutting tree, j/PMTSim, X4IntersectTest, GeoChain
-   :url: https://simoncblyth.bitbucket.io/env/presentation/opticks_202112XX.html  
-   :date: XX Dec 2021
+   :description: (Dec 2021) NNVT PMT ZSolid Cutting, base_steel, 
+   :url: https://simoncblyth.bitbucket.io/env/presentation/opticks_20211223_pre_xmas.html  
+   :date: 23 Dec 2021
 
 .. include:: my_s5defs.txt
 
@@ -13,15 +13,15 @@
 
 
 ==============================================================================
-JUNO Opticks : OptiX 7 Ray Trace times >100x faster following geometry fixes
+JUNO Opticks - Geo Fixes:  >100x faster 
 ==============================================================================
 
 ..
 
     * :b:`ZSolid::ApplyZCutTree` applied to both NNVT and Hama PMTs
 
-      * :r:`PROFLIGATE : G4ItersectionSolid Z-Cut`
-      * :b:`SOLUTION : ZSolid::ApplyZCutTree : Actually Cut the CSG Tree`      
+      * Avoid :r:`PROFLIGATE : G4ItersectionSolid Z-Cut`
+      * With : :b:`ZSolid::ApplyZCutTree : Actually Cut the CSG Tree`      
 
     * fixed **base_steel** *G4Polycone* with multiple R-inner
      
@@ -30,12 +30,12 @@ JUNO Opticks : OptiX 7 Ray Trace times >100x faster following geometry fixes
 
     * ray trace renders and render times following geometry fixes 
 
-      * timings : no standout bottlenecks remain
-      * > 100x faster than times from July 
+      * :b:`timings : no standout bottlenecks remain`
+      * :r:`> 100x faster than times from July`
        
-    * *G4Sphere* phiCut thetaCut : LHCb RICH reports Opticks translation bug 
+    * *G4Sphere* phiCut thetaCut : Opticks translation bug 
 
-      * need fix for their mirror geometry 
+      * LHCb RICH : needs fix for their mirror geometry 
       * fixing with unbounded primitives : CSG_PHICUT CSG_THETACUT 
       
 
@@ -55,6 +55,7 @@ JUNO Opticks : OptiX 7 Ray Trace times >100x faster following geometry fixes
 
     :small:`JUNO-Opticks Option changes`
     ----------------------------------------- 
+
 
 
 
@@ -388,7 +389,7 @@ Using *CSGOptiX/tests/CSGOptiXRenderTest.cc*::
     cxr.sh         ## creates 3D render .jpg of geometry 
 
 
-:b:`At bottom left of all cxr .jpg is launch time(seconds) for 2M pixels`
+:b:`At bottom left of all cxr .jpg is launch time(seconds) for 2M pixels (1920x1080)`
 
 
 
@@ -853,7 +854,7 @@ sWaterTube timings whilst varying geometry
 
 .. class:: normal 
 
-    * times for rendering 2M pixels in seconds
+    * times for rendering 2M 1920x1080 pixels in seconds
 
     * range 0.0004 - 0.0067 s
 
@@ -1083,15 +1084,15 @@ cxr_overview.sh renders
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
     |  4|        6,|        0.0006    |        0.1009    |    ONLY: 1:uni1                                                              |
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
-    |  5|        1,|        0.0009    |        0.1476    |    ONLY: 5:PMT_3inch_pmt_solid                                               |
+    |  5|        1,|    :b:`0.0009`   |    :b:`0.1476`   |:b:`ONLY: 5:PMT_3inch_pmt_solid`               :b:`FAST cf 20in`              |
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
     |  6|        4,|        0.0015    |        0.2386    |    ONLY: 4:mask_PMT_20inch_vetosMask                                         |
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
-    |  7|        3,|        0.0033    |        0.5373    |    ONLY: 5:HamamatsuR12860sMask                                              |
+    |  7|        3,|    :r:`0.0033`   |    :r:`0.5373`   |:r:`ONLY: 5:HamamatsuR12860sMask`              :r:`SLOW cf 3in`               |
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
     |  8|        0,|        0.0040    |        0.6556    |    ONLY: 3084:sWorld                                                         |
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
-    |  9|        2,|        0.0040    |        0.6627    |    ONLY: 5:NNVTMCPPMTsMask                                                   |
+    |  9|        2,|    :r:`0.0040`   |    :r:`0.6627`   |:r:`ONLY: 5:NNVTMCPPMTsMask`                   :r:`SLOW cf 3in`               |
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
     | 10|       t4,|        0.0050    |        0.8307    |    EXCL: 4:mask_PMT_20inch_vetosMask                                         |
     +---+----------+------------------+------------------+------------------------------------------------------------------------------+
@@ -1236,15 +1237,123 @@ cxr commands for renders and table
 
 
 
-
     
 :r:`cxr_geochain_SphereWithPhiSegment_difference_old`
 ------------------------------------------------------------------
+
+.. class:: small
+
+    **LHCb RICH mirror geometry reveals bug** 
+
+    * X4Solid::convertSphere **G4Sphere** 
+
+      * phi/theta cut not translated correctly 
+      * phi segment half sized in Z
 
     
 :r:`cxr_geochain_SphereWithPhiSegment_difference_new`
 ------------------------------------------------------------------
 
+.. class:: small
+
+    Fixed bug, but approach has problems:
+
+    * intersects with convex-polyhedron shapes  
+    * complex/expensive when have both phi+theta cuts 
+
+    **Better approach : New Unbounded Primitives**
+
+    * simpler implementation and usage 
+    * avoid adhoc sizing : make infinite
+
+    CSG_PHICUT 
+        cosPhi1, sinPhi1, cosPhi2, sinPhi2 
+
+        * fewer planes in "cutter" shape 
+
+    CSG_THETACUT  
+        cosTheta1, sinTheta1, cosTheta2, sinTheta2 
+
+
+    :b:`Working with LHCb RICH student (Lucas) to implement` 
+
+
+
+.. comment
+
+    SphereWithPhiSegment_X4Mesh
+    -----------------------------
+
+SphereWithPhiSegment_xxs_isect 
+---------------------------------
+
+.. class:: normal
+
+    ``CSG_PHICUT : XY cross section : slice of cake shape`` 
+
+    ``need intersects with two half-planes at phi1 and phi2`` 
+
+
+:small:`New unbounded primitive CSG_PHICUT : intersect_node_phicut`
+---------------------------------------------------------------------
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    bool intersect_node_phicut( float4& isect, const quad& q0, const float t_min, const float3& ray_origin, const float3& ray_direction )
+    {
+        const float cosPhi0 = q0.f.x ; 
+        const float sinPhi0 = q0.f.y ; 
+        const float cosPhi1 = q0.f.z ; 
+        const float sinPhi1 = q0.f.w ; 
+
+        // dot products with normal0  [ sinPhi0, -cosPhi0, 0.f ]
+        float d_n0 = ray_direction.x*sinPhi0 + ray_direction.y*(-cosPhi0) ; 
+        float o_n0 = ray_origin.x*sinPhi0 + ray_origin.y*(-cosPhi0) ; 
+        float t0 = d_n0 == 0.f ? t_min : -o_n0/d_n0 ;   
+        float side0 = ray_origin.x*cosPhi0 + ray_origin.y*sinPhi0 + ( ray_direction.x*cosPhi0 + ray_direction.y*sinPhi0 )*t0 ;  
+        if(side0 < 0.f) t0 = t_min ;    <span class="r">// Disqualify intersect with other half plane </span> 
+
+        // dot products with normal1   [ -sinPhi1,  cosPhi1, 0.f ]
+        float d_n1 = ray_direction.x*(-sinPhi1) + ray_direction.y*cosPhi1 ; 
+        float o_n1 = ray_origin.x*(-sinPhi1) + ray_origin.y*cosPhi1 ; 
+        float t1 = d_n1 == 0.f ? t_min : -o_n1/d_n1 ; 
+        float side1 = ray_origin.x*cosPhi1 + ray_origin.y*sinPhi1 + ( ray_direction.x*cosPhi1 + ray_direction.y*sinPhi1 )*t1 ;  
+        if(side1 < 0.f) t1 = t_min ;    <span class="r">// Disqualify intersect with other half plane </span>
+
+        float t_near = fminf(t0,t1);  // order the intersects 
+        float t_far  = fmaxf(t0,t1);
+        float t_cand = t_near > t_min  ?  t_near : ( t_far > t_min ? t_far : t_min ) ;  
+        bool valid_intersect = t_cand > t_min ;
+        if( valid_intersect ) 
+        {    
+            isect.x = t_cand == t1 ? -sinPhi1 :  sinPhi0 ; 
+            isect.y = t_cand == t1 ?  cosPhi1 : -cosPhi0 ;  
+            isect.z = 0.f ; 
+            isect.w = t_cand ; 
+        }    
+        return valid_intersect ; 
+    }
+    </pre>
+
+
+
+:i:`CSGNodeScanTest_iphi_figs_scanplot.png`
+----------------------------------------------
+
+
+.. raw:: html
+
+   <p style="margin-bottom:12cm;" />
+
+
+.. class:: small
+
+   ``opticks/CSG/tests/CSGNodeScanTest.{cc,py,sh}``
+
+    ``* CPU test of GPU ray trace code``
+
+    ``* isect : intersect normal + distance``
 
 
 
