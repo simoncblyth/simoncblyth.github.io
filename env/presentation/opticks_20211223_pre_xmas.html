@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>Opticks : JUNO PMT Modelling Issue : FIX</title>
+<title>JUNO Opticks : OptiX 7 Ray Trace times &gt;100x faster following geometry fixes</title>
 <meta content="Navigate the HTML slides by entering a page number and pressing return" name="note" />
 <meta content="Opticks Winter" name="title" />
 <meta content="(Dec 2021) JUNO PMT Modelling, G4IntersectionSolid makes PMT tree too deep, ZSolid fix actually cutting tree, j/PMTSim, X4IntersectTest, GeoChain" name="description" />
@@ -386,13 +386,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1>Opticks : JUNO PMT Modelling Issue : FIX</h1>
+<h1>JUNO Opticks : OptiX 7 Ray Trace times &gt;100x faster following geometry fixes</h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title">Opticks : JUNO PMT Modelling Issue : FIX</h1>
+<h1 class="title">JUNO Opticks : OptiX 7 Ray Trace times &gt;100x faster following geometry fixes</h1>
 
 <!-- comment
 
@@ -3007,6 +3007,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-position: 0px 0px;
              
           }
+          div.slide#dbec-cxr-solid-r7-copy{
+             background-image: url(/env/presentation/3dbec4dc3bdef47884fe48af781a179d/CSGOptiXRenderTest/cvd1/70000/cxr_solid_r7@/cam_1/cxr_solid_r7@_.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
           div.slide#dbec-cxr-solid-r8{
              background-image: url(/env/presentation/3dbec4dc3bdef47884fe48af781a179d/CSGOptiXRenderTest/cvd1/70000/cxr_solid_r8@/cam_1/cxr_solid_r8@_.jpg);
              background-size: 1280px 720px;
@@ -3069,6 +3075,18 @@ Processed by unicode2rstsubs.py, part of Docutils:
           }
           div.slide#sworld-cam-0-t0-cxr-view-eye-0-0-6-0-4-zoom-1-tmin-0-4-sworld-jpg{
              background-image: url(/env/presentation/3dbec4dc3bdef47884fe48af781a179d/CSGOptiXRenderTest/cvd1/70000/sWorld/cam_0_t0/cxr_view___eye_0,0.6,0.4__zoom_1__tmin_0.4_sWorld.jpg);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#polyconewithmultiplermin-x4mesh{
+             background-image: url(/env/presentation/X4IntersectTest/PolyconeWithMultipleRmin/X4Mesh/pvplot.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#polyconewithmultiplermin-xxs-isect{
+             background-image: url(/env/presentation/X4IntersectTest/PolyconeWithMultipleRmin/X4Intersect/figs/isect_mpplt.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
@@ -3216,20 +3234,24 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <!--  -->
 <blockquote>
 <ul class="simple">
-<li>Hamamatsu PMT Solid breaking Opticks<ul>
-<li>CSG tree height 8 : TOO DEEP</li>
+<li><span class="b">ZSolid::ApplyZCutTree</span> applied to both NNVT and Hama PMTs<ul>
 <li><span class="r">PROFLIGATE : G4ItersectionSolid Z-Cut</span></li>
 <li><span class="b">SOLUTION : ZSolid::ApplyZCutTree : Actually Cut the CSG Tree</span></li>
 </ul>
 </li>
-<li>Tools for development of solution <span class="b">ZSolid::ApplyZCutTree</span><ul>
-<li>PMTSim::GetSolid PMTSim::GetPV</li>
-<li>X4IntersectTest</li>
-<li><span class="b">ZSolid::ApplyZCutTree</span> algorithm</li>
+<li>fixed <strong>base_steel</strong> <em>G4Polycone</em> with multiple R-inner<ul>
+<li>improved Opticks <em>G4Polycone</em> translation</li>
+<li>avoids overlap with <strong>sStrutBallhead</strong></li>
 </ul>
 </li>
-<li>new Opticks pkg : GeoChain<ul>
-<li>single executables handle full chain of geometry conversions</li>
+<li>ray trace renders and render times following geometry fixes<ul>
+<li>timings : no standout bottlenecks remain</li>
+<li>&gt; 100x faster than times from July</li>
+</ul>
+</li>
+<li><em>G4Sphere</em> phiCut thetaCut : LHCb RICH reports Opticks translation bug<ul>
+<li>need fix for their mirror geometry</li>
+<li>fixing with unbounded primitives : CSG_PHICUT CSG_THETACUT</li>
 </ul>
 </li>
 </ul>
@@ -3240,18 +3262,258 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 
         <!--  s5talk  -->
         <br/>
-    
+    <!-- comment
+
+:small:`JUNO-Opticks Option changes`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 </div>
-<div class="slide" id="todo">
-<h1>TODO</h1>
-<ul class="simple">
-<li>check the hatboxes</li>
-<li>update the scans and tables run the pub and check collect the pages</li>
-<li>compare with old timings</li>
-<li>fix base_steel PolyconeWithMultipleRmin</li>
-<li>3D renders corresponding to the 2D ones would be good</li>
-<li>maybe cxr outputs should be housed in geocache too</li>
+<div class="slide" id="nnvt-pmt-solid-profligate-g4itersectionsolid-z-cut">
+<h1><span class="small">NNVT PMT Solid : PROFLIGATE G4ItersectionSolid Z-Cut</span></h1>
+<p class="small"><strong>Using G4IntersectionSolid to apply Z-cut to PMT</strong></p>
+<ul class="small simple">
+<li>NNVT PMT also used the <span class="r">profligate anti-pattern</span> : <strong>not so terrible as Hama as simpler</strong></li>
 </ul>
+ <pre class="mypretiny">
+
+344 void NNVTMCPPMTManager::helper_make_solid_profligate_tail_cut()
+345 {
+346     std::cout << "NNVTMCPPMTManager::helper_make_solid_profligate_tail_cut" << std::endl ;
+347     // inner2
+348     G4double helper_sep_tube_r = m_pmt_r;
+349     const double tail_height = m_pmt_h - m_z_equator;
+350     const double tail_half_height = tail_height / 2;
+351     const G4ThreeVector cut_tail_displacement(0., 0., -tail_half_height);
+352     G4VSolid* cut_tail_solid = new G4Tubs("CutTail_NNVTMCPPMT_Solid",
+353                                           0.,
+354                                           helper_sep_tube_r+1E-9*mm,
+355                                           tail_half_height,
+356                                           0., 360.*degree);
+357     inner2_solid = new G4IntersectionSolid( GetName() + "_inner2_tail_solid",
+358                                             inner2_solid,
+359                                             cut_tail_solid,
+360                                             NULL,
+361                                             cut_tail_displacement);
+362
+
+ </pre><p class="small"><strong>SOLUTION</strong> <span class="r">ACTUALLY CUT THE CSG TREE</span> using <a class="reference external" href="https://github.com/simoncblyth/j/blob/main/PMTSim/ZSolid.hh">https://github.com/simoncblyth/j/blob/main/PMTSim/ZSolid.hh</a></p>
+<pre class="literal-block">
+G4VSolid* ZSolid::ApplyZCutTree( const G4VSolid* original, double zcut)
+</pre>
+</div>
+<div class="slide" id="zsolid-applyzcuttree-to-nnvt-pmt-solid-makes-simpler">
+<h1><span class="small">ZSolid::ApplyZCutTree to NNVT PMT Solid : Makes Simpler</span></h1>
+<pre class="mypre11">
+
+nnvt_body_solid [-1] nameprefix _body_solid  NODE:5 PRIM:3 UNDEFINED:5 EXCLUDE:0 INCLUDE:0 MIXED:0 Order:IN
+
+                        Uni
+                        U
+                        3
+
+
+        Uni                     Tub
+        U                       U
+        1                       4
+
+
+Ell             Pol
+U               U
+0               2
+
+
+0               -193            -299    zdelta
+
+184             -174            -213    az1
+-184            -213            -386    az0
+_head   _1_2    _neck           _tail
+ zcut -200
+solid_zcut [-1] nameprefix _body_solid_  NODE:3 PRIM:2 UNDEFINED:3 EXCLUDE:0 INCLUDE:0 MIXED:0 Order:IN
+
+        Uni
+        U
+        1
+
+
+Ell             Pol
+U               U
+0               2
+
+
+0               -193    zdelta
+
+184             -174    az1
+-184            -200    az0
+head    1_2     neck
+
+
+</pre><ul class="small simple">
+<li><span class="b">non-critical (unlike Hama) as CSG modelling already quite simple after eliminate G4Torus neck</span></li>
+</ul>
+</div>
+<div class="slide" id="nnvt-maker-zcut-500-0">
+<h1><span class="r">nnvt_maker_zcut-500.0</span></h1>
+</div>
+<div class="slide" id="nnvt-maker-zcut-400-0">
+<h1><span class="r">nnvt_maker_zcut-400.0</span></h1>
+</div>
+<div class="slide" id="nnvt-maker-zcut-350-0">
+<h1><span class="r">nnvt_maker_zcut-350.0</span></h1>
+</div>
+<div class="slide" id="nnvt-maker-zcut-300-0">
+<h1><span class="r">nnvt_maker_zcut-300.0</span></h1>
+</div>
+<div class="slide" id="nnvt-maker-zcut-200-0">
+<h1><span class="r">nnvt_maker_zcut-200.0</span></h1>
+</div>
+<div class="slide" id="nnvt-maker-zcut-183-25">
+<h1><span class="r">nnvt_maker_zcut-183.25</span></h1>
+</div>
+<div class="slide" id="nnvt-body-phys">
+<h1><span class="r">nnvt_body_phys</span></h1>
+</div>
+<div class="slide" id="nnvt-body-phys-nurs">
+<h1><span class="r">nnvt_body_phys_nurs</span></h1>
+</div>
+<div class="slide" id="nnvt-body-phys-nurs-pdyn">
+<h1><span class="r">nnvt_body_phys_nurs_pdyn</span></h1>
+</div>
+<div class="slide" id="nnvt-body-phys-nurs-pdyn-prtc-obto">
+<h1><span class="r">nnvt_body_phys_nurs_pdyn_prtc_obto</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">NNVT : obsolete cylinder-torus neck</span></p>
+<ul class="last simple">
+<li>also has spurious G4 intersects</li>
+</ul>
+</div>
+</div>
+<div class="slide" id="nnvt-body-phys-pdyn">
+<h1><span class="r">nnvt_body_phys_pdyn</span></h1>
+</div>
+<div class="slide" id="opticks-offline-cmake-integration">
+<h1><span class="small">Opticks-Offline CMake Integration</span></h1>
+<p>opticks/cmake/Modules/FindOpticks.cmake used from offline/cmake/JUNODependencies.cmake:</p>
+<pre class="literal-block">
+if(DEFINED ENV{OPTICKS_PREFIX})
+   set(CMAKE_MODULE_PATH
+      ${CMAKE_MODULE_PATH} &quot;$ENV{JUNOTOP}/opticks/cmake/Modules&quot;)
+   find_package(Opticks QUIET MODULE)
+   message(STATUS
+      &quot;${CMAKE_CURRENT_LIST_FILE} : Opticks_FOUND:${Opticks_FOUND}&quot; )
+endif()
+</pre>
+<p>Then subsequently packages needing Opticks headers add dependency line:</p>
+<pre class="literal-block">
+$&lt;$&lt;BOOL:${Opticks_FOUND}&gt;:${Opticks_TARGET}&gt;
+</pre>
+<p><span class="r">Much easier than integration with CMT Offline : as can use CMake targets</span></p>
+<ul class="simple">
+<li>can eliminate generation of .pc (pkg-config) files by Opticks installation</li>
+<li>main difficulty was getting to work without some extras on CMake command line</li>
+</ul>
+</div>
+<div class="slide" id="polyconewithmultiplermin-x4mesh">
+<h1>PolyconeWithMultipleRmin_X4Mesh</h1>
+<p style="margin-bottom:11cm;" /><p class="normal"><strong>base_steel</strong> : <em>G4Polycone</em> with two <em>R_inner</em></p>
+<ul class="normal simple">
+<li><em>X4Solid::convertPolycone</em> ignored <strong>inner</strong> with &gt; 1 inner radius</li>
+<li><span class="r">now fixed by CSG subtraction of CSG union inner</span></li>
+<li>required coincidence avoidance tricks</li>
+</ul>
+</div>
+<div class="slide" id="polyconewithmultiplermin-xxs-isect">
+<h1>PolyconeWithMultipleRmin_xxs_isect</h1>
+<p style="margin-bottom:12cm;" /><p class="normal"><strong>Geant4 Intersect Positions</strong></p>
+<p class="normal"><tt class="docutils literal">GEOM=PolyconeWithMultipleRmin ~/opticks/extg4/xxs.sh</tt></p>
+</div>
+<div class="slide" id="dbec-cxr-solid-r7-copy">
+<h1><tt class="docutils literal">3dbec_cxr_solid_r7&#64; copy</tt></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Polycone Inner Needed</span></p>
+<p class="small last">Prevents overlap with  <strong>sStrutBallhead</strong></p>
+</div>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r7&#64; ./cxr_solid.sh&nbsp;&nbsp; ## 1:base_steel</tt></p>
+</div>
+<div class="slide" id="geometry-changes-since-last-performance-check">
+<h1>Geometry Changes Since Last Performance Check</h1>
+<ul class="normal simple">
+<li>NNVT and Hama PMTs : avoid needless <em>G4IntersectionSolid</em><ul>
+<li><em>body_solid</em> : actually cutting CSG trees with <em>ZSolid::ApplyZCutTree</em></li>
+<li><em>inner1/2_solid</em> : simply by mode argument and switch statement</li>
+</ul>
+</li>
+<li>Fastener<ul>
+<li><em>base_steel</em> : corrected translation of G4Polycone with multiple R_inner</li>
+<li><em>uni_acrylic3</em> -&gt; <em>uni_acrylic1</em> : avoid subtraction of cavities for daughter volumes</li>
+<li>subtraction of huge acrylic sphere led to <span class="r">huge Fastener bounding box</span><ul>
+<li><span class="b">fixed by positiv-izing CSG tree and not including bbox of complemented</span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="uni-acrylic3-0-figs-positions-mpplt-pid-png">
+<h1>uni_acrylic3_0_figs_positions_mpplt_pid.png</h1>
+<p><tt class="docutils literal">cxs.sh OptiX 7, 2D intersect scatter plots</tt></p>
+<p><tt class="docutils literal">spurious intersects evident</tt></p>
+<p><tt class="docutils literal">* interfering <span class="pre">subtraction-of-subtraction</span> issue</tt></p>
+</div>
+<div class="slide" id="uni-acrylic1-0-figs-positions-mpplt-pid-png">
+<h1>uni_acrylic1_0_figs_positions_mpplt_pid.png</h1>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">--additionacrylic-simplify-csg</span></tt></dt>
+<dd><tt class="docutils literal">do not subtract cavities for daughter volumes</tt></dd>
+</dl>
+</div>
+<div class="slide" id="hama-1-figs-positions-mpnky-pid-png">
+<h1>Hama_1_figs_positions_mpnky_pid.png</h1>
+<p><tt class="docutils literal">mask tail cutting across PMT bulb ?</tt></p>
+</div>
+<div class="slide" id="hama-1-figs-positions-mpplt-pid-png">
+<h1>Hama_1_figs_positions_mpplt_pid.png</h1>
+</div>
+<div class="slide" id="hama-2-figs-positions-mpnky-pid-png">
+<h1>Hama_2_figs_positions_mpnky_pid.png</h1>
+</div>
+<div class="slide" id="hama-2-figs-positions-mpplt-pid-png">
+<h1>Hama_2_figs_positions_mpplt_pid.png</h1>
+</div>
+<div class="slide" id="hama-4-figs-positions-mpnky-pid-png">
+<h1>Hama_4_figs_positions_mpnky_pid.png</h1>
+</div>
+<div class="slide" id="hama-4-figs-positions-mpplt-pid-png">
+<h1>Hama_4_figs_positions_mpplt_pid.png</h1>
+</div>
+<div class="slide" id="hama-16-figs-positions-mpnky-pid-png">
+<h1>Hama_16_figs_positions_mpnky_pid.png</h1>
+<p class="small"><tt class="docutils literal">Improve <span class="pre">cross-section</span> view quality ?</tt></p>
+<p class="small"><tt class="docutils literal">* needs development :</tt></p>
+<p class="small"><tt class="docutils literal">* target gensteps according to 2D histo of intersects</tt></p>
+<p class="small"><tt class="docutils literal">* progressive refinement</tt></p>
+</div>
+<div class="slide" id="hama-16-figs-positions-mpplt-pid-png">
+<h1>Hama_16_figs_positions_mpplt_pid.png</h1>
+</div>
+<div class="slide" id="csgoptix-nvidia-optix-7-renderers">
+<h1>CSGOptiX (NVIDIA OptiX 7) renderers</h1>
+<p>Not built by standard Opticks build, need:</p>
+<pre class="literal-block">
+cd ~/opticks/CSGOptiX/
+b7                       ## short for opticks-build7
+</pre>
+<p>Using <em>CSGOptiX/tests/CSGOptiXSimulateTest.cc</em>:</p>
+<pre class="literal-block">
+cxs.sh        ## creates 2D cross section .png scatter plots
+</pre>
+<p>Using <em>CSGOptiX/tests/CSGOptiXRenderTest.cc</em>:</p>
+<pre class="literal-block">
+cxr_view.sh
+cxr_solid.sh
+cxr_overview.sh
+cxr.sh         ## creates 3D render .jpg of geometry
+</pre>
+<p><span class="b">At bottom left of all cxr .jpg is launch time(seconds) for 2M pixels</span></p>
 </div>
 <div class="slide" id="sworld-cam-0-t0-cxr-view-eye-0-0-6-0-4-zoom-1-tmin-0-4-sworld-jpg">
 <h1><span class="i">sWorld_cam_0_t0_cxr_view___eye_0,0.6,0.4__zoom_1__tmin_0.4_sWorld.jpg</span></h1>
@@ -3259,6 +3521,20 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 </div>
 <div class="slide" id="nnvt-0-1000-cam-0-t0-cxr-view-eye-2-2-2-1-look-0-0-2-1-zoom-1-tmin-0-4-nnvt-0-1000-jpg">
 <h1><span class="i">NNVT:0:1000_cam_0_t0_cxr_view___eye_-2,-2,-2,1__look_0,0,2,1__zoom_1__tmin_0.4_NNVT:0:1000.jpg</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">MOI Mname:mOrdinal:InstanceIndex</span></p>
+<p class="small"><tt class="docutils literal">MOI=NNVT:0:1000</tt></p>
+<ul class="small simple">
+<li>selects first <em>Mname</em> starting &quot;NNVT&quot;</li>
+<li><em>mOrdinal</em> &quot;0&quot; selects non-instanced repeat</li>
+<li><em>InstanceIndex</em> &quot;1000&quot; selects instanced repeat</li>
+</ul>
+<p class="small">MOI defines a center-extent &quot;CE&quot; frame</p>
+<ul class="small last simple">
+<li>EYE,LOOK,UP viewpoint inputs use CE frame</li>
+<li>TMIN in units of extent cuts into geometry</li>
+</ul>
+</div>
 <p style="margin-bottom:16cm;" /><p><tt class="docutils literal">MOI=NNVT:0:1000 <span class="pre">EYE=-2,-2,-2</span> LOOK=0,0,2,1 TMIN=0.4 ./cxr_view.sh</tt></p>
 </div>
 <div class="slide" id="nnvt-0-1000-cam-0-t0-cxr-view-eye-2-2-2-1-zoom-1-tmin-0-4-nnvt-0-1000-jpg">
@@ -3279,6 +3555,13 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 </div>
 <div class="slide" id="swatertube-cam-0-t0-cxr-view-eye-0-1-0-5-look-0-0-0-5-zoom-1-tmin-1-swatertube-jpg">
 <h1><span class="i">sWaterTube_cam_0_t0_cxr_view___eye_0,1,-0.5__look_0,0,-0.5__zoom_1__tmin_1_sWaterTube.jpg</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Chimney Coincidence Speckle</span></p>
+<p class="small">Looks like fully coincident cylinders</p>
+<ul class="small last simple">
+<li>note ring pattern in the speckle</li>
+</ul>
+</div>
 <p style="margin-bottom:16cm;" /><p><tt class="docutils literal">MOI=sWaterTube <span class="pre">EYE=0,1,-0.5</span> <span class="pre">LOOK=0,0,-0.5</span> TMIN=1 ./cxr_view.sh</tt></p>
 </div>
 <div class="slide" id="swatertube-cam-0-t0-cxr-view-eye-0-1-1-1-look-0-0-1-zoom-1-tmin-0-4-swatertube-jpg">
@@ -3289,78 +3572,226 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <h1><span class="i">sWaterTube_cam_0_t0_cxr_view___eye_0,1,-1,1__zoom_1__tmin_0.4_sWaterTube.jpg</span></h1>
 <p style="margin-bottom:16cm;" /><p><tt class="docutils literal">MOI=sWaterTube <span class="pre">EYE=0,1,-1</span> LOOK=0,0,0 TMIN=0.4 ./cxr_view.sh</tt></p>
 </div>
+<div class="slide" id="current-juno-geometry-auto-factorized-by-progeny-digest">
+<h1><span class="small">Current JUNO Geometry : Auto-Factorized by &quot;progeny digest&quot;</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Factorize ~300,000 vol -&gt; 10 comp</span></p>
+<ul class="small simple">
+<li><strong>ridx</strong>: repeat index</li>
+<li><strong>plc</strong>: number of placements of the instance</li>
+<li><strong>prim</strong>: number of Prim/volumes in the instance</li>
+<li><strong>component</strong>: numPrim:outerPrimName</li>
+</ul>
+<p class="small last"><span class="r">&quot;progeny digest&quot;</span> characterizes subtree of every volume-node</p>
+</div>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="4%" />
+<col width="7%" />
+<col width="6%" />
+<col width="51%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">ridx</th>
+<th class="head">plc</th>
+<th class="head">vol</th>
+<th class="head">component name</th>
+<th class="head">note (3dbec4dc)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>0</td>
+<td>1</td>
+<td>3084</td>
+<td>3084:sWorld</td>
+<td>non-repeated remainder</td>
+</tr>
+<tr><td>1</td>
+<td>25600</td>
+<td>5</td>
+<td>5:PMT_3inch_pmt_solid</td>
+<td rowspan="4">4 types of PMT</td>
+</tr>
+<tr><td>2</td>
+<td>12612</td>
+<td>5</td>
+<td>5:NNVTMCPPMTsMask</td>
+</tr>
+<tr><td>3</td>
+<td>5000</td>
+<td>5</td>
+<td>5:HamamatsuR12860sMask</td>
+</tr>
+<tr><td>4</td>
+<td>2400</td>
+<td>4</td>
+<td>4:mask_PMT_20inch_vetosMask</td>
+</tr>
+<tr><td>5</td>
+<td>590</td>
+<td>1</td>
+<td>1:sStrutBallhead</td>
+<td rowspan="4">4 parts of Fastener but
+not instanced together
+as are sibling volumes
+that happen to line up
+rather than parent-child</td>
+</tr>
+<tr><td>6</td>
+<td>590</td>
+<td>1</td>
+<td>1:uni1</td>
+</tr>
+<tr><td>7</td>
+<td>590</td>
+<td>1</td>
+<td>1:base_steel</td>
+</tr>
+<tr><td>8</td>
+<td>590</td>
+<td>1</td>
+<td>1:uni_acrylic1</td>
+</tr>
+<tr><td>9</td>
+<td>504</td>
+<td>130</td>
+<td>130:sPanel</td>
+<td>repeated parts of TT</td>
+</tr>
+</tbody>
+</table>
+<p class="small"><tt class="docutils literal">~/opticks/ana/ggeo.sh <span class="pre">--mmtrim</span> <span class="pre">--mmsmry</span></tt></p>
+<ul class="small simple">
+<li><strong>ridx:0</strong> &quot;remainder&quot; Prim<ul>
+<li>Prim that did not pass instancing criteria, on number of repeats + complexity</li>
+<li>COULD: tune criteria to instance more, reducing remainder Prim (Expect: 3084-&gt;~ 84)<ul>
+<li><span class="r">BUT LOW PRIORITY as seems not performance bottleneck</span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>ridx:1,2,3,4</strong><ul>
+<li>four types of PMT, with 4/5 Prim</li>
+</ul>
+</li>
+<li><strong>ridx:5,6,7,8</strong><ul>
+<li>same 590x assembly <span class="redbold">but not grouped together</span> : as siblings (not parent-child like PMTs)</li>
+<li>COULD: implement instancing of siblings could combining 4 -&gt; 1<ul>
+<li><span class="r">BUT LOW PRIORITY as again seems not to be bottleneck</span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="cxr-solid-sh-renders">
+<h1>cxr_solid.sh renders</h1>
+<p class="normal"><strong>cxr_solid.sh</strong> renders of single &quot;Solids&quot; in Opticks sense</p>
+<p class="normal">Actually composite corresponding to &quot;factors&quot; of the geometry</p>
+<ul class="normal simple">
+<li>ridx == 0 : global non-instanced remainder</li>
+<li>ridx &gt; 0 : repeated piece of geometry (not G4VSolid)</li>
+</ul>
+<p class="normal">Renders of the 10 auto-factorized JUNO solids follow.</p>
+</div>
 <div class="slide" id="dbec-cxr-solid-r0">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r0&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r0&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r0&#64; ./cxr_solid.sh&nbsp;&nbsp;&nbsp; ## 3084:sWorld</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r1">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r1&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r1&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r1&#64; ./cxr_solid.sh&nbsp;&nbsp; ## 5:PMT_3inch_pmt_solid</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r2">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r2&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r2&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r2&#64; ./cxr_solid.sh&nbsp; ## 5:NNVTMCPPMTsMask</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r3">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r3&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r3&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r3&#64; ./cxr_solid.sh&nbsp;&nbsp; ## 5:HamamatsuR12860sMask</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r4">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r4&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r4&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r4&#64; ./cxr_solid.sh&nbsp;&nbsp; ## 4:mask_PMT_20inch_vetosMask</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r5">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r5&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r5&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r5&#64; ./cxr_solid.sh&nbsp;&nbsp; ## 1:sStrutBallhead</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r6">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r6&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r6&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r6&#64; ./cxr_solid.sh&nbsp;&nbsp; ## 1:uni1</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r7">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r7&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r7&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r7&#64; ./cxr_solid.sh&nbsp;&nbsp; ## 1:base_steel</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r8">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r8&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r8&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r8&#64; ./cxr_solid.sh&nbsp;&nbsp;&nbsp; ## 1:uni_acrylic1</tt></p>
 </div>
 <div class="slide" id="dbec-cxr-solid-r9">
 <h1><tt class="docutils literal">3dbec_cxr_solid_r9&#64;</tt></h1>
-<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r9&#64; ./cxr_solid.sh</tt></p>
+<p style="margin-bottom:15cm;" /><p><tt class="docutils literal">SLA=r9&#64; ./cxr_solid.sh&nbsp;&nbsp;&nbsp; ## 130:sPanel</tt></p>
 </div>
-<div class="slide" id="cxr-view-cam-0-0-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_0,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-1-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_1,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-2-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_2,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-3-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_3,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-4-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_4,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-5-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_5,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-6-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_6,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-7-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_7,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-8-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_8,_cxr_view_sWaterTube.jpg</h1>
-</div>
-<div class="slide" id="cxr-view-cam-0-9-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_9,_cxr_view_sWaterTube.jpg</h1>
+<div class="slide" id="cxr-view-sh-renders-varying-included-geometry">
+<h1>cxr_view.sh renders varying included geometry</h1>
+<p class="normal"><strong>cxr_view.sh</strong> from same position, changing included geometry</p>
+<ul class="normal simple">
+<li>EMM : &quot;-e&quot; option, meaning enabled-merged-mesh</li>
+</ul>
+<p class="normal"><strong>cxr_views.sh</strong>:</p>
+<pre class="normal literal-block">
+emms=$(seq 0 9)
+for emm in $emms ; do
+    EMM=$emm, ./cxr_view.sh
+done
+</pre>
 </div>
 <div class="slide" id="cxr-view-cam-0-t0-cxr-view-swatertube-jpg">
-<h1>cxr_view_cam_0_t0_cxr_view_sWaterTube.jpg</h1>
+<h1><span class="i">cxr_view_cam_0_t0_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">t0 : <span class="pre">tilde-zero</span> : ~0 : meaning ALL</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-0-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_0,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">3084:sWorld</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-1-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_1,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">5:PMT_3inch_pmt_solid</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-2-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_2,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">5:NNVTMCPPMTsMask</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-3-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_3,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">5:HamamatsuR12860sMask</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-4-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_4,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">4:mask_PMT_20inch_vetosMask</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-5-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_5,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">1:sStrutBallhead</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-6-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_6,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">1:uni1</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-7-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_7,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">1:base_steel</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-8-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_8,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">1:uni_acrylic1</tt></p>
+</div>
+<div class="slide" id="cxr-view-cam-0-9-cxr-view-swatertube-jpg">
+<h1><span class="i">cxr_view_cam_0_9,_cxr_view_sWaterTube.jpg</span></h1>
+<p><tt class="docutils literal">130:sPanel</tt></p>
 </div>
 <div class="slide" id="swatertube-timings-whilst-varying-geometry">
 <h1>sWaterTube timings whilst varying geometry</h1>
@@ -3370,7 +3801,8 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <col width="8%" />
 <col width="14%" />
 <col width="14%" />
-<col width="61%" />
+<col width="37%" />
+<col width="25%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">idx</th>
@@ -3378,6 +3810,7 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <th class="head">time(s)</th>
 <th class="head">relative</th>
 <th class="head">enabled geometry description 3dbec4dc</th>
+<th class="head">&nbsp;</th>
 </tr>
 </thead>
 <tbody valign="top">
@@ -3386,169 +3819,255 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <td>0.0004</td>
 <td>0.0004</td>
 <td>ONLY: 1:sStrutBallhead</td>
+<td>&nbsp;</td>
 </tr>
 <tr><td>1</td>
 <td>7,</td>
 <td>0.0004</td>
 <td>0.0004</td>
 <td>ONLY: 1:base_steel</td>
+<td>&nbsp;</td>
 </tr>
 <tr><td>2</td>
 <td>8,</td>
 <td>0.0005</td>
 <td>0.0005</td>
 <td>ONLY: 1:uni_acrylic1</td>
+<td>&nbsp;</td>
 </tr>
 <tr><td>3</td>
 <td>6,</td>
 <td>0.0005</td>
 <td>0.0005</td>
 <td>ONLY: 1:uni1</td>
+<td>&nbsp;</td>
 </tr>
 <tr><td>4</td>
 <td>1,</td>
+<td><span class="b">0.0006</span></td>
 <td>0.0006</td>
-<td>0.0006</td>
-<td>ONLY: 5:PMT_3inch_pmt_solid</td>
+<td><span class="b">ONLY: 5:PMT_3inch_pmt_solid</span></td>
+<td><span class="b">NOTABLY FAST cf 20inch</span></td>
 </tr>
 <tr><td>5</td>
 <td>9,</td>
 <td>0.0006</td>
 <td>0.0006</td>
 <td>ONLY: 130:sPanel</td>
+<td>&nbsp;</td>
 </tr>
 <tr><td>6</td>
 <td>4,</td>
 <td>0.0011</td>
 <td>0.0011</td>
 <td>ONLY: 4:mask_PMT_20inch_vetosMask</td>
+<td>&nbsp;</td>
 </tr>
 <tr><td>7</td>
 <td>3,</td>
+<td><span class="r">0.0022</span></td>
 <td>0.0022</td>
-<td>0.0022</td>
-<td>ONLY: 5:HamamatsuR12860sMask</td>
+<td><span class="r">ONLY: 5:HamamatsuR12860sMask</span></td>
+<td rowspan="3"><span class="r">NOTABLY SLOW cf 3inch</span></td>
 </tr>
 <tr><td>8</td>
 <td>2,</td>
+<td><span class="r">0.0031</span></td>
 <td>0.0031</td>
-<td>0.0031</td>
-<td>ONLY: 5:NNVTMCPPMTsMask</td>
+<td><span class="r">ONLY: 5:NNVTMCPPMTsMask</span></td>
 </tr>
 <tr><td>9</td>
 <td>0,</td>
+<td><span class="r">0.0035</span></td>
 <td>0.0035</td>
-<td>0.0035</td>
-<td>ONLY: 3084:sWorld</td>
+<td><span class="r">ONLY: 3084:sWorld</span></td>
 </tr>
 <tr><td>10</td>
 <td>t0</td>
 <td>0.0067</td>
 <td>0.0067</td>
 <td>ALL</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<ul class="normal simple">
+<li>times for rendering 2M pixels in seconds</li>
+<li>range 0.0004 - 0.0067 s</li>
+<li>Times for 3inch are factor 4-6x faster than 20inch, even though more of them.  <span class="r">WHY ?</span><ul>
+<li><span class="r">Perhaps overlapping of Mask and 20inch PMT causing some slowdown</span></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="cxr-overview-sh-renders">
+<h1>cxr_overview.sh renders</h1>
+<p class="normal">Using cxr_scan.sh to repeateadly invoke cxr_overview.sh with different <strong>-e</strong> options</p>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="4%" />
+<col width="7%" />
+<col width="6%" />
+<col width="51%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">ridx</th>
+<th class="head">plc</th>
+<th class="head">vol</th>
+<th class="head">component name</th>
+<th class="head">note (3dbec4dc)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>0</td>
+<td>1</td>
+<td>3084</td>
+<td>3084:sWorld</td>
+<td>non-repeated remainder</td>
+</tr>
+<tr><td>1</td>
+<td>25600</td>
+<td>5</td>
+<td>5:PMT_3inch_pmt_solid</td>
+<td rowspan="4">4 types of PMT</td>
+</tr>
+<tr><td>2</td>
+<td>12612</td>
+<td>5</td>
+<td>5:NNVTMCPPMTsMask</td>
+</tr>
+<tr><td>3</td>
+<td>5000</td>
+<td>5</td>
+<td>5:HamamatsuR12860sMask</td>
+</tr>
+<tr><td>4</td>
+<td>2400</td>
+<td>4</td>
+<td>4:mask_PMT_20inch_vetosMask</td>
+</tr>
+<tr><td>5</td>
+<td>590</td>
+<td>1</td>
+<td>1:sStrutBallhead</td>
+<td rowspan="4">4 parts of Fastener but
+not instanced together
+as are sibling volumes
+that happen to line up
+rather than parent-child</td>
+</tr>
+<tr><td>6</td>
+<td>590</td>
+<td>1</td>
+<td>1:uni1</td>
+</tr>
+<tr><td>7</td>
+<td>590</td>
+<td>1</td>
+<td>1:base_steel</td>
+</tr>
+<tr><td>8</td>
+<td>590</td>
+<td>1</td>
+<td>1:uni_acrylic1</td>
+</tr>
+<tr><td>9</td>
+<td>504</td>
+<td>130</td>
+<td>130:sPanel</td>
+<td>repeated parts of TT</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="slide" id="uni-acrylic3-0-figs-positions-mpplt-pid-png">
-<h1>uni_acrylic3_0_figs_positions_mpplt_pid.png</h1>
-</div>
-<div class="slide" id="uni-acrylic1-0-figs-positions-mpplt-pid-png">
-<h1>uni_acrylic1_0_figs_positions_mpplt_pid.png</h1>
-<dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">--additionacrylic-simplify-csg</span></tt></dt>
-<dd><tt class="docutils literal">do not subtract cavities for daughter volumes</tt></dd>
-</dl>
-</div>
-<div class="slide" id="hama-1-figs-positions-mpnky-pid-png">
-<h1>Hama_1_figs_positions_mpnky_pid.png</h1>
-</div>
-<div class="slide" id="hama-1-figs-positions-mpplt-pid-png">
-<h1>Hama_1_figs_positions_mpplt_pid.png</h1>
-</div>
-<div class="slide" id="hama-2-figs-positions-mpnky-pid-png">
-<h1>Hama_2_figs_positions_mpnky_pid.png</h1>
-</div>
-<div class="slide" id="hama-2-figs-positions-mpplt-pid-png">
-<h1>Hama_2_figs_positions_mpplt_pid.png</h1>
-</div>
-<div class="slide" id="hama-4-figs-positions-mpnky-pid-png">
-<h1>Hama_4_figs_positions_mpnky_pid.png</h1>
-</div>
-<div class="slide" id="hama-4-figs-positions-mpplt-pid-png">
-<h1>Hama_4_figs_positions_mpplt_pid.png</h1>
-</div>
-<div class="slide" id="hama-16-figs-positions-mpnky-pid-png">
-<h1>Hama_16_figs_positions_mpnky_pid.png</h1>
-</div>
-<div class="slide" id="hama-16-figs-positions-mpplt-pid-png">
-<h1>Hama_16_figs_positions_mpplt_pid.png</h1>
-</div>
 <div class="slide" id="cxr-overview-emm-t0-moi-1-all-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t0_moi_-1_ALL.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t0_moi_-1_ALL.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t0 : ALL</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-1-2-3-4-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_1,2,3,4_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_1,2,3,4_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 1,2,3,4 : ONLY PMTs</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-0-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_0,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_0,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 0, : ONLY 0 : 3084:sWorld</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-1-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_1,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_1,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 1, : ONLY 1 : 5:PMT_3inch_pmt_solid</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-2-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_2,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_2,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 2, : ONLY 2 : 5:NNVTMCPPMTsMask</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-3-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_3,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_3,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 3, : ONLY 3 : 5:HamamatsuR12860sMask</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-4-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_4,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_4,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 4, : ONLY 4 : 4:mask_PMT_20inch_vetosMask</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-5-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_5,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_5,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 5, : ONLY 5 : 1:sStrutBallhead</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-6-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_6,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_6,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 6, : ONLY 6 : 1:uni1</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-7-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_7,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_7,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 7, : ONLY 7 : 1:base_steel</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-8-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_8,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_8,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 8, : ONLY 8 : 1:uni_acrylic1</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-9-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_9,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_9,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> 9, : ONLY 9 : 130:sPanel</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t0-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t0,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t0,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t0, : NOT 0 : 3084:sWorld</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t1-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t1,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t1,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t1, : NOT 1 : 5:PMT_3inch_pmt_solid</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t2-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t2,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t2,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t2, : NOT 2 : 5:NNVTMCPPMTsMask</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t3-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t3,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t3,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t3, : NOT 3 : 5:HamamatsuR12860sMask</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t4-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t4,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t4,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t4, : NOT 4 : 4:mask_PMT_20inch_vetosMask</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t5-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t5,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t5,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t5, : NOT 5 : 1:sStrutBallhead</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t6-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t6,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t6,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t6, : NOT 6 : 1:uni1</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t7-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t7,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t7,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t7, : NOT 7 : 1:base_steel</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t8-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t8,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t8,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t8, : NOT 8 : 1:uni_acrylic1</tt></p>
 </div>
 <div class="slide" id="cxr-overview-emm-t9-moi-1-jpg">
-<h1><tt class="docutils literal"><span class="pre">cxr_overview_emm_t9,_moi_-1.jpg</span></tt></h1>
+<h1><span class="i">cxr_overview_emm_t9,_moi_-1.jpg</span></h1>
+<p><tt class="docutils literal"><span class="pre">-e</span> t9, : NOT 9 : 130:sPanel</tt></p>
 </div>
 <div class="slide" id="dec-juno-optix-7-ray-trace-times-2m-pix-titan-rtx">
 <h1><span class="small">[Dec] JUNO : OptiX 7 Ray Trace Times ~2M-pix : TITAN RTX</span></h1>
@@ -3932,490 +4451,6 @@ cx
 </div>
 <div class="slide" id="cxr-geochain-spherewithphisegment-difference-new">
 <h1><span class="r">cxr_geochain_SphereWithPhiSegment_difference_new</span></h1>
-</div>
-<div class="slide" id="wip-integrating-zsolid-with-j-pmtsim-and-then-offline-pmtsim">
-<h1><span class="small">WIP : Integrating ZSolid with j/PMTSim and then offline/PMTSim</span></h1>
-<ul class="small simple">
-<li>tidy up ZSolid and j/PMTSim</li>
-<li>integrate ZSolid into j/PMTSim in a manner appropriate for use from actual offline/PMTSim
-(much faster to test in j/PMTSim so keep development there until close to finalization)</li>
-</ul>
-<p class="small">DONE</p>
-<ul class="small simple">
-<li>returned Hamamatsu_R12860_PMTSolid to minimally changed state</li>
-<li>add NNVT PMT to j/PMTSim</li>
-<li>move to STANDALONE being used just for making the class usable in standalone fashion</li>
-<li>review diffs between PMT classes in j and offline</li>
-<li>added jdiff for getting diff commands</li>
-<li>remove the tubs minus torus by making polycone neck non-optional</li>
-<li>stagger the zcut for the layers of PMT volume (via &quot;thickness&quot; offset) to avoid ambiguous edge</li>
-<li>renamed IGeomStandalone.h to IGeomManager.h as the simple protocol base could be useful beyond just STANDALONE testing</li>
-<li>removed polycone neck control as now standard</li>
-<li>DECIDED : j/PMTSim class is just for testing, but should it be in offline anyhow ? Hmm uses NP, so NO for now.</li>
-<li>DECIDED : OK for Opticks API export stuff needed for om-compilation to be hidden behind STANDALONE within offline code</li>
-<li>DECIDED : useful functionality should not be hidden behind STANDALONE</li>
-<li>DECIDED : switch between old/new PMT geometry within the managers, as jgr HamamatsuR12860PMTManager shows that the name
-is hardcoded all over the place so switching between multiple managers would be difficult and duplicitous</li>
-</ul>
-<p class="small">TODO</p>
-<ul class="small simple">
-<li>check compilation of updated PMT geometry code + ZSolid etc  within offline/PMTSim environment</li>
-<li>check Opticks operation with the simplified PMT CSG</li>
-</ul>
-</div>
-<div class="slide" id="nnvt-maker-zcut-500-0">
-<h1><span class="r">nnvt_maker_zcut-500.0</span></h1>
-</div>
-<div class="slide" id="nnvt-maker-zcut-400-0">
-<h1><span class="r">nnvt_maker_zcut-400.0</span></h1>
-</div>
-<div class="slide" id="nnvt-maker-zcut-350-0">
-<h1><span class="r">nnvt_maker_zcut-350.0</span></h1>
-</div>
-<div class="slide" id="nnvt-maker-zcut-300-0">
-<h1><span class="r">nnvt_maker_zcut-300.0</span></h1>
-</div>
-<div class="slide" id="nnvt-maker-zcut-200-0">
-<h1><span class="r">nnvt_maker_zcut-200.0</span></h1>
-</div>
-<div class="slide" id="nnvt-maker-zcut-183-25">
-<h1><span class="r">nnvt_maker_zcut-183.25</span></h1>
-</div>
-<div class="slide" id="hama-body-phys">
-<h1><span class="r">hama_body_phys</span></h1>
-</div>
-<div class="slide" id="hama-body-phys-nurs">
-<h1><span class="r">hama_body_phys_nurs</span></h1>
-</div>
-<div class="slide" id="hama-body-phys-nurs-pdyn">
-<h1><span class="r">hama_body_phys_nurs_pdyn</span></h1>
-</div>
-<div class="slide" id="hama-body-phys-nurs-pdyn-prtc-obto">
-<h1><span class="r">hama_body_phys_nurs_pdyn_prtc_obto</span></h1>
-</div>
-<div class="slide" id="hama-body-phys-pdyn">
-<h1><span class="r">hama_body_phys_pdyn</span></h1>
-</div>
-<div class="slide" id="nnvt-body-phys">
-<h1><span class="r">nnvt_body_phys</span></h1>
-</div>
-<div class="slide" id="nnvt-body-phys-nurs">
-<h1><span class="r">nnvt_body_phys_nurs</span></h1>
-</div>
-<div class="slide" id="nnvt-body-phys-nurs-pdyn">
-<h1><span class="r">nnvt_body_phys_nurs_pdyn</span></h1>
-</div>
-<div class="slide" id="nnvt-body-phys-nurs-pdyn-prtc-obto">
-<h1><span class="r">nnvt_body_phys_nurs_pdyn_prtc_obto</span></h1>
-</div>
-<div class="slide" id="nnvt-body-phys-pdyn">
-<h1><span class="r">nnvt_body_phys_pdyn</span></h1>
-</div>
-<div class="slide" id="hamamatsu-pmt-solid-breaking-opticks-csg-tree-height-8-too-deep">
-<h1><span class="small">Hamamatsu PMT Solid breaking Opticks : CSG tree height 8 : TOO DEEP</span></h1>
-<pre class="mypre11">
-ZSolid::Draw [-1] nameprefix _body_solid_  NODE:19 PRIM:10 UNDEFINED:19 EXCLUDE:0 INCLUDE:0 MIXED:0 Order:IN                            Int
-                                                                                                                                        U
-                                                                                                                                        17
-
-                                                                                                                        Uni                     Pol
-                                                                                                                        U                       U
-                                                                                                                        15                      18
-
-                                                                                                        Uni                     Pol
-                                                                                                        U                       U
-                                                                                                        13                      16
-
-                                                                                        Uni                     Pol
-                                                                                        U                       U
-                                                                                        11                      14
-
-                                                                        Uni                     Ell
-                                                                        U                       U
-                                                                        9                       12
-
-                                        Uni                                     Pol
-                                        U                                       U
-                                        5                                       10
-
-                        Uni                             Sub
-                        U                               U
-                        3                               7
-
-        Uni                     Ell             Pol             Tor
-        U                       U               U               U
-        1                       4               6               8
-
-Ell             Pol
-U               U
-0               2
-
-0.0             -2.5            -5.0            -179.2          -210.0          -242.5          -275.0          -385.0          -420.0          3.4     zdelta
-
-190.0           0.0             -5.0            -148.4          -130.0          -210.0          -275.0          -350.0          -420.0          190.0   az1
-0.0             -5.0            -195.0          -210.0          -290.0          -275.0          -365.0          -420.0          -450.0          -183.2  az0
-
-I       1_2     II      1_3     III     1_4     IV_tub  IV      IV_tor  1_5     V       1_6     VI      1_8     VIII    1_9     IX      cut     intubs
-</pre><ul class="small simple">
-<li>ZSolid::Draw Uni:Union Ell:Ellipsoid Pol:Polycone Tor:Torus Int:Intersection Sub:Subtraction</li>
-<li>19 Nodes, 10 prims, depth 8 <span class="r">Use of G4IntersectionSolid to make z-cut prevents tree balancing</span></li>
-</ul>
-</div>
-<div class="slide" id="hamamatsu-pmt-solid-profligate-g4itersectionsolid-z-cut">
-<h1><span class="small">Hamamatsu PMT Solid : PROFLIGATE G4ItersectionSolid Z-Cut</span></h1>
-<p class="small"><strong>Using G4IntersectionSolid to apply Z-cut to PMT</strong></p>
-<ul class="small simple">
-<li>very convenient cut solid definition</li>
-<li>BUT <span class="r">EXCEEDINGLY EXPENSIVE (PROFLIGATE)</span> : and it breaks Opticks geometry</li>
-<li>every single intersect must traverse CSG tree checking intersects with multiple cutaway constituent primitives</li>
-<li><span class="b">-&gt; pay the price of convenient solid definition easily millions of times per event</span></li>
-</ul>
-<pre class="mypretiny">
-
-485     // Reduce the size when real surface is enabled.
-486     // Tao Lin, 09 Aug 2021
-487     if (m_useRealSurface ) {
-...
-546         const double body_height = m_pmt_h;
-547         const double body_half_height = body_height / 2;
-548         const G4ThreeVector cut_body_displacement(0., 0., m_z_equator-pmt_half_height);
-549         G4VSolid* cut_body_solid = new G4Tubs( GetName() + "_body_solid_intubs",
-550                                               0.,
-551                                               helper_sep_tube_r+1E-9*mm,
-552                                               body_half_height,
-553                                               0., 360.*degree);
-554         body_solid = new G4IntersectionSolid( GetName() + "_body_solid_cut",
-555                                                 body_solid,
-556                                                 cut_body_solid,
-557                                                 NULL,
-558                                                 cut_body_displacement);
-</pre><p class="small"><strong>SOLUTION</strong> <span class="r">ACTUALLY CUT THE CSG TREE</span> using <a class="reference external" href="https://github.com/simoncblyth/j/blob/main/PMTSim/ZSolid.hh">https://github.com/simoncblyth/j/blob/main/PMTSim/ZSolid.hh</a></p>
-<pre class="literal-block">
-G4VSolid* ZSolid::ApplyZCutTree( const G4VSolid* original, double zcut)
-</pre>
-</div>
-<div class="slide" id="j-pmtsim-standalone-provider-of-juno-pmt-solids-and-volumes">
-<h1><span class="small">j/PMTSim : Standalone Provider of JUNO PMT Solids and Volumes</span></h1>
-<ul class="small simple">
-<li><a class="reference external" href="https://github.com/simoncblyth/j/tree/main/PMTSim">https://github.com/simoncblyth/j/tree/main/PMTSim</a></li>
-<li>Extracted just the offline code needed to create materials, Hamamatsu PMT solids+volumes</li>
-</ul>
-<pre class="literal-block">
-G4VSolid* body_solid = PMTSim::GetSolid(&quot;body_solid&quot;);
-G4VSolid* inner1_solid = PMTSim::GetSolid(&quot;inner1_solid&quot;);
-
-G4VPhysicalVolume* body_phys = PMTSim::GetPV(&quot;body_phys&quot;);
-</pre>
-<ul class="small simple">
-<li>convenient standalone access to solids and volumes</li>
-<li>easy to change modelling and check results</li>
-</ul>
-<!-- comment
-
-.. raw:: html
-
-    <pre class="mypretiny">
-    </pre> -->
-</div>
-<div class="slide" id="x4intersectsolidtest-geant4-2d-cross-sections-of-single-g4vsolid">
-<h1><span class="small">X4IntersectSolidTest : Geant4 2D cross-sections of single G4VSolid</span></h1>
-<ul class="small simple">
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/xxs.sh">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/xxs.sh</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectSolidTest.cc">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectSolidTest.cc</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectSolidTest.py">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectSolidTest.py</a></li>
-</ul>
-<ol class="small arabic simple">
-<li>get G4VSolid from j/PMTSim with <span class="b">PMTSim::GetSolid</span></li>
-<li>SEvent::GenerateCenterExtentGenstepsPhotons creates grid of 2D planar &quot;rays&quot;</li>
-<li>X4Intersect::scan uses X4Intersect::Distance and collects intersect positions into NP array</li>
-<li>X4IntersectSolidTest.py presents the intersect positions with scatter plots</li>
-</ol>
-<pre class="literal-block">
-G4double X4Intersect::Distance(const G4VSolid* solid,
-          const G4ThreeVector&amp; pos, const G4ThreeVector&amp; dir)
-{
-    EInside in =  solid-&gt;Inside(pos) ; G4double t = kInfinity ;
-    switch( in ) {
-        case kInside:  t = solid-&gt;DistanceToOut( pos, dir ) ; break ;
-        case kSurface: t = solid-&gt;DistanceToOut( pos, dir ) ; break ;
-        case kOutside: t = solid-&gt;DistanceToIn(  pos, dir ) ; break ; }
-    return t ;
-}
-</pre>
-</div>
-<div class="slide" id="body-solid">
-<h1><span class="r">body_solid</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">default <span class="pre">G4Tubs-G4Torus</span> neck has spurious G4 intersects</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-solid-nurs">
-<h1><span class="r">body_solid_nurs</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">still spurious neck intersects after G4IntersectionSolid cut</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-solid-nurs-pcnk">
-<h1><span class="r">body_solid_nurs_pcnk</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">G4Polycone neck avoids the spurious intersects</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-solid-pcnk">
-<h1><span class="r">body_solid_pcnk</span></h1>
-</div>
-<div class="slide" id="j-pmtsim-zsolid-applyzcuttree">
-<h1><span class="small">j/PMTSim : ZSolid::ApplyZCutTree</span></h1>
-<pre class="literal-block">
-G4VSolid* ZSolid::ApplyZCutTree(const G4VSolid* orig, double zcut)
-</pre>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">ZSolid::SetRight</span></p>
-<dl class="small docutils">
-<dt><em>G4BooleanSolid</em> has no <em>SetRight</em> <em>SetLeft</em></dt>
-<dd>so <em>placement new</em> replace at same address</dd>
-</dl>
-<ul class="small simple">
-<li><span class="r">trick to re-use ctor with different args</span></li>
-</ul>
-<pre class="mypretiny">
-G4BooleanSolid* src = dynamic_cast&lt;G4BooleanSolid*&gt;(node) ;
-G4String name = src->GetName() ;
-G4VSolid* left = src->GetConstituentSolid(0) ;
-
-G4SolidStore::GetInstance()->DeRegister(src);
-
-src1 = new (src) G4UnionSolid(name, left, new_right)
-assert( src1 == src );
-</pre><p class="small last">Similar trick used to cut G4Polycone <em>ZSolid::ApplyZCut_G4Polycone</em></p>
-</div>
-<p class="small"><a class="reference external" href="https://github.com/simoncblyth/j/blob/main/PMTSim/ZSolid.hh">https://github.com/simoncblyth/j/blob/main/PMTSim/ZSolid.hh</a></p>
-<p class="small"><strong>Applying Z-cut to G4VSolid CSG Tree</strong></p>
-<ol class="small arabic simple">
-<li>classify tree nodes INCLUDE/EXCLUDE against Z-cut</li>
-<li>identify &quot;crux&quot; nodes dividing INCLUDE/EXCLUDE subtrees</li>
-<li>prune at crux nodes by tree surgery reconnections</li>
-<li>repeat until all tree nodes are INCLUDE</li>
-</ol>
-<p class="small"><strong>Pruning and Reconnection</strong></p>
-<ul class="small simple">
-<li>pruning at non-root &quot;crux&quot; node<ul>
-<li>identify surviving child</li>
-<li>change crux parent Left/Right to the survivor</li>
-</ul>
-</li>
-<li>pruning at root &quot;crux&quot; node<ul>
-<li>identify surviving child</li>
-<li>change root to the survivor</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="slide" id="zsolid-applyzcuttree-classify-tree-nodes-against-z-cut">
-<h1><span class="small">ZSolid::ApplyZCutTree classify tree nodes against Z-cut</span></h1>
-<pre class="mypre12">
-ZSolid::apply_cut before prune [ 0] nameprefix maker_body_solid_zcut-183.2246_  NODE:15 PRIM:8 UNDEFINED:0 EXCLUDE:4 INCLUDE:7 MIXED:4 Order:IN
-                                                                                                        Uni
-             I : include                                                                                IE
-                                                                                                        13
-             E : exclude
-                                                                                        Uni                     Pol
-             IE: mixed include/exclude                                                  IE                      E
-                                                                                        11                      14
-             X : "crux" node
-                                                                        Uni                     Pol
-             S : survivor node                                          IE                      E
-                                                                        9                       12
-
-                                                        Uni                     Ell
-                                                        IE                      E
-                                                        7                       10
-                                                        X
-                                        Uni                     Pol
-                                        I                       E
-                                        5                       8
-                                        S
-                        Uni                     Pol
-                        I                       I
-                        3                       6
-
-        Uni                     Ell
-        I                       I
-        1                       4
-
-Ell             Pol
-I               I
-0               2
-
-0.0             -2.5            -5.0            -179.2          -242.5          -275.0          -385.0          -420.0  zdelta
-
-190.0           0.0             -5.0            -162.0          -210.0          -275.0          -350.0          -420.0  az1
-0.0             -5.0            -183.2          -183.2          -275.0          -365.0          -420.0          -450.0  az0
-
-I       1_2     II      1_3     III     1_4     IV      1_5     V       1_6     VI      1_8     VIII    1_9     IX
-</pre></div>
-<div class="slide" id="zsolid-applyzcuttree-2-prune-reconnect-tree">
-<h1><span class="small">ZSolid::ApplyZCutTree : (2) prune + reconnect tree</span></h1>
-<pre class="mypre12">
-tree::apply_cut after prune and re-classify [ 3] nameprefix maker_body_solid_zcut-183.2246_  NODE:7 PRIM:4 UNDEFINED:0 EXCLUDE:0 INCLUDE:7 MIXED:0 Order:IN
-
-                                        Uni
-                                        I
-                                        5
-                                        S
-
-                        Uni                     Pol
-                        I                       I
-                        3                       6
-
-
-        Uni                     Ell
-        I                       I
-        1                       4
-
-
-Ell             Pol
-I               I
-0               2
-
-
-0.0             -2.5            -5.0            -179.2  zdelta
-
-190.0           0.0             -5.0            -162.0  az1
-0.0             -5.0            -183.2          -183.2  az0
-I       1_2     II      1_3     III     1_4     IV
-</pre><ul class="small simple">
-<li><span class="r">MAJOR SIMPLIFICATION</span>  tree cut from (node:15, prim:8, height:7) -&gt; (node:7, prim:4, height:3)</li>
-<li>&quot;cutting&quot; with <strong>G4IntersectionSolid</strong> increases tree to (node:17, prim:9, height:8 )</li>
-</ul>
-</div>
-<div class="slide" id="maker-body-solid-zcut-500-0">
-<h1><span class="red">maker_body_solid_zcut-500.0</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcut-400-0">
-<h1><span class="red">maker_body_solid_zcut-400.0</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcut-350-0">
-<h1><span class="red">maker_body_solid_zcut-350.0</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcut-300-0">
-<h1><span class="red">maker_body_solid_zcut-300.0</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcut-200-0">
-<h1><span class="red">maker_body_solid_zcut-200.0</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcut-183-25">
-<h1><span class="red">maker_body_solid_zcut-183.25</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcut-100-0">
-<h1><span class="red">maker_body_solid_zcut-100.0</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcut-0-0">
-<h1><span class="red">maker_body_solid_zcut-0.0</span></h1>
-</div>
-<div class="slide" id="maker-body-solid-zcutp100-0">
-<h1><span class="red">maker_body_solid_zcutp100.0</span></h1>
-</div>
-<div class="slide" id="x4intersectvolumetest-geant4-2d-cross-sections-of-g4vphysicalvolume">
-<h1><span class="small">X4IntersectVolumeTest : Geant4 2D cross-sections of G4VPhysicalVolume</span></h1>
-<ul class="small simple">
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/xxv.sh">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/xxv.sh</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectVolumeTest.cc">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectVolumeTest.cc</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectVolumeTest.py">https://bitbucket.org/simoncblyth/opticks/src/master/extg4/tests/X4IntersectVolumeTest.py</a></li>
-</ul>
-<p class="small"><em>G4VPhysicalVolume</em> has no convenient &quot;Distance&quot; methods ... so scan solids
-individually and present together after applying structure transforms.</p>
-<ol class="small arabic simple">
-<li>get <em>G4VPhysicalVolume</em> from <em>j/PMTSim</em> with <span class="b">PMTSim::GetPV</span></li>
-<li>collect and save structure transforms <em>PMTSim::SaveTransforms</em> for each solid</li>
-<li><em>X4Intersect::Scan</em> each solid and persist in NP arrays</li>
-<li>present together using <em>X4IntersectVolumeTest.py</em></li>
-</ol>
-<ul class="small simple">
-<li><span class="r">Gives rapid 2D cross-sections of G4PhysicalVolume</span> (very little Opticks code used)</li>
-</ul>
-<p class="small">Usage of <em>xxv.sh</em> script which runs executable and ipython:</p>
-<pre class="small literal-block">
-cd ~/opticks/extg4
-./xxv.sh
-GEOM=body_phys ./xxv.sh
-</pre>
-</div>
-<div class="slide" id="body-phys-nurs">
-<h1><span class="r">body_phys_nurs</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">spurious Geant4 intersects from <span class="pre">G4Tubs-G4Torus</span> neck</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-phys">
-<h1><span class="r">body_phys</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">spurious Geant4 intersects from <span class="pre">G4Tubs-G4Torus</span> neck</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-phys-nurs-pcnk">
-<h1><span class="r">body_phys_nurs_pcnk</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">G4Polycone neck : simpler, faster, <span class="pre">no-spurious</span> intersects</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-phys-nurs-pcnk-pdyn">
-<h1><span class="r">body_phys_nurs_pcnk_pdyn</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">with dynode geometry included and G4Polycone neck</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-phys-nurs-pdyn">
-<h1><span class="r">body_phys_nurs_pdyn</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">with dynode geometry and default <span class="pre">G4Tubs-G4Torus</span> neck</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-phys-pdyn">
-<h1><span class="r">body_phys_pdyn</span></h1>
-<ul class="simple">
-<li><tt class="docutils literal">with dynode geometry and default <span class="pre">G4Tubs-G4Torus</span> neck</tt></li>
-</ul>
-</div>
-<div class="slide" id="body-phys-pdyn-pcnk">
-<h1><span class="r">body_phys_pdyn_pcnk</span></h1>
-</div>
-<div class="slide" id="geochainsolidtest-single-solid-full-chain-of-geometry-conversions">
-<h1><span class="small">GeoChainSolidTest : single solid full chain of geometry conversions</span></h1>
-<dl class="small docutils">
-<dt><span class="b">opticks/GeoChain</span></dt>
-<dd>new package for fast iteration geometry debugging by doing all geometry conversions in single executables</dd>
-</dl>
-<ul class="small simple">
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/GeoChain/tests/GeoChainSolidTest.cc">https://bitbucket.org/simoncblyth/opticks/src/master/GeoChain/tests/GeoChainSolidTest.cc</a></li>
-</ul>
-<p class="small">The solid to create is controlled by the name string obtained from envvar <em>GEOM</em></p>
-<ol class="small arabic simple">
-<li>creates G4VSolid directly or from j/PMTSim</li>
-<li>invokes GeoChain::convert<ul>
-<li>(x4) X4PhysicalVolume::ConvertSolid : G4VSolid -&gt; nnode -&gt; GMesh/GPts<ul>
-<li>X4Solid::Convert converts G4VSolid into npy/nnode tree</li>
-<li>NTreeProcess&lt;nnode&gt;::Process balances the nnode tree when that is configured</li>
-<li>NCSG::Adopt wrap nnode tree enabling it to travel</li>
-<li>X4Mesh::Convert converts G4VSolid into GMesh which has above created NCSG associated</li>
-</ul>
-</li>
-<li>(this) using placeholder GVolume the GMesh is added to a test GGeo</li>
-<li>(cg) CSG_GGeo_Convert GGeo -&gt; CSGFoundry</li>
-</ul>
-</li>
-<li>saves geometry to $TMP/GeoChain/$GEOM/CSGFoundry/  (OptiX 7 compatible)</li>
-</ol>
-<p class="small">Subsequently can render this geometry, eg with CSGOptiX/cxs.sh using
-just the path to the CSGFoundry directory.</p>
-</div>
-<div class="slide" id="geochainvolumetest-volume-full-chain-of-geometry-conversions">
-<h1><span class="small">GeoChainVolumeTest : volume full chain of geometry conversions</span></h1>
-<ul class="small simple">
-<li>volume could be single PMT or full geometry</li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/GeoChain/tests/GeoChainVolumeTest.cc">https://bitbucket.org/simoncblyth/opticks/src/master/GeoChain/tests/GeoChainVolumeTest.cc</a></li>
-<li>using existing opticks/extg4/X4PhysicalVolume functionality</li>
-</ul>
 </div>
 </div>
 </body>
