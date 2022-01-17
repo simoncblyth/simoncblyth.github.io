@@ -2434,7 +2434,18 @@ X4MeshTest_SJReceiverConstruction_png
 ``GEOM=SJReceiverConstruction EYE=1,1,0.2 ZOOM=2.5 ./X4MeshTest.sh``
     ``union of two unconnected parts : inner cone face is spherically curved``
 
-:r:`Geant4 docs : booleans must not be disjoint`
+
+.. raw:: html
+
+    <p style="margin-bottom:8cm;" />
+
+
+.. table::
+    :align: center
+
+    +------------------------------------------------------------+
+    | :r:`Geant4 docs : component solids must not be disjoint`   |
+    +------------------------------------------------------------+
 
 
 .. s5_talk::
@@ -2485,8 +2496,8 @@ Geant4_docs_Boolean_Solids_html
 
 
 
-Stick Geometry Overview
---------------------------
+Stick Geometry Issue Overview
+-------------------------------
 
 .. class:: small
 
@@ -2507,22 +2518,23 @@ Stick Geometry Overview
      +-----------------------------------+--------------------+---------------+---------------+------------------------------------------------+  
      | XJanchorConstruction (3)          |  solidXJanchor     |  lXJanchor    |  Acrylic      |   Tubs, Cons, Sphere, Sub., Union              |
      +-----------------------------------+--------------------+---------------+---------------+------------------------------------------------+
-     | XJfixtureConstruction (4)         |  solidXJfixture    |  lXJfixture   |  PE_PA        |   Tubs, Box, Union                             |
+     | XJfixtureConstruction (4)(5)      |  solidXJfixture    |  lXJfixture   |  PE_PA        |   Tubs, Box, Union                             |
      +-----------------------------------+--------------------+---------------+---------------+------------------------------------------------+  
      | SJCLSanchorConstruction           |  solidSJCLSanchor  |  lSJCLSanchor |  Acrylic      |   Box, Cons, Sphere, Sub., Union               |
      +-----------------------------------+--------------------+---------------+---------------+------------------------------------------------+  
      | SJFixtureConstruction             |  solidSJFixture    |  lSJFixture   |  Acrylic      |   Box, Cons, Sphere, Sub., Union               |
      +-----------------------------------+--------------------+---------------+---------------+------------------------------------------------+  
-     | SJReceiverConstruction (5)        |  solidSJReceiver   |  lSJReceiver  |  Acrylic      |   Tubs, Cons, Box, Sphere, Sub., Union         |
+     | SJReceiverConstruction (6)        |  solidSJReceiver   |  lSJReceiver  |  Acrylic      |   Tubs, Cons, Box, Sphere, Sub., Union         |
      +-----------------------------------+--------------------+---------------+---------------+------------------------------------------------+  
 
 .. class:: small
 
-    1. required fix to Opticks Polycone with multiple Rmin translation 
-    2. needs ``--additionacrylic-simplify-csg`` to fix daughter volume cavity subtraction 
-    3. :r:`spurious Geant4 intersects observed (subtracting big sphere implicated)`
-    4. :r:`overlaps uni_acylic1, uni1, self, spurious Opticks coincidence (not easy to fix)`
-    5. :r:`disjoint union` 
+    1. DONE : fixed Opticks Polycone with multiple Rmin translation 
+    2. needs ``--additionacrylic-simplify-csg`` to fix daughter volume cavity subtraction (TODO: make default)
+    3. :r:`spurious Geant4 intersects observed (subtracting big sphere implicated, TODO: try without)`
+    4. :r:`overlaps uni_acylic1, uni1, self` (WIP: Yuxiang assigned to update positions) 
+    5. spurious coincidences (TODO: try simpler CSG modelling) 
+    6. :r:`disjoint union + overlap with solidXJfixture`  
 
 .. s5_talk::
 
@@ -2532,54 +2544,60 @@ Stick Geometry Overview
 
 
 
-:small:`Summary and Links`
+:small:`Overview`
 ----------------------------------------------------------------
+
+.. table::
+   :align: center
+
+   +------------------------------------------------------------------+
+   |   **JUNO Simulation -> Opticks -> GPU**                          |
+   +---------------+--------------------------------------------------+
+   | Benefits:     |  1. drastically faster GPU sim. in production    |
+   |               |  2. improved CPU sim. speed + correctness        |
+   +---------------+--------------------------------------------------+
+   | Status:       |  * :b:`running out of geometry to have issues`   |
+   |               |  * :r:`issues getting smaller, are converging`   |  
+   +---------------+--------------------------------------------------+
 
 .. sidebar:: :small:`Next Steps`
 
    .. class:: small
 
-      * few more geometry issues to fix
+      * few more geometry issues to resolve
+      * high stats history matching check
+      * sim performance measurements
       * integrate OptiX 7 API work 
       * production optimization
-      * port new PMT optical model  
-
-
-.. image:: /env/presentation/1px.png
-   :width: 500px
-   :height: 20px
-
-..
-
-  *Opticks* : state-of-the-art GPU ray traced optical simulation 
-  integrated with *Geant4*. :red:`Match with JUNO-Geant4 is converging.`
-
+      * CUDA/Opticks port new PMT optical model  
 
 .. class:: normal
 
-   * Maintaining JUNO on GPU is time consuming
+   * extremely sensitive to source geometry issues               
 
-     * side benefits : improved CPU simulation correctness + speed
+     * DONE: many fixes to PMTs, Fastener 
+     * => :r:`improves CPU sim, enables GPU sim`
 
-   * NOW : running out of geometry to have issues with  
+   **Many Thanks to : Yuxiang Hu, Wang Zike**
 
-
-  .. image:: /env/presentation/1px.png
-     :width: 1000px
-     :height: 1px
+   * More pioneer users very welcome
 
 
 .. table::
-    :align: center
+   :align: center
 
-    +--------------------------------------------------+-----------------------------------------+
-    | https://bitbucket.org/simoncblyth/opticks        | code repository                         |                   
-    +--------------------------------------------------+-----------------------------------------+
-    | https://simoncblyth.bitbucket.io                 | presentations and videos                |
-    +--------------------------------------------------+-----------------------------------------+
-    | https://groups.io/g/opticks                      | forum/mailing list archive              |
-    +--------------------------------------------------+-----------------------------------------+ 
+   +--------------------------------------------------+-----------------------------------------+
+   | https://bitbucket.org/simoncblyth/opticks        | code repository                         |                   
+   +--------------------------------------------------+-----------------------------------------+
+   | https://simoncblyth.bitbucket.io                 | presentations and videos                |
+   +--------------------------------------------------+-----------------------------------------+
 
+
+.. comment
+
+    .. raw:: html
+
+        <p style="margin-bottom:1cm;" />
 
 
 .. s5_talk::
@@ -2590,9 +2608,315 @@ Stick Geometry Overview
 
 
 
+:i:`Extra Slides : G4Cerenkov Improvement, Cerenkov on GPU`
+---------------------------------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:5cm;" />
+
+    <h1>Extra Slides : G4Cerenkov Improvement, CK on GPU</h1>
+   
+.. class:: small
+
+    * Frank-Tamm Formula : Cerenkov Photon Yield /mm  at BetaInverse  
+
+      * :r:`G4Cerenkov makes poor approximation => -ve photon yield`
+
+    * Numerical Integration Imprecision close to RINDEX peak
+    * Numerical Integration Error (number of CK photons)  
+    * Improved Precision "S2" Integration 
+    * Monte Carlo Sampling : "Rejection" vs "Inverse Transform"
+    * Cerenkov ICDF for various BetaInverse
+    * Chi2 Comparisons of the two sampling methods
+
+      * :b:`New Cerenkov ICDF sampling : faster, avoids double->float sensitivity`
+
+
+.. s5_talk::
+
+    Cerenkov 
 
 
 
+:small:`Frank-Tamm Formula : Cerenkov Photon Yield /mm  at BetaInverse`
+-------------------------------------------------------------------------
+
+.. raw:: html
+
+    <pre class="mypretiny">
+                                                    BetaInverse^2    
+              N_photon/369.81  =    Integral ( 1 - -----------------  )  dE         where   BetaInverse < ri[E] 
+                                                       ri(E)^2      
+
+                                =   Integral [ 1 ] dE -  BetaInverse^2 * Integral[ 1./(ri[E]*ri[E]) ] dE
+
+    </pre>
+
+
+.. class:: small
+
+    **G4Cerenkov::BuildThePhysicsTable -> CerenkovAngleIntegrals (misnomer)** 
+
+    * ``Integral[ 1/ri^2 ] dE``  cumulative trapezoidal approx. integral over RINDEX[E] of material
+
+    :redbold:`Problems with G4Cerenkov::GetAverageNumberOfPhotons integration`
+
+    * assumes monotonic RINDEX : only one permitted energy range 
+    * putting together the split integral leads to -ve NumPhotons when close to RINDEX peak           
+    * ``G4PhysicsVector::GetValue`` applies **linear interpolation** to cumulative integral of 1/ri^2  :redbold:`<-- POOR APPROX`  
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    636   G4double CAImax = CerenkovAngleIntegrals->GetMaxValue();
+    637 
+    638   G4double dp, ge;
+    642   if (nMax < BetaInverse)        // ... no photons
+    649   else if (nMin > BetaInverse) {
+    650      dp = Pmax - Pmin;
+    651      ge = CAImax;
+    660   } else {
+    661      Pmin = Rindex->GetEnergy(BetaInverse);
+    662      dp = Pmax - Pmin;
+    667      G4double CAImin = CerenkovAngleIntegrals->GetValue(Pmin, isOutRange);
+    668      ge = CAImax - CAImin;
+    674   }
+    677   G4double NumPhotons = Rfact * charge/eplus * charge/eplus * (dp - ge * BetaInverse*BetaInverse);
+    </pre>
+
+
+
+
+:i:`scan_GetAverageNumberOfPhotons_plot_1.7000_1.8000`
+-------------------------------------------------------
+
+
+:i:`scan_GetAverageNumberOfPhotons_difference_plot`
+-----------------------------------------------------
+
+
+    
+   
+
+:small:`Alternative "s2" integral approach : more precise, simpler, faster`
+--------------------------------------------------------------------------------------
+
+
+.. sidebar:: :small:`Trapezoidal s2 Integration`
+
+    .. class:: small
+
+        **s2(E) : from RINDEX(E) values and BetaInverse** 
+
+
+    .. image:: /env/presentation/ana/ckn/trapezoidal_half.png 
+
+    .. class:: small
+
+        * B,C,D : trapezoids
+        * A,E   : edge triangles  
+        * x,y: "crossings" : RINDEX(E) == BetaInverse
+          
+          * (better than s2 zeros, as s2 non-linear)
+
+.. raw:: html
+
+    <pre class="mypretiny">
+
+                     BetaInverse*BetaInverse
+    Integral [ 1. -  ----------------------- ] (for BetaInverse < RINDEX)
+                     RINDEX * RINDEX 
+
+    Integral [ 1. - cos^2 theta ]   
+    
+    Integral [ sin^2 theta ]    
+
+    Integral [ s2 ]             ( s2 > 0 )
+
+    </pre> 
+
+                 
+.. class:: small
+
+   Do not split the integral, do "s2" integral in one pass.  Advantages:
+
+   * avoids one level of linear approximation, ca 
+   * cannot give -ve values
+   * simple one pass code, no separate find_crossings
+   * also s2 is faster other than when numPhotons is zero 
+
+     * AVOID by not calling when **BetaInverse > RINDEX_max**
+
+
+.. comment
+
+    * ``Integral a:b [ f(x) ] dx ~ (b - a)*(f(a) + f(b))/ 2``  trapezoidal approx
+
+
+        In [1]: 2*np.pi*1e7/(137*1240)     # fine-structure-constant 1/137 and hc = 1240 eV nm 
+        Out[1]: 369.860213514221
+
+
+
+    <pre class="mypretiny">
+    Integral a->b [ f(x) ] dx   ~     ( b - a )*( f(a) + f(b) ) / 2         trapezoidal numerical integration  
+    </pre>             
+
+
+
+    I noticed a small issue with G4Cerenkov/G4Cerenkov_modified.
+    When BetaInverse is approaching the maximum LS RINDEX the 
+    result of G4Cerenkov_modified::GetAverageNumberOfPhotons goes
+    slightly negative. 
+
+    Looking into this I found the cause is the splitting of the 
+    numerical integral into pieces. The Frank-Tamm formula requires::
+
+        Integral [ 1. - (BetaInverse*BetaInverse)/(rindex*rindex) ] 
+
+    The G4Cerenkov approach is to split that up, storing the below integral 
+    into CerenkovAngleIntegral::
+
+    However when putting it back together with the below::
+
+        1066      G4double dp1 = 0; G4double ge1 = 0;
+        1067      for (int i=0; i<cross_num; i++) {
+        1068         dp1 += the_energies_threshold[2*i+1] - the_energies_threshold[2*i];
+        1069         G4bool isOutRange;
+        1070         ge1 += CerenkovAngleIntegrals->GetValue(the_energies_threshold[2*i+1], isOutRange)
+        1071                - CerenkovAngleIntegrals->GetValue(the_energies_threshold[2*i], isOutRange);
+        1072      }
+        1073 
+        1077   G4double NumPhotons = Rfact * charge/eplus * charge/eplus *
+        1078          (dp1 - ge1 * BetaInverse*BetaInverse);
+        1079 
+
+    The CerenkovAngleIntegrals->GetValue is doing linear interpolation
+    which is a rather poor approximation for the parabolic cumulative integral.
+
+    I find that this problem is avoided by doing the 
+    numerical integral directly on sin^2 theta 
+    which is valid as all the below are equivalent:: 
+     
+        Integral [ 1. - (BetaInverse*BetaInverse)/(rindex*rindex) ]   ( for: BetaInverse < rindex )
+
+        Integral [ 1. - cos^2 theta ]   
+        
+        Integral [ sin^2 theta ] 
+
+    Doing this avoids making the poor linear approximation for the parabolic
+    cumulative integral, and avoids going -ve as there is no subtraction to 
+    cause problems.
+
+    Also, there is another advantage with this, in that you do not need
+    to separately find rindex-BetaInverse crossings because sin^2 theta = ( 1 - cos(th) ) ( 1 + cos(th) )
+    goes negative at the crossings so you can just numerically 
+    integrate the "s2" over the energy range that it is positive 
+    and use the "s2" zero crossings to add triangles for bins with crossings 
+    to the full bin trapezoids.  
+
+
+
+
+:small:`Monte Carlo "Rejection Sampling" VS "Inverse Transform Sampling"`
+---------------------------------------------------------------------------------
+
+.. sidebar:: :small:`Cerenkov Photons Energy Distrib`
+
+   .. class:: small
+
+        * Particle velocity, **Beta=v/c** **BetaInv=1/Beta** 
+        * **n(E)** : refractive index **n = c/v**
+
+          * Air~1.0003, Water:1.33-1.34, Glass:1.5-1.9 
+
+        * **BetaInv > n(E)_max** : CK disallowed, too slow
+        * **n(E)_min < BetaInv < n(E)_max** 
+
+          * allowed energy depends on **n(E)** shape  
+
+        * :redbold:`ICDF(BetaInv)` => 2d lookup **(u, BetaInv)** 
+
+        New approach : Cerenkov ICDF sampling ?
+
+        * :bluebold:`can it be done ?`
+        * :redbold:`PRO: "free" (GPU texture lookup) sampling`
+       
+
+.. class:: small
+
+    **Sampling** : generate **(x0,x1,x2,... )** that follow distribution **f(x)**
+
+    :bluebold:`Rejection Sampling (used by current G4Cerenkov)`
+
+    * throw 2 random numbers **(x,y)** in (domain, value) range
+    * reject **x**  when **y > f(x)**  
+
+    * Pros : simple, no integration or lookup tables 
+    * Cons :
+
+      * poor efficiency for some **f(x)** : many candidates rejected
+      * :redbold:`observed float/double sensitivity` : **problem on GPU**
+
+    :bluebold:`Inverse Transform (ICDF) Sampling`
+
+    * compute CDF Cumulative Distribution Function, **CDF(x)** : integrals of **f(x)** across domain 
+    * normalize : **CDF(xmin) = 0, CDF(xmax) = 1**
+    * domain **x** and **CDF(x)** monotonic -> invert (swap **y<->x**) 
+    * equate random **u(0->1)** to **y** enables to lookup sample **x** 
+
+    * Cons : requires computation of large ICDF lookup tables 
+    * Pros :
+
+      * simple sampling : **one random lookup** (eg GPU texture lookup) 
+      * ICDF lookups tables can be created once for a geometry 
+        (often depending only on constant properties of materials)
+
+
+.. class:: tiny 
+
+    Cerenkov radiation is electromagnetic equivalent of sonic boom in air or bow waves in water
+
+
+
+:i:`test_makeICDF_SplitBin_QCKTest_s2cn_plot.png`
+---------------------------------------------------
+
+
+
+:small:`Chi2 comparison of Rejection and ICDF Lookup Cerenkov energy samples`
+-------------------------------------------------------------------------------------
+
+.. class:: normal
+
+    Created with::
+
+        cd ~/opticks/qudarap
+        QCerenkovIntegralTest   # create ICDF lookups for many BetaInverse
+        QCKTest                 # load ICDF, create lookup+rejection samples
+        ipython -i tests/QCKTest.py   # chi2 comparisons on energy distribs
+         
+
+.. class:: normal
+
+    Plots show:
+
+    * histogram of energy distrib from ICDF lookup sample
+    * histogram of energy distrib from rejection sample
+    * "s2(E)" sin^2(cerenkov_cone_angle)[E]  : :redbold:`distribution the samples seek to follow`
+    * ICDF : cumulative integral curve
+    * relative chi2 contribution for each energy bin 
+
+    :bluebold:`Note: ICDF becomes flat in disallowed energy regions` 
+
+
+:i:`QCKTest_1.5000_en_plot.png`
+----------------------------------
+
+
+:i:`QCKTest_1.6000_en_plot.png`
+----------------------------------
 
 
 
@@ -2602,6 +2926,7 @@ Stick Geometry Overview
 .. s5_talk::
 
    Cerenkov
+
 
 
 
