@@ -182,7 +182,7 @@ Geometry/Translation Issues Summary
 
        **Fastener base_steel : multiple-Rmin Polycone** 
 
-       * FIXED : :b:`improved Opticks translation`
+       * FIXED : :g:`improved Opticks translation`
 
        **Hamamatsu neck : cylinder minus torus**
 
@@ -191,11 +191,11 @@ Geometry/Translation Issues Summary
 
        **PMT mask : CSG coincidence issue**
 
-       * FIXED : :b:`straightforwardly at Geant4 level`  
+       * FIXED : :g:`straightforwardly at Geant4 level`  
 
        **XJanchorConstruction : spurious G4 intersects**
 
-       * TODO : :b:`not fixed by expanding cylinder` 
+       * WIP : :r:`find not fixed by expanding cylinder` 
 
        **SJReceiverConstruction**
 
@@ -207,7 +207,7 @@ Geometry/Translation Issues Summary
     **Fastener : interfering subtraction-of-subtraction issue**
 
     ``--additionacrylic-simplify-csg`` 
-         * TODO: further checks before making it default  
+         * TODO: :r:`further checks before making it default`  
          * could add "cavity" volume to avoid geo change
 
     * :b:`PMTs do not CSG subtract cavity in Pyrex for Vacuum...`
@@ -221,7 +221,7 @@ Geometry/Translation Issues Summary
 
     **solidXJfixture : ~10/64 overlaps with fasteners**
 
-    * :r:`fastener/fixture positions need to work together`
+    * WIP : :r:`fastener/fixture positions need to work together`
 
     **solidXJfixture : extreme coincidence, many spurious intersects**
 
@@ -2621,7 +2621,7 @@ Stick Geometry Issue Overview
 
     * Frank-Tamm Formula : Cerenkov Photon Yield /mm  at BetaInverse  
 
-      * :r:`G4Cerenkov makes poor approximation => -ve photon yield`
+      * :r:`G4Cerenkov/G4Cerenkov_modified makes poor approximation => -ve photon yield close to RINDEX peak`
 
     * Numerical Integration Imprecision close to RINDEX peak
     * Numerical Integration Error (number of CK photons)  
@@ -2635,7 +2635,7 @@ Stick Geometry Issue Overview
 
 .. s5_talk::
 
-    Cerenkov 
+    Extras on Cerenkov 
 
 
 
@@ -2685,18 +2685,28 @@ Stick Geometry Issue Overview
     677   G4double NumPhotons = Rfact * charge/eplus * charge/eplus * (dp - ge * BetaInverse*BetaInverse);
     </pre>
 
+.. s5_talk::
+
+   Not splitting the numerical integration into two terms avoids making poor linear interpolation approximation
 
 
 
 :i:`scan_GetAverageNumberOfPhotons_plot_1.7000_1.8000`
 -------------------------------------------------------
 
+.. s5_talk::
+
+   The two curves differ in the region close to the refractive index peak.
+   
+
 
 :i:`scan_GetAverageNumberOfPhotons_difference_plot`
 -----------------------------------------------------
 
+.. s5_talk::
 
-    
+    Residual shape explained by using linear approximation for parabolic integral
+
    
 
 :small:`Alternative "s2" integral approach : more precise, simpler, faster`
@@ -2718,7 +2728,6 @@ Stick Geometry Issue Overview
         * A,E   : edge triangles  
         * x,y: "crossings" : RINDEX(E) == BetaInverse
           
-          * (better than s2 zeros, as s2 non-linear)
 
 .. raw:: html
 
@@ -2817,6 +2826,9 @@ Stick Geometry Issue Overview
     to the full bin trapezoids.  
 
 
+.. s5_talk::
+
+   Direct integration of sin^2theta cone angle avoids the approximation
 
 
 :small:`Monte Carlo "Rejection Sampling" VS "Inverse Transform Sampling"`
@@ -2840,7 +2852,7 @@ Stick Geometry Issue Overview
 
         New approach : Cerenkov ICDF sampling ?
 
-        * :bluebold:`can it be done ?`
+        * :bluebold:`can it be done ?`  :r:`YES`
         * :redbold:`PRO: "free" (GPU texture lookup) sampling`
        
 
@@ -2879,9 +2891,20 @@ Stick Geometry Issue Overview
     Cerenkov radiation is electromagnetic equivalent of sonic boom in air or bow waves in water
 
 
+.. s5_talk::
+
+    Standard way to generate Cerenkov wavelengths is with rejection sampling, but thats problematic on GPU.
+    So I developed inverse transform sampling to yield Cerenkov wavelengths
+
+
+
 
 :i:`test_makeICDF_SplitBin_QCKTest_s2cn_plot.png`
 ---------------------------------------------------
+
+.. s5_talk::
+
+    The curves are the ICDF for a variety of BetaInverse values
 
 
 
@@ -2911,13 +2934,27 @@ Stick Geometry Issue Overview
     :bluebold:`Note: ICDF becomes flat in disallowed energy regions` 
 
 
+.. s5_talk::
+
+   Both sampling techniques give equivalent samples, the new sampling approach does not 
+   suffer from using float precision like rejection sampling does : so its better on GPU.
+   
+
 :i:`QCKTest_1.5000_en_plot.png`
 ----------------------------------
+
+.. s5_talk::
+
+   This compare the two samples with the target shape and gives the chi2
 
 
 :i:`QCKTest_1.6000_en_plot.png`
 ----------------------------------
 
+
+.. s5_talk::
+
+   Get good agreement across entire BetaInverse range 
 
 
 :i:`image_grid_QCKTest`
@@ -2925,10 +2962,7 @@ Stick Geometry Issue Overview
 
 .. s5_talk::
 
-   Cerenkov
-
-
-
+   These are the comparisons for many BetaInverse values 
 
 
 
