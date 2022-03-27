@@ -5,9 +5,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>JUNO+Opticks : Geometry Issues</title>
-<meta content="opticks_20220118_juno_collaboration_meeting" name="name" />
-<meta content="(Jan 2022)" name="description" />
+<title>JUNO+Opticks : Progress Towards Production</title>
+<meta content="opticks_20220329_progress_towards_production" name="name" />
+<meta content="(Mar 2022)" name="description" />
 <meta content="progress update" name="notes" />
 <style type="text/css">
 
@@ -384,13 +384,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">JUNO+Opticks : Geometry Issues</span></h1>
+<h1><span class="i">JUNO+Opticks : Progress Towards Production</span></h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">JUNO+Opticks : Geometry Issues</span></h1>
+<h1 class="title"><span class="i">JUNO+Opticks : Progress Towards Production</span></h1>
 
 <!-- comment
 
@@ -6994,7 +6994,7 @@ Monday 15:30-16:30, Beijing time. -->
 <div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey">
-    JUNO+Opticks : XJfixtureConstruction + trunk Geometry
+    JUNO+Opticks : Progress Towards Production
     <h2 style="background-color:lightgrey;text-align:center"> Open source, https://bitbucket.org/simoncblyth/opticks </h2>
 </h1>
 </header>
@@ -7006,7 +7006,7 @@ All optically relevant aspects of <em>Geant4</em> context must be translated+cop
 <ul class="simple">
 <li><span class="b">geometry : solids, structure, material+surface properties</span></li>
 <li>generation : Cerenkov + Scintillation (using <strong>Gensteps</strong> from <em>Geant4</em>)</li>
-<li>propagation : Rayleigh scattering, absorption, reemission, boundary</li>
+<li><span class="b">propagation : Rayleigh scattering, absorption, reemission, boundary</span></li>
 </ul>
 <p>Achieving+maintaining <strong>equivalence</strong> is time consuming, BUT:</p>
 <ul class="simple">
@@ -7019,6 +7019,215 @@ All optically relevant aspects of <em>Geant4</em> context must be translated+cop
         <!--  s5talk  -->
         <br/>
     
+</div>
+<div class="slide" id="high-level-overview-2022-january-february">
+<h1>High Level Overview : 2022 January/February</h1>
+<p class="small"><strong>January : Updating to JUNO trunk geometry</strong></p>
+<blockquote class="small">
+<ul class="simple">
+<li>x3 slowdown compared to ~December trunk</li>
+<li>many unintended overlaps : demonstrated with new 2D slice renders</li>
+<li><em>XJfixtureConstruction</em> : spurious internal intersects + performance bottleneck<ul>
+<li>Anti-coincidence fixes <strong>do not remove all spurious intersects</strong></li>
+<li><span class="r">Reveals incompatibility between Opticks CSG intersection and balanced trees</span></li>
+<li><span class="b">switch OFF tree balancing avoids issue, but very bad for performance</span> : <em>NEED BETTER SOLUTION</em></li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p class="small"><strong>February : Generalize Opticks CSG to handle &quot;list-nodes&quot; : n-ary (not binary) CSG</strong></p>
+<blockquote class="small">
+<ul class="simple">
+<li>attempt to fix balancing (eg postorder preserving balance) and/or changing CSG intersection alg
+unsuccessful (difficult as problem only with high node count solids)<ul>
+<li>balancing was always a hack (not a solution) for handling high node count solids</li>
+<li>conclude that although it may be possible to get balancing to work the best longterm
+solution is to take the simpler route of avoiding large trees by implementing &quot;list-nodes&quot;</li>
+</ul>
+</li>
+<li><span class="b">list-nodes avoid large trees, tree overheads, tree balancing</span><ul>
+<li>CSG_CONTIGUOUS Union (Similar to G4MultiUnion)</li>
+<li>CSG_DISCONTIGUOUS Union</li>
+<li>CSG_OVERLAP Intersection</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+</div>
+<div class="slide" id="high-level-overview-2022-march">
+<h1>High Level Overview : 2022 March</h1>
+<p class="small"><strong>March : Geometry Optimization + Migrating Sim from Old to New Workflow</strong></p>
+<ul class="small simple">
+<li>fix &quot;global leaf transform&quot; bug following list-node CSG generalization<ul>
+<li>add <em>X4VolumeMaker</em> <em>G4OKVolumeTest</em> for volume level debugging</li>
+</ul>
+</li>
+<li>act on several suggestions from NVIDIA engineers regards OptiX 7 usage (PRD pointer trick, launch flags, stacksize config)<ul>
+<li>performance stays same (geometry otherwise bottlenecked?)</li>
+</ul>
+</li>
+<li>investigate x3 slower geometry compared to December<ul>
+<li>bottleneck is global compound solid (~3000 Prim)</li>
+<li><span class="b">implement dynamic CSG Prim include/exclude for fine-grained slowdown investigation</span></li>
+<li>apply dynamic geometry to do render scan : quantifying slow Prim</li>
+</ul>
+</li>
+<li>mid-March : switch gears from geometry to physics<ul>
+<li><span class="r">Simply skipping slow XJfixtureConstruction is faster way to get into production</span><ul>
+<li><span class="b">BUT: ray trace bottlenecks so far always from geometry not physics</span></li>
+<li><span class="b">This is why my focus has been on a sequence of geometry issues over many months</span></li>
+</ul>
+</li>
+<li>fill_state, rayleigh_scatter, propagate_to_boundary, propagate_at_boundary : brought over to qsim.h workflow</li>
+<li><em>QSimTest</em> : fine grained testing as bring over functionality to new QUDARap/QSim workflow<ul>
+<li>random aligned comparison qsim-vs-bst : 1-in-a-million level match for S/P/X-polarization/normal-incidence/TIR</li>
+<li>bst: opticks/examples/Geant4/BoundaryStandalone mocked Geant4 environment for Boundary unit testing</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>Month-by-month progress notes</td>
+<td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst">https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst</a></td>
+</tr>
+<tr><td>Day-by-day commit messages</td>
+<td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/commits/">https://bitbucket.org/simoncblyth/opticks/commits/</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="big-picture-of-multi-year-transition-to-all-new-nvidia-optix-7-api">
+<h1><span class="small">Big Picture of Multi Year Transition to all new NVIDIA OptiX 7 API</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">New Workflow Packages</span></p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Package</th>
+<th class="head">Role</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>CSG</td>
+<td>GPU/CPU geometry model Inst/Solid/Prim/Node</td>
+</tr>
+<tr><td>CSG_GGeo</td>
+<td>Translates GGeo into CSG</td>
+</tr>
+<tr><td>GeoChain</td>
+<td>Geometry Translation Debug</td>
+</tr>
+<tr><td>QUDARap</td>
+<td>CUDA Simulation</td>
+</tr>
+<tr><td>CSGOptiX</td>
+<td>Geom (CSG) + Sim (QUDARap)</td>
+</tr>
+</tbody>
+</table>
+<p class="small">Design goals:</p>
+<ul class="small simple">
+<li>fine-grained GPU simulation testing <em>QSimTest</em></li>
+<li>CPU testing of GPU code (eg CSG)</li>
+<li>works with OptiX 7, 6, 5 (<span class="b">7 is prime target</span>)</li>
+</ul>
+<p class="small"><span class="r">Non-monolithic flexibility, easier: test + customize</span></p>
+<ul class="small last simple">
+<li>eg JUNO MultiFilm PMT optical model)</li>
+</ul>
+</div>
+<p class="small">Selection of most important Opticks packages</p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Package</th>
+<th class="head">Indicative Functionality Examples</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>SysRap</td>
+<td>SStr.hh, SSys.hh, NP.hh array</td>
+</tr>
+<tr><td>BoostRap</td>
+<td>less need with C++17 (longterm:remove)</td>
+</tr>
+<tr><td>NPY</td>
+<td>old array, primitives (longterm:remove)</td>
+</tr>
+<tr><td>OpticksCore</td>
+<td>argument handling, central steering</td>
+</tr>
+<tr><td>GGeo</td>
+<td>geometry model, GInstancer geo-factorization</td>
+</tr>
+<tr><td>ExtG4</td>
+<td>geometry translation from G4 to GGeo</td>
+</tr>
+<tr><td>CFG4</td>
+<td>Opticks Geant4 comparison eg <em>CRecorder</em></td>
+</tr>
+<tr><td><span class="r">CUDARap</span></td>
+<td>curandState persist (<span class="r">removing</span>)</td>
+</tr>
+<tr><td><span class="r">ThrustRap</span></td>
+<td>genstep-&gt;photon, photon index (<span class="r">removing</span>)</td>
+</tr>
+<tr><td><span class="r">OptiXRap</span></td>
+<td>monolithic pre-7 simulation (<span class="r">removing</span>)</td>
+</tr>
+<tr><td>G4Opticks</td>
+<td>High Level Interface</td>
+</tr>
+</tbody>
+</table>
+<p class="small">Cherry-picking removed into new: CSG, QUDARap, CSGOptiX</p>
+</div>
+<div class="slide" id="prediction-2022-april-modulo-unforseen-problems">
+<h1>Prediction : 2022 April (Modulo unforseen problems)</h1>
+<p class="small"><span class="b">Prediction not impossible as are migrating existing functionality from old to new workflow</span></p>
+<p class="small"><strong>Expect completed new workflow by end of April, what remains:</strong></p>
+<ul class="small simple">
+<li><em>propagate_at_surface</em> (the more complex <em>propagate_at_boundary</em> took 3~4 days)</li>
+<li>photon step-by-step history recording (for A-B testing)<ul>
+<li>not needed in production, but essential for validation</li>
+</ul>
+</li>
+<li>event handling : stream compaction for downloading hits</li>
+<li>integrate new CSGOptiX workflow into <em>G4Opticks</em> (gensteps in, hits out)</li>
+</ul>
+<p class="small"><strong>Towards end of April</strong></p>
+<ul class="small simple">
+<li>New workflow performance testing</li>
+<li>Try to integrate MultiFilm PMT model (using LUT approach developed by Yuxiang)</li>
+<li>Prepare release for Installation onto GPU cluster</li>
+<li></li>
+</ul>
+</div>
+<div class="slide" id="prediction-after-april-geometry-optimization-needed-to-get-good-performance">
+<h1><span class="small">Prediction : After April : Geometry Optimization Needed to get good performance</span></h1>
+<p class="small">Expect will need geometry optimization work to get good performance even with <em>XJfixtureConstruction</em> skipped</p>
+<ul class="small simple">
+<li>Geometry optimization by measuring performance as make changes:<ul>
+<li>adjust instancing criteria -&gt; different geometry factorization<ul>
+<li>more instancing expected to be faster but there is some balancing against overheads</li>
+</ul>
+</li>
+<li>use CSG_CONTIGUOUS list-node for the slower G4VSolid</li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="slide" id="investigate-xjfixtureconstruction-solid">
 <h1><span class="i">Investigate XJfixtureConstruction Solid</span></h1>
