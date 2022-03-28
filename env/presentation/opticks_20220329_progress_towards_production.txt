@@ -4,16 +4,14 @@
    :title: 
    :name: opticks_20220329_progress_towards_production
    :description: (Mar 2022) 
-   :notes: progress update 
+   :notes: progress update Tue Mar. 29, 16:00 Beijing time.  09:00 BST 
+   :url: https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=1682
 
 .. include:: my_s5defs.txt
 
 .. include:: s5_background_image.txt
 
 
-.. comment
-
-    Monday 15:30-16:30, Beijing time.
 
 
 
@@ -58,6 +56,9 @@
 
     Most recent work has been focussed on fixing geometry issues
     
+
+
+
 
 
 High Level Overview : 2022 January/February
@@ -136,9 +137,19 @@ High Level Overview : 2022 March
     +-------------------------------+--------------------------------------------------------------------------+
 
 
+:small:`https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst`
+-----------------------------------------------------------------------------------
 
-:small:`Big Picture of Multi Year Transition to all new NVIDIA OptiX 7 API`
-----------------------------------------------------------------------------------
+:b:`Majority of recent months dominated by sequence of geometry issues` 
+
+.. image:: /env/presentation/notes/progress/2022_mar.png
+   :align: center
+   :width: 1000px
+
+
+
+:small:`Big Picture of Multi Year Transition to new workflow (OptiX 7 compatible)`
+------------------------------------------------------------------------------------
 
 .. sidebar:: :small:`New Workflow Packages`
 
@@ -166,7 +177,7 @@ High Level Overview : 2022 March
 
         :r:`Non-monolithic flexibility, easier: test + customize` 
 
-        * eg JUNO MultiFilm PMT optical model)
+        * eg JUNO MultiFilm PMT optical model
 
 
 
@@ -200,11 +211,306 @@ High Level Overview : 2022 March
     | G4Opticks       | High Level Interface                                             |
     +-----------------+------------------------------------------------------------------+
 
-    Cherry-picking removed into new: CSG, QUDARap, CSGOptiX 
+    Cherry-picking from removed packages into new ones
 
 
-    
 
+
+:small:`qudarap/QSimTest.cc fine-grained GPU testing qsim.h methods`
+--------------------------------------------------------------------------------
+
+.. class:: small
+
+    * :r:`Major design goal of new workflow : fine-grained testing (much better than monolithic)` 
+    * some tests generate photon arrays, others mutate input arrays of photons
+
+.. raw:: html
+
+    <pre class="mypre15">
+    switch(type){
+        case RNG_SEQUENCE:                  rng_sequence(num, ni_tranche_size)         ; break ; 
+        case WAVELENGTH_S  :                wavelength('S', num)                       ; break ; 
+        case WAVELENGTH_C  :                wavelength('C', num)                       ; break ; 
+        case SCINT_PHOTON_P:                scint_photon(num);                         ; break ; 
+        case CERENKOV_PHOTON_K:             cerenkov_photon(num, print_id);            ; break ; 
+        case CERENKOV_PHOTON_ENPROP_E:      cerenkov_photon_enprop(num, print_id);     ; break ; 
+        case GENERATE_PHOTON_G:             generate_photon();                         ; break ; 
+        case BOUNDARY_LOOKUP_ALL_A:         boundary_lookup_all()                      ; break ;   
+        case BOUNDARY_LOOKUP_LINE_WATER_W:  boundary_lookup_line("Water", x0, x1, nx)  ; break ;   
+        case BOUNDARY_LOOKUP_LINE_LS_L:     boundary_lookup_line("LS",    x0, x1, nx)  ; break ;   
+        case PROP_LOOKUP_Y:                 prop_lookup(-1, -1.f,16.f,1701)            ; break ;   
+        case FILL_STATE_0:                  fill_state(0)                              ; break ;   
+        case RAYLEIGH_SCATTER_ALIGN:        photon_launch_generate(num, type)          ; break ;   
+        case PROPAGATE_TO_BOUNDARY:         photon_launch_generate(8,   type)          ; break ;   
+        case PROPAGATE_AT_SURFACE:          photon_launch_generate(8,   type)          ; break ;   
+        case PROPAGATE_AT_BOUNDARY:   
+        case PROPAGATE_AT_BOUNDARY_NORMAL_INCIDENCE:  
+                                            photon_launch_generate(num, type)          ; break ;   
+        case HEMISPHERE_S_POLARIZED:   
+        case HEMISPHERE_P_POLARIZED:  
+        case HEMISPHERE_X_POLARIZED:   
+                                            photon_launch_generate(num, type)          ; break ;   
+        case PROPAGATE_AT_BOUNDARY_S_POLARIZED: 
+        case PROPAGATE_AT_BOUNDARY_P_POLARIZED:   
+        case PROPAGATE_AT_BOUNDARY_X_POLARIZED:  
+                                                 photon_launch_mutate(num, type)       ; break ;   
+    }   
+    </pre>
+
+
+
+
+
+:small:`Standalone Geant4 Tests : Cerenkov, RayLeigh, Boundary`
+------------------------------------------------------------------------------------------------
+
+.. class:: small 
+
+    Provide photon arrays to compare against Opticks 
+
+    * https://bitbucket.org/simoncblyth/opticks/src/master/examples/Geant4/BoundaryStandalone/
+    * https://bitbucket.org/simoncblyth/opticks/src/master/examples/Geant4/RayleighStandalone/
+    * https://bitbucket.org/simoncblyth/opticks/src/master/examples/Geant4/CerenkovStandalone/
+
+    *Mocking* just enough Geant4 environment to invoke **PostStepDoIt** of process
+
+    Common Inputs to both Opticks and Geant4 tests: 
+
+    * pre-cooked random numbers from curand (using *OpticksRandom*) 
+    * input photons (generated by other tests)
+    * other params (eg refractive indices, momentum, polarization) via envvars
+
+    :b:`Small amount of Geant4 (and Opticks) code being run..` 
+
+    * easy to match every random consumption
+    * straightforward direct photon array A-B comparison 
+    * simple environment to debug discrepancies
+
+
+``hemisphere_s_polarized_pvplt_polarized_p0.png``
+---------------------------------------------------
+
+``1M photons all incident at origin   (red:momentum, grey:polarization)``
+
+
+.. raw:: html
+
+     <p style="margin-bottom:13cm;" />
+
+
+``S-polarization direction transverse to plane of incidence (and momentum)``
+
+
+``hemisphere_p_polarized_pvplt_polarized_p0.png``
+---------------------------------------------------
+
+``1M  photons all incident at origin   (red:momentum, grey:polarization)``
+
+.. raw:: html
+
+     <p style="margin-bottom:13cm;" />
+
+
+``P-polarization direction in plane of incidence, transverse to momentum``
+
+
+
+``hemisphere_x_polarized_pvplt_polarized_p0.png``
+---------------------------------------------------
+
+``1M photons all incident at origin   (red:momentum, grey:polarization)``
+
+.. raw:: html
+
+     <p style="margin-bottom:13cm;" />
+
+
+``"X"-polarized : equal admixture of S and P polarized``
+
+
+
+
+
+:small:`Boundary matched QSimTest.sh and G4OpBoundaryProcessTest.sh`
+---------------------------------------------------------------------------------------------------- 
+
+.. raw:: html
+
+    <pre class="mypre15">
+    epsilon:BoundaryStandalone blyth$ TEST=propagate_at_boundary_s_polarized NUM=1000000  ./G4OpBoundaryProcessTest.sh cf
+    a.shape (1000000, 4, 4) : /tmp/blyth/opticks/QSimTest/propagate_at_boundary_s_polarized/p.npy  
+    b.shape (1000000, 4, 4) : /tmp/blyth/opticks/G4OpBoundaryProcessTest/propagate_at_boundary_s_polarized/p.npy  
+
+    a_flag=a[:,3,3].view(np.uint32)                    : [2048 2048 2048 ... 2048 2048 1024]
+    b_flag=b[:,3,3].view(np.uint32)                    : [2048 2048 2048 ... 2048 2048 1024]
+    w_flag=np.where( a_flag != b_flag )                : <span class="redbold">(array([209411]),)   ## 1 REFLECT/TRANSMIT flag mismatch</span>
+    ua_flag=np.unique(a_flag, return_counts=True)      : (array([1024, 2048], dtype=uint32), array([ 45024, 954976]))
+    ub_flag=np.unique(b_flag, return_counts=True)      : (array([1024, 2048], dtype=uint32), array([ 45025, 954975]))
+    a_TransCoeff=a[:,1,3]                              : [0.784 0.799 0.588 ... 0.853 0.481 0.959]
+    b_TransCoeff=b[:,1,3]                              : [0.784 0.799 0.588 ... 0.853 0.481 0.959]
+    w_TransCoeff=np.where( np.abs( a_TransCoeff - b_TransCoeff) > 1e-6 ) : (array([], dtype=int64),)
+    a_flat=a[:,0,3]                                    : [0.438 0.46  0.25  ... 0.557 0.184 0.992]
+    b_flat=b[:,0,3]                                    : [0.438 0.46  0.25  ... 0.557 0.184 0.992]
+    w_flat=np.where(a_flat != b_flat)                  : (array([], dtype=int64),)
+    w_ab0=np.where( np.abs(a[:,0] - b[:,0]) > 1e-6 )   : (array([], dtype=int64), array([], dtype=int64))
+    w_ab1=np.where( np.abs(a[:,1] - b[:,1]) > 1e-6 )   : <span class="redbold">(array([209411, 209411, 209411]), array([0, 1, 2])) ## diff direction</span>
+    w_ab2=np.where( np.abs(a[:,2] - b[:,2]) > 1e-6 )   : <span class="redbold">(array([209411, 209411]), array([0, 1])) ## diff polarization</span>
+    w_ab3=np.where( np.abs(a[:,3] - b[:,3]) > 1e-6 )   : (array([], dtype=int64), array([], dtype=int64))
+
+    In [1]: a[209411]                                                  
+    Out[1]:                                                       <span class="bluebold"> u_reflect > TransCoeff </span>             
+    array([[ -0.136,  -0.264,  -0.955,   0.955],                       In [3]: a[209411,0,3] > a[209411,1,3]
+           [ -0.09 ,  -0.176,  -0.98 ,   0.955],                       Out[3]: False  <span class="bluebold"> BOUNDARY_TRANSMIT </span> 
+           [  0.89 ,  -0.456,  -0.   , 500.   ],                              
+           [  0.89 ,  -0.456,   0.   ,   0.   ]], dtype=float32)       
+                                                                       
+    In [2]: b[209411] 
+    Out[2]:                                               
+    array([[ -0.136,  -0.264,  -0.955,   0.955],                       In [4]: b[209411,0,3] > b[209411,1,3]
+           [ -0.136,  -0.264,   0.955,   0.955],                       Out[4]: True    <span class="bluebold"> BOUNDARY_REFLECT </span> $                      
+           [ -0.89 ,   0.456,  -0.   , 500.   ],
+           [  0.89 ,  -0.456,   0.   ,   0.   ]], dtype=float32)
+                                                       <span class="redbold">One-in-a-million on TransCoeff REFLECT/TRANSMIT cut edge</span>
+    In [5]: a[209411,0,3] == b[209411,0,3]                             In [6]: a[209411,1,3] - b[209411,1,3]
+    Out[5]: True                                                       Out[6]: 5.9604645e-08                
+    </pre>
+
+
+
+:small:`Dynamic Prim Selection Speed Scan : One "G4VSolid" Geometries`
+--------------------------------------------------------------------------
+
+::
+
+    cd ~/opticks/CSGOptiX
+    ./grabsnap.sh --reverse --selectspec not_elv_t --candle t103 --rst
+
+.. sidebar:: :small:`ELV including single Prim`
+
+     .. class:: small
+
+         * relative: to candle t103:EXCLUDE-solidXJfixture
+         * :r:`NNVTMCPPMTTail` in 2nd spot 
+         * informs where to investigate
+
+         JUNO Geometry (January trunk) has 140 solids
+
+         * full include, exclude table : ~280 entries
+
+.. class:: tiny
+
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |idx|        -e|       time(s)    |      relative    |    enabled geometry description 41c046fe                                     |
+    +===+==========+==================+==================+==============================================================================+
+    |  0|       103|        0.0225    |        3.0917    |:r:`ONLY: solidXJfixture`                                                     |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  1|       112|        0.0051    |        0.7009    |:r:`ONLY: NNVTMCPPMTTail`                                                     |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  2|       105|        0.0027    |        0.3644    |    ONLY: HamamatsuR12860Tail                                                 |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  3|       111|        0.0025    |        0.3422    |    ONLY: NNVTMCPPMTsMask                                                     |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  4|       117|        0.0022    |        0.3051    |    ONLY: NNVTMCPPMTsMask_virtual                                             |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  5|         0|        0.0018    |        0.2496    |    ONLY: sTopRock_domeAir                                                    |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  6|         1|        0.0018    |        0.2474    |    ONLY: sTopRock_dome                                                       |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  7|        94|        0.0018    |        0.2406    |    ONLY: sTarget                                                             |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  8|       123|        0.0017    |        0.2392    |    ONLY: sChimneyAcrylic                                                     |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  9|       127|        0.0017    |        0.2378    |    ONLY: sInnerWater                                                         |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 10|       128|        0.0017    |        0.2366    |    ONLY: sReflectorInCD                                                      |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 11|        95|        0.0017    |        0.2363    |    ONLY: sAcrylic                                                            |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 12|        14|        0.0016    |        0.2160    |    ONLY: sAirTT                                                              |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 13|        15|        0.0016    |        0.2142    |    ONLY: sExpHall                                                            |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 14|       109|        0.0015    |        0.2025    |    ONLY: HamamatsuR12860_PMT_20inch_pmt_solid_1_4                            |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 15|       104|        0.0013    |        0.1847    |    ONLY: HamamatsuR12860sMask                                                |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+
+::
+
+    SNAP_LIMIT=16 ./grabsnap.sh --reverse --selectspec not_elv_t --jpg --out
+    ./image_grid.sh  ; ./pub1.sh path-returned-by-above
+
+
+
+``image_grid_elv_scan_dyn_prim_scan.jpg``    
+-------------------------------------------
+
+
+
+:small:`Dynamic Prim Selection Speed Scan : Exclude G4VSolid Geometries`
+--------------------------------------------------------------------------
+
+::
+
+    cd ~/opticks/CSGOptiX
+    ./grabsnap.sh --selectspec only_elv_t --candle t103 --rst
+
+.. sidebar:: :small:`ELV excluding single Prim`
+
+     .. class:: small
+
+         * relative: cf candle t103:not-solidXJfixture
+         * TODO: scan again with solidXJfixture excluded from base geometry
+
+           * as that problem may be hiding other smaller problems 
+
+
+.. class:: tiny
+
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |idx|        -e|       time(s)    |      relative    |    enabled geometry description 41c046fe                                     |
+    +===+==========+==================+==================+==============================================================================+
+    |  0|      t103|        0.0073    |        1.0000    |    EXCL: solidXJfixture                                                      |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  1|        t1|        0.0118    |        1.6169    |    EXCL: sTopRock_dome                                                       |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  2|        t0|        0.0119    |        1.6306    |    EXCL: sTopRock_domeAir                                                    |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  3|      t112|        0.0119    |        1.6311    |    EXCL: NNVTMCPPMTTail                                                      |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  4|         t|        0.0119    |        1.6317    |    ALL                                                                       |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  5|      t127|        0.0119    |        1.6393    |    EXCL: sInnerWater                                                         |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  6|       t97|        0.0120    |        1.6488    |    EXCL: sStrut                                                              |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  7|       t29|        0.0121    |        1.6558    |    EXCL: GLw2.equ_bt01_FlangeI_Web_FlangeII                                  |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  8|      t136|        0.0121    |        1.6563    |    EXCL: sPoolLining                                                         |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    |  9|       t95|        0.0121    |        1.6576    |    EXCL: sAcrylic                                                            |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 10|      t128|        0.0121    |        1.6576    |    EXCL: sReflectorInCD                                                      |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 11|      t105|        0.0121    |        1.6657    |    EXCL: HamamatsuR12860Tail                                                 |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 12|       t60|        0.0121    |        1.6670    |    EXCL: GLb3.bt09_FlangeI_Web_FlangeII                                      |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 13|      t135|        0.0121    |        1.6673    |    EXCL: sOuterWaterPool                                                     |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 14|      t104|        0.0122    |        1.6684    |    EXCL: HamamatsuR12860sMask                                                |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+    | 15|      t137|        0.0122    |        1.6687    |    EXCL: sBottomRock                                                         |
+    +---+----------+------------------+------------------+------------------------------------------------------------------------------+
+
+::
+
+    SNAP_LIMIT=16 ./grabsnap.sh --selectspec only_elv_t --jpg --out
+    ./image_grid.sh  ; ./pub1.sh  path-returned-by-above
+
+
+``image_grid_elv_scan_exclude_grid.jpg``
+-----------------------------------------
 
 
 Prediction : 2022 April (Modulo unforseen problems)
