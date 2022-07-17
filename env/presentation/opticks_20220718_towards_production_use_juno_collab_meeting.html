@@ -3769,6 +3769,15 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
          margin: 1em 0;
     }
 
+    pre.mypre18 {
+         display: block;
+         font-family: monospace;
+         font-size: 18px;
+         white-space: pre;
+         margin: 1em 0;
+    }
+
+
     pre.mypre15 {
          display: block;
          font-family: monospace;
@@ -7141,20 +7150,21 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 </div><!--  -->
 <blockquote>
 <p><em>Opticks</em> replaces <em>Geant4</em> optical photon simulation with an <strong>equivalent implementation</strong>
-that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX.
-All optically relevant aspects of <em>Geant4</em> context must be translated+copied to GPU:</p>
+that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can yield
+<span class="r">performance &gt;1000x Geant4</span>.</p>
+<p>All optically relevant aspects of <em>Geant4</em> context are translated+copied to GPU:</p>
 <ul class="simple">
 <li>geometry : solids, structure, material+surface properties</li>
 <li>generation : Cerenkov + Scintillation (using <strong>Gensteps</strong> from <em>Geant4</em>)</li>
 <li><span class="b">propagation : Rayleigh scattering, absorption, reemission, boundary</span></li>
 </ul>
-<p>Achieving+maintaining <strong>equivalence</strong> is time consuming, BUT:</p>
+<p><span class="r">COMPLETED : Full Simulation re-implementation for OptiX 7 API</span></p>
 <ul class="simple">
-<li><span class="r">transformative performance benefits &gt;1000x Geant4</span></li>
+<li><span class="b">NEXT : A-B Validation iteration, geometry issue fixes</span></li>
 </ul>
 </blockquote>
 <div class="mycredit">
-<h2 style="background-color:lightgrey"> Simon C Blyth &mdash; IHEP, CAS  &mdash; 18 July 2022 </h2>
+<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; 18 July 2022 </h2>
 </div>
         <!--  s5talk  -->
         <br/>
@@ -7425,6 +7435,57 @@ conducted via debugger</li>
         <!--  s5talk  -->
         <br/>
     </div>
+<div class="slide" id="cx-csgoptix7-cu-simulate-high-level-details-in-qudarap-sysrap">
+<h1><span class="small">cx/CSGOptiX7.cu:simulate  : High Level, details in qudarap+sysrap</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">CSGOptiX built upon:</span></p>
+<ul class="small simple">
+<li><strong>OptiX</strong> : <span class="b">trace</span>-intersection</li>
+<li><strong>qudarap</strong> : qsim.h</li>
+<li><strong>sysrap</strong> : sctx.h sphoton.h sevent.h ...</li>
+</ul>
+<dl class="small docutils">
+<dt>sctx::point</dt>
+<dd>record ctx.p sphoton -&gt; record/rec/seq</dd>
+</dl>
+<p class="small"><span class="g">Geometry + Simulation brought together here</span></p>
+<ul class="small last simple">
+<li><span class="r">red recording code</span> for debugging only</li>
+</ul>
+</div>
+<pre class="mypre18">
+void simulate(const uint3& idx, const uint3& dim)
+{
+    // skip some setup
+
+    curandState rng = sim->rngstate[idx] ;
+    sim->generate_photon(ctx.p, rng, gs, idx, gs_idx );
+
+    int command = START ;
+    int bounce = 0 ;
+    <span class="r">ctx.point(bounce)</span>;
+
+    while( bounce < evt->max_bounce )
+    {
+        <span class="b">trace( params.handle, ctx.p.pos, ctx.p.mom,
+              params.tmin, params.tmax, prd)</span>;
+        if( prd->boundary() == 0xffffu ) break ;
+        <span class="r">ctx.trace(bounce); // record PerRayData intersect</span>
+
+        command = sim->propagate(bounce, rng, ctx);
+
+        bounce++;
+        <span class="r">ctx.point(bounce)</span> ;
+        if(command == BREAK) break ;
+    }
+    <span class="r">ctx.end();  // write seq, tag, flat </span>
+    <span class="b">evt->photon[idx] = ctx.p ;  // final photon </span>
+}
+</pre><p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/CSGOptiX/CSGOptiX7.cu">https://bitbucket.org/simoncblyth/opticks/src/master/CSGOptiX/CSGOptiX7.cu</a></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="opticks-packages-many-more-to-be-removed">
 <h1>Opticks Packages : <span class="b">Many more to be removed</span></h1>
 <!-- comment
@@ -7566,7 +7627,10 @@ created by bin/packages.py:presentation_page with bin/stats.sh -->
  490     float absorption_distance = -absorption_length*logf(u_absorption);
  ...
 </pre><p class="small"><strong>sysrap/stag.h/stagr</strong> collects into <strong>tag.npy flat.npy</strong> : <span class="huge">A</span>-side straightforward as already control all code</p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="systematic-approach-to-random-alignment-of-two-simulations-b-side">
 <h1><span class="small">Systematic Approach to Random Alignment of Two Simulations : B side</span></h1>
 <div class="sidebar">
@@ -7622,10 +7686,13 @@ u4/tests/DsG4Scintillation.cc
  </pre><p class="small"><strong>sysrap/SEvt.cc:SEvt::AddTag</strong> using same <strong>stagr</strong> struct as <span class="huge">A</span></p>
 <p class="small"><strong>u4/U4Process::ClearNumberOfInteractionLengthLeft</strong></p>
 <ul class="small simple">
-<li>makes Geant4 consumption more regular -&gt; possible to align</li>
+<li>makes Geant4 consumption more regular -&gt; easier to align</li>
 <li>used from <strong>U4Recorder::UserSteppingAction_Optical</strong></li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="a-b-compare-tag-arrays-with-numpy-to-check-alignment">
 <h1><span class="small">A - B : Compare tag arrays with NumPy to check alignment</span></h1>
 <div class="sidebar">
@@ -7669,10 +7736,16 @@ sm = np.all( a.seq[:,0] == b.seq[:,0] )            : True
 ww = np.where( a.seq[:,0] != b.seq[:,0] )[0]       : []         <span class="r"> History alignment : can be accidental </span>
 we = np.where( A.t.view('|S64') != B.t2.view('|S64') )[0] : []  <span class="b"> Tag enum alignment : much more stringent </span>
 <span class="b"> match sequences of 64 tags by viewing as 64 char string </span>
-</pre></div>
+</pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="raindroprockairwatersmall-upxz1000-chk-png">
 <h1><tt class="docutils literal">RaindropRockAirWaterSmall_UpXZ1000_chk.png</tt></h1>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="a-b-1m-raindroprockairwatersmall-simple-geometry-machinery-test">
 <h1><span class="small">A - B : 1M : RaindropRockAirWaterSmall : simple geometry machinery test</span></h1>
 <ul class="small simple">
@@ -7709,7 +7782,10 @@ Out[36]: ['TO AB','TO AB','TO BT BT AB','TO AB','TO AB','TO BR AB','TO SC BT BT 
  </pre><ul class="small simple">
 <li><span class="r">22/1M not tag aligned, 9(466)/1M with deviation &gt; 0.01(0.001)</span></li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="m-mis-aligned-tag-arrays-show-alignment-lost-at-1st-br-after-sc">
 <h1><span class="small">22/1M mis-aligned : tag arrays show alignment lost at 1st BR after SC</span></h1>
 <ul class="small simple">
@@ -7748,7 +7824,10 @@ Out[4]: A(41595) : TO BT SC BR BR BR BR BR BR BR          B(41595) : TO BT SC BR
 </pre><ul class="small simple">
 <li>TODO: <span class="b">run the non-aligned indices in debugger to understand unexpected G4 random consumption</span></li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="a-b-deviant-scattering-sc-and-absorption-ab-position-logf-u">
 <h1><span class="small">A - B : Deviant Scattering SC and Absorption AB Position : __logf(u)</span></h1>
 <div class="sidebar">
@@ -7783,9 +7862,12 @@ Out[4]: A(41595) : TO BT SC BR BR BR BR BR BR BR          B(41595) : TO BT SC BR
 <p class="small"><span class="r">Using KLUDGE_FASTMATH_LOGF reduces SC/AB position deviation</span></p>
 <pre class="mypre20">
 ##define KLUDGE_FASTMATH_LOGF(u) (u < 0.998f ? __logf(u) : __logf(u) - 0.46735790f*1e-7f )
-</pre></div>
-<div class="slide" id="start-a-b-aligned-iteration-with-full-juno-gdml-geometry">
-<h1><span class="small">Start A - B aligned iteration with full JUNO GDML geometry</span></h1>
+</pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="started-a-b-aligned-iteration-with-full-juno-gdml-geometry">
+<h1><span class="small">Started : A - B aligned iteration with full JUNO GDML geometry</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Full geom, but target single PMT</span></p>
 <dl class="small docutils">
@@ -7820,11 +7902,17 @@ cd ~/opticks/u4
 cd ~/opticks/g4cx
 ./gxt.sh ana
 ./ab.sh           # compare A and B with NumPy
-</pre></div>
+</pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="j000-downxz1000-pmt-ellipsoid-transform-again-png">
 <h1><tt class="docutils literal">J000_DownXZ1000_PMT_ellipsoid_transform_again.png</tt></h1>
 <p class="small"><tt class="docutils literal">&quot;simtrace&quot; : scatter plot of intersects, looks like missed ellipsoid transform</tt></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="j000-downxz1000-virtual-too-png">
 <h1><tt class="docutils literal">J000_DownXZ1000_virtual_too.png</tt></h1>
 <pre>
@@ -7839,11 +7927,17 @@ cd ~/opticks/g4cx
 <dt><tt class="docutils literal">A:red, B:blue : virtual Water/Water &quot;hatbox&quot; skipped in A</tt></dt>
 <dd><tt class="docutils literal">prevents alignment</tt></dd>
 </dl>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="hama-body-log-downxz1000-no-issue-with-hama-body-log-png">
 <h1><tt class="docutils literal">hama_body_log_DownXZ1000_no_issue_with_hama_body_log.png</tt></h1>
 <p class="small"><tt class="docutils literal">single PMT test : <span class="pre">no-such</span> missed ellipsoid transform issue</tt></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="next-steps-in-detail">
 <h1>Next steps in detail</h1>
 <div class="sidebar">
@@ -7880,7 +7974,10 @@ cd ~/opticks/g4cx
 </ul>
 </li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="overview">
 <h1><span class="small">Overview</span></h1>
 <table border="1" class="docutils align-center">
@@ -7939,7 +8036,10 @@ cd ~/opticks/g4cx
 </tr>
 </tbody>
 </table>
-<!-- comment
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
 
 cxs_debug_moi37684_repeated_step_point.png
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
