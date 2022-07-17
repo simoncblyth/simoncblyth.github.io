@@ -1,0 +1,451 @@
+.. meta::
+
+   :title: Opticks: towards production use, Simon Blyth
+   :name: opticks_20220329_progress_towards_production
+   :description: (July 2022)
+   :notes: 15-20 min : general status summary and highlight the work since last review
+   :url: https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=1682
+   :date: Jul 18 and 19
+
+.. include:: my_s5defs.txt
+
+.. include:: s5_background_image.txt
+
+
+
+:i:`JUNO+Opticks : Progress Towards Production` 
+========================================================================================
+
+.. raw:: html
+
+    <p style="margin-bottom:4cm;" />
+    <div class="mytitle">
+    <header>
+    <h1 style="background-color:lightgrey"> 
+        JUNO+Opticks : Progress Towards Production
+        <h2 style="background-color:lightgrey;text-align:center"> Open source, https://bitbucket.org/simoncblyth/opticks </h2>
+    </h1>
+    </header>
+    </div>
+
+..
+
+  *Opticks* replaces *Geant4* optical photon simulation with an **equivalent implementation** 
+  that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX. 
+  All optically relevant aspects of *Geant4* context must be translated+copied to GPU:
+
+  * geometry : solids, structure, material+surface properties
+  * generation : Cerenkov + Scintillation (using **Gensteps** from *Geant4*) 
+  * :b:`propagation : Rayleigh scattering, absorption, reemission, boundary`
+
+  Achieving+maintaining **equivalence** is time consuming, BUT:
+
+  * :r:`transformative performance benefits >1000x Geant4`   
+
+
+.. raw:: html
+
+    <div class="mycredit">
+    <h2 style="background-color:lightgrey"> Simon C Blyth  &mdash; 18 July 2022 </h2>
+    </div>
+
+
+.. s5_talk:: 
+
+    Most recent work has been focussed on getting both A and B simulations operational
+    and ready to align and compare  
+    
+
+
+:i:`Geant4OpticksWorkflow`
+------------------------------
+
+.. s5_talk::
+
+    A brief reminder of Opticks
+
+
+:i:`Geant4OpticksWorkflow 2`
+------------------------------
+
+.. raw:: html 
+
+    <p style="margin-bottom:1cm;" />
+
+
+.. sidebar:: :small:`Integrate NVIDIA OptiX with Geant4`
+ 
+  .. class:: small
+
+     :g:`Geometry Translation` + :b:`"Gensteps"`
+       :r:`=> entirely offload photon simulation to GPU` 
+
+     * upload translated geometry at initialization
+     * only hits need to consume CPU memory 
+
+
+.. s5_talk::
+
+    Getting the geometry translated is the difficult part
+
+
+
+
+
+
+Validation : Opticks-Geant4 A-B testing 
+----------------------------------------------
+
+.. sidebar:: :small:`SEvt NumPy arrays : Extreme Detail`
+
+   .. raw:: html
+
+      <pre class="mypre15"> 
+      : a.genstep :        (1, 6, 4) : generation param
+      : a.seed    :         (10000,) : photon -> genstep
+      : a.inphoton:    (10000, 4, 4) : input photon 
+      : a.photon  :    (10000, 4, 4) : final photon param
+      : a.hit     :     (9633, 4, 4) : hitmasked photon
+      : a.seq     :       (10000, 2) : history sequence
+      : a.record  :(10000, 10, 4, 4) : steppoint record
+      : a.rec     :(10000, 10, 2, 4) : compressed record
+      : a.domain  :        (2, 4, 4) : used for compression
+      : a.sframe  :        (4, 4, 4) : used for targetting 
+      : a.flat    :      (10000, 64) : random numbers tagged
+      : a.tag     :       (10000, 4) : compressed tag enum 
+      : a.prd     :(10000, 10, 2, 4) : per-ray-data isect
+      </pre>
+
+   .. class:: small
+
+      :b:`Every random consumed by every photon step`
+
+
+.. class:: normal 
+
+   :huge:`A` : Opticks : GPU geometry + optical sim.
+
+   * full step point recording (QEvent, SEvt)
+
+   :huge:`B` : Geant4 simulation
+   
+   * full step point recording (U4Recorder, SEvt)
+
+   :huge:`A-B` : comparison via python/NumPy analysis
+
+   **Random Aligned**
+      direct comparison of photon steppoint record and history arrays 
+
+   **Non-aligned**  
+      statistical comparison of history fractions 
+
+
+
+.. s5_talk::
+
+    A - B  
+
+
+:small:`July => ??? : A-B validation iteration : random alignment, deviation checks`
+-------------------------------------------------------------------------------------
+
+.. class:: normal 
+
+    March : :b:`Shifted focus, geom issues => optical sim`,  July : :r:`A-B` iteration starting 
+
+.. image:: /env/presentation/notes/progress/2022_jul.png
+   :align: center
+   :width: 1000px
+
+
+.. class:: small 
+
+   :huge:`A` : Opticks GPU sim,  :huge:`B` : Geant4 CPU sim (both fully instrumented: point recording, histories, tagged random consumption) 
+
+
+.. comment 
+
+   https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst  
+
+
+.. s5_talk::
+
+    This link provides month by month progress notes
+
+
+
+Opticks Packages : Many Removed, Many Added
+--------------------------------------------
+
+.. comment
+    created by bin/packages.py:presentation_page with bin/stats.sh 
+
+
+.. class:: small
+
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |                 pkg     |         hh/cc/cu/py     |                                      Old CUDA Simulation and Visualization     |
+    +=========================+=========================+================================================================================+
+    |         :r:`cudarap`    |        :r:`16/8/3/0`    |                                                     :r:`old CUDA interface`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |       :r:`thrustrap`    |        :r:`20/2/6/1`    |                  :r:`old CUDA thrust interface : photon seeding, indexing`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |        :r:`optixrap`    |       :r:`43/30/3/2`    |            :r:`old optical photon simulation implemented in old OptiX API`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |            :r:`okop`    |       :r:`14/10/1/0`    |                                     :r:`high level pkg on top of optixrap`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |          :r:`oglrap`    |       :r:`38/29/0/0`    |                  :r:`old OpenGL based visualization of opticksgeo geometry`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |       :r:`opticksgl`    |         :r:`9/5/0/0`    |                                    :r:`integrating OpenGL with okop OptiX`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+
+
+
+.. class:: small
+
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |                 pkg     |         hh/cc/cu/py     |                                   New Geometry model and CUDA simulation       |
+    +=========================+=========================+================================================================================+
+    |        :b:`CSG_GGeo`    |         :b:`3/2/0/0`    |                                      :b:`GGeo to CSG geometry translation`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |        :b:`GeoChain`    |         :b:`3/2/0/0`    |                                           :b:`geometry translation testing`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |             :g:`CSG`    |       :g:`37/18/0/7`    |                                                     :g:`New geometry model`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |        :g:`CSGOptiX`    |       :g:`20/14/4/2`    |                                         :g:`CSG intersection with OptiX 7`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |         :g:`qudarap`    |      :g:`43/25/13/1`    |        :g:`CUDA optical photon simulation, CUDA upload, download, textures`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |              :g:`u4`    |       :g:`32/10/0/2`    |                  :g:`New Geant4 interface, genstep collection, U4Recorder`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |           :g:`gdxml`    |         :g:`6/4/0/0`    |                                         :g:`GDML loaded as XML for fixups`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |            :g:`g4cx`    |         :g:`3/2/0/0`    |                  :g:`New top level package integrating Geant4 and CSGOptiX`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+
+
+
+:g:`green : active development`,   :b:`blue : plan to remove`,   :r:`red : removed`
+
+
+.. s5_talk::
+
+    Lots of Change 
+
+
+:small:`Simulation : Why so much had to be re-implemented ?` 
+---------------------------------------------------------------
+
+.. class:: small
+
+    * :r:`Huge change unavoidable from new OptiX API` --> :b:`So profit from rethink of simulation code` --> **2nd impl advantage** 
+
+    +------------------------------------------+-----------------------------------------------------+
+    |  Old simulation (OptiXRap)               |  New simulation (QUDARap/qsim.h + CSGOptiX)         | 
+    +==========================================+=====================================================+
+    |  * implemented on top of old OptiX API   | * pure CUDA implementation                          |
+    |                                          | * OptiX use kept separate, just for intersection    |
+    |                                          |                                                     |
+    +------------------------------------------+-----------------------------------------------------+
+    |  * rather monolithic .cu                 | * many small headers                                |
+    |  * GPU only implementation               | * many GPU+CPU headers                              |
+    |  * deep stack of support code            | * shallow stack : QUDARap depends only on SYSRap    | 
+    +------------------------------------------+-----------------------------------------------------+
+    |  * most code in GPU only context,        | * strict code segregation                           |
+    |    even when not needing OptiX or CUDA   |                                                     |
+    |                                          |   * code not needing GPU in SYSRap not QUDARap      |
+    +------------------------------------------+-----------------------------------------------------+
+    |  * testing : GPU only, coarse            | * testing : CPU+GPU , fine-grained                  |
+    |                                          | * curand mocking on CPU                             | 
+    +------------------------------------------+-----------------------------------------------------+
+    |  * limited code sharing between A and B  | * maximal sharing : SEvt.hh, sphoton.h, ...         |
+    +------------------------------------------+-----------------------------------------------------+
+    |  * timeconsuming manual random alignment | * :b:`new systematic approach to random alignment`  |  
+    |    conducted via debugger                |                                                     |
+    +------------------------------------------+-----------------------------------------------------+
+
+    **Goals of re-implementation : flexible, modular GPU simulation, easily testable, less code**
+
+    * code reduction, sharing as much as possible between **A** and **B** 
+    * fine grained testing on both CPU and GPU, with GPU curand mocking 
+    * profit from several years of CUDA experience, eg QSim.hh/qsim.h host/device counterpart pattern:
+
+      * hostside initializes and uploads device side counterpart --> :r:`device side hits ground running` 
+
+
+.. s5_talk::
+
+    Embrace the change : might as well profit from a rethink 
+
+
+
+Opticks Packages : :b:`Many more to be removed`
+-----------------------------------------------
+
+.. comment
+    created by bin/packages.py:presentation_page with bin/stats.sh 
+
+
+.. sidebar:: :small:`Strong Code Reduction Potential`
+
+    .. class:: small
+
+        Several :b:`pkgs only used by geo translation`, not sim
+
+        Longer term: revisit geometry translation + viz
+
+        * more direct G4 -> GGeo -> CSG model
+        * simplified intermediary "GGeo"
+
+        Same translation in less code: 
+
+        * non-urgent, necessary for maintainability 
+
+
+
+.. class:: small
+
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |                 pkg     |         hh/cc/cu/py     |                                                                       Base     |
+    +=========================+=========================+================================================================================+
+    |              okconf     |             3/2/0/0     |                                                   config version detection     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |          :g:`sysrap`    |      :g:`150/70/1/8`    |                                           :g:`basis types, new array NP.hh`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |        :b:`boostrap`    |       :b:`46/42/0/0`    |                                                            :b:`boost tools`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |             :b:`npy`    |     :b:`181/165/0/6`    |                                      :b:`geo primitives, old array NPY.hpp`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |     :b:`optickscore`    |       :b:`70/62/0/1`    |                                           :b:`old core, argument parsing`      |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+
+
+
+.. class:: small
+
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |                 pkg     |         hh/cc/cu/py     |                                                                  Geometry      |
+    +=========================+=========================+================================================================================+
+    |            :b:`ggeo`    |       :b:`68/65/0/2`    |                         :b:`complete geometry model : no Geant4 dependency`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |           :b:`extg4`    |       :b:`62/53/0/0`    |                           :b:`Geant4 geometry translation into GGeo model`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |      :r:`opticksgeo`    |        :r:`10/6/0/0`    |                                          :r:`high level pkg on top of ggeo`    |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+    |            :r:`cfg4`    |     :r:`126/117/0/3`    |                         :r:`Old Geant4 comparison machinery, eg CRecorder`     |
+    +-------------------------+-------------------------+--------------------------------------------------------------------------------+
+
+
+
+:g:`green : active development`,   :b:`blue : plan to remove`,   :r:`red : removed`
+
+
+
+
+.. s5_talk::
+
+    Having the final model, gives strong motivation to simplify intermediary geometry model 
+
+
+
+
+A - B : New Systematic Random Alignment Approach
+------------------------------------------------------
+
+
+
+A : Reduce Scatter and Absorption deviation 
+----------------------------------------------
+
+
+
+
+
+
+.. comment
+
+    cxs_debug_moi37684_repeated_step_point.png
+    ---------------------------------------------
+
+    cxs_debug_moi37684_yellow_epsilon_looks_appropriate.png
+    ---------------------------------------------------------
+
+
+
+
+Prediction : 2022 April 
+-----------------------------------------------------
+
+.. class:: small
+
+    Experience suggests that predictions are impossible due to:
+
+    * changing geometry + geometry issues
+
+    BUT with caveat of excluding those
+
+    * :b:`migrating existing functionality from old to new workflow is less predictable`
+
+    **Expect completed new workflow by end of April, what remains:**
+
+    * *propagate_at_surface* (the more complex *propagate_at_boundary* took 3~4 days) 
+    * photon step-by-step history recording (for A-B testing)
+
+      * not needed in production, but essential for validation 
+
+    * event handling : stream compaction for downloading hits 
+    * integrate new CSGOptiX workflow into *G4Opticks* (gensteps in, hits out)
+
+    **Towards end of April**
+
+    * New workflow performance testing 
+    * Try to integrate MultiFilm PMT model (using LUT texture approach being developed by Yuxiang)
+    * Prepare release for Installation onto GPU cluster 
+
+
+.. s5_talk::
+
+    Preditions usually impossible, BUT 
+
+
+:small:`Prediction : After April : Geometry Optimization + Production Optimization`
+-------------------------------------------------------------------------------------------
+
+.. class:: small
+
+    :r:`performance so far always limited by geometry`
+
+    * intersecting with geometry much more resource intensive that physics simulation
+    * very sensitive to any geometry issues
+ 
+
+    **Geometry Optimization : Measure Simulation+Render performance as make changes:** 
+
+    Expect geometry optimization needed to maximize performance even with *XJfixtureConstruction* skipped
+
+    * adjust instancing criteria -> different geometry factorization 
+
+      * more instancing expected to be faster but there is some balancing against overheads
+
+    * apply CSG_CONTIGUOUS list-node to slower solids
+
+    * try again suggestions from NVIDIA Engineers (PRD trick, flags, stack config)
+
+      * worthwhile to retry as bottlenecks eliminated : as differences may become visible  
+
+    **Production Optimization : New Territory, Experience needed to direct expts**
+
+    * Now many GPUs per node ?
+    * Split/combine events depending on GPU memory 
+
+      * large launches filling GPU memory expected to make better use of GPU 
+      * BUT: what about implications for overall cluster throughput ?
+
+
+.. s5_talk::
+
+   Lots of scope for optimization  
+
+
+
+
