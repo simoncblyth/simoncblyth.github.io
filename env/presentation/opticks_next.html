@@ -3948,6 +3948,18 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
+          }
+          div.slide#hamalogicalpmtwraplv-modeltriggeryes-png{
+             background-image: url(extg4/X4IntersectVolumeTest/hamaLogicalPMTWrapLV/figs/xxv/mpcap/hamaLogicalPMTWrapLV_ModelTriggerYES.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmtwraplv-modeltriggerno-png{
+             background-image: url(extg4/X4IntersectVolumeTest/hamaLogicalPMTWrapLV/figs/xxv/mpcap/hamaLogicalPMTWrapLV_ModelTriggerNO.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
           } 
 
        </style>
@@ -7604,6 +7616,18 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
+          }
+          div.slide#hamalogicalpmtwraplv-modeltriggeryes-png{
+             background-image: url(extg4/X4IntersectVolumeTest/hamaLogicalPMTWrapLV/figs/xxv/mpcap/hamaLogicalPMTWrapLV_ModelTriggerYES.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmtwraplv-modeltriggerno-png{
+             background-image: url(extg4/X4IntersectVolumeTest/hamaLogicalPMTWrapLV/figs/xxv/mpcap/hamaLogicalPMTWrapLV_ModelTriggerNO.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
           } 
 
        </style>
@@ -7679,6 +7703,86 @@ that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can
 <h1>hamaLogicalPMTWrapLV_bounce.png</h1>
 <p><tt class="docutils literal">~/opticks/extg4/xxv.sh # EXTRA from U4PMTFastSimTest.py</tt></p>
 </div>
+<div class="slide" id="hamalogicalpmtwraplv-modeltriggeryes-png">
+<h1>hamaLogicalPMTWrapLV_ModelTriggerYES.png</h1>
+<p style="margin-bottom:0.1cm;" /><p class="small">          Starts at upper left, here --&gt;</p>
+<p style="margin-bottom:14cm;" /><ul class="small simple">
+<li>Unnatural Geometry -&gt; DoIt shifts position by <strong>dist1</strong>  -&gt; Effectively &quot;Pre-Triggering&quot; : slide the red dots forwards</li>
+</ul>
+</div>
+<div class="slide" id="big-bouncer">
+<h1>Big Bouncer</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">SFastSim_Debug.hh</span></p>
+<div class="last"><pre class="mypretiny">
+ struct SYSRAP_API SFastSim_Debug
+ {
+     static std::vector&lt;SFastSim_Debug&gt; record ;
+     static constexpr const char* NAME = "SFastSim_Debug.npy" ;
+     static constexpr int LIMIT = 100000 ;
+     static void Save(const char* dir);
+     void add();
+
+     double posx ;  // fs[:,0,:3]
+     double posy ;
+     double posz ;
+     double time ;  // fs[:,0,3]
+
+     double dirx ;  // fs[:,1,:3]
+     double diry ;
+     double dirz ;
+     double dist1 ; // fs[:,1,3]
+
+     double polx ;  // fs[:,2,:3]
+     double poly ;
+     double polz ;
+     double dist2 ; // fs[:,2,3]
+
+     double ModelTrigger; // fs[:,3,0].astype(np.int64)
+     double whereAmI ;    // fs[:,3,1].astype(np.int64)
+     double c ;           // fs[:,3,2]
+     double PhotonId ;    // fs[:,3,3].astype(np.int64)
+};
+</pre></div></div>
+<pre class="mypre12">
+epsilon:tests blyth$ PID=726 ./U4PMTFastSimTest.sh nana
+ In [1]: extra.shape
+ Out[1]: (14, 4, 4)
+ In [2]: extra
+ Out[2]:
+ array([[[-112.83 ,    0.   ,  164.918,    0.164],
+         [   0.032,    0.   ,   -0.999,    0.001],    // dist1:1e-3 mm
+         [   0.   ,   -1.   ,    0.   ,  165.005],
+         [  <span class="r"> 1.</span>   ,    1.   ,    0.   ,  726.   ]], ##<span class="r"> ModelTrigger:1 </span>
+
+        [[-112.83 ,    0.   ,  164.917,    0.164],
+         [  -0.138,    0.   ,   -0.99 ,  166.512],    // dist1 and dist2 equal
+         [   0.   ,   -1.   ,    0.   ,  166.512],
+         [  <span class="b"> 0.</span>   ,    2.   ,    0.   ,  726.   ]], ##<span class="b"> ModelTrigger:0 </span>
+
+        [[-156.577,    0.   , -148.846,    1.778],
+         [   0.81 ,    0.   ,    0.587,  253.614],
+         [   0.   ,    1.   ,    0.   ,    0.   ],
+         [   0.   ,    1.   ,    0.   ,  726.   ]],
+
+        [[ -95.   ,    0.   , -104.211,    2.166],
+         [  -0.81 ,    0.   ,    0.587,  177.561],
+         [   0.   ,   -1.   ,    0.   ,  169.042],
+         [   0.   ,    1.   ,    0.   ,  726.   ]],
+
+        [[-238.764,    0.   ,   -0.   ,    3.071],
+         [  -0.81 ,    0.   ,    0.587,   12.404],
+         [   0.   ,   -1.   ,    0.   ,   -1.   ],
+         [   1.   ,    2.   ,    0.   ,  726.   ]],
+         ...
+</pre><p class="small"><em>ModelTrigger</em> &quot;pre-triggering&quot; <em>dist1</em> ahead as <em>DoIt</em> will shift by <strong>dist1</strong></p>
+<ul class="small simple">
+<li><span class="r">Complication arising from unnatural geometry</span></li>
+</ul>
+</div>
+<div class="slide" id="hamalogicalpmtwraplv-modeltriggerno-png">
+<h1>hamaLogicalPMTWrapLV_ModelTriggerNO.png</h1>
+</div>
 <div class="slide" id="old-pmt-optical-model-g4-optical-surfaces-photocathode-mirror">
 <h1><span class="small">Old PMT Optical Model : G4 Optical Surfaces photocathode, mirror</span></h1>
 <div class="sidebar">
@@ -7746,8 +7850,8 @@ that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can
 </li>
 </ul>
 </div>
-<div class="slide" id="multilayer-pmt-optical-model-split-vacuum-complications">
-<h1><span class="small">MultiLayer PMT Optical Model : Split Vacuum Complications</span></h1>
+<div class="slide" id="multilayer-pmt-optical-model-split-vacuum-contorted-modeltrigger">
+<h1><span class="small">MultiLayer PMT Optical Model : Split Vacuum -&gt; Contorted ModelTrigger</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Current MultiLayer POM</span></p>
 <pre class="mypretiny">
@@ -7816,8 +7920,48 @@ that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can
   120     return false;
   121 }
 </pre></div>
-<div class="slide" id="multilayer-pmt-optical-model-natural-geometry-simplification">
-<h1><span class="small">MultiLayer PMT Optical Model : Natural Geometry Simplification</span></h1>
+<div class="slide" id="multilayer-pmt-optical-model-natural-geometry-simple-modeltrigger">
+<h1><span class="small">MultiLayer PMT Optical Model : Natural Geometry -&gt; Simple ModelTrigger</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Simplified MultiLayer POM</span></p>
+<pre class="mypretiny">
+  +---------------pmt-Pyrex----------------+
+  |                                        |
+  |                                        |
+  |                                        |
+  |       +~inner~Vacuum~(FSim~env)+       |
+  |       !                        !       |
+  |       !                        !       |
+  |       !                        !       |
+  |       !                        !       |
+  |       !                        !       |
+  |       +                        +       |
+  |       |                        |       |
+  |       |                        |       |
+  |       |                        |       |
+  |       |                        |       |
+  |       |                        |       |
+  |       +------------------------+       |
+  |                                        |
+  |                                        |
+  |                                        |
+  +----------------------------------------+
+</pre><ul class="small last simple">
+<li><em>ModelTrigger</em> : z&gt;0 : no unnatural trig</li>
+<li>override <em>mirror_opsurf</em> (inner&lt;-&gt;pmt) &#64; z &gt; 0</li>
+<li>simpler <em>DoIt</em> : no geom. queries, no shifting</li>
+</ul>
+</div>
+<p style="margin-bottom:6cm;" />
+<pre class="mypretiny">
+ G4bool junoPMTOpticalModel::ModelTrigger(const G4FastTrack &fastTrack)
+ {
+      // <span class="r"> Simple + Cheap due to natural geometry </span>
+     return fastTrack.GetPrimaryTrackLocalPosition().z() > 0. ;
+ }
+</pre></div>
+<div class="slide" id="multilayer-pmt-optical-model-natural-geometry-simple-doit">
+<h1><span class="small">MultiLayer PMT Optical Model : Natural Geometry -&gt; Simple DoIt</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Simplified MultiLayer POM</span></p>
 <pre class="mypretiny">
@@ -7849,12 +7993,6 @@ that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can
 </ul>
 </div>
 <pre class="mypretiny">
- G4bool junoPMTOpticalModel::ModelTrigger(const G4FastTrack &fastTrack)
- {
-      // <span class="r"> Simple + Cheap due to natural geometry </span>
-     return fastTrack.GetPrimaryTrackLocalPosition().z() > 0. ;
- }
-
  void junoPMTOpticalModel::DoIt(const G4FastTrack& fastTrack,
        G4FastStep &fastStep)
  {
