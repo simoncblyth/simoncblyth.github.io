@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>Opticks+JUNO : PMT Mask Bugs, GPU Multilayer TMM</title>
+<title>Opticks+JUNO : junoPMTOpticalModel FastSim issues</title>
 <meta content="JUNO+Opticks : PMT Mask Debug and TMM on GPU" name="title" />
 <meta content="opticks_20221117_mask_debug_and_tmm.txt" name="name" />
 <meta content="(Nov 2022)" name="description" />
@@ -387,13 +387,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">Opticks+JUNO : PMT Mask Bugs, GPU Multilayer TMM</span></h1>
+<h1><span class="i">Opticks+JUNO : junoPMTOpticalModel FastSim issues</span></h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">Opticks+JUNO : PMT Mask Bugs, GPU Multilayer TMM</span></h1>
+<h1 class="title"><span class="i">Opticks+JUNO : junoPMTOpticalModel FastSim issues</span></h1>
 
 <!-- comment
 
@@ -3987,6 +3987,30 @@ Processed by unicode2rstsubs.py, part of Docutils:
           }
           div.slide#hamalogicalpmt-two-pmt-check-png{
              background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_two_pmt_check.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmt-two-pmt-cf-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/0/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_two_pmt_cf.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmt-two-pmt-geom-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/0/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_two_pmt_geom.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmt-natural-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_natural.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmt-fake-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_fake.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
@@ -7688,6 +7712,30 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
+          }
+          div.slide#hamalogicalpmt-two-pmt-cf-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/0/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_two_pmt_cf.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmt-two-pmt-geom-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/0/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_two_pmt_geom.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmt-natural-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_natural.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#hamalogicalpmt-fake-png{
+             background-image: url(GEOM/hamaLogicalPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/hamaLogicalPMT_fake.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
           } 
 
        </style>
@@ -7712,7 +7760,7 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey">
-    Opticks+JUNO : PMT Mask Bugs, GPU Multilayer TMM
+    Opticks+JUNO : junoPMTOpticalModel FastSim issues
     <h2 style="background-color:lightgrey;text-align:center"> Open source, https://bitbucket.org/simoncblyth/opticks </h2>
 </h1>
 </header>
@@ -7727,20 +7775,174 @@ that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can
 <li>generation : Cerenkov + Scintillation (using <strong>Gensteps</strong> from <em>Geant4</em>)</li>
 <li><span class="b">propagation : Rayleigh scattering, absorption, reemission, boundary,</span> <span class="r">+multi-layer TMM (WIP)</span></li>
 </ul>
-<p><span class="b">Tests Reveal : More Opticks+JUNO Geom. Issues</span> <span class="r">ALL KNOWN, FIXED</span></p>
+<p><span class="r">junoPMTOpticalModel : numerous issues, all from use of &quot;FastSim&quot;</span></p>
 <ul class="simple">
-<li><span class="b">WIP : Bringing multi-layer TMM &quot;FastSim&quot; into Opticks</span></li>
+<li><span class="b">Same TMM Multi-Layer calc using CustomG4OpBoundaryProcess ?</span><ul>
+<li><span class="r">less code, more correct, more standard</span></li>
+</ul>
+</li>
 </ul>
 </blockquote>
 <div class="mycredit">
-<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; 17 Nov 2022 </h2>
+<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; 20 Dec 2022 </h2>
 </div>
         <!--  s5talk  -->
         <br/>
     
 </div>
-<div class="slide" id="hamalogicalpmt-two-pmt-check-png">
-<h1>hamaLogicalPMT_two_pmt_check.png</h1>
+<div class="slide" id="junopmtopticalmodel-issues-all-from-using-fastsim">
+<h1>junoPMTOpticalModel Issues : All from using FastSim</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">CustomG4OpBoundaryProcess ?</span></p>
+<ul class="small simple">
+<li>simple 2 volume (Pyrex+Vacuum) geometry</li>
+<li>standard G4OpBoundaryProcess reflect/refract/absorb/TIR</li>
+<li>much less code : reuse of standard Geant4</li>
+<li>easier Opticks on GPU : simpler, more standard<ul>
+<li>no near-degenerate 1e-3 mm boundaries</li>
+<li>allows same geometry on CPU and GPU</li>
+<li>avoid history rewriting for comparisons</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>BUT : need to change very nasty Geant4 impl:</strong></p>
+<dl class="small docutils">
+<dt><tt class="docutils literal"><span class="pre">G4OpBoundaryProcess::PostStepDoIt</span></tt></dt>
+<dd>ugly monolith, rats nest of nested ifs</dd>
+</dl>
+<ul class="small last simple">
+<li>Unpleasant to get familiar with</li>
+<li>Change palatable, using : <tt class="docutils literal">CustomART.h</tt></li>
+<li>Keep change separated, detailed validation vital</li>
+</ul>
+</div>
+<p style="margin-bottom:1cm;" /><ol class="small arabic simple">
+<li><span class="r">Four volume PMT due to FastSim limitation</span><ul>
+<li>Two volumes (Pyrex + Vacuum) would be natural</li>
+</ul>
+</li>
+</ol>
+<p style="margin-bottom:1cm;" /><ol class="small arabic simple" start="2">
+<li>Fake volumes yield many fake intersects<ul>
+<li>Pyrex/Pyrex + Vacuum/Vacuum same material fakes</li>
+<li><span class="b">complicates Geant4 step point history</span></li>
+<li><span class="b">complicates comparison with Opticks</span></li>
+</ul>
+</li>
+</ol>
+<p style="margin-bottom:1cm;" /><ol class="small arabic simple" start="3">
+<li>Non-FastSim in PMT propagates at Pyrex (not Vacuum) speed<ul>
+<li>FastSim-&gt;SlowSim transition misses speed fixup</li>
+</ul>
+</li>
+</ol>
+<p style="margin-bottom:1cm;" /><ol class="small arabic simple" start="4">
+<li><span class="r">reflected + refracted polarization doesnt follow Geant4</span><ul>
+<li>should follow G4OpBoundaryProcess, depending on S/P</li>
+</ul>
+</li>
+</ol>
+<p style="margin-bottom:0.1cm;" /><ul class="small simple">
+<li><span class="b">All issues stem from using FastSim (designed for regions)</span><ul>
+<li><span class="b">not good fit for 1 boundary (Pyrex/ARC/PHC/Vacuum)</span></li>
+</ul>
+</li>
+</ul>
+<!-- comment
+
+.. class:: small
+
+   6. TODO: look into _qe definition
+
+      * justification for ``efficiency=_qe/An`` ? -->
+</div>
+<div class="slide" id="polarization-on-fresnelreflection-fresnelrefraction-totalinternalreflection">
+<h1><span class="small">Polarization on FresnelReflection/FresnelRefraction/TotalInternalReflection</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">inline sboundary::sboundary():</span></p>
+<div class="last"><pre class="mypretiny">
+_E2_t(make_float2( 2.f*n1c1/(n1c1+n2c2) ,
+                   2.f*n1c1/(n2c1+n1c2) )),// (ts,tp)
+_E2_r(make_float2( _E2_t.x - 1.f       ,
+                   n2*_E2_t.y/n1 - 1.f  )),// (rs,rp)
+A_transverse(cross(p.mom, orient*normal)),
+E1_perp(dot(p.pol, A_transverse)),
+E1(make_float2(E1_perp,sqrtf(1.f-E1_perp*E1_perp)))),
+E2_t(_E2_t*E1),RR(normalize(E2_r)),
+E2_r(_E2_r*E1),TT(normalize(E2_t)),
+{
+p.mom = reflect
+      ?
+         p.mom + 2.0f*c1*orient*(*normal)
+      :
+         eta*(p.mom) + (eta*c1 - c2)*orient*normal
+      ;
+A_parallel = normalize(cross(p.mom, A_transverse));
+
+<span class="b">p.pol =
+        ( reflect ?
+             ( tir ?
+                   -p.pol + 2.f*EdotN*orient*normal
+             :
+                   RR.x*A_transverse + RR.y*A_parallel
+             )
+          :
+             TT.x*A_transverse + TT.y*A_parallel
+        )
+      ;</span>
+}
+</pre></div></div>
+<p class="small"><strong>Reflect/Refract Polarization</strong></p>
+<pre class="mypretiny">
+ void junoPMTOpticalModel::Reflect()
+ {
+     dir -= 2.*(dir*norm)*norm;
+     <span class="r">pol -= 2.*(pol*norm)*norm;</span> <span class="b">// similar to G4 TIR pol, NOT Fresnel </span>
+ }
+ void junoPMTOpticalModel::Refract()
+ {
+     dir = (real(_cos_theta4) -
+            _cos_theta1*_n1/_n4)*norm + (_n1/_n4)*dir;
+     <span class="r">pol = (pol-(pol*dir)*dir).unit();</span>
+ }
+</pre><p class="small"><tt class="docutils literal">G4OpBoundaryProcess</tt> polarization from:</p>
+<ol class="small arabic simple">
+<li>S/P Fresnel Coeff</li>
+<li>S/P Directions : out/in plane of incidence</li>
+</ol>
+<p class="small"><strong>Opticks : sysrap/sboundary.h qudarap/qsim.h follows G4, ===&gt;</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/sysrap/sboundary.h">opticks/src/master/sysrap/sboundary.h</a></li>
+</ul>
+<p class="small"><strong>Derive Fresnel from Maxwell Boundary Conditions</strong></p>
+<dl class="small docutils">
+<dt><em>Fresnel Equations, Alexander I. Lvovsky</em></dt>
+<dd><em>Encylopedia of Optical Engineering</em> (<strong>fresnel-eoe.pdf</strong>)</dd>
+</dl>
+</div>
+<div class="slide" id="illustration-of-reflect-refract-tir-polarization">
+<h1><span class="small">Illustration of Reflect/Refract/TIR Polarization</span></h1>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/sysrap/tests/sboundary_test.sh">opticks/src/master/sysrap/tests/sboundary_test.sh</a> : build, run, plot</li>
+</ul>
+<img alt="sboundary_test/figs/sboundary_test/pvcap/AOI_BREWSTER_linear_polarization_by_reflection.png" src="sboundary_test/figs/sboundary_test/pvcap/AOI_BREWSTER_linear_polarization_by_reflection.png" style="width: 550px;" />
+<img alt="sboundary_test/figs/sboundary_test/pvcap/AOI_CRITICAL_tir_pol.png" src="sboundary_test/figs/sboundary_test/pvcap/AOI_CRITICAL_tir_pol.png" style="width: 550px;" />
+<table border="1" class="small docutils">
+<colgroup>
+<col width="59%" />
+<col width="41%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>Reflection at Brewster Angle : Only S-polarized survives</td>
+<td>Total Internal Reflection at Critical Angle</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li>incident from left (-X), surface normal vertically upwards (+Z), intersection point in middle,</li>
+<li>Colored lines represent polarization directions of 128 photons before and after Reflection</li>
+<li>Reflected using <tt class="docutils literal">sboundary.h</tt> (impl validated against <tt class="docutils literal">G4OpBoundaryProcess</tt>)</li>
+</ul>
 </div>
 <div class="slide" id="aoi-brewster-linear-polarization-by-reflection-png">
 <h1>AOI_BREWSTER_linear_polarization_by_reflection.png</h1>
@@ -7748,23 +7950,30 @@ that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can
 <div class="slide" id="aoi-critical-tir-pol-png">
 <h1>AOI_CRITICAL_tir_pol.png</h1>
 </div>
-<div class="slide" id="junopmtopticalmodel-issues">
-<h1>junoPMTOpticalModel Issues</h1>
-<ol class="small arabic simple">
-<li>overcomplex PMT geometry due to using FastSim<ul>
-<li>using 4 volumes, when 2 are possible</li>
+<div class="slide" id="standalone-few-pmt-test-n-0-1-junopmtopticalmodel-customart-h">
+<h1><span class="small">Standalone few PMT test : N=0/1 junoPMTOpticalModel/CustomART.h</span></h1>
+<p class="small"><strong>Minor changes for standalone use</strong> <tt class="docutils literal">#ifdef PMTFASTSIM_STANDALONE</tt></p>
+<ul class="small simple">
+<li><tt class="docutils literal">JPMT.h</tt> parameter access (not PMTSimParamSvc, PMTParamSvc)</li>
+<li><a class="reference external" href="https://github.com/simoncblyth/j/blob/main/PMTFastSim/junoPMTOpticalModel.cc">https://github.com/simoncblyth/j/blob/main/PMTFastSim/junoPMTOpticalModel.cc</a></li>
+<li><a class="reference external" href="https://github.com/simoncblyth/j/blob/main/PMTFastSim/HamamatsuR12860PMTManager.cc">https://github.com/simoncblyth/j/blob/main/PMTFastSim/HamamatsuR12860PMTManager.cc</a></li>
+<li><tt class="docutils literal">N=0/1</tt> <strong>bool m_natural_geometry = false/true</strong></li>
 </ul>
-</li>
-<li>propagating at Pyrex speed inside inner2<ul>
-<li>FastSim to SlowSim transition misses the speed fixup</li>
+<p class="small"><strong>Optical only Geant4 simulation, with full step point recording</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/u4/tests/U4SimulateTest.sh">https://bitbucket.org/simoncblyth/opticks/src/master/u4/tests/U4SimulateTest.sh</a></li>
 </ul>
-</li>
-<li>incorrect polarization<ul>
-<li>needs to depend on S/P fractions</li>
+<p class="small"><tt class="docutils literal">N=0/1 ./U4SimulateTest.sh</tt></p>
+<p class="small"><strong>Geant4 Simtrace intersection : for 2D geometry plotting</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/u4/tests/U4SimtraceTest.sh">https://bitbucket.org/simoncblyth/opticks/src/master/u4/tests/U4SimtraceTest.sh</a></li>
 </ul>
-</li>
-<li>qe/An looks wrong, should be qe*An perhaps ?</li>
-</ol>
+<p class="small"><tt class="docutils literal">N=0/1 ./U4SimtraceTest.sh</tt></p>
+<p class="small"><strong>CustomART integrated with InstrumentedG4OpBoundaryProcess</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/u4/CustomART.h">https://bitbucket.org/simoncblyth/opticks/src/master/u4/CustomART.h</a>  (uses <tt class="docutils literal">Layr.h</tt> for TMM calcs)</li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/u4/InstrumentedG4OpBoundaryProcess.cc">https://bitbucket.org/simoncblyth/opticks/src/master/u4/InstrumentedG4OpBoundaryProcess.cc</a></li>
+</ul>
 </div>
 <div class="slide" id="hamalogicalpmtwraplv-old-png">
 <h1>hamaLogicalPMTWrapLV_old.png</h1>
@@ -7804,32 +8013,26 @@ that benefits from state-of-the-art GPU ray tracing from NVIDIA OptiX, which can
 </div>
 <table border="1" class="small docutils">
 <colgroup>
-<col width="60%" />
-<col width="40%" />
+<col width="49%" />
+<col width="33%" />
+<col width="18%" />
 </colgroup>
 <tbody valign="top">
 <tr><td>m_Photocathode_opsurf</td>
 <td>inner1&lt;-&gt;body</td>
+<td>pv&lt;-&gt;pv</td>
 </tr>
 <tr><td>m_mirror_opsurf</td>
 <td>inner2&lt;-&gt;body</td>
+<td>pv&lt;-&gt;pv</td>
 </tr>
 </tbody>
 </table>
 <p class="small"><strong>Why pmt+body Pyrex (1e-3 mm separation) ? GUESS:</strong></p>
-<ul class="small simple">
-<li>coding convenience, makes PMT manager self-contained ?<ul>
-<li>use body pv for G4LogicalBorderSurface</li>
-<li>otherwise would have to defer surface creation
-to caller of GetLV which creates the PV</li>
-</ul>
-</li>
-<li><span class="r">Extra solid+lv+pv just for code self-containment ?</span><ul>
-<li><strong>NOT REALLY ACCEPTABLE</strong></li>
-<li><span class="b">Is there some other reason ?</span></li>
-</ul>
-</li>
-</ul>
+<ol class="small arabic simple">
+<li>avoid G4LogicalBorderSurface for every PMT, as 1 body pv</li>
+<li>keeps PMT manager self-contained</li>
+</ol>
 <p class="small"><strong>Why split vacuum inner1/inner2 ?</strong></p>
 <ul class="small simple">
 <li>convenient for photocathode and mirror properties</li>
@@ -7838,18 +8041,39 @@ to caller of GetLV which creates the PV</li>
 </ul>
 </li>
 </ul>
+<p class="small"><strong>Alternatively : with CustomG4OpBoundaryProcess</strong></p>
+<ul class="small simple">
+<li>Two Volume PMT : Pyrex + Vacuum (Instead of Four)</li>
+<li>mirror_opsurf G4LogicalSkinSurface<ul>
+<li>Skin not Border: so only need LV</li>
+</ul>
+</li>
+<li>custom override to Photocathode_opsurf for local_z &gt; 0.</li>
+</ul>
+<dl class="small docutils">
+<dt><span class="b">Effectively : -Z:mirror +Z:photocathode</span></dt>
+<dd>NOT YET IMPLEMENTED : SEEMS DOABLE</dd>
+</dl>
 </div>
-<div class="slide" id="hamalogicalpmtwraplv-orig-png">
-<h1>hamaLogicalPMTWrapLV_orig.png</h1>
-<p><tt class="docutils literal">hama_UsePMTOpticalModel=1 ~/opticks/extg4/xxv.sh</tt></p>
+<div class="slide" id="hamalogicalpmt-fake-png">
+<h1>hamaLogicalPMT_fake.png</h1>
+<p style="margin-bottom:3cm;" /><p class="normal">       
+       
+   
+<span class="c">body</span> hidden under <span class="m">inner1</span> <span class="y">inner2</span></p>
 <p class="normal">       
        
    
-<span class="g">body</span> hidden under <span class="b">inner1</span> <span class="c">inner2</span></p>
-<p class="normal">       
-       
-   
-<span class="g">body</span> is <span class="b">FastSim envelope volume</span></p>
+<span class="c">body</span> is <span class="r">FastSim envelope volume</span></p>
+</div>
+<div class="slide" id="hamalogicalpmt-natural-png">
+<h1>hamaLogicalPMT_natural.png</h1>
+<!-- comment
+
+hamaLogicalPMTWrapLV_orig.png
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+``hama_UsePMTOpticalModel=1 ~/opticks/extg4/xxv.sh`` -->
 </div>
 <div class="slide" id="multilayer-pmt-optical-model-split-vacuum-contorted-modeltrigger">
 <h1><span class="small">MultiLayer PMT Optical Model : Split Vacuum -&gt; Contorted ModelTrigger</span></h1>
@@ -8026,7 +8250,10 @@ to caller of GetLV which creates the PV</li>
 }
 </pre><ul class="small simple">
 <li><span class="r">Simple : but not workable</span></li>
-<li><span class="b">Cannot stop:</span> <tt class="docutils literal">G4OpBoundaryProcess</tt></li>
+<li><span class="b">Cannot stop:</span> <tt class="docutils literal">G4OpBoundaryProcess</tt><ul>
+<li><strong>REAL REASON FOR THE FAKE VOLUMES</strong></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="slide" id="pivot-to-customg4opboundaryprocess-for-pmtopticalmodel">
@@ -8075,6 +8302,72 @@ to caller of GetLV which creates the PV</li>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="slide" id="u4-customart-h-included-into-customg4opboundaryprocess-cc">
+<h1><span class="small">u4/CustomART.h : Included into CustomG4OpBoundaryProcess.cc</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">CustomART&lt;J&gt;::maybe_doIt</span></p>
+<pre class="mypretiny">
+template&lt;typename J&gt;
+inline char CustomART&lt;J&gt;::maybe_doIt(
+     const char* OpticalSurfaceName,
+     const G4Track& aTrack, const G4Step& aStep )
+{
+    if( OpticalSurfaceName == nullptr ||
+        OpticalSurfaceName[0] != '@') return 'N' ;
+
+    const G4AffineTransform& transform =
+      aTrack.GetTouchable()
+      ->GetHistory()->GetTopTransform();
+
+    G4ThreeVector localPoint =
+      transform.TransformPoint(theGlobalPoint);
+
+    if(localPoint.z() <= 0) return 'Z' ;
+
+    return doIt(aTrack, aStep) ;
+}
+</pre><p class="small"><em>doIt</em> TMM calc, runs only for:</p>
+<ul class="small last simple">
+<li>OpticalSurfaceName[0]=='&#64;' &amp;&amp; zlocal &gt; 0</li>
+<li>-&gt; Transmittance, Reflectivity, Efficiency</li>
+<li>TMM calc using Layr.h multi-layer Stack</li>
+</ul>
+</div>
+<pre class="mypretiny">
+&#35;include "JPMT.h"
+&#35;include "Layr.h"
+&#35;include "U4Touchable.h"
+
+template&lt;typename J&gt; struct CustomART
+{
+    J* parameter_accessor ;
+
+    <span class="b">G4double& theTransmittance ;
+    G4double& theReflectivity ;
+    G4double& theEfficiency ;</span>
+
+    const G4ThreeVector& theGlobalPoint ;
+    const G4ThreeVector& OldMomentum ;
+    const G4ThreeVector& OldPolarization ;
+    const G4ThreeVector& theRecoveredNormal ;
+    const G4double& thePhotonMomentum ;
+
+    CustomART(
+        G4double& theTransmittance,
+        G4double& theReflectivity,
+        G4double& theEfficiency,
+        const G4ThreeVector& theGlobalPoint,
+        const G4ThreeVector& OldMomentum,
+        const G4ThreeVector& OldPolarization,
+        const G4ThreeVector& theRecoveredNormal,
+        const G4double& thePhotonMomentum
+    );
+    char maybe_doIt(const char* OpticalSurfaceName,
+              const G4Track& aTrack, const G4Step& aStep );
+    char doIt(const G4Track& aTrack, const G4Step& aStep );
+};
+</pre><p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/u4/CustomART.h">opticks/src/master/u4/CustomART.h</a></p>
 </div>
 <div class="slide" id="big-bouncer">
 <h1>Big Bouncer</h1>
@@ -8314,6 +8607,16 @@ array([[  0.137,   0.137,  29.837,  29.837, 218.038, 218.038],  ## Water
 </tr>
 </tbody>
 </table>
+</div>
+<div class="slide" id="hamalogicalpmt-two-pmt-geom-png">
+<h1><span class="i">hamaLogicalPMT_two_pmt_geom.png</span></h1>
+</div>
+<div class="slide" id="hamalogicalpmt-two-pmt-cf-png">
+<h1><span class="i">hamaLogicalPMT_two_pmt_cf.png</span></h1>
+<!-- comment
+
+hamaLogicalPMT_two_pmt_check.png
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 </div>
 </div>
 </body>
