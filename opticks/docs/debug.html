@@ -40,8 +40,14 @@
 <li><a class="reference internal" href="#">Debug</a><ul>
 <li><a class="reference internal" href="#debugging-optical-photon-propagation-using-numpy-ipython">Debugging optical photon propagation using NumPy + ipython</a></li>
 <li><a class="reference internal" href="#what-opicks-event-mode-does">What OPICKS_EVENT_MODE does</a></li>
+<li><a class="reference internal" href="#possible-arrays-saved-by-sysrap-sevt">Possible arrays saved by sysrap/SEvt</a></li>
+<li><a class="reference internal" href="#seventconfigtest">SEventConfigTest</a></li>
 <li><a class="reference internal" href="#saving-photon-propagations-into-numpy-arrays">Saving Photon Propagations into NumPy arrays</a></li>
 <li><a class="reference internal" href="#debugging-lack-of-hits">Debugging Lack of Hits</a></li>
+<li><a class="reference internal" href="#checking-photon-propagation-histories">Checking photon propagation histories</a></li>
+<li><a class="reference internal" href="#opticks-ana-tests-check-sh-setup-environment-for-numpy-debug">~/opticks/ana/tests/check.sh : setup environment for NumPy debug</a></li>
+<li><a class="reference internal" href="#opticks-ana-tests-check-py-python-basic-example">~/opticks/ana/tests/check.py : python basic example</a></li>
+<li><a class="reference internal" href="#debugging-geometry">Debugging Geometry</a></li>
 </ul>
 </li>
 </ul>
@@ -146,6 +152,138 @@ is not good with 3D plotting or large data sets.</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="possible-arrays-saved-by-sysrap-sevt">
+<h2>Possible arrays saved by sysrap/SEvt<a class="headerlink" href="#possible-arrays-saved-by-sysrap-sevt" title="Permalink to this headline">¶</a></h2>
+<p>The default is not saving any arrays.</p>
+<p>Array saving is regarded as purely a debugging activity
+that should not be done in production, as it will greatly slow down
+the simulation and write many large files.</p>
+<p>Configure what arrays to save and their limits with <em>SEventConfig</em>
+via envvars or static methods.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="17%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">array</th>
+<th class="head">shape</th>
+<th class="head">notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><em>genstep</em></td>
+<td>(num_gs,6,4)</td>
+<td>parameters of Cerenkov/Scintillation/Torch/… generation</td>
+</tr>
+<tr class="row-odd"><td><em>photon</em></td>
+<td>(num_ph,4,4)</td>
+<td>sysrap/sphoton.h : final photon params : position, time, mom, pol, flags</td>
+</tr>
+<tr class="row-even"><td><em>record</em></td>
+<td>(num_ph,16,4,4)</td>
+<td>sysrap/sphoton.h : step point records (configurable num points)</td>
+</tr>
+<tr class="row-odd"><td><em>hit</em></td>
+<td>(num_ht,4,4)</td>
+<td>sysrap/sphoton.h : selection of <em>photon</em></td>
+</tr>
+<tr class="row-even"><td><em>rec</em></td>
+<td>(num_ph,16,4,4)</td>
+<td>compressed rec (no longer used, use <em>record</em> instead)</td>
+</tr>
+<tr class="row-odd"><td><em>seq</em></td>
+<td>(num_ph,2)</td>
+<td>sysrap/sseq.h photon level step-by-step history and material recording</td>
+</tr>
+<tr class="row-even"><td><em>prd</em></td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="seventconfigtest">
+<h2>SEventConfigTest<a class="headerlink" href="#seventconfigtest" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>SEventConfigTest</strong> binary can be used to dump
+the configuration.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:sysrap blyth$ SEventConfigTest
+test_EstimateAlloc@20:
+SEventConfig::Desc
+       OPTICKS_EVENT_MODE          EventMode  : Default
+     OPTICKS_RUNNING_MODE        RunningMode  : 0
+                            RunningModeLabel  : SRM_DEFAULT
+     OPTICKS_G4STATE_SPEC        G4StateSpec  : 1000:38
+                            G4StateSpecNotes  :  38=2*17+4 is appropriate for MixMaxRng
+    OPTICKS_G4STATE_RERUN       G4StateRerun  : -1
+      OPTICKS_MAX_GENSTEP         MaxGenstep  : 1000000
+       OPTICKS_MAX_PHOTON          MaxPhoton  : 1000000
+     OPTICKS_MAX_SIMTRACE        MaxSimtrace  : 1000000     MaxCurandState  : 1000000
+       OPTICKS_MAX_BOUNCE          MaxBounce  : 9
+       OPTICKS_MAX_RECORD          MaxRecord  : 0
+          OPTICKS_MAX_REC             MaxRec  : 0
+          OPTICKS_MAX_SEQ             MaxSeq  : 0
+          OPTICKS_MAX_PRD             MaxPrd  : 0
+          OPTICKS_MAX_TAG             MaxTag  : 0
+         OPTICKS_MAX_FLAT            MaxFlat  : 0
+         OPTICKS_HIT_MASK            HitMask  : 64
+                                HitMaskLabel  : SD
+       OPTICKS_MAX_EXTENT          MaxExtent  : 1000
+         OPTICKS_MAX_TIME            MaxTime  : 10
+          OPTICKS_RG_MODE             RGMode  : 2
+                                 RGModeLabel  : simulate
+        OPTICKS_COMP_MASK           CompMask  : 262
+                               CompMaskLabel  : genstep,photon,hit
+         OPTICKS_OUT_FOLD            OutFold  : $DefaultOutputDir
+         OPTICKS_OUT_NAME            OutName  : -
+OPTICKS_PROPAGATE_EPSILON   PropagateEpsilon  :     0.0500
+     OPTICKS_INPUT_PHOTON        InputPhoton  : -
+
+test_EstimateAlloc@25: al.desc
+-
+epsilon:sysrap blyth$
+</pre></div>
+</div>
+<p>Changing the OPTICKS_EVENT_MODE envvar to “StandardFullDebug” has a large effect on the config:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:sysrap blyth$ OPTICKS_EVENT_MODE=StandardFullDebug SEventConfigTest
+test_EstimateAlloc@20:
+SEventConfig::Desc
+       OPTICKS_EVENT_MODE          EventMode  : StandardFullDebug
+     OPTICKS_RUNNING_MODE        RunningMode  : 0
+                            RunningModeLabel  : SRM_DEFAULT
+     OPTICKS_G4STATE_SPEC        G4StateSpec  : 1000:38
+                            G4StateSpecNotes  :  38=2*17+4 is appropriate for MixMaxRng
+    OPTICKS_G4STATE_RERUN       G4StateRerun  : -1
+      OPTICKS_MAX_GENSTEP         MaxGenstep  : 1000000
+       OPTICKS_MAX_PHOTON          MaxPhoton  : 1000000
+     OPTICKS_MAX_SIMTRACE        MaxSimtrace  : 1000000     MaxCurandState  : 1000000
+       OPTICKS_MAX_BOUNCE          MaxBounce  : 9
+       OPTICKS_MAX_RECORD          MaxRecord  : 10
+          OPTICKS_MAX_REC             MaxRec  : 10
+          OPTICKS_MAX_SEQ             MaxSeq  : 10
+          OPTICKS_MAX_PRD             MaxPrd  : 10
+          OPTICKS_MAX_TAG             MaxTag  : 1
+         OPTICKS_MAX_FLAT            MaxFlat  : 1
+         OPTICKS_HIT_MASK            HitMask  : 64
+                                HitMaskLabel  : SD
+       OPTICKS_MAX_EXTENT          MaxExtent  : 1000
+         OPTICKS_MAX_TIME            MaxTime  : 10
+          OPTICKS_RG_MODE             RGMode  : 2
+                                 RGModeLabel  : simulate
+        OPTICKS_COMP_MASK           CompMask  : 274814
+                               CompMaskLabel  : genstep,photon,record,rec,seq,prd,hit,tag,flat,aux
+         OPTICKS_OUT_FOLD            OutFold  : $DefaultOutputDir
+         OPTICKS_OUT_NAME            OutName  : -
+OPTICKS_PROPAGATE_EPSILON   PropagateEpsilon  :     0.0500
+     OPTICKS_INPUT_PHOTON        InputPhoton  : -
+
+test_EstimateAlloc@25: al.desc
+-
+epsilon:sysrap blyth$
+</pre></div>
+</div>
+</div>
 <div class="section" id="saving-photon-propagations-into-numpy-arrays">
 <h2>Saving Photon Propagations into NumPy arrays<a class="headerlink" href="#saving-photon-propagations-into-numpy-arrays" title="Permalink to this headline">¶</a></h2>
 <p>To see what G4CXOpticks__simulate_saveEvent is doing look at g4cx/G4CXOpticks.cc simulate method.</p>
@@ -167,6 +305,14 @@ the python machinery.</p>
 </div>
 <div class="section" id="debugging-lack-of-hits">
 <h2>Debugging Lack of Hits<a class="headerlink" href="#debugging-lack-of-hits" title="Permalink to this headline">¶</a></h2>
+<p>When none of your photons have flagmask SURFACE_DETECT you will get no hits.
+You will still have gensteps, photons and records without having hits.</p>
+<p>If your photon propagation histories are as expected and you
+are still not getting hits then your problem is probably that the geometry
+translation did not notice your sensitive detectors somehow OR
+that you do not have any sensitive detectors.</p>
+<p>A common cause of this is loading a geometry from GDML and not
+reinstating the association.</p>
 <p><em>hits</em> are the subset of <em>photons</em> with flagmask matching the hitmask (default SURFACE_DETECT)
 so when you get no hits it means that none of your photons .flagmask has
 all the bits of the hitmask set.</p>
@@ -175,6 +321,148 @@ but that will just match with NumPy what the C++/CUDA would do.</p>
 <p>You can learn about the mechanics of hit selection in:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">notes</span><span class="o">/</span><span class="n">mechanics_of_hit_selection</span><span class="o">.</span><span class="n">rst</span>
 <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">bitbucket</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">simoncblyth</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">notes</span><span class="o">/</span><span class="n">mechanics_of_hit_selection</span><span class="o">.</span><span class="n">rst</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="checking-photon-propagation-histories">
+<h2>Checking photon propagation histories<a class="headerlink" href="#checking-photon-propagation-histories" title="Permalink to this headline">¶</a></h2>
+<p>So in ipython:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/ami/opticks/GEOM/example_pet/ALL/007/record.npy”)</span>
+
+<span class="n">r</span><span class="p">[:,:</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>   <span class="c1"># (pos, time) of first 5 step point of all photons</span>
+<span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>   <span class="c1"># (pos, time) of first 5 step points of the first photon (slot 0)</span>
+</pre></div>
+</div>
+<p>So to start debugging I would look at the sequence of positions,
+times, momentum directions and polarizations and step point flags to
+see if they are what I would expect.</p>
+</div>
+<div class="section" id="opticks-ana-tests-check-sh-setup-environment-for-numpy-debug">
+<h2>~/opticks/ana/tests/check.sh : setup environment for NumPy debug<a class="headerlink" href="#opticks-ana-tests-check-sh-setup-environment-for-numpy-debug" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash -l
+
+usage(){ cat &lt;&lt; EOU
+check.sh
+==========
+
+Setup environment:
+
+PYTHONPATH=$HOME
+   allows python scripts to import opticks python machinery
+   eg with  &quot;from opticks.ana.fold import Fold&quot;
+
+CFBASE=$HOME/.opticks/GEOM/J004
+   configures where to load geometry from
+
+FOLD=$CFBASE/G4CXSimulateTest/ALL
+   configures the directory to load event arrays from,
+   the directory is up to the user
+
+To a large degree the directory positions of geometry
+and event files are controlled by the user.
+However the example of versioning a geometry name &quot;J004&quot;
+and keeping event folders within the corresponding
+geometry folder is a good one to follow as it is important
+to retain the connection between event data and the geometry used
+to create the event data.
+
+EOU
+}
+
+export PYTHONPATH=$HOME
+export CFBASE=$HOME/.opticks/GEOM/J004
+export FOLD=$CFBASE/G4CXSimulateTest/ALL
+
+${IPYTHON:-ipython} --pdb -i check.py
+</pre></div>
+</div>
+</div>
+<div class="section" id="opticks-ana-tests-check-py-python-basic-example">
+<h2>~/opticks/ana/tests/check.py : python basic example<a class="headerlink" href="#opticks-ana-tests-check-py-python-basic-example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:tests blyth$ cat check.py
+#!/usr/bin/env python
+
+import numpy as np
+from opticks.ana.fold import Fold
+from opticks.ana.p import *
+from opticks.ana.histype import HisType
+
+if __name__ == &#39;__main__&#39;:
+    f = Fold.Load(symbol=&quot;f&quot;)
+    print(repr(f))
+
+    p = f.photon
+    r = f.record
+    s = f.seq
+    h = f.hit
+</pre></div>
+</div>
+</div>
+<div class="section" id="debugging-geometry">
+<h2>Debugging Geometry<a class="headerlink" href="#debugging-geometry" title="Permalink to this headline">¶</a></h2>
+<p>To debug geometry issues you need to have some
+familiarity with the translation. It starts from G4CXOpticks::setGeometry.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">210</span> <span class="n">void</span> <span class="n">G4CXOpticks</span><span class="p">::</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">const</span> <span class="n">G4VPhysicalVolume</span><span class="o">*</span> <span class="n">world</span> <span class="p">)</span>
+<span class="mi">211</span> <span class="p">{</span>
+<span class="mi">212</span>     <span class="n">LOG</span><span class="p">(</span><span class="n">LEVEL</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; G4VPhysicalVolume world &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">world</span> <span class="p">;</span>
+<span class="mi">213</span>     <span class="k">assert</span><span class="p">(</span><span class="n">world</span><span class="p">);</span>
+<span class="mi">214</span>     <span class="n">wd</span> <span class="o">=</span> <span class="n">world</span> <span class="p">;</span>
+<span class="mi">215</span>
+<span class="mi">216</span>     <span class="n">sim</span> <span class="o">=</span> <span class="n">SSim</span><span class="p">::</span><span class="n">Create</span><span class="p">();</span>
+<span class="mi">217</span>     <span class="n">stree</span><span class="o">*</span> <span class="n">st</span> <span class="o">=</span> <span class="n">sim</span><span class="o">-&gt;</span><span class="n">get_tree</span><span class="p">();</span>
+<span class="mi">219</span>     <span class="n">tr</span> <span class="o">=</span> <span class="n">U4Tree</span><span class="p">::</span><span class="n">Create</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="n">SensorIdentifier</span> <span class="p">)</span> <span class="p">;</span>
+<span class="mi">220</span>
+<span class="mi">221</span>
+<span class="mi">222</span>     <span class="o">//</span> <span class="n">GGeo</span> <span class="n">creation</span> <span class="n">done</span> <span class="n">when</span> <span class="n">starting</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">gdml</span> <span class="ow">or</span> <span class="n">live</span> <span class="n">G4</span><span class="p">,</span>  <span class="n">still</span> <span class="n">needs</span> <span class="n">Opticks</span> <span class="n">instance</span>
+<span class="mi">223</span>     <span class="n">Opticks</span><span class="p">::</span><span class="n">Configure</span><span class="p">(</span><span class="s2">&quot;--gparts_transform_offset --allownokey&quot;</span> <span class="p">);</span>
+<span class="mi">224</span>
+<span class="mi">225</span>     <span class="n">GGeo</span><span class="o">*</span> <span class="n">gg_</span> <span class="o">=</span> <span class="n">X4Geo</span><span class="p">::</span><span class="n">Translate</span><span class="p">(</span><span class="n">wd</span><span class="p">)</span> <span class="p">;</span>
+<span class="mi">226</span>     <span class="n">setGeometry</span><span class="p">(</span><span class="n">gg_</span><span class="p">);</span>
+<span class="mi">227</span> <span class="p">}</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>X4Geo::Translate</dt>
+<dd>old way with loads of code, entire extg4 package</dd>
+<dt>U4Tree::Create</dt>
+<dd>is a simpler approach to translation that I am starting to develop
+which is aiming to go directly</dd>
+</dl>
+<p>The translation code is still in flux with both old and new
+approaches in use and an entire geometry model too many.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span>       <span class="n">extg4</span>         <span class="n">CSG_GGeo</span>
+<span class="n">Geant4</span>  <span class="o">----&gt;</span>   <span class="n">GGeo</span> <span class="o">-------&gt;</span>   <span class="n">CSG</span>
+</pre></div>
+</div>
+<p>The CSG_GGeo package translates the GGeo geometry model
+into CSG which gets upload to GPU.</p>
+<p>While I dont suggest you try to understand
+the geometry translation in detail, you need some familiarity
+with how the sensitive detectors get translated in order to
+debug your issue.</p>
+<p>The best way to start debugging geometry is to persist it by rerunning with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export G4CXOpticks=INFO
+export G4CXOpticks__setGeometry_saveGeometry=$HOME/.opticks/GEOM/$GEOM
+</pre></div>
+</div>
+<p>The above envvar configures directory to save the geometry.</p>
+<p>Then you can run small executables/scripts
+which load various parts of the persisted geometry and run tests.
+One, of many, of such tests is sysrap/tests/stree_test.sh
+Build and use that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">sysrap</span><span class="o">/</span><span class="n">tests</span>
+
+<span class="o">./</span><span class="n">stree_test</span><span class="o">.</span><span class="n">sh</span> <span class="n">build</span>
+    <span class="c1">## builds stree_test binary</span>
+
+<span class="o">./</span><span class="n">stree_test</span><span class="o">.</span><span class="n">sh</span> <span class="n">run</span>
+    <span class="c1">## these load the geometry into C++ and run tests against it</span>
+    <span class="c1">## one of the tests dumps sensor info</span>
+
+<span class="o">./</span><span class="n">stree_test</span><span class="o">.</span><span class="n">sh</span> <span class="n">ana</span>
+    <span class="c1">## this loads the same geometry into ipython</span>
+    <span class="c1">## and run tests against it</span>
 </pre></div>
 </div>
 </div>
