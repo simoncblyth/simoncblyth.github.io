@@ -1,0 +1,314 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>OpenGL Render Pipelines &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">OpenGL Render Pipelines</a><ul>
+<li><a class="reference internal" href="#geometry">Geometry</a></li>
+<li><a class="reference internal" href="#gensteps">Gensteps</a></li>
+<li><a class="reference internal" href="#photons">Photons</a></li>
+<li><a class="reference internal" href="#records-corresponding-to-each-recorded-step-of-the-photon">Records : corresponding to each recorded step of the photon</a></li>
+<li><a class="reference internal" href="#geometry-shader-docs">Geometry Shader Docs</a></li>
+<li><a class="reference internal" href="#record-renderer-geometry-shaders">Record Renderer Geometry Shaders</a></li>
+<li><a class="reference internal" href="#unpartitioned-record-structure">Unpartitioned Record structure</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/examples/UseGeometryShader/gl/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="opengl-render-pipelines">
+<h1>OpenGL Render Pipelines<a class="headerlink" href="#opengl-render-pipelines" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="geometry">
+<h2>Geometry<a class="headerlink" href="#geometry" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>nrm</dt>
+<dd>steered by <em>Renderer</em> (Scene.m_global_renderer)
+simple vert+frag tri-shading</dd>
+<dt>inrm</dt>
+<dd>steered by <em>Renderer</em> (Scene.m_instance_renderer[i] and  m_bbox_renderer[i])
+simple vert+frag tri-shading but using InstanceTransform mat4 attribute to yield gl_Position</dd>
+<dt>nrmvec</dt>
+<dd>steered by <em>Renderer</em> (Scene.m_globalvec_renderer) : uses geometry shader to draw normals and triangle “axes”</dd>
+<dt>tex</dt>
+<dd>steered by <em>Renderer</em> (Scene.m_raytrace_renderer)
+used for OptiX raycast renders, OptiX populates a texture that OpenGL presents</dd>
+<dt>inrmcull</dt>
+<dd>steered by <em>InstLODCull</em> (Scene.m_instlodcull[i])
+attempt to use instance culling using an objectVisible input array</dd>
+</dl>
+</div>
+<div class="section" id="gensteps">
+<h2>Gensteps<a class="headerlink" href="#gensteps" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>p2l</dt>
+<dd>point to line geometry shader used to render gensteps</dd>
+</dl>
+</div>
+<div class="section" id="photons">
+<h2>Photons<a class="headerlink" href="#photons" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pos</dt>
+<dd>point representation of <em>photon</em> positions
+(not a geometry shader)</dd>
+</dl>
+</div>
+<div class="section" id="records-corresponding-to-each-recorded-step-of-the-photon">
+<h2>Records : corresponding to each recorded step of the photon<a class="headerlink" href="#records-corresponding-to-each-recorded-step-of-the-photon" title="Permalink to this headline">¶</a></h2>
+<p>The records buffer has shape (3M, 16, 2, 4) with each step point
+domain compressed into 2*4 shorts (16 bits) totalling 128 bits.</p>
+<p>Relevant sources:</p>
+<ul class="simple">
+<li><em>oxrap/cu/generate.cu</em></li>
+<li><a href="#id1"><span class="problematic" id="id2">*</span></a>oxrap/cu/photon.h</li>
+</ul>
+<p>The visualization renders this buffer with a single <em>glDrawArrays</em> in
+<em>oglrap/Rdr.cc:render</em>  which uses an OpenGL geometry shader with the
+event time as an input uniform.
+Actually there are three variants of the record renderer, presenting the photons
+as a flying point, shortline or longline.</p>
+<dl class="docutils">
+<dt>rec</dt>
+<dd>flying point presentation, oglrap/Scene.cc:m_record_renderer</dd>
+<dt>altrec</dt>
+<dd>long line strip presentation, oglrap/Scene.cc:m_altrecord_renderer</dd>
+<dt>devrec</dt>
+<dd>vector (short line) presentation, vector length is controllable interactively
+via Composition/param.y, oglrap/Scene.cc:m_devrecord_renderer</dd>
+</dl>
+<p>The geometry shader is the crucial thing that must be understood to see how
+the visualization works:</p>
+<dl class="docutils">
+<dt>oglrap/gl/rec/geom.glsl</dt>
+<dd>flying point</dd>
+<dt>oglrap/gl/devrec/geom.glsl</dt>
+<dd>shortline “vector”</dd>
+<dt>oglrap/gl/altrec/geom.glsl</dt>
+<dd>longline</dd>
+</dl>
+<p>The input primitives to all three renderers are the same, LINE_STRIP,
+but the output primitive is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">401</span> <span class="n">void</span> <span class="n">Scene</span><span class="p">::</span><span class="n">initRenderers</span><span class="p">()</span>
+<span class="mi">402</span> <span class="p">{</span>
+<span class="o">...</span>
+<span class="mi">470</span>     <span class="n">m_record_renderer</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Rdr</span><span class="p">(</span><span class="n">m_device</span><span class="p">,</span> <span class="s2">&quot;rec&quot;</span><span class="p">,</span> <span class="n">m_shader_dir</span><span class="p">,</span> <span class="n">m_shader_incl_path</span> <span class="p">);</span>
+<span class="mi">471</span>     <span class="n">m_record_renderer</span><span class="o">-&gt;</span><span class="n">setPrimitive</span><span class="p">(</span><span class="n">Rdr</span><span class="p">::</span><span class="n">LINE_STRIP</span><span class="p">);</span>
+<span class="mi">472</span>
+<span class="mi">473</span>     <span class="n">m_altrecord_renderer</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Rdr</span><span class="p">(</span><span class="n">m_device</span><span class="p">,</span> <span class="s2">&quot;altrec&quot;</span><span class="p">,</span> <span class="n">m_shader_dir</span><span class="p">,</span> <span class="n">m_shader_incl_path</span><span class="p">);</span>
+<span class="mi">474</span>     <span class="n">m_altrecord_renderer</span><span class="o">-&gt;</span><span class="n">setPrimitive</span><span class="p">(</span><span class="n">Rdr</span><span class="p">::</span><span class="n">LINE_STRIP</span><span class="p">);</span>
+<span class="mi">475</span>
+<span class="mi">476</span>     <span class="n">m_devrecord_renderer</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Rdr</span><span class="p">(</span><span class="n">m_device</span><span class="p">,</span> <span class="s2">&quot;devrec&quot;</span><span class="p">,</span> <span class="n">m_shader_dir</span><span class="p">,</span> <span class="n">m_shader_incl_path</span><span class="p">);</span>
+<span class="mi">477</span>     <span class="n">m_devrecord_renderer</span><span class="o">-&gt;</span><span class="n">setPrimitive</span><span class="p">(</span><span class="n">Rdr</span><span class="p">::</span><span class="n">LINE_STRIP</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="geometry-shader-docs">
+<h2>Geometry Shader Docs<a class="headerlink" href="#geometry-shader-docs" title="Permalink to this headline">¶</a></h2>
+<p>The defining feature of the geometry shader is its ability to
+amplify or reduce geometry with respect to the input primitives.
+The Opticks photon visualization relies on the geometry shaders
+ability to emit zero primitives depending on the values in the
+record buffer that identify non-valid</p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.khronos.org/opengl/wiki/Geometry_Shader">https://www.khronos.org/opengl/wiki/Geometry_Shader</a></li>
+</ul>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="44%" />
+<col width="36%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">GS input</th>
+<th class="head">OpenGL primitives</th>
+<th class="head">vertex count</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>points</td>
+<td>GL_POINTS</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>lines</td>
+<td>GL_LINES,
+GL_LINE_STRIP,
+GL_LINE_LIST</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>The output_primitive must be one of the following:</p>
+<ul class="simple">
+<li>points</li>
+<li>line_strip</li>
+<li>triangle_strip</li>
+</ul>
+<p>These work exactly the same way their counterpart OpenGL rendering modes do. To
+output individual triangles or lines, simply use EndPrimitive (see below) after
+emitting each set of 3 or 2 vertices.</p>
+</div>
+<div class="section" id="record-renderer-geometry-shaders">
+<h2>Record Renderer Geometry Shaders<a class="headerlink" href="#record-renderer-geometry-shaders" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>oglrap/rec/geom.glsl::</dt>
+<dd>28 layout (lines) in;
+29 layout (points, max_vertices = 1) out;</dd>
+<dt>oglrap/devrec/geom.glsl::</dt>
+<dd>23 layout (lines) in;
+24 layout (line_strip, max_vertices = 2) out;</dd>
+<dt>oglrap/altrec/geom.glsl::</dt>
+<dd>22 layout (lines) in;
+23 layout (line_strip, max_vertices = 2) out;</dd>
+</dl>
+</div>
+<div class="section" id="unpartitioned-record-structure">
+<h2>Unpartitioned Record structure<a class="headerlink" href="#unpartitioned-record-structure" title="Permalink to this headline">¶</a></h2>
+<p>Below ascii art shows the pattern of record buffer slots and times
+for MAXREC 5 (for ease of presentation, actually MAXREC of 16 or 10 is used).</p>
+<ul class="simple">
+<li>remember that from the point of view of the shader the input time is <strong>CONSTANT</strong>
+think of the drawing as a chart plotter tracing over all the steps of all the photons,
+this shader determines when to put the pen down onto the paper<ul>
+<li>it needs to lift pen between photons and avoid invalids</li>
+<li>slot indices are presented modulo 5</li>
+<li>negative times indicates unset</li>
+<li>dt &lt; 0. indicates p1 invalid</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span>     <span class="n">t</span>
+<span class="o">//</span>
+<span class="o">//</span>     <span class="o">|</span>
+<span class="o">//</span>     <span class="o">|</span>
+<span class="o">//</span>     <span class="o">|</span>
+<span class="o">//</span>     <span class="o">|</span>          <span class="mi">3</span>
+<span class="o">//</span>     <span class="o">|</span>                                          <span class="mi">4</span>
+<span class="o">//</span>     <span class="o">|</span>      <span class="mi">2</span>                                <span class="mi">3</span>
+<span class="o">//</span>     <span class="o">|</span>    <span class="mi">1</span>                               <span class="mi">2</span>
+<span class="o">//</span>     <span class="o">|</span>  <span class="mi">0</span>                   <span class="mi">2</span>          <span class="mi">1</span>              <span class="mi">1</span>
+<span class="o">//</span>     <span class="o">|</span>                    <span class="mi">1</span>         <span class="mi">0</span>               <span class="mi">0</span>          <span class="mi">0</span>
+<span class="o">//</span>     <span class="o">+-----------------</span><span class="mi">0</span><span class="o">--------&gt;</span> <span class="n">slot</span> <span class="o">-------------------------------------&gt;</span>
+<span class="o">//</span>     <span class="o">|</span>
+<span class="o">//</span>     <span class="o">|</span>              <span class="mi">4</span>         <span class="mi">3</span> <span class="mi">4</span>                        <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span>    <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span>
+<span class="o">//</span>     <span class="o">|</span>
+<span class="o">//</span>
+<span class="o">//</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>geom shader gets to see all consequtive pairs
+(including invalid pairs that cross between different photons)</li>
+<li>shader uses one input time cut Param.w to provide history scrubbing</li>
+<li>a pair of contiguous recs corresponding to a potential line</li>
+</ul>
+<p>Choices over what to do with the pair:</p>
+<ul class="simple">
+<li>do nothing with this pair, eg for invalids</li>
+<li>interpolate the positions to find an intermediate position
+as a function of input time</li>
+<li>throw away one position, retaining the other</li>
+<li><a class="reference external" href="https://www.opengl.org/wiki/Geometry_Shader">https://www.opengl.org/wiki/Geometry_Shader</a></li>
+<li><a class="reference external" href="http://www.informit.com/articles/article.aspx?p=2120983&amp;seqNum=2">http://www.informit.com/articles/article.aspx?p=2120983&amp;seqNum=2</a></li>
+</ul>
+<p>Cannot form a line with only one valid point ? unless conjure a constant direction.
+The only hope is that a prior “thread” got the valid point as
+the second of a pair.</p>
+<p>Perhaps that means must draw with GL_LINE_STRIP rather than GL_LINES in order
+that the geometry shader sees each vertex twice (?)   YES : SEEMS SO</p>
+<p>Hmm how to select single photons/steps ?</p>
+<ul>
+<li><p class="first">Storing photon identifies occupies ~22 bits at least (1 &lt;&lt; 22)/1e6 ~ 4.19</p>
+</li>
+<li><p class="first">Step identifiers</p>
+</li>
+<li><p class="first"><a class="reference external" href="https://www.opengl.org/wiki/Built-in_Variable_(GLSL">https://www.opengl.org/wiki/Built-in_Variable_(GLSL</a>)</p>
+</li>
+<li><p class="first"><a class="reference external" href="https://www.opengl.org/sdk/docs/man/html/gl_VertexID.xhtml">https://www.opengl.org/sdk/docs/man/html/gl_VertexID.xhtml</a></p>
+<p>non-indexed: it is the effective index of the current vertex (number of vertices processed + <em>first</em> value)
+indexed:   index used to fetch this vertex from the buffer</p>
+<ul class="simple">
+<li>control the the glDrawArrays first/count to pick the desired range</li>
+<li>adopt glDrawElements and control the indices</li>
+</ul>
+</li>
+</ul>
+<p>Geometry Shader Background</p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.opengl.org/wiki/Geometry_Shader">https://www.opengl.org/wiki/Geometry_Shader</a></li>
+<li><a class="reference external" href="http://www.informit.com/articles/article.aspx?p=2120983&amp;seqNum=2">http://www.informit.com/articles/article.aspx?p=2120983&amp;seqNum=2</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

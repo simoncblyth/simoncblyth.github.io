@@ -34,6 +34,7 @@
 <li><a class="reference internal" href="#gpt">GPt</a></li>
 <li><a class="reference internal" href="#gpts">GPts</a></li>
 <li><a class="reference internal" href="#gparts">GParts</a><ul>
+<li><a class="reference internal" href="#buffers">Buffers</a></li>
 <li><a class="reference internal" href="#lifecycle-summary">Lifecycle Summary</a></li>
 <li><a class="reference internal" href="#details-on-where-gparts-is-used">Details on where GParts is used</a></li>
 <li><a class="reference internal" href="#mesh-type-or-node-type">Mesh-type or node-type</a><ul>
@@ -85,16 +86,17 @@
 <li><a class="reference internal" href="#gpt" id="id3">GPt</a></li>
 <li><a class="reference internal" href="#gpts" id="id4">GPts</a></li>
 <li><a class="reference internal" href="#gparts" id="id5">GParts</a><ul>
-<li><a class="reference internal" href="#lifecycle-summary" id="id6">Lifecycle Summary</a></li>
-<li><a class="reference internal" href="#details-on-where-gparts-is-used" id="id7">Details on where GParts is used</a></li>
-<li><a class="reference internal" href="#mesh-type-or-node-type" id="id8">Mesh-type or node-type</a><ul>
-<li><a class="reference internal" href="#persisted-structure-detailed-in-gparts-rst" id="id9">persisted structure detailed in GParts.rst</a></li>
+<li><a class="reference internal" href="#buffers" id="id6">Buffers</a></li>
+<li><a class="reference internal" href="#lifecycle-summary" id="id7">Lifecycle Summary</a></li>
+<li><a class="reference internal" href="#details-on-where-gparts-is-used" id="id8">Details on where GParts is used</a></li>
+<li><a class="reference internal" href="#mesh-type-or-node-type" id="id9">Mesh-type or node-type</a><ul>
+<li><a class="reference internal" href="#persisted-structure-detailed-in-gparts-rst" id="id10">persisted structure detailed in GParts.rst</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ggeo" id="id10">GGeo</a><ul>
-<li><a class="reference internal" href="#ggeo-deferredcreategparts" id="id11"><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></a></li>
+<li><a class="reference internal" href="#ggeo" id="id11">GGeo</a><ul>
+<li><a class="reference internal" href="#ggeo-deferredcreategparts" id="id12"><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -215,8 +217,30 @@ parts of Daya Bay PMT which were created by detdesc partitioning
 from python (pmt-/tree.py)</p>
 </li>
 </ul>
+<div class="section" id="buffers">
+<h2><a class="toc-backref" href="#id6">Buffers</a><a class="headerlink" href="#buffers" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>partBuffer</dt>
+<dd>CSG nodes eg Sphere, Box, Cylinder</dd>
+<dt>planBuffer</dt>
+<dd>planes referenced by some shapes such as ConvexPolyhedron like Trapezoid
+(JUNO geometry does not have any of these)</dd>
+<dt>primBuffer</dt>
+<dd>higher level than the partBuffer : references into partBuffer with an offset and
+a number of nodes eg corresponding to trees of nodes
+So the primBuffer corresponds (roughly) to a G4VSolid that is used within a LogicalVolume</dd>
+<dt>tranBuffer</dt>
+<dd>holds transforms, inverse transforms and transposed-inverse-transforms
+these transforms are referenced by index from the partBuffer nodes</dd>
+<dt>ITransformBuffer</dt>
+<dd>instance transform buffer, for example holding the transforms that position every PMT
+together with a reference to the prim</dd>
+<dt>InstanceIdentityBuffer</dt>
+<dd>holds things like the boundary code of the instance and also identifi</dd>
+</dl>
+</div>
 <div class="section" id="lifecycle-summary">
-<h2><a class="toc-backref" href="#id6">Lifecycle Summary</a><a class="headerlink" href="#lifecycle-summary" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id7">Lifecycle Summary</a><a class="headerlink" href="#lifecycle-summary" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>single tree(ie single solid) GParts created from NCSG by X4PhysicalVolume::convertNode
 on first encountering an lvIdx, where they get attached to a GVolume</li>
@@ -227,7 +251,7 @@ buffers into the OptiX context on GPU</li>
 </ul>
 </div>
 <div class="section" id="details-on-where-gparts-is-used">
-<h2><a class="toc-backref" href="#id7">Details on where GParts is used</a><a class="headerlink" href="#details-on-where-gparts-is-used" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id8">Details on where GParts is used</a><a class="headerlink" href="#details-on-where-gparts-is-used" title="Permalink to this headline">¶</a></h2>
 <p>Based on <em>opticks-fl GParts.hh</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>./ggeo/CMakeLists.txt
 ./ggeo/GParts.cc
@@ -302,7 +326,7 @@ buffers into the OptiX context on GPU</li>
 </div>
 </div>
 <div class="section" id="mesh-type-or-node-type">
-<h2><a class="toc-backref" href="#id8">Mesh-type or node-type</a><a class="headerlink" href="#mesh-type-or-node-type" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id9">Mesh-type or node-type</a><a class="headerlink" href="#mesh-type-or-node-type" title="Permalink to this headline">¶</a></h2>
 <p>Boundary spec is a node-type-qty, not a mesh-type-qty
 so it does not belong inside GParts (a mesh-type-qty)
 … there are relatively few mesh-type-qty for
@@ -311,7 +335,7 @@ each distinct shape (~249 DYB), but much more node-type-qty (~12k DYB)</p>
 between mesh-type when just for a single unplaced shape
 into node-type once applyPlacementTransform is used by GMergedMesh::mergeVolumeAnalytic</p>
 <div class="section" id="persisted-structure-detailed-in-gparts-rst">
-<h3><a class="toc-backref" href="#id9">persisted structure detailed in GParts.rst</a><a class="headerlink" href="#persisted-structure-detailed-in-gparts-rst" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id10">persisted structure detailed in GParts.rst</a><a class="headerlink" href="#persisted-structure-detailed-in-gparts-rst" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>for examination of structure of multi-complete tree buffers see GParts.rst</li>
 </ul>
@@ -319,14 +343,43 @@ into node-type once applyPlacementTransform is used by GMergedMesh::mergeVolumeA
 </div>
 </div>
 <div class="section" id="ggeo">
-<h1><a class="toc-backref" href="#id10">GGeo</a><a class="headerlink" href="#ggeo" title="Permalink to this headline">¶</a></h1>
+<h1><a class="toc-backref" href="#id11">GGeo</a><a class="headerlink" href="#ggeo" title="Permalink to this headline">¶</a></h1>
+<p>HMM: thoughts on removing m_ok okc/Opticks to rebase this on top of sysrap skipping NPY and BRAP ?</p>
+<ul class="simple">
+<li>removal is too big of a change, as it gets threaded thru most of the geo libs<ul>
+<li>also longterm this class can disappear once have a more direct G4-&gt;CSGFoundry
+translation : so it is not worthwhile doing such extreme surgery</li>
+</ul>
+</li>
+<li>could however change type from okc/Opticks to sysrap/SOpticks with just the subset of Opticks needed
+much more readily ?<ul>
+<li>BUT: there is a lot of code here based in NPY, BRAP so maybe not worthwile trying
+to change that until implement direct  G4-&gt;CSGFoundry</li>
+</ul>
+</li>
+</ul>
 <div class="section" id="ggeo-deferredcreategparts">
-<h2><a class="toc-backref" href="#id11"><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></a><a class="headerlink" href="#ggeo-deferredcreategparts" title="Permalink to this headline">¶</a></h2>
-<p>Canonically invoked from <code class="docutils literal notranslate"><span class="pre">GGeo::postLoadFromCache</span></code> and <code class="docutils literal notranslate"><span class="pre">GGeo::postDirectTranslation</span></code>.</p>
+<h2><a class="toc-backref" href="#id12"><code class="docutils literal notranslate"><span class="pre">GGeo::deferredCreateGParts</span></code></a><a class="headerlink" href="#ggeo-deferredcreategparts" title="Permalink to this headline">¶</a></h2>
+<p>Canonically invoked from <code class="docutils literal notranslate"><span class="pre">GGeo::postLoadFromCache</span></code> and <code class="docutils literal notranslate"><span class="pre">GGeo::postDirectTranslation</span></code>.
+so this happens both on direct translation and on saving.
+But beware the –gparts_transform_offset setting : when creating a CSGFoundry
+geometry it needs to be enabled.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">frame</span> <span class="c1">#3: 0x00000001069a76f5 libGGeo.dylib`GParts::Create(ok=0x0000000110100310, pts=0x000000010eed2e60, solids=size=7, num_mismatch_pt=0x00007ffeefbfa7c0, mismatch_placements=0x00007ffeefbfa7a8 size=0, imm=0, global_tranOffset=0)0&gt;, std::__1::allocator&lt;glm::mat&lt;4, 4, float, (glm::qualifier)0&gt; &gt; &gt;*, int, int) at GParts.cc:258</span>
+<span class="n">frame</span> <span class="c1">#4: 0x0000000106a1b01e libGGeo.dylib`GGeo::deferredCreateGParts(this=0x000000010ee8e360) at GGeo.cc:1472</span>
+<span class="n">frame</span> <span class="c1">#5: 0x0000000106a185d0 libGGeo.dylib`GGeo::deferred(this=0x000000010ee8e360) at GGeo.cc:622</span>
+<span class="n">frame</span> <span class="c1">#6: 0x0000000106a18aec libGGeo.dylib`GGeo::postDirectTranslation(this=0x000000010ee8e360) at GGeo.cc:602</span>
+<span class="n">frame</span> <span class="c1">#7: 0x00000001000e39c3 libG4OK.dylib`G4Opticks::translateGeometry(this=0x000000010ee79720, top=0x000000010ed1f570) at G4Opticks.cc:974</span>
+<span class="n">frame</span> <span class="c1">#8: 0x00000001000e2874 libG4OK.dylib`G4Opticks::setGeometry(this=0x000000010ee79720, world=0x000000010ed1f570) at G4Opticks.cc:602</span>
+</pre></div>
+</div>
 <p>This is needed prior to GPU upload of analytic geometry by OGeo,
 it requires the GMergedMesh from GGeoLib and the NCSG solids from GMeshLib.
 Thus it can be done postcache, as all the ingredients are loaded from cache.</p>
 <p>See <span class="xref std std-doc">../notes/issues/GPts_GParts_optimization</span></p>
+<ul class="simple">
+<li>option –savegparts Opticks::isSaveGPartsEnabled() writes $TMP/GParts/0,1,2,..
+which is read by ana/GParts.py to provide a python interface to the analytic geometry</li>
+</ul>
 </div>
 </div>
 

@@ -1,0 +1,294 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>OGeo &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">OGeo</a><ul>
+<li><a class="reference internal" href="#ogeo-details">OGeo Details</a><ul>
+<li><a class="reference internal" href="#table-2-optix-manual">Table 2, OptiX Manual</a></li>
+<li><a class="reference internal" href="#geometry-tree-that-allows-instance-identity">Geometry tree that allows instance identity</a></li>
+<li><a class="reference internal" href="#alternate-tree-layout">Alternate Tree Layout</a></li>
+<li><a class="reference internal" href="#optix-7-terminology-change">OptiX 7 terminology change</a></li>
+<li><a class="reference internal" href="#why-proliferate-the-pergi-so-can-assign-an-instance-index-to-it-ie-know-which-pmt-gets-hit">Why proliferate the <em>pergi</em> ? So can assign an instance index to it : ie know which PMT gets hit</a></li>
+<li><a class="reference internal" href="#could-the-perxform-geometrygroup-be-common-to-all">Could the perxform GeometryGroup be common to all ?</a></li>
+<li><a class="reference internal" href="#where-to-put-the-raylod-selector-raylod-is-not-currently-in-use">Where to put the RayLOD Selector ? RAYLOD IS NOT CURRENTLY IN USE</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ogeo-convert">OGeo::convert</a></li>
+<li><a class="reference internal" href="#ogeo-makeanalyticgeometry">OGeo::makeAnalyticGeometry</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/oxrap/OGeo.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ogeo">
+<h1>OGeo<a class="headerlink" href="#ogeo" title="Permalink to this headline">¶</a></h1>
+<p>The canonical OGeo instance resides in OScene and is
+instanciated and has <em>OGeo::convert</em> called from <em>OScene::init</em>.
+<em>OGeo::convert</em> loops over the GMergedMesh within GGeo/GGeoLib
+converting them into optix::Group or optix::GeometryGroup
+and adds them to m_top(optix::Group).</p>
+<p>The first ridx 0 GMergedMesh is non-instanced,
+the rest are instanced and hold the necessary transform
+and identity buffers.</p>
+<p>Details of geometry tree are documented with
+the OGeo::convert method.</p>
+<div class="section" id="ogeo-details">
+<h2>OGeo Details<a class="headerlink" href="#ogeo-details" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="table-2-optix-manual">
+<h3>Table 2, OptiX Manual<a class="headerlink" href="#table-2-optix-manual" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="43%" />
+<col width="34%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parent Node Type</th>
+<th class="head">Child Node Types</th>
+<th class="head">Associated Node Types</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Geometry</td>
+<td>None</td>
+<td>Material</td>
+</tr>
+<tr class="row-odd"><td>Acceleration</td>
+<td>None</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>GeometryInstance</td>
+<td>Geometry</td>
+<td>Material</td>
+</tr>
+<tr class="row-odd"><td>GeometryGroup</td>
+<td>GeometryInstance</td>
+<td>Acceleration</td>
+</tr>
+<tr class="row-even"><td>Transform</td>
+<td>GeometryGroup</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>Selector</td>
+<td>Transform</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>Group</td>
+<td>GeometryGroup</td>
+<td>Acceleration</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li>Group contains : rtGroup, rtGeometryGroup, rtTransform, or rtSelector</li>
+<li>Transform houses single child : rtGroup, rtGeometryGroup, rtTransform, or rtSelector   (NB not GeometryInstance)</li>
+<li>GeometryGroup is a container for an arbitrary number of geometry instances, and must be assigned an Acceleration</li>
+<li>Selector contains : rtGroup, rtGeometryGroup, rtTransform, and rtSelector</li>
+</ul>
+</div>
+<div class="section" id="geometry-tree-that-allows-instance-identity">
+<h3>Geometry tree that allows instance identity<a class="headerlink" href="#geometry-tree-that-allows-instance-identity" title="Permalink to this headline">¶</a></h3>
+<p>JUNO has 6 repeated pieces of geometry.
+The two different types of photomultiplier tubes (PMTs) are
+by far the most prolific with 20k of one type (20inch)
+and 36k of another (3inch)</p>
+<p>The geometry tree follows that show in OptiX 6.0.0 manual Fig 3.4 x6</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m_top</span>                  <span class="p">(</span><span class="n">Group</span><span class="p">)</span>             <span class="n">m_top_accel</span>
+   <span class="n">ggg</span>                 <span class="p">(</span><span class="n">GeometryGroup</span><span class="p">)</span>        <span class="n">m_ggg_accel</span>           <span class="k">global</span> <span class="n">non</span><span class="o">-</span><span class="n">instanced</span> <span class="n">geometry</span> <span class="kn">from</span> <span class="nn">merged</span> <span class="n">mesh</span> <span class="mi">0</span>
+      <span class="n">ggi</span>              <span class="p">(</span><span class="n">GeometryInstance</span><span class="p">)</span>
+
+   <span class="n">assembly</span><span class="o">.</span><span class="mi">0</span>          <span class="p">(</span><span class="n">Group</span><span class="p">)</span>                <span class="n">m_assembly_accel</span>      <span class="mi">1</span><span class="p">:</span><span class="mi">1</span> <span class="k">with</span> <span class="n">instanced</span> <span class="n">merged</span> <span class="n">mesh</span> <span class="p">(</span><span class="o">~</span><span class="mi">6</span> <span class="n">of</span> <span class="n">these</span> <span class="k">for</span> <span class="n">JUNO</span><span class="p">)</span>
+
+         <span class="n">xform</span><span class="o">.</span><span class="mi">0</span>       <span class="p">(</span><span class="n">Transform</span><span class="p">)</span>                                  <span class="p">(</span><span class="n">at</span> <span class="n">most</span> <span class="mi">20</span><span class="n">k</span><span class="o">/</span><span class="mi">36</span><span class="n">k</span> <span class="n">different</span> <span class="n">transforms</span><span class="p">)</span>
+           <span class="n">perxform</span>    <span class="p">(</span><span class="n">GeometryGroup</span><span class="p">)</span>
+              <span class="n">accel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                            <span class="n">m_instance_accel</span>  <span class="n">common</span> <span class="n">accel</span> <span class="n">within</span> <span class="n">each</span> <span class="n">assembly</span>
+              <span class="n">pergi</span>    <span class="p">(</span><span class="n">GeometryInstance</span><span class="p">)</span>                           <span class="n">distinct</span> <span class="n">pergi</span> <span class="k">for</span> <span class="n">every</span> <span class="n">instance</span><span class="p">,</span> <span class="k">with</span> <span class="n">instance_index</span> <span class="n">assigned</span>
+                 <span class="n">omm</span>   <span class="p">(</span><span class="n">Geometry</span><span class="p">)</span>                                   <span class="n">the</span> <span class="n">same</span> <span class="n">omm</span> <span class="ow">and</span> <span class="n">mat</span> <span class="n">are</span> <span class="n">child</span> <span class="n">of</span> <span class="nb">all</span> <span class="n">xform</span><span class="o">/</span><span class="n">perxform</span><span class="o">/</span><span class="n">pergi</span>
+                 <span class="n">mat</span>   <span class="p">(</span><span class="n">Material</span><span class="p">)</span>
+
+         <span class="n">xform</span><span class="o">.</span><span class="mi">1</span>       <span class="p">(</span><span class="n">Transform</span><span class="p">)</span>
+           <span class="n">perxform</span>    <span class="p">(</span><span class="n">GeometryGroup</span><span class="p">)</span>
+              <span class="n">pergi</span>    <span class="p">(</span><span class="n">GeometryInstance</span><span class="p">)</span>
+              <span class="n">accel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                 <span class="n">omm</span>   <span class="p">(</span><span class="n">Geometry</span><span class="p">)</span>
+                 <span class="n">mat</span>   <span class="p">(</span><span class="n">Material</span><span class="p">)</span>
+
+         <span class="o">...</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">many</span> <span class="n">thousands</span> <span class="n">of</span> <span class="n">instances</span> <span class="n">of</span> <span class="n">repeated</span> <span class="n">geometry</span> <span class="o">...</span>
+
+
+   <span class="n">assembly</span><span class="o">.</span><span class="mi">1</span>          <span class="p">(</span><span class="n">Group</span><span class="p">)</span>                  <span class="p">(</span><span class="n">order</span> <span class="o">~</span><span class="mi">6</span> <span class="n">repeated</span> <span class="n">assemblies</span> <span class="k">for</span> <span class="n">JUNO</span><span class="p">)</span>
+        <span class="n">xform</span><span class="o">.</span><span class="mi">0</span>
+        <span class="o">...</span> <span class="n">just</span> <span class="n">like</span> <span class="n">above</span> <span class="o">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>transforms can only be contained in “group” or another transform so add top level group with
+another acceleration structure</li>
+<li>transforms must be assigned exactly one child of type rtGroup, rtGeometryGroup, rtTransform, or rtSelector,</li>
+</ul>
+</div>
+<div class="section" id="alternate-tree-layout">
+<h3>Alternate Tree Layout<a class="headerlink" href="#alternate-tree-layout" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="docutils">
+<dt>(Group)</dt>
+<dd><dl class="first last docutils">
+<dt>(Transform)</dt>
+<dd><dl class="first last docutils">
+<dt>(GeometryGroup)</dt>
+<dd><dl class="first last docutils">
+<dt>(GeometryInstance)</dt>
+<dd><dl class="first last docutils">
+<dt>(Geometry)</dt>
+<dd>(Material)</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="optix-7-terminology-change">
+<h3>OptiX 7 terminology change<a class="headerlink" href="#optix-7-terminology-change" title="Permalink to this headline">¶</a></h3>
+<p>OptiX 7 changes terminology in a way which may inform
+concerning which trees can be handled in RT cores</p>
+<ul class="simple">
+<li>Geometry Group -&gt; Geometry AS (only primitives)</li>
+<li>Group -&gt; Instance AS</li>
+<li>Transform -&gt; just input to Instance AS at build</li>
+</ul>
+</div>
+<div class="section" id="why-proliferate-the-pergi-so-can-assign-an-instance-index-to-it-ie-know-which-pmt-gets-hit">
+<h3>Why proliferate the <em>pergi</em> ? So can assign an instance index to it : ie know which PMT gets hit<a class="headerlink" href="#why-proliferate-the-pergi-so-can-assign-an-instance-index-to-it-ie-know-which-pmt-gets-hit" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Need to assign an index to each instance means need a GeometryInstance beneath the xform ?</li>
+<li><dl class="first docutils">
+<dt>“Geometry” and “Material” can also hold variables, but that doesnt help for instance_index</dt>
+<dd>as there is only one geometry and material instance for each assembly</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="could-the-perxform-geometrygroup-be-common-to-all">
+<h3>Could the perxform GeometryGroup be common to all ?<a class="headerlink" href="#could-the-perxform-geometrygroup-be-common-to-all" title="Permalink to this headline">¶</a></h3>
+<p>NO, needs to be a separate GeometryGroup into which to place
+the distinct pergi GeometryInstance required for instanced identity</p>
+</div>
+<div class="section" id="where-to-put-the-raylod-selector-raylod-is-not-currently-in-use">
+<h3>Where to put the RayLOD Selector ? RAYLOD IS NOT CURRENTLY IN USE<a class="headerlink" href="#where-to-put-the-raylod-selector-raylod-is-not-currently-in-use" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>LOD : Level Of Detail<ul>
+<li>level0 : most precise/expensive used for ray.origin inside instance sphere</li>
+<li>level1 : cheaper alternative used for ray.origin outside instance sphere</li>
+</ul>
+</li>
+</ul>
+<p>The RayLOD idea is to switch geometry based on the distance from it, using
+radius of outermost solid origin centered bounding sphere with safety margin
+see notes/issues/can-optix-selector-defer-expensive-csg.rst</p>
+<p>Given that the same omm is used for all pergi…
+it would seem most appropriate to arrange the selector in common also,
+as all instances have the same simplified version of their geometry too..</p>
+<p>TODO:
+Currently all the accelerations are using Sbvh/Bvh.
+Investigate if container groups might be better as “pass through”
+NoAccel as the geometryGroup and groups they contain have all the
+geometry.</p>
+</div>
+</div>
+<div class="section" id="ogeo-convert">
+<h2>OGeo::convert<a class="headerlink" href="#ogeo-convert" title="Permalink to this headline">¶</a></h2>
+<p>Converts the GMergedMesh instances from (m_geolib)GGeoLib
+into optix::Group and optix::GeometryGroup and adds them
+to m_top(optix::Group).</p>
+</div>
+<div class="section" id="ogeo-makeanalyticgeometry">
+<h2>OGeo::makeAnalyticGeometry<a class="headerlink" href="#ogeo-makeanalyticgeometry" title="Permalink to this headline">¶</a></h2>
+<p>The GParts instance that this operates from will usually
+have been concatenated from multiple other GParts instances,
+one for each NCSG solid.  GParts concatenation happens during
+GMergedMesh formation in GMergedMesh::mergeVolumeAnalytic.</p>
+<p>For repeated geometry note how all bar one of the geometry buffers
+are small. Only the idBuf is large and usage GPU side requires
+use of the instance_index.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

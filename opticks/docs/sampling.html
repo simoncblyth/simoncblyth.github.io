@@ -1,0 +1,251 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>sampling &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sampling</a><ul>
+<li><a class="reference internal" href="#how-to-map-from-rejection-sampling-that-can-take-hundreds-of-randoms-and-double-precision-to-a-simple-single-random-icdf-lookups-using-floats">How to map from rejection sampling that can take hundreds of randoms and double precision to a simple single random ICDF lookups using floats ?</a></li>
+<li><a class="reference internal" href="#ana-rindex-py-cumulative-integral-for-s2">ana/rindex.py cumulative integral for s2</a></li>
+<li><a class="reference internal" href="#why-use-s2-sin-2-th-rather-than-ct-or-1-ct-perhaps-because-of-sin-2-th-range-0-1">Why use s2: sin^2(th) rather than ct or 1-ct ? Perhaps because of sin^2(th) range 0-&gt;1 ?</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/docs/sampling.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="sampling">
+<h1>sampling<a class="headerlink" href="#sampling" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_transform_sampling">https://en.wikipedia.org/wiki/Inverse_transform_sampling</a></li>
+<li></li>
+</ul>
+<p>CK rejection sampling:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">580</span>     <span class="n">double</span> <span class="n">nMax</span> <span class="o">=</span> <span class="mf">1.793</span> <span class="p">;</span>
+<span class="mi">581</span>     <span class="n">double</span> <span class="n">maxCos</span> <span class="o">=</span> <span class="n">BetaInverse</span> <span class="o">/</span> <span class="n">nMax</span><span class="p">;</span>
+<span class="mi">582</span>     <span class="n">double</span> <span class="n">maxSin2</span> <span class="o">=</span> <span class="p">(</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">maxCos</span> <span class="p">)</span><span class="o">*</span><span class="p">(</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">maxCos</span> <span class="p">);</span>
+<span class="o">...</span>
+<span class="mi">594</span>     <span class="n">do</span> <span class="p">{</span>
+<span class="mi">596</span>         <span class="n">u0</span> <span class="o">=</span> <span class="n">curand_uniform_double</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rng</span><span class="p">)</span> <span class="p">;</span>
+<span class="mi">598</span>         <span class="n">energy</span> <span class="o">=</span> <span class="n">Pmin</span> <span class="o">+</span> <span class="n">u0</span><span class="o">*</span><span class="p">(</span><span class="n">Pmax</span> <span class="o">-</span> <span class="n">Pmin</span><span class="p">)</span> <span class="p">;</span>
+<span class="mi">600</span>         <span class="n">sampledRI</span> <span class="o">=</span> <span class="n">prop</span><span class="o">-&gt;</span><span class="n">interpolate</span><span class="p">(</span> <span class="mi">0</span><span class="n">u</span><span class="p">,</span> <span class="n">energy</span> <span class="p">);</span>
+<span class="mi">602</span>         <span class="n">cosTheta</span> <span class="o">=</span> <span class="n">BetaInverse</span> <span class="o">/</span> <span class="n">sampledRI</span> <span class="p">;</span>
+<span class="mi">604</span>         <span class="n">sin2Theta</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">cosTheta</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">cosTheta</span><span class="p">);</span>
+<span class="mi">606</span>         <span class="n">u1</span> <span class="o">=</span> <span class="n">curand_uniform_double</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rng</span><span class="p">)</span> <span class="p">;</span>
+<span class="mi">608</span>         <span class="n">u_mxs2_s2</span> <span class="o">=</span> <span class="n">u1</span><span class="o">*</span><span class="n">maxSin2</span> <span class="o">-</span> <span class="n">sin2Theta</span> <span class="p">;</span>
+<span class="mi">610</span>         <span class="n">loop</span> <span class="o">+=</span> <span class="mi">1</span> <span class="p">;</span>
+<span class="mi">612</span>     <span class="p">}</span> <span class="k">while</span> <span class="p">(</span> <span class="n">u_mxs2_s2</span> <span class="o">&gt;</span> <span class="mf">0.</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>The condition for the sample to be rejected and to keep looping:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">u1</span><span class="o">*</span><span class="n">maxSin2</span> <span class="o">&gt;</span> <span class="n">sin2Theta</span>
+</pre></div>
+</div>
+<p>Is that equivalent to rejecting based on cosTheta ?:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">u1</span><span class="o">*</span><span class="n">maxCos</span> <span class="o">&lt;</span> <span class="n">cosTheta</span>
+</pre></div>
+</div>
+<p>Or maybe need to 1-cosTheta (to do this corresponding to zero) ?</p>
+<ul class="simple">
+<li>BetaInverse is an input (from the velocity of the particle)
+making it difficult to imagine how to convert the rejection sampling
+into anything else</li>
+<li>But if can avoid the non-linearity of the sin2Theta its just a linear factor and cut</li>
+<li>There can be holes in the allowable energies, is that a problem ? It will mean the
+cumulative probability will stay constant across the disallowed energy region then
+in inverse the probability of hitting the delta function is zero(?)</li>
+<li><a class="reference external" href="http://patricklam.org/teaching/sampling_print.pdf">http://patricklam.org/teaching/sampling_print.pdf</a></li>
+</ul>
+<div class="section" id="how-to-map-from-rejection-sampling-that-can-take-hundreds-of-randoms-and-double-precision-to-a-simple-single-random-icdf-lookups-using-floats">
+<h2>How to map from rejection sampling that can take hundreds of randoms and double precision to a simple single random ICDF lookups using floats ?<a class="headerlink" href="#how-to-map-from-rejection-sampling-that-can-take-hundreds-of-randoms-and-double-precision-to-a-simple-single-random-icdf-lookups-using-floats" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/Rejection_sampling">https://en.wikipedia.org/wiki/Rejection_sampling</a></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Rejection</span> <span class="n">sampling</span> <span class="ow">is</span> <span class="n">based</span> <span class="n">on</span> <span class="n">the</span> <span class="n">observation</span> <span class="n">that</span> <span class="n">to</span> <span class="n">sample</span> <span class="n">a</span> <span class="n">random</span> <span class="n">variable</span>
+<span class="ow">in</span> <span class="n">one</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">one</span> <span class="n">can</span> <span class="n">perform</span> <span class="n">a</span> <span class="n">uniformly</span> <span class="n">random</span> <span class="n">sampling</span> <span class="n">of</span> <span class="n">the</span>
+<span class="n">two</span><span class="o">-</span><span class="n">dimensional</span> <span class="n">Cartesian</span> <span class="n">graph</span><span class="p">,</span> <span class="ow">and</span> <span class="n">keep</span> <span class="n">the</span> <span class="n">samples</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">region</span> <span class="n">under</span> <span class="n">the</span>
+<span class="n">graph</span> <span class="n">of</span> <span class="n">its</span> <span class="n">density</span> <span class="n">function</span><span class="o">.</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="n">Note</span> <span class="n">that</span> <span class="n">this</span> <span class="nb">property</span> <span class="n">can</span> <span class="n">be</span> <span class="n">extended</span>
+<span class="n">to</span> <span class="n">N</span><span class="o">-</span><span class="n">dimension</span> <span class="n">functions</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Hmm : this makes me think, can I create an inverse CDF from the RINDEX ?
+RINDEX is a piecewise linear function, so an analytic integral can be calculated.
+The BetaInverse is a constant factor so that could be kept factored.
+Want to have one CDF integral that can be used for all BetaInverse.</p>
+<p>The non-linear transform from cosTheta to sin2Theta is problematic ?
+But is it necassary ? Can I not just do the sampling cut on the cosTheta,
+or equivalently do the the integal on the cosTheta ?</p>
+<ul class="simple">
+<li>kinda did this (numerically and for constant BetaInverse) in ana/rindex.py
+but the results are very poor… pilot error : must do it with the s2
+and it gives a good match : chi2/ndf ~ 1.1</li>
+</ul>
+</div>
+<div class="section" id="ana-rindex-py-cumulative-integral-for-s2">
+<h2>ana/rindex.py cumulative integral for s2<a class="headerlink" href="#ana-rindex-py-cumulative-integral-for-s2" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BetaInverse</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="n">ri_</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+<span class="n">rif_</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span> <span class="o">-</span> <span class="n">BetaInverse</span>
+<span class="n">xri</span> <span class="o">=</span> <span class="n">find_cross</span><span class="p">(</span><span class="n">ri</span><span class="p">,</span> <span class="n">BetaInverse</span><span class="o">=</span><span class="n">BetaInverse</span><span class="p">)</span>
+<span class="n">nMax</span> <span class="o">=</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">xri</span><span class="p">)</span>
+
+<span class="n">ct_</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span><span class="n">BetaInverse</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+<span class="n">s2_</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:(</span><span class="mi">1</span><span class="o">-</span><span class="n">ct_</span><span class="p">(</span><span class="n">e</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">ct_</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+<span class="n">ed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xri</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">xri</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">40960</span><span class="p">)</span>   <span class="c1"># assuming simple 2 crossings &quot;single peak&quot; RINDEX</span>
+<span class="n">s2e</span> <span class="o">=</span> <span class="n">s2_</span><span class="p">(</span><span class="n">ed</span><span class="p">)</span>
+
+<span class="n">cs2e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">s2e</span><span class="p">)</span>
+<span class="n">cs2e</span> <span class="o">/=</span> <span class="n">cs2e</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>           <span class="c1"># last bin will be max</span>
+
+<span class="n">look_</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">cs2e</span><span class="p">,</span> <span class="n">ed</span> <span class="p">)</span>     <span class="c1"># numerical inversion of CDF</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">look_</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>     <span class="c1">## ck energy distrib obtained with single random throw</span>
+</pre></div>
+</div>
+<p>But to use this would need to use a 2d texture with one dimension
+being BetaInverse ( or BetaInverse/nMax ? ).
+Could repeat the about for 1000 steps across the BetaInverse domain …
+but theres a variable energy range problem too</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cosTheta</span> <span class="o">=</span> <span class="n">BetaInverse</span><span class="o">/</span><span class="n">sampleRI</span>
+</pre></div>
+</div>
+<p>At the point of maximum RI:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cosTheta_max</span> <span class="o">=</span> <span class="n">BetaInverse</span><span class="o">/</span><span class="n">sampleRI_max</span>
+</pre></div>
+</div>
+<p>In energy regions where sampleRI &lt; BetaInverse, cosTheta &gt; 1 =&gt; no Cerenkov
+As lookups always return a value have to avoid that happening : so must
+constrain the domain ?</p>
+<p>No, I dont think this is needed the energy is a looked up value from
+a (BetaInverse, u:0-&gt;1 ) texture so the permissable energy ranges for each BetaInverse
+are baked into the ICDF</p>
+<p>Hmm I can see that interpolation between u points is appropriate but
+what about between BetaInverse points in the other dimension ?</p>
+<p>What about disallowed energy ranges from multi-peak rindex ?</p>
+<p>That will lead to flat regions of the CDF that become vertical in the ICDF
+hence the probability of landing there becomes zero.</p>
+<p>What about when there is only a tiny energy region left, just a tiny peak of RINDEX
+poking above the BetaInverse sea ?  The find_crossing algorithm defines the energy domain
+of the CDF which becomes the energy value range of the ICDF</p>
+<p>find_crossing will need to find all crossings and pick the extreme ones to define
+the ranges to bake into the texture.</p>
+<p>Hmm what about an “inverted” two lobe RINDEX situation ?</p>
+</div>
+<div class="section" id="why-use-s2-sin-2-th-rather-than-ct-or-1-ct-perhaps-because-of-sin-2-th-range-0-1">
+<h2>Why use s2: sin^2(th) rather than ct or 1-ct ? Perhaps because of sin^2(th) range 0-&gt;1 ?<a class="headerlink" href="#why-use-s2-sin-2-th-rather-than-ct-or-1-ct-perhaps-because-of-sin-2-th-range-0-1" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sin^2(th) == 1 - cos^2(th) = (1 - cos(th)) (1 + cos(th))
+
+
+Hmm can trig identities be used ?
+
+sin^2(th) =  1 - cos(2x)
+            --------------
+                 2
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">reject</span> <span class="p">;</span>
+<span class="n">double</span> <span class="n">u0</span> <span class="p">;</span>
+<span class="n">double</span> <span class="n">u1</span> <span class="p">;</span>
+<span class="n">double</span> <span class="n">energy</span> <span class="p">;</span>
+
+<span class="n">double</span> <span class="n">maxCos</span> <span class="o">=</span> <span class="n">BetaInverse</span> <span class="o">/</span> <span class="n">nMax</span><span class="p">;</span>
+<span class="n">double</span> <span class="n">maxSin2</span> <span class="o">=</span> <span class="p">(</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">maxCos</span> <span class="p">)</span><span class="o">*</span><span class="p">(</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">maxCos</span> <span class="p">);</span>
+<span class="n">double</span> <span class="n">cosTheta</span> <span class="p">;</span>
+<span class="n">double</span> <span class="n">sin2Theta</span> <span class="p">;</span>
+
+<span class="o">//</span><span class="n">double</span> <span class="n">oneMinusCosTheta</span> <span class="p">;</span>
+
+<span class="n">unsigned</span> <span class="n">loop</span> <span class="o">=</span> <span class="mi">0</span><span class="n">u</span> <span class="p">;</span>
+
+<span class="n">do</span> <span class="p">{</span>
+    <span class="n">u0</span> <span class="o">=</span> <span class="n">curand_uniform_double</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rng</span><span class="p">)</span> <span class="p">;</span>
+    <span class="n">u1</span> <span class="o">=</span> <span class="n">curand_uniform_double</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rng</span><span class="p">)</span> <span class="p">;</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">Pmin</span> <span class="o">+</span> <span class="n">u0</span><span class="o">*</span><span class="p">(</span><span class="n">Pmax</span> <span class="o">-</span> <span class="n">Pmin</span><span class="p">)</span> <span class="p">;</span>
+    <span class="n">sampledRI</span> <span class="o">=</span> <span class="n">prop</span><span class="o">-&gt;</span><span class="n">interpolate</span><span class="p">(</span> <span class="mi">0</span><span class="n">u</span><span class="p">,</span> <span class="n">energy</span> <span class="p">);</span>
+    <span class="o">//</span><span class="n">oneMinusCosTheta</span> <span class="o">=</span> <span class="p">(</span><span class="n">sampledRI</span> <span class="o">-</span> <span class="n">BetaInverse</span><span class="p">)</span> <span class="o">/</span> <span class="n">sampledRI</span> <span class="p">;</span>
+    <span class="o">//</span><span class="n">reject</span> <span class="o">=</span> <span class="n">u1</span><span class="o">*</span><span class="n">maxOneMinusCosTheta</span> <span class="o">-</span> <span class="n">oneMinusCosTheta</span> <span class="p">;</span>
+    <span class="n">loop</span> <span class="o">+=</span> <span class="mi">1</span> <span class="p">;</span>
+
+    <span class="n">cosTheta</span> <span class="o">=</span> <span class="n">BetaInverse</span> <span class="o">/</span> <span class="n">sampledRI</span> <span class="p">;</span>
+    <span class="n">sin2Theta</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">cosTheta</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">cosTheta</span><span class="p">);</span>
+    <span class="n">reject</span> <span class="o">=</span> <span class="n">u1</span><span class="o">*</span><span class="n">maxSin2</span> <span class="o">-</span> <span class="n">sin2Theta</span> <span class="p">;</span>
+
+<span class="p">}</span> <span class="k">while</span> <span class="p">(</span> <span class="n">reject</span> <span class="o">&gt;</span> <span class="mf">0.</span> <span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

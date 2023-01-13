@@ -1,0 +1,299 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>snapscan-varying-enabledmergedmesh-option &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">snapscan-varying-enabledmergedmesh-option</a><ul>
+<li><a class="reference internal" href="#classical-ggeo-optix-6-geometry">Classical GGeo OptiX 6 Geometry</a></li>
+<li><a class="reference internal" href="#optix-7-csgoptix-experimental-geometry">OptiX 7 CSGOptiX Experimental Geometry</a></li>
+<li><a class="reference internal" href="#comparing">Comparing</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/misc/snapscan-varying-enabledmergedmesh-option.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="snapscan-varying-enabledmergedmesh-option">
+<h1>snapscan-varying-enabledmergedmesh-option<a class="headerlink" href="#snapscan-varying-enabledmergedmesh-option" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="classical-ggeo-optix-6-geometry">
+<h2>Classical GGeo OptiX 6 Geometry<a class="headerlink" href="#classical-ggeo-optix-6-geometry" title="Permalink to this headline">¶</a></h2>
+<p>To identify performance problems with geometry it is useful to
+make render snapshots that vary the included geometry. See:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://simoncblyth.bitbucket.io/env/presentation/juno_opticks_20210426.html">https://simoncblyth.bitbucket.io/env/presentation/juno_opticks_20210426.html</a></li>
+</ul>
+<p>This section describes how the renders and tables in the above
+presentation were created using Opticks executables and scripts.</p>
+<p>On GPU Workstation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snapscan</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">cvd</span> <span class="mi">1</span> <span class="o">--</span><span class="n">rtx</span> <span class="mi">1</span>    <span class="c1">## runs snap.sh with sequence of -e options saving jpg/json/npy</span>
+</pre></div>
+</div>
+<p>CAUTION bin/snapscan.sh gets installed, so to update it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="nb">bin</span>
+<span class="n">om</span>
+</pre></div>
+</div>
+<p>On laptop:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span><span class="o">.</span><span class="n">sh</span>    <span class="c1">## rsyncs jpg,npy,json outputs for each snap from workstation to laptop</span>
+</pre></div>
+</div>
+<p>snap.py analysis script reads the json and presents a table sorted by render speed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ snap.py  ## reads metadata and creates table
+idx         -e    time(s)   relative     enabled geometry description
+  0         5,     0.0020     0.1140     ONLY: 1:sStrutBallhead0x34be280
+  1         6,     0.0023     0.1363     ONLY: 1:uni10x3461bd0
+  2         7,     0.0030     0.1739     ONLY: 1:base_steel0x35a1810
+  3         1,     0.0033     0.1939     ONLY: 5:PMT_3inch_pmt_solid0x43c0a40
+  4         9,     0.0041     0.2366     ONLY: 130:sPanel0x4e71750
+  5         4,     0.0042     0.2428     ONLY: 5:mask_PMT_20inch_vetosMask0x3c2e7c0
+  6         3,     0.0068     0.3937     ONLY: 5:HamamatsuR12860sMask0x3c39130
+  7         2,     0.0075     0.4331     ONLY: 5:NNVTMCPPMTsMask0x3c2c750
+  8    1,2,3,4     0.0172     1.0000     ONLY PMT
+  9        ~8,     0.0238     1.3806     EXCL: 1:uni_acrylic30x35932f0
+ 10         0,     0.0510     2.9614     ONLY: 3084:sWorld0x33e3370
+ 11        t8,     0.0875     5.0861     EXCL: 1:uni_acrylic30x35932f0
+ 12         8,     1.1124    64.6409     ONLY: 1:uni_acrylic30x35932f0
+ 13        t0,     1.4057    81.6813     EXCL: 3084:sWorld0x33e3370
+ 14        t4,     1.6793    97.5841     EXCL: 5:mask_PMT_20inch_vetosMask0x3c2e7c0
+ 15        t6,     1.6910    98.2647     EXCL: 1:uni10x3461bd0
+ 16        t7,     1.6942    98.4478     EXCL: 1:base_steel0x35a1810
+ 17        t5,     1.6942    98.4485     EXCL: 1:sStrutBallhead0x34be280
+ 18         t0     1.6983    98.6845     3084:sWorld0x33e3370
+ 19        t9,     1.7003    98.8055     EXCL: 130:sPanel0x4e71750
+ 20        t3,     1.7042    99.0309     EXCL: 5:HamamatsuR12860sMask0x3c39130
+ 21        t2,     1.7261   100.3045     EXCL: 5:NNVTMCPPMTsMask0x3c2c750
+ 22        t1,     1.7581   102.1626     EXCL: 5:PMT_3inch_pmt_solid0x43c0a40
+idx         -e    time(s)   relative     enabled geometry description
+epsilon:~ blyth$
+</pre></div>
+</div>
+<p>For inclusion into s5 presentations the table can be output in RST format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ snap.py --rst
++---+----------+----------+----------+--------------------------------------------------------------------------+
+|idx|        -e|   time(s)|  relative|    enabled geometry description                                          |
++===+==========+==========+==========+==========================================================================+
+|  0|        5,|    0.0020|    0.1140|    ONLY: 1:sStrutBallhead0x34be280                                       |
++---+----------+----------+----------+--------------------------------------------------------------------------+
+|  1|        6,|    0.0023|    0.1363|    ONLY: 1:uni10x3461bd0                                                 |
+...
+</pre></div>
+</div>
+<p>The commandlines can be dumped:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ snap.py --argline
+OpSnapTest --targetpvn lLowerChimney_phys --eye -1,-1,-1 -e 5, --snapoutdir /tmp/blyth/opticks/snap/lLowerChimney_phys --nameprefix lLowerChimney_phys__5,__ --cvd 1 --rtx 1 --tracer
+OpSnapTest --targetpvn lLowerChimney_phys --eye -1,-1,-1 -e 6, --snapoutdir /tmp/blyth/opticks/snap/lLowerChimney_phys --nameprefix lLowerChimney_phys__6,__ --cvd 1 --rtx 1 --tracer
+OpSnapTest --targetpvn lLowerChimney_phys --eye -1,-1,-1 -e 7, --snapoutdir /tmp/blyth/opticks/snap/lLowerChimney_phys --nameprefix lLowerChimney_phys__7,__ --cvd 1 --rtx 1 --tracer
+OpSnapTest --targetpvn lLowerChimney_phys --eye -1,-1,-1 -e 1, --snapoutdir /tmp/blyth/opticks/snap/lLowerChimney_phys --nameprefix lLowerChimney_phys__1,__ --cvd 1 --rtx 1 --tracer
+OpSnapTest --targetpvn lLowerChimney_phys --eye -1,-1,-1 -e 9, --snapoutdir /tmp/blyth/opticks/snap/lLowerChimney_phys --nameprefix lLowerChimney_phys__9,__ --cvd 1 --rtx 1 --tracer
+...
+</pre></div>
+</div>
+<p>Also the source for presentations can be dumped:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ snap.py --refjpg          ## image references for inclusion into s5_background_image.txt
+    [0]lLowerChimney_phys__5,__00000
+    /env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__5,__00000.jpg 1280px_720px
+
+    [1]lLowerChimney_phys__6,__00000
+    /env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__6,__00000.jpg 1280px_720px
+
+    [2]lLowerChimney_phys__7,__00000
+    /env/presentation/snap/lLowerChimney_phys/lLowerChimney_phys__7,__00000.jpg 1280px_720px
+...
+
+epsilon:~ blyth$ snap.py --pagejpg          ## snap pages for inclusion into s5 presentations
+:blue:`[0]lLowerChimney_phys__5,__00000`
+----------------------------------------
+
+:blue:`[1]lLowerChimney_phys__6,__00000`
+----------------------------------------
+</pre></div>
+</div>
+<p>To view the renders use “–jpg” option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:lLowerChimney_phys blyth$ snap.py --jpg                                ## list jpg snaps in speed of render order
+/tmp/blyth/opticks/snap/lLowerChimney_phys/lLowerChimney_phys__5,__00000.jpg
+/tmp/blyth/opticks/snap/lLowerChimney_phys/lLowerChimney_phys__6,__00000.jpg
+/tmp/blyth/opticks/snap/lLowerChimney_phys/lLowerChimney_phys__7,__00000.jpg
+...
+epsilon:lLowerChimney_phys blyth$ open $(snap.py --jpg)
+epsilon:lLowerChimney_phys blyth$
+</pre></div>
+</div>
+</div>
+<div class="section" id="optix-7-csgoptix-experimental-geometry">
+<h2>OptiX 7 CSGOptiX Experimental Geometry<a class="headerlink" href="#optix-7-csgoptix-experimental-geometry" title="Permalink to this headline">¶</a></h2>
+<p>Currently the CSGFoundry geometry needs the –gparts-transform-offset option which
+messes up the classical geometry.  But that is only needed during the conversion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">CSG_GGeo</span>
+<span class="o">./</span><span class="n">run</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">gparts_transform_offset</span>
+ <span class="c1">## CSGFoundry geometry is written to tmpdir</span>
+</pre></div>
+</div>
+<p>On GPU workstation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">CSGOptiX</span>
+
+<span class="o">./</span><span class="n">build</span><span class="o">.</span><span class="n">sh</span>     <span class="c1"># OptiX 6</span>
+<span class="o">./</span><span class="n">build7</span><span class="o">.</span><span class="n">sh</span>    <span class="c1"># OptiX 7</span>
+
+<span class="o">./</span><span class="n">cxr</span><span class="o">.</span><span class="n">sh</span>       <span class="c1"># CSGOptiXRender at default inputs for EMM MOI EYE LOOK UP</span>
+               <span class="c1"># creating /tmp/blyth/opticks/CSGOptiX/CSGOptiXRender/70000/render/CSG_GGeo/1/cxr_t8,_sStrut.jpg</span>
+
+<span class="n">MOI</span><span class="o">=</span><span class="n">ALL</span> <span class="o">./</span><span class="n">cxr</span><span class="o">.</span><span class="n">sh</span>   <span class="c1"># creates renders for each line of the arglist from a single geometry load</span>
+</pre></div>
+</div>
+<p>Scan the included geometry:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cxr_scan</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>On laptop:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd ~/CSGOptiX
+./grab.sh
+
+epsilon:CSGOptiX blyth$ ./cxr_table.sh
+idx         -e    time(s)   relative     enabled geometry description
+  0         7,     0.0017     0.1042     ONLY: 1:base_steel0x35a1810
+  1         5,     0.0017     0.1049     ONLY: 1:sStrutBallhead0x34be280
+  2         9,     0.0018     0.1135     ONLY: 130:sPanel0x4e71750
+  3         1,     0.0021     0.1292     ONLY: 5:PMT_3inch_pmt_solid0x43c0a40
+  4         6,     0.0029     0.1824     ONLY: 1:uni10x3461bd0
+  5         3,     0.0082     0.5075     ONLY: 5:HamamatsuR12860sMask0x3c39130
+  6         4,     0.0082     0.5084     ONLY: 5:mask_PMT_20inch_vetosMask0x3c2e7c0
+  7         2,     0.0104     0.6408     ONLY: 5:NNVTMCPPMTsMask0x3c2c750
+  8    1,2,3,4     0.0162     1.0000     ONLY PMT
+  9         0,     0.1163     7.1935     ONLY: 3084:sWorld0x33e3370
+ 10        t8,     0.1203     7.4401     EXCL: 1:uni_acrylic30x35932f0
+ 11         8,     0.5373    33.2399     ONLY: 1:uni_acrylic30x35932f0
+ 12        t0,     0.5530    34.2133     EXCL: 3084:sWorld0x33e3370
+ 13        t1,     0.6060    37.4915     EXCL: 5:PMT_3inch_pmt_solid0x43c0a40
+ 14        t7,     0.6151    38.0565     EXCL: 1:base_steel0x35a1810
+ 15        t2,     0.6168    38.1601     EXCL: 5:NNVTMCPPMTsMask0x3c2c750
+ 16        t6,     0.6253    38.6862     EXCL: 1:uni10x3461bd0
+ 17        t3,     0.6279    38.8472     EXCL: 5:HamamatsuR12860sMask0x3c39130
+ 18         t0     0.6334    39.1866     3084:sWorld0x33e3370
+ 19        t4,     0.6371    39.4137     EXCL: 5:mask_PMT_20inch_vetosMask0x3c2e7c0
+ 20        t5,     0.6470    40.0268     EXCL: 1:sStrutBallhead0x34be280
+ 21        t9,     0.6471    40.0361     EXCL: 130:sPanel0x4e71750
+idx         -e    time(s)   relative     enabled geometry description
+epsilon:CSGOptiX blyth$
+
+
+epsilon:CSGOptiX blyth$ ./cxr_table.sh -h
+usage:
+::
+
+    ggeo.py --mm &gt; $TMP/mm.txt    # create list of mm names used for labels
+
+    snap.py       # list the snaps in speed order with labels
+
+    open $(snap.py --jpg)         # open the jpg ordered by render speed
+
+       [-h] [--level LEVEL] [--basedir BASEDIR] [--reldir RELDIR] [--jpg]
+       [--refjpgpfx REFJPGPFX] [--s5base S5BASE] [--refjpg] [--pagejpg]
+       [--mvjpg] [--cpjpg] [--argline] [--rst]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --level LEVEL         logging level
+  --basedir BASEDIR     base
+  --reldir RELDIR       Relative dir beneath $TMP/snap from which to load snap
+                        .json
+  --jpg                 List jpg paths in speed order
+  --refjpgpfx REFJPGPFX
+                        List jpg paths s5 background image presentation format
+  --s5base S5BASE       Presentation repo base
+  --refjpg              List jpg paths s5 background image presentation format
+  --pagejpg             List jpg for inclusion into s5 presentation
+  --mvjpg               List jpg for inclusion into s5 presentation
+  --cpjpg               List cp commands to place into presentation repo
+  --argline             List argline in speed order
+  --rst                 Dump table in RST format
+</pre></div>
+</div>
+</div>
+<div class="section" id="comparing">
+<h2>Comparing<a class="headerlink" href="#comparing" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash -l
+
+adir=/tmp/$USER/opticks/snap
+bdir=/tmp/$USER/opticks/CSGOptiX/CSGOptiXRender/70000/render/CSG_GGeo/1
+
+q=${1:-t8,}
+
+find $adir -name &quot;lLowerChimney_phys__*${q}__00000.jpg&quot;
+find $bdir -name &quot;*${q}_sWaterTube.jpg&quot;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

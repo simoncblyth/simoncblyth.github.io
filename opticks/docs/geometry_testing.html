@@ -1,0 +1,195 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Geometry Testing (Feb 2022) &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Geometry Testing (Feb 2022)</a><ul>
+<li><a class="reference internal" href="#list-of-geom-scripts">List of GEOM scripts</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/docs/geometry_testing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="geometry-testing-feb-2022">
+<h1>Geometry Testing (Feb 2022)<a class="headerlink" href="#geometry-testing-feb-2022" title="Permalink to this headline">¶</a></h1>
+<p>I welcome all work that leads to improvements to Opticks correctness and performance.</p>
+<p>Making such improvements however demands familiarity with the details of the
+Opticks and Geant4 geometry implementations (especially CSG) and the translation
+between them. Given this background : creation of a test suite that creates a
+large variety of Geant4 solids is a good idea as it can be helpful without
+requiring great familiarity, initially anyhow.</p>
+<p>It is important to be aware that Opticks transition to the all new NVIDIA OptiX 7 API
+is not complete and the default OptiX used by the Opticks build is still &lt; 7.
+Clearly it would not be productive to validate or optimize the pre-7 workflow
+as the future is with the all new API. That means lots of code, eg all of OptiXRap,
+is about to be retired. It is difficult to predict exactly when, but within months I
+aim to make the leap to OptiX 7. The source of delay is other urgent JUNO work.</p>
+<p>Opticks has a great deal of geometry testing functionality already.
+The relevant packages and sources for testing Opticks geometry with the OptiX 7 API
+are listed below.  Anyone wishing to test/improve/extend the
+Opticks geometry implementation shoud get familiar with the below in order to avoid
+reinventing the wheel.</p>
+<dl class="docutils">
+<dt>extg4/X4SolidMaker.cc</dt>
+<dd>source of test Geant4 solids
+const G4VSolid* X4SolidMaker::Make(const char* qname)</dd>
+<dt>extg4/xxs.sh</dt>
+<dd>creates 2D cross sections of Geant4 solids providing
+a good way to find problems such as spurious intersects
+at geant4 level</dd>
+<dt>extg4/X4MeshTest.sh</dt>
+<dd>creates 3D visualizations of Geant4 polygonized meshes using pyvista</dd>
+<dt>GeoChain</dt>
+<dd>performs full chain of geometry conversions, taking a Geant4 solid
+and converting it via npy/NNode and GGeo into CSG/CSGFoundry</dd>
+<dt>GeoChain/run.sh</dt>
+<dd>invokes the conversion starting with X4SolidMaker::Make</dd>
+<dt>CSG_GGeo</dt>
+<dd>converts GGeo geometries into the CSG model, used by GeoChain</dd>
+<dt>CSG</dt>
+<dd>OptiX 7 (and &lt;7) compatible geometry model</dd>
+<dt>CSG/csg_geochain.sh</dt>
+<dd>CPU test of the CUDA compatible CSG implementation : csg_intersect_tree.h csg_intersect_node.h
+This loads GeoChain converted CSG geometries and shoots rays at them,
+saving first intersects into .npy files for python plotting using pyvista and matplotlib</dd>
+<dt>CSG/sdf_geochain.sh</dt>
+<dd><p class="first">saves “SDF” distance fields of a solid and uses pyvista iso-surface finding (eg marching cubes)
+to present a 3D render of the surface.
+<em>distance_node functions are currently not implemented for all primitives</em></p>
+<p class="last">The distance_node functions return distance to surface for any 3D position,
+as that should be close to zero for all intersects onto the solid this
+provides a useful way of finding some forms of spurious intersect problems.</p>
+</dd>
+<dt>qudarap</dt>
+<dd>CUDA elements of the simulation not requiring intersections with geometry
+such as photon generation, this is used from CSGOptiX</dd>
+<dt>CSGOptiX</dt>
+<dd><p class="first">Uses OptiX 7 to render and simulate within
+Unlike all the above packages this one does depends on OptiX 7,</p>
+<p class="last">CAUTION : CSGOptiX builds by default against OptiX &lt; 7, to build against OptiX 7
+follow the pasted opticks-build7-notes in the postscript below.</p>
+</dd>
+<dt>CSGOptiX/cxr_geochain.sh</dt>
+<dd>Creates 3D renders of CSG geometries converted via GeoChain</dd>
+<dt>CSGOptiX/cxs_geochain.sh</dt>
+<dd><p class="first">Creates 2D cross-sections of CSG geometries composed of intersections
+onto the geometry.</p>
+<ul class="last simple">
+<li>not implemented for OptiX &lt; 7 (only works with OptiX 7)</li>
+</ul>
+</dd>
+</dl>
+<p>Opticks is not something that can be picked up quickly, or installed quickly either.
+For hackathons or similar to be productive requires significant preparation work
+by everyone that will be working with Opticks.</p>
+<div class="section" id="list-of-geom-scripts">
+<h2>List of GEOM scripts<a class="headerlink" href="#list-of-geom-scripts" title="Permalink to this headline">¶</a></h2>
+<p>All the below scripts access the $HOME/.opticks/GEOM.txt file or GEOM envvar to configure the geometry to create, visualize or shoot single rays at.
+The first three scripts run directly from the G4VSolid or G4PhysicalVolume.
+The last four scripts require the third translate.sh or fourth CSGMakerTest.sh  script to have been run first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x4</span> <span class="p">;</span> <span class="o">./</span><span class="n">X4MeshTest</span><span class="o">.</span><span class="n">sh</span>    <span class="c1">## CPU : Geant4 polygons visualized with pyvista</span>
+
+<span class="n">x4</span> <span class="p">;</span> <span class="o">./</span><span class="n">xxs</span><span class="o">.</span><span class="n">sh</span>           <span class="c1">## CPU : 2D Geant4 intersects visualized with matplotlib and/or pyvista</span>
+
+
+
+<span class="n">gc</span> <span class="p">;</span> <span class="o">./</span><span class="n">translate</span><span class="o">.</span><span class="n">sh</span>     <span class="c1">## CPU : Create CSGFoundry geometry via translation of Geant4 geometry via the GeoChain</span>
+
+<span class="n">c</span> <span class="p">;</span> <span class="o">./</span><span class="n">CSGMakerTest</span><span class="o">.</span><span class="n">sh</span>   <span class="c1">## CPU : Create CSGFoundry geometry directly at CSGNode/CSGPrim/CSGSolid level with CSGMaker</span>
+
+
+
+<span class="n">c</span> <span class="p">;</span> <span class="o">./</span><span class="n">sdf_geochain</span><span class="o">.</span><span class="n">sh</span>   <span class="c1">## CPU : 3D Opticks distance field visualised with pyvista iso-surface finding</span>
+
+<span class="n">c</span> <span class="p">;</span> <span class="o">./</span><span class="n">csg_geochain</span><span class="o">.</span><span class="n">sh</span>   <span class="c1">## CPU : 2D(or 3D) pyvista visualization of Opticks intersects (CPU test run of CUDA comparible intersect code)</span>
+
+<span class="n">c</span> <span class="p">;</span> <span class="n">SPUR</span><span class="o">=</span><span class="mi">1</span> <span class="o">./</span><span class="n">csg_geochain</span><span class="o">.</span><span class="n">sh</span>
+       <span class="c1">## highlight spurious intersects</span>
+
+<span class="n">c</span> <span class="p">;</span> <span class="n">SXYZW</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">93</span> <span class="o">./</span><span class="n">csg_geochain</span><span class="o">.</span><span class="n">sh</span> <span class="n">run</span>
+       <span class="c1">## rerun a single ray chosen via genstep grid coordinates and ray index within the genstep</span>
+
+<span class="n">c</span> <span class="p">;</span> <span class="o">./</span><span class="n">CSGQueryTest</span><span class="o">.</span><span class="n">sh</span>   <span class="c1">## CPU : test mostly used for shooting single rays at geometry, useful after compiling with DEBUG flag enabled</span>
+
+
+
+
+<span class="n">cx</span> <span class="p">;</span> <span class="o">./</span><span class="n">cxr_geochain</span><span class="o">.</span><span class="n">sh</span>  <span class="c1">## GPU : 3D OptiX/Opticks render of geometry</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

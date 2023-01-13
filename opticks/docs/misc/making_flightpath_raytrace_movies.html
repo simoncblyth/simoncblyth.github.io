@@ -1,0 +1,148 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>making_flightpath_raytrace_movies &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">making_flightpath_raytrace_movies</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#related">Related</a></li>
+<li><a class="reference internal" href="#scripts">Scripts</a></li>
+<li><a class="reference internal" href="#old-notes">Old Notes</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/misc/making_flightpath_raytrace_movies.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="making-flightpath-raytrace-movies">
+<h1>making_flightpath_raytrace_movies<a class="headerlink" href="#making-flightpath-raytrace-movies" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Opticks includes several scripts and executables that can
+be used to make movies of geometry and geometry+event propagations
+using various techniques based on both raytraced and rasterized visualizations.</p>
+<p>Some techniques are based on the combination of .jpg images into .mp4 using ffmpeg
+whilst some use separate screen capture software to capture movies from Opticks OpenGL windows.</p>
+<ul class="simple">
+<li>NVIDIA OptiX pre-7 ray traced geometry</li>
+<li>OpenGL rasterized event propagations (implemented somewhat confusingly with OpenGL geometry shaders) composited with NVIDIA OptiX pre-7 geometry</li>
+<li>OpenGL rasterized event propagations combined with OpenGL rasterized representations of Geant4 polygonized geometry</li>
+<li>NVIDIA OptiX 7 ray traced geometry</li>
+</ul>
+<p>This page seeks to catalog and organized the various approaches and briefly document them.</p>
+</div>
+<div class="section" id="related">
+<h2>Related<a class="headerlink" href="#related" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="python_browsing_geometry.html"><span class="doc">python_browsing_geometry</span></a></li>
+</ul>
+</div>
+<div class="section" id="scripts">
+<h2>Scripts<a class="headerlink" href="#scripts" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>bin/flight.sh</dt>
+<dd>uses executable OpFlightPathTest okop/tests/OpFlightPathTest.cc
+jpg created by the executable are combined into mp4 using ffmpeg</dd>
+<dt>bin/flight7.sh</dt>
+<dd><p class="first">previously used CSGOptiXFlight, probably now CSGOptiXRenderTest CSGOptiX/tests/CSGOptiXRenderTest.cc
+jpg created by the executable are combined into mp4 using ffmpeg</p>
+<p class="last">TODO: CFBASE location changes need attention</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="old-notes">
+<h2>Old Notes<a class="headerlink" href="#old-notes" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="2">
+<li><p class="first">create an eye-look-up flight path, that is saved to /tmp/flightpath.npy:</p>
+<p>flight.sh –roundaboutxy</p>
+</li>
+<li><p class="first">launch visualization, press U to switch to the animated InterpolatedView created from the flightpath:</p>
+<p>OTracerTest –targetpvn lFasteners_phys
+OTracerTest –target 69078</p>
+</li>
+<li><p class="first">for non-interative raytrace jpg snaps around the flightpath:</p>
+<p>PERIOD=8 PVN=lLowerChimney_phys EMM=~5, flight.sh –rtx 1 –cvd 1</p>
+</li>
+<li><p class="first">make an mp4 from the jpg snaps.  flight.sh can automatically
+create the mp4 assuming env repo and ffmpeg are installed</p>
+</li>
+<li><p class="first">when doing the above snaps on remote ssh node P:</p>
+<p>okop ; cd tests
+./OpFlightPathTest.sh grab</p>
+</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

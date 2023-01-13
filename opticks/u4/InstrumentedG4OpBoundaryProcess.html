@@ -1,0 +1,315 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>InstrumentedG4OpBoundaryProcess &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">InstrumentedG4OpBoundaryProcess</a><ul>
+<li><a class="reference internal" href="#capture-theglobalexitnormal-before-any-flips">capture theGlobalExitNormal before any flips</a></li>
+<li><a class="reference internal" href="#making-sense-of-the-normals">Making sense of the normals</a></li>
+<li><a class="reference internal" href="#is-it-possible-to-reliably-recover-the-unflipped-global-normal-somehow">Is it possible to reliably recover the unflipped global normal somehow ?</a></li>
+<li><a class="reference internal" href="#theglobalnormal-and-flips">theGlobalNormal and flips</a></li>
+<li><a class="reference internal" href="#g4navigator-not-providing-the-simple-consistent-geometry-normal-needed-for-customboundaryart">G4Navigator not providing the simple consistent Geometry Normal Needed for CustomBoundaryART</a></li>
+<li><a class="reference internal" href="#easiest-to-use-g4vsolid-surfacenormal-localpoint-to-avoid-all-the-flipping-that-hides-the-real-normal">Easiest to use G4VSolid::SurfaceNormal(localPoint) : to avoid all the flipping that hides the real normal</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/u4/InstrumentedG4OpBoundaryProcess.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="instrumentedg4opboundaryprocess">
+<h1>InstrumentedG4OpBoundaryProcess<a class="headerlink" href="#instrumentedg4opboundaryprocess" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="capture-theglobalexitnormal-before-any-flips">
+<h2>capture theGlobalExitNormal before any flips<a class="headerlink" href="#capture-theglobalexitnormal-before-any-flips" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">434</span>     <span class="n">G4int</span> <span class="n">hNavId</span> <span class="o">=</span> <span class="n">G4ParallelWorldProcess</span><span class="p">::</span><span class="n">GetHypNavigatorID</span><span class="p">();</span>
+<span class="mi">435</span>     <span class="n">std</span><span class="p">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">G4Navigator</span><span class="o">*&gt;</span><span class="p">::</span><span class="n">iterator</span> <span class="n">iNav</span> <span class="o">=</span>
+<span class="mi">436</span>                 <span class="n">G4TransportationManager</span><span class="p">::</span><span class="n">GetTransportationManager</span><span class="p">()</span><span class="o">-&gt;</span>
+<span class="mi">437</span>                                          <span class="n">GetActiveNavigatorsIterator</span><span class="p">();</span>
+<span class="mi">438</span>     <span class="n">theGlobalNormal</span> <span class="o">=</span>
+<span class="mi">439</span>                    <span class="p">(</span><span class="n">iNav</span><span class="p">[</span><span class="n">hNavId</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">GetGlobalExitNormal</span><span class="p">(</span><span class="n">theGlobalPoint</span><span class="p">,</span><span class="o">&amp;</span><span class="n">valid</span><span class="p">);</span>
+<span class="mi">440</span>
+<span class="mi">441</span>     <span class="n">theGlobalExitNormal</span> <span class="o">=</span> <span class="n">theGlobalNormal</span> <span class="p">;</span>  <span class="o">//</span> <span class="n">BEFORE</span> <span class="n">ANY</span> <span class="n">FLIPS</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="making-sense-of-the-normals">
+<h2>Making sense of the normals<a class="headerlink" href="#making-sense-of-the-normals" title="Permalink to this headline">¶</a></h2>
+<p>CustomART:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1223</span>     <span class="o">//</span><span class="n">dbg</span><span class="o">.</span><span class="n">nrm</span> <span class="o">=</span> <span class="n">oriented_normal</span> <span class="p">;</span>
+<span class="mi">1224</span>     <span class="o">//</span><span class="n">dbg</span><span class="o">.</span><span class="n">nrm</span> <span class="o">=</span> <span class="n">surface_normal</span> <span class="p">;</span>     <span class="o">//</span> <span class="n">verified</span> <span class="n">that</span> <span class="n">surface_normal</span> <span class="n">always</span> <span class="n">outwards</span>
+<span class="mi">1225</span>     <span class="n">dbg</span><span class="o">.</span><span class="n">nrm</span> <span class="o">=</span> <span class="n">theGlobalExitNormal</span> <span class="p">;</span>  <span class="o">//</span> <span class="n">inwards</span> <span class="n">first</span><span class="p">,</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">outwards</span> <span class="p">:</span> <span class="n">oriented</span> <span class="n">into</span> <span class="n">direction</span> <span class="n">of</span> <span class="n">incident</span> <span class="n">photon</span>
+<span class="mi">1226</span>     <span class="o">//</span><span class="n">dbg</span><span class="o">.</span><span class="n">nrm</span> <span class="o">=</span> <span class="n">theGlobalNormal</span> <span class="p">;</span>    <span class="o">//</span> <span class="n">this</span> <span class="n">has</span> <span class="n">been</span> <span class="n">oriented</span> <span class="p">:</span> <span class="n">outwards</span> <span class="n">first</span><span class="p">,</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">inwards</span>
+</pre></div>
+</div>
+<p>Even theGlobalExitNormal has been flipped by the G4Navigator to point into the 2nd volume</p>
+<p>This means:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">theGlobalExitNormal</span><span class="o">*</span><span class="n">OldMomentum</span> <span class="n">always</span> <span class="o">+</span><span class="n">ve</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="is-it-possible-to-reliably-recover-the-unflipped-global-normal-somehow">
+<h2>Is it possible to reliably recover the unflipped global normal somehow ?<a class="headerlink" href="#is-it-possible-to-reliably-recover-the-unflipped-global-normal-somehow" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="theglobalnormal-and-flips">
+<h2>theGlobalNormal and flips<a class="headerlink" href="#theglobalnormal-and-flips" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>367 G4VParticleChange* InstrumentedG4OpBoundaryProcess::PostStepDoIt_(const G4Track&amp; aTrack, const G4Step&amp; aStep)
+368 {
+...
+426     //[theGlobalNorml
+427     theGlobalPoint = pStep-&gt;GetPostStepPoint()-&gt;GetPosition();
+428
+429     G4bool valid;
+430     // Use the new method for Exit Normal in global coordinates,
+431     // which provides the normal more reliably.
+432     // ID of Navigator which limits step
+433
+434     G4int hNavId = G4ParallelWorldProcess::GetHypNavigatorID();
+435     std::vector&lt;G4Navigator*&gt;::iterator iNav =
+436                 G4TransportationManager::GetTransportationManager()-&gt;
+437                                          GetActiveNavigatorsIterator();
+438     theGlobalNormal =
+439                    (iNav[hNavId])-&gt;GetGlobalExitNormal(theGlobalPoint,&amp;valid);
+440 #ifdef DEBUG_PIDX
+441     {
+442         quad2&amp; prd = SEvt::Get()-&gt;current_prd ;
+443         prd.q0.f.x = theGlobalNormal.x() ;
+444         prd.q0.f.y = theGlobalNormal.y() ;
+445         prd.q0.f.z = theGlobalNormal.z() ;
+446
+447         // TRY USING PRE-&gt;POST POSITION CHANGE TO GET THE PRD DISTANCE ?
+448         G4ThreeVector theGlobalPoint_pre = pStep-&gt;GetPreStepPoint()-&gt;GetPosition();
+449         G4ThreeVector theGlobalPoint_delta = theGlobalPoint - theGlobalPoint_pre  ;
+450         prd.q0.f.w = theGlobalPoint_delta.mag() ;
+451
+452         // HMM: PRD intersect identity ? how to mimic what Opticks does ?
+453     }
+454 #endif
+455
+456     if (valid)
+457     {
+458         theGlobalNormal = -theGlobalNormal;
+459     }
+</pre></div>
+</div>
+</div>
+<div class="section" id="g4navigator-not-providing-the-simple-consistent-geometry-normal-needed-for-customboundaryart">
+<h2>G4Navigator not providing the simple consistent Geometry Normal Needed for CustomBoundaryART<a class="headerlink" href="#g4navigator-not-providing-the-simple-consistent-geometry-normal-needed-for-customboundaryart" title="Permalink to this headline">¶</a></h2>
+<p>g4-cls G4Navigator:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">227</span>   <span class="n">virtual</span> <span class="n">G4ThreeVector</span> <span class="n">GetGlobalExitNormal</span><span class="p">(</span><span class="n">const</span> <span class="n">G4ThreeVector</span><span class="o">&amp;</span> <span class="n">point</span><span class="p">,</span>
+<span class="mi">228</span>                                                   <span class="n">G4bool</span><span class="o">*</span> <span class="n">valid</span><span class="p">);</span>
+<span class="mi">229</span>     <span class="o">//</span> <span class="n">Return</span> <span class="n">Exit</span> <span class="n">Surface</span> <span class="n">Normal</span> <span class="ow">and</span> <span class="n">validity</span> <span class="n">too</span><span class="o">.</span>
+<span class="mi">230</span>     <span class="o">//</span> <span class="n">Can</span> <span class="n">only</span> <span class="n">be</span> <span class="n">called</span> <span class="k">if</span> <span class="n">the</span> <span class="n">Navigator</span><span class="s1">&#39;s last Step has crossed a</span>
+<span class="mi">231</span>     <span class="o">//</span> <span class="n">volume</span> <span class="n">geometrical</span> <span class="n">boundary</span><span class="o">.</span>
+<span class="mi">232</span>     <span class="o">//</span> <span class="n">It</span> <span class="n">returns</span> <span class="n">the</span> <span class="n">Normal</span> <span class="n">to</span> <span class="n">the</span> <span class="n">surface</span> <span class="n">pointing</span> <span class="n">out</span> <span class="n">of</span> <span class="n">the</span> <span class="n">volume</span> <span class="n">that</span>
+<span class="mi">233</span>     <span class="o">//</span> <span class="n">was</span> <span class="n">left</span> <span class="n">behind</span> <span class="ow">and</span><span class="o">/</span><span class="ow">or</span> <span class="n">into</span> <span class="n">the</span> <span class="n">volume</span> <span class="n">that</span> <span class="n">was</span> <span class="n">entered</span><span class="o">.</span>
+<span class="mi">234</span>     <span class="o">//</span> <span class="n">Convention</span><span class="p">:</span>
+<span class="mi">235</span>     <span class="o">//</span>   <span class="n">The</span> <span class="o">*</span><span class="n">local</span><span class="o">*</span> <span class="n">normal</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">coordinate</span> <span class="n">system</span> <span class="n">of</span> <span class="n">the</span> <span class="o">*</span><span class="n">final</span><span class="o">*</span> <span class="n">volume</span><span class="o">.</span>
+<span class="mi">236</span>     <span class="o">//</span> <span class="n">Restriction</span><span class="p">:</span>
+<span class="mi">237</span>     <span class="o">//</span>   <span class="n">Normals</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">available</span> <span class="k">for</span> <span class="n">replica</span> <span class="n">volumes</span> <span class="p">(</span><span class="n">returns</span> <span class="n">valid</span><span class="o">=</span> <span class="n">false</span><span class="p">)</span>
+<span class="mi">238</span>     <span class="o">//</span> <span class="n">These</span> <span class="n">methods</span> <span class="n">takes</span> <span class="n">full</span> <span class="n">care</span> <span class="n">about</span> <span class="n">how</span> <span class="n">to</span> <span class="n">calculate</span> <span class="n">this</span> <span class="n">normal</span><span class="p">,</span>
+<span class="mi">239</span>     <span class="o">//</span> <span class="n">but</span> <span class="k">if</span> <span class="n">the</span> <span class="n">surfaces</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">convex</span> <span class="n">it</span> <span class="n">will</span> <span class="k">return</span> <span class="n">valid</span><span class="o">=</span><span class="n">false</span><span class="o">.</span>
+<span class="mi">240</span>
+
+
+<span class="mi">1647</span>        <span class="n">localNormal</span> <span class="o">=</span> <span class="n">GetLocalExitNormalAndCheck</span><span class="p">(</span><span class="n">IntersectPointGlobal</span><span class="p">,</span>
+<span class="mi">1648</span>                                                 <span class="o">&amp;</span><span class="n">validNormal</span><span class="p">);</span>
+<span class="mi">1649</span>        <span class="o">*</span><span class="n">pNormalCalculated</span> <span class="o">=</span> <span class="n">fCalculatedExitNormal</span><span class="p">;</span>
+<span class="mi">1650</span>
+<span class="mi">1651</span>        <span class="n">G4AffineTransform</span> <span class="n">localToGlobal</span> <span class="o">=</span> <span class="n">GetLocalToGlobalTransform</span><span class="p">();</span>
+<span class="mi">1652</span>        <span class="n">globalNormal</span> <span class="o">=</span> <span class="n">localToGlobal</span><span class="o">.</span><span class="n">TransformAxis</span><span class="p">(</span> <span class="n">localNormal</span> <span class="p">);</span>
+<span class="mi">1653</span>     <span class="p">}</span>
+
+
+<span class="mi">1329</span> <span class="o">//</span> <span class="o">********************************************************************</span>
+<span class="mi">1330</span> <span class="o">//</span> <span class="n">GetLocalExitNormal</span>
+<span class="mi">1331</span> <span class="o">//</span>
+<span class="mi">1332</span> <span class="o">//</span> <span class="n">Obtains</span> <span class="n">the</span> <span class="n">Normal</span> <span class="n">vector</span> <span class="n">to</span> <span class="n">a</span> <span class="n">surface</span> <span class="p">(</span><span class="ow">in</span> <span class="n">local</span> <span class="n">coordinates</span><span class="p">)</span>
+<span class="mi">1333</span> <span class="o">//</span> <span class="n">pointing</span> <span class="n">out</span> <span class="n">of</span> <span class="n">previous</span> <span class="n">volume</span> <span class="ow">and</span> <span class="n">into</span> <span class="n">current</span> <span class="n">volume</span>
+<span class="mi">1334</span> <span class="o">//</span> <span class="o">********************************************************************</span>
+<span class="mi">1335</span> <span class="o">//</span>
+<span class="mi">1336</span> <span class="n">G4ThreeVector</span> <span class="n">G4Navigator</span><span class="p">::</span><span class="n">GetLocalExitNormal</span><span class="p">(</span> <span class="n">G4bool</span><span class="o">*</span> <span class="n">valid</span> <span class="p">)</span>
+<span class="mi">1337</span> <span class="p">{</span>
+<span class="mi">1338</span>   <span class="n">G4ThreeVector</span>    <span class="n">ExitNormal</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">);</span>
+<span class="mi">1339</span>   <span class="n">G4VSolid</span>        <span class="o">*</span><span class="n">currentSolid</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="mi">1340</span>   <span class="n">G4LogicalVolume</span> <span class="o">*</span><span class="n">candidateLogical</span><span class="p">;</span>
+<span class="mi">1341</span>
+<span class="mi">1342</span>   <span class="k">if</span> <span class="p">(</span> <span class="n">fLastTriedStepComputation</span> <span class="p">)</span>
+<span class="mi">1343</span>   <span class="p">{</span>
+<span class="mi">1344</span>     <span class="o">//</span> <span class="n">use</span> <span class="n">fLastLocatedPointLocal</span> <span class="ow">and</span> <span class="nb">next</span> <span class="n">candidate</span> <span class="n">volume</span>
+<span class="mi">1345</span>     <span class="o">//</span>
+<span class="mi">1346</span>     <span class="n">G4ThreeVector</span> <span class="n">nextSolidExitNormal</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">);</span>
+<span class="mi">1347</span>
+<span class="mi">1348</span>     <span class="k">if</span><span class="p">(</span> <span class="n">fEntering</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">fBlockedPhysicalVolume</span><span class="o">!=</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+<span class="mi">1349</span>     <span class="p">{</span>
+<span class="mi">1350</span>       <span class="n">candidateLogical</span><span class="o">=</span> <span class="n">fBlockedPhysicalVolume</span><span class="o">-&gt;</span><span class="n">GetLogicalVolume</span><span class="p">();</span>
+<span class="mi">1351</span>       <span class="k">if</span><span class="p">(</span> <span class="n">candidateLogical</span> <span class="p">)</span>
+<span class="mi">1352</span>       <span class="p">{</span>
+<span class="mi">1353</span>         <span class="o">//</span> <span class="n">fLastStepEndPointLocal</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">coordinates</span> <span class="n">of</span> <span class="n">the</span> <span class="n">mother</span>
+<span class="mi">1354</span>         <span class="o">//</span> <span class="n">we</span> <span class="n">need</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">daughter</span><span class="s1">&#39;s coordinate system.</span>
+<span class="mi">1355</span>
+<span class="mi">1356</span>         <span class="o">//</span> <span class="n">The</span> <span class="n">following</span> <span class="n">code</span> <span class="n">should</span> <span class="n">also</span> <span class="n">work</span> <span class="ow">in</span> <span class="n">case</span> <span class="n">of</span> <span class="n">Replica</span>
+<span class="mi">1357</span>         <span class="p">{</span>
+<span class="mi">1358</span>           <span class="o">//</span> <span class="n">First</span> <span class="n">transform</span> <span class="n">fLastLocatedPointLocal</span> <span class="n">to</span> <span class="n">the</span> <span class="n">new</span> <span class="n">daughter</span>
+<span class="mi">1359</span>           <span class="o">//</span> <span class="n">coordinates</span>
+<span class="mi">1360</span>           <span class="o">//</span>
+<span class="mi">1361</span>           <span class="n">G4AffineTransform</span> <span class="n">MotherToDaughterTransform</span><span class="o">=</span>
+<span class="mi">1362</span>             <span class="n">GetMotherToDaughterTransform</span><span class="p">(</span> <span class="n">fBlockedPhysicalVolume</span><span class="p">,</span>
+<span class="mi">1363</span>                                           <span class="n">fBlockedReplicaNo</span><span class="p">,</span>
+<span class="mi">1364</span>                                           <span class="n">VolumeType</span><span class="p">(</span><span class="n">fBlockedPhysicalVolume</span><span class="p">)</span> <span class="p">);</span>
+<span class="mi">1365</span>           <span class="n">G4ThreeVector</span> <span class="n">daughterPointOwnLocal</span><span class="o">=</span>
+<span class="mi">1366</span>             <span class="n">MotherToDaughterTransform</span><span class="o">.</span><span class="n">TransformPoint</span><span class="p">(</span> <span class="n">fLastStepEndPointLocal</span> <span class="p">);</span>
+<span class="mi">1367</span>
+<span class="mi">1368</span>           <span class="o">//</span> <span class="n">OK</span> <span class="k">if</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">parameterised</span> <span class="n">volume</span>
+<span class="mi">1369</span>           <span class="o">//</span>
+
+
+<span class="mi">1454</span>     <span class="k">if</span> <span class="p">(</span> <span class="n">EnteredDaughterVolume</span><span class="p">()</span> <span class="p">)</span>
+<span class="mi">1455</span>     <span class="p">{</span>
+<span class="mi">1456</span>       <span class="n">G4VSolid</span><span class="o">*</span> <span class="n">daughterSolid</span> <span class="o">=</span><span class="n">fHistory</span><span class="o">.</span><span class="n">GetTopVolume</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetLogicalVolume</span><span class="p">()</span>
+<span class="mi">1457</span>                                                       <span class="o">-&gt;</span><span class="n">GetSolid</span><span class="p">();</span>
+<span class="mi">1458</span>       <span class="n">ExitNormal</span><span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">daughterSolid</span><span class="o">-&gt;</span><span class="n">SurfaceNormal</span><span class="p">(</span><span class="n">fLastLocatedPointLocal</span><span class="p">));</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>daughterSolid-&gt;SurfaceNormal is outwards, but that gets flipped inwards
+when the incident photon is going from mother to daughter (Pyrex-&gt;Vacuum)<ul>
+<li>so this is flipping based on volume hierarchy</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="easiest-to-use-g4vsolid-surfacenormal-localpoint-to-avoid-all-the-flipping-that-hides-the-real-normal">
+<h2>Easiest to use G4VSolid::SurfaceNormal(localPoint) : to avoid all the flipping that hides the real normal<a class="headerlink" href="#easiest-to-use-g4vsolid-surfacenormal-localpoint-to-avoid-all-the-flipping-that-hides-the-real-normal" title="Permalink to this headline">¶</a></h2>
+<p>But that normal is inherently local. Preferable to avoid having to transform into local
+and back.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">127</span>     <span class="n">virtual</span> <span class="n">G4ThreeVector</span> <span class="n">SurfaceNormal</span><span class="p">(</span><span class="n">const</span> <span class="n">G4ThreeVector</span><span class="o">&amp;</span> <span class="n">p</span><span class="p">)</span> <span class="n">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="mi">128</span>       <span class="o">//</span> <span class="n">Returns</span> <span class="n">the</span> <span class="n">outwards</span> <span class="n">pointing</span> <span class="n">unit</span> <span class="n">normal</span> <span class="n">of</span> <span class="n">the</span> <span class="n">shape</span> <span class="k">for</span> <span class="n">the</span>
+<span class="mi">129</span>       <span class="o">//</span> <span class="n">surface</span> <span class="n">closest</span> <span class="n">to</span> <span class="n">the</span> <span class="n">point</span> <span class="n">at</span> <span class="n">offset</span> <span class="n">p</span><span class="o">.</span>
+
+
+<span class="mi">276</span> <span class="o">//////////////////////////////////////////////////////////////////////////</span>
+<span class="mi">277</span> <span class="o">//</span>
+<span class="mi">278</span> <span class="o">//</span> <span class="n">Return</span> <span class="n">unit</span> <span class="n">normal</span> <span class="n">of</span> <span class="n">surface</span> <span class="n">closest</span> <span class="n">to</span> <span class="n">p</span>
+<span class="mi">279</span>
+<span class="mi">280</span> <span class="n">G4ThreeVector</span> <span class="n">G4Orb</span><span class="p">::</span><span class="n">SurfaceNormal</span><span class="p">(</span> <span class="n">const</span> <span class="n">G4ThreeVector</span><span class="o">&amp;</span> <span class="n">p</span> <span class="p">)</span> <span class="n">const</span>
+<span class="mi">281</span> <span class="p">{</span>
+<span class="mi">282</span>   <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="o">.</span><span class="n">mag</span><span class="p">())</span><span class="o">*</span><span class="n">p</span><span class="p">;</span>
+<span class="mi">283</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>Simply the gradient operator applied to the implicit eqn of the ellipsoid,
+gives the normal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>290 ///////////////////////////////////////////////////////////////////////////////
+291 //
+292 // Return unit normal of surface closest to p not protected against p=0
+293
+294 G4ThreeVector G4Ellipsoid::SurfaceNormal( const G4ThreeVector&amp; p) const
+295 {
+296   G4double distR, distZBottom, distZTop;
+297
+298   // normal vector with special magnitude:  parallel to normal, units 1/length
+299   // norm*p == 1.0 if on surface, &gt;1.0 if outside, &lt;1.0 if inside
+300   //
+301   G4ThreeVector norm(p.x()/(xSemiAxis*xSemiAxis),
+302                      p.y()/(ySemiAxis*ySemiAxis),
+303                      p.z()/(zSemiAxis*zSemiAxis));
+304   G4double radius = 1.0/norm.mag();
+
+/// simple sphere case the axes are all 1 -&gt;  norm(x,y,z)  radius=1
+/// so norm is the same as p, making distR zero for p on surface
+
+305
+306   // approximate distance to curved surface
+307   //
+308   distR = std::fabs( (p*norm - 1.0) * radius ) / 2.0;
+309
+310   // Distance to z-cut plane
+311   //
+312   distZBottom = std::fabs( p.z() - zBottomCut );
+313   distZTop = std::fabs( p.z() - zTopCut );
+
+///  extrema cuts are -r +r
+
+314
+315   if ( (distZBottom &lt; distR) || (distZTop &lt; distR) )
+316   {
+317     return G4ThreeVector(0.,0.,(distZBottom &lt; distZTop) ? -1.0 : 1.0);
+318   }
+319   return ( norm *= radius );
+320 }
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

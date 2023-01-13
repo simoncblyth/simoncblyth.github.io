@@ -1,0 +1,385 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>integration_with_new_opticks_using_G4CXOpticks_and_U4 &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">integration_with_new_opticks_using_G4CXOpticks_and_U4</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#interface">Interface</a></li>
+<li><a class="reference internal" href="#translation-of-geometry">Translation of Geometry</a></li>
+<li><a class="reference internal" href="#collection-of-gensteps">Collection of Gensteps</a></li>
+<li><a class="reference internal" href="#launch-gpu-simulation-generating-and-propagating-sphoton-h-on-gpu-gather-configured-components">Launch GPU Simulation, generating and propagating sphoton.h on GPU, gather configured components</a></li>
+<li><a class="reference internal" href="#hit-handling">Hit Handling</a></li>
+<li><a class="reference internal" href="#logging-control">Logging Control</a></li>
+<li><a class="reference internal" href="#about-geometry-translation-in-g4cxopticks-setgeometry">About Geometry Translation in G4CXOpticks::setGeometry</a></li>
+<li><a class="reference internal" href="#debugging-geometry-issues-with-numpy-ipython">Debugging Geometry Issues with NumPy+ipython</a></li>
+<li><a class="reference internal" href="#how-to-report-problems">How to report problems</a></li>
+<li><a class="reference internal" href="#making-your-gpu-geometry-faster">Making Your GPU Geometry Faster</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/docs/integration_with_new_opticks_using_G4CXOpticks_and_U4.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="integration-with-new-opticks-using-g4cxopticks-and-u4">
+<h1>integration_with_new_opticks_using_G4CXOpticks_and_U4<a class="headerlink" href="#integration-with-new-opticks-using-g4cxopticks-and-u4" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This document aims to assist people wanting to integrate
+the new Opticks workflow with Geant4 applications.</p>
+<p>While there is currently a lack of full examples for
+doing such and integration there unit tests
+of all classes/structs.</p>
+</div>
+<div class="section" id="interface">
+<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h2>
+<p>The below are the main interface classes in new Opticks.
+You are suggested to study these classes:</p>
+<dl class="docutils">
+<dt>g4cx/G4CXOpticks.hh</dt>
+<dd>translate the geometry, launch simulation, get hits</dd>
+<dt>u4/U4.hh</dt>
+<dd>collect gensteps into sysrap/SEvt.hh,</dd>
+<dt>sysrap/SEventConfig.hh</dt>
+<dd>configures components and structure of sysrap/SEvt arrays
+based on envvars or calls to static methods
+that are make <strong>prior to SEvt instanciation</strong>
+which is done by G4CXOpticks::setGeometry</dd>
+</dl>
+</div>
+<div class="section" id="translation-of-geometry">
+<h2>Translation of Geometry<a class="headerlink" href="#translation-of-geometry" title="Permalink to this headline">¶</a></h2>
+<p>Translate the geometry:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#include &quot;G4CXOpticks.hh&quot;</span>
+<span class="k">if</span><span class="p">(</span> <span class="n">opticksMode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">)</span> <span class="n">G4CXOpticks</span><span class="p">::</span><span class="n">SetGeometry</span><span class="p">(</span><span class="n">world</span><span class="p">)</span> <span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="collection-of-gensteps">
+<h2>Collection of Gensteps<a class="headerlink" href="#collection-of-gensteps" title="Permalink to this headline">¶</a></h2>
+<p>Opticks works by moving the optical photon generation
+and propagation to the GPU. It knows what to generate using
+the parameters of the gensteps which you must collect.</p>
+<p>The Geant4 processes that generate optical photons
+which are relevant to your detector
+(eg for JUNO thats G4Scintillation and G4Cerenkov)
+need to be modified in order to collect gensteps (using u4/U4.hh)</p>
+<p>Gensteps are collected just prior to the optical photon generation loop
+in the PostStepDoIt method of the processes
+and the generation loop is skipped in order to get speedups.</p>
+<p>In each optical photon generating process PostStepDoIt before the generation loop
+collecting gensteps with u4/U4.hh:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">U4</span><span class="p">::</span><span class="n">CollectGenstep_DsG4Scintillation_r4695</span>
+<span class="n">U4</span><span class="p">::</span><span class="n">CollectGenstep_G4Cerenkov_modified</span>
+</pre></div>
+</div>
+<p>For debugging its also useful to do both Geant4 and Opticks
+propagations, when doing that setup photon labels on the secondaryTrack
+with the below methods that have machinery to follow photons thru
+reemission generations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">U4</span><span class="p">::</span><span class="n">GenPhotonAncestor</span>
+<span class="n">U4</span><span class="p">::</span><span class="n">GenPhotonBegin</span>
+<span class="n">U4</span><span class="p">::</span><span class="n">GenPhotonEnd</span>
+</pre></div>
+</div>
+<p>So in Scintillation and Cerenkov PostStepDoIt:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#include &quot;U4.hh&quot;</span>
+
+<span class="n">U4</span><span class="p">::</span><span class="n">GenPhotonAncestor</span><span class="p">(</span><span class="o">&amp;</span><span class="n">aTrack</span><span class="p">);</span>
+
+<span class="k">if</span><span class="p">(</span><span class="n">NumPhoton</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">m_opticksMode</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="n">U4</span><span class="p">::</span><span class="n">CollectGenstep_DsG4Scintillation_r4695</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">aTrack</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">aStep</span><span class="p">,</span> <span class="n">NumPhoton</span><span class="p">,</span> <span class="n">scnt</span><span class="p">,</span> <span class="n">ScintillationTime</span><span class="p">);</span>
+
+    <span class="n">OR</span>
+
+    <span class="n">U4</span><span class="p">::</span><span class="n">CollectGenstep_G4Cerenkov_modified</span><span class="p">(</span>
+        <span class="o">&amp;</span><span class="n">aTrack</span><span class="p">,</span>
+        <span class="o">&amp;</span><span class="n">aStep</span><span class="p">,</span>
+        <span class="n">fNumPhotons</span><span class="p">,</span>
+        <span class="n">BetaInverse</span><span class="p">,</span>
+        <span class="n">Pmin</span><span class="p">,</span>
+        <span class="n">Pmax</span><span class="p">,</span>
+        <span class="n">maxCos</span><span class="p">,</span>
+        <span class="n">maxSin2</span><span class="p">,</span>
+        <span class="n">MeanNumberOfPhotons1</span><span class="p">,</span>
+        <span class="n">MeanNumberOfPhotons2</span>
+    <span class="p">);</span>
+
+<span class="p">}</span>
+
+
+
+  <span class="k">if</span><span class="p">(</span><span class="n">m_opticksMode</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span>  <span class="o">//</span> <span class="n">still</span> <span class="n">do</span> <span class="n">CPU</span> <span class="n">generation</span> <span class="n">loop</span><span class="p">,</span> <span class="n">eg</span> <span class="k">for</span> <span class="n">opticksMode</span> <span class="mi">3</span>
+   <span class="p">{</span>
+
+       <span class="k">for</span><span class="p">(</span><span class="n">G4int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NumPhoton</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+       <span class="p">{</span>
+            <span class="n">U4</span><span class="p">::</span><span class="n">GenPhotonBegin</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+
+
+            <span class="o">//</span> <span class="n">standard</span> <span class="n">Geant4</span> <span class="n">photon</span> <span class="n">generation</span>
+
+
+            <span class="n">U4</span><span class="p">::</span><span class="n">GenPhotonEnd</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">aSecondaryTrack</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Find examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:opticks blyth$ grep U4::Collect u4/tests/*.cc
+u4/tests/Local_DsG4Scintillation.cc:            U4::CollectGenstep_DsG4Scintillation_r4695( &amp;aTrack, &amp;aStep, NumPhoton, scnt, ScintillationTime);
+u4/tests/Local_G4Cerenkov_modified.cc:  U4::CollectGenstep_G4Cerenkov_modified(
+</pre></div>
+</div>
+</div>
+<div class="section" id="launch-gpu-simulation-generating-and-propagating-sphoton-h-on-gpu-gather-configured-components">
+<h2>Launch GPU Simulation, generating and propagating sphoton.h on GPU, gather configured components<a class="headerlink" href="#launch-gpu-simulation-generating-and-propagating-sphoton-h-on-gpu-gather-configured-components" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#include &quot;G4CXOpticks.hh&quot;</span>
+<span class="c1">#include &quot;SEvt.hh&quot;</span>
+<span class="c1">#include &quot;U4Hit.h&quot;</span>
+<span class="c1">#include &quot;U4HitGet.h&quot;</span>
+<span class="c1">#include &quot;U4Recorder.hh&quot;</span>
+
+
+<span class="mi">176</span> <span class="c1">#ifdef WITH_G4CXOPTICKS</span>
+<span class="mi">179</span>     <span class="n">SEvt</span><span class="p">::</span><span class="n">SetIndex</span><span class="p">(</span><span class="n">eventID</span><span class="p">);</span>
+
+<span class="mi">182</span>     <span class="n">unsigned</span> <span class="n">num_genstep</span> <span class="o">=</span> <span class="n">SEvt</span><span class="p">::</span><span class="n">GetNumGenstepFromGenstep</span><span class="p">();</span>
+<span class="mi">183</span>     <span class="n">unsigned</span> <span class="n">num_photon</span>  <span class="o">=</span> <span class="n">SEvt</span><span class="p">::</span><span class="n">GetNumPhotonCollected</span><span class="p">();</span>
+<span class="mi">184</span>
+<span class="mi">185</span>     <span class="n">G4CXOpticks</span><span class="p">::</span><span class="n">Get</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">simulate</span><span class="p">()</span> <span class="p">;</span>
+<span class="mi">186</span>
+<span class="mi">187</span>     <span class="n">unsigned</span> <span class="n">num_hit</span> <span class="o">=</span> <span class="n">SEvt</span><span class="p">::</span><span class="n">GetNumHit</span><span class="p">()</span> <span class="p">;</span>
+<span class="mi">189</span>
+<span class="mi">190</span>     <span class="n">LOG</span><span class="p">(</span><span class="n">LEVEL</span><span class="p">)</span>
+<span class="mi">191</span>         <span class="o">&lt;&lt;</span> <span class="s2">&quot; eventID &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">eventID</span>
+<span class="mi">192</span>         <span class="o">&lt;&lt;</span> <span class="s2">&quot; num_genstep &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">num_genstep</span>
+<span class="mi">193</span>         <span class="o">&lt;&lt;</span> <span class="s2">&quot; num_photon &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">num_photon</span>
+<span class="mi">194</span>         <span class="o">&lt;&lt;</span> <span class="s2">&quot; num_hit &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">num_hit</span>
+<span class="mi">196</span>         <span class="p">;</span>
+<span class="mi">197</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="hit-handling">
+<h2>Hit Handling<a class="headerlink" href="#hit-handling" title="Permalink to this headline">¶</a></h2>
+<p>Note that the hits are merely a subset of the photons
+that are represented by sysrap/sphoton.h struct on CPU and GPU.</p>
+<p>U4Hit provides an example to convert those into Geant4 types.
+However, you do not need to use U4Hit, it is just an example.</p>
+<p>You can easily create your own converters to translate from the
+underlying sphoton.h into the hit type needed by your simulation application.
+If you have lots of hits this can avoid pointless conversions through
+multiple types.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>...
+235 #ifdef WITH_G4CXOPTICKS
+236     U4Hit hit ;
+237     U4HitExtra hit_extra ;
+238     U4HitExtra* hit_extra_ptr = way_enabled ? &amp;hit_extra : nullptr ;
+239     for(int idx=0 ; idx &lt; int(num_hit) ; idx++)
+240     {
+241         U4HitGet::FromEvt(hit, idx);
+242         collectHit(&amp;hit, hit_extra_ptr, merged_count, savehit_count );
+243         if(idx &lt; 20 &amp;&amp; LEVEL == info) ss &lt;&lt; descHit(idx, &amp;hit, hit_extra_ptr ) &lt;&lt; std::endl ;
+244     }
+245
+</pre></div>
+</div>
+<p>The U4HitGet is converting from Opticks SEvt into Geant4 types within U4Hit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">52</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">U4HitGet</span><span class="p">::</span><span class="n">FromEvt</span><span class="p">(</span><span class="n">U4Hit</span><span class="o">&amp;</span> <span class="n">hit</span><span class="p">,</span> <span class="n">unsigned</span> <span class="n">idx</span> <span class="p">)</span>
+<span class="mi">53</span> <span class="p">{</span>
+<span class="mi">54</span>     <span class="n">sphoton</span> <span class="k">global</span><span class="p">,</span> <span class="n">local</span>  <span class="p">;</span>
+<span class="mi">55</span>     <span class="n">SEvt</span><span class="o">*</span> <span class="n">sev</span> <span class="o">=</span> <span class="n">SEvt</span><span class="p">::</span><span class="n">Get</span><span class="p">();</span>
+<span class="mi">56</span>     <span class="n">sev</span><span class="o">-&gt;</span><span class="n">getHit</span><span class="p">(</span> <span class="k">global</span><span class="p">,</span> <span class="n">idx</span><span class="p">);</span>
+<span class="mi">57</span>
+<span class="mi">58</span>     <span class="n">sphit</span> <span class="n">ht</span> <span class="p">;</span>
+<span class="mi">59</span>     <span class="n">sev</span><span class="o">-&gt;</span><span class="n">getLocalHit</span><span class="p">(</span> <span class="n">ht</span><span class="p">,</span> <span class="n">local</span><span class="p">,</span>  <span class="n">idx</span><span class="p">);</span>
+<span class="mi">60</span>
+<span class="mi">61</span>     <span class="n">ConvertFromPhoton</span><span class="p">(</span><span class="n">hit</span><span class="p">,</span> <span class="k">global</span><span class="p">,</span> <span class="n">local</span><span class="p">,</span> <span class="n">ht</span> <span class="p">);</span>
+<span class="mi">62</span> <span class="p">}</span>
+<span class="mi">63</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="logging-control">
+<h2>Logging Control<a class="headerlink" href="#logging-control" title="Permalink to this headline">¶</a></h2>
+<p>Logging of almost all classes/struct can be controlled by setting
+envvars corresponding to the name of the classs/struct, eg:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">SEvt</span><span class="o">=</span><span class="n">INFO</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="about-geometry-translation-in-g4cxopticks-setgeometry">
+<h2>About Geometry Translation in G4CXOpticks::setGeometry<a class="headerlink" href="#about-geometry-translation-in-g4cxopticks-setgeometry" title="Permalink to this headline">¶</a></h2>
+<p>The translation code is still in flux with both old and new
+approaches in use and an entire geometry model too many.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span>        <span class="n">extg4</span>         <span class="n">CSG_GGeo</span>
+<span class="n">Geant4</span>  <span class="o">----&gt;</span>   <span class="n">GGeo</span> <span class="o">-------&gt;</span>   <span class="n">CSG</span>
+</pre></div>
+</div>
+<p>The CSG_GGeo package translates the GGeo geometry model
+into CSG which gets upload to GPU.</p>
+<dl class="docutils">
+<dt>X4Geo::Translate</dt>
+<dd>old way with loads of code, entire extg4 package, still in use</dd>
+<dt>U4Tree::Create</dt>
+<dd>is a simpler approach to translation that I am starting to develop
+which is aiming to go directly</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">210</span> <span class="n">void</span> <span class="n">G4CXOpticks</span><span class="p">::</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">const</span> <span class="n">G4VPhysicalVolume</span><span class="o">*</span> <span class="n">world</span> <span class="p">)</span>
+<span class="mi">211</span> <span class="p">{</span>
+<span class="mi">212</span>     <span class="n">LOG</span><span class="p">(</span><span class="n">LEVEL</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; G4VPhysicalVolume world &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">world</span> <span class="p">;</span>
+<span class="mi">213</span>     <span class="k">assert</span><span class="p">(</span><span class="n">world</span><span class="p">);</span>
+<span class="mi">214</span>     <span class="n">wd</span> <span class="o">=</span> <span class="n">world</span> <span class="p">;</span>
+<span class="mi">215</span>
+<span class="mi">216</span>     <span class="n">sim</span> <span class="o">=</span> <span class="n">SSim</span><span class="p">::</span><span class="n">Create</span><span class="p">();</span>
+<span class="mi">217</span>     <span class="n">stree</span><span class="o">*</span> <span class="n">st</span> <span class="o">=</span> <span class="n">sim</span><span class="o">-&gt;</span><span class="n">get_tree</span><span class="p">();</span>
+<span class="mi">219</span>     <span class="n">tr</span> <span class="o">=</span> <span class="n">U4Tree</span><span class="p">::</span><span class="n">Create</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="n">SensorIdentifier</span> <span class="p">)</span> <span class="p">;</span>
+<span class="mi">220</span>
+<span class="mi">221</span>
+<span class="mi">222</span>     <span class="o">//</span> <span class="n">GGeo</span> <span class="n">creation</span> <span class="n">done</span> <span class="n">when</span> <span class="n">starting</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">gdml</span> <span class="ow">or</span> <span class="n">live</span> <span class="n">G4</span><span class="p">,</span>  <span class="n">still</span> <span class="n">needs</span> <span class="n">Opticks</span> <span class="n">instance</span>
+<span class="mi">223</span>     <span class="n">Opticks</span><span class="p">::</span><span class="n">Configure</span><span class="p">(</span><span class="s2">&quot;--gparts_transform_offset --allownokey&quot;</span> <span class="p">);</span>
+<span class="mi">224</span>
+<span class="mi">225</span>     <span class="n">GGeo</span><span class="o">*</span> <span class="n">gg_</span> <span class="o">=</span> <span class="n">X4Geo</span><span class="p">::</span><span class="n">Translate</span><span class="p">(</span><span class="n">wd</span><span class="p">)</span> <span class="p">;</span>
+<span class="mi">226</span>     <span class="n">setGeometry</span><span class="p">(</span><span class="n">gg_</span><span class="p">);</span>
+<span class="mi">227</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="debugging-geometry-issues-with-numpy-ipython">
+<h2>Debugging Geometry Issues with NumPy+ipython<a class="headerlink" href="#debugging-geometry-issues-with-numpy-ipython" title="Permalink to this headline">¶</a></h2>
+<p>The best way to start debugging geometry is to persist it by rerunning with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export G4CXOpticks=INFO
+export G4CXOpticks__setGeometry_saveGeometry=$HOME/.opticks/GEOM/$GEOM
+</pre></div>
+</div>
+<p>The above envvar configures directory to save the geometry.</p>
+<p>Then you can run small executables or python scripts
+which load various parts of the persisted geometry and run tests.
+One, of many, of such tests is sysrap/tests/stree_test.sh
+Build and use that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">sysrap</span><span class="o">/</span><span class="n">tests</span>
+
+<span class="o">./</span><span class="n">stree_test</span><span class="o">.</span><span class="n">sh</span> <span class="n">build</span>
+    <span class="c1">## builds stree_test binary</span>
+
+<span class="o">./</span><span class="n">stree_test</span><span class="o">.</span><span class="n">sh</span> <span class="n">run</span>
+    <span class="c1">## these load the geometry into C++ and run tests against it</span>
+    <span class="c1">## one of the tests dumps sensor info</span>
+
+<span class="o">./</span><span class="n">stree_test</span><span class="o">.</span><span class="n">sh</span> <span class="n">ana</span>
+    <span class="c1">## this loads the same geometry into ipython</span>
+    <span class="c1">## and run tests against it</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="how-to-report-problems">
+<h2>How to report problems<a class="headerlink" href="#how-to-report-problems" title="Permalink to this headline">¶</a></h2>
+<p>Whenever you get asserts please run under gdb and provide a backtrace.
+The backtrace gives precisely the call stack that resulted in the assert.</p>
+<p>Collect a backtrace using gdb:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gdb</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">execuable</span>
+<span class="n">r</span>   <span class="c1"># run</span>
+
+<span class="n">bt</span>  <span class="c1"># short for backtrace, after hit assert</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="making-your-gpu-geometry-faster">
+<h2>Making Your GPU Geometry Faster<a class="headerlink" href="#making-your-gpu-geometry-faster" title="Permalink to this headline">¶</a></h2>
+<p>The translation gets exercised mostly with highly factorizable geometry
+with many thousands of PMTs that become instanced.
+Instancing greatly reduces GPU memory resources for geometry
+that has many repeated elements.</p>
+<p>This factorization works by computing a digest
+(based on all the transforms and shape indices of the subtree)
+for every subtree of the entire tree of volumes.
+Then repeated subtrees are identified as “factored” pieces of the
+geometry that get instanced : ie treated as identical just requiring
+a different transform to place them.</p>
+<p>The volumes with subtrees that are not repeated enough times
+to pass instancing cuts are treated as “remainder” volumes
+(the cut is something like 500 repeats).
+All the remainder volumes are treated together in the so
+called global factor (with repeat index 0) which does not
+get instanced.</p>
+<p>There is potentially a large performance differences between
+an instanced geometry and an all global one.
+But this performance difference  will be very dependent
+on the geometry so its good to do both and compare performance.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

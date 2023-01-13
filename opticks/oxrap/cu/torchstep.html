@@ -1,0 +1,142 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>torchstep.h : Torch modes &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/oxrap/cu/torchstep.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="torchstep-h-torch-modes">
+<h1>torchstep.h : Torch modes<a class="headerlink" href="#torchstep-h-torch-modes" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><em>disc</em></dt>
+<dd>Photons start from a point on the disc</dd>
+<dt><em>discaxial</em></dt>
+<dd>Shoot target with disc beam from 26 directions: from every axis(6), quadrant(4*3=12) and octant(8)
+Expanding radius beyond the size of the object is useful for finding geometry bugs</dd>
+<dt><em>sphere</em></dt>
+<dd>Torch photons start from the transformed “source”
+and are emitted in the direction
+of the transformed “target”  ie direction normalize(tgt - src )</dd>
+</dl>
+<p><em>invsphere</em>
+<em>refltest T_REFLTEST</em></p>
+<blockquote>
+<div>Photons start from a position on the sphere and go in
+direction towards the center of the sphere
+where the “source” position provides the center of the sphere
+(so in this case the target is not used)</div></blockquote>
+<p><em>discIntersectSphere T_DISC_INTERSECT_SPHERE</em></p>
+<blockquote>
+<div><p>Photons start from position on a disc canonically centered at [0,0,+600]
+and all travel in same -Z direction [0,0,-1].
+They are incident on a sphere of the same radius as the disc.</p>
+<p>For definiteness consider spherical coordinate system with
+photons incident from above the Z pole</p>
+<blockquote>
+<div>x_sphere = r sin(th) cos(ph)
+y_sphere = r sin(th) sin(ph)
+z_sphere = r cos(th)</div></blockquote>
+<p>At the point of intersection the surface normal is given by</p>
+<blockquote>
+<div>surface_normal = [x_sphere, y_sphere, z_sphere ]</div></blockquote>
+<p>Plane of incidence contains the photon direction (actually the plane wave k vector)
+and the surface normal.</p>
+<p>Cross product of the photon direction and surface normal is perpendicular
+to the plane of incidence, this corresponds to the S-polarized direction.</p>
+<blockquote>
+<div><blockquote>
+<div>norm_( z ^ surface_normal )</div></blockquote>
+<p>=  norm_( [ -y , x,  0 ]  )</p>
+<p>= [ -sin(ph), cos(ph), 0 ]</p>
+</div></blockquote>
+<p>Where y and x are the coordinates generated on the original disc, using
+the aligned coordinate systems of sphere and disc</p>
+<p>A vector perpendicular the above and the photon direction
+is within the plane of incidence and defines the P-polarized direction.</p>
+<blockquote>
+<div><blockquote>
+<div>norm_( [  x,  y,  0 ] )</div></blockquote>
+<p>= [  cos(ph), sin(ph), 0 ]</p>
+</div></blockquote>
+<p>The spherical geometry and alighment of the source disc and sphere
+means that it is straightforward to arrange S-pol and P-pol without
+needing to calculate the intersect.</p>
+</div></blockquote>
+<p><a class="reference external" href="http://mathworld.wolfram.com/SpherePointPicking.html">http://mathworld.wolfram.com/SpherePointPicking.html</a></p>
+<p>To obtain points such that any small area on the sphere is expected to contain
+the same number of points (right figure above), choose U and V to be random
+variates on (0,1). Then</p>
+<p>theta   =   2 pi U
+phi     =   acos( 2V-1 )</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

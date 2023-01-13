@@ -1,0 +1,209 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Debugging &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Updating this documentation" href="updating_this_documentation.html" />
+    <link rel="prev" title="orientation : Opticks Codebase Orientation for Developers" href="orientation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="updating_this_documentation.html" title="Updating this documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="orientation.html" title="orientation : Opticks Codebase Orientation for Developers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Debugging</a><ul>
+<li><a class="reference internal" href="#debugging-optical-photon-propagation-using-numpy-ipython">Debugging optical photon propagation using NumPy + ipython</a></li>
+<li><a class="reference internal" href="#what-opicks-event-mode-does">What OPICKS_EVENT_MODE does</a></li>
+<li><a class="reference internal" href="#saving-photon-propagations-into-numpy-arrays">Saving Photon Propagations into NumPy arrays</a></li>
+<li><a class="reference internal" href="#debugging-lack-of-hits">Debugging Lack of Hits</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="orientation.html"
+                        title="previous chapter"><strong>orientation</strong> : Opticks Codebase Orientation for Developers</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="updating_this_documentation.html"
+                        title="next chapter">Updating this documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/docs/debugging.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="debugging">
+<h1>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="debugging-optical-photon-propagation-using-numpy-ipython">
+<h2>Debugging optical photon propagation using NumPy + ipython<a class="headerlink" href="#debugging-optical-photon-propagation-using-numpy-ipython" title="Permalink to this headline">¶</a></h2>
+<p>Using <em>num_hits</em> to debug an optical propagation is hopeless.</p>
+<p>You need to enable photon step-by-step recording and
+save the corresponding arrays in NumPy .npy files.
+Then you can examine the parameters of all the photons including
+history flags at every step point of their propagation
+(up to a configured maximum number of step points) from
+interactive ipython sessions.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ipython</span><span class="o">&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/photon.npy&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You could then make plots drawing the paths of the photons.
+I recommend pyvista if your want to do that
+A convenient way to install pyvista is to use anaconda.
+The more commonly used matplotlib python plotting library
+is not good with 3D plotting or large data sets.</p>
+<p>To save the arrays you need to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">OPTICKS_EVENT_MODE</span><span class="o">=</span><span class="n">StandardFullDebug</span>   <span class="c1"># configure step point recording</span>
+<span class="n">export</span> <span class="n">G4CXOpticks__simulate_saveEvent</span><span class="o">=</span><span class="mi">1</span>      <span class="c1"># enable saveEvent from G4CXOpticks::simulate</span>
+
+<span class="c1"># optionally enable logging in relevant classes</span>
+<span class="n">export</span> <span class="n">G4CXOpticks</span><span class="o">=</span><span class="n">INFO</span>
+<span class="n">export</span> <span class="n">SEventConfig</span><span class="o">=</span><span class="n">INFO</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="what-opicks-event-mode-does">
+<h2>What OPICKS_EVENT_MODE does<a class="headerlink" href="#what-opicks-event-mode-does" title="Permalink to this headline">¶</a></h2>
+<p>To see how OPTICKS_EVENT_MODE works look at:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sysrap</span><span class="o">/</span><span class="n">SEventConfig</span><span class="o">.</span><span class="n">hh</span>
+<span class="n">sysrap</span><span class="o">/</span><span class="n">SEventConfig</span><span class="o">.</span><span class="n">cc</span>
+</pre></div>
+</div>
+<p>Especially:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">324</span> <span class="nb">int</span> <span class="n">SEventConfig</span><span class="p">::</span><span class="n">Initialize</span><span class="p">()</span> <span class="o">//</span> <span class="n">static</span>
+<span class="mi">325</span> <span class="p">{</span>
+<span class="mi">326</span>     <span class="n">const</span> <span class="n">char</span><span class="o">*</span> <span class="n">mode</span> <span class="o">=</span> <span class="n">EventMode</span><span class="p">();</span>
+<span class="mi">327</span>     <span class="nb">int</span> <span class="n">maxbounce</span> <span class="o">=</span> <span class="n">MaxBounce</span><span class="p">();</span>
+<span class="mi">328</span>
+<span class="mi">329</span>     <span class="k">if</span><span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">Default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="mi">330</span>     <span class="p">{</span>
+<span class="mi">331</span>         <span class="n">SetCompMaskAuto</span><span class="p">()</span> <span class="p">;</span>   <span class="o">//</span> <span class="n">comp</span> <span class="nb">set</span> <span class="n">based</span> <span class="n">on</span> <span class="n">Max</span> <span class="n">values</span>
+<span class="mi">332</span>     <span class="p">}</span>
+<span class="mi">333</span>     <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">StandardFullDebug</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="mi">334</span>     <span class="p">{</span>
+<span class="mi">335</span>         <span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxRecord</span><span class="p">(</span><span class="n">maxbounce</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+<span class="mi">336</span>         <span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxRec</span><span class="p">(</span><span class="n">maxbounce</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+<span class="mi">337</span>         <span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxSeq</span><span class="p">(</span><span class="n">maxbounce</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+<span class="mi">338</span>         <span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxPrd</span><span class="p">(</span><span class="n">maxbounce</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+<span class="mi">339</span>
+<span class="mi">340</span>         <span class="o">//</span> <span class="n">since</span> <span class="n">moved</span> <span class="n">to</span> <span class="n">compound</span> <span class="n">sflat</span><span class="o">/</span><span class="n">stag</span> <span class="n">so</span> <span class="n">MaxFlat</span><span class="o">/</span><span class="n">MaxTag</span> <span class="n">should</span> <span class="n">now</span> <span class="n">either</span> <span class="n">be</span> <span class="mi">0</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nothing</span> <span class="k">else</span>
+<span class="mi">341</span>         <span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxTag</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="mi">342</span>         <span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxFlat</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="mi">343</span>         <span class="n">SetCompMaskAuto</span><span class="p">()</span> <span class="p">;</span>   <span class="o">//</span> <span class="n">comp</span> <span class="nb">set</span> <span class="n">based</span> <span class="n">on</span> <span class="n">Max</span> <span class="n">values</span>
+<span class="mi">344</span>     <span class="p">}</span>
+<span class="mi">345</span>     <span class="k">else</span>
+<span class="mi">346</span>     <span class="p">{</span>
+<span class="mi">347</span>         <span class="n">LOG</span><span class="p">(</span><span class="n">fatal</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;mode [&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mode</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;] IS NOT RECOGNIZED &quot;</span>  <span class="p">;</span>
+<span class="mi">348</span>         <span class="n">LOG</span><span class="p">(</span><span class="n">fatal</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; options : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Default</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;,&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">StandardFullDebug</span> <span class="p">;</span>
+<span class="mi">349</span>         <span class="k">assert</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="mi">350</span>     <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="saving-photon-propagations-into-numpy-arrays">
+<h2>Saving Photon Propagations into NumPy arrays<a class="headerlink" href="#saving-photon-propagations-into-numpy-arrays" title="Permalink to this headline">¶</a></h2>
+<p>To see what G4CXOpticks__simulate_saveEvent is doing look at g4cx/G4CXOpticks.cc simulate method.</p>
+<p>The directory where the numpy arrays is saved is based
+on your executable name and the event index you set with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SEvt</span><span class="p">::</span><span class="n">SetIndex</span><span class="p">(</span><span class="n">eventid</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Enable logging in SEvt to see what it is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">SEvt</span><span class="o">=</span><span class="n">INFO</span>
+</pre></div>
+</div>
+<p>Opticks has lots of python machinery for loading and presenting
+such NumPy .npy arrays in the “ana” directory and all over the place.
+However it is better to examine them manually using ipython to begin with,
+because most people will need to improve their NumPy+ipython skills
+to make best use of this debugging info and to be able to understand
+the python machinery.</p>
+</div>
+<div class="section" id="debugging-lack-of-hits">
+<h2>Debugging Lack of Hits<a class="headerlink" href="#debugging-lack-of-hits" title="Permalink to this headline">¶</a></h2>
+<p><em>hits</em> are the subset of <em>photons</em> with flagmask matching the hitmask (default SURFACE_DETECT)
+so when you get no hits it means that none of your photons .flagmask has
+all the bits of the hitmask set.</p>
+<p>You can of course select the hits array from the photons array using one line of NumPy,
+but that will just match with NumPy what the C++/CUDA would do.</p>
+<p>You can learn about the mechanics of hit selection in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">opticks</span><span class="o">/</span><span class="n">notes</span><span class="o">/</span><span class="n">mechanics_of_hit_selection</span><span class="o">.</span><span class="n">rst</span>
+<span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">bitbucket</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">simoncblyth</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">notes</span><span class="o">/</span><span class="n">mechanics_of_hit_selection</span><span class="o">.</span><span class="n">rst</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="updating_this_documentation.html" title="Updating this documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="orientation.html" title="orientation : Opticks Codebase Orientation for Developers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

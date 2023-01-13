@@ -1,0 +1,155 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QUDARap &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">QUDARap</a><ul>
+<li><a class="reference internal" href="#opticks-gpu-context-prototyping">Opticks GPU Context Prototyping</a></li>
+<li><a class="reference internal" href="#todo">TODO</a></li>
+<li><a class="reference internal" href="#observations">Observations</a></li>
+<li><a class="reference internal" href="#expts">Expts</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/qudarap/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="qudarap">
+<h1>QUDARap<a class="headerlink" href="#qudarap" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="opticks-gpu-context-prototyping">
+<h2>Opticks GPU Context Prototyping<a class="headerlink" href="#opticks-gpu-context-prototyping" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>qsim.h QSim.hh</dt>
+<dd>GPU context and CPU counterpart that preps it
+acting as coordinator of all the below</dd>
+<dt>QRng.hh</dt>
+<dd>loading+uploading curandState : use curand without the stack cost of curand_init</dd>
+<dt>QTex.hh</dt>
+<dd>2D texture creation</dd>
+<dt>QBnd.hh</dt>
+<dd>ggeo/GBndLib -&gt; QTex “boundary texture”</dd>
+<dt>QScint.hh</dt>
+<dd>ggeo/GScintillatorLib -&gt; QTex “scintillation inverse-CDF texture”</dd>
+<dt>qprop.h QProp.hh</dt>
+<dd><p class="first">marshalling variable length paired (energy/wavelength,property)
+into compound array, linear interpolation with binary bin search
+just like Geant4 properties</p>
+<ul class="last simple">
+<li>alternative to boundary texture when excactly matching Geant4
+is more important</li>
+<li>TODO: accuracy/performance comparison with QBnd</li>
+</ul>
+</dd>
+<dt>qgs.h</dt>
+<dd>union based collective Scintillation and Cerenkov genstep handling</dd>
+<dt>qcurand.h</dt>
+<dd>templated float/double specializations for uniform access to
+curand_uniform/curand_uniform_double</dd>
+<dt>QU.hh</dt>
+<dd>utilitles : eg device&lt;-&gt;host copies</dd>
+</dl>
+</div>
+<div class="section" id="todo">
+<h2>TODO<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>QCerenkov</dt>
+<dd>treat it like QScint now that have workable icdf</dd>
+<dt>QEvent/qevent</dt>
+<dd><p class="first">hold refs to gensteps, seeds, photons, …</p>
+<ul class="last simple">
+<li>coordinate with OpticksEvent or lower level NP based SEvent</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="observations">
+<h2>Observations<a class="headerlink" href="#observations" title="Permalink to this headline">¶</a></h2>
+<p>The pattern of having GPU and CPU counterparts is a useful one</p>
+<ul class="simple">
+<li>do more of that to keep qsim/QSim simple by encapsulating the pieces
+like texture handling into qtex/QTex</li>
+</ul>
+</div>
+<div class="section" id="expts">
+<h2>Expts<a class="headerlink" href="#expts" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>qpoly.h QPoly.hh</dt>
+<dd>extern “C” expt</dd>
+<dt>qscint.h</dt>
+<dd>NOT USED ANYMORE : MOVED TO COLLECTIVE HANDLING IN qgs.h TO AVOID DUPLICATION</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>
