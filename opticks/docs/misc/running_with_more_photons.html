@@ -30,6 +30,9 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">running_with_more_photons</a><ul>
+<li><a class="reference internal" href="#new-opticks-how-to-increase-the-max-number-of-photons-gensteps">New Opticks : How to Increase the max number of photons/gensteps ?</a></li>
+<li><a class="reference internal" href="#new-opticks-background-on-qcurandstate-files">New Opticks : Background on QCurandState files</a></li>
+<li><a class="reference internal" href="#old-opticks">Old Opticks</a></li>
 <li><a class="reference internal" href="#when-using-embedded-opticks-withing-g4opticks">When using embedded Opticks withing G4Opticks</a></li>
 <li><a class="reference internal" href="#what-is-the-maximum-number-of-photons-that-can-be-handled-at-once">What is the maximum number of photons that can be handled at once ?</a></li>
 <li><a class="reference internal" href="#oxrap-orng-populates-rng-states-in-the-optix-gpu-context">oxrap/ORng : populates rng_states in the OptiX GPU context</a></li>
@@ -67,6 +70,102 @@
             
   <div class="section" id="running-with-more-photons">
 <h1>running_with_more_photons<a class="headerlink" href="#running-with-more-photons" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="new-opticks-how-to-increase-the-max-number-of-photons-gensteps">
+<h2>New Opticks : How to Increase the max number of photons/gensteps ?<a class="headerlink" href="#new-opticks-how-to-increase-the-max-number-of-photons-gensteps" title="Permalink to this headline">¶</a></h2>
+<p>Setting envvars can change the defaults:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OPTICKS_MAX_GENSTEP</span>
+<span class="n">OPTICKS_MAX_PHOTON</span>
+</pre></div>
+</div>
+<p>Those defaults can be overridden in the code by calling
+<strong>SEventConfig</strong> static functions prior to calling
+<strong>G4CXOpticks::SetGeometry</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxGenstep</span>
+<span class="n">SEventConfig</span><span class="p">::</span><span class="n">SetMaxPhoton</span>
+</pre></div>
+</div>
+<p>In addition to that config it is also necessary to create
+<em>QCurandState</em> files corresponding to the MaxPhoton you set.
+That can be done using the <em>qudarap-prepare-installation</em> bash function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>qudarap-prepare-sizes-Linux-(){  echo ${OPTICKS_QUDARAP_RNGMAX:-1,3,10} ; }
+qudarap-prepare-sizes-Darwin-(){ echo ${OPTICKS_QUDARAP_RNGMAX:-1,3} ; }
+qudarap-prepare-sizes(){ $FUNCNAME-$(uname)- | tr &quot;,&quot; &quot;\n&quot;  ; }
+
+qudarap-prepare-installation()
+{
+   local sizes=$(qudarap-prepare-sizes)
+   local size
+   for size in $sizes ; do
+       QCurandState_SPEC=$size:0:0  QCurandStateTest
+       rc=$? ; [ $rc -ne 0 ] &amp;&amp; return $rc
+   done
+   return 0
+}
+</pre></div>
+</div>
+<p>Check your environment with <em>SEventConfigTest</em> binary:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:~ blyth$ SEventConfigTest
+test_EstimateAlloc@20:
+SEventConfig::Desc
+       OPTICKS_EVENT_MODE          EventMode  : Default
+     OPTICKS_RUNNING_MODE        RunningMode  : 0
+                            RunningModeLabel  : SRM_DEFAULT
+     OPTICKS_G4STATE_SPEC        G4StateSpec  : 1000:38
+                            G4StateSpecNotes  : 38=2*17+4 is appropriate for MixMaxRng
+    OPTICKS_G4STATE_RERUN       G4StateRerun  : -1
+      OPTICKS_MAX_GENSTEP         MaxGenstep  : 1000000
+       OPTICKS_MAX_PHOTON          MaxPhoton  : 1000000
+     OPTICKS_MAX_SIMTRACE        MaxSimtrace  : 1000000     MaxCurandState  : 1000000
+       OPTICKS_MAX_BOUNCE          MaxBounce  : 9
+                              MaxBounceNotes  : MaxBounceLimit:31, MaxRecordLimit:32 (see sseq.h)
+       OPTICKS_MAX_RECORD          MaxRecord  : 0
+          OPTICKS_MAX_REC             MaxRec  : 0
+          OPTICKS_MAX_SEQ             MaxSeq  : 0
+          OPTICKS_MAX_PRD             MaxPrd  : 0
+          OPTICKS_MAX_TAG             MaxTag  : 0
+         OPTICKS_MAX_FLAT            MaxFlat  : 0
+         OPTICKS_HIT_MASK            HitMask  : 64
+                                HitMaskLabel  : SD
+       OPTICKS_MAX_EXTENT          MaxExtent  : 1000
+         OPTICKS_MAX_TIME            MaxTime  : 10
+          OPTICKS_RG_MODE             RGMode  : 2
+                                 RGModeLabel  : simulate
+        OPTICKS_COMP_MASK           CompMask  : 262
+                               CompMaskLabel  : genstep,photon,hit
+         OPTICKS_OUT_FOLD            OutFold  : $DefaultOutputDir
+         OPTICKS_OUT_NAME            OutName  : -
+OPTICKS_PROPAGATE_EPSILON   PropagateEpsilon  :     0.0500
+     OPTICKS_INPUT_PHOTON        InputPhoton  : -
+</pre></div>
+</div>
+</div>
+<div class="section" id="new-opticks-background-on-qcurandstate-files">
+<h2>New Opticks : Background on QCurandState files<a class="headerlink" href="#new-opticks-background-on-qcurandstate-files" title="Permalink to this headline">¶</a></h2>
+<p>The QCurandState files allows using curand in the simulation
+without having to initialize it every time.
+This is much much faster than calling curand_init everytime.
+If you initialized curand when simulating the performance would be
+factors of 100 worse, because the large stack means that far fewer threads
+can run at the same time.</p>
+<ul class="simple">
+<li>Opticks uses curand to generate randoms on device.</li>
+<li>Initializing curand requires calling curand_init, but doing that requires a lot of stack.
+Far more stack than is needed for ray tracing and simulation. So to avoid having to initialize
+curand every time, and have large stacks and few threads in flight, this is done at Opticks
+installation time and the resulting curandState objects are saved to file.</li>
+<li>When simulation is done the QCurandState files are loaded and uploaded to device.</li>
+<li>The QCurandState files are necessary. They do not contain random numbers, they
+contain initialized curandState objects needed to generate random numbers on device.</li>
+</ul>
+<p>I plan at some point to support splitting the QCurandState into multiple
+smaller files to avoid the inconvenience of very large &gt; 4GB files. And also
+to avoid having to recreate all the states when you want to extend the size.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/qudarap/QCurandState.hh">https://bitbucket.org/simoncblyth/opticks/src/master/qudarap/QCurandState.hh</a></li>
+</ul>
+</div>
+<div class="section" id="old-opticks">
+<h2>Old Opticks<a class="headerlink" href="#old-opticks" title="Permalink to this headline">¶</a></h2>
 <p>Not Enough RNG issue:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>-------------------------
 Number of Scintillation Photons:  12177
@@ -148,6 +247,7 @@ that the default <strong>rngmax</strong> is 3M:</p>
 <p>If 10M photons is insufficient use the below to initialize more curandState slots, eg for 100M:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CUDARAP_RNGMAX_M</span><span class="o">=</span><span class="mi">100</span> <span class="n">cudarap</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">rng</span><span class="o">-</span>
 </pre></div>
+</div>
 </div>
 <div class="section" id="when-using-embedded-opticks-withing-g4opticks">
 <h2>When using embedded Opticks withing G4Opticks<a class="headerlink" href="#when-using-embedded-opticks-withing-g4opticks" title="Permalink to this headline">¶</a></h2>
