@@ -61,6 +61,109 @@
 
 
 
+:small:`junosw + Opticks : Input Photon Running : gist of ntds bash function`
+------------------------------------------------------------------------------
+
+.. sidebar:: :small:`Opticks AnaMgr + GtOpticksTool`
+
+    .. class:: small
+
+        **js/U4RecorderAnaMgr -> ok/U4Recorder**
+
+        * G4Track, G4Step -> ok/U4Recorder -> ok/SEvt   
+        * ok/SEvt -> .npy NumPy arrays 
+        * numpy/matplotlib/pyvista analysis+plotting 
+
+        **js/GtOpticksTool : input photons via GenTool**
+
+        * ok/ana/input_photons.sh -> .npy (n,4,4) arrays
+        * targetting with Opticks frame selection 
+
+        **MOI frame targetting**
+
+        ``solidNamePrefix:ordinal:instance``
+
+        * Hama:0:1000
+        * NNVT:0:1000
+
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    ntds(){
+        local opts=""
+        opts="$opts --opticks-mode 2"  # G4 with Opticks Instrumentation  
+
+        case $POM in     ## passed into UsePMTOpticalModel
+          0) opts="$opts --no-pmt-optical-model"  ;;  
+          1) opts="$opts --pmt-optical-model"     ;;  
+        esac 
+
+        <span class="r">case $PMT in  ## passed into UsePMTNaturalGeometry
+          0) opts="$opts --pmt-unnatural-geometry" ;;  
+          1) opts="$opts --pmt-natural-geometry"   ;;  
+        esac</span>
+
+        <span class="m">opts="$opts --opticks-anamgr"  ## Full Photon Point recording   
+        export OPTICKS_EVENT_MODE=StandardFullDebug
+        export OPTICKS_MAX_BOUNCE=31 
+        [ "$PMT" == "0" ] && export U4Recorder__FAKES_SKIP=1</span>
+
+        <span class="b">export OPTICKS_INPUT_PHOTON=RainXZ_Z230_10k_f8.npy
+        export MOI=Hama:0:1000  ## input photon frame </span>
+
+        python tut_detsim.py $opts opticks  ## GtOpticksTool 
+   }
+   </pre>
+
+.. class:: small
+
+    Actual ntds bash function : https://github.com/simoncblyth/j/blob/main/jx.bash
+
+
+  
+
+:i:`A_V0J008_N0_ip_MOI_Hama:0:1000_a_no_skip_fake.png`
+-------------------------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:163mm;" />
+
+.. class:: small
+
+   :r:`Unnatural Pyrex+Pyrex+Vacuum+Vacuum PMT geometry, without` : ``export U4Recorder__FAKES_SKIP=1``
+    
+
+
+:i:`A_V0J008_N0_ip_MOI_Hama:0:1000_a.png`
+-------------------------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:163mm;" />
+
+.. class:: small
+
+   :r:`Unnatural Pyrex+Pyrex+Vacuum+Vacuum PMT geometry, with` : ``export U4Recorder__FAKES_SKIP=1``
+    
+
+
+:i:`B_V1J008_N1_ip_MOI_Hama:0:1000_b.png`
+-------------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:163mm;" />
+
+.. class:: small
+
+   :b:`Natural Pyrex+Vacuum PMT geometry, no fakes, no skipping needed`
+ 
+
+
+
 
 :small:`Standalone few PMT tests using junosw/blyth-88 branch + Opticks` 
 --------------------------------------------------------------------------
@@ -1529,483 +1632,9 @@ hamaLogicalPMT_fake.png
    Separate header for cleaner customization. 
 
 
-:i:`hamaLogicalPMTWrapLV_full_history.png`
---------------------------------------------
 
-.. raw:: html
 
-   <p style="margin-bottom:16.5cm;" />
 
-.. raw:: html
 
-   <pre class="mypre20">   
-   TO  BT  BT  BT  BT  SR  SR  BT  BR  BR  BT  SR  SR  SR  BT  BR  BT  SR  BT  SA   <span class="b"> Lots of fakes </span> 
-   00  01 [02] 03 [04] 05  06 [07] 08  09 [10] 11  12  13 [14] 15 [16] 17 [18] 19   (7/20 Fake)
-   </pre>
-
-
-.. s5_talk::
-
-   Lots of fake step points in current Geant4 histories. The ones across the 
-   middle are obvious. There are others much closer together that are difficult to see. 
-
-
-:i:`hamaLogicalPMTWrapLV_natural.png`
---------------------------------------
-
-.. raw:: html
-
-   <p style="margin-bottom:16.5cm;" />
-
-.. raw:: html
-
-   <pre class="mypre20">   
-   TO  BT  BT  SR  SR  BR  BR  SR  SR  SR  BR  SR  BR <span class="r"> SR  SA</span>
-   00  01  02  03  04  05  06  07  08  09  10  11  12 <span class="r"> 13  14</span>      <span class="b"> Simpler history, no fakes </span> 
-   00  01  03  05  06  08  09  11  12  13  15  17  19  
-   </pre>
-
-
-.. s5_talk::
-
-    No fakes 
-
-
-:small:`Compare "big bouncer" position, time between N=0,1 (1)`
-------------------------------------------------------------------
-
-.. raw:: html
-
-    <pre class="mypretiny">
-    u4t ; ./U4SimulateTest.sh cf
-
-    In [12]: np.c_[ar[:,0],np.arange(len(ar)),br[:,0]]
-    Out[12]: 
-    array([[-113.   ,    0.   ,  200.   ,    0.   ,    0.   , -113.   ,    0.   ,  200.   ,    0.   ],
-           [-113.   ,    0.   ,  170.163,    0.137,    1.   , -113.   ,    0.   ,  170.163,    0.137],
-           [-112.83 ,    0.   ,  164.918,    0.164,    2.   , -112.83 ,    0.   ,  164.917,    0.164],
-           [-112.83 ,    0.   ,  164.917,    0.164,    3.   , -156.577,    0.   , -148.846,    1.22 ],
-           [-135.824,    0.   ,    0.   ,    1.012,    4.   ,  -95.   ,    0.   , -104.211,    1.474],
-           [-156.577,    0.   , -148.846,    1.778,    5.   , -248.807,    0.   ,    7.28 ,    2.108],
-           [ -95.   ,    0.   , -104.211,    2.166,    6.   ,   53.206,    0.   ,  180.727,    3.269],
-           [-238.764,    0.   ,   -0.   ,    3.071,    7.   ,  245.605,    0.   ,  -35.443,    4.235],
-           [-248.807,    0.   ,    7.28 ,    3.112,    8.   ,   95.   ,    0.   ,  -99.428,    4.781],
-           [  53.205,    0.   ,  180.727,    4.274,    9.   ,  177.724,    0.   , -134.574,    5.08 ],
-           [ 214.06 ,    0.   ,    0.   ,    5.507,   10.   ,  141.059,    0.   ,  152.451,    6.046],
-           [ 245.605,    0.   ,  -35.443,    5.749,   11.   , -239.66 ,    0.   ,  -55.195,    7.492],
-           [  95.   ,    0.   ,  -99.428,    6.583,   12.   ,  237.91 ,    0.   ,   54.597,    9.127],
-           [ 177.724,    0.   , -134.574,    7.041,   13.   ,   50.   ,    0.   ,  -63.74 ,    9.867],
-           [ 160.533,    0.   ,    0.   ,    7.732,   14.   ,   58.352,    0.   ,  -69.   ,    9.9  ],
-           [ 141.059,    0.   ,  152.451,    8.245,   15.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [-138.46 ,    0.   ,    0.   ,    9.867,   16.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [-239.66 ,    0.   ,  -55.195,   10.455,   17.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [   0.427,    0.   ,    0.   ,   11.71 ,   18.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [ 237.91 ,    0.   ,   54.596,   12.523,   19.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [   0.   ,    0.   ,    0.   ,    0.   ,   20.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [   0.   ,    0.   ,    0.   ,    0.   ,   21.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [   0.   ,    0.   ,    0.   ,    0.   ,   22.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [   0.   ,    0.   ,    0.   ,    0.   ,   23.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-
-    </pre>
-    
-.. class:: small
-
-    +----+-----------------+------------------+---------------------------------------+
-    | ar | a.record[PID]   | N=0 current geom | degenerate and fake intersect points  |
-    +----+-----------------+------------------+---------------------------------------+
-    | bb | b.record[PID]   | N=1 natural geom | less points, simpler history          |
-    +----+-----------------+------------------+---------------------------------------+
-
-    :r:`Need point-to-point mapping to compare`
-
-
-.. s5_talk::
-
-    This is comparing positions and times with the un-natural and natural geometry 
-
-
-:small:`Compare "big bouncer" position, time between N=0,1 (2)`
-------------------------------------------------------------------
-
-.. raw:: html
-
-    <pre class="mypretiny">
-    u4t ; ./U4SimulateTest.sh cf
-
-    In [2]: b2a  ## point-to-point mapping to skip a fakes  
-    Out[2]: array([ 0,  1,  3,  5,  6,  8,  9, 11, 12, 13, 15, 17, 19])
-
-    In [4]: abr = np.c_[ar[b2a,0],br[:len(b2a),0],ar[b2a,0]-br[:len(b2a),0]] ; abr
-    Out[4]: 
-    array([[-113.   ,    0.   ,  200.   ,    0.   , -113.   ,    0.   ,  200.   ,    0.   ,    0.   ,    0.   ,    0.   ,    0.   ],
-           [-113.   ,    0.   ,  170.163,    0.137, -113.   ,    0.   ,  170.163,    0.137,    0.   ,    0.   ,    0.   ,    0.   ],
-           [-112.83 ,    0.   ,  164.917,    0.164, -112.83 ,    0.   ,  164.917,    0.164,    0.   ,    0.   ,    0.   ,   -0.   ],
-           [-156.577,    0.   , -148.846,    1.778, -156.577,    0.   , -148.846,    1.22 ,   -0.   ,    0.   ,    0.   ,    0.558],
-           [ -95.   ,    0.   , -104.211,    2.166,  -95.   ,    0.   , -104.211,    1.474,    0.   ,    0.   ,    0.   ,    0.692],
-           [-248.807,    0.   ,    7.28 ,    3.112, -248.807,    0.   ,    7.28 ,    2.108,    0.   ,    0.   ,   -0.   ,    1.004],
-           [  53.205,    0.   ,  180.727,    4.274,   53.206,    0.   ,  180.727,    3.269,   -0.   ,    0.   ,    0.   ,    1.004],
-           [ 245.605,    0.   ,  -35.443,    5.749,  245.605,    0.   ,  -35.443,    4.235,    0.   ,    0.   ,    0.   ,    1.514],
-           [  95.   ,    0.   ,  -99.428,    6.583,   95.   ,    0.   ,  -99.428,    4.781,    0.   ,    0.   ,    0.   ,    1.802],
-           [ 177.724,    0.   , -134.574,    7.041,  177.724,    0.   , -134.574,    5.08 ,    0.   ,    0.   ,    0.   ,    1.96 ],
-           [ 141.059,    0.   ,  152.451,    8.245,  141.059,    0.   ,  152.451,    6.046,   -0.   ,    0.   ,    0.   ,    2.199],
-           [-239.66 ,    0.   ,  -55.195,   10.455, -239.66 ,    0.   ,  -55.195,    7.492,    0.   ,    0.   ,    0.   ,    2.963],
-           [ 237.91 ,    0.   ,   54.596,   12.523,  237.91 ,    0.   ,   54.597,    9.127,    0.   ,    0.   ,   -0.   ,    3.397]], dtype=float32)
-   </pre>
-
-.. class:: small
-
-    :b:`Positions match closely, some times are way off` 
-
-.. s5_talk::
-
-    After doing point to point mapping to skip the fakes can see that the positions closely match, but the times are ns off. 
-
-
-:small:`Compare "big bouncer" position, time, dist, speed between N=0,1`
---------------------------------------------------------------------------
-
-::
-
-    rvtime_ = lambda r:np.diff(r[:,0,3])
-    rvstep_ = lambda r:np.diff(r[:,0,:3],axis=0 )   
-    rvdist_ = lambda r:np.sqrt(np.sum(rvstep_(r)*rvstep_(r),axis=1))
-    rvspeed_ = lambda r:rvdist_(r)/rvtime_(r)
-
-    In [14]: np.c_[rvtime_(ar[b2a]), rvtime_(br[:len(b2a)]),
-                   rvdist_(ar[b2a]), rvdist_(br[:len(b2a)]),
-                  rvspeed_(ar[b2a]),rvspeed_(br[:len(b2a)])]
- 
-.. raw:: html
-
-    <pre class="mypretiny">
-    Out[14]: 
-    array([[  0.137,   0.137,  29.837,  29.837, 218.038, 218.038],  ## Water
-           [  0.027,   0.027,   5.249,   5.249, 196.216, 196.215],  ## Pyrex 
-           [  1.615,   1.057, 316.798, 316.798, <span class="r">196.215</span>, 299.792],  ## Vacuum
-           [  0.388,   0.254,  76.053,  76.053, <span class="r">196.215</span>, 299.792],
-           [  0.946,   0.634, 189.965, 189.965, <span class="b">200.744</span>, 299.792],  ## <span class="b">comb. of Vacuum and Pyrex speeds, split at Fake </span>
-           [  1.162,   1.162, 348.275, 348.275, 299.792, 299.792],
-           [  1.475,   0.965, 289.392, 289.392, <span class="r">196.215</span>, 299.792],
-           [  0.834,   0.546, 163.634, 163.634, <span class="r">196.215</span>, 299.792],
-           [  0.458,   0.3  ,  89.881,  89.881, <span class="r">196.215</span>, 299.792],
-           [  1.204,   0.965, 289.357, 289.357, <span class="b">240.315</span>, 299.792],  ## <span class="b">comb. of Vacuum and Pyrex speeds, split at Fake</span>  
-           [  2.21 ,   1.447, 433.663, 433.663, 196.215, 299.792],
-           [  2.068,   1.635, 490.027, 490.027, 236.919, 299.792]], dtype=float32)
-    </pre>
-
-.. class:: small
-
-    +-----+--------------------------------+----------------------------------------------------------+
-    | N=0 | Pyrex speed within PMT Vacuum  | :r:`FastSim->SlowSim transitions miss speed setup ?`     |
-    +-----+--------------------------------+----------------------------------------------------------+
-    | N=1 | Always Vacuum speed in Vacuum  | All standard Geant4 with customized G4OpBoundaryProcess  |
-    +-----+--------------------------------+----------------------------------------------------------+
-
-
-.. s5_talk::
- 
-   Calculating the speed for each step you can see that the un-natural geometry 
-   also has un-natural propagation times with photons travelling at Pyrex speed 
-   within the lower hemisphere of the PMT. The natural geometry is using standard 
-   Geant4 giving the expected vacuum speed with the PMT vacuum.  
-
-
-
-.. comment
-
-    :small:`Rerunning Single Photons : Very Useful Debug Technique`
-    -----------------------------------------------------------------
-
-    .. sidebar:: :small:`Save/Load g4state into NP array`
-
-        .. class:: small
-
-            :r:`Efficiently save/restore thousands of states` 
-
-        .. class:: small
-
-            **MixMaxRng (G4 1042 random engine)**
-          
-            State of engine : 38*uint32 
-
-        .. raw:: html
-
-            <pre class="mypretiny">
-            U4Engine::SaveState(    NP* states, int idx );
-            U4Engine::RestoreState( NP* states, int idx );
-            </pre>
-
-
-        .. class:: small
-
-            **Rerun "big bouncer" photon**
-
-        .. raw:: html
-
-            <pre class="mypretiny">
-            vi U4SimulateTest.sh    # SRM_G4STATE_SAVE
-            N=0 ./U4SimulateTest.sh # save g4state into ALL0
-            vi U4SimulateTest.sh    # SRM_G4STATE_RERUN
-            N=1 ./U4SimulateTest.sh # load ALL0, save SEL1
-            </pre>
-        
-
-
-    * save g4state before sim each photon 
-    * :r:`enables re-simulation of single photons`
-    * compare between geometry versions
-    * add random "burns" matching consumption
-
-      * :b:`manual fixup, only for debug`
-
-
-
-
-
-
-
-
-:i:`hamaLogicalPMT_two_pmt_geom.png`
---------------------------------------
-
-.. s5_talk::
-
-    Two PMT test.  Unnatural geometry on left, natural on right. 
-
-
-:i:`hamaLogicalPMT_two_pmt_cf.png`
-------------------------------------
-
-.. s5_talk::
-
-    The difference between the unnatural and natural histories is clear 
-
-
-.. comment
-
-    hamaLogicalPMT_two_pmt_check.png 
-    -----------------------------------
-
-
-
-
-
-Low dependency access to PMT data :r:`(26x faster)`
-----------------------------------------------------
-
-
-.. sidebar:: :small:`Why Low Dependency Access ?` 
-
-   .. class:: small
-
-       * CODING BEST PRACTICE
-
-         * :r:`less deps -> more useful code`
-
-       * test separate from the "monolith"
- 
-         * :r:`development cycle < 1 s (vs minutes)`
-
-       * serialization with **NP.hh,NPFold.h** 
-
-         * https://github.com/simoncblyth/np/  
-         * :b:`0-deps (hdr-only) -> PMT data anywhere`
-
-
-       **QE scan over 100 energy points, all PMTs**
-
-       ::
-
-           get_pmtid_qe( pmtid, en );   
-
-       +----------------------------------+--------------+  
-       |  IPMTSimParamSvc                 |   7.70 s     |
-       +----------------------------------+--------------+  
-       |  PMTSimParamData                 |   0.30 s     |
-       +----------------------------------+--------------+
-       |  IPMTSimParamSvc/PMTSimParamData |   26.10      | 
-       +----------------------------------+--------------+
-
-       * :r:`exactly same results, 26x faster` 
-
-
-
-.. class:: small
-
-    +--------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | `junosw/-/merge_requests/126 <https://code.ihep.ac.cn/JUNO/offline/junosw/-/merge_requests/126>`_   :r:`MERGED AFTER ~3 WEEKS`                         |
-    +--------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | `junosw/-/issues/66 <https://code.ihep.ac.cn/JUNO/offline/junosw/-/issues/66>`_                                                                        |
-    +--------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | `junosw/-/tree/blyth-66-low-dependency-PMT-data-access <https://code.ihep.ac.cn/JUNO/offline/junosw/-/tree/blyth-66-low-dependency-PMT-data-access>`_  |
-    +--------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-    *PMTSimParamSvc* and *PMTParamSvc* 
-        => too many deps for *CustomG4OpBoundaryProcess*
-
-    * **hdrs for collecting data are irrelevant to access**
-    * -> separate data struct from Svc 
-
-      * header-only impl : *PMTSimParamData* *PMTParamData* 
-      * *_PMTSimParamData* : serialization save/load
-
-    * reference data struct from Svc 
-
-      * minimal changes to Svc, API
-      * consistency guaranteed
-      * no change with diff src : file, DB, Frontier
-
-    * speedup not the motivation, BUT 26x faster by:
-
-      * :r:`calc qe_scale ONCE, not for every photon`
-      * large pmtid std::map -> std::vector
-
-
-.. s5_talk::
-
-   First step is to improve access to PMT data for use from the custom boundary process   
-
-
-.. comment
-
-    Other Work : Opticks Code Reduction
-    ----------------------------------------
-
-    .. class:: small
-
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |                 pkg     |         hh/cc/cu/py     |                                                                       Base     |
-        +=========================+=========================+================================================================================+
-        |          :b:`sysrap`    |     :b:`197/78/1/11`    |                                           :b:`basis types, new array NP.hh`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |        :r:`boostrap`    |       :r:`46/42/0/0`    |                                                            :r:`boost tools`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |             :r:`npy`    |     :r:`181/165/0/6`    |                                      :r:`geo primitives, old array NPY.hpp`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |     :r:`optickscore`    |       :r:`70/62/0/1`    |                                           :r:`old core, argument parsing`      |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |            :r:`ggeo`    |       :r:`68/65/0/2`    |                         :r:`complete geometry model : no Geant4 dependency`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |           :r:`extg4`    |       :r:`64/53/0/0`    |                           :r:`Geant4 geometry translation into GGeo model`     |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |             :b:`CSG`    |       :b:`45/23/0/9`    |                                                     :b:`New geometry model`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |        :r:`CSG_GGeo`    |         :r:`3/2/0/0`    |                                      :r:`GGeo to CSG geometry translation`     |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |        :r:`GeoChain`    |         :r:`3/2/0/0`    |                                           :r:`geometry translation testing`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |         :b:`qudarap`    |      :b:`47/27/15/1`    |        :b:`CUDA optical photon simulation, CUDA upload, download, textures`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |        :b:`CSGOptiX`    |       :b:`20/14/4/2`    |                                         :b:`CSG intersection with OptiX 7`     |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |              :b:`u4`    |       :b:`63/20/0/2`    |                  :b:`New Geant4 interface, genstep collection, U4Recorder`     |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |           :b:`gdxml`    |         :b:`6/4/0/0`    |                                         :b:`GDML loaded as XML for fixups`     |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-        |            :b:`g4cx`    |         :b:`3/2/0/0`    |                  :b:`New top level package integrating Geant4 and CSGOptiX`    |
-        +-------------------------+-------------------------+--------------------------------------------------------------------------------+
-
-        * :b:`blue : active development`,  :r:`red : plan to remove` : not used for simulation, only used for geometry translation
-
-          * progress with U4Material, U4Surface, U4Solid, snd, snode, stree => :b:`close to removing ~7 pkgs, hundreds of files` 
-
-
-
-OTHER WORK : U4Tree.h/stree.h : Direct Geometry Translation
---------------------------------------------------------------
-
-.. sidebar:: :small:`Current Approach : extg4 translated`
-
-
-    .. class:: small
-
-        +---------------------------+
-        | Geant4 -> *GGeo* -> CSG   |
-        +---------------------------+
-        
-        :r:`Full intermediate GGeo model`
-          * GMaterial/GMaterialLib/GSurfaceLib/...
-          * GMergedMesh/GMesh
-          * nnode/NCSG/...
-          * :b:`(lots of code)` 
-
-
-
-.. sidebar:: :small:`DRASTIC CODE REDUCTION NEAR`
-
-    .. class:: small
-
-        * ~6 pkgs, literally hundreds of classes/structs
-
-
-
-.. class:: small
-
-
-   +--------------------------------------+
-   | Geant4 -> U4Tree.h/stree.h -> CSG    |
-   +--------------------------------------+
-
-   :b:`Minimal intermediate stree.h model` 
-     * stree.h : n-ary tree of snode volumes
-     * scsg.hh : n-ary trees of snd constituent solids
-     * :r:`(much less code)`
-
-
-   +----------------------------------------+
-   |                                        | 
-   | U4Tree                                 |
-   |     G4VPhysicalVolume -> stree/snode   |
-   |                                        |
-   | U4Solid                                |
-   |     G4VSolid -> scsg/snd               |
-   |                                        |
-   | U4Material                             |
-   |     G4Material -> NPFold/NP            | 
-   |                                        |
-   | U4Surface                              |
-   |     G4LogicalSurface -> NPFold/NP      |
-   |                                        |
-   +----------------------------------------+
-   
-
-   +--------------------------------------------------------------+
-   |  stree/snode/scsg/snd -> CSGFoundry/CSGSolid/CSGPrim/CSGNode | 
-   +--------------------------------------------------------------+
-
-
-.. s5_talk::
-
-    While waiting for merge : worked on direct geometry translation
-
-
-:small:`Next Steps : Custom Boundary + Natural Geometry Branch`
--------------------------------------------------------------------------------
-
-**junosw : Natural PMT Geometry Branch**
-
-* almost all standalone tested already, need to bring into junosw monolith
-* need switch : FastSim/standard-Sim, natural geometry, custom boundary
-
-+------------------------------+---------------------------------------------+
-| Primary                      |   Support                                   |
-+==============================+=============================================+
-| *CustomG4OpBoundaryProcess*  |  *PMTSimParamData* (merged in MR 126)       |
-| *CustomART.h*                |  *PMTAccessor/IPMTAccessor* (j/Layr)        | 
-| *Layr.h*                     |  *HamamatsuR12860PMTManager*                |
-|                              |  *NNVTMCPPMTManager*                        |
-+------------------------------+---------------------------------------------+
-
-
-**Opticks : Custom boundary equivalent**
-
-* *PMTSimParamData* *PMTAccessor* -> GPU 
-* natural geometry => easier to validate (no fakes)
-* standard propagation + polarization => easier (already implemented qudarap/qsim.h ) 
-
-
-.. s5_talk::
-
-    Next steps 
 
 
