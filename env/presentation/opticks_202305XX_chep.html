@@ -556,6 +556,18 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-position: 0px 0px;
              meta:thumb
           }
+          div.slide#geant4-opticks-nvidia-optix-7-hybrid-workflow-2{
+             background-image: url(../Documents/Geant4OpticksWorkflow7/Geant4OpticksWorkflow7_005.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#geant4-opticks-instrumentation-no-gpu-usage{
+             background-image: url(../Documents/Geant4OpticksWorkflow7/Geant4OpticksWorkflow7_006.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
           div.slide#ggeoview{
              background-image: url(../graphics/ggeoview/ggeoview-cerenkov-001.png);
              background-size: 1047px 795px;
@@ -1797,6 +1809,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-size: 640px 360px,640px 360px,640px 360px;
              background-position: 0px 360px,640px 0px,640px 360px;
                
+          }
+          div.slide#hardware-accelerated-ray-tracing-rt-cores-in-the-data-center{
+             background-image: url(nvidia/ada_lovelace/NVIDIA-L4-Render-2.jpg);
+             background-size: 640px 360px;
+             background-position: 0px 360px;
+             
           }
           div.slide#nvidia-optix-7-programs-full{
              background-image: url(nvidia/optix7/relationship_of_optix_programs.png);
@@ -4210,6 +4228,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-position: 0px 0px;
              
           }
+          div.slide#fewpmt-check-mtd-trig-vacuum-upper-due-to-obliques-png{
+             background-image: url(GEOM/FewPMT/U4SimulateTest/0/figs/U4SimulateTest/mpcap/FewPMT_check_mtd_trig_vacuum_upper_due_to_obliques.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
           div.slide#n0-one-pmt-fewpmt-hamalogicalpmt-lhs-window-line-inwin-png{
              background-image: url(GEOM/FewPMT/U4SimulateTest/0/figs/U4SimulateTest/mpcap/N0_one_pmt_FewPMT_hamaLogicalPMT_lhs_window_line_inwin.png);
              background-size: 1280px 720px;
@@ -4513,7 +4537,40 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 
 </style><!-- comment
 
-Navigate the HTML slides by entering a page number and pressing return -->
+Opticks : GPU Optical Photon Simulation using NVIDIA OptiX 7 and NVIDIA CUDA
+
+Opticks is an open source project that accelerates optical photon simulation by
+integrating NVIDIA GPU ray tracing, accessed via the NVIDIA OptiX 7 API, with
+Geant4 toolkit based simulations. A single NVIDIA Turing architecture GPU has
+been measured to provide optical photon simulation speedup factors exceeding
+1500 times single threaded Geant4 with a full JUNO analytic GPU geometry
+automatically translated from the Geant4 geometry. Optical physics processes of
+scattering, absorption, scintillator reemission and boundary processes are
+implemented in CUDA based on Geant4.  Wavelength-dependent material and surface
+properties as well as inverse cumulative distribution functions for reemission
+are interleaved into GPU textures providing fast interpolated property lookup
+or wavelength generation.
+
+In this work we describe the near complete re-implementation of geometry and
+optical simulation required to adopt the entirely new NVIDIA OptiX 7 API, with
+the implementation now directly CUDA based with OptiX usage restricted to
+providing intersects.  The new Opticks features a modular many small header
+design that provides fine grained testing both on GPU and CPU as well as
+substantial code reductions from CPU/GPU sharing.  Enhanced modularity has
+enabled CSG tree generalization to support "list-nodes", similar to
+G4MultiUnion, that improve performance for complex CSG solids.  Recent addition
+of support for interference effects in boundaries with multiple thin layers,
+such as anti-reflection coatings and photocathodes, using CUDA compatible
+transfer matrix method (TMM) calculations of reflectance, transmittance and
+absorptance is also reported.
+
+
+* complete re-implementation of geometry
+* complete re-implementation of optical simulation
+* CSG tree generalizations to support "list-nodes" to improve handling of complex CSG solids
+* multi-thin-layer TMM
+
+* list of packages (?) -->
 <div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey;text-align:center;">
@@ -4526,7 +4583,7 @@ Navigate the HTML slides by entering a page number and pressing return -->
 
 <img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="/env/presentation/juno/JUNO_logo.png"  />
 <div class="mycredit">
-<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS &mdash; (Presented by Dr Tao Lin, IHEP, CAS) &mdash; CHEP, ?? May 2023</h2>
+<h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS &mdash; (Presented by Dr Tao Lin, IHEP, CAS) &mdash; CHEP, Norfolk VA, 8-12 May 2023</h2>
 </div>
         <!--  s5talk  -->
         <br/>
@@ -4536,33 +4593,32 @@ Navigate the HTML slides by entering a page number and pressing return -->
 <h1>Outline</h1>
 <img alt="/env/presentation/newtons-opticks.png" class="align-right" src="/env/presentation/newtons-opticks.png" style="width: 299px; height: 547px;" />
 <div class="small"><span>&nbsp;</span></div><ul class="small simple">
-<li>Context and Problem<ul>
+<li>Optical Photon Simulation : Context and Problem<ul>
 <li>p2: Jiangmen Underground Neutrino Observatory (JUNO)</li>
 <li>p3: JUNO Optical Photon Simulation Problem...</li>
 <li>p4: Optical Photon Simulation ≈ Ray Traced Image Rendering</li>
 </ul>
 </li>
 <li>NVIDIA Tools to create Solution<ul>
-<li>p5: NVIDIA Ampere : 2nd Generation RTX</li>
-<li>p6: NVIDIA OptiX Ray Tracing Engine</li>
-<li>p7: NVIDIA OptiX 7 : Entirely new thin API</li>
+<li>p5,6: NVIDIA Ada Lovelave : 3rd Generation RTX, RT Cores in Data-Center</li>
+<li>p7: NVIDIA OptiX Ray Tracing Engine</li>
+<li>p8: NVIDIA OptiX 7 : Entirely new thin API</li>
 </ul>
 </li>
-<li>Opticks : Introduction + New Features<ul>
-<li>p8,9: Geant4 + Opticks Hybrid Workflow : External Optical Photon Simulation</li>
-<li>p10: New : Collection Efficiency Culling on GPU</li>
-<li>p11: New : <em>CSGFoundry</em> Geometry Model</li>
+<li>Opticks : Introduction + Full Re-implementation<ul>
+<li>p9,10: Geant4 + Opticks Hybrid Workflow : External Optical Photon Simulation</li>
+<li>p11: Full re-implementation for NVIDIA OptiX 7 API</li>
+<li>p12-14: <em>CSGFoundry</em> Geometry Model, Translation to GPU</li>
+<li>p15: QUDARap : CUDA Optical Simulation Implementation</li>
 </ul>
 </li>
-<li>Opticks : 1st JUNO Renders with NVIDIA OptiX 7<ul>
-<li>p12:Ray trace renders</li>
-<li>p13:Geometry factorization</li>
-<li>p15:Ray trace times for various geometries</li>
+<li>Opticks : New Features<ul>
+<li>p16:n-Ary CSG &quot;List-Nodes&quot;</li>
+<li>p17,18: Specialized n-ary CSG intersect algs : &quot;contiguous&quot; and &quot;dis-contiguous&quot;</li>
+<li>p19: Multi-Layer Thin Film (A,R,T) Calc using TMM (Custom4 Package)</li>
 </ul>
 </li>
-<li>p17: Summary + Links</li>
-<li>p18: Acknowledgement : Opticks &quot;Hackathon&quot; Series for NVIDIA OptiX 6-&gt;7</li>
-<li>p19: LZ with Opticks</li>
+<li>p20: Summary + Links</li>
 </ul>
 <div class="small"><hr/></div>
         <!--  s5talk  -->
@@ -4649,18 +4705,15 @@ simulation. -->
 <li>16,384 CUDA Cores, 24GB VRAM, USD 1599</li>
 </ul>
 </li>
-<li>Ada (2022) : <span class="redbold">continued ray tracing improvements</span><ul>
-<li>2x ray trace over Ampere (2020), 4x with DLSS 3</li>
-<li><span class="b">games becoming fully simulated worlds</span></li>
+<li><span class="r">Continued large ray tracing improvements:</span><ul>
+<li><strong>Ada</strong> ~2x ray trace over <strong>Ampere</strong> (2020), 4x with DLSS 3</li>
+<li><strong>Ampere</strong> ~2x ray trace over <strong>Turing</strong> (2018)</li>
 </ul>
 </li>
 <li>DLSS : Deep Learning Super Sampling<ul>
 <li>AI upsampling, not applicable to optical simulation</li>
 </ul>
 </li>
-</ul>
-<ul class="tiny simple">
-<li>TOPS : Tera operations per second</li>
 </ul>
 
         <!--  s5talk  -->
@@ -4680,6 +4733,88 @@ simulation. -->
 
    https://developer.nvidia.com/rtx/ray-tracing/optix -->
 </div>
+<div class="slide" id="hardware-accelerated-ray-tracing-rt-cores-in-the-data-center">
+<h1><span class="small">Hardware accelerated Ray tracing (RT Cores) in the Data Center</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Data Center GPUs with RT Cores</span></p>
+<ul class="small simple">
+<li><span class="b">An Established part of NVIDIA Lineup</span></li>
+</ul>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="29%" />
+<col width="37%" />
+<col width="35%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">&nbsp;</th>
+<th class="head">NVIDIA L40</th>
+<th class="head">NVIDIA L4</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Release</td>
+<td>2022/10</td>
+<td>2023/03</td>
+</tr>
+<tr><td>GPU Arch</td>
+<td>Ada Lovelace</td>
+<td>Ada Lovelace</td>
+</tr>
+<tr><td>VRAM</td>
+<td>48 GB gddr6</td>
+<td>24 GB gddr6</td>
+</tr>
+<tr><td>TDP</td>
+<td>300W</td>
+<td><span class="r">72W</span></td>
+</tr>
+<tr><td>Form factor</td>
+<td>dual slot</td>
+<td><span class="r">1-slot</span></td>
+</tr>
+<tr><td>CUDA Core</td>
+<td>18,176</td>
+<td>7,680</td>
+</tr>
+<tr><td><span class="b">RT Core</span></td>
+<td><span class="b">142 (3rd gen)</span></td>
+<td><span class="b">60 (3rd gen)</span></td>
+</tr>
+<tr><td>Tensor Core</td>
+<td>568 (4th gen)</td>
+<td>240 (4th gen)</td>
+</tr>
+<tr><td>FP32</td>
+<td>90.5 TFLOPS</td>
+<td>30 TFLOPS</td>
+</tr>
+<tr><td>FP16(*)</td>
+<td>181 TFLOPS</td>
+<td>121 TFLOPS</td>
+</tr>
+<tr><td>Predecessor</td>
+<td>A40</td>
+<td>T4</td>
+</tr>
+</tbody>
+</table>
+<p class="small last">(*) x2 with Sparsity</p>
+</div>
+<p class="small"><strong>NVIDIA L4 Tensor Core GPU (Released 2023/03)</strong></p>
+<ul class="small simple">
+<li>Ada Lovelace GPU architecture</li>
+<li><span class="r">universal accelerator for graphics and AI workloads</span></li>
+<li><span class="b">small form-factor, easy to integrate, power efficient</span></li>
+<li>PCIe Gen4 x16 slot without extra power</li>
+<li>Google Cloud adopted for G2 VMs, successor to <strong>NVIDIA T4</strong></li>
+<li><strong>NVIDIA L4 likely to become a very popular GPU</strong></li>
+</ul>
+<p style="margin-bottom:2cm;" /><p class="small"><span class="incremental">NVIDIA L4 Tensor Core GPU (Data Center, low profile+power)</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="nvidia-optix-ray-tracing-engine-accessible-gpu-ray-tracing">
 <h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- Accessible GPU Ray Tracing</span></h1>
 <div class="sidebar">
@@ -4692,12 +4827,12 @@ simulation. -->
 <ul class="small simple">
 <li><span class="r">Programmable GPU-accelerated Ray-Tracing Pipeline</span></li>
 <li>Single-ray shader programming model using CUDA</li>
-<li>ray Tracing acceleration using RT Cores (RTX GPUs)</li>
+<li>ray tracing acceleration using RT Cores (RTX GPUs)</li>
 <li>&quot;...free to use within any application...&quot;</li>
 </ul>
 <p class="small"><strong>OptiX features</strong></p>
 <ul class="small simple">
-<li>acceleration structure creation + traversal</li>
+<li>acceleration structure creation + traversal (eg BVH)</li>
 <li>instanced sharing of geometry + acceleration structures</li>
 <li>compiler optimized for GPU ray tracing</li>
 </ul>
@@ -4747,14 +4882,6 @@ simulation. -->
     </div>
 <div class="slide" id="geant4-opticks-nvidia-optix-7-hybrid-workflow">
 <h1>Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow</h1>
-<!-- comment
-
-.. table::
-    :align: center
-
-    +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
-    | :b:`https://bitbucket.org/simoncblyth/opticks`   |
-    +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+ -->
 <table border="1" class="small docutils align-center">
 <colgroup>
 <col width="100%" />
@@ -4765,129 +4892,249 @@ simulation. -->
 </tbody>
 </table>
 <p style="margin-bottom:13cm;" /><p class="small">Opticks API : split according to dependency -- Optical photons are GPU &quot;resident&quot;, only hits need to be copied to CPU memory</p>
-</div>
-<div class="slide" id="geant4opticksworkflow">
-<h1><span class="i">Geant4OpticksWorkflow</span></h1>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="geant4opticksworkflow-2">
-<h1><span class="i">Geant4OpticksWorkflow 2</span></h1>
+<div class="slide" id="geant4-opticks-nvidia-optix-7-hybrid-workflow-2">
+<h1>Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow 2</h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Opticks : GPU Optical Photons</span></p>
+<p class="first sidebar-title"><span class="small">Offload Optical Simulation to GPU</span></p>
 <ul class="small last simple">
-<li>CUDA port of G4 generation+propagation</li>
-<li><span class="redbold">auto-translate G4 geometry to OptiX GPU</span></li>
-<li>offloads optical simulation to GPU</li>
+<li><span class="redbold">translate Geant4 geometry to OptiX GPU</span><ul>
+<li>intersect functions</li>
+<li>instance transforms</li>
+<li>GPU textures for mat/surf properties</li>
+</ul>
+</li>
+<li>CUDA port of Geant4 generation+propagation<ul>
+<li>cuRAND random number generation</li>
+</ul>
+</li>
 </ul>
 </div>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="opticks-juno-progress-efficiency-hit-culling-on-gpu">
-<h1><span class="small">Opticks + JUNO Progress : Efficiency Hit Culling on GPU</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title">ε, ε [θ, φ]  -&gt; GPU Tex</p>
-<p class="small"><strong>Separate Textures for each sensor type</strong></p>
-<dl class="small last docutils">
-<dt><tt class="docutils literal">G4Opticks::</tt></dt>
-<dd><tt class="docutils literal">setSensorData</tt>
-<tt class="docutils literal">setSensorAngularEfficiency</tt></dd>
-</dl>
-</div>
-<p class="small"><strong>On GPU Efficiency Culling</strong></p>
+<div class="slide" id="full-re-implementation-of-opticks-for-nvidia-optix-7-api">
+<h1><span class="small">Full re-implementation of Opticks for NVIDIA OptiX 7 API</span></h1>
 <ul class="small simple">
-<li>upload sensor angular efficiencies</li>
-<li>-&gt; <tt class="docutils literal">COLLECT</tt> OR <tt class="docutils literal">CULL</tt> hit flags</li>
+<li><span class="r">Huge change unavoidable from new OptiX API</span> --&gt; <span class="b">So profit from rethink of simulation code</span> --&gt; <strong>2nd impl advantage</strong></li>
 </ul>
-<p class="small">CUDA Thrust <strong>stream compaction</strong></p>
-<ul class="small simple">
-<li><tt class="docutils literal"><span class="pre">thrust::count_if</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">thrust::copy_if</span></tt></li>
-<li>Download hits with : <tt class="docutils literal">hitmask = COLLECT</tt></li>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="44%" />
+<col width="56%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Old simulation (OptiXRap)</th>
+<th class="head">New simulation (QUDARap/qsim.h + CSGOptiX, CSG)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><ul class="first last simple">
+<li>implemented on top of old OptiX API</li>
 </ul>
-<ul class="small simple">
-<li><span class="r">Reduces hit CPU memory by factor of the efficiency</span></li>
-<li>reduce size of GPU-&gt;CPU downloads by factor of efficiency</li>
-<li><strong>all</strong> downloaded hits -&gt; electronics simulation</li>
+</td>
+<td><ul class="first last simple">
+<li>pure CUDA implementation</li>
+<li>OptiX use kept separate, just for intersection</li>
 </ul>
-<pre>
-
-</pre><p class="small"><strong>Mock angular efficiency test of GPU texture machinery :</strong></p>
+</td>
+</tr>
+<tr><td><ul class="first last simple">
+<li>monolithic .cu</li>
+<li>GPU only implementation</li>
+<li>deep stack of support code</li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li>many small headers</li>
+<li>many GPU+CPU headers</li>
+<li>shallow stack : QUDARap depends only on SYSRap</li>
+</ul>
+</td>
+</tr>
+<tr><td><ul class="first last simple">
+<li>most code in GPU only context,
+even when not needing OptiX or CUDA</li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li>strict code segregation<ul>
+<li>code not needing GPU in SYSRap not QUDARap</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr><td><ul class="first last simple">
+<li>testing : GPU only, coarse</li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li>testing : CPU+GPU , fine-grained</li>
+<li>curand mocking on CPU</li>
+</ul>
+</td>
+</tr>
+<tr><td><ul class="first last simple">
+<li>limited CPU/GPU code sharing</li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li>maximal sharing : SEvt.hh, sphoton.h, ...</li>
+</ul>
+</td>
+</tr>
+<tr><td><ul class="first last simple">
+<li>timeconsuming manual random alignment
+conducted via debugger</li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li><span class="b">new systematic approach to random alignment</span></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="small"><strong>Goals of re-implementation : flexible, modular GPU simulation, easily testable, less code</strong></p>
 <ul class="small simple">
-<li>texturing sensor surfaces with the efficiency</li>
-<li>mockup striped theta efficiency, two random categories</li>
-<li>cosine phi efficiency variation for one category</li>
+<li>code reduction, sharing as much as possible between CPU and GPU</li>
+<li>fine grained testing on both CPU and GPU, with GPU curand mocking</li>
+<li>profit from several years of CUDA experience, eg QSim.hh/qsim.h host/device counterpart pattern:<ul>
+<li>hostside initializes and uploads device side counterpart --&gt; <span class="r">device side hits ground running</span></li>
+</ul>
+</li>
 </ul>
 
         <!--  s5talk  -->
         <br/>
-    <!-- comment
-
-https://bitbucket.org/simoncblyth/opticks/src/master/optickscore/tests/MockSensorLibTest.cc
-
-https://bitbucket.org/simoncblyth/opticks/src/master/optixrap/tests/OSensorLibGeoTest.cc -->
+    </div>
+<div class="slide" id="two-level-hierarchy-instance-transforms-tlas-over-geometry-blas">
+<h1><span class="small">Two-Level Hierarchy : Instance transforms (TLAS) over Geometry (BLAS)</span></h1>
+<p class="small"><strong>OptiX supports multiple instance levels : IAS-&gt;IAS-&gt;GAS</strong> BUT: <span class="redbold">Simple two-level is faster</span> : <span class="red">works in hardware RT Cores</span></p>
+<div class="small figure align-right">
+<img alt="/env/presentation/nvidia/tlas_blas_two_level_hierarchy.png" src="/env/presentation/nvidia/tlas_blas_two_level_hierarchy.png" style="width: 800px;" />
+<p class="caption"><a class="reference external" href="https://developer.nvidia.com/blog/introduction-nvidia-rtx-directx-ray-tracing/">https://developer.nvidia.com/blog/introduction-nvidia-rtx-directx-ray-tracing/</a></p>
 </div>
-<div class="slide" id="new-foundry-model-shared-cpu-gpu-geometry-context">
-<h1><span class="small">New &quot;Foundry&quot; Model : Shared CPU/GPU Geometry Context</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">IAS &lt; Inst &lt; Solid &lt; Prim &lt; Node</span></p>
-<ul class="small simple">
-<li><strong>Inst</strong> : 4x4 tran. + <strong>Solid</strong> ref. ( <strong>Inst</strong> -&gt; 1 <strong>IAS</strong> )</li>
-<li><strong>Solid</strong> : 1 or more <strong>Prim</strong>  : ( <strong>Solid</strong> -&gt; <strong>GAS</strong> )</li>
-<li><strong>Prim</strong> : 1,3,7,15,31,... <strong>Node</strong>  : (<strong>Prim</strong> ~ <em>G4VSolid</em>)</li>
-</ul>
-<pre class="mypretiny">
-struct CSGFoundry
-{
-   void upload(); <span class="redbold">// to GPU </span>
-...
-   std::vector&lt;CSGSolid&gt;  solid ; // compounds (eg PMT)
-   std::vector&lt;CSGPrim&gt;   prim ;
-   std::vector&lt;CSGNode&gt;   node ; // shapes, operators
-
-   std::vector&lt;float4&gt; plan ; // planes
-   std::vector&lt;qat4&gt;   tran ; // CSG transforms
-   std::vector&lt;qat4&gt;   itra ; // inverse CSG transforms
-   std::vector&lt;qat4&gt;   inst ; // instance transforms
-
-   <span class="redbold">// entire geometry in four GPU allocations</span>
-   CSGPrim*    d_prim ;
-   CSGNode*    d_node ;
-   float4*     d_plan ;
-   qat4*       d_itra ;
- };
-</pre><p class="small last"><span class="bluebold">referencing by offset, count</span></p>
+<dl class="small docutils">
+<dt>AS</dt>
+<dd>Acceleration Structure</dd>
+<dt>TLAS (aka <strong>IAS</strong>)</dt>
+<dd>4x4 transforms, refs to BLAS</dd>
+<dt>BLAS (aka <strong>GAS</strong>)</dt>
+<dd><div class="first last line-block">
+<div class="line">triangles : vertices, indices</div>
+<div class="line">custom primitives : AABB</div>
 </div>
-<ul class="small simple">
-<li><span class="r">replaces geometry context dropped in OptiX 6-&gt;7</span></li>
-<li>array-based -&gt; simple, inherent serialization + persisting</li>
-<li>entire geometry in 4 GPU allocations</li>
-</ul>
-<p class="small"><strong>Simple intersect headers, common CPU/GPU types</strong></p>
-<ul class="small simple">
-<li>use with : pre-7, 7 + testing on CPU</li>
-</ul>
-<pre>
-</pre><dl class="small docutils">
-<dt><span class="bluebold">https://github.com/simoncblyth/CSG</span> &quot;Foundry&quot; model</dt>
-<dd><dl class="first last docutils">
-<dt><strong>csg_intersect_tree.h/csg_intersect_node.h/...</strong></dt>
-<dd><span class="redbold">simple headers common to pre-7/7/CPU-testing</span></dd>
-</dl>
 </dd>
-<dt><span class="bluebold">https://github.com/simoncblyth/CSG_GGeo</span></dt>
-<dd>Convert <em>Opticks/GGeo</em> -&gt; <em>CSGFoundry</em></dd>
-<dt><span class="bluebold">https://github.com/simoncblyth/CSGOptiX</span></dt>
-<dd>OptiX 7 + pre-7 rendering</dd>
+<dt>AABB</dt>
+<dd>axis-aligned bounding box</dd>
 </dl>
-<pre>
+<p class="small"><strong>SBT : Shader Binding Table</strong></p>
+<p class="small">Flexibly binds together:</p>
+<ol class="small arabic simple">
+<li>geometry objects</li>
+<li>shader programs</li>
+<li>data for shader programs</li>
+</ol>
+<p class="small"><strong>Hidden in OptiX 1-6 APIs</strong></p>
 
-</pre><p class="tiny"><strong>GAS</strong> : Geometry Acceleration Structure</p>
-<p class="tiny"><strong>IAS</strong> : Instance Acceleration Structure</p>
-<p class="tiny"><strong>CSG</strong> : Constructive Solid Geometry</p>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="geometry-model-translation-geant4-csgfoundry-nvidia-optix-7">
+<h1><span class="small">Geometry Model Translation : Geant4 =&gt; CSGFoundry =&gt; NVIDIA OptiX 7</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">CSGFoundry Model</span></p>
+<ul class="small last simple">
+<li>array-based -&gt; simple serialization + upload</li>
+<li>entire geometry in 4 GPU allocations</li>
+<li>factorized using subtree digests</li>
+</ul>
+</div>
+<p class="small"><strong>Geant4 Geometry Model (JUNO: 300k PV, deep hierarchy)</strong></p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="5%" />
+<col width="36%" />
+<col width="59%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>PV</td>
+<td><em>G4VPhysicalVolume</em></td>
+<td>placed, refs LV</td>
+</tr>
+<tr><td>LV</td>
+<td><em>G4LogicalVolume</em></td>
+<td>unplaced, refs SO</td>
+</tr>
+<tr><td>SO</td>
+<td><em>G4VSolid,G4BooleanSolid</em></td>
+<td>binary tree of SO &quot;nodes&quot;</td>
+</tr>
+</tbody>
+</table>
+<p class="small"><strong>Opticks CSGFoundry Geometry Model</strong> (index references)</p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="14%" />
+<col width="63%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">struct</th>
+<th class="head">Notes</th>
+<th class="head">Geant4 Equivalent</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><em>CSGFoundry</em></td>
+<td>vectors of the below, easily serialized + uploaded</td>
+<td>None</td>
+</tr>
+<tr><td><em>qat4</em></td>
+<td>4x4 transform refs <em>CSGSolid</em> using &quot;spare&quot; 4th column</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td rowspan="2"><em>CSGSolid</em></td>
+<td>refs sequence of <em>CSGPrim</em></td>
+<td rowspan="2">Groups of nearby PV, LV
++ Remainder</td>
+</tr>
+<tr><td>eg JUNO <em>CSGSolid</em> numPrim [3089, 5, 11, 14, 6, 1, 1, 1, 1, 130]</td>
+</tr>
+<tr><td><em>CSGPrim</em></td>
+<td>bbox, refs sequence of <em>CSGNode</em>, root of CSG Tree of nodes</td>
+<td>root <em>G4VSolid</em></td>
+</tr>
+<tr><td><em>CSGNode</em></td>
+<td>CSG node parameters (JUNO: ~23k <em>CSGNode</em>)</td>
+<td>node <em>G4VSolid</em></td>
+</tr>
+</tbody>
+</table>
+<p class="small"><strong>NVIDIA OptiX 7 Geometry Acceleration Structures (JUNO: 1 IAS + 10 GAS, 2-level hierarchy)</strong></p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="4%" />
+<col width="30%" />
+<col width="65%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>IAS</td>
+<td>Instance Acceleration Structures</td>
+<td>JUNO: 1 IAS created from vector of ~50k <em>qat4</em> (JUNO)</td>
+</tr>
+<tr><td>GAS</td>
+<td>Geometry Acceleration Structures</td>
+<td>JUNO: 10 GAS created from 10 <em>CSGSolid</em> (which refs <em>CSGPrim,CSGNode</em> )</td>
+</tr>
+</tbody>
+</table>
 
         <!--  s5talk  -->
         <br/>
@@ -4899,351 +5146,267 @@ struct CSGFoundry
 
 
 </pre><div class="sidebar">
-<p class="first sidebar-title"><span class="small">1st JUNO Opticks OptiX 7 Ray-trace</span></p>
-<p class="small">Very New CSG &quot;Foundry&quot; CPU/GPU Geometry</p>
+<p class="first sidebar-title"><span class="small">JUNO Opticks OptiX 7 Ray-trace</span></p>
+<p class="small">CSGFoundry CPU/GPU Geometry</p>
 <ul class="small last simple">
 <li><span class="redbold">purely analytic CSG, no triangles</span></li>
-<li>everything at default, no optimization</li>
 </ul>
 </div>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="current-juno-geometry-auto-factorized-by-progeny-digest">
-<h1><span class="small">Current JUNO Geometry : Auto-Factorized by &quot;progeny digest&quot;</span></h1>
+<div class="slide" id="qudarap-cuda-optical-simulation-implementation">
+<h1><span class="small">QUDARap : CUDA Optical Simulation Implementation</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Factorize ~300,000 vol -&gt; 10 comp</span></p>
-<ul class="small simple">
-<li><strong>ridx</strong>: repeat index</li>
-<li><strong>plc</strong>: number of placements of the instance</li>
-<li><strong>prim</strong>: number of Prim/volumes in the instance</li>
-<li><strong>component</strong>: numPrim:outerPrimName</li>
-</ul>
-<p class="small last"><span class="r">&quot;progeny digest&quot;</span> characterizes subtree of every volume-node</p>
+<p class="first sidebar-title"><span class="small">CPU Pre-Init of GPU Counterpart</span></p>
+<dl class="small docutils">
+<dt>hh</dt>
+<dd>instanciate device .h <strong>on host</strong>, upload constituents (eg texture buffers),
+set constituent device pointers into .h instance, upload .h instance to GPU</dd>
+<dt>h</dt>
+<dd>simple device header, testable on CPU</dd>
+</dl>
+<p class="small last">--&gt; <span class="r">device side hits ground running</span></p>
 </div>
-<table border="1" class="tiny docutils">
+<table border="1" class="small docutils">
 <colgroup>
-<col width="5%" />
-<col width="7%" />
-<col width="6%" />
-<col width="51%" />
-<col width="32%" />
+<col width="48%" />
+<col width="26%" />
+<col width="26%" />
 </colgroup>
 <thead valign="bottom">
-<tr><th class="head">ridx</th>
-<th class="head">plc</th>
-<th class="head">prim</th>
-<th class="head">component</th>
-<th class="head">note</th>
+<tr><th class="head">&nbsp;</th>
+<th class="head">CPU</th>
+<th class="head">GPU header</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr><td>0</td>
-<td>1</td>
-<td>3084</td>
-<td>3084:sWorld</td>
-<td>non-repeated remainder</td>
+<tr><td>context steering</td>
+<td>QSim.hh</td>
+<td>qsim.h</td>
 </tr>
-<tr><td>1</td>
-<td>25600</td>
-<td>5</td>
-<td>5:PMT_3inch_pmt_solid</td>
-<td rowspan="4">4 types of PMT</td>
+<tr><td>curandState setup</td>
+<td>QRng.hh</td>
+<td>qrng.h</td>
 </tr>
-<tr><td>2</td>
-<td>12612</td>
-<td>5</td>
-<td>5:NNVTMCPPMTsMask</td>
+<tr><td>property interpolation</td>
+<td>QProp.hh</td>
+<td>qprop.h</td>
 </tr>
-<tr><td>3</td>
-<td>5000</td>
-<td>5</td>
-<td>5:HamamatsuR12860sMask</td>
+<tr><td>event handling</td>
+<td>QEvent.hh</td>
+<td>qevent.h</td>
 </tr>
-<tr><td>4</td>
-<td>2400</td>
-<td>5</td>
-<td>5:mask_PMT_20inch_vetosMask</td>
+<tr><td>Cerenkov generation</td>
+<td>QCerenkov.hh</td>
+<td>qcerenkov.h</td>
 </tr>
-<tr><td>5</td>
-<td>590</td>
-<td>1</td>
-<td>1:sStrutBallhead</td>
-<td rowspan="4">4 parts of same
-assembly, BUT not
-grouped as siblings
-(not parent-child)</td>
+<tr><td>Scintillation generation</td>
+<td>QScint.hh</td>
+<td>qscint.h</td>
 </tr>
-<tr><td>6</td>
-<td>590</td>
-<td>1</td>
-<td>1:uni1</td>
-</tr>
-<tr><td>7</td>
-<td>590</td>
-<td>1</td>
-<td>1:base_steel</td>
-</tr>
-<tr><td>8</td>
-<td>590</td>
-<td>1</td>
-<td>1:uni_acrylic3</td>
-</tr>
-<tr><td>9</td>
-<td>504</td>
-<td>130</td>
-<td>130:sPanel</td>
-<td>repeated parts of TT</td>
+<tr><td>texture handling</td>
+<td>QTex.hh</td>
+<td>&nbsp;</td>
 </tr>
 </tbody>
 </table>
+<p class="small">Aims of counterpart code organization:</p>
 <ul class="small simple">
-<li><strong>ridx:0</strong> &quot;remainder&quot; Prim<ul>
-<li>Prim that did not pass instancing criteria, on number of repeats + complexity</li>
-<li>TODO: tune criteria to instance more, reducing remainder Prim (Expect: 3084-&gt;~ 84)</li>
+<li><span class="redbold">facilitate fine-grained modular simulation testing</span></li>
+<li>bulk of GPU code in simple to test headers<ul>
+<li>many can be tested on CPU</li>
 </ul>
 </li>
-<li><strong>ridx:1,2,3,4</strong><ul>
-<li>four types of PMT, all with 5 Prim</li>
+<li><em>QUDARap</em> does not depend on OptiX -&gt; more flexible -&gt; simpler testing</li>
 </ul>
-</li>
-<li><strong>ridx:5,6,7,8</strong><ul>
-<li>same 590x assembly <span class="redbold">but not grouped together</span> : as siblings (not parent-child like PMTs)</li>
-<li>TODO: implement instancing of siblings, combining 4 -&gt; 1</li>
-</ul>
-</li>
-</ul>
-<p class="small"><span class="redbold">Increasing instancing : reduces memory for geometry -&gt; improved performance</span></p>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="juno-optix-7-foundry-geometry-scan">
-<h1><span class="i">JUNO OptiX 7 : &quot;Foundry&quot; Geometry Scan</span></h1>
+<div class="slide" id="n-ary-csg-compound-list-nodes-much-smaller-csg-trees">
+<h1><span class="small">n-ary CSG Compound &quot;List-Nodes&quot; =&gt; Much Smaller CSG trees</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Vary Geom. Compare Render Times</span></p>
-<p class="small last">Fast render -&gt; Fast simulation</p>
+<p class="first sidebar-title"><span class="small">Complex CSG =&gt; Tree Overheads</span></p>
+<img alt="GeoChain_Darwin/XJfixtureConstruction/CSGOptiXRenderTest/cvd0/50001/ALL/top_i0_/cxr_geochain_XJfixtureConstruction_ALL_upper.jpg" class="last align-right" src="GeoChain_Darwin/XJfixtureConstruction/CSGOptiXRenderTest/cvd0/50001/ALL/top_i0_/cxr_geochain_XJfixtureConstruction_ALL_upper.jpg" style="width: 500px;" />
 </div>
+<ul class="small simple">
+<li>list-node references sub-nodes by <strong>subNum</strong> <strong>subOffset</strong></li>
+</ul>
+<dl class="small docutils">
+<dt>CSG_CONTIGUOUS Union</dt>
+<dd><dl class="first last docutils">
+<dt>user guarantees contiguous</dt>
+<dd><ul class="first last simple">
+<li>like G4MultiUnion of prim only</li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>CSG_DISCONTIGUOUS Union</dt>
+<dd><dl class="first last docutils">
+<dt>user guarantees no overlaps</dt>
+<dd><ul class="first last simple">
+<li>=&gt; simple, low resource intersect</li>
+<li>eg use for &quot;holes&quot; to be cutaway</li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>CSG_OVERLAP Intersection</dt>
+<dd><dl class="first last docutils">
+<dt>user guarantees overlap</dt>
+<dd><ul class="first last simple">
+<li>eg general G4Sphere: inner radius, thetacut, phicut</li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt><span class="r">Communicate shape more precisely</span></dt>
+<dd><span class="r">=&gt; better suited intersect alg =&gt; less resources =&gt; faster</span></dd>
+</dl>
+<p class="small">Generalized Opticks CSG into three levels : tree &lt; node &lt; leaf (avoids recursion in intersect)</p>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_tree.h">opticks/src/master/CSG/csg_intersect_tree.h</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h">csg_intersect_node.h</a>
+<a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_leaf.h">csg_intersect_leaf.h</a></li>
+</ul>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="juno-geometry-optix-7-ray-trace-times-2m-pixels-titan-rtx">
-<h1><span class="small">JUNO Geometry : OptiX 7 Ray Trace Times ~2M pixels : TITAN RTX</span></h1>
+<div class="slide" id="csg-contiguous-union-n-ary-not-bin-ary-csg-intersection">
+<h1><span class="small">CSG_CONTIGUOUS Union : n-ary (not bin-ary) CSG intersection</span></h1>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h">https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h</a> <span class="r">intersect_node_contiguous</span></li>
+</ul>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Same viewpoint, vary GPU geometry</span></p>
-<ul class="small simple">
-<li><strong>-e</strong> : controls components : &quot;t&quot; means ~ (NOT)</li>
-<li><strong>time(s)</strong> : GPU ray trace CUDA launch time</li>
-<li><strong>relative</strong> : compares to &quot;ONLY PMT&quot; baseline</li>
-</ul>
-<p class="small">Very large range of times 1:600</p>
-<p class="small"><span class="r">Table identifies slow geometry to fix :</span></p>
-<ul class="small simple">
-<li><strong>3084:sWorld</strong> (too many non-instanced Prim)</li>
-<li><strong>1:uni_acrylic</strong> (CSG sub. 35m diam. sphere)</li>
-</ul>
-<p class="small">Good performance for <span class="b">ONLY PMTs</span> :</p>
+<p class="first sidebar-title"><span class="small">Alg works : but many TODOs</span></p>
 <ul class="small last simple">
-<li><span class="b">45,612 PMT instances handled without issue</span></li>
+<li>integer templating : suit resources to shape</li>
+<li>try sort networks, bitonic sort, ...</li>
+<li>compare performance with unbalanced trees</li>
+<li>iterate implementation whilst measuring perf.</li>
 </ul>
 </div>
-<table border="1" class="tiny docutils">
-<colgroup>
-<col width="2%" />
-<col width="9%" />
-<col width="14%" />
-<col width="14%" />
-<col width="60%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">idx</th>
-<th class="head">-e</th>
-<th class="head">time(s)</th>
-<th class="head">relative</th>
-<th class="head">enabled geometry description</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>0</td>
-<td>9,</td>
-<td>0.0017</td>
-<td>0.1702</td>
-<td>ONLY: 130:sPanel</td>
-</tr>
-<tr><td>1</td>
-<td>7,</td>
-<td>0.0017</td>
-<td>0.1714</td>
-<td>ONLY: 1:base_steel</td>
-</tr>
-<tr><td>2</td>
-<td>6,</td>
-<td>0.0019</td>
-<td>0.1923</td>
-<td>ONLY: 1:uni1</td>
-</tr>
-<tr><td>3</td>
-<td>5,</td>
-<td>0.0027</td>
-<td>0.2780</td>
-<td>ONLY: 1:sStrutBallhead</td>
-</tr>
-<tr><td>4</td>
-<td>4,</td>
-<td>0.0032</td>
-<td>0.3268</td>
-<td>ONLY: 5:mask_PMT_20inch_vetosMask</td>
-</tr>
-<tr><td>5</td>
-<td>1,</td>
-<td>0.0032</td>
-<td>0.3287</td>
-<td>ONLY: 5:PMT_3inch_pmt_solid</td>
-</tr>
-<tr><td>6</td>
-<td>2,</td>
-<td>0.0055</td>
-<td>0.5669</td>
-<td>ONLY: 5:NNVTMCPPMTsMask</td>
-</tr>
-<tr><td>7</td>
-<td>3,</td>
-<td>0.0074</td>
-<td>0.7582</td>
-<td>ONLY: 5:HamamatsuR12860sMask</td>
-</tr>
-<tr><td>8</td>
-<td><span class="b">1,2,3,4</span></td>
-<td><span class="b">0.0097</span></td>
-<td><span class="b">1.0000</span></td>
-<td><span class="b">ONLY PMT</span></td>
-</tr>
-<tr><td>9</td>
-<td>t8,0</td>
-<td>0.0099</td>
-<td>1.0179</td>
-<td>EXCL: 1:uni_acrylic3 3084:sWorld</td>
-</tr>
-<tr><td>10</td>
-<td><span class="r">0,</span></td>
-<td><span class="r">0.1171</span></td>
-<td><span class="r">12.0293</span></td>
-<td><span class="r">ONLY: 3084:sWorld</span></td>
-</tr>
-<tr><td>11</td>
-<td><span class="r">t8,</span></td>
-<td><span class="r">0.1186</span></td>
-<td><span class="r">12.1769</span></td>
-<td><span class="r">EXCL: 1:uni_acrylic3</span></td>
-</tr>
-<tr><td>12</td>
-<td><span class="r">t0,</span></td>
-<td><span class="r">0.5278</span></td>
-<td><span class="r">54.2066</span></td>
-<td><span class="r">EXCL: 3084:sWorld</span></td>
-</tr>
-<tr><td>13</td>
-<td><span class="r">8,</span></td>
-<td><span class="r">0.5310</span></td>
-<td><span class="r">54.5298</span></td>
-<td><span class="r">ONLY: 1:uni_acrylic3</span></td>
-</tr>
-<tr><td>14</td>
-<td>t3,</td>
-<td>0.6017</td>
-<td>61.7954</td>
-<td>EXCL: 5:HamamatsuR12860sMask</td>
-</tr>
-<tr><td>15</td>
-<td>t2,</td>
-<td>0.6043</td>
-<td>62.0620</td>
-<td>EXCL: 5:NNVTMCPPMTsMask</td>
-</tr>
-<tr><td>16</td>
-<td>t5,</td>
-<td>0.6171</td>
-<td>63.3787</td>
-<td>EXCL: 1:sStrutBallhead</td>
-</tr>
-<tr><td>17</td>
-<td>t6,</td>
-<td>0.6196</td>
-<td>63.6301</td>
-<td>EXCL: 1:uni1</td>
-</tr>
-<tr><td>18</td>
-<td>t7,</td>
-<td>0.6226</td>
-<td>63.9458</td>
-<td>EXCL: 1:base_steel</td>
-</tr>
-<tr><td>19</td>
-<td>t0</td>
-<td>0.6240</td>
-<td>64.0879</td>
-<td>3084:sWorld</td>
-</tr>
-<tr><td>20</td>
-<td>t4,</td>
-<td>0.6243</td>
-<td>64.1169</td>
-<td>EXCL: 5:mask_PMT_20inch_vetosMask</td>
-</tr>
-<tr><td>21</td>
-<td>t9,</td>
-<td>0.6335</td>
-<td>65.0636</td>
-<td>EXCL: 130:sPanel</td>
-</tr>
-<tr><td>22</td>
-<td>t1,</td>
-<td>0.6391</td>
-<td>65.6384</td>
-<td>EXCL: 5:PMT_3inch_pmt_solid</td>
-</tr>
-</tbody>
-</table>
+<ol class="small arabic simple">
+<li><em>zeroth pass</em> : find <strong>nearest_enter</strong> and count first exits</li>
+<li>if zero exits =&gt; outside compound =&gt; return <strong>nearest_enter</strong></li>
+<li><em>first pass</em> : collect enter distances, <strong>farthest_exit</strong></li>
+<li>order enter indices making <strong>enter</strong> distances ascend<ul>
+<li><span class="r">n-ary : store, sort enters</span> <span class="b">(cf bin-ary : compare two)</span></li>
+<li><span class="b">no tree overheads, but must store+sort distances</span></li>
+</ul>
+</li>
+<li><em>2nd pass</em> : loop over enters in distance order<ul>
+<li>contiguous requirement : <strong>enter &lt; farthest_exit</strong> so far</li>
+<li>find Exits for Enters that qualify as contiguous, update farthest_exit</li>
+</ul>
+</li>
+<li>return <strong>farthest_exit</strong> that qualifies as contiguous</li>
+</ol>
+<pre class="mypre15">
+         +----------------+     +-------------------+                  DISJOINT MUST BE DISQUALIFIED
+         |B               |     |D                  |
+    +----|----+      +----|-----|----+       +------|----------+             +-----------+
+    |A   |    |      |C   |     |    |       |E     |          |             |           |
+    |    |    |      |    |     |    |       |      |          |             |           |
+    | 0 E1    X2     E3  X4    E5   X6      E7     X8        [X9]           E10         X11
+    |    |    |      |    |     |    |       |      |          |             |           |
+    |    |    |      |    |     |    |       |      |          |             |           |
+    +----|----+      +----|-----|----+       +------|----------+             +-----------+
+         |                |     |                   |
+         +----------------+     +-------------------+
+
+         E           E          E            E                               E
+              X           X          X              X          X                         X
+ </pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="csg-discontiguous-union-csg-intersection">
+<h1><span class="small">CSG_DISCONTIGUOUS Union : CSG intersection</span></h1>
+<ul class="small simple">
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h">https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h</a> <span class="r">intersect_node_discontiguous</span></li>
+</ul>
+<p class="small"><span class="r">User guarantees : absolutely no overlapping between constituents</span></p>
+<pre class="mypre15">
+ +-------+          +-------+          +-------+          +-------+         +-------+
+ |       |          |       |          |       |          |       |         |       |
+ |       |          |       |          |       |          |       |         |       |
+ +-------+          +-------+          +-------+          +-------+         +-------+
+
+ +-------+          +-------+          +-------+          +-------+         +-------+
+ |       |          |       |          |       |          |       |         |       |
+ |       |          |       |          |       |          |       |         |       |
+ +-------+          +-------+          +-------+          +-------+         +-------+
+
+ </pre><ul class="small simple">
+<li>=&gt; very simple low resource intersection : <strong>closest Enter or Exit</strong></li>
+<li><span class="b">More closely suiting algorithm to geometry =&gt; better performance</span></li>
+<li>this can help with &quot;holes&quot; subtracted from another solid : the &quot;holes&quot; usually do not overlap</li>
+</ul>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="juno-all-pmts-2m-ray-traced-pixels-in-0-0097-s-nvidia-titan-rtx-nvidia-optix-7-0-0-opticks">
-<h1><span class="white">JUNO ALL PMTs : 2M ray traced pixels in 0.0097 s : NVIDIA TITAN RTX, NVIDIA OptiX 7.0.0, Opticks</span></h1>
+<div class="slide" id="multi-layer-thin-film-a-r-t-calc-using-tmm-custom4-package">
+<h1><span class="small">Multi-Layer Thin Film (A,R,T) Calc using TMM (Custom4 Package)</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">TMM : Transfer Matrix Method</span></p>
+<img alt="tmm/multi-layer-stack.png" class="align-center" src="tmm/multi-layer-stack.png" style="width: 400px;" />
+<p class="small"><strong>multi-layer thin films, coherent calc:</strong></p>
+<ul class="small simple">
+<li>complex refractives indices, thicknesses</li>
+<li>=&gt; (A,R,T)  (Absorb, Reflect, Transmit)</li>
+<li>Used from <strong>C4OpBoundaryProcess</strong></li>
+</ul>
+<p class="small"><span class="r">header-only GPU/CPU</span> : <strong>C4MultiLayrStack.h</strong></p>
+<p class="small last"><a class="reference external" href="https://github.com/simoncblyth/customgeant4/">https://github.com/simoncblyth/customgeant4/</a></p>
+</div>
+<dl class="small docutils">
+<dt>C4OpBoundaryProcess.hh</dt>
+<dd>G4OpBoundaryProcess with C4CustomART.h</dd>
+<dt>C4CustomART.h</dt>
+<dd>integrate custom boundary process and TMM calculation</dd>
+<dt>C4MultiLayrStack.h <span class="classifier-delimiter">:</span> <span class="classifier"><span class="b">TMM calculation of (A,R,T)</span></span></dt>
+<dd>based on complex refractive indices and layer thicknesses</dd>
+</dl>
+<p class="small">Enables <strong>junosw</strong> to use natural Pyrex+Vacuum PMT geometry</p>
+<img alt="GEOM/FewPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/FewPMT_demo.png" class="align-left" src="GEOM/FewPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/FewPMT_demo.png" style="width: 580px;" />
+<!-- comment
+
+.. image:: Custom4/Custom4_README.png
+   :width: 580px
+   :align: left -->
 
         <!--  s5talk  -->
         <br/>
-    <!-- comment
-
-:white:`[8]cxr_i0_1,2,3,4_-1 : ALL PMTS`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   8 : ALL PMTS -->
-</div>
+    </div>
 <div class="slide" id="summary-and-links">
 <h1><span class="small">Summary and Links</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Next Steps</span></p>
-<ul class="small last simple">
-<li>Foundry JUNO geometry validation</li>
-<li>migrate optical physics to NVIDIA OptiX 7</li>
-<li>JUNO Production validation</li>
+<p class="first sidebar-title"><span class="small">Hidden Benefits of CPU=&gt;GPU Sim.</span></p>
+<ul class="small simple">
+<li>detailed photon instrumentation</li>
+<li>comparisons find issues with both simulations:<ul>
+<li>complex geometry, overlaps, bugs...</li>
 </ul>
+</li>
+</ul>
+<p class="small last"><span class="r">=&gt; using Opticks improves CPU simulation</span></p>
 </div>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 500px; height: 20px;" />
 <!--  -->
 <blockquote>
 <p><em>Opticks</em> : state-of-the-art GPU ray traced optical simulation integrated with <em>Geant4</em>.
-Geometry progress with OptiX 7 suggests integration within months is achievable.</p>
+Full re-implementation of Opticks geometry and simulation for NVIDIA OptiX 7 completed.</p>
 <img alt="/env/presentation/1px.png" src="/env/presentation/1px.png" style="width: 1000px; height: 1px;" />
 <ul class="simple">
-<li>Efficiency culling decision moved to GPU, reducing CPU hit memory</li>
-<li>&quot;Foundry&quot; geometry model implemented to support NVIDIA OptiX 7 API.</li>
-<li><span class="redbold">First JUNO OptiX 7 renders achieved.</span></li>
+<li>NVIDIA Ray Trace Performance continues rapid progress (2x each gen.)</li>
+<li>Increasing availability of HW accelerated ray tracing</li>
+<li>NEXT: Opticks production testing, optimization</li>
 </ul>
 </blockquote>
 <table border="1" class="docutils align-center">
@@ -5254,9 +5417,6 @@ Geometry progress with OptiX 7 suggests integration within months is achievable.
 <tbody valign="top">
 <tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
 <td>code repository</td>
-</tr>
-<tr><td><a class="reference external" href="https://github.com/simoncblyth/opticks/releases">https://github.com/simoncblyth/opticks/releases</a></td>
-<td>.zip .tar.gz  archives</td>
 </tr>
 <tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
 <td>presentations and videos</td>
@@ -5273,149 +5433,6 @@ Geometry progress with OptiX 7 suggests integration within months is achievable.
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="acknowledgement-opticks-hackathon-series-for-nvidia-optix-6-7">
-<h1><span class="small">Acknowledgement : Opticks &quot;Hackathon&quot; Series for NVIDIA OptiX 6-&gt;7</span></h1>
-<ul class="simple">
-<li>Suggested and organized by LZ, LBNL, NERSC</li>
-<li>~fortnightly meetings since Feb 2021</li>
-<li><span class="r">Valuable advice from NVIDIA engineers</span></li>
-<li>see next talk by Oisin Creaner, <strong>LZ with Opticks</strong></li>
-</ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="lz-with-opticks-images-from-sam-eriksen-university-of-bristol">
-<h1><span class="small">LZ with Opticks (Images from Sam Eriksen, University of Bristol)</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
-
-
-:white:`[7]cxr_i0_2,_-1 : ONLY NNVT PMTs`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   7
-
-
-:white:`[10]cxr_i0_0,_-1 : ONLY GLOBAL "REMAINDER"`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   10 : REMAINDER ONLY : 0,
-
-
-:white:`[9]cxr_i0_t8,_-1 : EXCLUDE SLOWEST : 2`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. s5_talk::
-
-   9 : EXCLUDE THE SLOW : t8 -->
-<!-- comment
-
-cxr_view
-- - - - - - - - - - - -
-
-
-
-cxr_view_0
-- - - - - - - - - - - -
-
-cxr_solid_r0@
-- - - - - - - - - - - - - - -
-
-
-
-cxr_view_1
-- - - - - - - - - - - -
-
-cxr_solid_r1@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r1p
-- - - - - - - - - - - - -
-
-
-
-cxr_view_2
-- - - - - - - - - - - -
-
-cxr_solid_r2@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r2p
-- - - - - - - - - - - - -
-
-
-
-cxr_view_3
-- - - - - - - - - - - -
-
-cxr_solid_r3@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r3p
-- - - - - - - - - - - - -
-
-
-
-cxr_view_4
-- - - - - - - - - - - -
-
-cxr_solid_r4@
-- - - - - - - - - - - - - - -
-
-cxr_solid_r4p
-- - - - - - - - - - - - -
-
-
-
-
-cxr_view_5
-- - - - - - - - - - - -
-
-cxr_solid_r5@
-- - - - - - - - - - - - - - -
-
-
-
-
-
-cxr_view_6
-- - - - - - - - - - - -
-
-cxr_solid_r6@
-- - - - - - - - - - - - - - -
-
-
-
-
-cxr_view_7
-- - - - - - - - - - - -
-
-cxr_solid_r7@
-- - - - - - - - - - - - - - -
-
-
-
-cxr_view_8
-- - - - - - - - - - - -
-
-cxr_solid_r8@
-- - - - - - - - - - - - - - -
-
-
-
-cxr_view_9
-- - - - - - - - - - - -
-
-cxr_solid_r9@
-- - - - - - - - - - - - - - - -->
-</div>
 </div>
 </body>
 </html>
