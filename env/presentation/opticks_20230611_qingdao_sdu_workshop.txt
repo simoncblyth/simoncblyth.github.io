@@ -106,42 +106,6 @@
 
 
 
-cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg
--------------------------------------------------------------
-
-
-
-
-:i:`B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png`
-----------------------------------------------
-
-
-::
-
-     export OPTICKS_INPUT_PHOTON=GridXY_X1000_Z1000_40k_f8.npy
-     export OPTICKS_INPUT_PHOTON_FRAME=NNVT:0:1000
-
-     MODE=3 EDL=1 N=0 EYE=500,0,2300 CHECK=not_first ~/j/ntds/ntds.sh ana
-
-
-.. raw:: html
-
-    <p style="margin-bottom:110mm;" />
-    
-
-::
-
-    Photon step points from grid of input photons target NNVT:0:1000 (POM:1)
-
-
-.. s5_talk::
-
-    Can distinguish NNVT from HAMA by the size of ring inside 
-
-
-
-
-
 
 Outline
 ---------
@@ -522,6 +486,42 @@ Outline
 
    [Notes: No need to read slide, just the above comments]
 
+
+
+
+
+``Spatial Index Acceleration Structure``
+---------------------------------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:11cm;" />
+
+.. sidebar:: :small:`Tree of Bounding Boxes (bbox)`
+
+    .. class:: small
+
+        * aims to minimize bbox+primitive intersects 
+        * accelerates ray-geometry intersection
+
+
+.. s5_talk::
+
+   The principal technique to accelerate ray geometry intersection 
+   is an acceleration structure called a bounding volume hierarchy 
+   
+   This divides space into progressively smaller boxes which forms
+   a spatial index.
+
+   Traversing the tree of bounds allows to minimize tests
+   needed to find an intersect.
+
+   With some geometry it is possible for the traversal 
+   to be done on the dedicated RT cores.
+
+
+
 Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow
 -------------------------------------------------------------
 
@@ -838,6 +838,43 @@ Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow 2
 
 
 
+:i:`cxr_min__eye_-10,0,0__zoom_1__tmin_0.1__sChimneyAcrylic_altview.jpg`
+-------------------------------------------------------------------------
+
+``Raytrace render view from inside JUNO Water Buffer``
+
+:i:`cxr_min__eye_-30,0,5__zoom_1__tmin_25__sChimneyAcrylic_tmin_cutaway.jpg`
+------------------------------------------------------------------------------
+
+``ray TMIN cuts away sphere`` 
+
+:i:`cxr_min__eye_-30,0,5__zoom_1__tmin_25__sChimneyAcrylic_skip_target_acrylic.jpg`
+------------------------------------------------------------------------------------
+
+``ELV=t94,95 ./cxr_min.sh  ## skip sTarget sAcrylic``
+
+
+:i:`cxr_min__eye_-10,0,-30__zoom_0.5__tmin_0.1__sChimneyAcrylic_photon_eye_view.jpg`
+--------------------------------------------------------------------------------------
+
+``ELV=t94,95 ./cxr_min.sh ## skip sTarget sAcrylic : upwards view`` 
+
+
+:i:`cxr_overview_emm_image_grid_overview`
+-------------------------------------------
+
+``Comparison of ray traced render times of different geometry`` 
+  ``simple way to find issues, eg over complex CSG, overlarge BBox`` 
+
+.. s5_talk::
+
+   Ray trace rendering performance provides natural way to look for issues
+
+
+
+:i:`scan_emm_jpg_select.txt_coarse.jpg`
+-----------------------------------------
+
 :i:`cxr_view_emm_t0_elv_t142_eye_-1,-1,-1,1__zoom_1__tmin_0.4__sWaterTube_skip_sBottomRock.jpg`
 -------------------------------------------------------------------------------------------------
 
@@ -852,6 +889,49 @@ Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow 2
     cx
     JPGLIST=$JPGLIST ./image_grid.sh 
 
+
+
+
+.. comment
+
+    cxr_min__eye_-10,0,0__zoom_0.5__tmin_0.1__sChimneyAcrylic_explain_the_grey.jpg
+    --------------------------------------------------------------------------------
+
+    Maybe a TMAX issue again ?
+
+
+
+cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg
+-------------------------------------------------------------
+
+
+
+
+:i:`B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png`
+----------------------------------------------
+
+
+::
+
+     export OPTICKS_INPUT_PHOTON=GridXY_X1000_Z1000_40k_f8.npy
+     export OPTICKS_INPUT_PHOTON_FRAME=NNVT:0:1000
+
+     MODE=3 EDL=1 N=0 EYE=500,0,2300 CHECK=not_first ~/j/ntds/ntds.sh ana
+
+
+.. raw:: html
+
+    <p style="margin-bottom:110mm;" />
+    
+
+::
+
+    Photon step points from grid of input photons target NNVT:0:1000 (POM:1)
+
+
+.. s5_talk::
+
+    Can distinguish NNVT from HAMA by the size of ring inside 
 
 
 
@@ -957,107 +1037,112 @@ Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow 2
 
 
 
-:small:`CSG_CONTIGUOUS Union : n-ary (not bin-ary) CSG intersection`
------------------------------------------------------------------------
+.. comment
 
-.. class:: small
-
-    * https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h :r:`intersect_node_contiguous`
-
-.. sidebar:: :small:`Alg works : but many TODOs`
+    :small:`CSG_CONTIGUOUS Union : n-ary (not bin-ary) CSG intersection`
+    -----------------------------------------------------------------------
 
     .. class:: small
 
-       * integer templating : suit resources to shape
-       * try sort networks, bitonic sort, ... 
-       * compare performance with unbalanced trees
-       * iterate implementation whilst measuring perf.
+        * https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h :r:`intersect_node_contiguous`
+
+    .. sidebar:: :small:`Alg works : but many TODOs`
+
+        .. class:: small
+
+           * integer templating : suit resources to shape
+           * try sort networks, bitonic sort, ... 
+           * compare performance with unbalanced trees
+           * iterate implementation whilst measuring perf.
 
 
-.. class:: small
+    .. class:: small
 
-    1. *zeroth pass* : find **nearest_enter** and count first exits
-    2. if zero exits => outside compound => return **nearest_enter**
-    3. *first pass* : collect enter distances, **farthest_exit**
-    4. order enter indices making **enter** distances ascend
+        1. *zeroth pass* : find **nearest_enter** and count first exits
+        2. if zero exits => outside compound => return **nearest_enter**
+        3. *first pass* : collect enter distances, **farthest_exit**
+        4. order enter indices making **enter** distances ascend
 
-       * :r:`n-ary : store, sort enters` :b:`(cf bin-ary : compare two)`
-       * :b:`no tree overheads, but must store+sort distances`
+           * :r:`n-ary : store, sort enters` :b:`(cf bin-ary : compare two)`
+           * :b:`no tree overheads, but must store+sort distances`
 
-    5. *2nd pass* : loop over enters in distance order 
+        5. *2nd pass* : loop over enters in distance order 
 
-       * contiguous requirement : **enter < farthest_exit** so far  
-       * find Exits for Enters that qualify as contiguous, update farthest_exit
+           * contiguous requirement : **enter < farthest_exit** so far  
+           * find Exits for Enters that qualify as contiguous, update farthest_exit
 
-    6. return **farthest_exit** that qualifies as contiguous
-
-
-.. raw:: html
-
-    <pre class="mypre15">
-             +----------------+     +-------------------+                  DISJOINT MUST BE DISQUALIFIED
-             |B               |     |D                  |                   
-        +----|----+      +----|-----|----+       +------|----------+             +-----------+
-        |A   |    |      |C   |     |    |       |E     |          |             |           |
-        |    |    |      |    |     |    |       |      |          |             |           |
-        | 0 E1    X2     E3  X4    E5   X6      E7     X8        [X9]           E10         X11
-        |    |    |      |    |     |    |       |      |          |             |           |
-        |    |    |      |    |     |    |       |      |          |             |           |
-        +----|----+      +----|-----|----+       +------|----------+             +-----------+
-             |                |     |                   |
-             +----------------+     +-------------------+
-
-             E           E          E            E                               E 
-                  X           X          X              X          X                         X
-     </pre>
+        6. return **farthest_exit** that qualifies as contiguous
 
 
+    .. raw:: html
 
-.. s5_talk::
+        <pre class="mypre15">
+                 +----------------+     +-------------------+                  DISJOINT MUST BE DISQUALIFIED
+                 |B               |     |D                  |                   
+            +----|----+      +----|-----|----+       +------|----------+             +-----------+
+            |A   |    |      |C   |     |    |       |E     |          |             |           |
+            |    |    |      |    |     |    |       |      |          |             |           |
+            | 0 E1    X2     E3  X4    E5   X6      E7     X8        [X9]           E10         X11
+            |    |    |      |    |     |    |       |      |          |             |           |
+            |    |    |      |    |     |    |       |      |          |             |           |
+            +----|----+      +----|-----|----+       +------|----------+             +-----------+
+                 |                |     |                   |
+                 +----------------+     +-------------------+
 
-   Communicating the geometry more precisely enables a better suited intersection 
-   algorithm to be used. This reduces resources and increases performance. 
-
-   [notes: dont need to explain the algorithm in detail, important point is just the above comment] 
-
-
-:small:`CSG_DISCONTIGUOUS Union : CSG intersection`
----------------------------------------------------------------
-
-.. class:: small
-
-    * https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h :r:`intersect_node_discontiguous`
-
-    :r:`User guarantees : absolutely no overlapping between constituents`
-
-.. raw:: html
-
-    <pre class="mypre15">
-     +-------+          +-------+          +-------+          +-------+         +-------+      
-     |       |          |       |          |       |          |       |         |       |      
-     |       |          |       |          |       |          |       |         |       |      
-     +-------+          +-------+          +-------+          +-------+         +-------+       
-
-     +-------+          +-------+          +-------+          +-------+         +-------+      
-     |       |          |       |          |       |          |       |         |       |      
-     |       |          |       |          |       |          |       |         |       |      
-     +-------+          +-------+          +-------+          +-------+         +-------+       
-
-     </pre>
+                 E           E          E            E                               E 
+                      X           X          X              X          X                         X
+         </pre>
 
 
-.. class:: small
 
-    * => very simple low resource intersection : **closest Enter or Exit**
+    .. s5_talk::
 
-    * :b:`More closely suiting algorithm to geometry => better performance`
-    * this can help with "holes" subtracted from another solid : the "holes" usually do not overlap 
+       Communicating the geometry more precisely enables a better suited intersection 
+       algorithm to be used. This reduces resources and increases performance. 
 
-.. s5_talk::
+       [notes: dont need to explain the algorithm in detail, important point is just the above comment] 
 
-   Again more precise communication of intent for geometry -> better performance
-   as it enables a very low resource intersection appoach to be used and it can 
-   avoid tree overheads.  
+
+
+.. comment
+
+    :small:`CSG_DISCONTIGUOUS Union : CSG intersection`
+    ---------------------------------------------------------------
+
+    .. class:: small
+
+        * https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h :r:`intersect_node_discontiguous`
+
+        :r:`User guarantees : absolutely no overlapping between constituents`
+
+    .. raw:: html
+
+        <pre class="mypre15">
+         +-------+          +-------+          +-------+          +-------+         +-------+      
+         |       |          |       |          |       |          |       |         |       |      
+         |       |          |       |          |       |          |       |         |       |      
+         +-------+          +-------+          +-------+          +-------+         +-------+       
+
+         +-------+          +-------+          +-------+          +-------+         +-------+      
+         |       |          |       |          |       |          |       |         |       |      
+         |       |          |       |          |       |          |       |         |       |      
+         +-------+          +-------+          +-------+          +-------+         +-------+       
+
+         </pre>
+
+
+    .. class:: small
+
+        * => very simple low resource intersection : **closest Enter or Exit**
+
+        * :b:`More closely suiting algorithm to geometry => better performance`
+        * this can help with "holes" subtracted from another solid : the "holes" usually do not overlap 
+
+    .. s5_talk::
+
+       Again more precise communication of intent for geometry -> better performance
+       as it enables a very low resource intersection appoach to be used and it can 
+       avoid tree overheads.  
 
 
 
