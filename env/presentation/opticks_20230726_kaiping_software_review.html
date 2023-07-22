@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>Opticks + JUNO : Progress Review</title>
+<title>JUNOSW + Opticks : Status of Opticks Simulation</title>
 <meta content="Opticks + JUNO : Progress Review" name="title" />
 <meta content="opticks_20230721_kaiping_pwg_afg.txt" name="name" />
 <meta content="(26 July 2023)" name="description" />
@@ -385,35 +385,14 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">Opticks + JUNO : Progress Review</span></h1>
+<h1><span class="i">JUNOSW + Opticks : Status of Opticks Simulation</span></h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">Opticks + JUNO : Progress Review</span></h1>
+<h1 class="title"><span class="i">JUNOSW + Opticks : Status of Opticks Simulation</span></h1>
 
-<!-- comment
-
-From Ziyan, July 11th
-
-Due to conflits with other sessions, finally the offline software review has
-been arranged in the moring of Beijing time(26 Jul 2023, 09:00).  Please see
-the details from DocDB:
-https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?conferenceid=1231
-
-26 Jul 2023 at 09:00
-https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=2390
-
-So could you please overcome the difficuties of the time difference?
-
-THAT IS EARLY MORNING 02:00 AM OF Wednesday 26th July,
-IE IMMEDIATELY FOLLOWING LATE NIGHT OF Tuesday 25th -->
-<!-- comment
-
-TO INCLUDE
-
-* primary merges list -->
 <!-- comment
 
 https://docutils.sourceforge.io/docutils/parsers/rst/include/
@@ -8855,62 +8834,86 @@ SM*64 gives cores
 https://www.techpowerup.com/gpu-specs/titan-v.c3051
 https://www.techpowerup.com/gpu-specs/titan-rtx.c3311
 https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
+<!-- comment
+
+From Ziyan, July 11th
+
+Due to conflits with other sessions, finally the offline software review has
+been arranged in the moring of Beijing time(26 Jul 2023, 09:00).  Please see
+the details from DocDB:
+https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?conferenceid=1231
+
+26 Jul 2023 at 09:00
+https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=2390
+
+So could you please overcome the difficuties of the time difference?
+
+THAT IS EARLY MORNING 02:00 AM OF Wednesday 26th July,
+IE IMMEDIATELY FOLLOWING LATE NIGHT OF Tuesday 25th
+
+TODO : Next steps
+
+TODO : Other work (essentially "Misc") needing mention
+
+* describe MOCK_TEXTURE, MOCK_CURAND : and what that allows : that can be a sidebar
+* add as last page, simply a bullet list and ref to progress notes
+* sur/mat/bnd/optical is essentially complete
+* snd/sn/scsg/sndtree/s_pool : very liable to change so just a bullet point
+
+
+WIP : QPMT_Test ART plot, LayrTest comparison table, comparison with CPU calc, PMT Specific check -->
 <div class="mytitle">
     <header>
         <h1 style="background-color:lightgrey">
-            Opticks + JUNO : Progress Review
-            <h2 style="background-color:lightgrey;text-align:center"> Open source, https://bitbucket.org/simoncblyth/opticks </h2>
+            JUNOSW + Opticks : Status of Opticks Simulation
         </h1>
     </header>
 </div>
-<p style="margin-bottom:35mm;" /><ul class="small simple">
-<li>JUNO + Opticks : Summary Timeline of PMT Simulation Development</li>
-<li>Reminder of <em>junoPMTOpticalModel</em> issues:<ul>
-<li>Unnatural FastSim kludged PMT geometry : Pyrex+Pyrex+Vacuum+Vacuum</li>
-<li>Natural PMT geometry : Pyrex+Vacuum</li>
-<li><span class="r">BUGS:</span> polarization and propagation time within PMT are wrong</li>
-<li><span class="r">MORE BUGS:</span> unphysical mid-vacuum reflect, refract, absorb, detect, &quot;tunneling&quot;</li>
+<p style="margin-bottom:25mm;" /><ul class="small simple">
+<li><strong>Summary Timeline of JUNOSW PMT Simulation Development</strong></li>
+<li><strong>Issues</strong> : with FastSim based <em>junoPMTOpticalModel</em><ul>
+<li>Unnatural FastSim kludged PMT geometry : Pyrex+Pyrex+Vacuum+Vacuum (Natural: Pyrex+Vacuum)</li>
+<li><span class="r">BUGS:</span> polarization and propagation time within PMT were wrong</li>
+<li><span class="r">MORE BUGS:</span> unphysical mid-vacuum reflect, refract, absorb, detect, &quot;tunneling&quot; thru dynode/MCP</li>
 </ul>
 </li>
-<li>Fix for all issues with simple PMT geometry and custom C4BoundaryProcess<ul>
-<li>Custom4 : mini-package with Geant4 customizations</li>
-<li>Multi-Layer Thin Film (A,R,T) Calc using TMM Calc</li>
+<li><strong>FIX</strong> : adopting simple PMT geometry with custom C4OpBoundaryProcess<ul>
+<li>Pivot to C4OpBoundaryProcess for PMT Optical Model (<span class="r">MR 180 : MERGED</span>)</li>
+<li>C4OpBoundaryProcess::PostStepDoIt : 3-way (A,R,T) Customization with C4CustomART.h</li>
+<li>Low dependency access to PMT data from anywhere (<span class="r">MR 126 : MERGED</span>)</li>
+<li>Custom4 : Custom Boundary Multi-Layer Thin Film (A,R,T) TMM Calc</li>
+</ul>
+</li>
+<li><strong>Validation of FIX</strong> : with Opticks full photon history recording, U4Recorder<ul>
+<li>Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow</li>
+<li>Opticks SEvt loaded into ipython : arrays detailing every photon point</li>
+<li>Insitu input photon tests (CPU only), Statistical photon history Chi2 comparison</li>
+</ul>
+</li>
+<li><strong>Extra</strong> : slow <tt class="docutils literal"><span class="pre">junoSD_PMT_v2::get_pmtid</span></tt> ~50us per hit candidate, alternative &lt;1us with exact same results</li>
+</ul>
+<p style="margin-bottom:-5mm;" />
+<hr/>
+<p style="margin-bottom:-5mm;" /><ul class="small simple">
+<li><strong>Opticks Geometry Update</strong> :  Render performance scan : excluding volumes for each of 146 solids</li>
+<li><strong>Opticks Extension for PMT Optical Model</strong> : using full PMT info on GPU<ul>
+<li>CUDA equivalent of C4CustomART::doIt, (A,R,T) Comparisons from AOI scans : <span class="r">MATCHED</span></li>
+</ul>
+</li>
+<li><strong>Next Steps</strong> : Validation with input photons (GPU vs CPU)<ul>
+<li>standalone (FewPMT) then insitu tests, statistical history comparisons, random aligned comparison if needed</li>
 </ul>
 </li>
 </ul>
 <div class="mycredit">
-   <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; 26 July 2023 </h2>
+   <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; 22nd JUNO Collaboration Meeting, Kaiping, Software Review &mdash; 26 July 2023 </h2>
 </div>
         <!--  s5talk  -->
         <br/>
-    <!-- comment
-
-DONE : NPFold : BUT HOW TO FIT THAT IN
-
-DONE : SPMT/QPMT/qpmt workflow
-DONE : Custom Fix Validation
-
-
-DONE : geom scan renders
-
-TODO : Low dep PMT data access (this is more interesting than other work)
-
-TODO : Other work : needs mention, but code dev not very engaging, until almost done
-
-* sur/mat/bnd/optical is essentially complete : but not very interesting, just needs a bullet point
-* snd/sn/scsg/sndtree/s_pool : very liable to change so just a bullet point
-
-TODO : QPMT_Test ART plot, LayrTest comparison table, comparison with CPU calc, PMT Specific check
-
-TODO : describe MOCK_TEXTURE, MOCK_CURAND : and what that allows
-
-TODO : Next steps
-
-TODO : contents -->
-
+    
 </div>
-<div class="slide" id="juno-opticks-summary-timeline-of-pmt-simulation-development">
-<h1><span class="small">JUNO + Opticks : Summary Timeline of PMT Simulation Development</span></h1>
+<div class="slide" id="junosw-opticks-summary-timeline-of-pmt-simulation-development">
+<h1><span class="small">JUNOSW + Opticks : Summary Timeline of PMT Simulation Development</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Opticks used to find JUNOSW bugs</span></p>
 <ul class="small simple">
@@ -9056,15 +9059,6 @@ Compare Unnatural/Natural N=0/1 geometry simulations by skipping N=0 Pyrex/Pyrex
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="hamalogicalpmtwraplv-full-history-png">
-<h1><span class="i">hamaLogicalPMTWrapLV_full_history.png</span></h1>
-<p style="margin-bottom:16.5cm;" /><pre class="mypre20">
-TO  BT  BT  BT  BT  SR  SR  BT  BR  BR  BT  SR  SR  SR  BT  BR  BT  SR  BT  SA   <span class="b"> Lots of fakes </span>
-00  01 [02] 03 [04] 05  06 [07] 08  09 [10] 11  12  13 [14] 15 [16] 17 [18] 19   (7/20 Fake)
-</pre>
-        <!--  s5talk  -->
-        <br/>
-    </div>
 <div class="slide" id="fewpmt-demo-png">
 <h1><span class="i">FewPMT_demo.png</span></h1>
 <p style="margin-bottom:172mm;" /><p class="small"><strong>Natural 2 volume PMT geometry : HAMA and NNVT</strong></p>
@@ -9074,65 +9068,16 @@ two_pmt layout with HAMA, NNVT (Natural Geometry N=1) -->
 
         <!--  s5talk  -->
         <br/>
-    <!-- comment
-
-:i:`hamaLogicalPMT_fake.png`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. class:: small
-
-   Biggest problem with FastSim based POM : :r:`forces using unnatural geometry`
-
-.. raw:: html
-
-    <p style="margin-bottom:3cm;" />
-
-
-.. class:: normal
-
-   |emsp| |emsp| |emsp| |emsp|
-   |emsp| |emsp| |emsp| |emsp|
-   |emsp| |emsp|
-   :c:`body` hidden under :m:`inner1` :y:`inner2`
-
-   |emsp| |emsp| |emsp| |emsp|
-   |emsp| |emsp| |emsp| |emsp|
-   |emsp| |emsp|
-   :c:`body` is :r:`FastSim envelope volume`
-
-
-.. raw:: html
-
-    <p style="margin-bottom:10cm;" />
-
-
-.. class:: large
-
-    OLD **Unnatural** 4-volume PMT (Pyrex+Pyrex+Vacuum+Vacuum) => :r:`Half Fake`
-
-
-:i:`hamaLogicalPMT_natural.png`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-.. class:: small
-
-   Biggest advantage with Custom Boundary Process POM : :r:`enables natural geometry`
-
-
-.. raw:: html
-
-    <p style="margin-bottom:15.6cm;" />
-
-
-.. class:: large
-
-    Natural 2-volume PMT (:b:`Pyrex` + :c:`Vacuum`) : :r:`NOT COMPATIBLE WITH FastSim`
-
-
-.. s5_talk::
-
-    Natural geometry is not possible when using FastSim -->
-</div>
+    </div>
+<div class="slide" id="hamalogicalpmtwraplv-full-history-png">
+<h1><span class="i">hamaLogicalPMTWrapLV_full_history.png</span></h1>
+<p style="margin-bottom:16.5cm;" /><pre class="mypre20">
+TO  BT  BT  BT  BT  SR  SR  BT  BR  BR  BT  SR  SR  SR  BT  BR  BT  SR  BT  SA   <span class="b"> Lots of fakes </span>
+00  01 [02] 03 [04] 05  06 [07] 08  09 [10] 11  12  13 [14] 15 [16] 17 [18] 19   (7/20 Fake)
+</pre>
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="cxr-min-eye-0-1-5-0-zoom-1-2-tmin-1-0-all-maybe-box-too-small-elv-t6-7-jpg">
 <h1><span class="i">cxr_min__eye_0,1.5,0__zoom_1.2__tmin_1.0__ALL_maybe_box_too_small_ELV_t6,7.jpg</span></h1>
 <p><tt class="docutils literal">CSGOptiX/cxr_min.sh render : NNVT PMT with natural geometry</tt></p>
@@ -9230,7 +9175,11 @@ two_pmt layout with HAMA, NNVT (Natural Geometry N=1) -->
     return false;
   }
 
-</pre>
+</pre><p class="small">Fix in <strong>junoPMTOpticalModel::ModelTriggerSimple_</strong></p>
+<ul class="small simple">
+<li>fixed FastSim impl. as needed something to validate against</li>
+</ul>
+
         <!--  s5talk  -->
         <br/>
     </div>
@@ -9241,7 +9190,7 @@ two_pmt layout with HAMA, NNVT (Natural Geometry N=1) -->
         <br/>
     </div>
 <div class="slide" id="fix-pivot-to-c4opboundaryprocess-for-pmt-optical-model-merged">
-<h1><span class="small">FIX : Pivot to C4OpBoundaryProcess For PMT Optical Model</span> <span class="r">MERGED</span></h1>
+<h1><span class="small">FIX: Pivot to C4OpBoundaryProcess for PMT Optical Model:</span> <span class="r">MERGED</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Custom Boundary POM</span></p>
 <pre class="mypretiny">
@@ -9425,8 +9374,91 @@ struct C4CustomART {
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="multi-layer-thin-film-a-r-t-calc-using-tmm-calc-custom4-package">
-<h1><span class="small">Multi-Layer Thin Film (A,R,T) Calc using TMM Calc (Custom4 Package)</span></h1>
+<div class="slide" id="low-dependency-access-to-pmt-data-from-anywhere">
+<h1>Low dependency access to PMT data <span class="r">from anywhere</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Why Low Dependency Access ?</span></p>
+<ul class="small simple">
+<li>REQUIRED, BY Custom4 + Opticks</li>
+<li>CODING BEST PRACTICE<ul>
+<li><span class="r">less deps -&gt; more useful code</span></li>
+</ul>
+</li>
+<li>test separate from the &quot;monolith&quot;<ul>
+<li><span class="r">development cycle &lt; 1 s (vs minutes)</span></li>
+</ul>
+</li>
+<li>serialization with <strong>NP.hh,NPFold.h</strong><ul>
+<li><a class="reference external" href="https://github.com/simoncblyth/np/">https://github.com/simoncblyth/np/</a></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>QE scan over 100 energy points, all PMTs</strong></p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="71%" />
+<col width="29%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>IPMTSimParamSvc</td>
+<td>7.70 s</td>
+</tr>
+<tr><td>PMTSimParamData</td>
+<td>0.30 s</td>
+</tr>
+<tr><td>IPMTSimParamSvc/PMTSimParamData</td>
+<td>26.10</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li><span class="r">exactly same results, 26x faster</span></li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://code.ihep.ac.cn/JUNO/offline/junosw/-/merge_requests/126">junosw/-/merge_requests/126</a></p>
+<table border="1" class="small last docutils">
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>MR 126 <span class="r">MERGED Feb 3, 2023</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="small">Full PMT access from <strong>Custom4</strong> + <strong>Opticks</strong> without <strong>Svc</strong> : <span class="r">How ?</span></p>
+<ol class="small arabic simple">
+<li>Add <em>PMTSimParamData</em> &quot;core&quot; to <em>PMTSimParamSvc</em><ul>
+<li><span class="b">consistent by design</span> from any source file/DB/Frontier/...</li>
+</ul>
+</li>
+<li>Add <em>PMTAccessor</em> impl. of protocol base <em>C4IPMTAccessor</em><ul>
+<li>header only impl + serialization =&gt; <span class="r">PMT data anywhere</span></li>
+<li>=&gt; <span class="b">liberate PMT data from monolith</span></li>
+</ul>
+</li>
+</ol>
+<p class="small"><strong>SimSvc/PMTSimParamSvc/PMTSimParamSvc/PMTAccessor.h</strong></p>
+<pre class="mypretiny">&#35;include "C4IPMTAccessor.h"
+struct PMTAccessor : public C4IPMTAccessor
+{
+    PMTAccessor(const PMTSimParamData* data);
+    int    get_num_lpmt() const ;
+    double get_pmtid_qe( int pmtid, double energy ) const ;
+    ...</pre><p class="small"><strong>Pure virtual protocol base : Custom4/C4IPMTAccessor.h</strong></p>
+<pre class="mypretiny">
+struct C4IPMTAccessor   // only standard types in API
+{
+    virtual int    get_num_lpmt() const = 0 ;
+    virtual double get_pmtid_qe( int pmtid, double energy ) const = 0 ;
+    virtual double get_qescale( int pmtid ) const = 0 ;
+    ...
+</pre><p class="small"><span class="r">Consistent PMT data access : JUNOSW + Opticks + Custom4</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="custom4-custom-boundary-multi-layer-thin-film-a-r-t-tmm-calc">
+<h1><span class="small">Custom4 : Custom Boundary Multi-Layer Thin Film (A,R,T) TMM Calc</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">TMM : Transfer Matrix Method</span></p>
 <img alt="tmm/multi-layer-stack.png" class="align-center" src="tmm/multi-layer-stack.png" style="width: 400px;" />
@@ -9437,59 +9469,105 @@ struct C4CustomART {
 <li>Used from <strong>C4OpBoundaryProcess</strong></li>
 </ul>
 <p class="small"><span class="r">header-only GPU/CPU</span> : <strong>C4MultiLayrStack.h</strong></p>
-<p class="small last"><a class="reference external" href="https://github.com/simoncblyth/customgeant4/">https://github.com/simoncblyth/customgeant4/</a></p>
-</div>
-<dl class="small docutils">
-<dt>C4OpBoundaryProcess.hh</dt>
-<dd>G4OpBoundaryProcess with C4CustomART.h</dd>
-<dt>C4CustomART.h</dt>
-<dd>integrate custom boundary process and TMM calculation</dd>
-<dt>C4MultiLayrStack.h <span class="classifier-delimiter">:</span> <span class="classifier"><span class="b">CPU/GPU TMM calculation of (A,R,T)</span></span></dt>
-<dd><p class="first">based on complex refractive indices and layer thicknesses</p>
-<ul class="last simple">
-<li>GPU: <strong>using thrust::complex</strong> CPU:<strong>using std::complex</strong></li>
+<ul class="small last simple">
+<li><tt class="docutils literal">Custom4</tt> depends only on Geant4</li>
+<li>Dependency of JUNOSW and Opticks</li>
 </ul>
-</dd>
-</dl>
-<p class="small"><span class="r">Custom4: Simplifies JUNO PMT Optical Model + Geometry</span></p>
-<img alt="GEOM/FewPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/FewPMT_demo.png" class="align-left" src="GEOM/FewPMT/U4SimtraceTest/1/figs/U4SimtraceTest/mpcap/FewPMT_demo.png" style="width: 580px;" />
-<!-- comment
-
-.. image:: Custom4/Custom4_README.png
-   :width: 580px
-   :align: left -->
+</div>
+<img alt="Custom4/Custom4_README.png" class="align-left" src="Custom4/Custom4_README.png" style="width: 580px;" />
+<p class="normal"><a class="reference external" href="https://github.com/simoncblyth/customgeant4/">https://github.com/simoncblyth/customgeant4/</a></p>
 
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="custom4-mini-package-with-geant4-customizations">
-<h1><span class="small">Custom4 : mini-package with Geant4 customizations</span></h1>
+<div class="slide" id="opticks-translates-entire-geometry-simulation-data-into-npfold-h-tree">
+<h1><span class="small">Opticks : Translates Entire Geometry + Simulation data into NPFold.h tree</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Why Custom4 mini-package ?</span></p>
+<p class="first sidebar-title"><span class="small">NPFold.h : Contains sub-NPFold.h ...</span></p>
 <ul class="small simple">
-<li><span class="r">Avoid junosw-opticks circular dependency:</span><ul>
-<li>by splitting off Custom4 mini-package</li>
+<li>Tree of <tt class="docutils literal">NP.hh</tt> arrays</li>
+<li><span class="r">recursive data structure</span></li>
+<li>save into directory tree of <tt class="docutils literal">.npy</tt> (optional)</li>
+<li>load from directory tree into C++ or python</li>
 </ul>
-</li>
-<li><tt class="docutils literal">Custom4</tt> depends only on Geant4</li>
-<li>junosw depends on <tt class="docutils literal">Custom4</tt></li>
-<li>opticks uses <tt class="docutils literal">Custom4</tt> for detailed testing</li>
-</ul>
-<p class="small">Added to : <strong>junoenv/junoenv-external-libs.sh</strong></p>
-<p class="small">Auto-installed like other externals (eg Geant4), or:</p>
-<pre class="last literal-block">
-cd $JUNOTOP/junoenv
-bash junoenv libs get custom4
-bash junoenv libs conf custom4
-bash junoenv libs make custom4
-bash junoenv libs install custom4
-
-bash junoenv libs all custom4
-</pre>
+<p class="small"><span class="b">persisting extremely useful:</span></p>
+<ol class="small arabic simple" start="0">
+<li><strong>rsync</strong> across network =&gt; testing on laptop</li>
+<li><strong>NPFold::Load</strong> into C++ for standalone tests</li>
+<li><strong>np.load</strong> with NumPy for ipython debug, plots</li>
+</ol>
+<dl class="small last docutils">
+<dt><tt class="docutils literal">SSim/extra/jpmt/PMTSimParamData</tt></dt>
+<dd>JUNO PMT info, without JUNOSW classes</dd>
+</dl>
 </div>
-<img alt="Custom4/Custom4_README.png" class="align-left" src="Custom4/Custom4_README.png" style="width: 580px;" />
-<p class="small"><a class="reference external" href="https://github.com/simoncblyth/customgeant4/">https://github.com/simoncblyth/customgeant4/</a></p>
+<pre class="mypretiny">
+ epsilon:V1J009 blyth$ pwd
+ /Users/blyth/.opticks/GEOM/V1J009
+ epsilon:V1J009 blyth$ find . -name '*.npy'
+ ...
+ ./CSGFoundry/node.npy
+ ./CSGFoundry/itra.npy
+ ./CSGFoundry/tran.npy
+ ./CSGFoundry/inst.npy
+ ./CSGFoundry/solid.npy
+ ./CSGFoundry/prim.npy
 
+ ./CSGFoundry/SSim/extra/jpmt/PMTParamData/pmtCat.npy
+
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/lpmtData.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtTotal.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtCat.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtCatVec.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtID.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/spmtData.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/qeScale.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/lpmtCat.npy
+
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/PHC_KINDEX.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/PHC_RINDEX.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/ARC_KINDEX.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/ARC_RINDEX.npy
+ ...
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_NNVT_HiQE.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_WP_PMT.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_R12860.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_NNVT.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_HZC.npy
+ ...
+ ./CSGFoundry/SSim/extra/jpmt/PMT_RINDEX/PyrexRINDEX.npy
+ ./CSGFoundry/SSim/extra/jpmt/PMT_RINDEX/VacuumRINDEX.npy
+ ...
+ ./CSGFoundry/SSim/stree/inst.npy
+ ./CSGFoundry/SSim/stree/inst_f4.npy
+ ./CSGFoundry/SSim/stree/inst_nidx.npy
+ ./CSGFoundry/SSim/stree/standard/icdf.npy
+ ./CSGFoundry/SSim/stree/standard/bd.npy
+ ./CSGFoundry/SSim/stree/standard/bnd.npy
+ ./CSGFoundry/SSim/stree/standard/sur.npy
+ ./CSGFoundry/SSim/stree/standard/rayleigh.npy
+ ./CSGFoundry/SSim/stree/standard/energy.npy
+ ./CSGFoundry/SSim/stree/standard/wavelength.npy
+ ./CSGFoundry/SSim/stree/standard/optical.npy
+ ./CSGFoundry/SSim/stree/standard/mat.npy
+ ./CSGFoundry/SSim/stree/digs.npy
+ ./CSGFoundry/SSim/stree/mtname_no_rindex.npy
+ ./CSGFoundry/SSim/stree/suindex.npy
+ ./CSGFoundry/SSim/stree/subs_freq/val.npy
+ ./CSGFoundry/SSim/stree/subs_freq/key.npy
+ ./CSGFoundry/SSim/stree/implicit.npy
+ ./CSGFoundry/SSim/stree/mtindex.npy
+ ./CSGFoundry/SSim/stree/rem.npy
+ ./CSGFoundry/SSim/stree/iinst.npy
+ ./CSGFoundry/SSim/stree/w2m.npy
+ ./CSGFoundry/SSim/stree/material/Pyrex/ABSLENGTH.npy
+ ./CSGFoundry/SSim/stree/material/Pyrex/GROUPVEL.npy
+ ./CSGFoundry/SSim/stree/material/Pyrex/RINDEX.npy
+ ./CSGFoundry/SSim/stree/material/CDReflectorSteel/ABSLENGTH.npy
+ ./CSGFoundry/SSim/stree/material/CDReflectorSteel/REFLECTIVITY.npy
+ ./CSGFoundry/SSim/stree/material/AcrylicMask/ABSLENGTH.npy
+ ...
+</pre>
         <!--  s5talk  -->
         <br/>
     </div>
@@ -9718,6 +9796,77 @@ Photon step points from grid of input photons target NNVT:0:1000 (POM:0)
         <!--  s5talk  -->
         <br/>
     </div>
+<div class="slide" id="stamp-processhits-56us-hama-0-0-png">
+<h1><span class="i">STAMP_ProcessHits_56us_Hama_0_0.png</span></h1>
+<p><tt class="docutils literal">STAMP_TT=257400,600 STAMP_ANNO=1 ~/j/ntds/stamp.sh ## inpho =&gt; Hama:0:0</tt></p>
+<p style="margin-bottom:152mm;" /><p class="small"><span class="r">(s0) beginPhoton</span> <span class="b">(s1) finalPhoton</span> <span class="g">( ) pointPhoton</span> <span class="c">(h0) ProcessHits[</span> <span class="c">(i0) ProcessHits]</span>
+-- <strong>ProcessHits taking ~56us for SD</strong></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="tail-gap-junosd-pmt-v2-get-pmtid-50us-per-hit-candidate">
+<h1><span class="small">Tail &quot;gap&quot; : junoSD_PMT_v2::get_pmtid : ~50us per hit candidate</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">&quot;get_pmtid_fast&quot; (~1us)</span></p>
+<p class="small"><span class="r">Only few SD volumes =&gt; use simpler approach :</span></p>
+<pre class="literal-block">
+const G4VTouchable* th =
+    track-&gt;GetTouchable();
+int ID(-1) ;
+ID = th-&gt;GetReplicaNumber(1);
+if( ID &lt;= 0)
+ID = th-&gt;GetReplicaNumber(2);
+</pre>
+<dl class="m18 docutils">
+<dt>G4VTouchable::GetReplicaNumber(int depth)</dt>
+<dd>depth:0/1/2 : current/parent/grandparent</dd>
+</dl>
+<ul class="small last simple">
+<li>tested : old_lpmt, new_lpmt, spmt, wpmt</li>
+<li><span class="b">same pmtId result in ~1us (not ~50us)</span></li>
+</ul>
+</div>
+<pre class="mypretiny">
+int junoSD_PMT_v2::get_pmtid(G4Track* track) {
+    int ipmt= -1;
+    const G4VTouchable* touch= track->GetTouchable();
+    int nd= touch->GetHistoryDepth();
+    int id=0;
+    for (id=0; id<nd; id++) {
+      if (touch->GetVolume(id)==track->GetVolume()) {
+        int idid=1;
+        G4VPhysicalVolume* tmp_pv=NULL;
+        for (idid=1; idid < (nd-id); ++idid) {
+          tmp_pv = touch->GetVolume(id+idid);
+
+          G4LogicalVolume* mother_vol = tmp_pv->GetLogicalVolume();
+          G4LogicalVolume* daughter_vol = touch->GetVolume(id+idid-1)->
+              GetLogicalVolume();
+          int no_daugh = mother_vol -> GetNoDaughters();
+          if (no_daugh > 1) {
+              int count = 0;
+              for (int i=0; (count<2) &&(i < no_daugh); ++i) {
+                  if (daughter_vol->GetName()
+                          ==mother_vol->GetDaughter(i)
+                             ->GetLogicalVolume()->GetName()) {
+                      ++count;
+                  }
+              }
+              if (count > 1) break;
+          }
+        }
+        ipmt= touch->GetReplicaNumber(id+idid-1);
+        break;
+      }
+    }
+    return ipmt;
+}
+</pre><p class="small"><span class="r">Looping over daughters at multiple levels and name matching to find copyNo</span> : <span class="b">NO NEED FOR SUCH GENERALITY</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="cxr-min-eye-10-0-0-zoom-0-5-tmin-0-1-schimneyacrylic-increased-tmax-jpg">
 <h1><span class="i">cxr_min__eye_-10,0,0__zoom_0.5__tmin_0.1__sChimneyAcrylic_increased_TMAX.jpg</span></h1>
 <p><tt class="docutils literal">ELV=t94,95 ./cxr_min.sh&nbsp; ## skip sTarget sAcrylic</tt></p>
@@ -9865,91 +10014,6 @@ Maybe a TMAX issue again ? -->
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="entire-geometry-serializes-into-npfold-h-tree">
-<h1><span class="small">Entire Geometry Serializes into NPFold.h tree</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">NPFold : Contains sub-NPFold ...</span></p>
-<ul class="small simple">
-<li>recursive data structure</li>
-<li>save into directory tree</li>
-<li>load from directory tree</li>
-</ul>
-<p class="small">(persisting to file system is optional)</p>
-<dl class="small last docutils">
-<dt><tt class="docutils literal">SSim/extra/jpmt/PMTSimParamData</tt></dt>
-<dd>JUNO PMT info, without JUNOSW classes</dd>
-</dl>
-</div>
-<pre class="mypretiny">
- epsilon:V1J009 blyth$ pwd
- /Users/blyth/.opticks/GEOM/V1J009
- epsilon:V1J009 blyth$ find . -name '*.npy'
- ...
- ./CSGFoundry/node.npy
- ./CSGFoundry/itra.npy
- ./CSGFoundry/tran.npy
- ./CSGFoundry/inst.npy
- ./CSGFoundry/solid.npy
- ./CSGFoundry/prim.npy
-
- ./CSGFoundry/SSim/extra/jpmt/PMTParamData/pmtCat.npy
-
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/lpmtData.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtTotal.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtCat.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtCatVec.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/pmtID.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/spmtData.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/qeScale.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/lpmtCat.npy
-
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/PHC_KINDEX.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/PHC_RINDEX.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/ARC_KINDEX.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/MPT/000/ARC_RINDEX.npy
- ...
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_NNVT_HiQE.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_WP_PMT.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_R12860.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_NNVT.npy
- ./CSGFoundry/SSim/extra/jpmt/PMTSimParamData/QEshape/QEshape_HZC.npy
- ...
- ./CSGFoundry/SSim/extra/jpmt/PMT_RINDEX/PyrexRINDEX.npy
- ./CSGFoundry/SSim/extra/jpmt/PMT_RINDEX/VacuumRINDEX.npy
- ...
- ./CSGFoundry/SSim/stree/inst.npy
- ./CSGFoundry/SSim/stree/inst_f4.npy
- ./CSGFoundry/SSim/stree/inst_nidx.npy
- ./CSGFoundry/SSim/stree/standard/icdf.npy
- ./CSGFoundry/SSim/stree/standard/bd.npy
- ./CSGFoundry/SSim/stree/standard/bnd.npy
- ./CSGFoundry/SSim/stree/standard/sur.npy
- ./CSGFoundry/SSim/stree/standard/rayleigh.npy
- ./CSGFoundry/SSim/stree/standard/energy.npy
- ./CSGFoundry/SSim/stree/standard/wavelength.npy
- ./CSGFoundry/SSim/stree/standard/optical.npy
- ./CSGFoundry/SSim/stree/standard/mat.npy
- ./CSGFoundry/SSim/stree/digs.npy
- ./CSGFoundry/SSim/stree/mtname_no_rindex.npy
- ./CSGFoundry/SSim/stree/suindex.npy
- ./CSGFoundry/SSim/stree/subs_freq/val.npy
- ./CSGFoundry/SSim/stree/subs_freq/key.npy
- ./CSGFoundry/SSim/stree/implicit.npy
- ./CSGFoundry/SSim/stree/mtindex.npy
- ./CSGFoundry/SSim/stree/rem.npy
- ./CSGFoundry/SSim/stree/iinst.npy
- ./CSGFoundry/SSim/stree/w2m.npy
- ./CSGFoundry/SSim/stree/material/Pyrex/ABSLENGTH.npy
- ./CSGFoundry/SSim/stree/material/Pyrex/GROUPVEL.npy
- ./CSGFoundry/SSim/stree/material/Pyrex/RINDEX.npy
- ./CSGFoundry/SSim/stree/material/CDReflectorSteel/ABSLENGTH.npy
- ./CSGFoundry/SSim/stree/material/CDReflectorSteel/REFLECTIVITY.npy
- ./CSGFoundry/SSim/stree/material/AcrylicMask/ABSLENGTH.npy
- ...
-</pre>
-        <!--  s5talk  -->
-        <br/>
-    </div>
 <div class="slide" id="cuda-equivalent-of-c4customart-doit-with-full-lpmt-info">
 <h1><span class="small">CUDA equivalent of C4CustomART::doIt : With Full LPMT info</span></h1>
 <div class="sidebar">
@@ -10060,83 +10124,6 @@ CFLayrTest
 +------------------------------+----------+----------+----------+----------+----------+----------+----------+----------+
 </pre><p class="small">Largest differences between ART (9, 900, 4, 4) from various tests (float,double,GPU,CPU,mock-CPU,standalone...)</p>
 </div>
-<div class="slide" id="extras-not-for-presentation-follow">
-<h1>Extras : not for presentation follow</h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="stamp-processhits-56us-hama-0-0-png">
-<h1><span class="i">STAMP_ProcessHits_56us_Hama_0_0.png</span></h1>
-<p><tt class="docutils literal">STAMP_TT=257400,600 STAMP_ANNO=1 ~/j/ntds/stamp.sh ## inpho =&gt; Hama:0:0</tt></p>
-<p style="margin-bottom:152mm;" /><p class="small"><span class="r">(s0) beginPhoton</span> <span class="b">(s1) finalPhoton</span> <span class="g">( ) pointPhoton</span> <span class="c">(h0) ProcessHits[</span> <span class="c">(i0) ProcessHits]</span>
--- <strong>ProcessHits taking ~56us for SD</strong></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="tail-gap-junosd-pmt-v2-get-pmtid-50us-per-hit-candidate">
-<h1><span class="small">Tail &quot;gap&quot; : junoSD_PMT_v2::get_pmtid : ~50us per hit candidate</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">&quot;get_pmtid_fast&quot; (~1us)</span></p>
-<p class="small"><span class="r">Only few SD volumes =&gt; use simpler approach :</span></p>
-<pre class="literal-block">
-const G4VTouchable* th =
-    track-&gt;GetTouchable();
-int ID(-1) ;
-ID = th-&gt;GetReplicaNumber(1);
-if( ID &lt;= 0)
-ID = th-&gt;GetReplicaNumber(2);
-</pre>
-<dl class="m18 docutils">
-<dt>G4VTouchable::GetReplicaNumber(int depth)</dt>
-<dd>depth:0/1/2 : current/parent/grandparent</dd>
-</dl>
-<ul class="small last simple">
-<li>tested : old_lpmt, new_lpmt, spmt, wpmt</li>
-<li><span class="b">same pmtId result in ~1us (not ~50us)</span></li>
-</ul>
-</div>
-<pre class="mypretiny">
-int junoSD_PMT_v2::get_pmtid(G4Track* track) {
-    int ipmt= -1;
-    const G4VTouchable* touch= track->GetTouchable();
-    int nd= touch->GetHistoryDepth();
-    int id=0;
-    for (id=0; id<nd; id++) {
-      if (touch->GetVolume(id)==track->GetVolume()) {
-        int idid=1;
-        G4VPhysicalVolume* tmp_pv=NULL;
-        for (idid=1; idid < (nd-id); ++idid) {
-          tmp_pv = touch->GetVolume(id+idid);
-
-          G4LogicalVolume* mother_vol = tmp_pv->GetLogicalVolume();
-          G4LogicalVolume* daughter_vol = touch->GetVolume(id+idid-1)->
-              GetLogicalVolume();
-          int no_daugh = mother_vol -> GetNoDaughters();
-          if (no_daugh > 1) {
-              int count = 0;
-              for (int i=0; (count<2) &&(i < no_daugh); ++i) {
-                  if (daughter_vol->GetName()
-                          ==mother_vol->GetDaughter(i)
-                             ->GetLogicalVolume()->GetName()) {
-                      ++count;
-                  }
-              }
-              if (count > 1) break;
-          }
-        }
-        ipmt= touch->GetReplicaNumber(id+idid-1);
-        break;
-      }
-    }
-    return ipmt;
-}
-</pre><p class="small"><span class="r">Looping over daughters at multiple levels and name matching to find copyNo</span> : <span class="b">NO NEED FOR SUCH GENERALITY</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
 </div>
 </body>
 </html>
