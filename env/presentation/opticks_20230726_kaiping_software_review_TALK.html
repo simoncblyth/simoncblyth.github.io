@@ -8947,9 +8947,13 @@ TODO : iPad update for Zoom -->
 <div class="mycredit">
    <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; 22nd JUNO Collaboration Meeting, Kaiping, Software Review &mdash; 26 July 2023 </h2>
 </div>
-        <!--  s5talk  -->
-        <br/>
-    
+</div>
+<div class="slide" id="junosw-opticks-status-of-opticks-simulation-talk">
+<h1><span class="i">JUNOSW + Opticks : Status of Opticks Simulation</span>  Talk</h1>
+<p class="normal">Despite the title, most of my recent work has been
+finding and fixing issues with the PMT simulation on CPU.</p>
+<p class="normal">Its necessary to fix simulation bugs on the CPU
+before can validate the Opticks simulation on GPU.</p>
 </div>
 <div class="slide" id="junosw-opticks-summary-timeline-of-pmt-simulation-development">
 <h1><span class="small">JUNOSW + Opticks : Summary Timeline of PMT Simulation Development</span></h1>
@@ -9005,10 +9009,17 @@ TODO : iPad update for Zoom -->
 </ul>
 </dd>
 </dl>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="junosw-opticks-summary-timeline-of-pmt-simulation-development-talk">
+<h1><span class="small">JUNOSW + Opticks : Summary Timeline of PMT Simulation Development</span> Talk</h1>
+<ul class="normal simple">
+<li>Here is the timeline.</li>
+<li>Above the line is mostly using Opticks to fix the PMT simulation on CPU.</li>
+<li>Below the line is extending Opticks to bring the PMT optical model to the GPU.</li>
+<li>Standalone PMT tests on CPU, revealed lots of bugs. I will describe the bugs
+and the fix. Which is already merged.</li>
+</ul>
+<!-- comment
 
 Almost a year ago now I was working on fixing PMT geomerty overlaps.
 
@@ -9103,43 +9114,64 @@ Details in above presentations + notes : https://bitbucket.org/simoncblyth/optic
     6. TODO: look into _qe definition
 
        * justification for ``efficiency=_qe/An`` ? -->
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="junopmtopticalmodel-issues-all-from-using-fastsim-talk">
+<h1>junoPMTOpticalModel Issues : All from using FastSim  Talk</h1>
+<ul class="normal simple">
+<li>Using FastSim to model a single surface required
+adding several fake volumes to kludge a region around the surface.</li>
+<li>It worked, but looking closer there were quite a few bugs.</li>
+<li>I patched up some of those, but the approach is not a good one.</li>
+</ul>
+<p class="normal">Much better to pivot away from FastSim</p>
+<p class="normal">Using a custom boundary process, allows using natural geometry
+and means can just change (A,R,T) and use standard Geant4 for
+everything else.</p>
+</div>
 <div class="slide" id="fewpmt-demo0-png">
 <h1><span class="i">FewPMT_demo0.png</span></h1>
 <p style="margin-bottom:172mm;" /><p class="small"><strong>Old unnatural 4 vol. PMT geometry, kludged for FastSim : HAMA and NNVT</strong></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="fewpmt-demo0-png-talk">
+<h1><span class="i">FewPMT_demo0.png</span> Talk</h1>
+<ul class="normal simple">
+<li>This is the old unnatural PMT geometry with fake volumes to kludge the region.</li>
+<li>There are fake boundaries in the middle of the PMT vacuum, and also in the Pyrex.</li>
+</ul>
+</div>
 <div class="slide" id="fewpmt-demo-png">
 <h1><span class="i">FewPMT_demo.png</span></h1>
 <p style="margin-bottom:172mm;" /><p class="small"><strong>Natural 2 volume PMT geometry : HAMA and NNVT</strong></p>
 <!-- comment
 
 two_pmt layout with HAMA, NNVT (Natural Geometry N=1) -->
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="fewpmt-demo-png-talk">
+<h1><span class="i">FewPMT_demo.png</span> Talk</h1>
+<p class="normal">The natural geometries are as simple as possible.</p>
+</div>
 <div class="slide" id="hamalogicalpmtwraplv-full-history-png">
 <h1><span class="i">hamaLogicalPMTWrapLV_full_history.png</span></h1>
 <p style="margin-bottom:16.5cm;" /><pre class="mypre20">
 TO  BT  BT  BT  BT  SR  SR  BT  BR  BR  BT  SR  SR  SR  BT  BR  BT  SR  BT  SA   <span class="b"> Lots of fakes </span>
 00  01 [02] 03 [04] 05  06 [07] 08  09 [10] 11  12  13 [14] 15 [16] 17 [18] 19   (7/20 Fake)
-</pre>
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</pre></div>
+<div class="slide" id="hamalogicalpmtwraplv-full-history-png-talk">
+<h1><span class="i">hamaLogicalPMTWrapLV_full_history.png</span> Talk</h1>
+<ul class="normal simple">
+<li>with the old kludged geometry there are fake step points in Geant4 histories.</li>
+<li>mid-vacuum fakes are obvious, there are also fakes inside the Pyrex,
+that are difficult to see</li>
+</ul>
+</div>
 <div class="slide" id="cxr-min-eye-0-1-5-0-zoom-1-2-tmin-1-0-all-maybe-box-too-small-elv-t6-7-jpg">
 <h1><span class="i">cxr_min__eye_0,1.5,0__zoom_1.2__tmin_1.0__ALL_maybe_box_too_small_ELV_t6,7.jpg</span></h1>
 <p><tt class="docutils literal">CSGOptiX/cxr_min.sh render : NNVT PMT with natural geometry</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="cxr-min-eye-0-1-5-0-zoom-1-2-tmin-1-0-all-maybe-box-too-small-elv-t6-7-jpg-talk">
+<h1><span class="i">cxr_min__eye_0,1.5,0__zoom_1.2__tmin_1.0__ALL_maybe_box_too_small_ELV_t6,7.jpg</span> Talk</h1>
+<p class="normal">Heres a ray trace render of the natural geometry.</p>
+</div>
 <div class="slide" id="compare-reflected-polarization-impls-for-brewster-angle-incidence">
 <h1><span class="small">Compare Reflected Polarization Impls for Brewster Angle Incidence</span></h1>
 <ul class="small simple">
@@ -9165,10 +9197,12 @@ TO  BT  BT  BT  BT  SR  SR  BT  BR  BR  BT  SR  SR  SR  BT  BR  BT  SR  BT  SA  
 <li>Compared with <tt class="docutils literal">sboundary.h:alt_pol</tt> that duplicates <tt class="docutils literal"><span class="pre">junoPMTOpticalModel::Reflect</span></tt></li>
 </ul>
 <p class="small">Brewster (or polarizing) incident angle th1 : <tt class="docutils literal">tan(th1) = n2/n1&nbsp; ;&nbsp; th1 + th2 = pi/2</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="compare-reflected-polarization-impls-for-brewster-angle-incidence-talk">
+<h1><span class="small">Compare Reflected Polarization Impls for Brewster Angle Incidence</span> Talk</h1>
+<p class="normal">One of the bugs was not polarizing on reflection.
+The difference is very clear at the Brewster angle as illustrated here.</p>
+</div>
 <div class="slide" id="junopmtopticalmodel-modeltrigger-bug-unphysical-photons">
 <h1><span class="small">junoPMTOpticalModel::ModelTrigger BUG =&gt; Unphysical Photons</span></h1>
 <div class="sidebar">
@@ -9234,16 +9268,24 @@ TO  BT  BT  BT  BT  SR  SR  BT  BR  BR  BT  SR  SR  SR  BT  BR  BT  SR  BT  SA  
 <ul class="small simple">
 <li>fixed FastSim impl. as needed something to validate against</li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="junopmtopticalmodel-modeltrigger-bug-unphysical-photons-talk">
+<h1><span class="small">junoPMTOpticalModel::ModelTrigger BUG =&gt; Unphysical Photons</span> Talk</h1>
+<p class="normal">Another bug was from the FastSim ModelTrigger which didnt
+account for having photons reflect off things inside the PMT
+and resulted in unphysical behavior.</p>
+</div>
 <div class="slide" id="fewpmt-2942-unphysical-cross-geometry-vac-reflect-png">
 <h1><span class="i">FewPMT_2942_Unphysical_cross_geometry_vac_reflect.png</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="fewpmt-2942-unphysical-cross-geometry-vac-reflect-png-talk">
+<h1><span class="i">FewPMT_2942_Unphysical_cross_geometry_vac_reflect.png</span> Talk</h1>
+<p class="normal">This shows two examples of unphysical behavior:</p>
+<ul class="normal simple">
+<li>Tunneling through geometry</li>
+<li>mid-vacuum reflection</li>
+</ul>
+</div>
 <div class="slide" id="fix-pivot-to-c4opboundaryprocess-for-pmt-optical-model-merged">
 <h1><span class="small">FIX: Pivot to C4OpBoundaryProcess for PMT Optical Model:</span> <span class="r">MERGED</span></h1>
 <div class="sidebar">
@@ -9311,10 +9353,12 @@ TO  BT  BT  BT  BT  SR  SR  BT  BR  BR  BT  SR  SR  SR  BT  BR  BT  SR  BT  SA  
 </ul>
 </dd>
 </dl>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="fix-pivot-to-c4opboundaryprocess-for-pmt-optical-model-merged-talk">
+<h1><span class="small">FIX: Pivot to C4OpBoundaryProcess for PMT Optical Model:</span> <span class="r">MERGED</span> Talk</h1>
+<p class="normal">Using a custom boundary process simplifies the geometry
+and provides a natural fix for the issues.</p>
+</div>
 <div class="slide" id="c4opboundaryprocess-poststepdoit-3-way-a-r-t-customization">
 <h1><span class="small">C4OpBoundaryProcess::PostStepDoIt : 3-way (A,R,T) Customization</span></h1>
 <div class="sidebar">
@@ -9369,10 +9413,11 @@ if( OpticalSurfaceName0 == '@' || OpticalSurfaceName0 == '#' )
 }
 </pre><p class="small"><em>DielectricDielectric</em> expects 2-way <strong>(theReflectivity,theTransmittance)</strong> =&gt; so <tt class="docutils literal">C4CustomART.h</tt> rescales 3-way <strong>(A,R,T)</strong></p>
 <p class="small"><tt class="docutils literal">(theAbsorption,theReflectivity,theTransmittance) &lt;= (A, <span class="pre">R/(1-A),</span> <span class="pre">T/(1-A))</span></tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="c4opboundaryprocess-poststepdoit-3-way-a-r-t-customization-talk">
+<h1><span class="small">C4OpBoundaryProcess::PostStepDoIt : 3-way (A,R,T) Customization</span> Talk</h1>
+<p class="normal">Customization only active for surfaces with names starting with '&#64;' or '#'</p>
+</div>
 <div class="slide" id="custom4-c4customart-h-include-into-c4opboundaryprocess-cc">
 <h1><span class="small">custom4/C4CustomART.h : include into C4OpBoundaryProcess.cc</span></h1>
 <div class="sidebar">
@@ -9425,10 +9470,13 @@ struct C4CustomART {
     <span class="b">void doIt(const G4Track& aTrack, const G4Step& aStep ); </span>
 };
 </pre><p class="small"><a class="reference external" href="https://github.com/simoncblyth/customgeant4/blob/main/C4CustomART.h">https://github.com/simoncblyth/customgeant4/blob/main/C4CustomART.h</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="custom4-c4customart-h-include-into-c4opboundaryprocess-cc-talk">
+<h1><span class="small">custom4/C4CustomART.h : include into C4OpBoundaryProcess.cc</span> Talk</h1>
+<p class="normal">Most the customization is done in a Separate header, to minimize changes
+to the boundary process. This CustomART header included the shared header
+that does the TMM calculation.</p>
+</div>
 <div class="slide" id="custom4-custom-boundary-multi-layer-thin-film-a-r-t-tmm-calc">
 <h1><span class="small">Custom4 : Custom Boundary Multi-Layer Thin Film (A,R,T) TMM Calc</span></h1>
 <div class="sidebar">
@@ -9448,10 +9496,13 @@ struct C4CustomART {
 </div>
 <img alt="Custom4/Custom4_README.png" class="align-left" src="Custom4/Custom4_README.png" style="width: 580px;" />
 <p class="normal"><a class="reference external" href="https://github.com/simoncblyth/customgeant4/">https://github.com/simoncblyth/customgeant4/</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="custom4-custom-boundary-multi-layer-thin-film-a-r-t-tmm-calc-talk">
+<h1><span class="small">Custom4 : Custom Boundary Multi-Layer Thin Film (A,R,T) TMM Calc</span> Talk</h1>
+<p class="normal">As the TMM calculation is needed both by JUNOSW on CPU and Opticks
+on GPU it is useful to organize it into a separate Custom4 package
+that both JUNOSW and Opticks depend on. This avoids circular dependency.</p>
+</div>
 <div class="slide" id="low-dependency-access-to-pmt-data-from-anywhere">
 <h1>Low dependency access to PMT data <span class="r">from anywhere</span></h1>
 <div class="sidebar">
@@ -9531,10 +9582,14 @@ struct C4IPMTAccessor   // only standard types in API
     virtual double get_qescale( int pmtid ) const = 0 ;
     ...
 </pre><p class="small"><span class="r">Consistent PMT data access : JUNOSW + Opticks + Custom4</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="low-dependency-access-to-pmt-data-from-anywhere-talk">
+<h1>Low dependency access to PMT data <span class="r">from anywhere</span> Talk</h1>
+<p class="normal">A C++ protocol base design allows JUNOSW to
+pass its PMT data to Opticks and Custom4.
+Combining that with Opticks serialization means that
+the PMT data can be used anywhere.</p>
+</div>
 <div class="slide" id="opticks-translates-entire-geometry-simulation-data-into-npfold-h-tree">
 <h1><span class="small">Opticks : Translates Entire Geometry + Simulation data into NPFold.h tree</span></h1>
 <div class="sidebar">
@@ -9622,23 +9677,28 @@ struct C4IPMTAccessor   // only standard types in API
  ./CSGFoundry/SSim/stree/material/CDReflectorSteel/REFLECTIVITY.npy
  ./CSGFoundry/SSim/stree/material/AcrylicMask/ABSLENGTH.npy
  ...
-</pre>
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</pre></div>
+<div class="slide" id="opticks-translates-entire-geometry-simulation-data-into-npfold-h-tree-talk">
+<h1><span class="small">Opticks : Translates Entire Geometry + Simulation data into NPFold.h tree</span> Talk</h1>
+<p class="normal">Opticks translation serializes everything needed for the optical simulation, now including full PMT info.
+The entire geometry and simulation data is serialized into an NPFold data structure,
+which can be persisted into a directory of arrays.</p>
+</div>
 <div class="slide" id="geant4-opticks-nvidia-optix-7-hybrid-workflow">
 <h1>Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow</h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="geant4-opticks-nvidia-optix-7-hybrid-workflow-talk">
+<h1>Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow Talk</h1>
+<p class="normal">This is the Opticks workflow.</p>
+</div>
 <div class="slide" id="geant4-opticks-instrumentation-no-gpu-usage">
 <h1>Geant4 + Opticks Instrumentation (no GPU usage)</h1>
 <p style="margin-bottom:15cm;" /><p class="small"><tt class="docutils literal">U4Recorder</tt> : uses CPU Opticks to persist <tt class="docutils literal">SEvt</tt> photons/histories/.. into NumPy .npy files for analysis</p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="geant4-opticks-instrumentation-no-gpu-usage-talk">
+<h1>Geant4 + Opticks Instrumentation (no GPU usage) Talk</h1>
+<p class="normal">The CPU part of Opticks has machinery to collect and persist Geant4 photon histories into Opticks events.</p>
+</div>
 <div class="slide" id="opticks-sevt-loaded-into-ipython-arrays-detailing-every-photon-point">
 <h1><span class="small">Opticks SEvt loaded into ipython : arrays detailing every photon point</span></h1>
  <pre class="mypretiny">In [3]: b
@@ -9697,27 +9757,32 @@ struct C4IPMTAccessor   // only standard types in API
 </tr>
 </tbody>
 </table>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="opticks-sevt-loaded-into-ipython-arrays-detailing-every-photon-point-talk">
+<h1><span class="small">Opticks SEvt loaded into ipython : arrays detailing every photon point</span> Talk</h1>
+<p class="normal">This is an Opticks event loaded into python as NumPy arrays.
+The record array holds up to 32 step points for each photon.</p>
+</div>
 <div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-yy-target-frame-png">
 <h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_yy_target_frame.png</span></h1>
 <p style="margin-bottom:40mm;" /><p class="small"><tt class="docutils literal">cd ~/j/ntds ; N=1 GLOBAL=1 MODE=3 ./ntds.sh ana ## interactive 3D pyvista</tt></p>
 <p style="margin-bottom:100mm;" /><p class="small"><tt class="docutils literal">Target Frame Hama:0:1000</tt></p>
 <p class="small"><tt class="docutils literal">solidName:ordinalIdx:instanceIdx</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-yy-target-frame-png-talk">
+<h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_yy_target_frame.png</span> Talk</h1>
+<p class="normal">This is a pyvista 3D visualization of the photon history</p>
+</div>
 <div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-yy-frame-close-png">
 <h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_yy_frame_close.png</span></h1>
 <p style="margin-bottom:130mm;" /><p class="small"><tt class="docutils literal">Green : start position (100k input photons)</tt></p>
 <p class="small"><tt class="docutils literal">Red : end position,&nbsp; Cyan : other position</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-yy-frame-close-png-talk">
+<h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_yy_frame_close.png</span> Talk</h1>
+<p class="normal">The green line is the start position of input photons,
+the squares indicates the target frame.</p>
+</div>
 <div class="slide" id="transform-photon-history-points-into-target-frame">
 <h1>Transform photon history points into target frame</h1>
 <p class="small">NumPy transform all photon positions to target frame (eg Hama:0:1000)</p>
@@ -9738,10 +9803,11 @@ lpos = np.dot( gpos, w2m )      # (100000,32,4) : local (pos, 1)
 cd ~/j/ntds ; MODE=2 ./ntds.sh ana
 </pre>
 <p class="small"><a class="reference external" href="https://github.com/simoncblyth/j/blob/main/ntds/ntds.sh">https://github.com/simoncblyth/j/blob/main/ntds/ntds.sh</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="transform-photon-history-points-into-target-frame-talk">
+<h1>Transform photon history points into target frame Talk</h1>
+<p class="normal">Transforming the 3D global positions into the target frame enables a 2D view.</p>
+</div>
 <div class="slide" id="a-v0j008-n0-ip-moi-hama-0-1000-a-no-skip-fake-png">
 <h1><span class="i">A_V0J008_N0_ip_MOI_Hama:0:1000_a_no_skip_fake.png</span></h1>
 <p class="small">         
@@ -9751,10 +9817,11 @@ cd ~/j/ntds ; MODE=2 ./ntds.sh ana
          
 <tt class="docutils literal">cd ~/j/ntds ; N=0 ./ntds.sh ana</tt></p>
 <p style="margin-bottom:150mm;" /><p class="small"><span class="r">10k : Unnatural Pyrex+Pyrex+Vac+Vac PMT geometry, without</span> : <tt class="docutils literal">export U4Recorder__FAKES_SKIP=1</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="a-v0j008-n0-ip-moi-hama-0-1000-a-no-skip-fake-png-talk">
+<h1><span class="i">A_V0J008_N0_ip_MOI_Hama:0:1000_a_no_skip_fake.png</span> Talk</h1>
+<p class="normal">Without fake skipping the fake intersects are visible</p>
+</div>
 <div class="slide" id="a-v0j008-n0-ip-moi-hama-0-1000-a-png">
 <h1><span class="i">A_V0J008_N0_ip_MOI_Hama:0:1000_a.png</span></h1>
 <p class="small">         
@@ -9764,10 +9831,11 @@ cd ~/j/ntds ; MODE=2 ./ntds.sh ana
          
 <tt class="docutils literal">cd ~/j/ntds ; N=0 ./ntds.sh ana</tt></p>
 <p style="margin-bottom:150mm;" /><p class="small"><span class="r">10k : Unnatural Pyrex+Pyrex+Vac+Vac HAMA PMT geometry, with</span> : <tt class="docutils literal">export U4Recorder__FAKES_SKIP=1</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="a-v0j008-n0-ip-moi-hama-0-1000-a-png-talk">
+<h1><span class="i">A_V0J008_N0_ip_MOI_Hama:0:1000_a.png</span> Talk</h1>
+<p class="normal">Fake skipping just doesnt record those points</p>
+</div>
 <div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-b-png">
 <h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_b.png</span></h1>
 <p class="small">         
@@ -9777,10 +9845,11 @@ cd ~/j/ntds ; MODE=2 ./ntds.sh ana
          
 <tt class="docutils literal">cd ~/j/ntds ; N=1 ./ntds.sh ana</tt></p>
 <p style="margin-bottom:150mm;" /><p class="small"><span class="b">10k : Natural Pyrex+Vac HAMA PMT geometry, no fakes, no skipping needed</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-b-png-talk">
+<h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_b.png</span> Talk</h1>
+<p class="normal">Fake skipping enables the simulations to be compared</p>
+</div>
 <div class="slide" id="k-input-photons-targetting-hama-0-1000-chi2-history-comparison">
 <h1><span class="small">100k Input Photons targetting Hama:0:1000 Chi2 History Comparison</span></h1>
 <pre class="mypretiny">cd ~/j/ntds ; ./ntds.sh cf
@@ -9813,10 +9882,14 @@ np.c_[siq,_quo,siq,sabo2,sc2,sabo1][:25]  ## A-B history frequency chi2 comparis
 <ul class="small simple">
 <li>BUT: does not catch all issues (eg time offsets)</li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="k-input-photons-targetting-hama-0-1000-chi2-history-comparison-talk">
+<h1><span class="small">100k Input Photons targetting Hama:0:1000 Chi2 History Comparison</span> Talk</h1>
+<p class="normal">Chi2 shows the two simulations are consistent</p>
+<ul class="normal simple">
+<li>any large Chi2 contribitions : would point at bugs</li>
+</ul>
+</div>
 <div class="slide" id="b-v1j008-n1-oipf-nnvt-0-1000-gridxy-png">
 <h1><span class="i">B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png</span></h1>
 <pre class="literal-block">
@@ -9828,10 +9901,11 @@ MODE=3 EDL=1 N=0 EYE=500,0,2300 CHECK=not_first ~/j/ntds/ntds.sh ana
 <p style="margin-bottom:110mm;" /><pre class="literal-block">
 Photon step points from grid of input photons target NNVT:0:1000 (POM:1)
 </pre>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="b-v1j008-n1-oipf-nnvt-0-1000-gridxy-png-talk">
+<h1><span class="i">B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png</span> Talk</h1>
+<p class="normal">Can distinguish NNVT from HAMA by the size of ring inside</p>
+</div>
 <div class="slide" id="b-v1j008-n1-oipf-nnvt-0-1000-pom0-png">
 <h1><span class="i">B_V1J008_N1_OIPF_NNVT:0:1000_POM0.png</span></h1>
 <pre class="literal-block">
@@ -9840,26 +9914,30 @@ POM=0 ntds2_cf ## Check No PMT Optical model
 <p style="margin-bottom:130mm;" /><pre class="literal-block">
 Photon step points from grid of input photons target NNVT:0:1000 (POM:0)
 </pre>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="b-v1j008-n1-oipf-nnvt-0-1000-pom0-png-talk">
+<h1><span class="i">B_V1J008_N1_OIPF_NNVT:0:1000_POM0.png</span> Talk</h1>
+<p class="normal">With a traditional PMT Optical Model, photons do not enter PMT</p>
+</div>
 <div class="slide" id="cxr-min-eye-1-0-5-zoom-2-tmin-0-5-nnvt-0-1000-demo-jpg">
 <h1><span class="i">cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg</span></h1>
 <p><tt class="docutils literal">ray traced renders : exact same geometry &quot;seen&quot; by simulation</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="cxr-min-eye-1-0-5-zoom-2-tmin-0-5-nnvt-0-1000-demo-jpg-talk">
+<h1><span class="i">cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg</span> Talk</h1>
+<p class="normal">This is a ray trace render targetting the same group of PMTs.
+You can see the same pattern of PMTs from the ray trace and from the simulation.</p>
+</div>
 <div class="slide" id="stamp-processhits-56us-hama-0-0-png">
 <h1><span class="i">STAMP_ProcessHits_56us_Hama_0_0.png</span></h1>
 <p><tt class="docutils literal">STAMP_TT=257400,600 STAMP_ANNO=1 ~/j/ntds/stamp.sh ## inpho =&gt; Hama:0:0</tt></p>
 <p style="margin-bottom:152mm;" /><p class="small"><span class="r">(s0) beginPhoton</span> <span class="b">(s1) finalPhoton</span> <span class="g">( ) pointPhoton</span> <span class="c">(h0) ProcessHits[</span> <span class="c">(i0) ProcessHits]</span>
 -- <strong>ProcessHits taking ~56us for SD</strong></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="stamp-processhits-56us-hama-0-0-png-talk">
+<h1><span class="i">STAMP_ProcessHits_56us_Hama_0_0.png</span> Talk</h1>
+<p class="normal">Looking at the pattern of time stamps in the simulation, I found &quot;tail gaps&quot; for hit candidates</p>
+</div>
 <div class="slide" id="tail-gap-junosd-pmt-v2-get-pmtid-50us-per-hit-candidate">
 <h1><span class="small">Tail &quot;gap&quot; : junoSD_PMT_v2::get_pmtid : ~50us per hit candidate</span></h1>
 <div class="sidebar">
@@ -9918,34 +9996,42 @@ int junoSD_PMT_v2::get_pmtid(G4Track* track) {
     return ipmt;
 }
 </pre><p class="small"><span class="r">Looping over daughters at multiple levels and name matching to find copyNo</span> : <span class="b">NO NEED FOR SUCH GENERALITY</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="tail-gap-junosd-pmt-v2-get-pmtid-50us-per-hit-candidate-talk">
+<h1><span class="small">Tail &quot;gap&quot; : junoSD_PMT_v2::get_pmtid : ~50us per hit candidate</span>  Talk</h1>
+<p class="normal">Moving the positions of time stamp collection around in the code,
+I isolated this method that gets the pmtid as the cause of the tail gaps.
+On the right is an alternative that gives the same results 50 times faster.</p>
+</div>
 <div class="slide" id="cxr-min-eye-10-0-0-zoom-0-5-tmin-0-1-schimneyacrylic-increased-tmax-jpg">
 <h1><span class="i">cxr_min__eye_-10,0,0__zoom_0.5__tmin_0.1__sChimneyAcrylic_increased_TMAX.jpg</span></h1>
 <p><tt class="docutils literal">ELV=t94,95 ./cxr_min.sh&nbsp; ## skip sTarget sAcrylic</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="cxr-min-eye-10-0-0-zoom-0-5-tmin-0-1-schimneyacrylic-increased-tmax-jpg-talk">
+<h1><span class="i">cxr_min__eye_-10,0,0__zoom_0.5__tmin_0.1__sChimneyAcrylic_increased_TMAX.jpg</span> Talk</h1>
+<p class="normal">As geometry is updated, I redid render checks.
+This render skips acrylic sphere and scintillator.</p>
+</div>
 <div class="slide" id="cxr-min-eye-10-0-30-zoom-0-5-tmin-0-1-schimneyacrylic-photon-eye-view-jpg">
 <h1><span class="i">cxr_min__eye_-10,0,-30__zoom_0.5__tmin_0.1__sChimneyAcrylic_photon_eye_view.jpg</span></h1>
 <p><tt class="docutils literal">ELV=t94,95 ./cxr_min.sh ## skip sTarget sAcrylic : upwards view</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="cxr-min-eye-10-0-30-zoom-0-5-tmin-0-1-schimneyacrylic-photon-eye-view-jpg-talk">
+<h1><span class="i">cxr_min__eye_-10,0,-30__zoom_0.5__tmin_0.1__sChimneyAcrylic_photon_eye_view.jpg</span> Talk</h1>
+<p class="normal">Here is an upwards view from inside the scintillator, looking towards the Chimney.</p>
+</div>
 <div class="slide" id="cxr-overview-emm-image-grid-overview">
 <h1><span class="i">cxr_overview_emm_image_grid_overview</span></h1>
 <dl class="docutils">
 <dt><tt class="docutils literal">Comparison of ray traced render times of different geometry</tt></dt>
 <dd><tt class="docutils literal">simple way to find issues, eg over complex CSG, overlarge BBox</tt></dd>
 </dl>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="cxr-overview-emm-image-grid-overview-talk">
+<h1><span class="i">cxr_overview_emm_image_grid_overview</span> Talk</h1>
+<p class="normal">A standard check I do after geometry updates is to compare
+ray trace rendering times to look for slow geometry.</p>
+<!-- comment
 
 :i:`scan_emm_jpg_select.txt_coarse.jpg`
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -9953,17 +10039,22 @@ int junoSD_PMT_v2::get_pmtid(G4Track* track) {
 <div class="slide" id="cxr-view-emm-t0-elv-t142-eye-1-1-1-1-zoom-1-tmin-0-4-swatertube-skip-sbottomrock-jpg">
 <h1><span class="i">cxr_view_emm_t0_elv_t142_eye_-1,-1,-1,1__zoom_1__tmin_0.4__sWaterTube_skip_sBottomRock.jpg</span></h1>
 <p><tt class="docutils literal">Render inside JUNO water buffer : PMTs, chimney, support sticks</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="cxr-view-emm-t0-elv-t142-eye-1-1-1-1-zoom-1-tmin-0-4-swatertube-skip-sbottomrock-jpg-talk">
+<h1><span class="i">cxr_view_emm_t0_elv_t142_eye_-1,-1,-1,1__zoom_1__tmin_0.4__sWaterTube_skip_sBottomRock.jpg</span> Talk</h1>
+<p class="normal">Render from near the chimney</p>
+</div>
 <div class="slide" id="image-grid-elv-scan-jpg">
 <h1><span class="i">image_grid_elv_scan.jpg</span></h1>
 <p><tt class="docutils literal">Spot the differences : from volume exclusions</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
+</div>
+<div class="slide" id="image-grid-elv-scan-jpg-talk">
+<h1><span class="i">image_grid_elv_scan.jpg</span> Talk</h1>
+<p class="normal">If you look closely at the renders you can see differences
+from the exclusion of single volume types. Doing this for
+all volume types allows to sort the volumes by their
+impact on the performance.</p>
+<!-- comment
 
 vi $HOME/j/issues/scan_elv_jpg_select.txt  ## manually prepare list of 9 jpg with visible diffs
 export JPGLIST=$HOME/j/issues/scan_elv_jpg_select.txt
@@ -10059,10 +10150,15 @@ JPGLIST=$JPGLIST ./image_grid.sh -->
 <ul class="small simple">
 <li><span class="r">solids with deep CSG trees (eg solidXJfixture) can cause &gt;2x slow downs</span></li>
 </ul>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="cxr-overview-sh-elv-scan-1080x1920-2m-nvidia-titan-rtx-talk">
+<h1><span class="small">cxr_overview.sh ELV scan 1080x1920 2M (NVIDIA TITAN RTX)</span> Talk</h1>
+<p class="normal">You might think that the geometry without any exclusions would be the slowest, but
+that is not the case. Varying the geometry changes the details of the acceleration structure.
+Here the time range from fastest to slowest is rather small, suggesting there are
+no major geometry performance problems left.</p>
+<p class="normal">This is only the case after I excluded some problematic geometry.</p>
+</div>
 <div class="slide" id="cuda-equivalent-of-c4customart-doit-with-full-lpmt-info">
 <h1><span class="small">CUDA equivalent of C4CustomART::doIt : With Full LPMT info</span></h1>
 <div class="sidebar">
@@ -10123,34 +10219,48 @@ JPGLIST=$JPGLIST ./image_grid.sh -->
 </dd>
 </dl>
 <p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/qudarap/qpmt.h">https://bitbucket.org/simoncblyth/opticks/src/master/qudarap/qpmt.h</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="cuda-equivalent-of-c4customart-doit-with-full-lpmt-info-talk">
+<h1><span class="small">CUDA equivalent of C4CustomART::doIt : With Full LPMT info</span>  Talk</h1>
+<p class="normal">CUDA code to implement PMT Optical Model straightforward,
+because it re-uses existing propagate_at_boundary just
+like on CPU can reuse Geant4 boundary process methods.</p>
+</div>
 <div class="slide" id="layrtest-r12860-qpmt-test-png">
 <h1><span class="i">LayrTest__R12860_QPMT_Test.png</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="layrtest-r12860-qpmt-test-png-talk">
+<h1><span class="i">LayrTest__R12860_QPMT_Test.png</span> Talk</h1>
+<p class="normal">ARTPlot : each of A, R, T have three versions from three pmt categories</p>
+<ul class="normal simple">
+<li>this shows Absorption, Reflection and Transmission probabilities which sum to 1
+scanning across the full range of angles of incidences</li>
+<li>angles above 90 degrees correspond to reverse photons going from the vacuum to the pyrex</li>
+<li>there are lots of lines because S-polarized/P-polarized/Avg are shown</li>
+<li>also there are lines for each of three PMT catehories</li>
+</ul>
+</div>
 <div class="slide" id="layrtest-r12860-aspa-png">
 <h1><span class="i">LayrTest__R12860_Aspa.png</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="layrtest-r12860-aspa-png-talk">
+<h1><span class="i">LayrTest__R12860_Aspa.png</span> Talk</h1>
+<p class="normal">Aspa : This is just showing the absorption, the dotted lines are the average of the S and P polarizations</p>
+</div>
 <div class="slide" id="layrtest-r12860-rspa-png">
 <h1><span class="i">LayrTest__R12860_Rspa.png</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="layrtest-r12860-rspa-png-talk">
+<h1><span class="i">LayrTest__R12860_Rspa.png</span> Talk</h1>
+<p class="normal">Rspa : the reflection, which goes to 1. at grazing incidence</p>
+</div>
 <div class="slide" id="layrtest-r12860-tspa-png">
 <h1><span class="i">LayrTest__R12860_Tspa.png</span></h1>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="layrtest-r12860-tspa-png-talk">
+<h1><span class="i">LayrTest__R12860_Tspa.png</span> Talk</h1>
+<p class="normal">Tspa : above the Critical angle there is no transmission, only absorption and reflection</p>
+</div>
 <div class="slide" id="comparing-aoi-scans-j-layr-layrtest-sh">
 <h1>Comparing AOI scans : <tt class="docutils literal">j/Layr/LayrTest.sh</tt></h1>
 <div class="sidebar">
@@ -10193,10 +10303,12 @@ CFLayrTest
 |                            h:| 2.907e-06| 3.248e-06| 2.907e-06| 2.921e-06| 7.451e-07| 8.941e-07| 8.419e-07|         0|
 +------------------------------+----------+----------+----------+----------+----------+----------+----------+----------+
 </pre><p class="small"><span class="b">Largest differences between ART (9, 900, 4, 4) from various tests (float,double,GPU,CPU,mock-CPU,standalone...)</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="comparing-aoi-scans-j-layr-layrtest-sh-talk">
+<h1>Comparing AOI scans : <tt class="docutils literal">j/Layr/LayrTest.sh</tt>  Talk</h1>
+<p class="normal">Compare ART values from AOI scans from multiple tests, including on GPU and CPU and mock GPU
+shows expected levels of deviation..</p>
+</div>
 <div class="slide" id="other-work-u4tree-stree-minimal-geometry-translation">
 <h1><span class="small">Other Work : U4Tree/stree Minimal Geometry Translation</span></h1>
 <div class="sidebar">
@@ -10294,10 +10406,11 @@ CFLayrTest
 </tbody>
 </table>
 <p class="small"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/notes/progress.rst">opticks/src/master/notes/progress.rst</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="other-work-u4tree-stree-minimal-geometry-translation-talk">
+<h1><span class="small">Other Work : U4Tree/stree Minimal Geometry Translation</span> Talk</h1>
+<p class="normal">Are very close to being able drop lots of old code.</p>
+</div>
 <div class="slide" id="other-work-mocking-cuda-curand-uniform-and-tex2d">
 <h1><span class="small">Other Work : Mocking CUDA : curand_uniform and tex2D</span></h1>
 <div class="sidebar">
@@ -10353,10 +10466,12 @@ T tex2D(cudaTextureObject_t tex,
 }
 </pre>
 <p style="margin-bottom:-3mm;" /><p class="small"><span class="r">Simple technique, proving useful, especially now PMT Optical Model on GPU</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="other-work-mocking-cuda-curand-uniform-and-tex2d-talk">
+<h1><span class="small">Other Work : Mocking CUDA : curand_uniform and tex2D</span> Talk</h1>
+<p class="normal">Simple technique, proving useful : especially now that have PMT Optical Model on GPU</p>
+<p class="normal">Mocking just these two functions, allows most Opticks CUDA code to be tested on CPU.</p>
+</div>
 <div class="slide" id="next-steps-cpu-vs-gpu-validation-now-with-full-pmt-optical-model">
 <h1><span class="small">Next Steps : CPU vs GPU validation : Now with full PMT Optical Model</span></h1>
 <div class="sidebar">
@@ -10416,10 +10531,11 @@ T tex2D(cudaTextureObject_t tex,
 </tr>
 </tbody>
 </table>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="next-steps-cpu-vs-gpu-validation-now-with-full-pmt-optical-model-talk">
+<h1><span class="small">Next Steps : CPU vs GPU validation : Now with full PMT Optical Model</span> Talk</h1>
+<p class="normal">Next steps : validation comparing between opticksMode : mostly standard</p>
+</div>
 <div class="slide" id="further-steps-performance-production-updates-problem-geometry">
 <h1><span class="small">Further Steps : Performance, Production, Updates, Problem Geometry</span></h1>
 <ul class="small simple">
@@ -10510,10 +10626,11 @@ T tex2D(cudaTextureObject_t tex,
 <li>Torus (Guide Tube) : NVIDIA OptiX 7.1+ adds Curves primitive : may give performant Torus intersect</li>
 </ul>
 <p class="tiny">[1] minor Opticks changes to support NVIDIA OptiX 7.5, 7.6 done already for Opticks users from Fermilab Geant4 group</p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="further-steps-performance-production-updates-problem-geometry-talk">
+<h1><span class="small">Further Steps : Performance, Production, Updates, Problem Geometry</span> Talk</h1>
+<p class="normal">Choices depend on findings from performance measurements from different OptiX versions</p>
+</div>
 <div class="slide" id="summary-and-links">
 <h1><span class="small">Summary and Links</span></h1>
 <div class="sidebar">
@@ -10559,10 +10676,15 @@ Migration to NVIDIA OptiX 7 complete. Full JUNO PMT Optical Model now on GPU.</b
 </tr>
 </tbody>
 </table>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="summary-and-links-talk">
+<h1><span class="small">Summary and Links</span> Talk</h1>
+<p class="normal">Opticks brings state-of-the-art GPU ray tracing performance to optical photon simulations.</p>
+<p class="normal">The detailed validations needed when adopting a new simulation has a
+hidden benefit in that detailed comparisons reveal problems with both
+simulations.</p>
+<p class="normal"><strong>Opticks improves CPU simulation and adds GPU simulation.</strong></p>
+</div>
 <div class="slide" id="opticks-progress-summary">
 <h1><span class="i">Opticks Progress Summary</span></h1>
 <p style="margin-bottom:-10mm;" />
@@ -10594,10 +10716,11 @@ Migration to NVIDIA OptiX 7 complete. Full JUNO PMT Optical Model now on GPU.</b
 +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
 | https://simoncblyth.bitbucket.io  |
 +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+ -->
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
+</div>
+<div class="slide" id="opticks-progress-summary-talk">
+<h1><span class="i">Opticks Progress Summary</span>  Talk</h1>
+<p class="normal">This is a summary page : highlighting key points</p>
+</div>
 </div>
 </body>
 </html>
