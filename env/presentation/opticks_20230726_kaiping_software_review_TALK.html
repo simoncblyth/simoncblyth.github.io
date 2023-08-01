@@ -10,6 +10,7 @@
 <meta content="opticks_20230721_kaiping_pwg_afg.txt" name="name" />
 <meta content="(26 July 2023)" name="description" />
 <meta content="Summer Meeting Software Review" name="notes" />
+<meta content="https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/ShowDocument?docid=10384" name="url" />
 <style type="text/css">
 
 /*
@@ -8882,6 +8883,17 @@ SM*64 gives cores
 https://www.techpowerup.com/gpu-specs/titan-v.c3051
 https://www.techpowerup.com/gpu-specs/titan-rtx.c3311
 https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
+<!-- title_and_abstract
+
+Opticks Simulation Status : PMT Optical Model issues, fix and GPU port
+
+Issues with the former JUNOSW FastSim based PMT Optical Model
+are described including kludged 4 volume geometry,
+unphysical polarization, time propagation and mid-vacuum absorption, reflection,
+refraction and tunneling through dynode/MCP inside the PMT vacuum.
+A fix for all these issues using a custom boundary process that enables adoption
+of a natural two volume PMT geometry is described. In addition the extension of
+Opticks to bring the full PMT Optical Model to the GPU is detailed. -->
 <!-- comment
 
 From Ziyan, July 11th
@@ -8899,10 +8911,8 @@ THAT IS EARLY MORNING 02:00 AM OF Wednesday 26th July,
 IE IMMEDIATELY FOLLOWING LATE NIGHT OF Tuesday 25th -->
 <!-- comment
 
-TODO : s5_talk, talk PDF
-TODO : publish in triplicate
-TODO : PDF creation, docdb upload
-TODO : iPad update for Zoom -->
+TODO : s5_talk, talk PDF, AirDrop talk PDF
+FAIL : iPad update for Zoom, fails due to Network Error -->
 <div class="mytitle">
     <header>
         <h1 style="background-color:lightgrey">
@@ -8951,9 +8961,9 @@ TODO : iPad update for Zoom -->
 <div class="slide" id="junosw-opticks-status-of-opticks-simulation-talk">
 <h1><span class="i">JUNOSW + Opticks : Status of Opticks Simulation</span>  Talk</h1>
 <p class="normal">Despite the title, most of my recent work has been
-finding and fixing issues with the PMT simulation on CPU.</p>
-<p class="normal">Its necessary to fix simulation bugs on the CPU
-before can validate the Opticks simulation on GPU.</p>
+finding and fixing bugs with JUNOSW PMT simulation.</p>
+<p class="normal">Clearly, need to fix bugs on the CPU
+before bringing the simulation to the GPU.</p>
 </div>
 <div class="slide" id="junosw-opticks-summary-timeline-of-pmt-simulation-development">
 <h1><span class="small">JUNOSW + Opticks : Summary Timeline of PMT Simulation Development</span></h1>
@@ -9118,15 +9128,14 @@ Details in above presentations + notes : https://bitbucket.org/simoncblyth/optic
 <div class="slide" id="junopmtopticalmodel-issues-all-from-using-fastsim-talk">
 <h1>junoPMTOpticalModel Issues : All from using FastSim  Talk</h1>
 <ul class="normal simple">
-<li>Using FastSim to model a single surface required
-adding several fake volumes to kludge a region around the surface.</li>
-<li>It worked, but looking closer there were quite a few bugs.</li>
-<li>I patched up some of those, but the approach is not a good one.</li>
+<li>Using FastSim required kludging the geometry
+with fake volumes to place a region around the photocathode</li>
+<li>It kinda worked, but looking closely there were lots of bugs.</li>
+<li>I fixed some of them, but the approach is not a good one.</li>
 </ul>
-<p class="normal">Much better to pivot away from FastSim</p>
-<p class="normal">Using a custom boundary process, allows using natural geometry
-and means can just change (A,R,T) and use standard Geant4 for
-everything else.</p>
+<p class="normal">Much better to pivot away from FastSim to using a custom boundary process.</p>
+<p class="normal">That allows using natural geometry and makes it possible to use a much
+more standard approach, just changing the minimum.</p>
 </div>
 <div class="slide" id="fewpmt-demo0-png">
 <h1><span class="i">FewPMT_demo0.png</span></h1>
@@ -9135,7 +9144,7 @@ everything else.</p>
 <div class="slide" id="fewpmt-demo0-png-talk">
 <h1><span class="i">FewPMT_demo0.png</span> Talk</h1>
 <ul class="normal simple">
-<li>This is the old unnatural PMT geometry with fake volumes to kludge the region.</li>
+<li>This is the old unnatural PMT geometry with fake volumes to kludge the FastSim region.</li>
 <li>There are fake boundaries in the middle of the PMT vacuum, and also in the Pyrex.</li>
 </ul>
 </div>
@@ -9200,7 +9209,7 @@ that are difficult to see</li>
 </div>
 <div class="slide" id="compare-reflected-polarization-impls-for-brewster-angle-incidence-talk">
 <h1><span class="small">Compare Reflected Polarization Impls for Brewster Angle Incidence</span> Talk</h1>
-<p class="normal">One of the bugs was not polarizing on reflection.
+<p class="normal">Another bug was not polarizing on reflection.
 The difference is very clear at the Brewster angle as illustrated here.</p>
 </div>
 <div class="slide" id="junopmtopticalmodel-modeltrigger-bug-unphysical-photons">
@@ -9356,8 +9365,8 @@ and resulted in unphysical behavior.</p>
 </div>
 <div class="slide" id="fix-pivot-to-c4opboundaryprocess-for-pmt-optical-model-merged-talk">
 <h1><span class="small">FIX: Pivot to C4OpBoundaryProcess for PMT Optical Model:</span> <span class="r">MERGED</span> Talk</h1>
-<p class="normal">Using a custom boundary process simplifies the geometry
-and provides a natural fix for the issues.</p>
+<p class="normal">Using a custom boundary process provides a natural fix for the issues
+and enables using natural geometry with no kludging.</p>
 </div>
 <div class="slide" id="c4opboundaryprocess-poststepdoit-3-way-a-r-t-customization">
 <h1><span class="small">C4OpBoundaryProcess::PostStepDoIt : 3-way (A,R,T) Customization</span></h1>
@@ -9416,7 +9425,7 @@ if( OpticalSurfaceName0 == '@' || OpticalSurfaceName0 == '#' )
 </div>
 <div class="slide" id="c4opboundaryprocess-poststepdoit-3-way-a-r-t-customization-talk">
 <h1><span class="small">C4OpBoundaryProcess::PostStepDoIt : 3-way (A,R,T) Customization</span> Talk</h1>
-<p class="normal">Customization only active for surfaces with names starting with '&#64;' or '#'</p>
+<p class="normal">Customization only active for specially named surfaces</p>
 </div>
 <div class="slide" id="custom4-c4customart-h-include-into-c4opboundaryprocess-cc">
 <h1><span class="small">custom4/C4CustomART.h : include into C4OpBoundaryProcess.cc</span></h1>
@@ -9474,8 +9483,8 @@ struct C4CustomART {
 <div class="slide" id="custom4-c4customart-h-include-into-c4opboundaryprocess-cc-talk">
 <h1><span class="small">custom4/C4CustomART.h : include into C4OpBoundaryProcess.cc</span> Talk</h1>
 <p class="normal">Most the customization is done in a Separate header, to minimize changes
-to the boundary process. This CustomART header included the shared header
-that does the TMM calculation.</p>
+to the boundary process. This CustomART header includes another header
+with the TMM calculation.</p>
 </div>
 <div class="slide" id="custom4-custom-boundary-multi-layer-thin-film-a-r-t-tmm-calc">
 <h1><span class="small">Custom4 : Custom Boundary Multi-Layer Thin Film (A,R,T) TMM Calc</span></h1>
@@ -9585,8 +9594,8 @@ struct C4IPMTAccessor   // only standard types in API
 </div>
 <div class="slide" id="low-dependency-access-to-pmt-data-from-anywhere-talk">
 <h1>Low dependency access to PMT data <span class="r">from anywhere</span> Talk</h1>
-<p class="normal">A C++ protocol base design allows JUNOSW to
-pass its PMT data to Opticks and Custom4.
+<p class="normal">Using a pure virtual protocol struct allows JUNOSW to
+pass the PMT data to Opticks and Custom4.
 Combining that with Opticks serialization means that
 the PMT data can be used anywhere.</p>
 </div>
@@ -9697,7 +9706,8 @@ which can be persisted into a directory of arrays.</p>
 </div>
 <div class="slide" id="geant4-opticks-instrumentation-no-gpu-usage-talk">
 <h1>Geant4 + Opticks Instrumentation (no GPU usage) Talk</h1>
-<p class="normal">The CPU part of Opticks has machinery to collect and persist Geant4 photon histories into Opticks events.</p>
+<p class="normal">The CPU part of Opticks has machinery to collect and persist Geant4 photon histories into Opticks events.
+I validated the fix by comparing photon histories.</p>
 </div>
 <div class="slide" id="opticks-sevt-loaded-into-ipython-arrays-detailing-every-photon-point">
 <h1><span class="small">Opticks SEvt loaded into ipython : arrays detailing every photon point</span></h1>
@@ -9999,7 +10009,7 @@ int junoSD_PMT_v2::get_pmtid(G4Track* track) {
 </div>
 <div class="slide" id="tail-gap-junosd-pmt-v2-get-pmtid-50us-per-hit-candidate-talk">
 <h1><span class="small">Tail &quot;gap&quot; : junoSD_PMT_v2::get_pmtid : ~50us per hit candidate</span>  Talk</h1>
-<p class="normal">Moving the positions of time stamp collection around in the code,
+<p class="normal">Moving positions of time stamp collection in the code,
 I isolated this method that gets the pmtid as the cause of the tail gaps.
 On the right is an alternative that gives the same results 50 times faster.</p>
 </div>
@@ -10050,10 +10060,8 @@ ray trace rendering times to look for slow geometry.</p>
 </div>
 <div class="slide" id="image-grid-elv-scan-jpg-talk">
 <h1><span class="i">image_grid_elv_scan.jpg</span> Talk</h1>
-<p class="normal">If you look closely at the renders you can see differences
-from the exclusion of single volume types. Doing this for
-all volume types allows to sort the volumes by their
-impact on the performance.</p>
+<p class="normal">Varying volumes included and excluded allows sorting
+by render times so can find slow geometry.</p>
 <!-- comment
 
 vi $HOME/j/issues/scan_elv_jpg_select.txt  ## manually prepare list of 9 jpg with visible diffs
@@ -10153,10 +10161,10 @@ JPGLIST=$JPGLIST ./image_grid.sh -->
 </div>
 <div class="slide" id="cxr-overview-sh-elv-scan-1080x1920-2m-nvidia-titan-rtx-talk">
 <h1><span class="small">cxr_overview.sh ELV scan 1080x1920 2M (NVIDIA TITAN RTX)</span> Talk</h1>
-<p class="normal">You might think that the geometry without any exclusions would be the slowest, but
-that is not the case. Varying the geometry changes the details of the acceleration structure.
-Here the time range from fastest to slowest is rather small, suggesting there are
-no major geometry performance problems left.</p>
+<p class="normal">Heres the volumes sorted by render time.
+Varying the geometry changes the details of the acceleration structure.
+As the time range from fastest to slowest is small, can say there are
+no major geometry performance problems.</p>
 <p class="normal">This is only the case after I excluded some problematic geometry.</p>
 </div>
 <div class="slide" id="cuda-equivalent-of-c4customart-doit-with-full-lpmt-info">
@@ -10409,7 +10417,8 @@ shows expected levels of deviation..</p>
 </div>
 <div class="slide" id="other-work-u4tree-stree-minimal-geometry-translation-talk">
 <h1><span class="small">Other Work : U4Tree/stree Minimal Geometry Translation</span> Talk</h1>
-<p class="normal">Are very close to being able drop lots of old code.</p>
+<p class="normal">Some other work on the geometry translation is getting close
+to concluding with a major reduction in Opticks code.</p>
 </div>
 <div class="slide" id="other-work-mocking-cuda-curand-uniform-and-tex2d">
 <h1><span class="small">Other Work : Mocking CUDA : curand_uniform and tex2D</span></h1>
@@ -10469,8 +10478,8 @@ T tex2D(cudaTextureObject_t tex,
 </div>
 <div class="slide" id="other-work-mocking-cuda-curand-uniform-and-tex2d-talk">
 <h1><span class="small">Other Work : Mocking CUDA : curand_uniform and tex2D</span> Talk</h1>
-<p class="normal">Simple technique, proving useful : especially now that have PMT Optical Model on GPU</p>
-<p class="normal">Mocking just these two functions, allows most Opticks CUDA code to be tested on CPU.</p>
+<p class="normal">Mocking just these two functions, allows most Opticks CUDA code to be tested on CPU.
+As GPU code getting more complicated that has proved useful.</p>
 </div>
 <div class="slide" id="next-steps-cpu-vs-gpu-validation-now-with-full-pmt-optical-model">
 <h1><span class="small">Next Steps : CPU vs GPU validation : Now with full PMT Optical Model</span></h1>
@@ -10534,7 +10543,9 @@ T tex2D(cudaTextureObject_t tex,
 </div>
 <div class="slide" id="next-steps-cpu-vs-gpu-validation-now-with-full-pmt-optical-model-talk">
 <h1><span class="small">Next Steps : CPU vs GPU validation : Now with full PMT Optical Model</span> Talk</h1>
-<p class="normal">Next steps : validation comparing between opticksMode : mostly standard</p>
+<p class="normal">Next steps : are to validate applying the same machinery used to check the PMT
+geometry pivot to compare between CPU and GPU simulations.</p>
+<p class="normal">This comparison should be simpler, because the geometry is the same.</p>
 </div>
 <div class="slide" id="further-steps-performance-production-updates-problem-geometry">
 <h1><span class="small">Further Steps : Performance, Production, Updates, Problem Geometry</span></h1>
@@ -10629,7 +10640,10 @@ T tex2D(cudaTextureObject_t tex,
 </div>
 <div class="slide" id="further-steps-performance-production-updates-problem-geometry-talk">
 <h1><span class="small">Further Steps : Performance, Production, Updates, Problem Geometry</span> Talk</h1>
-<p class="normal">Choices depend on findings from performance measurements from different OptiX versions</p>
+<p class="normal">If everything validates OK then the next steps are to work the practicalities
+of getting Opticks into production.  Checking performance with different OptiX versions
+is needed.</p>
+<p class="normal">Also there are some problem parts of the geometry, that are currently just skipped.</p>
 </div>
 <div class="slide" id="summary-and-links">
 <h1><span class="small">Summary and Links</span></h1>
@@ -10683,7 +10697,7 @@ Migration to NVIDIA OptiX 7 complete. Full JUNO PMT Optical Model now on GPU.</b
 <p class="normal">The detailed validations needed when adopting a new simulation has a
 hidden benefit in that detailed comparisons reveal problems with both
 simulations.</p>
-<p class="normal"><strong>Opticks improves CPU simulation and adds GPU simulation.</strong></p>
+<p class="normal"><strong>Opticks improves the CPU simulation as well as providing an on GPU simulation</strong></p>
 </div>
 <div class="slide" id="opticks-progress-summary">
 <h1><span class="i">Opticks Progress Summary</span></h1>

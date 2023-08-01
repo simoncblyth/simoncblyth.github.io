@@ -4,11 +4,24 @@
    :name: opticks_20230721_kaiping_pwg_afg.txt
    :description: (26 July 2023)
    :notes: Summer Meeting Software Review
+   :url: https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/ShowDocument?docid=10384
 
 .. include:: my_s5defs.txt
 
 .. include:: s5_background_image.txt
 
+
+.. title_and_abstract
+
+   Opticks Simulation Status : PMT Optical Model issues, fix and GPU port
+
+   Issues with the former JUNOSW FastSim based PMT Optical Model 
+   are described including kludged 4 volume geometry, 
+   unphysical polarization, time propagation and mid-vacuum absorption, reflection, 
+   refraction and tunneling through dynode/MCP inside the PMT vacuum.
+   A fix for all these issues using a custom boundary process that enables adoption 
+   of a natural two volume PMT geometry is described. In addition the extension of 
+   Opticks to bring the full PMT Optical Model to the GPU is detailed. 
 
 .. comment
 
@@ -29,10 +42,8 @@
 
 .. comment
 
-   TODO : s5_talk, talk PDF 
-   TODO : publish in triplicate
-   TODO : PDF creation, docdb upload   
-   TODO : iPad update for Zoom 
+   TODO : s5_talk, talk PDF, AirDrop talk PDF 
+   FAIL : iPad update for Zoom, fails due to Network Error 
 
 
 
@@ -105,10 +116,10 @@
 .. class:: normal
 
     Despite the title, most of my recent work has been 
-    finding and fixing issues with the PMT simulation on CPU. 
+    finding and fixing bugs with JUNOSW PMT simulation. 
 
-    Its necessary to fix simulation bugs on the CPU
-    before can validate the Opticks simulation on GPU. 
+    Clearly, need to fix bugs on the CPU
+    before bringing the simulation to the GPU. 
 
 
 
@@ -303,19 +314,16 @@ junoPMTOpticalModel Issues : All from using FastSim  Talk
 
 .. class:: normal
  
-    * Using FastSim to model a single surface required 
-      adding several fake volumes to kludge a region around the surface. 
+    * Using FastSim required kludging the geometry
+      with fake volumes to place a region around the photocathode
 
-    * It worked, but looking closer there were quite a few bugs. 
-    * I patched up some of those, but the approach is not a good one. 
+    * It kinda worked, but looking closely there were lots of bugs. 
+    * I fixed some of them, but the approach is not a good one. 
 
-    Much better to pivot away from FastSim 
+    Much better to pivot away from FastSim to using a custom boundary process.
 
-    Using a custom boundary process, allows using natural geometry 
-    and means can just change (A,R,T) and use standard Geant4 for 
-    everything else. 
- 
-
+    That allows using natural geometry and makes it possible to use a much 
+    more standard approach, just changing the minimum. 
 
 
 
@@ -336,7 +344,7 @@ junoPMTOpticalModel Issues : All from using FastSim  Talk
 
 .. class:: normal
 
-    * This is the old unnatural PMT geometry with fake volumes to kludge the region.  
+    * This is the old unnatural PMT geometry with fake volumes to kludge the FastSim region.  
     * There are fake boundaries in the middle of the PMT vacuum, and also in the Pyrex.
 
 
@@ -440,7 +448,7 @@ junoPMTOpticalModel Issues : All from using FastSim  Talk
 
 .. class:: normal
 
-    One of the bugs was not polarizing on reflection. 
+    Another bug was not polarizing on reflection.  
     The difference is very clear at the Brewster angle as illustrated here. 
 
 
@@ -628,8 +636,8 @@ junoPMTOpticalModel Issues : All from using FastSim  Talk
 
 .. class:: normal
 
-   Using a custom boundary process simplifies the geometry 
-   and provides a natural fix for the issues. 
+   Using a custom boundary process provides a natural fix for the issues
+   and enables using natural geometry with no kludging. 
 
 
 
@@ -713,8 +721,7 @@ junoPMTOpticalModel Issues : All from using FastSim  Talk
 
 .. class:: normal
 
-    Customization only active for surfaces with names starting with '@' or '#'  
-    
+    Customization only active for specially named surfaces
 
 
 
@@ -787,8 +794,8 @@ junoPMTOpticalModel Issues : All from using FastSim  Talk
 .. class:: normal
 
    Most the customization is done in a Separate header, to minimize changes 
-   to the boundary process. This CustomART header included the shared header 
-   that does the TMM calculation.   
+   to the boundary process. This CustomART header includes another header 
+   with the TMM calculation.   
    
 
 
@@ -934,8 +941,8 @@ Low dependency access to PMT data :r:`from anywhere` Talk
 
 .. class:: normal
 
-   A C++ protocol base design allows JUNOSW to 
-   pass its PMT data to Opticks and Custom4.
+   Using a pure virtual protocol struct allows JUNOSW to 
+   pass the PMT data to Opticks and Custom4.
    Combining that with Opticks serialization means that 
    the PMT data can be used anywhere. 
 
@@ -1075,7 +1082,7 @@ Geant4 + Opticks Instrumentation (no GPU usage) Talk
 .. class:: normal
 
     The CPU part of Opticks has machinery to collect and persist Geant4 photon histories into Opticks events. 
-
+    I validated the fix by comparing photon histories.  
 
 
 :small:`Opticks SEvt loaded into ipython : arrays detailing every photon point`
@@ -1556,7 +1563,7 @@ Transform photon history points into target frame Talk
 
 .. class:: normal
 
-   Moving the positions of time stamp collection around in the code, 
+   Moving positions of time stamp collection in the code, 
    I isolated this method that gets the pmtid as the cause of the tail gaps. 
    On the right is an alternative that gives the same results 50 times faster. 
  
@@ -1635,10 +1642,8 @@ Transform photon history points into target frame Talk
 
 .. class:: normal
 
-   If you look closely at the renders you can see differences 
-   from the exclusion of single volume types. Doing this for 
-   all volume types allows to sort the volumes by their 
-   impact on the performance. 
+   Varying volumes included and excluded allows sorting 
+   by render times so can find slow geometry. 
 
 
 .. comment
@@ -1699,10 +1704,10 @@ Transform photon history points into target frame Talk
 
 .. class:: normal
 
-    You might think that the geometry without any exclusions would be the slowest, but 
-    that is not the case. Varying the geometry changes the details of the acceleration structure. 
-    Here the time range from fastest to slowest is rather small, suggesting there are 
-    no major geometry performance problems left. 
+    Heres the volumes sorted by render time. 
+    Varying the geometry changes the details of the acceleration structure.
+    As the time range from fastest to slowest is small, can say there are 
+    no major geometry performance problems. 
 
     This is only the case after I excluded some problematic geometry. 
  
@@ -1981,7 +1986,8 @@ Comparing AOI scans : ``j/Layr/LayrTest.sh``  Talk
 
 .. class:: normal
 
-    Are very close to being able drop lots of old code. 
+    Some other work on the geometry translation is getting close
+    to concluding with a major reduction in Opticks code. 
 
 
 :small:`Other Work : Mocking CUDA : curand_uniform and tex2D`
@@ -2050,10 +2056,8 @@ Comparing AOI scans : ``j/Layr/LayrTest.sh``  Talk
 
 .. class:: normal
 
-   Simple technique, proving useful : especially now that have PMT Optical Model on GPU 
-
    Mocking just these two functions, allows most Opticks CUDA code to be tested on CPU. 
-
+   As GPU code getting more complicated that has proved useful. 
 
 
 :small:`Next Steps : CPU vs GPU validation : Now with full PMT Optical Model`
@@ -2100,7 +2104,12 @@ Comparing AOI scans : ``j/Layr/LayrTest.sh``  Talk
 
 .. class:: normal
 
-    Next steps : validation comparing between opticksMode : mostly standard  
+    Next steps : are to validate applying the same machinery used to check the PMT 
+    geometry pivot to compare between CPU and GPU simulations. 
+
+    This comparison should be simpler, because the geometry is the same. 
+
+
 
 
 :small:`Further Steps : Performance, Production, Updates, Problem Geometry`
@@ -2145,7 +2154,13 @@ Comparing AOI scans : ``j/Layr/LayrTest.sh``  Talk
 
 .. class:: normal
 
-    Choices depend on findings from performance measurements from different OptiX versions
+    If everything validates OK then the next steps are to work the practicalities
+    of getting Opticks into production.  Checking performance with different OptiX versions
+    is needed.  
+
+    Also there are some problem parts of the geometry, that are currently just skipped. 
+    
+
 
 
 
@@ -2209,10 +2224,8 @@ Comparing AOI scans : ``j/Layr/LayrTest.sh``  Talk
     hidden benefit in that detailed comparisons reveal problems with both 
     simulations. 
 
-    **Opticks improves CPU simulation and adds GPU simulation.**  
+    **Opticks improves the CPU simulation as well as providing an on GPU simulation**  
  
-
-
 
 
 
