@@ -70,9 +70,14 @@
 
    * Loading Serialized U4Mesh with NumPy, Visualize with PyVista
 
-   * Another Standalone Test Example : mandelbrot.sh, mandelbrot.cc
+   * Standalone Test Example : mandelbrot.sh, mandelbrot.cc
 
-   * TODO : Brief Description of PyVista and MatPlotLib
+   * Python Tools : NumPy, Matplotlib, PyVista
+
+   * Python Data Science Handbook 
+
+
+
 
 
 
@@ -684,7 +689,7 @@ Standalone Test Example : mandelbrot.sh
 
     .. class:: tiny
 
-        https://bitbucket.org/simoncblyth/env/src/master/mandelbrot/mandelbrot.sh 
+        https://github.com/simoncblyth/mandelbrot/blob/master/mandelbrot.sh
 
 
 
@@ -705,9 +710,9 @@ Standalone Test Example : mandelbrot.sh
     |    mandelbrot.sh                                                |
     |    ===============                                              |
     |                                                                 |
-    |    FOCUS=-1.45,0,0.05 ~/env/mandelbrot/mandelbrot.sh            |
-    |    FOCUS=-1.45,0,0.05 MIT=80 ~/env/mandelbrot/mandelbrot.sh     |
-    |    FOCUS=-1.45,0,0.05 MIT=50 ~/env/mandelbrot/mandelbrot.sh     |
+    |    FOCUS=-1.45,0,0.05 ~/mandelbrot/mandelbrot.sh                |
+    |    FOCUS=-1.45,0,0.05 MIT=80 ~/mandelbrot/mandelbrot.sh         |
+    |    FOCUS=-1.45,0,0.05 MIT=50 ~/mandelbrot/mandelbrot.sh         |
     |                                                                 |
     |    EOU                                                          |
     |    }                                                            |
@@ -847,7 +852,7 @@ Standalone Test Example : mandelbrot.cc
     <p style="margin-bottom:168mm;" />
    
 
-``~/env/mandelbrot/mandelbrot.sh``
+``~/mandelbrot/mandelbrot.sh``
 
 
 
@@ -860,7 +865,7 @@ Standalone Test Example : mandelbrot.cc
     <p style="margin-bottom:168mm;" />
    
 
-``FOCUS=-1.45,0,0.05 MIT=50 ~/env/mandelbrot/mandelbrot.sh``
+``FOCUS=-1.45,0,0.05 MIT=50 ~/mandelbrot/mandelbrot.sh``
 
 
 
@@ -940,15 +945,935 @@ Standalone Test Example : mandelbrot.py
 
 
 
+:i:`Best_IDE_bash_command_line.png`
+-------------------------------------
 
-TODO : Brief Description of PyVista and MatPlotLib
-----------------------------------------------------
+
+Best IDE to use : Unix Command Line : bash shell 
+--------------------------------------------------- 
+
+
+.. sidebar:: :small:`What is wrong with IDEs like "Visual Studio Code"?`
+
+   .. class:: small 
+
+      * hides commands and errors
+      
+        * :r:`like typing while wearing boxing gloves`
+
+      * pain to describe setup : this window, this box,... 
+      * megabytes of bloat-ware : slow
+      * big project files, vendor lock in  
+      * often not the target build system 
+      * :r:`prevents learning tools directly`
+
+
+.. sidebar:: :small:`Suggest: Avoid IDEs when learning`
+
+   .. class:: small 
+
+        * Just adds extra complex layer
+        * Imperfect interface ontop of tools 
+        
+        :r:`Using tools directly : you will learn faster`
+    
+
 
 .. class:: small 
 
 
-     PyVista 
-         Interface on top of VTK 
+   bash shell 
+       coordinate an infinity of tools
+   vim (or other minimal editor)
+       text editor 
+   compiler (gcc/clang etc..)
+       build code
+   ipython (interactive python shell)
+       analysis and debugging 
+   rsync 
+       transfer files between machines 
+   git,zip,curl,...
+       plethora of tools : whatever you need
+  
+   **Advantages of NOT using an IDE**   
+
+   * Standard tools : that work almost anywhere 
+   * Easy to automate : just write bash scripts 
+   * Nothing hidden : commands and errors directly
+   * Freedom to use(or create) the tool appropriate to the task 
+   * Arrange same environment on remote server anywhere
+   * Work with Open source projects 
+
+
+
+Opticks : GPU Optical Photon Simulation Package 
+--------------------------------------------------
+
+
+.. sidebar:: :small:`Opticks bitbucket`
+
+    .. image:: /env/presentation/opticks/opticks_repo.png
+       :width: 500px
+       :align: right
+
+
+.. class:: small
+
+   Opticks : Open source project 
+
+   * based on NVIDIA OptiX : GPU ray tracing 
+   * many thousands of classes, structs 
+   * :r:`thousands of unit tests` 
+   * accelerates optical photon simulation 
+
+     * speedup factor > 1500x 
+
+
+   **Importance of Unit tests**
+
+   * not just for testing 
+
+     * ideal way to recall functionality 
+
+   * integral part of development 
+
+     * run tests as add new features 
+
+
+.. class:: huge
+
+   https://bitbucket.org/simoncblyth/opticks/
+
+
+ 
+
+
+`Optical Photon Simulation Problem...`
+---------------------------------------------------------
+
+.. raw:: html
+
+     <p style="margin-bottom:7cm;" />
+
+.. sidebar:: :small:`Huge CPU Memory+Time Expense`
+
+    .. class:: small
+
+         **JUNO Muon Simulation Bottleneck**
+           ~99% CPU time, memory constraints
+
+         **Ray-Geometry intersection Dominates**
+           simulation is not alone in this problem...
+
+         **Optical photons : naturally parallel, simple :**
+           * produced by Cherenkov+Scintillation 
+           * yield only Photomultiplier hits
+
+
+.. s5_talk::
+
+   A muon travelling across the JUNO scintillator yields tens of millions 
+   of optical photons, presenting memory and time challenges for simulation.
+
+   Most of the time is taken finding intersections between photons and geometry 
+   Simulation is not alone in this bottleneck.
+
+.. comment
+
+   Optical photons are naturally parallel : they can be considered 
+   to be produced only by two processes : Cherenkov and Scintillation and we
+   are interested in photons that hit the PMTs.  
+
+   These characteristics make it straightforward integrate an external optical
+   simulation.
+ 
+
+   
+
+
+:small:`Optical Photon Simulation ≈ Ray Traced Image Rendering`
+-------------------------------------------------------------------------------
+
+.. sidebar:: :small:`Not a Photo, a Calculation`
+
+    .. image:: ../optix/samples/optix-ray-tracing-glasses.png 
+       :width: 450px
+       :align: right
+
+    .. class:: tiny
+
+        http://on-demand.gputechconf.com/siggraph/2013/presentation/SG3106-Building-Ray-Tracing-Applications-OptiX.pdf
+
+
+.. raw:: html
+
+    <p style="margin-bottom:2cm;" />
+
+.. class:: small
+
+    :b:`simulation` 
+       photon parameters at sensors (PMTs) 
+
+    :b:`rendering` 
+       pixel values at image plane
+
+
+.. raw:: html
+
+    <p style="margin-bottom:2cm;" />
+
+
+.. class:: small
+
+    **Much in common : geometry, light sources, optical physics**
+
+    * :redbold:`both limited by ray geometry intersection, aka ray tracing`
+
+.. raw:: html
+
+    <p style="margin-bottom:2cm;" />
+
+.. class:: small
+
+    **Many Applications of ray tracing** :
+
+    * advertising, design, architecture, films, games,...
+    * -> huge efforts to improve hw+sw over 30 yrs
+
+
+.. s5_talk::
+
+    Ray traced image rendering in computer graphics has exactly the same bottleneck.
+    Actually, there is a lot in common between optical photon simulation and ray traced image rendering.   
+    Simulation gives photon parameters at PMTs, rendering gives pixel values at the image plane.
+
+    Both these are limited by ray geometry intersection, which is also known as ray tracing.
+
+    Ray tracing is widely used resulting in huge efforts to improve ray tracing perfromance.
+    
+    
+
+
+Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow
+-------------------------------------------------------------
+
+.. class:: small
+
+    .. table::
+        :align: center
+
+        +--------------------------------------------------+
+        | :b:`https://bitbucket.org/simoncblyth/opticks`   |
+        +--------------------------------------------------+
+
+
+.. raw:: html
+
+    <p style="margin-bottom:13cm;" />
+
+.. class:: small
+
+    Opticks API : split according to dependency -- Optical photons are GPU "resident", only hits need to be copied to CPU memory 
+
+
+.. s5_talk::
+
+    This shows how Opticks is integrated with Geant4. The geometry is translated 
+    and uploaded to the GPU at initialization.
+
+    Cerenkov or Scintillation gensteps, the blue lines, are the generation parameters 
+    uploaded to the GPU so optical photon generation can be done there.
+
+    This allows the optical photon simulation to be entirely offloaded  
+    to the GPU with only collected hits requiring memory on the CPU.
+ 
+
+
+:i:`[9]cxr_i0_t8,_-1 : EXCLUDE SLOWEST`
+-----------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:2cm;" />
+
+
+.. sidebar:: :small:`JUNO Opticks OptiX 7 Ray-trace`
+
+    .. class:: small
+
+        CSGFoundry CPU/GPU Geometry 
+
+        * :redbold:`purely analytic CSG, no triangles` 
+
+
+.. s5_talk::
+
+   Here is a ray trace render of JUNO using OptiX 7 
+   Note that there are no triangles here, this is a purely analytic ray trace with 
+   the geometry that the simulation uses.
+
+   [Notes: ~10s slide, just the comment] 
+
+
+
+
+
+:i:`cxr_min__eye_-10,0,0__zoom_0.5__tmin_0.1__sChimneyAcrylic_increased_TMAX.jpg`
+-----------------------------------------------------------------------------------
+
+``ELV=t94,95 ./cxr_min.sh  ## skip sTarget sAcrylic``
+
+.. s5_talk::
+
+   As geometry is updated, I redid render checks. 
+   This render skips acrylic sphere and scintillator.
+ 
+
+
+:i:`cxr_min__eye_-10,0,-30__zoom_0.5__tmin_0.1__sChimneyAcrylic_photon_eye_view.jpg`
+--------------------------------------------------------------------------------------
+
+``ELV=t94,95 ./cxr_min.sh ## skip sTarget sAcrylic : upwards view`` 
+
+.. s5_talk::
+
+   Here is an upwards view from inside the scintillator, looking towards the Chimney. 
+
+
+
+:i:`scan-pf-check-GUI-TO-SC-BT5-SD`
+--------------------------------------
+
+.. s5_talk::
+
+   This GUI allows interactive selection between tens of millions 
+   of photons based on their histories.  
+
+   Here its showing the photons that scattered before boundary transmitting straight 
+   through to surface detect.
+
+   Its implemented by indexing the photon histories using some very fast 
+   GPU big integer sorting provided by CUDA Thrust, 
+   and using OpenGL shaders to switch between selections.
+
+   The 64-bit integers hold up to 16 4-bit flags for each step of the photon.
+
+   All of this is done using interop capabilities of OpenGL/CUDA/Thrust and OptiX
+   so GPU buffers can be written to and rendered inplace with no copying around.
+
+
+
+
+
+:i:`scan-pf-check-GUI-TO-BT5-SD`
+----------------------------------
+
+.. s5_talk::
+
+   The GUI also provides interactive time scrubbing of the propagation 
+   of tens of millions of photons. 
+
+   This is some nanoseconds later for a different history category. 
+  
+   I created this GUI to help with debugging the simulation. 
+
+
+.. comment
+
+     * DELL Precision 7920T Workstation
+     * Intel Xeon Silver 4114, 2.2GHz, 40 cores, 65G 
+     * NVIDIA Quadro RTX 8000, 48G 
+
+     * DELL Precision 7920T Workstation
+     * Intel Xeon Gold 5118, 2.3GHz, 48 cores, 65G  
+     * NVIDIA TITAN RTX, 24G
+     * NVIDIA TITAN V, 12G
+
+
+
+
+
+
+
+
+    
+
+Exercise 1 : Clone, build and run the Mandelbrot example
+------------------------------------------------------------
+
+
+.. class:: small 
+
+   Assuming you already have : bash, git, python, ipython, matplotlib  
+
+   * python related packages can conveniently be installed using **conda**
+
+   1. clone **mandelbrot** and **np** repos::
+
+        cd
+        git clone https://github.com/simoncblyth/mandelbrot
+        git clone https://github.com/simoncblyth/np
+
+   2. read the code downloaded, ask about things you do not understand
+
+   3. build and run::
+
+        cd ~/mandelbrot
+        ./mandelbrot.sh 
+
+
+   4. read the mandelbrot README and try FOCUS and max iterations MIT 
+      parameters as suggested
+
+   5. try changing the code : change the formula  
+
+
+Exercise 1 : Alternative URLs 
+----------------------------------
+
+.. class:: small
+
+    If github is blocked for you::
+
+         cd
+         git clone git@code.ihep.ac.cn:blyth/mandelbrot.git
+         git clone git@code.ihep.ac.cn:blyth/np.git
+
+
+
+.. comment
+
+    When git is blocked(it often will be) use rsync(over ssh)
+    -----------------------------------------------------------
+
+
+    .. sidebar:: :small:`Better Inflexible When Dangerous`
+
+        .. class:: small
+
+             * rsync has potential to delete many files 
+             * so inflexible very simple scripts are wise
+
+        .. class:: small
+
+             * github, bitbucket are very often blocked (even from IHEP)
+             * rsync which transfers files over ssh is seldom blocked     
+
+
+
+    .. raw:: html
+
+        <pre class="mypretiny">
+        &#35;!/bin/bash -l
+
+        defarg="info_all"
+        arg=${1:-$defarg}
+
+        ## for rsync a trailing slash on 
+        ## source directory means copy contents of this directory
+        src=/Users/blyth/np/     
+        dst=L7:bes3/np
+        cmd="rsync -zarv --delete  $src $dst"
+
+        vars="BASH_SOURCE defarg arg src dst cmd"
+
+        if [ "${arg/info}" != "$arg" ]; then
+           for var in $vars ; do printf "%20s : %s \n" "$var" "${!var}" ; done 
+        fi 
+
+        if [ "${arg/all}" != "$arg" ]; then
+           date 
+           echo $cmd
+           eval $cmd
+           [ $? -ne 0 ] && echo $BASH_SOURCE : all error && exit 1 
+           date
+        fi 
+        </pre>
+
+
+        
+
+    
+
+.. comment
+
+    Graphics from Remote Server Via X11 forwarding ?
+    ----------------------------------------------------
+
+    .. sidebar:: :small:`X11 Forwarded Graphics`
+
+       .. class:: small
+
+             * :r:`Its been terrible for 20 years`
+             * Dont expect any improvement 
+
+               * vendors not interested 
+               * potential to break their business models
+
+             **Advice : dont bother using remote graphics**
+
+             * set up graphics locally on your laptop
+             * rsync reduced data, analyse locally 
+             
+
+
+    .. class:: small 
+
+        It is possible to display graphics from remote server
+
+        * using X11 forwarding (ssh -Y L7) 
+        * but once you succeed (and it will not be easy) 
+        * the performance will be so terrible you will wonder why you bothered 
+
+
+        Much better to setup graphics locally on your laptop 
+
+        * use rsync to move data to you laptop, where you analyse 
+
+
+
+
+Python Tools
+---------------
+
+.. class:: small
+
+    NumPy
+       fundamental basis of numerical python : arrays 
+
+       * https://numpy.org
+
+    matplotlib
+       mainly 2D plotting  
+
+       * https://matplotlib.org/stable/gallery/index.html
+
+    pyvista
+       3D plotting 
+
+       * built on top of VTK (Visalization Toolkit)
+       * GPU accelerated : handle millions of data points 
+       * https://docs.pyvista.org/version/stable/
+
+
+
+:i:`NumPy_Logo.png`
+--------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:171mm;" />
+
+.. class:: huge
+
+    ``https://numpy.org/``
+
+
+:i:`NumPy_Broad.png`
+-----------------------
+
+
+:i:`Matplotlib_Logo.png`
+-------------------------
+
+
+:i:`PyVista_Logo.png`
+------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:55mm;" />
+
+.. class:: small 
+
+    ``https://docs.pyvista.org/version/stable/``
+
+
+
+
+:i:`Lao Tzu`
+--------------
+
+.. class:: huge
+
+   
+
+    |  To attain knowledge, add things everyday. 
+    |  To attain wisdom, remove things every day.
+    |  *Lao Tzu*
+
+
+.. class:: normal
+
+   You need to learn so many things...  : Actually no, you do not 
+ 
+   * you need to learn what you need, when you need it
+
+   Retain core principals that enable you to learn quickly
+
+   * unit tests : not just for testing
+
+     * hugely useful for learning too 
+
+
+
+
+Python Data Science Handbook 
+------------------------------
+
+.. comment
+
+    .. sidebar:: :i:`PythonDataScienceHandbook`
+
+        .. image:: /env/presentation/PythonDataScienceHandbook/cover.png
+           :width: 400px
+           :align: right
+
+
+.. class:: small
+
+   * https://jakevdp.github.io/PythonDataScienceHandbook/
+   * a good resource to get comfortable with python  
+
+   All these packages, features, can be overwhelming 
+
+   * dont be overwhelmed 
+   * just need basic familiarity 
+   * then can find whatever you need, when you need it
+
+
+
+View HTML Locally : To Avoid Network Issues
+---------------------------------------------
+
+.. class:: small
+
+    Download the zip archive::
+
+       curl -L -O https://github.com
+          /jakevdp/PythonDataScienceHandbook/archive/refs/heads/gh-pages.zip
+
+.. class:: small
+
+    Expand the zip archive of html pages::
+
+        mkdir PDSH
+        cp PythonDataScienceHandbook-gh-pages.zip PDSH/
+        cd PDSH/
+
+        unzip -l PythonDataScienceHandbook-gh-pages.zip  # check paths in the zip 
+        unzip PythonDataScienceHandbook-gh-pages.zip
+        ln -s PythonDataScienceHandbook-gh-pages PythonDataScienceHandbook
+        ln -s PythonDataScienceHandbook-gh-pages/theme 
+
+        python -m http.server
+
+        open http://localhost:8000/PythonDataScienceHandbook/index.html
+
+
+Objective of PythonDataScienceHandbook Review
+-----------------------------------------------
+
+.. class:: normal
+
+    I will go through a selection of items from the book.
+
+    * copy/paste-ing parts into an IPython session 
+
+      * :r:`follow along doing the same : I will explain the commands` 
+    
+    **Objective is NOT to learn commands** : :b:`aim is to get comfortable with IPython` 
+
+    * learn to play/discover functionality from various python packages 
+
+
+IPython : 01.01-help-and-documentation
+----------------------------------------
+
+.. class:: normal 
+
+    http://localhost:8000/PythonDataScienceHandbook/01.01-help-and-documentation.html
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/01.01-help-and-documentation.html
+
+.. class:: huge
+
+    * :b:`IPython_help_?`
+    * :b:`IPython_source_??`
+    * :b:`IPython_tab`
+
+
+:small:`IPython_help_?`
+-------------------------
+
+:small:`IPython_source_??`
+---------------------------
+
+:small:`IPython_tab`
+---------------------------
+
+
+IPython : 01.03-magic-commands
+---------------------------------
+
+.. class:: normal 
+
+    http://localhost:8000/PythonDataScienceHandbook/01.03-magic-commands.html
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/01.03-magic-commands.html
+
+.. class:: huge
+
+    * :b:`IPython_paste`
+    * :b:`IPython_cpaste`
+    * :b:`IPython_run`
+    * :b:`IPython_timeit`
+
+
+:small:`IPython_paste`
+--------------------------
+
+:small:`IPython_cpaste`
+--------------------------
+
+:small:`IPython_run`
+---------------------
+
+:small:`IPython_timeit`
+------------------------
+
+
+
+
+IPython : 01.05-ipython-and-shell-commands
+-------------------------------------------
+
+.. class:: normal 
+
+    http://localhost:8000/PythonDataScienceHandbook/01.05-ipython-and-shell-commands.html
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/01.05-ipython-and-shell-commands.html
+
+.. class:: huge
+
+    * :b:`IPython_shell`
+
+
+
+:small:`IPython_shell`
+------------------------
+
+
+
+
+
+NumPy : 02.00-introduction-to-numpy
+-------------------------------------
+
+.. class:: normal 
+
+    http://localhost:8000/PythonDataScienceHandbook/02.00-introduction-to-numpy.html
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/02.00-introduction-to-numpy.html
+
+
+.. class:: huge
+
+    * :b:`NumPy_np`             
+
+
+:small:`NumPy_np`
+-------------------
+
+
+
+NumPy : 02.01-understanding-data-types
+----------------------------------------
+
+.. class:: normal 
+
+    http://localhost:8000/PythonDataScienceHandbook/02.01-understanding-data-types.html
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/02.01-understanding-data-types.html
+
+.. class:: huge 
+
+    * :b:`NumPy_array`          
+    * :b:`NumPy_zeros`                                  
+    * :b:`NumPy_types`                                  
+
+
+
+:small:`NumPy_array`
+---------------------
+
+:small:`NumPy_zeros`
+---------------------
+
+:small:`NumPy_types`
+---------------------
+
+
+
+NumPy : 02.02-the-basics-of-numpy-arrays
+-------------------------------------------
+
+.. class:: normal 
+
+    http://localhost:8000/PythonDataScienceHandbook/02.02-the-basics-of-numpy-arrays.html  
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/02.02-the-basics-of-numpy-arrays.html
+
+.. class:: huge 
+
+    * :b:`NumPy_slice`                                  
+    * :b:`NumPy_subarray`                               
+    * :b:`NumPy_reshape`                                
+
+
+
+:small:`NumPy_slice`
+---------------------
+
+:small:`NumPy_subarray`
+------------------------
+
+:small:`NumPy_reshape`
+------------------------
+
+
+
+NumPy : 02.03-computation-on-arrays-ufuncs 
+---------------------------------------------
+
+.. class:: normal 
+
+    http://localhost:8000/PythonDataScienceHandbook/02.03-computation-on-arrays-ufuncs.html
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/02.03-computation-on-arrays-ufuncs.html
+
+
+.. class:: huge 
+
+    * :b:`NumPy_wrong`      
+    * :b:`NumPy_right`      
+    * :b:`NumPy_scipy`      
+
+
+
+:small:`NumPy_wrong`
+------------------------
+
+.. raw:: html
+   
+    <pre class="mypre">
+    +----------------------+
+    | Large Loops in NumPy | 
+    | almost always        |
+    | wrong approach       |
+    | (very sloooooooow)   | 
+    +----------------------+
+    </pre>
+
+
+:small:`NumPy_right`
+------------------------
+
+
+.. raw:: html
+   
+    <pre class="mypre">
+
+
+
+
+
+
+
+
+
+
+
+
+    +----------------------+
+    | Correct approach     | 
+    | MUCH MUCH FASTER     |
+    | ALSO SIMPLER         |
+    +----------------------+
+    </pre>
+
+
+
+
+:small:`NumPy_scipy`      
+----------------------
+
+
+
+
+
+
+
+
+
+
+NumPy : 02.05-computation-on-arrays-broadcasting 
+--------------------------------------------------
+
+.. class:: small
+
+    http://localhost:8000/PythonDataScienceHandbook/02.05-computation-on-arrays-broadcasting.html 
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/02.05-computation-on-arrays-broadcasting.html
+
+
+.. class:: huge 
+
+    * :b:`NumPy_broadcasting`      
+
+
+
+
+:small:`NumPy_broadcasting`      
+----------------------------
+
+
+
+
+NumPy : 02.06-boolean-arrays-and-masks
+----------------------------------------
+
+.. class:: small 
+
+    http://localhost:8000/PythonDataScienceHandbook/02.06-boolean-arrays-and-masks.html
+
+    https://jakevdp.github.io/PythonDataScienceHandbook/02.06-boolean-arrays-and-masks.html
+
+.. class:: huge 
+
+    * :b:`NumPy_mask`      
+    * :b:`NumPy_count_nonzero`      
+    * :b:`NumPy_masking`      
+
+
+
+:small:`NumPy_mask`      
+----------------------
+
+:small:`NumPy_count_nonzero`      
+-----------------------------
+
+:small:`NumPy_masking`      
+-----------------------
+
+
+.. comment 
+
+    up to http://localhost:8000/PythonDataScienceHandbook/02.07-fancy-indexing.html
+    considering binning and np.add.at 
+
 
 
 
