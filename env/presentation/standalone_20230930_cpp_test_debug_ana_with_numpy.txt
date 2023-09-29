@@ -10,6 +10,16 @@
 .. include:: s5_background_image.txt
 
 
+.. comment 
+
+    DEMO Commandlines
+
+    ~/opticks/u4/tests/U4Mesh_test.sh 
+
+    GEOM=xjfcSolid ~/opticks/u4/tests/U4Mesh_test2.sh ana
+
+
+
 .. comment
 
     Things to cover
@@ -50,34 +60,37 @@
     <p style="margin-bottom:25mm;" />
     <p style="margin-bottom:50mm;" />
 
-.. class:: normal
+.. class:: small
 
-   * Three Laws of Good Software Design + Development
+   * (p1) Three Laws of Good Software Design + Development
 
-   * Standalone Software Test Example : U4Mesh_test.sh 
+   * (p2) Power of Serialization + De-Serialization 
 
-   * Power of Serialization + De-Serialization 
+   * (p3-12) Opticks : Example Open Source Package 
 
-   * Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
+   * (p13-14) Best IDE to use : Unix Command Line + bash shell
 
-   * NumPy : Fundamental to Python Data Ecosystem
+   * (p15-16) Anaconda Distribution 
 
-   * The Zen of Numpy, by its creator, Travis Oliphant
+   * (p17-22) NumPy : Fundamental to Python Data Ecosystem
 
-   * NumPy : Python flexibility+brevity at C speed
+   * (p23) NPY minimal file format : metadata header + data buffer : trivial to parse
 
-   * NPY minimal file format : metadata header + data buffer : trivial to parse
+   * (p24-27) Matplotlib, PyVista
 
-   * Loading Serialized U4Mesh with NumPy, Visualize with PyVista
+   * (p28-31) Standalone Software Test Example : U4Mesh_test.sh 
 
-   * Standalone Test Example : mandelbrot.sh, mandelbrot.cc
+   * (p32-36) stamp_test.sh : remote/local workflow example  
 
-   * Python Tools : NumPy, Matplotlib, PyVista
+   * (p37-43) Standalone Test Example : mandelbrot.sh, mandelbrot.cc
 
-   * Python Data Science Handbook 
+   * (p44) Bash function Tip
 
+   * (p45) IPython launch customization 
 
+   * (p46-87) Python Data Science Handbook 
 
+   * (p89-90) Concluding
 
 
 
@@ -163,6 +176,49 @@ Three Laws of Good Software Design + Development
    |                                                              |
    |       <p style="margin-bottom:5mm;" />                       |
    +--------------------------------------------------------------+
+
+
+
+
+
+
+Power of Serialization + De-Serialization 
+--------------------------------------------
+
+.. sidebar:: :small:`What is Serialization ?`
+
+   .. class:: small
+
+        **Convert objects into stream of bytes, enabling:** 
+
+        * write to file
+        * transfer over network 
+        * upload to GPU address space      
+        
+        :b:`Handle data with standard tools`
+
+        **Favor simple data structures**
+
+        * arrays of simple struct  
+        * simplify serialization de-serialization 
+
+
+
+.. class:: small 
+
+    Power arises from dependency "suspension":
+
+    * many deps to create objects, much fewer to use
+    * => :r:`Huge potential for software simplification`
+
+    Under-used : as objects often over designed 
+
+    * design for easy serialize/de-serialize 
+    * => flexible data handling 
+
+
+
+
 
 
 
@@ -540,7 +596,7 @@ Best IDE to use : Unix Command Line + bash shell
    * Nothing hidden : commands and errors directly
    * Freedom to use(or create) the tool appropriate to the task 
    * Arrange same environment on remote server anywhere
-   * Work with Open source projects 
+   * Work with Open source projects : :r:`Cross-Platform`
 
 
 
@@ -549,216 +605,73 @@ Best IDE to use : Unix Command Line + bash shell
 
 
 
-Standalone Software Test Example : U4Mesh_test.sh 
-----------------------------------------------------
-
-.. sidebar:: :small:`What is a Standalone Test ?`
-
-    .. class:: small
-
-         * :r:`Very Simple => Very Fast` 
-         * tests small "unit" of software 
-
-           * ``U4Mesh.h``
-           * => simple fast build (no Makefile,..) 
-
-         * Serialization : C++ -> .npy -> NumPy 
-
-           * => analyse in python
-
-         * Communicate bash/C++/py : envvar ``FOLD``
 
 
-.. sidebar:: :small:`<= eg: Standalone Bash Script`
 
+Anaconda : Distribution of ~500 Data Science Pkgs
+--------------------------------------------------
 
-    ::
+.. class:: huge
+
+   :r:`MIXING ENVIRONMENTS CAUSES BREAKAGES`
+
+.. class:: normal
+
+   What will happen ? Mysterious bugs when trying to run/build packages in all environments. 
+
+   +----------+------------------------------------------------------------------------------------+
+   |          |                                                                                    |
+   | BEST     |  * create separate bash functions for each environment you use                     |
+   | PRACTICE |  * :b:`do not enable more than one environment at once`                            |
+   |          |                                                                                    |
+   +----------+------------------------------------------------------------------------------------+
+
+   Example bash function that enables anaconda environment:
+
+.. raw:: html
     
-         ./U4Mesh_test.sh info
-         ./U4Mesh_test.sh build
-         ./U4Mesh_test.sh run
-         ./U4Mesh_test.sh ana
+    <pre class="mypre">
+    bes3_conda () 
+    { 
+    type $FUNCNAME;
+    eval "$(/cvmfs/bes3.ihep.ac.cn/bes3sw/ExternalLib/contrib/anaconda/2023.07/bin/conda shell.bash hook)"
+    }
+    </pre>
+       
+.. class:: huge
 
-
-    .. class:: tiny
-
-        https://bitbucket.org/simoncblyth/opticks/src/master/u4/tests/U4Mesh_test.sh 
-
-
-.. class:: small
-
-   +--------------------------------------------------------------------+
-   |                                                                    | 
-   |                                                                    |
-   | .. raw:: html                                                      |
-   |                                                                    |
-   |    <pre class="mypretiny">&#35;!/bin/bash -l                       |
-   |    cd $(dirname $BASH_SOURCE)                                      |
-   |    name=U4Mesh_test                                                |
-   |    <span class="r">export FOLD=/tmp/$name </span>                  |
-   |    bin=$FOLD/$name                                                 |
-   |    mkdir -p $FOLD                                                  |
-   |    vars="BASH_SOURCE name FOLD bin"                                |
-   |                                                                    |
-   |    defarg="info_build_run_ana"                                     |
-   |    arg=${1:-$defarg}                                               |
-   |    g4- ; clhep-                                                    |
-   |                                                                    |
-   |    if [ "${arg/info}" != "$arg" ]; then                            |
-   |        for var in $vars ; do                                       |
-   |             printf "%20s : %s \n" "$var" "${!var}" ; done          |
-   |    fi                                                              |
-   |    if [ "${arg/build}" != "$arg" ]; then                           |
-   |         gcc $name.cc                                               |
-   |             -g -std=c++11 -lstdc++ -I.. -I$HOME/np                 |
-   |             -I$(clhep-prefix)/include -L$(clhep-prefix)/lib        |
-   |             -I$(g4-prefix)/include/Geant4 -L$(g4-prefix)/lib       |
-   |             -lG4global -lG4geometry -lG4graphics_reps -lCLHEP      |
-   |             -o $bin                                                |
-   |         [ $? -ne 0 ] && echo $BASH_SOURCE build error && exit 1    |
-   |    fi                                                              |
-   |    if [ "${arg/run}" != "$arg" ]; then                             |
-   |        $bin                                                        |
-   |        [ $? -ne 0 ] && echo $BASH_SOURCE run error && exit 2       |
-   |    fi                                                              |
-   |    if [ "${arg/ana}" != "$arg" ]; then                             |
-   |        ${IPYTHON:-ipython} --pdb -i $name.py                       |
-   |        [ $? -ne 0 ] && echo $BASH_SOURCE ana error && exit 3       |
-   |    fi                                                              |
-   |    exit 0                                                          |
-   |    </pre>                                                          |
-   |                                                                    |
-   +--------------------------------------------------------------------+
-    
-   
+     * :b:`THAT WILL CLASH WITH BES3 ENVIRONMENT`
 
 
 
-Power of Serialization + De-Serialization 
+
+
+Anaconda Distribution : Highlight packages
 --------------------------------------------
 
-.. sidebar:: :small:`What is Serialization ?`
-
-   .. class:: small
-
-        **Convert objects into stream of bytes, enabling:** 
-
-        * write to file
-        * transfer over network 
-        * upload to GPU address space      
-        
-        :b:`Handle data with standard tools`
-
-        **Favor simple data structures**
-
-        * arrays of simple struct  
-        * simplify serialization de-serialization 
-
-
-
-.. class:: small 
-
-    Power arises from dependency "suspension":
-
-    * many deps to create objects, much fewer to use
-    * => :r:`Huge potential for software simplification`
-
-    Under-used : as objects often over designed 
-
-    * design for easy serialize/de-serialize 
-    * => flexible data handling 
-
-
-
-
-
-
-
-Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
-------------------------------------------------------------
-
-
-.. sidebar:: :small:`Serialize + Save`
-
-    .. class:: tiny
-
-        https://bitbucket.org/simoncblyth/opticks/src/master/u4/U4Mesh.h
-
-    .. class:: small
-
-       +-----------------------------------------------------------------+
-       |                                                                 |
-       | .. raw:: html                                                   |
-       |                                                                 |
-       |    <pre class="mypretiny">                                      |
-       |    inline NPFold* U4Mesh::serialize() const                     |
-       |    {                                                            |
-       |        <span class="r">NPFold* fold = new NPFold ;</span>       |
-       |        fold->add("vtx", vtx );                                  |
-       |        fold->add("fpd", fpd );                                  |
-       |        return fold ;                                            |
-       |    }                                                            |
-       |    inline void U4Mesh::save(const char* base) const             |
-       |    {                                                            |
-       |        NPFold* fold = serialize();                              |
-       |        fold->save(base);                                        |
-       |    }                                                            |
-       |    </pre>                                                       |
-       +-----------------------------------------------------------------+
-
-    .. class:: small
-
-         *NP.hh*
-              NumPy ``.npy`` file format serialization
-
-         *NPFold.h*
-              In memory folders-of-folders of NP.hh arrays
-
-
-
 .. class:: small
+   
+    **Foundation Packages**   (:r:`This presentation focusses on Foundation Packages`)
 
-   ::
+    * numpy : core array  
+    * ipython : enhanced interactive python shell
+    * matplotlib : plotting 
 
-        https://github.com/simoncblyth/np
+    **Details**
 
+    * scipy : optimization, integration, interpolation, ...
+    * sympy : symbolic algebraic manipulations 
+    * pandas : data analysis and manipulation tool
+    * scikit-image : python image processing
+    * scikit-learn : python machine learning 
 
-   +-------------------------------------------------------------------+
-   |                                                                   |
-   | .. raw:: html                                                     |
-   |                                                                   |
-   |    <pre class="mypretiny">                                        |
-   |    &#35;include "G4Polyhedron.hh"                                 |
-   |    <span class="b">&#35;include "NP.hh" </span>                   |
-   |    <span class="b">&#35;include "NPFold.h" </span>                |
-   |                                                                   |
-   |    struct U4Mesh {                                                |
-   |        const G4VSolid* solid ;                                    |
-   |        G4Polyhedron*   poly ;                                     |
-   |        int             nv,nf ;                                    |
-   |        <span class="r">NP*             vtx ;</span>               |
-   |        double*         vtx_ ;                                     |
-   |        <span class="r">NP*             fpd ;</span>               |
-   |        ...                                                        |
-   |    };                                                             |
-   |    inline U4Mesh::U4Mesh(const G4VSolid* solid_):                 |
-   |        solid(solid_),                                             |
-   |        poly(solid->CreatePolyhedron()),                           |
-   |        nv(poly->GetNoVertices()),                                 |
-   |        nf(poly->GetNoFacets()),                                   |
-   |        <span class="r">vtx(NP::Make&lt;double&gt;(nv, 3)),</span> |
-   |        vtx_(vtx->values&lt;double&gt;()),                         |
-   |        fpd(nullptr)                                               |
-   |    {                                                              |
-   |        for(int i=0 ; i < nv ; i++){                               |
-   |            G4Point3D point = poly->GetVertex(i+1) ;               |
-   |            vtx_[3*i+0] = point.x() ;                              |
-   |            vtx_[3*i+1] = point.y() ;                              |
-   |            vtx_[3*i+2] = point.z() ;                              |
-   |        }                                                          |
-   |        ...                                                        |
-   |    }                                                              |
-   +-------------------------------------------------------------------+
+    **Utilities**
+
+    * pillow : Python Imaging Library
+    * lxml : python XML handling binding to C libraries libxml2 libxslt
+    * zeromq : message queue system 
+    * sphinx : RST based documentation system  
+
 
 
 
@@ -796,6 +709,23 @@ Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
 
 
 
+:i:`NumPy_Logo.png`
+--------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:171mm;" />
+
+.. class:: huge
+
+    ``https://numpy.org/``
+
+
+:i:`NumPy_Broad.png`
+-----------------------
+
+
 
 
 
@@ -803,13 +733,26 @@ Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
 :small:`The Zen of Numpy, by its creator, Travis Oliphant`
 --------------------------------------------------------------------------
 
+.. sidebar:: :small:`Explanation`
+
+    .. class:: small
+
+        * C++ **new** scatters memory allocation
+        * Arrays use contiguous blocks of memory       
+        * C++ std::vector uses contiguous memory 
+          (but reallocs as it grows)
+
+        :r:`Allocated memory layout is critical`
+
+
 .. raw:: html
 
     <pre class="mypre" >
 
     Strided is better than scattered.
     Contiguous is better than strided.
-    Descriptive is better than imperative[1] (e.g. data-types).
+    Descriptive is better than imperative[1] 
+    (e.g. data-types).
     <b>Array-orientated is better than object-oriented.</b>
     <b>Broadcasting is a great idea -- use where possible!</b>
     <b>Vectorized is better than an explicit loop.</b>
@@ -833,6 +776,22 @@ Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
 
    [2] but not so large that has trouble fitting in memory, np.memmap is possible but better to avoid for simplicity  
 
+
+.. s5_talk::
+
+    Why would you scatter data ? 
+
+
+
+:i:`NumPy_views`
+------------------
+
+
+.. sidebar:: :small:`NumPy views : same data, diff. view`
+
+   .. class:: small
+
+        **b** is a view of **a** with different shape 
 
 
 :small:`NumPy : Python flexibility+brevity at C speed`
@@ -955,6 +914,228 @@ Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
 
 
 
+:i:`Matplotlib_Logo.png`
+-------------------------
+
+
+:i:`PyVista_Logo.png`
+------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:55mm;" />
+
+.. class:: small 
+
+    ``https://docs.pyvista.org/version/stable/``
+
+
+:i:`ntds3_ana`
+-----------------
+
+.. raw:: html
+
+    <p style="margin-bottom:40mm;" />
+
+.. class:: normal
+
+    ``~/j/ntds/ntds3.sh info_ana``
+
+
+
+
+:i:`ntds3_ana 2`
+-----------------
+
+.. sidebar:: :small:`PyVista : 3D Plotting`
+
+     * GPU accelerated : handles millions of data points 
+     * :r:`Much better than Matplotlib for 3D`
+
+
+
+
+
+
+
+Standalone Software Test Example : U4Mesh_test.sh 
+----------------------------------------------------
+
+.. sidebar:: :small:`What is a Standalone Test ?`
+
+    .. class:: small
+
+         * :r:`Very Simple => Very Fast` 
+         * tests small "unit" of software 
+
+           * ``U4Mesh.h``
+           * => simple fast build (no Makefile,..) 
+
+         * Serialization : C++ -> .npy -> NumPy 
+
+           * => analyse in python
+
+         * Communicate bash/C++/py : envvar ``FOLD``
+
+
+.. sidebar:: :small:`<= eg: Standalone Bash Script`
+
+
+    ::
+    
+         ./U4Mesh_test.sh info
+         ./U4Mesh_test.sh build
+         ./U4Mesh_test.sh run
+         ./U4Mesh_test.sh ana
+
+
+    .. class:: tiny
+
+        https://bitbucket.org/simoncblyth/opticks/src/master/u4/tests/U4Mesh_test.sh 
+
+
+.. class:: small
+
+   +--------------------------------------------------------------------+
+   |                                                                    | 
+   |                                                                    |
+   | .. raw:: html                                                      |
+   |                                                                    |
+   |    <pre class="mypretiny">&#35;!/bin/bash -l                       |
+   |    cd $(dirname $BASH_SOURCE)                                      |
+   |    name=U4Mesh_test                                                |
+   |    <span class="r">export FOLD=/tmp/$name </span>                  |
+   |    bin=$FOLD/$name                                                 |
+   |    mkdir -p $FOLD                                                  |
+   |    vars="BASH_SOURCE name FOLD bin"                                |
+   |                                                                    |
+   |    defarg="info_build_run_ana"                                     |
+   |    arg=${1:-$defarg}                                               |
+   |    g4- ; clhep-                                                    |
+   |                                                                    |
+   |    if [ "${arg/info}" != "$arg" ]; then                            |
+   |        for var in $vars ; do                                       |
+   |             printf "%20s : %s \n" "$var" "${!var}" ; done          |
+   |    fi                                                              |
+   |    if [ "${arg/build}" != "$arg" ]; then                           |
+   |         gcc $name.cc                                               |
+   |             -g -std=c++11 -lstdc++ -I.. -I$HOME/np                 |
+   |             -I$(clhep-prefix)/include -L$(clhep-prefix)/lib        |
+   |             -I$(g4-prefix)/include/Geant4 -L$(g4-prefix)/lib       |
+   |             -lG4global -lG4geometry -lG4graphics_reps -lCLHEP      |
+   |             -o $bin                                                |
+   |         [ $? -ne 0 ] && echo $BASH_SOURCE build error && exit 1    |
+   |    fi                                                              |
+   |    if [ "${arg/run}" != "$arg" ]; then                             |
+   |        $bin                                                        |
+   |        [ $? -ne 0 ] && echo $BASH_SOURCE run error && exit 2       |
+   |    fi                                                              |
+   |    if [ "${arg/ana}" != "$arg" ]; then                             |
+   |        ${IPYTHON:-ipython} --pdb -i $name.py                       |
+   |        [ $? -ne 0 ] && echo $BASH_SOURCE ana error && exit 3       |
+   |    fi                                                              |
+   |    exit 0                                                          |
+   |    </pre>                                                          |
+   |                                                                    |
+   +--------------------------------------------------------------------+
+    
+   
+
+
+
+
+Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
+------------------------------------------------------------
+
+
+.. sidebar:: :small:`Serialize + Save`
+
+    .. class:: tiny
+
+        https://bitbucket.org/simoncblyth/opticks/src/master/u4/U4Mesh.h
+
+    .. class:: small
+
+       +-----------------------------------------------------------------+
+       |                                                                 |
+       | .. raw:: html                                                   |
+       |                                                                 |
+       |    <pre class="mypretiny">                                      |
+       |    inline NPFold* U4Mesh::serialize() const                     |
+       |    {                                                            |
+       |        <span class="r">NPFold* fold = new NPFold ;</span>       |
+       |        fold->add("vtx", vtx );                                  |
+       |        fold->add("fpd", fpd );                                  |
+       |        return fold ;                                            |
+       |    }                                                            |
+       |    inline void U4Mesh::save(const char* base) const             |
+       |    {                                                            |
+       |        NPFold* fold = serialize();                              |
+       |        fold->save(base);                                        |
+       |    }                                                            |
+       |    </pre>                                                       |
+       +-----------------------------------------------------------------+
+
+    .. class:: small
+
+         *NP.hh*
+              NumPy ``.npy`` file format serialization
+
+         *NPFold.h*
+              In memory folders-of-folders of NP.hh arrays
+
+
+
+.. class:: small
+
+   ::
+
+        https://github.com/simoncblyth/np
+
+
+   +-------------------------------------------------------------------+
+   |                                                                   |
+   | .. raw:: html                                                     |
+   |                                                                   |
+   |    <pre class="mypretiny">                                        |
+   |    &#35;include "G4Polyhedron.hh"                                 |
+   |    <span class="b">&#35;include "NP.hh" </span>                   |
+   |    <span class="b">&#35;include "NPFold.h" </span>                |
+   |                                                                   |
+   |    struct U4Mesh {                                                |
+   |        const G4VSolid* solid ;                                    |
+   |        G4Polyhedron*   poly ;                                     |
+   |        int             nv,nf ;                                    |
+   |        <span class="r">NP*             vtx ;</span>               |
+   |        double*         vtx_ ;                                     |
+   |        <span class="r">NP*             fpd ;</span>               |
+   |        ...                                                        |
+   |    };                                                             |
+   |    inline U4Mesh::U4Mesh(const G4VSolid* solid_):                 |
+   |        solid(solid_),                                             |
+   |        poly(solid->CreatePolyhedron()),                           |
+   |        nv(poly->GetNoVertices()),                                 |
+   |        nf(poly->GetNoFacets()),                                   |
+   |        <span class="r">vtx(NP::Make&lt;double&gt;(nv, 3)),</span> |
+   |        vtx_(vtx->values&lt;double&gt;()),                         |
+   |        fpd(nullptr)                                               |
+   |    {                                                              |
+   |        for(int i=0 ; i < nv ; i++){                               |
+   |            G4Point3D point = poly->GetVertex(i+1) ;               |
+   |            vtx_[3*i+0] = point.x() ;                              |
+   |            vtx_[3*i+1] = point.y() ;                              |
+   |            vtx_[3*i+2] = point.z() ;                              |
+   |        }                                                          |
+   |        ...                                                        |
+   |    }                                                              |
+   +-------------------------------------------------------------------+
+
+
+
+
+
+
 
 
 :small:`Loading Serialized U4Mesh with NumPy, Visualize with PyVista`
@@ -1042,7 +1223,11 @@ Using *NP.hh NPFold.h* Serialization from *U4Mesh.h*
 U4Mesh_test2_xjfcSolid_review.png
 ----------------------------------
 
+.. raw:: html
 
+    <p style="margin-bottom:140mm;" />
+
+``GEOM=xjfcSolid ~/opticks/u4/tests/U4Mesh_test2.sh ana``
 
 
 stamp_test.cc example
@@ -1145,6 +1330,27 @@ The script automates what you could laboriously do
 in a manual way.  
 
 
+
+:i:`STAMP_ProcessHits_56us_Hama_0_0.png`
+------------------------------------------
+
+``STAMP_TT=257400,600 STAMP_ANNO=1 ~/j/ntds/stamp.sh ## inpho => Hama:0:0``
+
+.. raw:: html
+
+    <p style="margin-bottom:152mm;" />
+    
+.. class:: small
+
+    :r:`(s0) beginPhoton` :b:`(s1) finalPhoton` :g:`( ) pointPhoton` :c:`(h0) ProcessHits[` :c:`(i0) ProcessHits]` 
+    -- **ProcessHits taking ~56us for SD** 
+
+
+
+
+
+
+
 Exercise 0 : Clone, build, run time stamp example
 ----------------------------------------------------------
 
@@ -1164,22 +1370,18 @@ Exercise 0 : Clone, build, run time stamp example
     
     ::
 
+         ## clone from public repos on github.com (using git+https)
          git clone https://github.com/simoncblyth/stamp
          git clone https://github.com/simoncblyth/np
 
-         ## alternate URLs if github is blocked 
-
-         git clone https://code.ihep.ac.cn/simoncblyth/stamp    
-         git clone https://code.ihep.ac.cn/simoncblyth/np
+         ## OR from internal repos on code.ihep.ac.cn (using git+ssh)
+         git clone git@code.ihep.ac.cn:blyth/stamp.git
+         git clone git@code.ihep.ac.cn:blyth/np.git
 
    
     2. Build and run the test on remote server
     3. Grab timestamps from remote server onto local laptop  
     4. Load timestamps into IPython on local laptop and examine the values 
-
-
-
-
 
 
 
@@ -1603,158 +1805,29 @@ Exercise 1 : Alternative URLs
 
 
 
-Python Tools
----------------
+.. comment
 
-.. class:: small
+    Python Tools
+    ---------------
 
-    NumPy
-       fundamental basis of numerical python : arrays 
+    .. class:: small
 
-       * https://numpy.org
+        NumPy
+           fundamental basis of numerical python : arrays 
 
-    matplotlib
-       mainly 2D plotting  
+           * https://numpy.org
 
-       * https://matplotlib.org/stable/gallery/index.html
+        matplotlib
+           mainly 2D plotting  
 
-    pyvista
-       3D plotting 
+           * https://matplotlib.org/stable/gallery/index.html
 
-       * built on top of VTK (Visalization Toolkit)
-       * GPU accelerated : handle millions of data points 
-       * https://docs.pyvista.org/version/stable/
+        pyvista
+           3D plotting 
 
-
-
-:i:`NumPy_Logo.png`
---------------------
-
-
-.. raw:: html
-
-    <p style="margin-bottom:171mm;" />
-
-.. class:: huge
-
-    ``https://numpy.org/``
-
-
-:i:`NumPy_Broad.png`
------------------------
-
-
-:i:`Matplotlib_Logo.png`
--------------------------
-
-
-:i:`PyVista_Logo.png`
-------------------------
-
-
-.. raw:: html
-
-    <p style="margin-bottom:55mm;" />
-
-.. class:: small 
-
-    ``https://docs.pyvista.org/version/stable/``
-
-
-
-:i:`sklearn_Logo`
-------------------
-
-
-:i:`Lao Tzu`
---------------
-
-.. class:: huge
-
-   
-
-    |  To attain knowledge, add things everyday. 
-    |  To attain wisdom, remove things every day.
-    |  *Lao Tzu*
-
-
-.. class:: normal
-
-   You need to learn so many things...  : Actually no, you do not 
- 
-   * you need to learn what you need, when you need it
-
-   Retain core principals that enable you to learn quickly
-
-   * unit tests : not just for testing
-
-     * :r:`hugely useful for learning+reminding too` 
-
-
-
-Anaconda : Distribution of ~500 Data Science Pkgs
---------------------------------------------------
-
-.. class:: huge
-
-   :r:`MIXING ENVIRONMENTS CAUSES BREAKAGES`
-
-.. class:: normal
-
-   What will happen ? Mysterious bugs when trying to run/build packages in all environments. 
-
-   +----------+------------------------------------------------------------------------------------+
-   |          |                                                                                    |
-   | BEST     |  * create separate bash functions for each environment you use                     |
-   | PRACTICE |  * :b:`do not enable more than one environment at once`                            |
-   |          |                                                                                    |
-   +----------+------------------------------------------------------------------------------------+
-
-   Example bash function that enables anaconda environment:
-
-.. raw:: html
-    
-    <pre class="mypre">
-    bes3_conda () 
-    { 
-    type $FUNCNAME;
-    eval "$(/cvmfs/bes3.ihep.ac.cn/bes3sw/ExternalLib/contrib/anaconda/2023.07/bin/conda shell.bash hook)"
-    }
-    </pre>
-       
-.. class:: huge
-
-     * :b:`THAT WILL CLASH WITH BES3 ENVIRONMENT`
-
-
-
-
-
-Anaconda Distribution : Highlight packages
---------------------------------------------
-
-.. class:: small
-   
-    **Foundation Packages**   (:r:`This presentation focusses on Foundation Packages`)
-
-    * numpy : core array  
-    * ipython : enhanced interactive python shell
-    * matplotlib : plotting 
-
-    **Details**
-
-    * scipy : optimization, integration, interpolation, ...
-    * sympy : symbolic algebraic manipulations 
-    * pandas : data analysis and manipulation tool
-    * scikit-image : python image processing
-    * scikit-learn : python machine learning 
-
-    **Utilities**
-
-    * pillow : Python Imaging Library
-    * lxml : python XML handling binding to C libraries libxml2 libxslt
-    * zeromq : message queue system 
-    * sphinx : RST based documentation system  
+           * built on top of VTK (Visalization Toolkit)
+           * GPU accelerated : handle millions of data points 
+           * https://docs.pyvista.org/version/stable/
 
 
 
@@ -1882,10 +1955,10 @@ Python Data Science Handbook
    * then can find whatever you need, when you need it
 
 
+   **Objective is NOT to learn commands, Aims:** 
 
-
-
-
+   * :b:`get comfortable with IPython` 
+   * learn to play/discover functionality from various python packages 
 
 
 
@@ -1894,10 +1967,10 @@ View HTML Locally : To Avoid Network Issues
 
 .. class:: small
 
-    Download the zip archive::
+    Use browser to download ZIP of html pages from:
 
-       curl -L -O https://github.com
-          /jakevdp/PythonDataScienceHandbook/archive/refs/heads/gh-pages.zip
+    * https://code.ihep.ac.cn/blyth/pythondatasciencehandbook/-/tree/gh-pages
+    * https://github.com/jakevdp/PythonDataScienceHandbook/tree/gh-pages
 
 .. class:: small
 
@@ -1912,26 +1985,28 @@ View HTML Locally : To Avoid Network Issues
         ln -s PythonDataScienceHandbook-gh-pages PythonDataScienceHandbook
         ln -s PythonDataScienceHandbook-gh-pages/theme 
 
-        python -m http.server
+        python -m http.server    ## start local web server 
 
         open http://localhost:8000/PythonDataScienceHandbook/index.html
 
 
-Objective of PythonDataScienceHandbook Review
+
+Exercise 3 : IPython copy/paste follow along
 -----------------------------------------------
 
-.. class:: normal
+.. class:: huge
 
-    I will go through a selection of items from the book.
+    As I copy/paste handbook items into IPython...
 
-    * copy/paste-ing parts into an IPython session 
+    * follow along in browser looking at handbook html
+    * copy/paste from your browser into your local IPython session 
 
-      * :r:`follow along doing the same : I will explain the commands` 
-    
-    **Objective is NOT to learn commands** : :b:`aim is to get comfortable with IPython` 
+.. class:: normal 
 
-    * learn to play/discover functionality from various python packages 
+    * Following slides are bitmapped, they are just a backup.
+    * Continue in your browser looking at Handbook html. 
 
+ 
 
 IPython : 01.01-help-and-documentation
 ----------------------------------------
@@ -2319,6 +2394,98 @@ Python Data Science Handbook1
    * you can easily continue exploring ...
 
   
+
+:i:`sklearn_Logo`
+------------------
+
+
+
+Three Laws of Good Software Design + Development
+---------------------------------------------------
+
+.. sidebar:: :small:`KEY : Units + Unit testing`
+
+    .. class:: small
+
+        Complex problems : Many simple units 
+
+        * each unit with test ready to run 
+        * dive into code in seconds 
+
+        Tame complexity : :r:`Divide and Conquer`
+
+
+
+.. raw:: html
+
+    <p style="margin-bottom:25mm;" />
+
+.. class:: small 
+
+   +--------------------------------------------------------------+
+   |                                                              |
+   |  1. **Arrange fast development cycle** : :b:`TOP PRIORITY`   | 
+   |                                                              |
+   |  * seconds to make change and see outcome, not minutes       |  
+   |  * <1s cycletime : no waiting, :r:`focussed development`     | 
+   |  * cheap cycles => great code                                |
+   |                                                              |
+   |  .. raw:: html                                               |
+   |                                                              |
+   |       <p style="margin-bottom:5mm;" />                       |
+   +--------------------------------------------------------------+
+   |                                                              |
+   |  2. **Always minimize dependencies**                         |
+   |                                                              |
+   |  * just good design : code more useful                       |
+   |  * organize code by dependency, NOT TOPIC                    |
+   |  * dependency is fundamental, topic just opinion             |
+   |  * use serialization to cut dependencies                     |
+   |                                                              |
+   |  .. raw:: html                                               |
+   |                                                              |
+   |       <p style="margin-bottom:5mm;" />                       |
+   +--------------------------------------------------------------+
+   |                                                              |
+   |  3. **Unit tests are your most powerful tool**               |
+   |                                                              |
+   |  * not just for testing, also for development+documenting    |
+   |  * use serialization + mocking to simplify tests             |   
+   |                                                              |
+   |  .. raw:: html                                               |
+   |                                                              |
+   |       <p style="margin-bottom:5mm;" />                       |
+   +--------------------------------------------------------------+
+
+
+
+
+
+
+
+:i:`Lao Tzu`
+--------------
+
+.. class:: huge
+
+
+    |  To attain knowledge, add things everyday. 
+    |  To attain wisdom, remove things every day.
+    |  *Lao Tzu*
+
+
+.. class:: normal
+
+   You need to learn so many things...  : Actually no, you do not 
+ 
+   * you need to learn (or re-learn) what you need, when you need it
+
+   Retain core principals that enable you to learn quickly
+
+   * unit tests : not just for testing
+
+     * :r:`hugely useful for learning+reminding too` 
+
 
 
 
