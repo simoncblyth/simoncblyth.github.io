@@ -68,6 +68,229 @@
     </div>
 
 
+
+
+
+
+:small:`Amdahls "Law" : Expected Speedup Limited by Serial Processing`
+--------------------------------------------------------------------------------------------
+
+.. sidebar:: :small:`S(n) Expected Speedup`
+
+    .. comment
+
+       :width: 1176px
+       :height: 358px
+       :width: 588px 
+       :height: 179px
+            
+    .. image:: /env/presentation/parallel/amdahl.png
+       :width: 392px 
+       :height: 112px
+       :align: center
+
+
+    .. class:: small
+
+        *P* 
+             parallelizable proportion
+        *1-P*
+             non-parallelizable portion
+        *n*
+             parallel speedup factor  
+
+
+
+optical photon simulation, P ~ 99% of CPU time  
+
+* -> potential overall speedup S(n) is 100x 
+* even with parallel speedup factor >> 1000x  
+
+
+
+**Must consider processing "big picture"**
+
+* remove bottlenecks one by one
+* re-evaluate "big picture" after each  
+
+
+.. s5_talk::
+
+   Serial Portion of processing determines the overall 
+   speedup because this goes to zero 
+
+
+
+
+:i:`amdahl_p_sensitive.png`
+-----------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:130mm;" />
+
+
+.. class:: small
+
+    .. image:: /env/presentation/parallel/amdahl.png
+       :width: 392px 
+       :height: 112px
+       :align: center
+
+
+
+
+:i:`ALL1_scatter_10M_photon_22pc_hit_alt.png`
+----------------------------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:150mm;" />
+ 
+
+
+``~/o/cxs_min.sh  ## 10M "TORCH" photons 22pc hit, 3.6 seconds``
+
+
+
+:i:`ALL1_scatter_10M_photon_22pc_hit.png`
+-------------------------------------------
+
+.. comment
+
+   PLOT=scatter MODE=3 PUB=10M_photon_22pc_hit ~/o/cxs_min.sh pvpub
+
+
+
+
+:i:`N6_Substamp_ONE_maxb_scan_A_expensive_tail.png`
+----------------------------------------------------
+
+:i:`N6_Substamp_ONE_maxb_scan_HIT__slow_hit_increase.png`
+----------------------------------------------------------
+
+
+:i:`ALL4_thit_high_time_tail.png`
+---------------------------------
+
+
+Creating that MAX_BOUNCE scan plot
+------------------------------------
+
+.. class:: small
+
+    Using ~/o/cxs_min.sh script with::
+
+        OPTICKS_RUNNING_MODE : SRM_TORCH
+        OPTICKS_EVENT_MODE   : HitPhoton   (picked with VERSION 3)
+        OPTICKS_NUM_PHOTON   : H1          (100K)
+        OPTICKS_MAX_PHOTON   : M1
+
+.. class:: tiny
+
+    Workstation::
+
+        ~/o/cxs_min_scan.sh      ## o is symbolic link to opticks
+
+    Laptop::
+        
+        ~/o/cxs_min.sh grab   
+
+        PLOT=Substamp_ONE_maxb_scan PICK=A ~/o/sreport.sh 
+        PLOT=Substamp_ONE_maxb_scan PICK=A ~/o/sreport.sh mpcap
+        PLOT=Substamp_ONE_maxb_scan PICK=A PUB=expensive_tail ~/o/sreport.sh mppub
+        vi ~/opticks/notes/issues/OPTICKS_MAX_BOUNCE_scanning.rst  ## notes 
+
+.. comment
+
+        PLOT=Substamp_ONE_maxb_scan_HIT ~/o/sreport.sh 
+        PLOT=Substamp_ONE_maxb_scan_HIT ~/o/sreport.sh mpcap
+        PLOT=Substamp_ONE_maxb_scan_HIT PUB=slow_hit_increase ~/o/sreport.sh mppub
+
+
+
+
+:i:`ALL4_seqnib_small_truncation_bump.png`
+---------------------------------------------
+
+
+
+
+Creating that seqnib plot
+---------------------------------
+
+.. class:: small
+
+    Using ~/o/cxs_min.sh script with::
+
+        OPTICKS_RUNNING_MODE : SRM_TORCH
+        OPTICKS_EVENT_MODE   : HitPhotonSeq   (picked with VERSION 4)
+        OPTICKS_NUM_PHOTON   : M1          
+        OPTICKS_MAX_PHOTON   : M1
+
+.. class:: tiny
+
+    Workstation::
+
+        VERSION=4 ~/o/cxs_min.sh   
+
+    Laptop::
+        
+        VERSION=4 ~/o/cxs_min.sh grab   
+        VERSION=4 MODE=2 PLOT=seqnib ~/o/cxs_min.sh ana
+        VERSION=4 MODE=2 PLOT=seqnib ~/o/cxs_min.sh mpcap
+        VERSION=4 MODE=2 PLOT=seqnib PUB=small_truncation_bump ~/o/cxs_min.sh mppub
+
+
+
+
+
+
+
+
+
+:i:`NPFold_profile_test_PWE_mach.png`
+---------------------------------------
+
+
+Creating Profile Plots
+---------------------------
+
+::
+ 
+    /data/blyth/opticks/GEOM/J23_1_0_rc3_ok0/jok-tds/ALL0 
+    PICK=CF PLOT=PWE ~/np/tests/NPFold_profile_test.sh 
+    PICK=CF PLOT=PWE ~/np/tests/NPFold_profile_test.sh ana
+
+    PYTHONPATH=$HOME MODE=0 ~/np/tests/NPFold_profile_test.sh ana
+
+.. class:: tiny
+
+    defaults, full debug 
+    Profile.ABPlot
+    A:ProfileWithinEvent  J23_1_0_rc3_ok0/jok-tds/ALL0 GPUMeta:0:NVIDIA_TITAN_V 1:NVIDIA_TITAN_RTX prefix://p creator:jok-tds
+    B:ProfileWithinEvent  J23_1_0_rc3_ok0/jok-tds/ALL0 prefix://n creator:jok-tds
+    BOA : 35.1 75.3 73.4 71.9 71.9 72.6 71.9 72.1 73.1 72.4   avg(BOA[1:]) 72.7  
+
+    set CVD:0
+    Profile.ABPlot
+    A:ProfileWithinEvent stampFmt:2023-11-20T16:53:25.315104  J23_1_0_rc3_ok0/jok-tds/ALL0 GPUMeta:0:NVIDIA_TITAN_V prefix://p creator:jok-tds
+    B:ProfileWithinEvent stampFmt:2023-11-20T16:53:07.719859  J23_1_0_rc3_ok0/jok-tds/ALL0 prefix://n creator:jok-tds
+    BOA : 32.4 75.6 81.8 76.2 87.6 77.3 75.6 92.5 90.8 74.1   avg(BOA[1:]) 81.3  
+
+    set CVD:1
+    Profile.ABPlot
+    A:ProfileWithinEvent stampFmt:2023-11-20T16:46:34.757874  J23_1_0_rc3_ok0/jok-tds/ALL0 GPUMeta:1:NVIDIA_TITAN_RTX prefix://p creator:jok-tds
+    B:ProfileWithinEvent stampFmt:2023-11-20T16:46:17.668147  J23_1_0_rc3_ok0/jok-tds/ALL0 prefix://n creator:jok-tds
+    BOA : 26.7 115.0 113.2 109.8 114.1 109.3 109.8 111.7 109.2 110.0   avg(BOA[1:]) 111.3  
+
+
+
+   
+ 
+
+
 Progress
 ---------
 
