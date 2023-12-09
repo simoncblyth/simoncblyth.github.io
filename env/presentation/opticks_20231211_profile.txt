@@ -53,6 +53,122 @@
 
 
 
+:small:`(November 13, 2023) Technical Test Release on /cvmfs/opticks.ihep.ac.cn`
+-----------------------------------------------------------------------------------
+
+::
+
+    /cvmfs/opticks.ihep.ac.cn/ok/releases/Opticks-v0.2.1/
+    x86_64-CentOS7-gcc1120-geant4_10_04_p02-dbg
+
+.. class:: small
+
+    Using NVIDIA OptiX 7.5, CUDA 11.7 
+
+    * release includes ~210 unit tests
+    * all tests passing on GPU cluster  
+  
+
+
+:small:`Optimizing separate Release build in addition to Debug build`
+------------------------------------------------------------------------
+
+
+.. class:: small
+
+   **Release** preprocessor macros : add: **PRODUCTION** , remove: **DEBUG_TAG, DEBUG_PIDX,...**
+
+   * remove debug array collection (eg photon step point records)
+   * remove debug code from GPU kernels 
+
+
+   **Examine flattened kernel source (103k lines) : all includes included**
+
+   ::
+
+       ~/opticks/preprocessor.sh > /tmp/out.cc   ## using gcc -E -C -P 
+
+   * flattens CSGOptiX/CSGOptiX7.cu 
+   * see what the compiler sees 
+
+
+   **Grepping Kernel PTX : Parallel Thread Execution ~Assembly code** 
+
+   Grepping PTX for doubles and printf, and then removing from source
+
+   ``grep \\.f64 $OPTICKS_PREFIX/ptx/CSGOptiX_generated_CSGOptiX7.cu.ptx`` 
+
+   * with OptiX 6.5 these gave large performance improvements
+   * not yet with 7.5
+
+
+
+:small:`sreport.sh : metadata collection and plotting machinery`
+------------------------------------------------------------------
+
+
+
+
+
+:small:`Pure Optical TORCH Run : 20 events from 0.1M to 100M photons`
+----------------------------------------------------------------------
+
+::
+
+    TEST=large_scan ~/opticks/cxs_min.sh 
+    
+
+
+.. class:: small
+
+    Generate 20 optical only events with 0.1M->100M photons starting from CD center, 
+    gather and save only Hits.
+
+    * uses CSGOptiXSMTest executable (no Geant4 dependency)
+
+::
+
+    OPTICKS_RUNNING_MODE=SRM_TORCH
+    OPTICKS_NUM_PHOTON=H1:10,M2,3,5,7,10,20,40,60,80,100
+    OPTICKS_NUM_EVENT=20
+    OPTICKS_EVENT_MODE=Hit
+
+
+.. class:: small
+
+   * no Geant4 initialization (~150s)
+   * load and upload geometry in ~2s 
+   * BUT with MAX_PHOTON 100M, uploading curandState costs 20s
+
+
+
+:i:`N7_Substamp_ALL_Hit_vs_Photon__linear.png`
+------------------------------------------------
+
+:i:`S7_Substamp_ALL_Hit_vs_Photon__linear.png`
+------------------------------------------------
+
+
+:i:`N7_Substamp_ALL_Etime_vs_Photon__34s_100M_debug.png`
+---------------------------------------------------------
+
+:i:`S7_Substamp_ALL_Etime_vs_Photon__100M_31s_Release.png`
+-----------------------------------------------------------
+
+
+:i:`N7_Ranges_SPAN__slow_downloads.png`
+----------------------------------------
+
+:i:`S7_Ranges_SPAN__fast_downloads.png`
+----------------------------------------
+
+
+:i:`N7_Ranges_ONE__Debug.png`
+-------------------------------
+
+:i:`S7_Ranges_ONE__Release.png`
+-------------------------------
+
 
 
 :small:`Amdahls "Law" : Expected Speedup Limited by Serial Processing`
