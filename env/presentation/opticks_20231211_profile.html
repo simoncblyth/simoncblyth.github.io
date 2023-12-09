@@ -5003,6 +5003,30 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
+          }
+          div.slide#n5-substamp-all-etime-vs-photon-u4recorder-oom-100m-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL3_sreport/figs/cxs_min/mpcap/N5_Substamp_ALL_Etime_vs_Photon__U4Recorder_OOM_100M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#n5-substamp-all-ratio-vs-photon-approach-200-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL3_sreport/figs/cxs_min/mpcap/N5_Substamp_ALL_RATIO_vs_Photon__approach_200.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#n5-subprofile-all-leaking-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL3_sreport/figs/cxs_min/mpcap/N5_Subprofile_ALL__leaking.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#s7-subprofile-all-no-leak-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/CSGOptiXSMTest/ALL1_sreport/figs/cxs_min/mpcap/S7_Subprofile_ALL__no_leak.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
           } 
 
        </style>
@@ -9715,6 +9739,30 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
+          }
+          div.slide#n5-substamp-all-etime-vs-photon-u4recorder-oom-100m-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL3_sreport/figs/cxs_min/mpcap/N5_Substamp_ALL_Etime_vs_Photon__U4Recorder_OOM_100M.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#n5-substamp-all-ratio-vs-photon-approach-200-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL3_sreport/figs/cxs_min/mpcap/N5_Substamp_ALL_RATIO_vs_Photon__approach_200.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#n5-subprofile-all-leaking-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL3_sreport/figs/cxs_min/mpcap/N5_Subprofile_ALL__leaking.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#s7-subprofile-all-no-leak-png{
+             background-image: url(GEOM/J23_1_0_rc3_ok0/CSGOptiXSMTest/ALL1_sreport/figs/cxs_min/mpcap/S7_Subprofile_ALL__no_leak.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
           } 
 
        </style>
@@ -9769,30 +9817,63 @@ x86_64-CentOS7-gcc1120-geant4_10_04_p02-dbg
 </ul>
 </div>
 <div class="slide" id="optimizing-separate-release-build-in-addition-to-debug-build">
-<h1><span class="small">Optimizing separate Release build in addition to Debug build</span></h1>
-<p class="small"><strong>Release</strong> preprocessor macros : add: <strong>PRODUCTION</strong> , remove: <strong>DEBUG_TAG, DEBUG_PIDX,...</strong></p>
+<h1><span class="small">Optimizing separate &quot;Release&quot; build in addition to &quot;Debug&quot; build</span></h1>
+<p class="small"><strong>Release</strong> preprocessor macros : adds: <strong>PRODUCTION</strong> , removes: <strong>DEBUG_TAG, DEBUG_PIDX,...</strong></p>
 <ul class="small simple">
 <li>remove debug array collection (eg photon step point records)</li>
 <li>remove debug code from GPU kernels</li>
+<li><span class="r">lots more mileage here : more can be removed from Release kernel</span></li>
 </ul>
-<p class="small"><strong>Examine flattened kernel source (103k lines) : all includes included</strong></p>
+<p class="small"><strong>Examine flattened kernel source CSGOptiX/CSGOptiX7.cu (103k lines) : all includes included</strong></p>
 <pre class="small literal-block">
 ~/opticks/preprocessor.sh &gt; /tmp/out.cc   ## using gcc -E -C -P
 </pre>
 <ul class="small simple">
-<li>flattens CSGOptiX/CSGOptiX7.cu</li>
-<li>see what the compiler sees</li>
+<li><span class="b">see what the compiler sees</span></li>
+<li>enables finding inadvertent doubles + printf</li>
 </ul>
 <p class="small"><strong>Grepping Kernel PTX : Parallel Thread Execution ~Assembly code</strong></p>
+<ul class="small simple">
+<li><span class="b">examine first stage output from compilation</span></li>
+</ul>
 <p class="small">Grepping PTX for doubles and printf, and then removing from source</p>
 <p class="small"><tt class="docutils literal">grep <span class="pre">\\.f64</span> $OPTICKS_PREFIX/ptx/CSGOptiX_generated_CSGOptiX7.cu.ptx</tt></p>
 <ul class="small simple">
-<li>with OptiX 6.5 these gave large performance improvements</li>
-<li>not yet with 7.5</li>
+<li>with OptiX 6.5 these gave large performance improvements, no big effects yet with 7.5</li>
 </ul>
 </div>
-<div class="slide" id="sreport-sh-metadata-collection-and-plotting-machinery">
-<h1><span class="small">sreport.sh : metadata collection and plotting machinery</span></h1>
+<div class="slide" id="sreport-sh-cc-py-opticks-event-metadata-reports-and-plots">
+<h1><span class="small">sreport.{sh,cc,py} : Opticks Event metadata reports and plots</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Opticks SEvt Metadata</span></p>
+<ul class="small last simple">
+<li>config : GPU, preprocessor switches, ...</li>
+<li>profile &quot;stamps&quot; <tt class="docutils literal">sprof.h</tt><ul>
+<li><strong>{int64_t[us], VM[kb], RSS[kb]}</strong></li>
+<li>beginOfEvent, endOfEvent, GPU launch ...</li>
+</ul>
+</li>
+<li><a class="reference external" href="https://github.com/simoncblyth/np/">https://github.com/simoncblyth/np/</a></li>
+</ul>
+</div>
+<p class="small">Opticks Event =&gt; folders of NumPy .npy (<tt class="docutils literal">NPFold.h/NP.hh</tt>)</p>
+<p class="small"><tt class="docutils literal">sreport</tt> executable:</p>
+<ol class="small arabic simple">
+<li>loads SEvt metadata in folders below eg <strong>ALL1</strong>
+(using <tt class="docutils literal"><span class="pre">NPFold::LoadNoData</span></tt> : <span class="r">metadata only</span>)</li>
+<li>saves summary NPFold to <strong>../ALL1_sreport</strong></li>
+<li><tt class="docutils literal">sreport.py</tt> loads summary and makes plots</li>
+</ol>
+<p class="small"><strong>Usage on workstation/GPU job and laptop</strong>:</p>
+<pre class="small literal-block">
+~/o/cxs_min.sh  ## create SEvt
+</pre>
+<p class="small">Laptop, <span class="b">rsync small metadata summary from remote</span>:</p>
+<pre class="small literal-block">
+JOB=N7 ~/o/sreport.sh grab
+JOB=N7 PLOT=Substamp_ALL_Etime_vs_Photon ~/o/sreport.sh
+</pre>
+<p class="normal"><span class="r">Effective automated reporting+plotting are essential for optimization</span></p>
 </div>
 <div class="slide" id="pure-optical-torch-run-20-events-from-0-1m-to-100m-photons">
 <h1><span class="small">Pure Optical TORCH Run : 20 events from 0.1M to 100M photons</span></h1>
@@ -9815,6 +9896,16 @@ OPTICKS_EVENT_MODE=Hit
 <li>load and upload geometry in ~2s</li>
 <li>BUT with MAX_PHOTON 100M, uploading curandState costs 20s</li>
 </ul>
+</div>
+<div class="slide" id="all1-scatter-10m-photon-22pc-hit-alt-png">
+<h1><span class="i">ALL1_scatter_10M_photon_22pc_hit_alt.png</span></h1>
+<p style="margin-bottom:150mm;" /><p><tt class="docutils literal">~/o/cxs_min.sh&nbsp; ## 10M &quot;TORCH&quot; photons 22pc hit, 3.6 seconds</tt></p>
+</div>
+<div class="slide" id="all1-scatter-10m-photon-22pc-hit-png">
+<h1><span class="i">ALL1_scatter_10M_photon_22pc_hit.png</span></h1>
+<!-- comment
+
+PLOT=scatter MODE=3 PUB=10M_photon_22pc_hit ~/o/cxs_min.sh pvpub -->
 </div>
 <div class="slide" id="n7-substamp-all-hit-vs-photon-linear-png">
 <h1><span class="i">N7_Substamp_ALL_Hit_vs_Photon__linear.png</span></h1>
@@ -9839,6 +9930,26 @@ OPTICKS_EVENT_MODE=Hit
 </div>
 <div class="slide" id="s7-ranges-one-release-png">
 <h1><span class="i">S7_Ranges_ONE__Release.png</span></h1>
+</div>
+<div class="slide" id="n5-substamp-all-etime-vs-photon-u4recorder-oom-100m-png">
+<h1><span class="i">N5_Substamp_ALL_Etime_vs_Photon__U4Recorder_OOM_100M.png</span></h1>
+</div>
+<div class="slide" id="n5-substamp-all-ratio-vs-photon-approach-200-png">
+<h1><span class="i">N5_Substamp_ALL_RATIO_vs_Photon__approach_200.png</span></h1>
+</div>
+<div class="slide" id="n5-subprofile-all-leaking-png">
+<h1><span class="i">N5_Subprofile_ALL__leaking.png</span></h1>
+<p style="margin-bottom:80mm;" /><p class="center">U4Recorder leaking badly! [Geant4 propagation recorded into Opticks SEvt]</p>
+</div>
+<div class="slide" id="s7-subprofile-all-no-leak-png">
+<h1><span class="i">S7_Subprofile_ALL__no_leak.png</span></h1>
+<p style="margin-bottom:80mm;" /><p class="center">Pure Opticks (no Geant4 or U4Recorder) : no leak</p>
+</div>
+<div class="slide" id="todo-leak-plot">
+<h1>TODO : Leak plot</h1>
+</div>
+<div class="slide" id="todo-g4cxtest-ratio-plot">
+<h1>TODO : G4CXTest ratio plot</h1>
 </div>
 <div class="slide" id="amdahls-law-expected-speedup-limited-by-serial-processing">
 <h1><span class="small">Amdahls &quot;Law&quot; : Expected Speedup Limited by Serial Processing</span></h1>
@@ -9878,15 +9989,20 @@ OPTICKS_EVENT_MODE=Hit
 <h1><span class="i">amdahl_p_sensitive.png</span></h1>
 <img alt="/env/presentation/parallel/amdahl.png" class="small align-center" src="/env/presentation/parallel/amdahl.png" style="width: 392px; height: 112px;" />
 </div>
-<div class="slide" id="all1-scatter-10m-photon-22pc-hit-alt-png">
-<h1><span class="i">ALL1_scatter_10M_photon_22pc_hit_alt.png</span></h1>
-<p style="margin-bottom:150mm;" /><p><tt class="docutils literal">~/o/cxs_min.sh&nbsp; ## 10M &quot;TORCH&quot; photons 22pc hit, 3.6 seconds</tt></p>
+<div class="slide" id="todo-standardfulldebug-1m-for-validation-table">
+<h1>TODO : StandardFullDebug 1M FOR validation table</h1>
 </div>
-<div class="slide" id="all1-scatter-10m-photon-22pc-hit-png">
-<h1><span class="i">ALL1_scatter_10M_photon_22pc_hit.png</span></h1>
-<!-- comment
-
-PLOT=scatter MODE=3 PUB=10M_photon_22pc_hit ~/o/cxs_min.sh pvpub -->
+<div class="slide" id="todo-render">
+<h1>TODO : Render</h1>
+<pre class="literal-block">
+~/o/cxr_min.sh   ## CSGOptiXRMTest
+</pre>
+</div>
+<div class="slide" id="todo-okjob-jok-tds">
+<h1>TODO : okjob jok-tds</h1>
+</div>
+<div class="slide" id="todo-gun-1-j-okjob-sh">
+<h1>TODO : GUN=1 ~/j/okjob.sh</h1>
 </div>
 <div class="slide" id="n6-substamp-one-maxb-scan-a-expensive-tail-png">
 <h1><span class="i">N6_Substamp_ONE_maxb_scan_A_expensive_tail.png</span></h1>
@@ -10138,7 +10254,7 @@ JUNO_DEBUG_DISABLE_FA</td>
 <td><p class="first">lWaterPool : cone subtract big sphere union cylinder
 (small-big subtraction precision + perf issue, expect coin)</p>
 <div class="system-message">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/Users/blyth/simoncblyth.bitbucket.io/env/presentation/opticks_20231211_profile.txt</tt>, line 512)</p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/Users/blyth/simoncblyth.bitbucket.io/env/presentation/opticks_20231211_profile.txt</tt>, line 630)</p>
 Unexpected indentation.</div>
 <blockquote class="last">
 <strong>SIMPLIFIED : FLAT TOP</strong></blockquote>

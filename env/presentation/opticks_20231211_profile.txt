@@ -70,43 +70,79 @@
   
 
 
-:small:`Optimizing separate Release build in addition to Debug build`
-------------------------------------------------------------------------
+:small:`Optimizing separate "Release" build in addition to "Debug" build`
+---------------------------------------------------------------------------
 
 
 .. class:: small
 
-   **Release** preprocessor macros : add: **PRODUCTION** , remove: **DEBUG_TAG, DEBUG_PIDX,...**
+   **Release** preprocessor macros : adds: **PRODUCTION** , removes: **DEBUG_TAG, DEBUG_PIDX,...**
 
    * remove debug array collection (eg photon step point records)
    * remove debug code from GPU kernels 
+   * :r:`lots more mileage here : more can be removed from Release kernel`
 
 
-   **Examine flattened kernel source (103k lines) : all includes included**
+   **Examine flattened kernel source CSGOptiX/CSGOptiX7.cu (103k lines) : all includes included**
 
    ::
 
        ~/opticks/preprocessor.sh > /tmp/out.cc   ## using gcc -E -C -P 
 
-   * flattens CSGOptiX/CSGOptiX7.cu 
-   * see what the compiler sees 
-
+   * :b:`see what the compiler sees` 
+   * enables finding inadvertent doubles + printf
 
    **Grepping Kernel PTX : Parallel Thread Execution ~Assembly code** 
+
+   * :b:`examine first stage output from compilation`
 
    Grepping PTX for doubles and printf, and then removing from source
 
    ``grep \\.f64 $OPTICKS_PREFIX/ptx/CSGOptiX_generated_CSGOptiX7.cu.ptx`` 
 
-   * with OptiX 6.5 these gave large performance improvements
-   * not yet with 7.5
+   * with OptiX 6.5 these gave large performance improvements, no big effects yet with 7.5
 
 
 
-:small:`sreport.sh : metadata collection and plotting machinery`
-------------------------------------------------------------------
+:small:`sreport.{sh,cc,py} : Opticks Event metadata reports and plots`
+-----------------------------------------------------------------------
+
+.. sidebar:: :small:`Opticks SEvt Metadata`
+
+     .. class:: small 
+
+        * config : GPU, preprocessor switches, ... 
+        * profile "stamps" ``sprof.h``
+
+          * **{int64_t[us], VM[kb], RSS[kb]}** 
+          * beginOfEvent, endOfEvent, GPU launch ...  
+
+        * https://github.com/simoncblyth/np/
+
+.. class:: small
+
+    Opticks Event => folders of NumPy .npy (``NPFold.h/NP.hh``) 
+
+    ``sreport`` executable:
+
+    1. loads SEvt metadata in folders below eg **ALL1**
+       (using ``NPFold::LoadNoData`` : :r:`metadata only`)
+    2. saves summary NPFold to **../ALL1_sreport**
+    3. ``sreport.py`` loads summary and makes plots  
+
+    **Usage on workstation/GPU job and laptop**::
+
+        ~/o/cxs_min.sh  ## create SEvt 
+
+    Laptop, :b:`rsync small metadata summary from remote`::
+
+        JOB=N7 ~/o/sreport.sh grab 
+        JOB=N7 PLOT=Substamp_ALL_Etime_vs_Photon ~/o/sreport.sh
 
 
+.. class:: normal 
+
+    :r:`Effective automated reporting+plotting are essential for optimization`
 
 
 
@@ -142,6 +178,36 @@
 
 
 
+
+
+:i:`ALL1_scatter_10M_photon_22pc_hit_alt.png`
+----------------------------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:150mm;" />
+ 
+
+
+``~/o/cxs_min.sh  ## 10M "TORCH" photons 22pc hit, 3.6 seconds``
+
+
+
+:i:`ALL1_scatter_10M_photon_22pc_hit.png`
+-------------------------------------------
+
+.. comment
+
+   PLOT=scatter MODE=3 PUB=10M_photon_22pc_hit ~/o/cxs_min.sh pvpub
+
+
+
+
+
+
+
+
 :i:`N7_Substamp_ALL_Hit_vs_Photon__linear.png`
 ------------------------------------------------
 
@@ -168,6 +234,59 @@
 
 :i:`S7_Ranges_ONE__Release.png`
 -------------------------------
+
+
+
+:i:`N5_Substamp_ALL_Etime_vs_Photon__U4Recorder_OOM_100M.png`
+---------------------------------------------------------------
+
+
+:i:`N5_Substamp_ALL_RATIO_vs_Photon__approach_200.png`
+-------------------------------------------------------
+
+
+:i:`N5_Subprofile_ALL__leaking.png`
+-------------------------------------
+
+
+.. raw:: html 
+
+    <p style="margin-bottom:80mm;" />
+
+
+.. class:: center
+
+    U4Recorder leaking badly! [Geant4 propagation recorded into Opticks SEvt]
+
+
+
+
+:i:`S7_Subprofile_ALL__no_leak.png`
+-------------------------------------
+
+.. raw:: html 
+
+    <p style="margin-bottom:80mm;" />
+
+
+.. class:: center
+
+    Pure Opticks (no Geant4 or U4Recorder) : no leak
+
+
+
+TODO : Leak plot
+-----------------
+
+
+
+TODO : G4CXTest ratio plot
+----------------------------
+
+
+
+
+
 
 
 
@@ -233,26 +352,25 @@ optical photon simulation, P ~ 99% of CPU time
 
 
 
-:i:`ALL1_scatter_10M_photon_22pc_hit_alt.png`
-----------------------------------------------
+TODO : StandardFullDebug 1M FOR validation table
+---------------------------------------------------
 
 
-.. raw:: html
+TODO : Render
+---------------
 
-    <p style="margin-bottom:150mm;" />
- 
+::
 
-
-``~/o/cxs_min.sh  ## 10M "TORCH" photons 22pc hit, 3.6 seconds``
-
+    ~/o/cxr_min.sh   ## CSGOptiXRMTest
 
 
-:i:`ALL1_scatter_10M_photon_22pc_hit.png`
--------------------------------------------
+TODO : okjob jok-tds 
+-----------------------
 
-.. comment
 
-   PLOT=scatter MODE=3 PUB=10M_photon_22pc_hit ~/o/cxs_min.sh pvpub
+TODO : GUN=1 ~/j/okjob.sh 
+-----------------------------
+
 
 
 
