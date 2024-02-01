@@ -39,13 +39,7 @@
   <ul>
 <li><a class="reference internal" href="#">Opticks Testing, Geocache Creation, Python setup</a><ul>
 <li><a class="reference internal" href="#testing-installation-with-opticks-t">Testing Installation with <strong>opticks-t</strong></a></li>
-<li><a class="reference internal" href="#how-to-proceed-when-tests-fail">How to proceed when tests fail</a></li>
-<li><a class="reference internal" href="#creating-a-geocache-geometry-directory-with-geocache-create">Creating a geocache geometry directory with <strong>geocache-create</strong></a><ul>
-<li><a class="reference internal" href="#common-issue-geocache-code-version-mismatch-causes-assert-at-geocache-loading">Common issue : GEOCACHE_CODE_VERSION MISMATCH causes assert at geocache loading</a></li>
-<li><a class="reference internal" href="#another-issue-geocache-create-fails-to-find-gdml-input-file">Another issue : geocache-create fails to find GDML input file</a></li>
-<li><a class="reference internal" href="#inspect-the-geocache-with-opticks-kcd">Inspect the geocache with <strong>opticks-kcd</strong></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#translating-a-gdml-geometry-into-opticks-csgfoundry-directory">Translating a GDML geometry into Opticks/CSGFoundry directory</a></li>
 <li><a class="reference internal" href="#opticks-analysis-and-debugging-using-python-ipython-numpy-and-matplotlib-manage-with-miniconda">Opticks Analysis and Debugging using Python, IPython, NumPy and Matplotlib : manage with <strong>miniconda</strong></a></li>
 </ul>
 </li>
@@ -91,186 +85,80 @@
 <ul class="simple">
 <li><a class="reference internal" href="#opticks-testing-geocache-creation-python-setup" id="id1">Opticks Testing, Geocache Creation, Python setup</a><ul>
 <li><a class="reference internal" href="#testing-installation-with-opticks-t" id="id2">Testing Installation with <strong>opticks-t</strong></a></li>
-<li><a class="reference internal" href="#how-to-proceed-when-tests-fail" id="id3">How to proceed when tests fail</a></li>
-<li><a class="reference internal" href="#creating-a-geocache-geometry-directory-with-geocache-create" id="id4">Creating a geocache geometry directory with <strong>geocache-create</strong></a></li>
-<li><a class="reference internal" href="#opticks-analysis-and-debugging-using-python-ipython-numpy-and-matplotlib-manage-with-miniconda" id="id5">Opticks Analysis and Debugging using Python, IPython, NumPy and Matplotlib : manage with <strong>miniconda</strong></a></li>
+<li><a class="reference internal" href="#translating-a-gdml-geometry-into-opticks-csgfoundry-directory" id="id3">Translating a GDML geometry into Opticks/CSGFoundry directory</a></li>
+<li><a class="reference internal" href="#opticks-analysis-and-debugging-using-python-ipython-numpy-and-matplotlib-manage-with-miniconda" id="id4">Opticks Analysis and Debugging using Python, IPython, NumPy and Matplotlib : manage with <strong>miniconda</strong></a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="testing-installation-with-opticks-t">
 <h2><a class="toc-backref" href="#id2">Testing Installation with <strong>opticks-t</strong></a><a class="headerlink" href="#testing-installation-with-opticks-t" title="Permalink to this headline">¶</a></h2>
-<p>The <em>opticks-t</em> function runs ctests for all the opticks projects:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>simon:opticks blyth$ opticks-
-simon:opticks blyth$ opticks-t
-Test project /usr/local/opticks/build
-      Start  1: SysRapTest.SEnvTest
- 1/65 Test  #1: SysRapTest.SEnvTest ........................   Passed    0.00 sec
-      Start  2: SysRapTest.SSysTest
- 2/65 Test  #2: SysRapTest.SSysTest ........................   Passed    0.00 sec
-      Start  3: SysRapTest.SDigestTest
- 3/65 Test  #3: SysRapTest.SDigestTest .....................   Passed    0.00 sec
-.....
-.....
-      Start 59: cfg4Test.CPropLibTest
-59/65 Test #59: cfg4Test.CPropLibTest ......................   Passed    0.05 sec
-      Start 60: cfg4Test.CTestDetectorTest
-60/65 Test #60: cfg4Test.CTestDetectorTest .................   Passed    0.04 sec
-      Start 61: cfg4Test.CGDMLDetectorTest
-61/65 Test #61: cfg4Test.CGDMLDetectorTest .................   Passed    0.45 sec
-      Start 62: cfg4Test.CG4Test
-62/65 Test #62: cfg4Test.CG4Test ...........................   Passed    5.06 sec
-      Start 63: cfg4Test.G4MaterialTest
-63/65 Test #63: cfg4Test.G4MaterialTest ....................   Passed    0.02 sec
-      Start 64: cfg4Test.G4StringTest
-64/65 Test #64: cfg4Test.G4StringTest ......................   Passed    0.02 sec
-      Start 65: cfg4Test.G4BoxTest
-65/65 Test #65: cfg4Test.G4BoxTest .........................   Passed    0.02 sec
+<p>The <em>opticks-t</em> function runs ctests for all the opticks packages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>N[blyth@localhost opticks]$ opticks-
+N[blyth@localhost opticks]$ opticks-t
+=== qudarap-check-installation : /home/blyth/.opticks/rngcache/RNG rc 0
+=== qudarap-check-installation : /home/blyth/.opticks/rngcache/RNG/QCurandState_1000000_0_0.bin rc 0
+=== qudarap-check-installation : /home/blyth/.opticks/rngcache/RNG/QCurandState_3000000_0_0.bin rc 0
+=== qudarap-check-installation : /home/blyth/.opticks/rngcache/RNG/QCurandState_10000000_0_0.bin rc 0
+=== opticks-check-installation : rc 0
+=== om-env : normal running
+...
 
-100% tests passed, 0 tests failed out of 65
+  21 /30  Test #21 : U4Test.U4Material_MakePropertyFold_MakeTest   Passed                         2.10
+  22 /30  Test #22 : U4Test.U4Material_MakePropertyFold_LoadTest   Passed                         0.16
+  23 /30  Test #23 : U4Test.U4TouchableTest                        Passed                         0.15
+  24 /30  Test #24 : U4Test.U4SurfaceTest                          Passed                         0.17
+  25 /30  Test #25 : U4Test.U4SolidTest                            Passed                         0.16
+  26 /30  Test #26 : U4Test.U4SensitiveDetectorTest                Passed                         0.16
+  27 /30  Test #27 : U4Test.U4Debug_Test                           Passed                         0.15
+  28 /30  Test #28 : U4Test.U4Hit_Debug_Test                       Passed                         0.16
+  29 /30  Test #29 : U4Test.G4ThreeVectorTest                      Passed                         0.17
+  30 /30  Test #30 : U4Test.U4PhysicsTableTest                     Passed                         0.16
 
-Total Test time (real) =  59.89 sec
-opticks-ctest : use -V to show output
-</pre></div>
-</div>
-</div>
-<div class="section" id="how-to-proceed-when-tests-fail">
-<h2><a class="toc-backref" href="#id3">How to proceed when tests fail</a><a class="headerlink" href="#how-to-proceed-when-tests-fail" title="Permalink to this headline">¶</a></h2>
-<p>See the instructions for running tests individually and running them in the <em>gdb</em>
-debugger at  <a class="reference internal" href="misc/debugging_failing_tests.html"><span class="doc">debugging_failing_tests</span></a>.</p>
-</div>
-<div class="section" id="creating-a-geocache-geometry-directory-with-geocache-create">
-<h2><a class="toc-backref" href="#id4">Creating a geocache geometry directory with <strong>geocache-create</strong></a><a class="headerlink" href="#creating-a-geocache-geometry-directory-with-geocache-create" title="Permalink to this headline">¶</a></h2>
-<p>Many of the tests will fail in the absence of a geocache.
-Geometries are created using the <em>geocache-</em> bash functions.
-To create a geometry use:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">geocache</span><span class="o">-</span>              <span class="c1"># run precursor function which defines the others</span>
-<span class="nb">type</span> <span class="n">geocache</span><span class="o">-</span><span class="n">create</span>   <span class="c1"># take a look at geocache-create</span>
-<span class="n">geocache</span><span class="o">-</span><span class="n">create</span>        <span class="c1"># create geocache from GDML geometry file, default geometry is Dayabay near site detector</span>
-</pre></div>
-</div>
-<p>The bash functions essentially boil down to the below commandline
-with additional command line options for metadata recording:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OKX4Test</span> <span class="o">--</span><span class="n">deletegeocache</span> <span class="o">--</span><span class="n">gdmlpath</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">detector</span><span class="o">.</span><span class="n">gdml</span>
-</pre></div>
-</div>
-<p>The <strong>OKX4Test</strong> executable loads a GDML file and translates it into an Opticks GGeo geometry
-instance and persists that into a geocache.</p>
-<p>Geocache creation is time and memory consuming, taking about 1 minute for the JUNO geometry
-on a workstation with lots of memory. Fortunately this only needs to be done once per geometry, and
-as the geocache is composed of binary .npy files they are fast to load and upload to the GPU.</p>
-<p>Near to the end of the logging from geocache creation you should find output
-similar to the below which reports the OPTICKS_KEY value of the geometry:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">09</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mf">26.523</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">6138491</span><span class="p">]</span> <span class="p">[</span><span class="n">OpticksProfile</span><span class="p">::</span><span class="n">dump</span><span class="nd">@482</span><span class="p">]</span>  <span class="n">npy</span> <span class="mi">69</span><span class="p">,</span><span class="mi">4</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">blyth</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">source</span><span class="o">/</span><span class="n">evt</span><span class="o">/</span><span class="n">g4live</span><span class="o">/</span><span class="n">torch</span><span class="o">/</span><span class="n">OpticksProfile</span><span class="o">.</span><span class="n">npy</span>
-<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">09</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mf">26.523</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">6138491</span><span class="p">]</span> <span class="p">[</span><span class="n">OpticksProfile</span><span class="p">::</span><span class="n">accumulateDump</span><span class="nd">@339</span><span class="p">]</span> <span class="n">Opticks</span><span class="p">::</span><span class="n">postgeocache</span> <span class="n">nacc</span> <span class="mi">0</span>
-<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">09</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mf">26.523</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">6138491</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportKey</span><span class="nd">@992</span><span class="p">]</span> <span class="n">OKX4Test</span>
+CTestLog :             CSGOptiX :      0/     4 : 2024-02-01 11:03:06.513634 : /home/blyth/junotop/ExternalLibs/opticks/head/build/CSGOptiX/ctest.log
+  1  /4   Test #1  : CSGOptiXTest.CSGOptiXVersion                  Passed                         0.05
+  2  /4   Test #2  : CSGOptiXTest.CSGOptiXVersionTest              Passed                         0.04
+  3  /4   Test #3  : CSGOptiXTest.CSGOptiXRenderTest               Passed                         1.47
+  4  /4   Test #4  : CSGOptiXTest.ParamsTest                       Passed                         0.04
 
-<span class="n">GEOCACHE_CODE_VERSION</span> <span class="mi">7</span>
-<span class="n">KEYDIR</span>  <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">geocache</span><span class="o">/</span><span class="n">OKX4Test_World0xc15cfc00x40f7000_PV_g4live</span><span class="o">/</span><span class="n">g4ok_gltf</span><span class="o">/</span><span class="mi">50</span><span class="n">a18baaf29b18fae8c1642927003ee3</span><span class="o">/</span><span class="mi">1</span>
-<span class="n">KEY</span>     <span class="n">OKX4Test</span><span class="o">.</span><span class="n">X4PhysicalVolume</span><span class="o">.</span><span class="n">World0xc15cfc00x40f7000_PV</span><span class="o">.</span><span class="mi">50</span><span class="n">a18baaf29b18fae8c1642927003ee3</span>
+CTestLog :                 g4cx :      0/     2 : 2024-02-01 11:03:10.025646 : /home/blyth/junotop/ExternalLibs/opticks/head/build/g4cx/ctest.log
+  1  /2   Test #1  : G4CXTest.G4CXRenderTest                       Passed                         1.49
+  2  /2   Test #2  : G4CXTest.G4CXOpticks_setGeometry_Test         Passed                         1.86
 
-<span class="n">To</span> <span class="n">reuse</span> <span class="n">this</span> <span class="n">geometry</span> <span class="n">include</span> <span class="n">below</span> <span class="n">export</span> <span class="ow">in</span> <span class="o">~/.</span><span class="n">opticks_config</span><span class="p">::</span>
 
-    <span class="n">export</span> <span class="n">OPTICKS_KEY</span><span class="o">=</span><span class="n">OKX4Test</span><span class="o">.</span><span class="n">X4PhysicalVolume</span><span class="o">.</span><span class="n">World0xc15cfc00x40f7000_PV</span><span class="o">.</span><span class="mi">50</span><span class="n">a18baaf29b18fae8c1642927003ee3</span>
+LOGS:
+CTestLog :               okconf :      0/     4 : 2024-02-01 11:02:10.441449 : /home/blyth/junotop/ExternalLibs/opticks/head/build/okconf/ctest.log
+CTestLog :               sysrap :      0/   107 : 2024-02-01 11:02:18.513475 : /home/blyth/junotop/ExternalLibs/opticks/head/build/sysrap/ctest.log
+CTestLog :                  ana :      0/     1 : 2024-02-01 11:02:18.682476 : /home/blyth/junotop/ExternalLibs/opticks/head/build/ana/ctest.log
+CTestLog :             analytic :      0/     1 : 2024-02-01 11:02:18.853477 : /home/blyth/junotop/ExternalLibs/opticks/head/build/analytic/ctest.log
+CTestLog :                  bin :      0/     1 : 2024-02-01 11:02:19.015477 : /home/blyth/junotop/ExternalLibs/opticks/head/build/bin/ctest.log
+CTestLog :                  CSG :      0/    42 : 2024-02-01 11:02:41.095550 : /home/blyth/junotop/ExternalLibs/opticks/head/build/CSG/ctest.log
+CTestLog :              qudarap :      0/    20 : 2024-02-01 11:02:50.496581 : /home/blyth/junotop/ExternalLibs/opticks/head/build/qudarap/ctest.log
+CTestLog :                gdxml :      0/     1 : 2024-02-01 11:02:50.722582 : /home/blyth/junotop/ExternalLibs/opticks/head/build/gdxml/ctest.log
+CTestLog :                   u4 :      0/    30 : 2024-02-01 11:03:04.775629 : /home/blyth/junotop/ExternalLibs/opticks/head/build/u4/ctest.log
+CTestLog :             CSGOptiX :      0/     4 : 2024-02-01 11:03:06.513634 : /home/blyth/junotop/ExternalLibs/opticks/head/build/CSGOptiX/ctest.log
+CTestLog :                 g4cx :      0/     2 : 2024-02-01 11:03:10.025646 : /home/blyth/junotop/ExternalLibs/opticks/head/build/g4cx/ctest.log
 
-<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">09</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mf">26.523</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">6138491</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">reportKey</span><span class="nd">@1011</span><span class="p">]</span> <span class="n">This</span> <span class="n">key</span> <span class="n">matches</span> <span class="n">that</span> <span class="n">of</span> <span class="n">the</span> <span class="n">current</span> <span class="n">envvar</span>
-<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">09</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mf">26.523</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">6138491</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">dumpRC</span><span class="nd">@240</span><span class="p">]</span>  <span class="n">rc</span> <span class="mi">0</span> <span class="n">rcmsg</span> <span class="p">:</span> <span class="o">-</span>
-</pre></div>
-</div>
-<p>Opticks executables and scripts read the <strong>OPTICKS_KEY</strong> envvar to determine the geometry to load.
-Add some lines to <cite>~/.opticks_config</cite> exporting the OPTICKS_KEY:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">OPTICKS_KEY</span><span class="o">=</span><span class="n">OKX4Test</span><span class="o">.</span><span class="n">X4PhysicalVolume</span><span class="o">.</span><span class="n">lWorld0x4bc2710_PV</span><span class="o">.</span><span class="n">f6cc352e44243f8fa536ab483ad390ce</span>
-</pre></div>
-</div>
-<p>The corresponding geocache directory is derived from this OPTICKS_KEY and can be found with the
-<em>geocache-keydir</em> bash function (python and C++ equivalents are <em>opticks.ana.key/Key</em> and <em>optickscore/OpticksResource.cc</em>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:ana blyth$ geocache-;geocache-keydir
-/usr/local/opticks/geocache/OKX4Test_lWorld0x4bc2710_PV_g4live/g4ok_gltf/f6cc352e44243f8fa536ab483ad390ce/1
-</pre></div>
-</div>
-<div class="section" id="common-issue-geocache-code-version-mismatch-causes-assert-at-geocache-loading">
-<h3>Common issue : GEOCACHE_CODE_VERSION MISMATCH causes assert at geocache loading<a class="headerlink" href="#common-issue-geocache-code-version-mismatch-causes-assert-at-geocache-loading" title="Permalink to this headline">¶</a></h3>
-<p>A code version integer <strong>Opticks::GEOCACHE_CODE_VERSION</strong> is persisted with the geocache metadata during geocache-create.
-On loading the geocache this persisted int is compared with the current static int from  <strong>optickscode/Opticks.hh</strong>.
-This is done to track code changes that would invalidate previously written geocache.
-When there is a mismatch the geocache loading asserts with error:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">21</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mf">59.717</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">28974</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">loadOriginCacheMeta</span><span class="nd">@1897</span><span class="p">]</span> <span class="n">ExtractCacheMetaGDMLPath</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">blyth</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">opticksaux</span><span class="o">/</span><span class="n">export</span><span class="o">/</span><span class="n">DayaBay_VGDX_20140414</span><span class="o">-</span><span class="mi">1300</span><span class="o">/</span><span class="n">g4_00_CGeometry_export_v0</span><span class="o">.</span><span class="n">gdml</span>
-<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">21</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mf">59.717</span> <span class="n">FATAL</span> <span class="p">[</span><span class="mi">28974</span><span class="p">]</span> <span class="p">[</span><span class="n">Opticks</span><span class="p">::</span><span class="n">loadOriginCacheMeta</span><span class="nd">@1916</span><span class="p">]</span>
- <span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="n">Opticks</span><span class="p">::</span><span class="n">GEOCACHE_CODE_VERSION</span> <span class="mi">7</span>
- <span class="p">(</span><span class="n">loaded</span><span class="p">)</span>  <span class="n">m_origin_geocache_code_version</span> <span class="mi">6</span>
- <span class="n">GEOCACHE_CODE_VERSION</span> <span class="n">MISMATCH</span> <span class="p">:</span> <span class="n">PERSISTED</span> <span class="n">CACHE</span> <span class="n">VERSION</span> <span class="n">DOES</span> <span class="n">NOT</span> <span class="n">MATCH</span> <span class="n">CURRENT</span> <span class="n">CODE</span>
- <span class="o">-&gt;</span> <span class="n">RECREATE</span> <span class="n">THE</span> <span class="n">CACHE</span> <span class="n">EG</span> <span class="n">WITH</span> <span class="n">geocache</span><span class="o">-</span><span class="n">create</span>
-</pre></div>
-</div>
-<p>The solution as suggested is to recreate the geocache and ensure that the OPTICKS_KEY exported
-into the environment is updated if necessary.
-When running <em>opticks-t</em> against an invalid or non-existing geocache a total of ~86 out of 440 tests
-are expected to fail. The solution is to recreate the geocache with the updated code with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">geocache</span><span class="o">-</span><span class="n">create</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="another-issue-geocache-create-fails-to-find-gdml-input-file">
-<h3>Another issue : geocache-create fails to find GDML input file<a class="headerlink" href="#another-issue-geocache-create-fails-to-find-gdml-input-file" title="Permalink to this headline">¶</a></h3>
-<p>If <em>geocache-create</em> gives an error like the below:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">21</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mf">46.910</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">54688</span><span class="p">]</span> <span class="p">[</span><span class="n">main</span><span class="nd">@72</span><span class="p">]</span>  <span class="n">digestextra2</span> <span class="n">NONE</span>
-<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">28</span> <span class="mi">21</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mf">46.910</span> <span class="n">INFO</span>  <span class="p">[</span><span class="mi">54688</span><span class="p">]</span> <span class="p">[</span><span class="n">CGDML</span><span class="p">::</span><span class="n">Parse</span><span class="nd">@39</span><span class="p">]</span> <span class="n">path</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">blyth</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">opticksaux</span><span class="o">/</span><span class="n">export</span><span class="o">/</span><span class="n">DayaBay_VGDX_20140414</span><span class="o">-</span><span class="mi">1300</span><span class="o">/</span><span class="n">g4_00_CGeometry_export_v1</span><span class="o">.</span><span class="n">gdml</span>
-<span class="n">G4GDML</span><span class="p">:</span> <span class="n">Reading</span> <span class="s1">&#39;/home/blyth/local/opticks/opticksaux/export/DayaBay_VGDX_20140414-1300/g4_00_CGeometry_export_v1.gdml&#39;</span><span class="o">...</span>
 
-<span class="o">--------</span> <span class="n">EEEE</span> <span class="o">-------</span> <span class="n">G4Exception</span><span class="o">-</span><span class="n">START</span> <span class="o">--------</span> <span class="n">EEEE</span> <span class="o">-------</span>
+SLOW: tests taking longer that 15 seconds
+...
 
-<span class="o">***</span> <span class="n">ExceptionHandler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">defined</span> <span class="o">***</span>
-<span class="o">***</span> <span class="n">G4Exception</span> <span class="p">:</span> <span class="n">InvalidRead</span>
-      <span class="n">issued</span> <span class="n">by</span> <span class="p">:</span> <span class="n">G4GDMLRead</span><span class="p">::</span><span class="n">Read</span><span class="p">()</span>
-<span class="n">Unable</span> <span class="n">to</span> <span class="nb">open</span> <span class="n">document</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">blyth</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks</span><span class="o">/</span><span class="n">opticksaux</span><span class="o">/</span><span class="n">export</span><span class="o">/</span><span class="n">DayaBay_VGDX_20140414</span><span class="o">-</span><span class="mi">1300</span><span class="o">/</span><span class="n">g4_00_CGeometry_export_v1</span><span class="o">.</span><span class="n">gdml</span>
-<span class="o">***</span> <span class="n">Fatal</span> <span class="ne">Exception</span> <span class="o">***</span>
-</pre></div>
-</div>
-<p>You probably need to update your clone of the <em>opticksaux</em> repository which is used to
-share test GDML files. Do this with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opticksaux</span><span class="o">-</span>
-<span class="n">opticksaux</span><span class="o">--</span>
+FAILS:  0   / 213   :  Thu Feb  1 11:03:10 2024
 </pre></div>
 </div>
 </div>
-<div class="section" id="inspect-the-geocache-with-opticks-kcd">
-<h3>Inspect the geocache with <strong>opticks-kcd</strong><a class="headerlink" href="#inspect-the-geocache-with-opticks-kcd" title="Permalink to this headline">¶</a></h3>
-<p>The bash function <strong>opticks-kcd</strong> changes directory to the geocache directory which is derived from the
-<strong>OPTICKS_KEY</strong> envvar.  Searching for NumPy arrays in the geocache reveals a large number of them.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:1 blyth$ find . -name &#39;*.npy&#39; | wc -l
-    2065
-
-epsilon:1 blyth$ find . -name volume_transforms.npy
-./GMergedMesh/0/volume_transforms.npy
-./GMergedMesh/6/volume_transforms.npy
-./GMergedMesh/1/volume_transforms.npy
-./GMergedMesh/4/volume_transforms.npy
-./GMergedMesh/3/volume_transforms.npy
-./GMergedMesh/2/volume_transforms.npy
-./GMergedMesh/5/volume_transforms.npy
-./GNodeLib/volume_transforms.npy
+<div class="section" id="translating-a-gdml-geometry-into-opticks-csgfoundry-directory">
+<h2><a class="toc-backref" href="#id3">Translating a GDML geometry into Opticks/CSGFoundry directory</a><a class="headerlink" href="#translating-a-gdml-geometry-into-opticks-csgfoundry-directory" title="Permalink to this headline">¶</a></h2>
+<p>Many tests will fail unless you have translated a geometry
+and selected it. Start by studying the documentation within the script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g4cx</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">G4CXOpticks_setGeometry_Test</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>IPython session loading the placement transform of a particular volume in the geometry:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>epsilon:1 blyth$ ipython
-
-In [1]: import numpy as np
-In [2]: vt = np.load(&quot;GNodeLib/all_volume_transforms.npy&quot;)
-In [3]: vt.shape
-Out[3]: (12230, 4, 4)
-In [3]: vt[3154]
-Out[3]:
-array([[      0.54317,      -0.83962,       0.     ,       0.     ],
-       [      0.83962,       0.54317,       0.     ,       0.     ],
-       [      0.     ,       0.     ,       1.     ,       0.     ],
-       [ -18079.453  , -799699.44   ,   -7100.     ,       1.     ]],
-      dtype=float32)
-</pre></div>
-</div>
-</div>
+<p>That includes instructions for selecting the geometry
+via your ~/.opticks/GEOM/GEOM.sh</p>
 </div>
 <div class="section" id="opticks-analysis-and-debugging-using-python-ipython-numpy-and-matplotlib-manage-with-miniconda">
-<h2><a class="toc-backref" href="#id5">Opticks Analysis and Debugging using Python, IPython, NumPy and Matplotlib : manage with <strong>miniconda</strong></a><a class="headerlink" href="#opticks-analysis-and-debugging-using-python-ipython-numpy-and-matplotlib-manage-with-miniconda" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id4">Opticks Analysis and Debugging using Python, IPython, NumPy and Matplotlib : manage with <strong>miniconda</strong></a><a class="headerlink" href="#opticks-analysis-and-debugging-using-python-ipython-numpy-and-matplotlib-manage-with-miniconda" title="Permalink to this headline">¶</a></h2>
 <p>Opticks uses the NumPy (NPY) buffer serialization format
 for geometry and event data, thus analysis and debugging requires
 python and ipython with numpy and matplotib extensions.

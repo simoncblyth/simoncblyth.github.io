@@ -30,7 +30,15 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">CSG</a><ul>
-<li><a class="reference internal" href="#todo">TODO</a></li>
+<li><a class="reference internal" href="#primary-geometry-model">Primary Geometry Model</a></li>
+<li><a class="reference internal" href="#csgfoundry-helpers">CSGFoundry Helpers</a></li>
+<li><a class="reference internal" href="#other-csgfoundry-helpers">Other CSGFoundry Helpers</a></li>
+<li><a class="reference internal" href="#dead-or-should-be-rearranged">Dead? OR should be rearranged</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#debug-machinery">Debug Machinery</a></li>
+<li><a class="reference internal" href="#plumbing">Plumbing</a></li>
+<li><a class="reference internal" href="#primary-csg-intersect-headers-functions-take-csgnode-arguments">Primary csg_intersect headers : functions take CSGNode arguments</a></li>
+<li><a class="reference internal" href="#helpers-for-csg-intersect">Helpers for csg_intersect</a></li>
 </ul>
 </li>
 </ul>
@@ -64,55 +72,182 @@
             
   <div class="section" id="csg">
 <h1>CSG<a class="headerlink" href="#csg" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="todo">
-<h2>TODO<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>get the tests into ctest</li>
-<li>document some code</li>
+<div class="section" id="primary-geometry-model">
+<h2>Primary Geometry Model<a class="headerlink" href="#primary-geometry-model" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CSGFoundry.h .cc</dt>
+<dd>geometry vector holder, nexus of control</dd>
+<dt>CSGSolid.h .cc</dt>
+<dd>references one or more CSGPrim, corresponds to compound solids
+such as the set of G4VSolid and PV/LV making up JUNO PMTs</dd>
+<dt>CSGPrim.h .cc</dt>
+<dd>references one or more CSGNode, corresponds to “root” G4VSolid like G4UnionSolid</dd>
+<dt>CSGNode.h .cc</dt>
+<dd>constituent CSG nodes, typically low level G4VSolid like G4Sphere G4Tubs etc..</dd>
+<dt>CSGPrimSpec.h .cc</dt>
+<dd><p class="first">specification to access the AABB and sbtIndexOffset of all CSGPrim of a CSGSolid</p>
+<ul class="last simple">
+<li>HMM: MAYBE CSGSolidSpec would be a better name</li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CSGNode</span><span class="o">.</span><span class="n">h</span>
-    <span class="n">synonymous</span> <span class="k">with</span> <span class="n">Part</span><span class="p">,</span> <span class="n">four</span> <span class="n">quad</span>
-
-<span class="n">CSGPrim</span><span class="o">.</span><span class="n">h</span>
-    <span class="n">references</span> <span class="n">one</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">CSGNode</span><span class="p">,</span> <span class="n">four</span> <span class="n">quad</span>
-
-<span class="n">CSGSolid</span><span class="o">.</span><span class="n">h</span>
-    <span class="n">one</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">CSGPrim</span>
-
-<span class="n">CSGFoundry</span><span class="o">.</span><span class="n">h</span>
-    <span class="n">geometry</span> <span class="n">vector</span> <span class="n">holder</span><span class="p">,</span> <span class="n">nexus</span> <span class="n">of</span> <span class="n">control</span>
-
-
-<span class="n">AABB</span><span class="o">.</span><span class="n">h</span>
-<span class="n">CSGName</span><span class="o">.</span><span class="n">h</span>
-<span class="n">CSGPrimSpec</span><span class="o">.</span><span class="n">h</span>
-<span class="n">CSGScan</span><span class="o">.</span><span class="n">h</span>
-<span class="n">CSGTarget</span><span class="o">.</span><span class="n">h</span>
-<span class="n">CSGView</span><span class="o">.</span><span class="n">h</span>
-<span class="n">CU</span><span class="o">.</span><span class="n">h</span>
-<span class="n">CUDA_CHECK</span><span class="o">.</span><span class="n">h</span>
-
-<span class="n">CSGEnum</span><span class="o">.</span><span class="n">h</span>
-
-
-<span class="n">InstanceId</span><span class="o">.</span><span class="n">h</span>
-<span class="n">Sys</span><span class="o">.</span><span class="n">h</span>
-<span class="n">Tran</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_classify</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_error</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_intersect_node</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_intersect_tree</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_pack</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_postorder</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_robust_quadratic_roots</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_stack</span><span class="o">.</span><span class="n">h</span>
-<span class="n">csg_tranche</span><span class="o">.</span><span class="n">h</span>
-<span class="n">qat4</span><span class="o">.</span><span class="n">h</span>
-
-<span class="o">//</span><span class="n">Quad</span><span class="o">.</span><span class="n">h</span>
-<span class="o">//</span><span class="n">sutil_vec_math</span><span class="o">.</span><span class="n">h</span>
-</pre></div>
+</dd>
+</dl>
 </div>
+<div class="section" id="csgfoundry-helpers">
+<h2>CSGFoundry Helpers<a class="headerlink" href="#csgfoundry-helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CSGTarget.h .cc</dt>
+<dd><p class="first">const CSGFoundry ctor argument, sframe/CE:center_extent/transform access</p>
+<ul class="last simple">
+<li>CSGFoundry::target instance : with transform related access</li>
+</ul>
+</dd>
+<dt>CSGMaker.h .cc</dt>
+<dd><p class="first">non-const CSGFoundry ctor argument, many “make” methods adding CSGSolid/CSGPrim/CSGNode to foundry</p>
+<ul class="last simple">
+<li>CSGFoundry::maker instance</li>
+</ul>
+</dd>
+<dt>CSGCopy.h .cc</dt>
+<dd>CSGFoundry cloning and copying with selection</dd>
+<dt>CSGQuery.h .cc</dt>
+<dd>const CSGFoundry ctor argument, CSGPrim and CSGNode selection API</dd>
+<dt>CU.h CU.cc</dt>
+<dd>upload/download array/vec used for CSGFoundry upload</dd>
+</dl>
+</div>
+<div class="section" id="other-csgfoundry-helpers">
+<h2>Other CSGFoundry Helpers<a class="headerlink" href="#other-csgfoundry-helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CSGDraw.h .cc</dt>
+<dd>CSGQuery ctor argument providing CSGNode access,
+ascii drawing of CSG node trees</dd>
+<dt>CSGGeometry.h .cc</dt>
+<dd><p class="first">higher level wrapper for CSGFoundry which avoids repetition of geometry setup,
+loading and querying mechanics used from some older tests</p>
+<ul class="last simple">
+<li>TODO: review usage and see if still useful or can be consolidated</li>
+</ul>
+</dd>
+<dt>CSGGrid.h</dt>
+<dd>signed distance field used from CSGQuery, CSGGeometry</dd>
+</dl>
+</div>
+<div class="section" id="dead-or-should-be-rearranged">
+<h2>Dead? OR should be rearranged<a class="headerlink" href="#dead-or-should-be-rearranged" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>InstanceId.h</dt>
+<dd><p class="first">simple bit packing of ins_idx and gas_idx</p>
+<ul class="last simple">
+<li>PROBABLY DEAD</li>
+</ul>
+</dd>
+<dt>Sys.h</dt>
+<dd>simple union conversions : unsigned_as_float , float_as_unsigned</dd>
+<dt>CSGGenstep.h .cc</dt>
+<dd><p class="first">const CSGFoundry ctor argumnent</p>
+<ul class="last simple">
+<li>TODO: suspect this has been superceeded by sysrap equiv</li>
+</ul>
+</dd>
+<dt>CSGEnum.h</dt>
+<dd><p class="first">solid type enum</p>
+<ul class="last simple">
+<li>TODO: eliminate or consolidate with CSGSolid.h</li>
+</ul>
+</dd>
+<dt>old_sutil_vec_math.h</dt>
+<dd>HUH: now comes from scuda.h, DEAD?</dd>
+<dt>CSGView.h .cc</dt>
+<dd><p class="first">glm based eye, look, up projection transform maths</p>
+<ul class="last simple">
+<li>HMM: no CSG dependency, this can and should be done at lower sysrap level</li>
+<li>TODO: review users and check for duplicated functionality</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CSGSimtrace.hh .cc</dt>
+<dd>2D cross sectioning, loads CSGFoundry, used from main CSGSimtraceTest.cc</dd>
+<dt>CSGSimtraceRerun.h .cc</dt>
+<dd>on CPU csg_intersect debugging, used from main CSGSimtraceRerunTest.cc</dd>
+<dt>CSGSimtraceSample.h</dt>
+<dd><p class="first">on CPU csg_intersect debugging, used from main CSGSimtraceSampleTest.cc</p>
+<ul class="last simple">
+<li>TODO: contrast with Rerun, maybe consolidate</li>
+</ul>
+</dd>
+<dt>CSGScan.h .cc</dt>
+<dd>CPU testing of GPU csg_intersect impl, used from main CSGScanTest.cc</dd>
+</dl>
+</div>
+<div class="section" id="debug-machinery">
+<h2>Debug Machinery<a class="headerlink" href="#debug-machinery" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CSGRecord.h .cc</dt>
+<dd>behind DEBUG_RECORD macro, used for deep debugging of CSG intersect impl on CPU</dd>
+<dt>CSGDebug_Cylinder.hh .cc</dt>
+<dd>recording deep details of cylinder intersection</dd>
+</dl>
+</div>
+<div class="section" id="plumbing">
+<h2>Plumbing<a class="headerlink" href="#plumbing" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CUDA_CHECK.h</dt>
+<dd>hostside CUDA_CHECK macro</dd>
+<dt>CSG_LOG.hh</dt>
+<dd>logging setup</dd>
+<dt>CSG_API_EXPORT.hh</dt>
+<dd>symbol visibility</dd>
+</dl>
+</div>
+<div class="section" id="primary-csg-intersect-headers-functions-take-csgnode-arguments">
+<h2>Primary csg_intersect headers : functions take CSGNode arguments<a class="headerlink" href="#primary-csg-intersect-headers-functions-take-csgnode-arguments" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>csg_intersect_tree.h</dt>
+<dd>distance_tree, distance_list, intersect_tree, intersect_prim, distance_prim</dd>
+<dt>csg_intersect_node.h</dt>
+<dd>distance_node_list, intersect_node_contiguous, intersect_node_discontiguous, intersect_node_overlap,
+intersect_node, distance_node</dd>
+<dt>csg_intersect_leaf.h</dt>
+<dd>distance_leaf_sphere, intersect_leaf_sphere, … , intersect_leaf</dd>
+<dt>csg_intersect_leaf_newcone.h</dt>
+<dd>intersect_leaf_newcone</dd>
+<dt>csg_intersect_leaf_oldcone.h</dt>
+<dd>intersect_leaf_oldcone</dd>
+<dt>csg_intersect_leaf_oldcylinder.h</dt>
+<dd>intersect_leaf_oldcylinder</dd>
+<dt>csg_intersect_leaf_phicut.h</dt>
+<dd>distance_leaf_phicut, intersect_leaf_phicut, intersect_leaf_phicut_dev, intersect_leaf_phicut_lucas</dd>
+<dt>csg_intersect_leaf_thetacut.h</dt>
+<dd>intersect_leaf_thetacut, intersect_leaf_thetacut_lucas</dd>
+</dl>
+</div>
+<div class="section" id="helpers-for-csg-intersect">
+<h2>Helpers for csg_intersect<a class="headerlink" href="#helpers-for-csg-intersect" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>csg_classify.h</dt>
+<dd>enum : CTRL_RETURN_MISS/../LOOP_B
+enum : State_Enter/Exit/Miss
+struct LUT</dd>
+<dt>csg_error.h</dt>
+<dd>enum : ERROR_LHS_POP_EMPTY …</dd>
+<dt>csg_tranche.h</dt>
+<dd>struct Tranche
+Postorder Tranch storing a stack of slices into the postorder sequence</dd>
+<dt>csg_pack.h</dt>
+<dd>PACK4/UNPACK4 macros</dd>
+<dt>csg_postorder.h</dt>
+<dd>complete binary tree traversal in bit-twiddling macros</dd>
+<dt>csg_robust_quadratic_roots.h</dt>
+<dd>Numerically Stable Method for Solving Quadratic Equations</dd>
+<dt>csg_stack.h</dt>
+<dd>CSG_Stack struct, csg_push, csg_pop</dd>
+<dt>f4_stack.h</dt>
+<dd>struct F4_Stack using float4 as micro stack</dd>
+</dl>
 </div>
 </div>
 
