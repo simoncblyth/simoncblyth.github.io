@@ -5,12 +5,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>JUNOSW + Opticks : Profiling + Status</title>
-<meta content="Opticks + JUNO : Profiling + Status" name="title" />
-<meta content="opticks_20231211_profile.txt" name="name" />
-<meta content="(11 Dec 2023)" name="description" />
-<meta content="Sim" name="notes" />
-<meta content="https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/ShowDocument?docid=10929" name="url" />
+<title>JUNOSW + Opticks : Status and Plan</title>
+<meta content="JUNOSW + Opticks : Status and Plan" name="title" />
+<meta content="opticks_20240224_offline_software_review.txt" name="name" />
+<meta content="(24 Feb 2024)" name="description" />
+<meta content="22nd collaboration meeting : Kaiping : 22-26 Feb 2024 : 15 min talk" name="notes" />
+<meta content="https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=2642" name="url" />
+<meta content="https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/ShowDocument?docid=11290" name="url" />
 <style type="text/css">
 
 /*
@@ -386,13 +387,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">JUNOSW + Opticks : Profiling + Status</span></h1>
+<h1><span class="i">JUNOSW + Opticks : Status and Plan</span></h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">JUNOSW + Opticks : Profiling + Status</span></h1>
+<h1 class="title"><span class="i">JUNOSW + Opticks : Status and Plan</span></h1>
 
 <!-- comment
 
@@ -1165,6 +1166,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              
           }
           div.slide#ray-tracing-vs-rasterization{
+             background-image: url(nvidia/black.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#rasterization-vs-ray-tracing{
              background-image: url(nvidia/black.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
@@ -5080,6 +5087,18 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-image: url(smonitor/figs/smonitor/mpcap/smonitor_cxs_min_igs_rg_default_stream_rg_default_stream.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
+             
+          }
+          div.slide#gamma-event-at-center-png{
+             background-image: url(huyuxiang/gamma_event_at_center.png);
+             background-size: 1186px 448px;
+             background-position: 50px 136px;
+             
+          }
+          div.slide#hit-position-wavelength-time-png{
+             background-image: url(huyuxiang/hit_position_wavelength_time.png);
+             background-size: 1280px 378px;
+             background-position: 0px 171px;
              
           } 
 
@@ -5971,6 +5990,12 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
              background-position: 0px 0px;
              
           }
+          div.slide#rasterization-vs-ray-tracing{
+             background-image: url(nvidia/black.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
           div.slide#raytrace-diagram{
              background-image: url(graphics/1024px-ray_trace_diagram.svg.png);
              background-size: 1280px 720px;
@@ -9882,6 +9907,18 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
+          }
+          div.slide#gamma-event-at-center-png{
+             background-image: url(huyuxiang/gamma_event_at_center.png);
+             background-size: 1186px 448px;
+             background-position: 50px 136px;
+             
+          }
+          div.slide#hit-position-wavelength-time-png{
+             background-image: url(huyuxiang/hit_position_wavelength_time.png);
+             background-size: 1280px 378px;
+             background-position: 0px 171px;
+             
           } 
 
        </style>
@@ -9908,85 +9945,161 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <div class="mytitle">
     <header>
         <h1 style="background-color:lightgrey">
-            JUNOSW + Opticks : Profiling + Status
+            JUNOSW + Opticks : Status and Plan
         </h1>
     </header>
 </div>
 <p style="margin-bottom:25mm;" />
-<p style="margin-bottom:5mm;" /><ul class="small simple">
-<li>&quot;Technical&quot; Opticks release onto /cvmfs/opticks.ihep.ac.cn</li>
+<p style="margin-bottom:35mm;" /><ul class="small simple">
+<li>(December 18, 2023) First Pre-Release of JUNOSW+Opticks</li>
+<li>Status of known issues : most leaks now fixed</li>
+<li>Opticks additions to assist with GPU+CPU memory leak finding</li>
 <li>Geometry in use based on J23_1_0_rc3</li>
 <li>Introduce Three Opticks test scripts [1] [2] [3]</li>
-<li>[2] G4CXTest_GEOM.sh : standalone optical bi-simulation for validation</li>
-<li>[2] A/B Validation Comparison : <tt class="docutils literal">~/o/G4CXTest_GEOM.sh ana</tt></li>
+<li>[2] A:B Chi2 comparison of optical propagation history frequencies</li>
 <li>[2] Chimney Issue : Photons going up the Chimney discrepant ?</li>
 <li>[3] Pure Optical TorchGenstep 20 evt scan : 0.1M to 100M photons</li>
-<li>[3] Hit vs Photon in Debug and Release builds</li>
+<li>[3] Hit vs Photon for Release build running</li>
 <li>Optimizing separate &quot;Release&quot; build in addition to &quot;Debug&quot; build</li>
-<li><strong>sreport.{sh,cc,py}</strong> : Opticks Event metadata reports and plots</li>
 <li>[3] Event Time vs Photon in Debug and Release builds</li>
-<li>[3] Profile reports and plots</li>
-<li>[2] G4CXTest_GEOM.sh : Event Time vs Photons with both A:CSGOptiX and B:U4Recorder</li>
-<li>[2] U4Recorder leaking badly</li>
-<li>[3] pure Opticks : no sign of leak</li>
-<li>[2] B:U4Recorder / A:CSGOptiX Ratio only 190 !</li>
 <li>Absolute Comparison with ancient Opticks Measurements ?</li>
 <li>Launch time (and hits) vs OPTICKS_MAX_BOUNCE</li>
-<li>Hit time histogram of all (and step tail) : Step point occurrence from single 1M photon event</li>
+<li>Yuxiang Hu : Gamma Event at CD center comparisons</li>
 <li>Amdahls Law : How much parellelized speedup actually useful to overall speedup ?</li>
-<li>NEXT STEPS</li>
+<li>NEXT STEPS/PLAN</li>
+<li>Opticks Links, JUNOSW+Opticks DocDB</li>
 </ul>
+<!-- comment
+
+* [3] Profile reports and plots
+* [2] G4CXTest_GEOM.sh : Event Time vs Photons with both A:CSGOptiX and B:U4Recorder
+* [2] U4Recorder leaking badly
+* [3] pure Opticks : no sign of leak
+* [2] B:U4Recorder / A:CSGOptiX Ratio only 190 ! -->
 <div class="mycredit">
-   <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; Simulation Meeting &mdash; 11 Dec 2023 </h2>
+   <h2 style="background-color:lightgrey"> Simon C Blyth, IHEP, CAS  &mdash; Offline Software Review &mdash; 24 Feb 2024 </h2>
 </div>
+        <!--  s5talk  -->
+        <br/>
+    
 </div>
-<div class="slide" id="november-13-2023-technical-test-release-on-cvmfs-opticks-ihep-ac-cn">
-<h1><span class="small">(November 13, 2023) Technical Test Release on /cvmfs/opticks.ihep.ac.cn</span></h1>
-<p class="small"><strong>/cvmfs/opticks.ihep.ac.cn/ok/releases/Opticks-v0.2.1/x86_64-CentOS7-gcc1120-geant4_10_04_p02-dbg</strong></p>
+<div class="slide" id="december-18-2023-first-pre-release-of-junosw-opticks">
+<h1><span class="small">(December 18, 2023) First Pre-Release of JUNOSW+Opticks</span></h1>
+<p class="small"><span class="r">source /cvmfs/juno.ihep.ac.cn/centos7_amd64_gcc1120_opticks/Pre-Release/J23.1.0-rc6/setup.sh</span></p>
 <ul class="small simple">
-<li>Objective : make it easier to test JUNOSW+Opticks</li>
+<li><span class="b">Objective of Pre-Release : enable non-developers to test JUNOSW+Opticks</span></li>
 </ul>
 <table border="1" class="small docutils">
 <colgroup>
-<col width="22%" />
-<col width="78%" />
+<col width="21%" />
+<col width="79%" />
 </colgroup>
 <tbody valign="top">
+<tr><td>OptiX 7.5</td>
+<td>Chosen to match NVIDIA CUDA 11.7 + Driver Version: 515.65.01 on IHEP GPU cluster</td>
+</tr>
 <tr><td>Geant4 10.4.2</td>
-<td>(Opticks with newer Geant4 already in use elsewhere)</td>
+<td>(Opticks with Geant4 11 already in use by Fermilab Geant4 group, others)</td>
 </tr>
 <tr><td>Custom4 0.1.8</td>
 <td>small package : but deeply coupled with : Geant4 + JUNOSW + Opticks</td>
 </tr>
-<tr><td>OptiX 7.5 CUDA 11.7</td>
-<td>straightforward update, so far did not exploit new features</td>
-</tr>
-<tr><td>Opticks-v0.2.1</td>
-<td>latest release <a class="reference external" href="https://github.com/simoncblyth/opticks/releases/tag/v0.2.1">https://github.com/simoncblyth/opticks/releases/tag/v0.2.1</a></td>
+<tr><td>Opticks-v0.2.4</td>
+<td>December 18 release <a class="reference external" href="https://github.com/simoncblyth/opticks/releases/tag/v0.2.4">https://github.com/simoncblyth/opticks/releases/tag/v0.2.4</a></td>
 </tr>
 </tbody>
 </table>
-<p class="small">Updated environment setup + distribution scripts:</p>
+<p class="small">Pre-Release usable only on IHEP GPU cluster (?)</p>
 <ul class="small simple">
-<li>distrib slimmed to 218 MB (started at several GB)</li>
-<li>distrib includes ctests : <span class="b">~210 unit tests</span></li>
-<li>all tests passed in GPU cluster jobs (after avoiding /tmp blackhole)</li>
+<li>unless NVIDIA Driver + CUDA + OptiX versions happen to match your machine</li>
 </ul>
-<p class="small">Testing distribution using ctests:</p>
-<pre class="small literal-block">
-cd $OPTICKS_PREFIX/tests
-ctest -N   # list tests
-ctest  —-output-on-failure   # run all
-ctest -R CSGFoundry_CreateFromSimTest --output-on-failure # run selected
+<p class="small">Example test scripts in j repository:</p>
+<ul class="small simple">
+<li><a class="reference external" href="https://code.ihep.ac.cn/blyth/j/-/blob/main/okjob.sh">https://code.ihep.ac.cn/blyth/j/-/blob/main/okjob.sh</a>    <span class="b">slurm submission wrapper</span></li>
+<li><a class="reference external" href="https://code.ihep.ac.cn/blyth/j/-/blob/main/jok.bash">https://code.ihep.ac.cn/blyth/j/-/blob/main/jok.bash</a>    <span class="b">tut_detsim.py commandline</span></li>
+</ul>
+<p class="small">Example job script for developers building JUNOSW+Opticks with <strong>bash junoenv opticks,bash junoenv offline</strong></p>
+<ul class="small simple">
+<li><a class="reference external" href="https://code.ihep.ac.cn/blyth/j/-/blob/main/okjobdev.sh">https://code.ihep.ac.cn/blyth/j/-/blob/main/okjobdev.sh</a></li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="status-of-known-issues-most-leaks-now-fixed">
+<h1>Status of known issues : most leaks now fixed</h1>
+<ul class="normal simple">
+<li><span class="strike">sensor_identifier off-by-one bug (caused SEGV on hitting SPMT 325599)</span><ul>
+<li><span class="r">FIX: 2023/12/19 Opticks v0.2.5</span></li>
+</ul>
+</li>
+<li><span class="strike">GPU memory leak : from creating CUDA stream for every launch</span><ul>
+<li><span class="r">FIX: 2024/01/25 Opticks v0.2.6</span>  <span class="b">(GPU leak : difficult to find, easy to fix)</span></li>
+</ul>
+</li>
+<li><span class="strike">CPU memory leak from hit handling</span> <span class="b">(CPU leak : re-implement more cleanly)</span><ul>
+<li><span class="r">FIX: 2024/02/20 Opticks HEAD</span> via reimplementation of <tt class="docutils literal"><span class="pre">SEvt::getLocalHit</span></tt><ul>
+<li>leak investigated with standalone test : <tt class="docutils literal">u4/tests/U4HitTest.sh</tt></li>
+<li>fix avoids transform related leak</li>
+<li>fix avoids transform inversion for each hit, adopts double precision transforms</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>U4Recorder CPU memory leak, non-critical<ul>
+<li>recorder only used for debug + validation</li>
+<li>no need to handle many or large (100M photon) events</li>
+<li><span class="b">TODO : check again, above hit handling fix might reduce this enough already</span></li>
+</ul>
+</li>
+<li>python analysis/plotting machinery not yet included in release</li>
+<li>geometry differences described separately</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-additions-to-assist-with-gpu-cpu-memory-leak-finding">
+<h1><span class="small">Opticks additions to assist with GPU+CPU memory leak finding</span></h1>
+<dl class="normal docutils">
+<dt><tt class="docutils literal">~/opticks/sysrap/smonitor.sh</tt></dt>
+<dd>NVML based GPU memory monitor (~nvidia-smi with NumPy array saving)</dd>
+<dt><tt class="docutils literal">~/opticks/sysrap/tests/sprof.sh</tt></dt>
+<dd>Analysis of sysrap/SProf.hh (time[us],VM[kb],RSS[kb]) CPU memory profile stamps</dd>
+</dl>
+<ul class="normal simple">
+<li><strong>2024/01/22</strong> : complete impl. of running from sequence of input gensteps<ul>
+<li>rerun GPU optical propagation with gensteps persisted from JUNOSW+Opticks job</li>
+<li><span class="r">ADVANTAGE : optical simulation dev. cycle time &lt; 2 seconds</span> (not 2 minutes)</li>
+<li><span class="b">enabled pinning down VRAM launch leak : without waiting 2 minutes between trials</span></li>
+<li>see <tt class="docutils literal">~/opticks/CSGOptiX/cxs_min_igs.sh</tt></li>
+</ul>
+</li>
+</ul>
+<pre class="normal literal-block">
+export OPTICKS_INPUT_GENSTEP=$BASE/jok-tds/ALL0/A%0.3d/genstep.npy
+## sequence of genstep arrays to load across multiple SEvt folders
 </pre>
-</div>
+<ul class="normal simple">
+<li><strong>2024/02/04</strong> :  complete <tt class="docutils literal">sysrap/NPX.h</tt> additions for <tt class="docutils literal"><span class="pre">std::unordered_map</span></tt><ul>
+<li>JUNOSW <tt class="docutils literal">map <span class="pre">-&gt;</span> unordered_map</tt> required additional NPX.h serialize/import methods</li>
+</ul>
+</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="cxr-min-eye-0-1-5-0-zoom-4-tmin-1-3-all-jpg">
 <h1><span class="i">cxr_min__eye_0,1.5,0__zoom_4__tmin_1.3__ALL.jpg</span></h1>
 <pre class="literal-block">
 EYE=0,1.5,0 TMIN=1.3 ZOOM=4 ~/opticks/cxr_min.sh  ## CSGOptiXRMTest
 </pre>
 <p style="margin-bottom:100mm;" /><p class="center"><tt class="docutils literal">Using GEOM J23_1_0_rc3_ok0</tt></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="geometry-in-use-based-on-j23-1-0-rc3">
 <h1><span class="small">Geometry in use based on J23_1_0_rc3</span></h1>
 <p class="small">Deferred geometry, switched off by tut_detsim.py options.</p>
@@ -10017,18 +10130,28 @@ can provide solution</td>
 </tr>
 </tbody>
 </table>
-<p class="small">Virtual surface shifts used to avoid degeneracy, together with defaults:</p>
+<p class="small">Virtual surface shifts used to avoid degeneracy, together with defaults (shifts avoid chi2 discrepancies from degenerate surfaces):</p>
 <pre class="small literal-block">
 export Tub3inchPMTV3Manager__VIRTUAL_DELTA_MM=0.10           ## 1.e-3
 export HamamatsuMaskManager__MAGIC_virtual_thickness_MM=0.10 ## 0.05
 export NNVTMaskManager__MAGIC_virtual_thickness_MM=0.10      ## 0.05
 </pre>
-<p class="small"><strong>sigma_alpha/polish ground surface handling ?</strong></p>
 <ul class="small simple">
-<li>closer examination shows Sigma_alpha surfaces not actually being used in current simulation</li>
+<li><span class="b">TODO: check virtual shifts have no performance effects or overlap issues</span><ul>
+<li><span class="r">convince offline group to enlarge defaults : avoiding these Opticks only shifts</span></li>
 </ul>
-<p class="tiny">[T] torus quartic analytic solution is painful : instead simply use appropriate triangulation approx, <strong>more precise that analytic</strong> with much less pain</p>
-</div>
+</li>
+<li><span class="b">TODO: add optional triangulated geometry handling : use for guide tube</span><ul>
+<li><span class="r">torus quartic analytic solution painful : expect triangulation approximation more robust+precise</span></li>
+</ul>
+</li>
+<li><span class="b">TODO: test &quot;listnode&quot; solution for handling deep CSG trees (complex solid shape)</span></li>
+</ul>
+<p class="center"><strong>Completing these three : will match GPU and CPU geometry</strong></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="introduce-three-opticks-test-scripts-1-2-3">
 <h1><span class="small">Introduce Three Opticks test scripts [1] [2] [3]</span></h1>
 <ul class="small simple">
@@ -10083,35 +10206,43 @@ export NNVTMaskManager__MAGIC_virtual_thickness_MM=0.10      ## 0.05
 <dt><strong>InputGenstep</strong></dt>
 <dd>general gensteps eg obtained from [1]:okjob.sh can be used in [3]:cxs_min.sh, not yet [2]:G4CXTest (expect straightforward)</dd>
 </dl>
-</div>
-<div class="slide" id="g4cxtest-geom-sh-standalone-optical-bi-simulation-for-validation">
-<h1><span class="small">[2] G4CXTest_GEOM.sh : standalone optical bi-simulation for validation</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">G4CXTest.cc usinh G4CXApp.h</span></p>
-<div class="last"><pre class="mypre20">
-&#35;include "OPTICKS_LOG.hh"
-<span class="r">&#35;include "G4CXApp.h"</span>
 
-int main(int argc, char** argv)
-{
-    OPTICKS_LOG(argc, argv);
-    return G4CXApp::Main();
-}
-</pre></div></div>
-<dl class="small docutils">
-<dt><strong>G4CXApp.h</strong></dt>
-<dd>standalone pure optical Geant4 + Opticks in single header</dd>
-</dl>
-<ul class="small simple">
-<li>operates from GDML</li>
-<li>GDML translated into Opticks GPU geometry</li>
-<li>&quot;primary&quot; photons passed to Geant4 in <strong>G4CXApp::GeneratePrimaries</strong></li>
-</ul>
-<p class="small"><span class="b">Enables pure optical simulation comparison</span></p>
-<p style="margin-bottom:30mm;" /><table border="1" class="small docutils">
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="a-b-chi2-comparison-of-optical-propagation-history-frequencies">
+<h1><span class="small">[2] A:B Chi2 comparison of optical propagation history frequencies</span></h1>
+<pre class="small literal-block">
+~/o/G4CXTest_GEOM.sh ana                   ## python history comparison
+~/o/sysrap/tests/sseq_index_test.sh        ## C++ history comparison
+</pre>
+<pre class="mypretiny">
+ a_path $AFOLD/seq.npy /data/blyth/opticks/GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL98/A000/seq.npy a_seq (1000000, 2, 2, )
+ b_path $BFOLD/seq.npy /data/blyth/opticks/GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL98/B000/seq.npy b_seq (1000000, 2, 2, )
+ AB [sseq_index_ab::desc u.size 152520 opt BRIEF mode 6
+    sseq_index_ab_chi2::desc                          sum   565.3332 ndf 504.0000 sum/ndf     1.1217 sseq_index_ab_chi2_ABSUM_MIN:200.0000
+     TO AB                             :  126549 126745 :     0.1517 : Y :       2      7 :
+     TO BT BT BT BT BT BT SD           :   70494  70397 :     0.0668 : Y :      18      2 :
+     TO BT BT BT BT BT BT SA           :   57103  57388 :     0.7094 : Y :       5      1 :
+     TO SC AB                          :   51434  51094 :     1.1275 : Y :       4     48 :
+     TO SC BT BT BT BT BT BT SD        :   35878  35913 :     0.0171 : Y :      58     56 :
+     TO SC BT BT BT BT BT BT SA        :   29676  30061 :     2.4813 : Y :     124     85 :
+     TO SC SC AB                       :   19993  19869 :     0.3857 : Y :     137     24 :
+     TO BT BT SA                       :   18932  18869 :     0.1050 : Y :      71    148 :
+     TO RE AB                          :   18319  18090 :     1.4403 : Y :       9     50 :
+     TO SC SC BT BT BT BT BT BT SD     :   15454  15326 :     0.5323 : Y :      19      8 :
+     TO SC SC BT BT BT BT BT BT SA     :   12785  12833 :     0.0899 : Y :      24    138 :
+     TO BT BT AB                       :   10993  10949 :     0.0882 : Y :      72     26 :
+     TO BT AB                          :    9250   9279 :     0.0454 : Y :      36     13 :
+     TO BT BT BT BT BT BT BT SA        :    7476   7577 :     0.6777 : Y :     176    634 :
+     TO SC SC SC AB                    :    7544   7418 :     1.0611 : Y :      90     82 :
+     TO RE BT BT BT BT BT BT SD        :    7419   7272 :     1.4709 : Y :     197     73 :
+     TO SC RE AB                       :    7137   7049 :     0.5459 : Y :     110     11 :
+     ...
+  </pre><table border="1" class="small docutils">
 <colgroup>
-<col width="48%" />
-<col width="52%" />
+<col width="30%" />
+<col width="70%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">Test</th>
@@ -10123,69 +10254,23 @@ int main(int argc, char** argv)
 <td>chi2 matched, no known issues</td>
 </tr>
 <tr><td>TorchGenstep from CD center</td>
-<td>chi2 marginal : chimney issue ?</td>
+<td>chi2 marginal : chimney issue ? Probably some coincident surfaces to fix</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="slide" id="a-b-validation-comparison-o-g4cxtest-geom-sh-ana">
-<h1><span class="small">A/B Validation Comparison</span> : <tt class="docutils literal">~/o/G4CXTest_GEOM.sh ana</tt></h1>
-<pre class="mypretiny">
- QCF qcf :  a.q 1000000 b.q 1000000
- <span class="r">c2sum :   567.1130 c2n :   506.0000 c2per:     1.1208  C2CUT:  200 </span>   <span class="b"> CHI2 ISSUE WITH TORCH RUNNING </span>
- <span class="r">c2sum/c2n:c2per(C2CUT)  567.11/506:1.121 (200) pv[0.031,< 0.05 : NOT:null-hyp ] </span>  <span class="b"> INPUT PHOTONS TARGETTING PMT CHI2 OK </span>
 
- np.c_[siq,_quo,siq,sabo2,sc2,sabo1][0:40]  ## A-B history frequency chi2 comparison
- [[' 0' 'TO AB                                               ' ' 0' '126549 126732' ' 0.1322' '     2      5']
-  [' 1' 'TO BT BT BT BT BT BT SD                             ' ' 1' ' 70494  70173' ' 0.7325' '    18      2']
-  [' 2' 'TO BT BT BT BT BT BT SA                             ' ' 2' ' 57103  56944' ' 0.2217' '     5     25']
-  [' 3' 'TO SC AB                                            ' ' 3' ' 51434  51739' ' 0.9016' '     4      9']
-  [' 4' 'TO SC BT BT BT BT BT BT SD                          ' ' 4' ' 35878  36119' ' 0.8067' '    58     45']
-  [' 5' 'TO SC BT BT BT BT BT BT SA                          ' ' 5' ' 29676  30164' ' 3.9797' '   124      4']
-  [' 6' 'TO SC SC AB                                         ' ' 6' ' 19993  19499' ' 6.1794' '   137    124']
-  [' 7' 'TO BT BT SA                                         ' ' 7' ' 18932  18837' ' 0.2390' '    71     14']
-  [' 8' 'TO RE AB                                            ' ' 8' ' 18319  18272' ' 0.0604' '     9     64']
-  [' 9' 'TO SC SC BT BT BT BT BT BT SD                       ' ' 9' ' 15454  15701' ' 1.9582' '    19     85']
-  ['10' 'TO SC SC BT BT BT BT BT BT SA                       ' '10' ' 12785  12696' ' 0.3109' '    24      3']
-  ['11' 'TO BT BT AB                                         ' '11' ' 10993  11100' ' 0.5182' '    72    188']
-  <span class="r">['12' 'TO BT AB                                            ' '12' '  9250   9727' '11.9897' '    36     96'] ## ABSLEN ACRYLIC ? </span>
-  ['13' 'TO BT BT BT BT BT BT BT SA                          ' '13' '  7476   7627' ' 1.5097' '   176    162']
-  ['14' 'TO SC SC SC AB                                      ' '14' '  7544   7545' ' 0.0001' '    90     84']
-  ['15' 'TO RE BT BT BT BT BT BT SD                          ' '15' '  7419   7364' ' 0.2046' '   197      6']
-  ['16' 'TO SC RE AB                                         ' '16' '  7137   7191' ' 0.2035' '   110     93']
-  ['17' 'TO RE BT BT BT BT BT BT SA                          ' '17' '  7126   7104' ' 0.0340' '    48    181']
-  ['18' 'TO SC BT BT AB                                      ' '18' '  6419   6527' ' 0.9010' '   153     89']
-  ['19' 'TO BT BT BT BT BT BT BT SR SA                       ' '19' '  6385   6367' ' 0.0254' '    16    139']
-  ['20' 'TO BT BT BT BT SD                                   ' '20' '  6146   6190' ' 0.1569' '    13     99']
-  ['21' 'TO SC SC SC BT BT BT BT BT BT SD                    ' '21' '  6148   6175' ' 0.0592' '   145    194']
-  ['22' 'TO SC BT BT SA                                      ' '22' '  6087   6170' ' 0.5620' '   120    185']
-  ['23' 'TO SC BT AB                                         ' '23' '  5589   5782' ' 3.2758' '     8     17']
-  ['24' 'TO BT BT DR BT SA                                   ' '24' '  5449   5543' ' 0.8039' '   600    246']
-  ['25' 'TO RE RE AB                                         ' '25' '  5538   5420' ' 1.2707' '   267    125']
-  ['26' 'TO BT BT BT SA                                      ' '26' '  5532   5259' ' 6.9066' '   745      7']
-  ['27' 'TO SC SC SC BT BT BT BT BT BT SA                    ' '27' '  5084   4974' ' 1.2030' '    23     31']
-  ['28' 'TO SC BT BT BT BT BT BT BT SA                       ' '28' '  4609   4610' ' 0.0001' '    20     63']
-  ['29' 'TO BT BT BT BT BT BT BR BT BT BT BT BT BT BT BT SD  ' '29' '  3809   3813' ' 0.0021' '   362    812']
-  ['30' 'TO RE SC AB                                         ' '30' '  3660   3565' ' 1.2491' '    54     30']
-  ['31' 'TO SC RE BT BT BT BT BT BT SD                       ' '31' '  3192   3134' ' 0.5318' '   292    136']
-  ['32' 'TO SC BT BT BT BT BT BT BT SR SA                    ' '32' '  3145   3173' ' 0.1241' '   243    419']
-  ['33' 'TO BT BT BT BT BT BT BT SD                          ' '33' '  3168   3138' ' 0.1427' '   181    424']
-  ['34' 'TO BT BT BT BT BT BT BR BT BT BT BT BT BT BT BT SA  ' '34' '  3142   3163' ' 0.0699' '    22    257']
-  ['35' 'TO BT BT BT BT BT BT BT SR SR SA                    ' '35' '  3043   3096' ' 0.4576' '   286   1591']
-  ['36' 'TO SC SC BT BT AB                                   ' '36' '  2878   2987' ' 2.0257' '   636    252']
-  ['37' 'TO SC RE BT BT BT BT BT BT SA                       ' '37' '  2877   2960' ' 1.1802' '   151    301']
-  ['38' 'TO BT BT BT BT AB                                   ' '38' '  2857   2834' ' 0.0930' '   225    228']
-  ['39' 'TO SC BT BT BT BT SD                                                                           ' '39' '  2841   2800' ' 0.2980' '   224    323']]
-  </pre></div>
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="chimney-issue-photons-going-up-the-chimney-discrepant">
 <h1><span class="small">[2] Chimney Issue : Photons going up the Chimney discrepant ?</span></h1>
 <pre class="mypretiny">
- np.c_[siq,_quo,siq,sabo2,sc2,sabo1][bzero]  ## in A but not B
- [['1107' 'TO BT BT BT BT BT BT BT BT SD                                                                  ' '1107' '    41      0' ' 0.0000' ' 11355     -1']
-  ['1305' 'TO BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT' '1305' '    33      0' ' 0.0000' ' 11040     -1']
-  ['1623' 'TO BT BT DR BT BT BT SD                                                                        ' '1623' '    26      0' ' 0.0000' '  1930     -1']
-  ['2375' 'TO BT BT BT BT BT BT BR BT BT BT BT BT BT BT BT BT SD                                          ' '2375' '    17      0' ' 0.0000' ' 10972     -1']
-  ['3264' 'TO SC BT BT BT BT BT BT BR BT BT BT BT BT BT BT BT BT SD                                       ' '3264' '    12      0' ' 0.0000' ' 22140     -1']]
+ np.c_[siq,_quo,siq,sabo2,sc2,sabo1][bzero]  ## <span class="r"> history seq in A but not B : usually from degeneracy</span>
+ [['1107' 'TO BT BT BT BT BT BT BT BT SD                                                                  ' '1107' '  41  0' ' 0.0000' ' 11355     -1']
+  ['1305' 'TO BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT' '1305' '  33  0' ' 0.0000' ' 11040     -1']
+  ['1623' 'TO BT BT DR BT BT BT SD                                                                        ' '1623' '  26  0' ' 0.0000' '  1930     -1']
+  ['2375' 'TO BT BT BT BT BT BT BR BT BT BT BT BT BT BT BT BT SD                                          ' '2375' '  17  0' ' 0.0000' ' 10972     -1']
+  ['3264' 'TO SC BT BT BT BT BT BT BR BT BT BT BT BT BT BT BT BT SD                                       ' '3264' '  12  0' ' 0.0000' ' 22140     -1']]
 
  In [1]: w = a.q_startswith("TO BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT BT") ; w
  Out[1]:
@@ -10194,7 +10279,7 @@ int main(int argc, char** argv)
 
  In [2]: a.f.record[w[0],:,0]    ## <span class="r">PHOTON STEP POINT POSITIONS : ALL SIMILAR : GOING UP THE CHIMNEY </span>
  Out[2]:
- array([[   -1.594,     0.835,    99.984,     0.   ],        ## <span class="r"> photon step point (x,y,z,t)  </span>
+ array([[   -1.594,     0.835,    99.984,     0.   ],        ## <span class="r"> photon step point (x,y,z,t) mm,ns  </span>
         [ -284.142,   148.854, 17823.998,    81.302],
         [ -315.513,   165.289, 20000.   ,    88.563],
         [ -332.369,   174.119, 21750.   ,    94.401],
@@ -10212,34 +10297,11 @@ int main(int argc, char** argv)
         [ -412.543,   216.12 , 29860.9  ,   124.621],
         [ -412.55 ,   216.124, 29861.5  ,   124.623],
         [ -412.56 ,   216.129, 29862.5  ,   124.627]], dtype=float32)
- </pre></div>
-<div class="slide" id="g4cxtest-geom-a-chimney-issue-png">
-<h1><span class="i">G4CXTest_GEOM_A_chimney_issue.png</span></h1>
-<table border="1" class="small docutils">
-<colgroup>
-<col width="42%" />
-<col width="58%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head" colspan="2"><span class="w">[2] G4CXTest_GEOM.sh</span></th>
-</tr>
-<tr><th class="head" colspan="2"><span class="w">1M photon Torch Genstep
-at CD center</span></th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td><span class="r">Red</span></td>
-<td><span class="r">End points</span></td>
-</tr>
-<tr><td><span class="g">Green</span></td>
-<td><span class="g">Step points</span></td>
-</tr>
-<tr><td><span class="c">Cyan</span></td>
-<td><span class="c">Hit points</span></td>
-</tr>
-</tbody>
-</table>
-</div>
+ </pre><p class="small"><span class="b">Investigating a discrepant Chimney photon : more of this + geometry examination needed to find cause of difference</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="pure-optical-torchgenstep-20-evt-scan-0-1m-to-100m-photons">
 <h1><span class="small">[3] Pure Optical TorchGenstep 20 evt scan : 0.1M to 100M photons</span></h1>
 <pre class="literal-block">
@@ -10251,7 +10313,7 @@ gather and save only Hits.</p>
 <li>uses CSGOptiXSMTest executable (no Geant4 dependency)</li>
 </ul>
 <pre class="literal-block">
-OPTICKS_RUNNING_MODE=SRM_TORCH
+OPTICKS_RUNNING_MODE=SRM_TORCH  ## &quot;Torch&quot; running enables num_photon scan
 OPTICKS_NUM_PHOTON=H1:10,M2,3,5,7,10,20,40,60,80,100
 OPTICKS_NUM_EVENT=20
 OPTICKS_EVENT_MODE=Hit
@@ -10262,8 +10324,8 @@ OPTICKS_EVENT_MODE=Hit
 </ul>
 <table border="1" class="small docutils">
 <colgroup>
-<col width="65%" />
-<col width="35%" />
+<col width="59%" />
+<col width="41%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">Test Hardware</th>
@@ -10278,30 +10340,48 @@ OPTICKS_EVENT_MODE=Hit
 <td>VRAM limited</td>
 </tr>
 <tr><td>DELL Precision Workstation with NVIDIA Quadro RTX 8000 (48G)</td>
-<td>TODO : try for 400M photons</td>
+<td>TODO : push to memory limit ~400M photons</td>
 </tr>
 <tr><td>GPU cluster nodes with NVIDIA V100 (32GB)</td>
-<td>Basic function tests only so far</td>
+<td>TODO: Production Config Testing, expect
+~250M photon per launch limit</td>
 </tr>
 </tbody>
 </table>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="all1-scatter-10m-photon-22pc-hit-alt-png">
 <h1><span class="i">ALL1_scatter_10M_photon_22pc_hit_alt.png</span></h1>
 <p style="margin-bottom:150mm;" /><p><tt class="docutils literal">~/o/cxs_min.sh&nbsp; ## 2.2M hits from 10M photon TorchGenstep, 3.1 seconds</tt></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="all1-scatter-10m-photon-22pc-hit-png">
 <h1><span class="i">ALL1_scatter_10M_photon_22pc_hit.png</span></h1>
 <!-- comment
 
 PLOT=scatter MODE=3 PUB=10M_photon_22pc_hit ~/o/cxs_min.sh pvpub -->
-</div>
-<div class="slide" id="n7-substamp-all-hit-vs-photon-linear-png">
-<h1><span class="i">N7_Substamp_ALL_Hit_vs_Photon__linear.png</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+:i:`N7_Substamp_ALL_Hit_vs_Photon__linear.png`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. s5_talk::
+
+   Linear relationship between photons and hits -->
 </div>
 <div class="slide" id="s7-substamp-all-hit-vs-photon-linear-png">
 <h1><span class="i">S7_Substamp_ALL_Hit_vs_Photon__linear.png</span></h1>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="optimizing-separate-release-build-in-addition-to-debug-build">
 <h1><span class="small">Optimizing separate &quot;Release&quot; build in addition to &quot;Debug&quot; build</span></h1>
 <p class="small"><strong>Release</strong> preprocessor macros : adds: <strong>PRODUCTION</strong> , removes: <strong>DEBUG_TAG, DEBUG_PIDX,...</strong></p>
@@ -10329,135 +10409,24 @@ grep \\.f64 $OPTICKS_PREFIX/ptx/CSGOptiX_generated_CSGOptiX7.cu.ptx
 <ul class="small simple">
 <li>with OptiX 6.5 removing doubles had large performance improvements, no big effects yet with 7.5</li>
 </ul>
-</div>
-<div class="slide" id="sreport-sh-cc-py-opticks-event-metadata-reports-and-plots">
-<h1><span class="small">sreport.{sh,cc,py} : Opticks Event metadata reports and plots</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">Opticks SEvt Metadata</span></p>
-<ul class="small last simple">
-<li>config : GPU, preprocessor switches, ...</li>
-<li>profile &quot;stamps&quot; <tt class="docutils literal">sprof.h</tt><ul>
-<li><strong>{int64_t[us], VM[kb], RSS[kb]}</strong></li>
-<li>beginOfEvent, endOfEvent, GPU launch ...</li>
-</ul>
-</li>
-<li><a class="reference external" href="https://github.com/simoncblyth/np/">https://github.com/simoncblyth/np/</a></li>
-</ul>
-</div>
-<p class="small">Opticks Event =&gt; folders of NumPy .npy (<tt class="docutils literal">NPFold.h/NP.hh</tt>)</p>
-<p class="small"><tt class="docutils literal">sreport</tt> executable:</p>
-<ol class="small arabic simple">
-<li>loads SEvt metadata in folders below eg <strong>ALL1</strong>
-(using <tt class="docutils literal"><span class="pre">NPFold::LoadNoData</span></tt> : <span class="r">metadata only</span>)</li>
-<li>saves summary NPFold to <strong>../ALL1_sreport</strong></li>
-<li><tt class="docutils literal">sreport.py</tt> loads summary and makes plots</li>
-</ol>
-<p class="small"><strong>Usage on workstation/GPU job and laptop</strong>:</p>
-<pre class="small literal-block">
-~/o/cxs_min.sh  ## create SEvt
-</pre>
-<p class="small">Laptop, <span class="b">rsync small metadata summary from remote</span>:</p>
-<pre class="small literal-block">
-JOB=N7 ~/o/sreport.sh grab
-JOB=N7 PLOT=Substamp_ALL_Etime_vs_Photon ~/o/sreport.sh
-</pre>
-<p class="normal"><span class="r">Effective automated reporting+plotting are essential for optimization</span></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="n7-substamp-all-etime-vs-photon-34s-100m-debug-png">
 <h1><span class="i">N7_Substamp_ALL_Etime_vs_Photon__34s_100M_debug.png</span></h1>
 <p style="margin-bottom:80mm;" /><p class="center">Debug : 0.341 seconds per million photons</p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="s7-substamp-all-etime-vs-photon-100m-31s-release-png">
 <h1><span class="i">S7_Substamp_ALL_Etime_vs_Photon__100M_31s_Release.png</span></h1>
 <p style="margin-bottom:80mm;" /><p class="center">Release : 0.314 seconds per million photons</p>
-</div>
-<div class="slide" id="profile-reporting-eg-o-cxs-min-sh-report">
-<h1><span class="small">Profile reporting eg:</span> <tt class="docutils literal">~/o/cxs_min.sh report</tt></h1>
-<ul class="small simple">
-<li>profile stamps <tt class="docutils literal">{t[us], VM[kb], RSS[kb]}</tt> collected throughout process lifetime</li>
-<li>reported with <strong>sreport</strong> executable</li>
-</ul>
-<pre class="mypretiny">
-   ...
-   A018_QSim__simulate_PREL :   1701933491020126,19102924,1300668    2023-12-07T15:18:11.020126  92,039,765  92,038,118       2,598
-   A018_QSim__simulate_POST :   1701933526625966,19102924,1300668    2023-12-07T15:18:46.625966 127,645,605 127,643,958  35,605,840
-        SEvt__endIndex_A018 :   1701933526626230,19102924,1300668    2023-12-07T15:18:46.626230 127,645,869 127,644,222         264
- SEvt__endOfEvent_LAST_EGPU :   1701933531837026,19102924,1300668    2023-12-07T15:18:51.837026 132,856,665 132,855,018   5,210,796
-             SEvt__EndOfRun :   1701933531837143,19102924,1300668    2023-12-07T15:18:51.837143 132,856,782 132,855,135         117
-   A018_QSim__simulate_TAIL :   1701933531837486,19102924,1300668    2023-12-07T15:18:51.837486 132,857,125 132,855,478         343
-CSGOptiX__SimulateMain_TAIL :   1701933531837541,19102924,1300668    2023-12-07T15:18:51.837541 132,857,180 132,855,533          55
 
- juncture:4 [SEvt__Init_RUN_META,SEvt__BeginOfRun,SEvt__EndOfRun,SEvt__Init_RUN_META] time ranges between junctures
-            SEvt__Init_RUN_META :           -1                        :            0 : 2023-12-07T15:16:38.980361 JUNCTURE
-               SEvt__BeginOfRun :   22,181,663                        :   22,181,663 : 2023-12-07T15:17:01.162024 JUNCTURE
-                 SEvt__EndOfRun :  110,675,119                        :  132,856,782 : 2023-12-07T15:18:51.837143 JUNCTURE
-            SEvt__Init_RUN_META : -132,856,782                        :            0 : 2023-12-07T15:16:38.980361 JUNCTURE
-
- ranges:6 time ranges between pairs of stamps
-             SEvt__Init_RUN_META ==>           CSGFoundry__Load_HEAD                 1,774    ## init
-           CSGFoundry__Load_HEAD ==>           CSGFoundry__Load_TAIL             1,325,321    ## load_geom
-           CSGOptiX__Create_HEAD ==>           CSGOptiX__Create_TAIL            20,854,325    ## upload_geom
-        A000_QSim__simulate_HEAD ==>        A000_QSim__simulate_PREL                19,450    ## upload_genstep
-        A000_QSim__simulate_PREL ==>        A000_QSim__simulate_POST                55,697    ## simulate
-        A000_QSim__simulate_POST ==>        A000_QSim__simulate_TAIL                 7,686    ## download
-        A001_QSim__simulate_HEAD ==>        A001_QSim__simulate_PREL                 1,037    ## upload_genstep
-        A001_QSim__simulate_PREL ==>        A001_QSim__simulate_POST               103,109    ## simulate
-        A001_QSim__simulate_POST ==>        A001_QSim__simulate_TAIL                11,304    ## download
-        A002_QSim__simulate_HEAD ==>        A002_QSim__simulate_PREL                 1,022    ## upload_genstep
-        A002_QSim__simulate_PREL ==>        A002_QSim__simulate_POST               112,313    ## simulate
-        A002_QSim__simulate_POST ==>        A002_QSim__simulate_TAIL                16,068    ## download
-        A003_QSim__simulate_HEAD ==>        A003_QSim__simulate_PREL                   988    ## upload_genstep
-        ...
-</pre></div>
-<div class="slide" id="n7-ranges-span-slow-downloads-png">
-<h1><span class="i">N7_Ranges_SPAN__slow_downloads.png</span></h1>
-<p style="margin-bottom:110mm;" /><p class="center">&quot;Debug&quot; : rather slow hit downloads ?</p>
-</div>
-<div class="slide" id="s7-ranges-span-fast-downloads-png">
-<h1><span class="i">S7_Ranges_SPAN__fast_downloads.png</span></h1>
-<p style="margin-bottom:110mm;" /><p class="center">Unclear why &quot;Release&quot; downloads so much faster than &quot;Debug&quot;</p>
-</div>
-<div class="slide" id="n7-ranges-one-debug-png">
-<h1><span class="i">N7_Ranges_ONE__Debug.png</span></h1>
-</div>
-<div class="slide" id="s7-ranges-one-release-png">
-<h1><span class="i">S7_Ranges_ONE__Release.png</span></h1>
-</div>
-<div class="slide" id="back-to-g4cxtest">
-<h1><span class="i">Back to G4CXTest</span></h1>
-<p style="margin-bottom:60mm;" /><p class="center">Now back to [2] <tt class="docutils literal">G4CXTest_GEOM.sh</tt> optical only comparison</p>
-<!-- comment
-
-:i:`N5_Substamp_ALL_Etime_vs_Photon__U4Recorder_OOM_100M.png`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-</div>
-<div class="slide" id="n5-substamp-all-etime-vs-photon-100m-31s-release-png">
-<h1><span class="i">N5_Substamp_ALL_Etime_vs_Photon__100M_31s_Release.png</span></h1>
-<p style="margin-bottom:60mm;" /><p class="center">Only got to 80M : due to U4Recorder memory leak</p>
-</div>
-<div class="slide" id="s5-substamp-all-etime-vs-photon-u4recorder-benefits-more-png">
-<h1><span class="i">S5_Substamp_ALL_Etime_vs_Photon__U4Recorder_benefits_more.png</span></h1>
-<p style="margin-bottom:60mm;" /><p class="center">&quot;Release&quot; benefits B:U4Recorder more than A:CSGOptiX</p>
-</div>
-<div class="slide" id="n5-subprofile-all-leaking-png">
-<h1><span class="i">N5_Subprofile_ALL__leaking.png</span></h1>
-<p style="margin-bottom:80mm;" /><p class="center"><span class="r">U4Recorder leaking badly! [Geant4 propagation recorded into Opticks SEvt]</span></p>
-<ul class="center simple">
-<li>reason only got to 80M in previous plots</li>
-</ul>
-</div>
-<div class="slide" id="s7-subprofile-all-no-leak-png">
-<h1><span class="i">S7_Subprofile_ALL__no_leak.png</span></h1>
-<p style="margin-bottom:80mm;" /><p class="center">([3] cxs_min.sh) Pure Opticks (no Geant4 or U4Recorder) : no leak</p>
-</div>
-<div class="slide" id="n5-substamp-all-ratio-vs-photon-approach-200-png">
-<h1><span class="i">N5_Substamp_ALL_RATIO_vs_Photon__approach_200.png</span></h1>
-<p style="margin-bottom:70mm;" /><p class="center"><span class="r">B:U4Recorder / A:CSGOptiX : ratio only ~190 !</span></p>
-<ul class="center simple">
-<li><span class="b">BUT: Geant4 not a good candle... (too flexible)</span></li>
-<li><span class="b">instead compare &quot;like-with-like&quot; absolute times</span></li>
-</ul>
-</div>
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="scan-pf-1-opticks-vs-geant4-2">
 <h1><span class="i">scan-pf-1_Opticks_vs_Geant4 2</span></h1>
 <p class="mytopbox">Absolute Comparison with ancient Opticks Measurements.. ? [Below presented at CHEP 2019] 58s / 400M photons</p>
@@ -10496,10 +10465,10 @@ CSGOptiX__SimulateMain_TAIL :   1701933531837541,19102924,1300668    2023-12-07T
 <h1><span class="small">Absolute Comparison with ancient Opticks Measurements ?</span></h1>
 <table border="1" class="small docutils align-center">
 <colgroup>
-<col width="23%" />
-<col width="27%" />
-<col width="17%" />
-<col width="33%" />
+<col width="22%" />
+<col width="25%" />
+<col width="16%" />
+<col width="36%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head" colspan="2">JUNO analytic, 400M photons from center</th>
@@ -10518,10 +10487,10 @@ CSGOptiX__SimulateMain_TAIL :   1701933531837541,19102924,1300668    2023-12-07T
 <td>1650x</td>
 <td>Ancient (2019)</td>
 </tr>
-<tr><td><span class="r">Current Opticks</span></td>
+<tr><td><span class="r">JUNOSW+Opticks 1st</span></td>
 <td><span class="r">124 s (~2x slower)</span></td>
 <td><span class="r">&quot;770x&quot;</span></td>
-<td>extrapolated from 31s for 100M</td>
+<td><span class="r">extrapolated from 31s for 100M</span></td>
 </tr>
 </tbody>
 </table>
@@ -10536,8 +10505,8 @@ CSGOptiX__SimulateMain_TAIL :   1701933531837541,19102924,1300668    2023-12-07T
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">~300 ns photon lifetime limit ?</span></p>
 <ul class="small simple">
-<li>long path photons likely irrelevant ?</li>
-<li><span class="r">IDEA : chop the tail</span></li>
+<li>long path photons : relevant ? how expensive ?</li>
+<li><span class="r">TODO : try chop tail</span></li>
 </ul>
 <pre class="small last literal-block">
 OPTICKS_MAX_BOUNCE=32 ## curr.
@@ -10551,7 +10520,10 @@ OPTICKS_MAX_NS=300    ## IDEA
 <li>more bounces -&gt; <span class="r">every bounce costing a ray trace</span></li>
 <li>more divergence -&gt; less parallelism</li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="n6-substamp-one-maxb-scan-a-expensive-tail-png">
 <h1><span class="i">N6_Substamp_ONE_maxb_scan_A_expensive_tail.png</span></h1>
 <p style="margin-bottom:15mm;" /><p class="center">Use <tt class="docutils literal">cxs_min_scan.sh</tt> to vary OPTICKS_MAX_BOUNCE from 0-&gt;32</p>
@@ -10560,76 +10532,52 @@ OPTICKS_MAX_NS=300    ## IDEA
 <li>every ray trace is costing about same</li>
 <li>warp stagglers holding down performance ?</li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="n6-substamp-one-maxb-scan-hit-slow-hit-increase-png">
 <h1><span class="i">N6_Substamp_ONE_maxb_scan_HIT__slow_hit_increase.png</span></h1>
 <p style="margin-bottom:15mm;" /><p class="center">Slow hit increase above MAX_BOUNCE 20</p>
-</div>
-<div class="slide" id="reproducing-the-max-bounce-scan-plot">
-<h1>Reproducing the MAX_BOUNCE scan plot</h1>
-<p class="small">Using ~/o/cxs_min.sh script with:</p>
-<pre class="small literal-block">
-OPTICKS_RUNNING_MODE : SRM_TORCH
-OPTICKS_EVENT_MODE   : HitPhoton   (picked with VERSION 3)
-OPTICKS_NUM_PHOTON   : H1          (100K)
-OPTICKS_MAX_PHOTON   : M1
-</pre>
-<p class="small">Workstation:</p>
-<pre class="small literal-block">
-~/o/cxs_min_scan.sh      ## o is symbolic link to opticks
-</pre>
-<p class="small">Laptop:</p>
-<pre class="small literal-block">
-~/o/cxs_min.sh grab
 
-PLOT=Substamp_ONE_maxb_scan PICK=A ~/o/sreport.sh
-PLOT=Substamp_ONE_maxb_scan PICK=A ~/o/sreport.sh mpcap
-PLOT=Substamp_ONE_maxb_scan PICK=A PUB=expensive_tail ~/o/sreport.sh mppub
-vi ~/opticks/notes/issues/OPTICKS_MAX_BOUNCE_scanning.rst  ## notes
-</pre>
-<!-- comment
-
-PLOT=Substamp_ONE_maxb_scan_HIT ~/o/sreport.sh
-PLOT=Substamp_ONE_maxb_scan_HIT ~/o/sreport.sh mpcap
-PLOT=Substamp_ONE_maxb_scan_HIT PUB=slow_hit_increase ~/o/sreport.sh mppub -->
-</div>
-<div class="slide" id="all4-thit-high-time-tail-png">
-<h1><span class="i">ALL4_thit_high_time_tail.png</span></h1>
-<p style="margin-bottom:35mm;" /><p class="center">TODO: check performance with MAX_TIME = 200,300,400 ns</p>
-</div>
-<div class="slide" id="all4-seqnib-small-truncation-bump-png">
-<h1><span class="i">ALL4_seqnib_small_truncation_bump.png</span></h1>
-<p style="margin-bottom:120mm;" /><p class="right">Small truncation bump at 32 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-</div>
-<div class="slide" id="reproducing-step-point-counts-aka-seqnib-plot">
-<h1><span class="small">Reproducing step point counts (aka seqnib) plot</span></h1>
-<div class="sidebar">
-<p class="first sidebar-title"><span class="small">sequence nibbles</span></p>
-<p class="small"><strong>sseq.h</strong> and <strong>seq.npy</strong> sequence array:</p>
-<ul class="small last simple">
-<li>4 bits(aka 1 nibble) : for each photon step point : 15 possible history flags</li>
-<li>2*64 bit words : giving up to 32 steps of photon &quot;seqnib&quot; history</li>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="hit-position-wavelength-time-png">
+<h1><span class="i">hit_position_wavelength_time.png</span></h1>
+<p style="margin-bottom:-10mm;" /><p class="normal"><strong>Yuxiang Hu</strong> : Gamma Event at CD center  : Comparison of JUNOSW with JUNOSW+Opticks</p>
+<p class="normal">Hit position, wavelength and time comparison</p>
+<p style="margin-bottom:130mm;" /><ul class="small simple">
+<li><span class="b">TODO: propagation comparison to understand ~2% hit difference</span></li>
 </ul>
-</div>
-<p class="small">Using ~/o/cxs_min.sh script with:</p>
-<pre class="small literal-block">
-OPTICKS_RUNNING_MODE : SRM_TORCH
-OPTICKS_EVENT_MODE   : HitPhotonSeq
-OPTICKS_NUM_PHOTON   : M1
-OPTICKS_MAX_PHOTON   : M1
-</pre>
-<p class="small">Workstation:</p>
-<pre class="small literal-block">
-VERSION=4 ~/o/cxs_min.sh
-</pre>
-<p class="small">Laptop:</p>
-<pre class="small literal-block">
-VERSION=4 ~/o/cxs_min.sh grab
-VERSION=4 MODE=2 PLOT=seqnib ~/o/cxs_min.sh ana
-VERSION=4 MODE=2 PLOT=seqnib ~/o/cxs_min.sh mpcap
-VERSION=4 MODE=2 PLOT=seqnib PUB=small_truncation_bump ~/o/cxs_min.sh mppub
-</pre>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="gamma-event-at-center-png">
+<h1><span class="i">gamma_event_at_center.png</span></h1>
+<p style="margin-bottom:-10mm;" /><p class="normal"><strong>Yuxiang Hu</strong> : Gamma Event at CD center  : Comparison of JUNOSW with JUNOSW+Opticks</p>
+<p style="margin-bottom:-5mm;" /><table border="1" class="normal docutils">
+<colgroup>
+<col width="46%" />
+<col width="10%" />
+<col width="43%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>Overall speedup [JSW/(JSW+Opticks)]</td>
+<td>~60X</td>
+<td><span class="b">UN-OPTIMIZED + PRELIM</span></td>
+</tr>
+</tbody>
+</table>
+<p style="margin-bottom:130mm;" /><p class="small">[Calculation: same TMM header as JUNOSW, Lookup: using uploaded &quot;ART&quot; texture (Gigabytes)]</p>
+<ul class="small simple">
+<li><span class="b">TODO: higher energies, muon, multi-muon, ...</span></li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="amdahls-law-expected-speedup-limited-by-serial-processing">
 <h1><span class="small">Amdahls &quot;Law&quot; : Expected Speedup Limited by Serial Processing</span></h1>
 <div class="sidebar">
@@ -10667,27 +10615,32 @@ VERSION=4 MODE=2 PLOT=seqnib PUB=small_truncation_bump ~/o/cxs_min.sh mppub
 <div class="slide" id="amdahl-p-sensitive-png">
 <h1><span class="i">amdahl_p_sensitive.png</span></h1>
 <img alt="/env/presentation/parallel/amdahl.png" class="small align-center" src="/env/presentation/parallel/amdahl.png" style="width: 392px; height: 112px;" />
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="how-much-parellelized-speedup-actually-useful-to-overall-speedup">
 <h1><span class="small">How much parellelized speedup actually useful to overall speedup?</span></h1>
-<p class="small"><strong>Very dependant on the parallel fraction</strong></p>
+<p class="small"><span class="r">Very dependant on the parallel fraction</span></p>
 <table border="1" class="small docutils">
 <colgroup>
 <col width="18%" />
-<col width="12%" />
-<col width="16%" />
+<col width="8%" />
+<col width="10%" />
+<col width="8%" />
 <col width="55%" />
 </colgroup>
 <thead valign="bottom">
-<tr><th class="head" colspan="4"><strong>Theoretical Overall Speedup for various parallel fractions and parallelized speedups</strong></th>
+<tr><th class="head" colspan="5"><strong>Theoretical Overall Speedup for various parallel fractions and parallelized speedups</strong></th>
 </tr>
 <tr><th class="head">&nbsp;</th>
-<th class="head" colspan="2">Parallelized Speedup</th>
+<th class="head" colspan="3">Parallelized Speedup</th>
 <th class="head">&nbsp;</th>
 </tr>
 <tr><th class="head">Parallel Fraction</th>
 <th class="head">100x</th>
 <th class="head">1000x</th>
+<th class="head">limit</th>
 <th class="head">Notes</th>
 </tr>
 </thead>
@@ -10695,67 +10648,139 @@ VERSION=4 MODE=2 PLOT=seqnib PUB=small_truncation_bump ~/o/cxs_min.sh mppub
 <tr><td>95%</td>
 <td>17x</td>
 <td>20x</td>
-<td rowspan="3">Little benefit beyond ~100x parellized speedup</td>
+<td>20x</td>
+<td rowspan="3">Little benefit beyond ~100x parallelized speedup</td>
 </tr>
 <tr><td>96%</td>
 <td>20x</td>
 <td>24x</td>
+<td>25x</td>
 </tr>
 <tr><td>97%</td>
 <td>25x</td>
 <td>32x</td>
+<td>33.3x</td>
 </tr>
 <tr><td>98%</td>
 <td>34x</td>
 <td>48x</td>
+<td>50x</td>
 <td rowspan="2">Substantial benefit from more parallelized speedup</td>
 </tr>
 <tr><td>99%</td>
 <td>50x</td>
 <td>91x</td>
+<td>100x</td>
 </tr>
 </tbody>
 </table>
-<ul class="small simple">
-<li><tt class="docutils literal">~/opticks/ana/amdahl.py</tt></li>
-</ul>
 <pre class="literal-block">
-In [4]: Amdahl.Overall_Speedup(np.array([100,1000]),0.95)
-Out[4]: array([16.807, 19.627])
+In [1]: run ~/opticks/ana/amdahl.py
 
-In [5]: Amdahl.Overall_Speedup(np.array([100,1000]),0.99)
-Out[5]: array([50.251, 90.992])
+In [2]: Amdahl.Overall_Speedup(np.array([100,1000,np.inf]),0.95)
+Out[2]: array([16.807, 19.627, 20.   ])
+
+In [3]: Amdahl.Overall_Speedup(np.array([100,1000,np.inf]),0.99)
+Out[3]: array([ 50.251,  90.992, 100.   ])
 </pre>
-</div>
-<div class="slide" id="next-steps">
-<h1>NEXT STEPS</h1>
-<ul class="small simple">
-<li>investigate small photon history chi2 deviations : Chimney geometry issue, and maybe others</li>
-<li>find and fix U4Recorder memory leak</li>
-<li>test with traditional POM to see if bouncy POM is sole culprit for 2x slowdown</li>
-<li>add <tt class="docutils literal">OPTICKS_MAX_TIME</tt> and measure performance using 200ns, 300ns, 400ns</li>
-<li>setup and profile on NVIDIA Quadro RTX 8000 : try to get to 400M photons again</li>
-<li>update setup and profile on GPU cluster</li>
-<li>muon running : to provide actual production speedup numbers<ul>
-<li>(hopefully Yuxiang can help with this)</li>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="next-steps-plan">
+<h1><span class="small">NEXT STEPS / PLAN</span></h1>
+<dl class="small docutils">
+<dt><strong>Release</strong></dt>
+<dd><ul class="first last simple">
+<li>create 2nd JUNOSW+Opticks release (with Tao) : <span class="b">after some(but not all) of the below completed</span></li>
 </ul>
-</li>
-<li>create with Tao : JUNOSW+Opticks release on /cvmfs based on latest JUNOSW release</li>
-<li>add triangulated geometry handling for the guide tube implemented in general way</li>
-<li>revisit the complex CSG solids : standalone check+measure &quot;listnode&quot; solution for complex CSG</li>
-<li>incorporate complex CSG solids, checking performance impact</li>
-<li>currently Opticks has hard OPTICKS_MAX_PHOTON limit, thats need to
-be set to an appropriate value for available VRAM<ul>
-<li>implement automated way to avoid this usage inconvenience</li>
+</dd>
+<dt><strong>Fix Leaks</strong></dt>
+<dd><ul class="first last simple">
+<li><span class="strike">GPU VRAM leak</span></li>
+<li><span class="strike">CPU hit handling leak</span></li>
+<li>U4Recorder CPU memory leak (less important than other leaks : as only used for validation/debug)</li>
 </ul>
-</li>
+</dd>
+<dt><strong>Geometry+Validation</strong></dt>
+<dd><ul class="first last simple">
+<li>investigate small photon history chi2 deviations : Chimney geometry degeneracy ?</li>
+<li>check PMT virtual Water/Water wrapper shifts for overlaps/performance effect ?</li>
+<li>add optional triangulated geometry handling : use for guide tube (<span class="r">reviving functionality from old Opticks</span>)</li>
+<li>test listnode solution for complex CSG solids (<span class="r">new &quot;territory&quot;, tree balancing not viable</span>)</li>
 </ul>
-<p class="small"><strong>Try Optix-IR (Intermediate Representation) alternative to PTX (new in OptiX 7.1)</strong></p>
-<ul class="small simple">
-<li>&quot;enables symbolic debugging, enhanced optimizations&quot;</li>
-<li>try kernel profiling with NVIDIA NSight tool etc..</li>
+</dd>
+<dt><strong>Optimization</strong></dt>
+<dd><ul class="first last simple">
+<li>further slimming &quot;Release&quot; kernel : only do what must be done, header minimize</li>
+<li>add <tt class="docutils literal">OPTICKS_MAX_TIME</tt> limit, measure performance using eg 200-400ns : understand performance drivers</li>
+<li>compare traditional vs bouncy POM : is bouncy POM primary culprit for 2x slowdown vs ancient measurements ?</li>
+<li>try NVIDIA Nsight kernel profiling tools : look for low hanging fruit</li>
+<li>try OptiX PTX=&gt;IR (Intermediate Representation) [from OptiX 7.1] : &quot;GPU debug, ...enhanced optimizations...&quot;</li>
 </ul>
-</div>
+</dd>
+<dt><strong>Production Preparation</strong></dt>
+<dd><ul class="first last simple">
+<li>gain muon running experience : is OPTICKS_MAX_PHOTON hard limit problematic in practice ?</li>
+<li>automated event splitting, depending on num photons and available/configured max VRAM (<span class="r">like Fermilab G4 group</span>)</li>
+<li>config tuning to maximize GPU cluster throughput (<span class="r">expect near-filling VRAM best for 1 node, for cluster too ?</span>)</li>
+<li>LESS IMMINENTLY: automated/configurable event joining ? can this extend usefulness to lower energy events ?</li>
+</ul>
+</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-links-junosw-opticks-docdb">
+<h1>Opticks Links, JUNOSW+Opticks DocDB</h1>
+<table border="1" class="docutils align-center">
+<colgroup>
+<col width="51%" />
+<col width="49%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
+<td>code repository (day-to-day)</td>
+</tr>
+<tr><td><a class="reference external" href="https://github.com/simoncblyth/opticks">https://github.com/simoncblyth/opticks</a></td>
+<td>code repository (~month-to-month), releases</td>
+</tr>
+<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a>
+<a class="reference external" href="https://simoncblyth.github.io">https://simoncblyth.github.io</a>
+<a class="reference external" href="https://juno.ihep.ac.cn/~blyth/">https://juno.ihep.ac.cn/~blyth/</a></td>
+<td>publications, presentations, videos</td>
+</tr>
+<tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
+<td>forum/mailing list archive</td>
+</tr>
+<tr><td>email:opticks+subscribe&#64;groups.io</td>
+<td>subscribe to mailing list</td>
+</tr>
+</tbody>
+</table>
+<p><strong>JUNOSW+Opticks</strong></p>
+<table border="1" class="normal docutils align-center">
+<colgroup>
+<col width="15%" />
+<col width="13%" />
+<col width="71%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>DocDB-10968</td>
+<td>2023/12/19</td>
+<td>Using first JUNOSW+Opticks Pre-Release at IHEP GPU cluster</td>
+</tr>
+<tr><td>DocDB-10929</td>
+<td>2023/12/11</td>
+<td>JUNOSW + Opticks : Profiling and Status</td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 </div>
 </body>
 </html>
