@@ -7,8 +7,9 @@
 <meta name="version" content="S5 1.1" />
 <title>Opticks : SEMINAR :  Optical Photon Simulation via GPU Ray Tracing from NVIDIA OptiX</title>
 <meta content="Opticks IHEP EPD Seminar" name="title" />
-<meta content="(2024 March/April) JUNO, OptiX, Opticks" name="description" />
+<meta content="(2024 April 18) JUNO, OptiX, Opticks" name="description" />
 <meta content="50 min" name="note0" />
+<meta content="https://indico.ihep.ac.cn/event/22301/" name="url" />
 <style type="text/css">
 
 /*
@@ -5393,7 +5394,7 @@ NVIDIA® OptiX™ -->
 <!--img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="juno/JUNO_logo.png"  /-->
 <div class="mycredit">
    <h2 style="background-color:lightgrey">
-      Simon C Blyth, IHEP, CAS &mdash; IHEP EPD Seminar &mdash; ?? April 2024
+      Simon C Blyth, IHEP, CAS &mdash; IHEP EPD Seminar &mdash; 18 April 2024
    </h2>
 </div>
         <!--  s5talk  -->
@@ -5459,33 +5460,50 @@ NVIDIA® OptiX™ -->
 <li>&quot;Foundry&quot; Model : Shared CPU/GPU Geometry Context</li>
 <li>Two-Level Hierarchy : Instance transforms (IAS) over Geometry (GAS)</li>
 <li>Geometry Model Translation : Geant4 =&gt; CSGFoundry =&gt; NVIDIA OptiX 7</li>
+<li>first renders with OptiX 7</li>
+<li>Ray trace render performance scanning</li>
 <li>n-Ary CSG &quot;List-Nodes&quot;</li>
+<li>CSG discontinuous union</li>
 <li>Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow</li>
 <li>Primary Packages and Structs Of Re-Implemented Opticks</li>
 <li>QUDARap : CUDA Optical Simulation Implementation</li>
-<li>Ray trace render performance scanning</li>
-<li>Validation</li>
+<li>Validation by comparison with Geant4</li>
 </ul>
 </li>
 <li>Selection of DetSim issues revealed/studied using Opticks<ul>
-<li>PMT Torus neck</li>
-<li>Geometry Overlaps</li>
+<li>Crucial Importance of standalone (fast cycle) tests</li>
+<li>CSG : (Cylinder - Torus) PMT neck : spurious intersects</li>
+<li>Geometry Overlaps, eg solidXJfixture</li>
+<li>Unphysical PMT geometry and optical model</li>
 <li>Compare Reflected Polarization Impls for Brewster Angle Incidence</li>
 </ul>
 </li>
 <li>Re-implemented JUNO PMT Optical Model<ul>
 <li>G4OpBoundaryProcess : customized for JUNO PMT Optical Model (POM)</li>
+<li>Validation with standalone tests, input photons</li>
 <li>Multi-Layer Thin Film (A,R,T) Calc using TMM (Custom4 Package)</li>
 </ul>
 </li>
+<li>Opticks performance with GPU PMT Optical Model<ul>
+<li>Pure Optical TorchGenstep scan</li>
+<li>Release Event Time</li>
+<li>Absolute Comparison with ancient Opticks Meaurements</li>
+<li>(Yuxiang Hu) Overall speedup check</li>
+</ul>
+</li>
+<li>Amdahls &quot;Law&quot; : Expected Speedup Limited by Serial Processing</li>
 <li>Summary + Links</li>
-<li>Acknowledgements : Geant4 Collab. + Dark Matter Search Community + NVIDIA</li>
+<li>Acknowledgements : G4 Collab. + DM Search Community + NVIDIA</li>
+<li>Innovation : Lessons Learned, Three Laws of Software Development</li>
 <li>Extras<ul>
 <li>NVIDIA Ada Lovelace : 3rd Generation RTX, RT Cores in Data-Center</li>
 </ul>
 </li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="juno-optical-photon-simulation-problem">
 <h1><span class="incremental">JUNO Optical Photon Simulation Problem...</span></h1>
 <p style="margin-bottom:7cm;" /><div class="sidebar">
@@ -7829,6 +7847,85 @@ After avoiding geometry problems : G4Torus, deep CSG trees
 
    [1] Single threaded Geant4 10.4.2, NVIDIA Quadro RTX 8000 (48G), 1st gen RTX, ancient JUNO geom, OptiX 6.5, ancient Opticks -->
 </div>
+<div class="slide" id="optical-simulation-comparison-statistical-or-direct">
+<h1><span class="small">Optical Simulation Comparison : Statistical OR Direct</span></h1>
+<p class="small">Statistical Chi-squared comparison of photon history occurence between two simulations</p>
+<ul class="small simple">
+<li>powerful metric to find discrepancies between simulations (eg from near-degenerate geometry)</li>
+</ul>
+<pre class="mypretiny">
+c2sum/c2n:c2per(C2CUT)  280.88/188:1.494 (30)
+
+np.c_[siq,_quo,siq,sabo2,sc2,sabo1][0:25]  ## A-B history frequency chi2 comparison
+    0   TO BT BT BT BT SD                                             33322  33343    0.0066        1      2
+    1   TO BT BT BT BT SA                                             28160  28070    0.1441        8      0
+    2   TO BT BT BT BT BT SR SA                                        6270   6268    0.0003    10363  10565
+    3   TO BT BT BT BT BT SA                                           4552   4649    1.0226     8398   8433
+    4   TO BT BT BT BT BT SR BR SR SA                                  1154   1186    0.4376    21156  21014
+    5   TO BT BT BT BT BT SR BR SA                                      923    989    2.2782    20241  20201
+    6   TO BT BT BT BT BR BT BT BT BT BT BT AB                          946    958    0.0756    10389   8432
+    7   TO BT BT BT BT BT SR SR SA                                      901    942    0.9121    10399  10410
+    8   TO BT BT AB                                                     878    895    0.1630       26    102
+    9   TO BT BT BT BT BT SR BT BT BT BT BT BT BT AB                    615    635    0.3200    20974  22027
+   10   TO BT BT BT BT BR BT BT BT BT AB                                571    601    0.7679     8459   9208
+   11   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SA                    533    537    0.0150     7312   7299
+   <span class="r">12   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SD        503    396   12.7353    12018  11465</span>
+   13   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SD                    480    497    0.2958     7974   7967
+   14   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SA        412    411    0.0012    11467  11471
+   15   TO BT BT BT BT BT SR SR SR SA                                   383    396    0.2169    10362  10368
+ </pre><p class="small">When causes of discrepancy cannot be identified statistically</p>
+<ul class="small simple">
+<li>use common input photons + aligned random consumption between simulations</li>
+<li>enable direct photon-to-photon comparison of simulations : reveals precisely where simulations diverge</li>
+</ul>
+<p class="small"><span class="b">Comparison of two independent optical simulation implementations : ideal way find issues</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-yy-frame-close-png">
+<h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_yy_frame_close.png</span></h1>
+<p style="margin-bottom:130mm;" /><p class="small"><tt class="docutils literal">Green : start position (100k input photons)</tt></p>
+<p class="small"><tt class="docutils literal">Red : end position,&nbsp; Cyan : other position</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-b-png">
+<h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_b.png</span></h1>
+<p class="small">         
+         
+         
+         
+         
+<tt class="docutils literal">cd ~/j/ntds ; N=1 ./ntds.sh ana</tt></p>
+<p style="margin-bottom:150mm;" /><p class="small"><span class="b">Geant4/U4Recorder 3D photon points transformed into target frame, viewed in 2D</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="b-v1j008-n1-oipf-nnvt-0-1000-gridxy-png">
+<h1><span class="i">B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png</span></h1>
+<pre class="literal-block">
+export OPTICKS_INPUT_PHOTON=GridXY_X1000_Z1000_40k_f8.npy
+export OPTICKS_INPUT_PHOTON_FRAME=NNVT:0:1000
+
+MODE=3 EDL=1 N=0 EYE=500,0,2300 CHECK=not_first ~/j/ntds/ntds.sh ana
+</pre>
+<p style="margin-bottom:110mm;" /><pre class="literal-block">
+Photon step points from grid of input photons target NNVT:0:1000 (POM:1)
+</pre>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cxr-min-eye-1-0-5-zoom-2-tmin-0-5-nnvt-0-1000-demo-jpg">
+<h1><span class="i">cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg</span></h1>
+<p><tt class="docutils literal">ray traced renders : exact same geometry &quot;seen&quot; by simulation</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="selection-of-detsim-issues-revealed-studied-using-opticks">
 <h1><span class="small">Selection of DetSim issues revealed/studied using Opticks</span></h1>
 <div class="sidebar">
@@ -7892,6 +7989,69 @@ After avoiding geometry problems : G4Torus, deep CSG trees
    :width: 1200px
    :align: center -->
 </div>
+<div class="slide" id="crucial-importance-of-standalone-fast-cycle-tests">
+<h1>Crucial Importance of Standalone (fast cycle) tests</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Standalone Advantage</span></p>
+<ul class="small simple">
+<li>Full control of code</li>
+<li>Fast build</li>
+<li>Fast cycle</li>
+</ul>
+<p class="small"><span class="r">make change, see impact in seconds, not minutes</span></p>
+<p class="small"><strong>Investigated Geometry Classes</strong></p>
+<div class="last"><pre class="mypretiny">
+Tub3inchPMTV3Manager.hh
+HamamatsuR12860PMTManager.hh
+NNVTMCPPMTManager.hh
+NNVTMaskManager.hh
+HamamatsuMaskManager.hh
+XJfixtureConstruction.hh
+FastenerAcrylicConstruction.hh
+SJFixtureConstruction.hh
+XJanchorConstruction.hh
+SJReceiverConstruction.hh
+SJCLSanchorConstruction.hh
+SJReceiverFasternConstruction.hh
+</pre></div></div>
+<p class="small"><strong>How standalone tests created:</strong></p>
+<ul class="small simple">
+<li>added <em>IGeomManager</em> standalone base to 12 investigated classes<ul>
+<li>depends only on Geant4 (Custom4)<ul>
+<li>less dependencies =&gt; more useful</li>
+</ul>
+</li>
+<li>enables testing separate from JUNOSW, eg:<ul>
+<li>One PMT tests of JUNO PMT Optical Model</li>
+<li>Geant4/Opticks 2D slice renders to reveal overlaps</li>
+<li>Opticks 3D rendering</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="small"><pre class="mypretiny">
+ 38 #ifdef PMTSIM_STANDALONE
+ 39 #include "PMTSIM_API_EXPORT.hh"
+ 40 class PMTSIM_API HamamatsuR12860PMTManager : public IGeomManager {
+ 41 #else
+ 42 class HamamatsuR12860PMTManager: public IPMTElement,
+ 43                                  public ToolBase {
+ 44 #endif
+</pre></div><ul class="small simple">
+<li>0-dependency PMT data access by serialize/de-serialize<ul>
+<li>PMT data access from anywhere, including GPU</li>
+<li>NP.hh NPFold.h : save PMT data into NumPy .npy files<ul>
+<li><a class="reference external" href="https://github.com/simoncblyth/np/">https://github.com/simoncblyth/np/</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="csg-cylinder-torus-pmt-neck-spurious-intersects">
 <h1><span class="i">CSG : (Cylinder - Torus) PMT neck : spurious intersects</span></h1>
 <p><tt class="docutils literal">CSG : (Cylinder - Torus) PMT neck : spurious intersects</tt></p>
@@ -8081,85 +8241,6 @@ After avoiding geometry problems : G4Torus, deep CSG trees
 </dd>
 </dl>
 <p class="normal"><a class="reference external" href="https://github.com/simoncblyth/customgeant4/">https://github.com/simoncblyth/customgeant4/</a></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="optical-simulation-comparison-statistical-or-direct">
-<h1><span class="small">Optical Simulation Comparison : Statistical OR Direct</span></h1>
-<p class="small">Statistical Chi-squared comparison of photon history occurence between two simulations</p>
-<ul class="small simple">
-<li>powerful metric to find discrepancies between simulations (eg from near-degenerate geometry)</li>
-</ul>
-<pre class="mypretiny">
-c2sum/c2n:c2per(C2CUT)  280.88/188:1.494 (30)
-
-np.c_[siq,_quo,siq,sabo2,sc2,sabo1][0:25]  ## A-B history frequency chi2 comparison
-    0   TO BT BT BT BT SD                                             33322  33343    0.0066        1      2
-    1   TO BT BT BT BT SA                                             28160  28070    0.1441        8      0
-    2   TO BT BT BT BT BT SR SA                                        6270   6268    0.0003    10363  10565
-    3   TO BT BT BT BT BT SA                                           4552   4649    1.0226     8398   8433
-    4   TO BT BT BT BT BT SR BR SR SA                                  1154   1186    0.4376    21156  21014
-    5   TO BT BT BT BT BT SR BR SA                                      923    989    2.2782    20241  20201
-    6   TO BT BT BT BT BR BT BT BT BT BT BT AB                          946    958    0.0756    10389   8432
-    7   TO BT BT BT BT BT SR SR SA                                      901    942    0.9121    10399  10410
-    8   TO BT BT AB                                                     878    895    0.1630       26    102
-    9   TO BT BT BT BT BT SR BT BT BT BT BT BT BT AB                    615    635    0.3200    20974  22027
-   10   TO BT BT BT BT BR BT BT BT BT AB                                571    601    0.7679     8459   9208
-   11   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SA                    533    537    0.0150     7312   7299
-   <span class="r">12   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SD        503    396   12.7353    12018  11465</span>
-   13   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SD                    480    497    0.2958     7974   7967
-   14   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SA        412    411    0.0012    11467  11471
-   15   TO BT BT BT BT BT SR SR SR SA                                   383    396    0.2169    10362  10368
- </pre><p class="small">When causes of discrepancy cannot be identified statistically</p>
-<ul class="small simple">
-<li>use common input photons + aligned random consumption between simulations</li>
-<li>enable direct photon-to-photon comparison of simulations : reveals precisely where simulations diverge</li>
-</ul>
-<p class="small"><span class="b">Comparison of two independent optical simulation implementations : ideal way find issues</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-yy-frame-close-png">
-<h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_yy_frame_close.png</span></h1>
-<p style="margin-bottom:130mm;" /><p class="small"><tt class="docutils literal">Green : start position (100k input photons)</tt></p>
-<p class="small"><tt class="docutils literal">Red : end position,&nbsp; Cyan : other position</tt></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="b-v1j008-n1-ip-moi-hama-0-1000-b-png">
-<h1><span class="i">B_V1J008_N1_ip_MOI_Hama:0:1000_b.png</span></h1>
-<p class="small">         
-         
-         
-         
-         
-<tt class="docutils literal">cd ~/j/ntds ; N=1 ./ntds.sh ana</tt></p>
-<p style="margin-bottom:150mm;" /><p class="small"><span class="b">Geant4/U4Recorder 3D photon points transformed into target frame, viewed in 2D</span></p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="b-v1j008-n1-oipf-nnvt-0-1000-gridxy-png">
-<h1><span class="i">B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png</span></h1>
-<pre class="literal-block">
-export OPTICKS_INPUT_PHOTON=GridXY_X1000_Z1000_40k_f8.npy
-export OPTICKS_INPUT_PHOTON_FRAME=NNVT:0:1000
-
-MODE=3 EDL=1 N=0 EYE=500,0,2300 CHECK=not_first ~/j/ntds/ntds.sh ana
-</pre>
-<p style="margin-bottom:110mm;" /><pre class="literal-block">
-Photon step points from grid of input photons target NNVT:0:1000 (POM:1)
-</pre>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
-<div class="slide" id="cxr-min-eye-1-0-5-zoom-2-tmin-0-5-nnvt-0-1000-demo-jpg">
-<h1><span class="i">cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg</span></h1>
-<p><tt class="docutils literal">ray traced renders : exact same geometry &quot;seen&quot; by simulation</tt></p>
 
         <!--  s5talk  -->
         <br/>
@@ -8595,11 +8676,12 @@ Out[3]: array([ 50.251,  90.992, 100.   ])
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="summary-and-links">
-<h1><span class="small">Summary and Links</span></h1>
+<div class="slide" id="summary">
+<h1><span class="small">Summary</span></h1>
 <div class="sidebar">
-<p class="first sidebar-title"><span class="small">Hidden Benefits of Adopting Opticks</span></p>
+<p class="first sidebar-title"><span class="small">Extra Benefits of Adopting Opticks</span></p>
 <ul class="small simple">
+<li>high performance novel visualization</li>
 <li>detailed photon instrumentation, validation</li>
 <li>comparisons find issues with both simulations:<ul>
 <li>complex geometry, overlaps, bugs...</li>
@@ -8610,13 +8692,19 @@ Out[3]: array([ 50.251,  90.992, 100.   ])
 </div>
 <p style="margin-bottom:5mm;" /><!--  -->
 <blockquote>
-<em>Opticks</em> : state-of-the-art GPU ray traced optical simulation integrated with <em>Geant4</em>.
-Full re-implementation of Opticks geometry and simulation for NVIDIA OptiX 7 completed.</blockquote>
+<em>Opticks</em> : state-of-the-art GPU ray traced optical simulation integrated with <em>Geant4</em>
+with automated geometry translation for use with NVIDIA OptiX 7+ API.</blockquote>
 <p style="margin-bottom:15mm;" /><ul class="normal simple">
 <li>NVIDIA Ray Trace Performance continues rapid progress (2x each generation)</li>
 <li><strong>any simulation limited by optical photons can benefit from Opticks</strong></li>
 <li>more photon limited -&gt; more overall speedup (99% -&gt; 100x)</li>
 </ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="links">
+<h1>Links</h1>
 <table border="1" class="docutils align-center">
 <colgroup>
 <col width="55%" />
@@ -8624,9 +8712,14 @@ Full re-implementation of Opticks geometry and simulation for NVIDIA OptiX 7 com
 </colgroup>
 <tbody valign="top">
 <tr><td><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks">https://bitbucket.org/simoncblyth/opticks</a></td>
-<td>code repository</td>
+<td>day-to-day code repository</td>
 </tr>
-<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a></td>
+<tr><td><a class="reference external" href="https://github.com/simoncblyth/opticks">https://github.com/simoncblyth/opticks</a></td>
+<td>month-to-month code repository</td>
+</tr>
+<tr><td><a class="reference external" href="https://simoncblyth.bitbucket.io">https://simoncblyth.bitbucket.io</a>
+<a class="reference external" href="https://simoncblyth.github.io">https://simoncblyth.github.io</a>
+<a class="reference external" href="https://juno.ihep.ac.cn/~blyth">https://juno.ihep.ac.cn/~blyth</a></td>
 <td>presentations and videos</td>
 </tr>
 <tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
@@ -8644,8 +8737,8 @@ Full re-implementation of Opticks geometry and simulation for NVIDIA OptiX 7 com
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="assistance-geant4-collab-dark-matter-search-community-nvidia">
-<h1><span class="small">Assistance : Geant4 Collab. + Dark Matter Search Community + NVIDIA</span></h1>
+<div class="slide" id="acknowledgements-g4-collab-dm-search-community-nvidia">
+<h1><span class="small">Acknowledgements : G4 Collab. + DM Search Community + NVIDIA</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Acknowledgements</span></p>
 <dl class="small docutils">
@@ -8715,7 +8808,7 @@ https://gitlab.cern.ch/geant4/geant4/-/tree/master/examples/advanced/CaTS -->
 </li>
 <li>development progresses issue-by-issue<ul>
 <li>most time is spent fixing issues</li>
-<li>software works only because someone has fixed the issues for you</li>
+<li>software works only after someone has fixed the issues for you</li>
 </ul>
 </li>
 <li>development skills and domain knowledge continually improve with experience<ul>
@@ -8727,11 +8820,14 @@ https://gitlab.cern.ch/geant4/geant4/-/tree/master/examples/advanced/CaTS -->
 <li>when learning, best to not be constrained by existing code<ul>
 <li>learn in unconstrained standalone tests</li>
 <li>but develop API usable from existing code</li>
-<li>develop from many standalone examples</li>
+<li>develop from many standalone examples, that become tests</li>
 </ul>
 </li>
 </ul>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="three-laws-of-good-software-design-development">
 <h1>Three Laws of Good Software Design + Development</h1>
 <div class="sidebar">
@@ -8781,7 +8877,21 @@ https://gitlab.cern.ch/geant4/geant4/-/tree/master/examples/advanced/CaTS -->
 </tbody>
 </table>
 <p class="small"><a class="reference external" href="https://simoncblyth.bitbucket.io/env/presentation/standalone_20230930_cpp_test_debug_ana_with_numpy.html">https://simoncblyth.bitbucket.io/env/presentation/standalone_20230930_cpp_test_debug_ana_with_numpy.html</a></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="extras-follow">
+<h1><span class="huge">Extras Follow</span></h1>
+<ul class="simple">
+<li>NVIDIA Ada : 3rd Generation RTX</li>
+<li>Hardware accelerated Ray tracing (RT Cores) in the Data Center</li>
+<li>US restricts export of highest performing GPUs</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="nvidia-ada-3rd-generation-rtx">
 <h1><span class="small">NVIDIA Ada : 3rd Generation RTX</span></h1>
 <ul class="small simple">
@@ -8893,15 +9003,15 @@ The current boom in interest in AI is only going to increase this trend. -->
 <h1><span class="small">US restricts export of highest performing GPUs</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">Performance Density Threshold</span></p>
-<div class="last"><pre class="mypretiny">
+<div class="last">  <pre class="mypretiny">
 +----------------------------------------------------+
-| total proc. performance (TFLOPs)                   |
-| ------------------------------ < 5.92 TFLOPs mm^-2 |
-| applicable die area (mm^2)                         |
-+----------------------------------------------------+
+  | total proc. performance (TFLOPs)                   |
+  | ------------------------------ < 5.92 TFLOPs mm^-2 |
+  | applicable die area (mm^2)                         |
+  +----------------------------------------------------+
 
-([0],[1] for full rule details )
-</pre></div></div>
+  ([0],[1] for full rule details )
+  </pre></div></div>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">China+HK : ~22% NVIDIA revenue (2023 Q3)</span></p>
 <p class="small last"><span class="r">=&gt; Bound to provide GPUs just below threshold</span></p>

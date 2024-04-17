@@ -1,7 +1,8 @@
 .. meta::
    :title: Opticks IHEP EPD Seminar
-   :description: (2024 March/April) JUNO, OptiX, Opticks
+   :description: (2024 April 18) JUNO, OptiX, Opticks
    :note0: 50 min 
+   :url: https://indico.ihep.ac.cn/event/22301/
 
 .. include:: my_s5defs.txt
 
@@ -42,7 +43,7 @@
     <!--img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="juno/JUNO_logo.png"  /-->
     <div class="mycredit">
        <h2 style="background-color:lightgrey">
-          Simon C Blyth, IHEP, CAS &mdash; IHEP EPD Seminar &mdash; ?? April 2024
+          Simon C Blyth, IHEP, CAS &mdash; IHEP EPD Seminar &mdash; 18 April 2024
        </h2>
     </div>
 
@@ -149,30 +150,49 @@ Outline : Opticks Reborn
      * "Foundry" Model : Shared CPU/GPU Geometry Context 
      * Two-Level Hierarchy : Instance transforms (IAS) over Geometry (GAS)
      * Geometry Model Translation : Geant4 => CSGFoundry => NVIDIA OptiX 7
+     * first renders with OptiX 7 
+     * Ray trace render performance scanning 
      * n-Ary CSG "List-Nodes"
+     * CSG discontinuous union   
      * Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow  
      * Primary Packages and Structs Of Re-Implemented Opticks
      * QUDARap : CUDA Optical Simulation Implementation
-     * Ray trace render performance scanning 
-     * Validation 
+     * Validation by comparison with Geant4 
 
    * Selection of DetSim issues revealed/studied using Opticks
 
-     * PMT Torus neck 
-     * Geometry Overlaps
+     * Crucial Importance of standalone (fast cycle) tests
+     * CSG : (Cylinder - Torus) PMT neck : spurious intersects 
+     * Geometry Overlaps, eg solidXJfixture
+     * Unphysical PMT geometry and optical model 
      * Compare Reflected Polarization Impls for Brewster Angle Incidence
    
    * Re-implemented JUNO PMT Optical Model
  
      * G4OpBoundaryProcess : customized for JUNO PMT Optical Model (POM)
+     * Validation with standalone tests, input photons  
      * Multi-Layer Thin Film (A,R,T) Calc using TMM (Custom4 Package)
+     
+   * Opticks performance with GPU PMT Optical Model
 
+     * Pure Optical TorchGenstep scan 
+     * Release Event Time
+     * Absolute Comparison with ancient Opticks Meaurements
+     * (Yuxiang Hu) Overall speedup check
+
+   * Amdahls "Law" : Expected Speedup Limited by Serial Processing
    * Summary + Links 
-   * Acknowledgements : Geant4 Collab. + Dark Matter Search Community + NVIDIA
-   * Extras
+   * Acknowledgements : G4 Collab. + DM Search Community + NVIDIA
+   * Innovation : Lessons Learned, Three Laws of Software Development
 
+   * Extras
+ 
      * NVIDIA Ada Lovelace : 3rd Generation RTX, RT Cores in Data-Center
 
+
+.. s5_talk::
+
+    Reborn 
 
 
 `JUNO Optical Photon Simulation Problem...`
@@ -3449,6 +3469,144 @@ Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow 2
 
 
 
+:small:`Optical Simulation Comparison : Statistical OR Direct`
+----------------------------------------------------------------
+
+.. class:: small
+
+    Statistical Chi-squared comparison of photon history occurence between two simulations
+
+    * powerful metric to find discrepancies between simulations (eg from near-degenerate geometry)
+
+.. raw:: html
+ 
+    <pre class="mypretiny">
+    c2sum/c2n:c2per(C2CUT)  280.88/188:1.494 (30)
+
+    np.c_[siq,_quo,siq,sabo2,sc2,sabo1][0:25]  ## A-B history frequency chi2 comparison 
+        0   TO BT BT BT BT SD                                             33322  33343    0.0066        1      2  
+        1   TO BT BT BT BT SA                                             28160  28070    0.1441        8      0  
+        2   TO BT BT BT BT BT SR SA                                        6270   6268    0.0003    10363  10565  
+        3   TO BT BT BT BT BT SA                                           4552   4649    1.0226     8398   8433  
+        4   TO BT BT BT BT BT SR BR SR SA                                  1154   1186    0.4376    21156  21014  
+        5   TO BT BT BT BT BT SR BR SA                                      923    989    2.2782    20241  20201  
+        6   TO BT BT BT BT BR BT BT BT BT BT BT AB                          946    958    0.0756    10389   8432  
+        7   TO BT BT BT BT BT SR SR SA                                      901    942    0.9121    10399  10410  
+        8   TO BT BT AB                                                     878    895    0.1630       26    102  
+        9   TO BT BT BT BT BT SR BT BT BT BT BT BT BT AB                    615    635    0.3200    20974  22027  
+       10   TO BT BT BT BT BR BT BT BT BT AB                                571    601    0.7679     8459   9208  
+       11   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SA                    533    537    0.0150     7312   7299  
+       <span class="r">12   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SD        503    396   12.7353    12018  11465</span>  
+       13   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SD                    480    497    0.2958     7974   7967  
+       14   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SA        412    411    0.0012    11467  11471  
+       15   TO BT BT BT BT BT SR SR SR SA                                   383    396    0.2169    10362  10368  
+     </pre>
+
+.. class:: small
+
+    When causes of discrepancy cannot be identified statistically
+
+    * use common input photons + aligned random consumption between simulations 
+    * enable direct photon-to-photon comparison of simulations : reveals precisely where simulations diverge
+
+    :b:`Comparison of two independent optical simulation implementations : ideal way find issues`
+
+
+.. s5_talk::
+
+    Ideal 
+
+
+
+:i:`B_V1J008_N1_ip_MOI_Hama:0:1000_yy_frame_close.png`
+----------------------------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:130mm;" />
+
+.. class:: small
+
+    ``Green : start position (100k input photons)`` 
+
+    ``Red : end position,  Cyan : other position``
+
+
+.. s5_talk::
+
+    3D pyvista view of photon points here from input photons shown in green. 
+    The squares indicates the target frame.
+
+
+:i:`B_V1J008_N1_ip_MOI_Hama:0:1000_b.png`
+-------------------------------------------
+
+.. class:: small
+
+   |emsp| |emsp| |emsp| |emsp| |emsp| 
+   |emsp| |emsp| |emsp| |emsp| |emsp| 
+   |emsp| |emsp| |emsp| |emsp| |emsp| 
+   |emsp| |emsp| |emsp| |emsp| |emsp| 
+   |emsp| |emsp| |emsp| |emsp| |emsp| 
+   ``cd ~/j/ntds ; N=1 ./ntds.sh ana``  
+
+.. raw:: html
+
+    <p style="margin-bottom:150mm;" />
+
+.. class:: small
+
+   :b:`Geant4/U4Recorder 3D photon points transformed into target frame, viewed in 2D`
+ 
+
+.. s5_talk::
+
+   This is a 2D view of the target frame, showing intersection positions on the
+   PMT mask and inside the PMT. 
+
+
+
+:i:`B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png`
+----------------------------------------------
+
+
+::
+
+     export OPTICKS_INPUT_PHOTON=GridXY_X1000_Z1000_40k_f8.npy
+     export OPTICKS_INPUT_PHOTON_FRAME=NNVT:0:1000
+
+     MODE=3 EDL=1 N=0 EYE=500,0,2300 CHECK=not_first ~/j/ntds/ntds.sh ana
+
+
+.. raw:: html
+
+    <p style="margin-bottom:110mm;" />
+    
+
+::
+
+    Photon step points from grid of input photons target NNVT:0:1000 (POM:1)
+
+
+.. s5_talk::
+
+    This is a 3D pyvista view of photon points from a grid of input photons. 
+    Looking closely you can distinguish the type of PMT 
+    by the size of ring inside. 
+
+
+:i:`cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg`
+-----------------------------------------------------------------
+
+``ray traced renders : exact same geometry "seen" by simulation``
+
+
+.. s5_talk::
+
+    This is a ray trace render targetting the same group of PMTs. 
+    You can see the same pattern of PMTs from the ray trace and from the simulation. 
+
+
 
 :small:`Selection of DetSim issues revealed/studied using Opticks`
 --------------------------------------------------------------------
@@ -3528,6 +3686,83 @@ Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow 2
        :align: center
 
 
+Crucial Importance of Standalone (fast cycle) tests
+------------------------------------------------------
+
+
+.. sidebar:: :small:`Standalone Advantage`
+
+    .. class:: small
+
+        * Full control of code 
+        * Fast build 
+        * Fast cycle 
+
+        :r:`make change, see impact in seconds, not minutes`
+
+        **Investigated Geometry Classes**
+ 
+    .. raw:: html
+
+       <pre class="mypretiny">
+       Tub3inchPMTV3Manager.hh
+       HamamatsuR12860PMTManager.hh
+       NNVTMCPPMTManager.hh
+       NNVTMaskManager.hh
+       HamamatsuMaskManager.hh
+       XJfixtureConstruction.hh
+       FastenerAcrylicConstruction.hh
+       SJFixtureConstruction.hh
+       XJanchorConstruction.hh
+       SJReceiverConstruction.hh
+       SJCLSanchorConstruction.hh
+       SJReceiverFasternConstruction.hh
+       </pre>
+
+
+.. class:: small
+
+    **How standalone tests created:**
+
+
+    * added *IGeomManager* standalone base to 12 investigated classes 
+
+      * depends only on Geant4 (Custom4)
+
+        * less dependencies => more useful 
+
+      * enables testing separate from JUNOSW, eg:
+
+        * One PMT tests of JUNO PMT Optical Model  
+        * Geant4/Opticks 2D slice renders to reveal overlaps
+        * Opticks 3D rendering 
+
+
+    .. raw:: html
+
+        <pre class="mypretiny">
+         38 #ifdef PMTSIM_STANDALONE
+         39 #include "PMTSIM_API_EXPORT.hh"
+         40 class PMTSIM_API HamamatsuR12860PMTManager : public IGeomManager {
+         41 #else
+         42 class HamamatsuR12860PMTManager: public IPMTElement,
+         43                                  public ToolBase {
+         44 #endif
+        </pre>
+
+.. class:: small
+
+    * 0-dependency PMT data access by serialize/de-serialize 
+        
+      * PMT data access from anywhere, including GPU 
+      * NP.hh NPFold.h : save PMT data into NumPy .npy files
+
+        * https://github.com/simoncblyth/np/
+
+
+.. s5_talk::
+
+    Primary tool to find issues is standalone testing : because of the fast cycle
 
 
 
@@ -3819,144 +4054,6 @@ Geant4 + Opticks + NVIDIA OptiX 7 : Hybrid Workflow 2
    advantage that it enables use of a natural geometry with no kludging. 
 
 
-
-
-:small:`Optical Simulation Comparison : Statistical OR Direct`
-----------------------------------------------------------------
-
-.. class:: small
-
-    Statistical Chi-squared comparison of photon history occurence between two simulations
-
-    * powerful metric to find discrepancies between simulations (eg from near-degenerate geometry)
-
-.. raw:: html
- 
-    <pre class="mypretiny">
-    c2sum/c2n:c2per(C2CUT)  280.88/188:1.494 (30)
-
-    np.c_[siq,_quo,siq,sabo2,sc2,sabo1][0:25]  ## A-B history frequency chi2 comparison 
-        0   TO BT BT BT BT SD                                             33322  33343    0.0066        1      2  
-        1   TO BT BT BT BT SA                                             28160  28070    0.1441        8      0  
-        2   TO BT BT BT BT BT SR SA                                        6270   6268    0.0003    10363  10565  
-        3   TO BT BT BT BT BT SA                                           4552   4649    1.0226     8398   8433  
-        4   TO BT BT BT BT BT SR BR SR SA                                  1154   1186    0.4376    21156  21014  
-        5   TO BT BT BT BT BT SR BR SA                                      923    989    2.2782    20241  20201  
-        6   TO BT BT BT BT BR BT BT BT BT BT BT AB                          946    958    0.0756    10389   8432  
-        7   TO BT BT BT BT BT SR SR SA                                      901    942    0.9121    10399  10410  
-        8   TO BT BT AB                                                     878    895    0.1630       26    102  
-        9   TO BT BT BT BT BT SR BT BT BT BT BT BT BT AB                    615    635    0.3200    20974  22027  
-       10   TO BT BT BT BT BR BT BT BT BT AB                                571    601    0.7679     8459   9208  
-       11   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SA                    533    537    0.0150     7312   7299  
-       <span class="r">12   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SD        503    396   12.7353    12018  11465</span>  
-       13   TO BT BT BT BT BR BT BT BT BT BT BT BT BT SD                    480    497    0.2958     7974   7967  
-       14   TO BT BT BT BT BR BT BT BT BT BT BT BT BT BT BT BT BT SA        412    411    0.0012    11467  11471  
-       15   TO BT BT BT BT BT SR SR SR SA                                   383    396    0.2169    10362  10368  
-     </pre>
-
-.. class:: small
-
-    When causes of discrepancy cannot be identified statistically
-
-    * use common input photons + aligned random consumption between simulations 
-    * enable direct photon-to-photon comparison of simulations : reveals precisely where simulations diverge
-
-    :b:`Comparison of two independent optical simulation implementations : ideal way find issues`
-
-
-.. s5_talk::
-
-    Ideal 
-
-
-
-:i:`B_V1J008_N1_ip_MOI_Hama:0:1000_yy_frame_close.png`
-----------------------------------------------------------
-
-.. raw:: html
-
-    <p style="margin-bottom:130mm;" />
-
-.. class:: small
-
-    ``Green : start position (100k input photons)`` 
-
-    ``Red : end position,  Cyan : other position``
-
-
-.. s5_talk::
-
-    3D pyvista view of photon points here from input photons shown in green. 
-    The squares indicates the target frame.
-
-
-:i:`B_V1J008_N1_ip_MOI_Hama:0:1000_b.png`
--------------------------------------------
-
-.. class:: small
-
-   |emsp| |emsp| |emsp| |emsp| |emsp| 
-   |emsp| |emsp| |emsp| |emsp| |emsp| 
-   |emsp| |emsp| |emsp| |emsp| |emsp| 
-   |emsp| |emsp| |emsp| |emsp| |emsp| 
-   |emsp| |emsp| |emsp| |emsp| |emsp| 
-   ``cd ~/j/ntds ; N=1 ./ntds.sh ana``  
-
-.. raw:: html
-
-    <p style="margin-bottom:150mm;" />
-
-.. class:: small
-
-   :b:`Geant4/U4Recorder 3D photon points transformed into target frame, viewed in 2D`
- 
-
-.. s5_talk::
-
-   This is a 2D view of the target frame, showing intersection positions on the
-   PMT mask and inside the PMT. 
-
-
-
-:i:`B_V1J008_N1_OIPF_NNVT:0:1000_gridxy.png`
-----------------------------------------------
-
-
-::
-
-     export OPTICKS_INPUT_PHOTON=GridXY_X1000_Z1000_40k_f8.npy
-     export OPTICKS_INPUT_PHOTON_FRAME=NNVT:0:1000
-
-     MODE=3 EDL=1 N=0 EYE=500,0,2300 CHECK=not_first ~/j/ntds/ntds.sh ana
-
-
-.. raw:: html
-
-    <p style="margin-bottom:110mm;" />
-    
-
-::
-
-    Photon step points from grid of input photons target NNVT:0:1000 (POM:1)
-
-
-.. s5_talk::
-
-    This is a 3D pyvista view of photon points from a grid of input photons. 
-    Looking closely you can distinguish the type of PMT 
-    by the size of ring inside. 
-
-
-:i:`cxr_min__eye_1,0,5__zoom_2__tmin_0.5__NNVT:0:1000_demo.jpg`
------------------------------------------------------------------
-
-``ray traced renders : exact same geometry "seen" by simulation``
-
-
-.. s5_talk::
-
-    This is a ray trace render targetting the same group of PMTs. 
-    You can see the same pattern of PMTs from the ray trace and from the simulation. 
 
 
 
@@ -4520,13 +4617,14 @@ optical photon simulation, P ~ 99% of CPU time
     This is the same information numerically 
 
 
-:small:`Summary and Links`
--------------------------------------------------------------------------------------
+:small:`Summary`
+------------------
 
-.. sidebar:: :small:`Hidden Benefits of Adopting Opticks`
+.. sidebar:: :small:`Extra Benefits of Adopting Opticks`
 
    .. class:: small
 
+      * high performance novel visualization
       * detailed photon instrumentation, validation 
       * comparisons find issues with both simulations:
        
@@ -4540,9 +4638,8 @@ optical photon simulation, P ~ 99% of CPU time
 
 ..
 
-  *Opticks* : state-of-the-art GPU ray traced optical simulation integrated with *Geant4*. 
-  Full re-implementation of Opticks geometry and simulation for NVIDIA OptiX 7 completed.
-
+  *Opticks* : state-of-the-art GPU ray traced optical simulation integrated with *Geant4*
+  with automated geometry translation for use with NVIDIA OptiX 7+ API.   
 
 .. raw:: html
 
@@ -4554,22 +4651,6 @@ optical photon simulation, P ~ 99% of CPU time
   * **any simulation limited by optical photons can benefit from Opticks**
   * more photon limited -> more overall speedup (99% -> 100x)
 
-
-.. table::
-    :align: center
-
-    +--------------------------------------------------+-----------------------------------------+
-    | https://bitbucket.org/simoncblyth/opticks        | code repository                         |                   
-    +--------------------------------------------------+-----------------------------------------+
-    | https://simoncblyth.bitbucket.io                 | presentations and videos                |
-    +--------------------------------------------------+-----------------------------------------+
-    | https://groups.io/g/opticks                      | forum/mailing list archive              |
-    +--------------------------------------------------+-----------------------------------------+
-    | email: ``opticks+subscribe@groups.io``           | subscribe to mailing list               |
-    +--------------------------------------------------+-----------------------------------------+ 
-    | ``simon.c.blyth@gmail.com``                      | any questions                           |   
-    +--------------------------------------------------+-----------------------------------------+ 
-
 .. s5_talk::
 
     Opticks brings state-of-the-art GPU ray tracing performance to optical photon 
@@ -4580,13 +4661,38 @@ optical photon simulation, P ~ 99% of CPU time
     simulations. Adopting Opticks means you will 
     improve your CPU simulation whilst also giving you a GPU simulation.  
  
+
+
+Links
+-------
+
+.. table::
+    :align: center
+
+    +--------------------------------------------------+-----------------------------------------+
+    | https://bitbucket.org/simoncblyth/opticks        | day-to-day code repository              |                   
+    +--------------------------------------------------+-----------------------------------------+
+    | https://github.com/simoncblyth/opticks           | month-to-month code repository          |
+    +--------------------------------------------------+-----------------------------------------+
+    | https://simoncblyth.bitbucket.io                 | presentations and videos                |
+    | https://simoncblyth.github.io                    |                                         | 
+    | https://juno.ihep.ac.cn/~blyth                   |                                         | 
+    +--------------------------------------------------+-----------------------------------------+
+    | https://groups.io/g/opticks                      | forum/mailing list archive              |
+    +--------------------------------------------------+-----------------------------------------+
+    | email: ``opticks+subscribe@groups.io``           | subscribe to mailing list               |
+    +--------------------------------------------------+-----------------------------------------+ 
+    | ``simon.c.blyth@gmail.com``                      | any questions                           |   
+    +--------------------------------------------------+-----------------------------------------+ 
+
+
+.. s5_talk::
+
     Links to get you started with using Opticks are listed here.
+    
 
 
-
-
-
-:small:`Assistance : Geant4 Collab. + Dark Matter Search Community + NVIDIA`
+:small:`Acknowledgements : G4 Collab. + DM Search Community + NVIDIA`
 ------------------------------------------------------------------------------------
 
 .. sidebar:: :small:`Acknowledgements`
@@ -4677,7 +4783,7 @@ Innovation Lessons Learned
     * development progresses issue-by-issue
 
       * most time is spent fixing issues 
-      * software works only because someone has fixed the issues for you
+      * software works only after someone has fixed the issues for you
 
     * development skills and domain knowledge continually improve with experience 
 
@@ -4689,7 +4795,12 @@ Innovation Lessons Learned
 
       * learn in unconstrained standalone tests 
       * but develop API usable from existing code 
-      * develop from many standalone examples 
+      * develop from many standalone examples, that become tests 
+
+
+.. s5_talk::
+
+    Innovation Lessons Learned
 
 
 Three Laws of Good Software Design + Development
@@ -4751,10 +4862,20 @@ Three Laws of Good Software Design + Development
 
    https://simoncblyth.bitbucket.io/env/presentation/standalone_20230930_cpp_test_debug_ana_with_numpy.html 
 
+.. s5_talk::
 
+    Three laws
 
+:huge:`Extras Follow`
+------------------------
 
+* NVIDIA Ada : 3rd Generation RTX
+* Hardware accelerated Ray tracing (RT Cores) in the Data Center
+* US restricts export of highest performing GPUs 
 
+.. s5_talk::
+
+   Extras
 
 
 :small:`NVIDIA Ada : 3rd Generation RTX`
@@ -4870,7 +4991,7 @@ Three Laws of Good Software Design + Development
     .. raw:: html
 
          <pre class="mypretiny">
-         +----------------------------------------------------+
+       +----------------------------------------------------+
          | total proc. performance (TFLOPs)                   |
          | ------------------------------ < 5.92 TFLOPs mm^-2 |
          | applicable die area (mm^2)                         |
