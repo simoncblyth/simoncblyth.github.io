@@ -15,6 +15,18 @@
 
 .. comment
 
+   summary sentence
+
+   DetSim+Opticks: Re-implemented WaterPoolConstruction with simple hierarchy approach avoiding complex CSG 
+   with >60 hole subtractions, 590 FastenerAcrylicConstruction working using new "listnode" feature,  
+   adding integrated triangulated geometry feature to handle the remaining less numerous solids.
+   
+
+   Opticks:  re-implement the water pool pillars geometry by avoiding the complicated hole subtraction, other missing geometry features studied.
+
+
+.. comment
+
     <p style="margin-bottom:50mm;" />
 
 
@@ -77,8 +89,205 @@
     This talk will outline progress with the integration of JUNOSW and Opticks 
 
 
+
+:small:`JUNOSW(main) 2024 June : Geometry Issues` 
+---------------------------------------------------
+
+.. class:: small
+
+
+    **WaterPoolConstruction + HBeamConstruction** : Addition of DeadWater + Tyvek 
+
+    * "sibling soup" model forces complex CSG gymnastics (>60 holes subtracted)
+ 
+      * :b:`very deep CSG tree breaks Opticks translation`
+
+    * lower HBeam cross pieces and all lower pillar sections impinge into pool bottom  
+
+      * :b:`may cause Geant4 "stuck" tracks` 
+
+    :r:`FIX (MR 458) under test : simplify geometry using hierarchy approach` (**WaterPoolConstruction__CONFIG** envvar) 
+
+
+    **FastenerAcrylicConstruction**
+
+    * Deep CSG tree causes Opticks translation issue
+  
+    :r:`FIX (MR 468) under test : using G4MultiUnion/list-node` (**FastenerAcrylicConstruction__CONFIG** envvar)
+
+
+
+
+.. comment
+
+   * `csg_intersect_tree.h <https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_tree.h>`_ 
+   * `csg_intersect_node.h <https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_node.h>`_
+   * `csg_intersect_leaf.h <https://bitbucket.org/simoncblyth/opticks/src/master/CSG/csg_intersect_leaf.h>`_
+
+
+
+:small:`n-ary CSG Compound "List-Nodes" => Much Smaller CSG trees`
+-------------------------------------------------------------------
+
+.. sidebar:: :small:`Complex CSG => Tree Overheads`
+
+    .. image:: GeoChain_Darwin/XJfixtureConstruction/CSGOptiXRenderTest/cvd0/50001/ALL/top_i0_/cxr_geochain_XJfixtureConstruction_ALL_upper.jpg 
+          :align: right
+          :width: 500px
+
+
+
+.. class:: small
+
+    :b:`Generalizes binary to n-ary CSG trees`
+
+    * using three-level Opticks CSG : tree < node < leaf 
+
+    .. raw:: html
+
+       <pre class="mypretiny">
+         +---------------+----------------------+ 
+         | 2-ary tree    |   n-ary "list-node"  |
+         +===============+======================+
+         |        U      |      U[A,B,C]        |
+         |       /       |                      |
+         |      U        |                      |
+         |     / \       |                      |   
+         |    U   A      |                      | 
+         |   / \         |                      |
+         |  C   B        |                      |
+         +---------------+----------------------+ 
+       </pre>
+
+
+
+    * list-node can be within binary trees 
+    * list-node references sub-nodes by **subNum** **subOffset**
+    * Opticks translates **G4MultiUnion** into list-node 
+
+    Hints in G4VSolid name : :r:`Specify shape more precisely` 
+       :r:`=> better suited intersect alg => less resources => faster` 
+
+    eg: CSG_DISCONTIGUOUS Union
+       user guarantees no overlaps, eg "union of holes" to be CSG subtracted : :r:`=> simple, low resource intersect` 
+
+
+
+.. s5_talk::
+
+   You need to be familiar with Opticks "list-nodes" to follow
+   the fixes for these issues. So here I introduce them.  
+
+   Complex solids like this one with deep CSG trees can cause 
+   large slowdowns.  In an attempt to reduce the performance degradation 
+   I have generalize Opticks CSG to support list nodes in order to 
+   reduce tree size and avoid large tree overheads. 
+
+
+
+
+
+
+:small:`WaterPoolConstruction "sibling soup" vs HIERARCHY`
+--------------------------------------------------------------
+
+.. sidebar:: :small:`HIERARCHY : Radically Simple`
+
+   .. raw:: html
+
+       <pre class="mypretiny">
+  
+              +---Air-----------------------+    
+              |                             |    
+              | +--DeadWater--------------+ |    
+              | | +---Tyvek-------------+ | |    
+              | | | +----vetoWater----+ | | |    
+              | | | |                 | | | |    
+              | | | | +-+         +-+ | | | |    
+              | | | | |Steel      | | | | | |    
+              | | | | +-+         +-+ | | | |    
+              | | | +-----------------+ | | |    
+              | | +---------------------+ | | 
+              | +-------------------------+ |
+              +-----------------------------+   
+
+        </pre>
+
+   .. class:: small
+
+        **Geant4 "Russian doll" hierarchy**
+
+        * daughter material overrides mother
+        * => simple cylinders G4Polycone (rmin 0.) 
+
+        :r:`BUT: pillars need to be within vetoWater`
+
+
+    
+.. class:: small
+
+   **ASIS** : Sibling soup approach 
+
+.. raw:: html
+
+   <pre class="mypretiny">
+   vetoWater
+       DeadWater
+       Tyvek    
+       Air
+       Steel
+    </pre>
+
+
+.. class:: small
+
+    * :b:`complex CSG : to avoid sibling overlaps`
+    
+      * DeadWater+Tyvek have 61 subtracted holes
+
+    :r:`ISSUE : Many pool bottom impingments`
+
+
+
+
+
+
+
+:small:`WaterPoolConstruction__CONFIG : testing alternative geometry`
+------------------------------------------------------------------------
+
+.. class:: small
+
+    blyth-WaterPoolConstruction__CONFIG-to-fix-pillar-impingement-and-opticks-translation
+
+    +------------------+------------------------------------------------------------+
+    | CONFIG           | Notes on WaterPoolConstruction HBeamConstruction           |
+    +==================+============================================================+
+    |  ASIS            | sibling soup => very complicated CSG                       |
+    +------------------+------------------------------------------------------------+
+    | ZERO_HOLES       | skip 60 one-by-one hole subtractions from DeadWater Tyvek  |
+    +------------------+------------------------------------------------------------+
+    | MULTIUNION_HOLES | collect holes into G4MultiUnion(listnode), subtract once   | 
+    +------------------+------------------------------------------------------------+
+    | HIERARCHY        | radical simplification, minor geometry change :            |
+    |                  |                                                            |
+    |                  | * skip bottom angled cross piece                           |
+    |                  | * raise base of pillars within vetoWater                   |  
+    +------------------+------------------------------------------------------------+
+
+    https://code.ihep.ac.cn/JUNO/offline/junosw/-/merge_requests/458
+
+    * :b:`2024-06-17 : Merged into main (geometry change NOT DEFAULT)`
+
+
+
 :i:`cxr_min__eye_0,1,0__zoom_1__tmin_0.1__GZ1.B06_07_FlangeI_Web_FlangeII:0:-1.jpg`
 ------------------------------------------------------------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:130mm;" />
+
 
 ``Using G4MultiUnion/listnode for 62 subtracted holes works, BUT...`` 
 
@@ -86,11 +295,20 @@
 :i:`cxr_min__eye_0,1,0__zoom_1__tmin_0.1__GZ1.B06_07_FlangeI_Web_FlangeII:0:-100000.jpg`
 ------------------------------------------------------------------------------------------
 
+.. raw:: html
+
+    <p style="margin-bottom:130mm;" />
+
 ``Impingment at bottom of WaterPool apparent, from angled cross-piece``
 
 
 :i:`cxr_min__eye_0,1,0__zoom_1__tmin_0.1__sDeadWater:0:-1.jpg`
 --------------------------------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:130mm;" />
+
 
 ``Also impingement from vertical and tilted pillars``
 
@@ -98,13 +316,50 @@
 :i:`cxr_min__eye_-1,0,0__zoom_1__tmin_0.1__GZ1.A06_07_FlangeI_Web_FlangeII:0:-100001.jpg`
 ------------------------------------------------------------------------------------------
 
-``WaterPoolConstruction__CONFIG=HIERARCHY``
+
+.. raw:: html
+
+    <p style="margin-bottom:130mm;" />
+
+
+``WaterPoolConstruction__CONFIG=HIERARCHY  (much simpler)``
 
 ``* skip bottom angled cross piece``
 
-``* raise pillar base by 126mm (keep within vetoWater)``
+``* raise pillar base 126mm (keep within vetoWater)``
 
-``* greatly simplify WaterPoolConstruction``
+
+
+
+
+
+:i:`cxr_min__eye_0,3,-1.5__zoom_1__tmin_0.5__uni1:0:0.jpg`
+-----------------------------------------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:150mm;" />
+
+
+``FastenerAcrylicConstruction : hidden within support base``
+
+
+
+:i:`cxr_min__eye_0,3,-1.5__zoom_1__tmin_0.5__uni1:0:000000.jpg`
+-----------------------------------------------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:150mm;" />
+
+
+``FastenerAcrylicConstruction : 8 cylinders``
+    ``modelled with G4MultiUnion/list-node``
+
+
+
 
 
 :small:`(December 18, 2023) First Pre-Release of JUNOSW+Opticks`
@@ -375,7 +630,7 @@ Status of known issues : most leaks now fixed
 .. raw:: html
 
    <pre class="mypretiny">
-    a_path $AFOLD/seq.npy /data/blyth/opticks/GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL98/A000/seq.npy a_seq (1000000, 2, 2, )
+    a_path $afolD/seq.npy /data/blyth/opticks/GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL98/A000/seq.npy a_seq (1000000, 2, 2, )
     b_path $BFOLD/seq.npy /data/blyth/opticks/GEOM/J23_1_0_rc3_ok0/G4CXTest/ALL98/B000/seq.npy b_seq (1000000, 2, 2, )
     AB [sseq_index_ab::desc u.size 152520 opt BRIEF mode 6 
        sseq_index_ab_chi2::desc                          sum   565.3332 ndf 504.0000 sum/ndf     1.1217 sseq_index_ab_chi2_ABSUM_MIN:200.0000
