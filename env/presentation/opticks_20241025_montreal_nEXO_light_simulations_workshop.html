@@ -5,11 +5,11 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
-<title>Opticks : GPU ray trace accelerated optical photon simulation</title>
-<meta content="opticks_20241021_krakow_chep2024.txt" name="name" />
-<meta content="Opticks : GPU ray trace accelerated optical photon simulation" name="title" />
-<meta content="(2024 October 21) JUNO, OptiX, Opticks" name="description" />
-<meta content="15+3 min" name="note0" />
+<title>nEXO + Opticks ? NVIDIA OptiX accelerated optical photon simulation ?</title>
+<meta content="opticks_20241025_montreal_nEXO_light_simulations_workshop.txt" name="name" />
+<meta content="nEXO + Opticks : GPU ray trace accelerated optical photon simulation with NVIDIA OptiX ?" name="title" />
+<meta content="(2024 October 25) JUNO, OptiX, Opticks, nEXO" name="description" />
+<meta content="30 min" name="note0" />
 <style type="text/css">
 
 /*
@@ -385,13 +385,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">Opticks : GPU ray trace accelerated optical photon simulation</span></h1>
+<h1><span class="i">nEXO + Opticks ? NVIDIA OptiX accelerated optical photon simulation ?</span></h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">Opticks : GPU ray trace accelerated optical photon simulation</span></h1>
+<h1 class="title"><span class="i">nEXO + Opticks ? NVIDIA OptiX accelerated optical photon simulation ?</span></h1>
 
 <!-- comment
 
@@ -5621,40 +5621,10 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
     }
 
 
-</style><!-- comment
-
-* https://agenda.infn.it/event/37867/contributions/228492/attachments/121669/177463/Neutrino2024_R1.pdf
-
-NEXT CRAB
-
-N.K. Byrnes et al 2023 JINST 18 P08006
-
-
-Opticks : GPU ray trace accelerated optical photon simulation
-
-Opticks is an open source project that accelerates optical photon simulation
-by integrating NVIDIA GPU ray tracing, accessed via the NVIDIA OptiX API, with
-Geant4 toolkit based simulations.
-Optical photon simulation times of *14 seconds per 100 million photons*
-have been measured within a fully analytic JUNO GPU geometry
-auto-translated from the Geant4 geometry when using a single NVIDIA GPU from
-the first RTX generation.
-Optical physics processes of scattering, absorption, scintillator reemission
-and boundary processes are implemented in CUDA based on Geant4.
-Wavelength-dependent material and surface
-properties as well as inverse cumulative distribution functions for reemission
-are interleaved into GPU textures providing fast interpolated property lookup
-or wavelength generation. In this work we describe the *application of Opticks
-to JUNO simulation including new Opticks features that improve performance for
-complex CSG shapes and torus solids*
-
-* (14s/?s) per 100M with (1st/3rd) Gen RTX
-* complex CSG shapes : listnode
-* torus : integrated triangles -->
-<div class="mytitle">
+</style><div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey;text-align:center;">
-    <i>Opticks</i> :<br/> GPU ray trace accelerated optical photon simulation
+    <i>nEXO + Opticks ?</i><br/> NVIDIA OptiX accelerated optical photon simulation ?
     <h2 style="background-color:lightgrey;text-align:center">
         Open source, https://bitbucket.org/simoncblyth/opticks
     </h2>
@@ -5664,7 +5634,7 @@ complex CSG shapes and torus solids*
 <!--img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="juno/JUNO_logo.png"  /-->
 <div class="mycredit">
    <h2 style="background-color:lightgrey">
-      Simon C Blyth, IHEP, CAS &mdash; CHEP, Krakow, Poland &mdash; 21 October 2024
+      Simon C Blyth, IHEP, CAS &mdash; nEXO Light Simulations Workshop, Montreal &mdash; 25 October 2024
    </h2>
 </div>
         <!--  s5talk  -->
@@ -5680,39 +5650,71 @@ The actual speedup depends on your geometry and your effort in avoiding
 geometry issues. -->
 
 </div>
-<div class="slide" id="outline">
-<h1>Outline</h1>
+<div class="slide" id="outline-1-current-opticks-description">
+<h1>Outline (1) : Current Opticks Description</h1>
 <img alt="newtons-opticks.png" class="align-right" src="newtons-opticks.png" style="width: 299px; height: 547px;" />
 <div class="small"><span>&nbsp;</span></div><ul class="small simple">
 <li>Optical Photon Simulation : Context and Problem<ul>
-<li>p2: (JUNO) Optical Photon Simulation Problem...</li>
-<li>p3: Optical photons limit many simulations =&gt; lots of interest in Opticks</li>
-<li>p4: Optical Photon Simulation ≈ Ray Traced Image Rendering</li>
-<li>p5: NVIDIA RTX Generations : <span class="b">RT performance : ~2x every ~2 years</span></li>
-<li>p6: NVIDIA OptiX : Ray Tracing Engine</li>
+<li>p3: (JUNO) Optical Photon Simulation Problem...</li>
+<li>p4: Optical photons limit many simulations =&gt; lots of interest in Opticks</li>
+<li>p5: Optical Photon Simulation ≈ Ray Traced Image Rendering</li>
+<li>p6: NVIDIA RTX Generations : <span class="b">RT performance : ~2x every ~2 years</span></li>
+<li>p7: NVIDIA OptiX : Ray Tracing Engine</li>
 </ul>
 </li>
 <li>Opticks : Solution to Optical Photon Simulation Problem<ul>
-<li>p7: Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow</li>
-<li>p8: Geometry Model Translation : Geant4 =&gt; CSGFoundry =&gt; NVIDIA OptiX</li>
-<li>p9: Full JUNO, Opticks, OptiX 7.5/8.0</li>
-<li>p10: <span class="r">Integrated Analytic + Triangulated Geometry (NEW)</span></li>
-<li>p11: <span class="b">Interactive ray traced visualization via OpenGL/OptiX interop (NEW)</span></li>
-<li>p13: GuideTube : Torus Triangulated</li>
-<li>p14: List-node : avoids deep CSG trees</li>
-<li>p15: Pure Optical TorchGenstep scan : 1M to 100M photons</li>
-<li>p17: <span class="b">Optical simulation 4x faster 1st-&gt;3rd gen RTX</span></li>
-<li>p19: How much parallelized speedup actually useful to overall speedup?</li>
+<li>p8: Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow</li>
+<li>p9: Geometry Model Translation : Geant4 =&gt; CSGFoundry =&gt; NVIDIA OptiX</li>
+<li>p10: Full JUNO, Opticks, OptiX 7.5/8.0</li>
+<li>p11: <span class="r">Integrated Analytic + Triangulated Geometry (NEW)</span></li>
+<li>p12: <span class="b">Interactive ray traced visualization via OpenGL/OptiX interop (NEW)</span></li>
+<li>p14: GuideTube : Torus Triangulated</li>
+<li>p15: List-node : avoids deep CSG trees</li>
+<li>p16: Pure Optical TorchGenstep scan : 1M to 100M photons</li>
+<li>p18: <span class="b">Optical simulation 4x faster 1st-&gt;3rd gen RTX</span></li>
+<li>p20: How much parallelized speedup actually useful to overall speedup?</li>
 </ul>
 </li>
-<li>p20: Summary + Links</li>
-<li>p21: Acknowledgements</li>
-<li>p22: NEW Opticks User : Ilker Parmaksiz, NEXT-CRAB0 Prototype</li>
+<li>p21: Summary + Links</li>
+<li>p22: Acknowledgements</li>
+<li>p23: NEW Opticks User : Ilker Parmaksiz, NEXT-CRAB0 Prototype</li>
 </ul>
 <hr/>
         <!--  s5talk  -->
         <br/>
     </div>
+<div class="slide" id="outline-2-review-early-chroma-investigations">
+<h1>Outline (2) : Review Early Chroma Investigations</h1>
+<img alt="newtons-opticks.png" class="align-right" src="newtons-opticks.png" style="width: 299px; height: 547px;" />
+<div class="small"><span>&nbsp;</span></div><ul class="small simple">
+<li>Opticks Early History<ul>
+<li>p24: pre-History : Chroma investigations</li>
+<li>Triangulated Geometry, G4DAE Geometry exporter</li>
+<li>Chroma + G4DAE -&gt; NVIDIA OptiX + &quot;Opticks&quot;</li>
+<li>Handling Huge Geometry (eg JUNO) with instancing</li>
+<li>NVIDIA OptiX 5 Ray Tracing Engine</li>
+<li>Triangulated Geometry Problems</li>
+</ul>
+</li>
+<li>Fully Analytic CSG<ul>
+<li>Analytic PMT (12 parts, not 2928 triangles)</li>
+<li>GPU Geometry starts from ray-primitive intersection</li>
+<li>Torus : much more difficult/expensive than other primitives</li>
+<li>Constructive Solid Geometry (CSG) : Which intersect ?</li>
+<li>CSG Problems : deep trees, coincident faces</li>
+<li>Opticks Instancing : &quot;Factorizes&quot; Geometry</li>
+</ul>
+</li>
+<li>Porting the physics<ul>
+<li>Translate Geant4 Optical Physics to GPU (OptiX/CUDA)</li>
+<li>Optical Photon Simulation : Deciding history on way to boundary</li>
+</ul>
+</li>
+<li>Validation of Opticks Simulation by Comparison with Geant4</li>
+<li>Performance : Scanning from 1M to 400M Photons</li>
+<li>NVIDIA Giveth and NVIDIA Taketh away ...</li>
+</ul>
+</div>
 <div class="slide" id="juno-optical-photon-simulation-problem">
 <h1><span class="incremental">(JUNO) Optical Photon Simulation Problem...</span></h1>
 <p style="margin-bottom:7cm;" /><div class="sidebar">
@@ -6532,6 +6534,192 @@ with automated geometry translation into GPU optimized form.</blockquote>
 <li>careful comparison : Data, Geant4, Opticks</li>
 <li><span class="r">Opticks 181x over Geant4</span></li>
 </ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-pre-history-chroma-investigations-for-dayabay-optical-sim">
+<h1><span class="small">Opticks pre-History : Chroma investigations for DayaBay Optical Sim</span></h1>
+<!-- comment
+
+simulating processes like diffuse and specular reflections,
+refraction, Rayleigh scattering and absorption. -->
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Chroma : S.Siebert, A.LaTorre</span></p>
+<p class="small">Chroma tracks photons thru <span class="red">triangle-mesh geometry</span>,
+using BVH acceleration structure, authors claim:</p>
+<p class="small"><em>With a CUDA GPU Chroma has propagated 2.5M photons per second
+in a detector with 29k PMTs. This is 200x faster than GEANT4.</em></p>
+<p class="small">Issues:</p>
+<ul class="small simple">
+<li><span class="r">limited to triangle mesh geometry</span></li>
+<li>polygonization : can be difficult+approximate</li>
+<li>tri. approx. =&gt; cannot precisely match Geant4</li>
+<li>pycuda impl. : difficult C++ integration</li>
+</ul>
+<p class="small">Made many efficiency fixes to work on mobile GPU:</p>
+<p class="small last"><span class="b">https://bitbucket.org/simoncblyth/chroma/</span></p>
+</div>
+<p class="small"><span class="r">CAVEAT : I LAST USED CHROMA IN 2015</span></p>
+<ul class="small simple">
+<li>developed &quot;G4DAE&quot; Geant4 exporter of 3D DAE files<ul>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></li>
+</ul>
+</li>
+<li>added DAE import to my Chroma fork</li>
+<li>2013 : bought macbook pro (NVIDIA Geforce 750M GPU)<ul>
+<li><span class="r">Last MBP with NVIDIA GPU</span></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Chroma : Disadvantages</strong></p>
+<ul class="small simple">
+<li>No use of ray trace engine, eg NVIDIA OptiX</li>
+<li>No use of dedicated ray trace hardware RT cores (RTX)</li>
+<li>BYOB : rolls own BVH acceleration structure<ul>
+<li>expert tuning work needed for new GPU arch ?</li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>Chroma : Fundamental Problem,</strong> <span class="r">triangles only</span></p>
+<ul class="small simple">
+<li><span class="r">approximate geometry : cannot match Geant4</span></li>
+<li>best available polygonization, <em>G4Polyhedron</em></li>
+<li>some solids (eg <em>G4Polycone</em>) yield &quot;cleaved&quot; meshes</li>
+<li>viz. bug for <em>Geant4</em>, broken geometry for <em>Chroma</em></li>
+<li><em>OpenMesh</em> surgery possible, but not automatic</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="chroma-camera-raycast">
+<h1><span class="i">chroma_camera_raycast</span></h1>
+<p><tt class="docutils literal">(g4daeview.py) Chroma Raycast of Daya Bay geometry (3x3 CUDA kernel lunches, 1.8s for 1.23M pixels, Geforce 750M GPU)</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="g4dae-dyb-pool-bottom-chroma-raycast">
+<h1><tt class="docutils literal">G4DAE : DYB pool bottom, Chroma raycast</tt></h1>
+<p style="margin-bottom:14cm;" /><p class="normal"><tt class="docutils literal">(g4daeview.py) Chroma raycast render of triangulated geometry</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="g4dae-dyb-pool-bottom-opengl-render">
+<h1><tt class="docutils literal">G4DAE : DYB pool bottom, OpenGL render</tt></h1>
+<p style="margin-bottom:14cm;" /><p class="normal"><tt class="docutils literal">(g4daeview.py) OpenGL rasterized render of triangulated geometry</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="triangulated-geometry-great-for-visualization">
+<h1>Triangulated Geometry : Great for Visualization</h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">G4DAE Geometry Exporter</span></p>
+<p class="small">Exports <em>Geant4</em> geometry into <strong>standard</strong> 3D files:</p>
+<ul class="small last simple">
+<li>standard digital asset exchange (DAE)</li>
+<li>volume tree: solid/physical+logical volumes</li>
+<li>vertices, tri. from <em>G4Polyhedron</em></li>
+<li>material/surface props. in <em>extra</em> XML elements</li>
+<li><a class="reference external" href="https://bitbucket.org/simoncblyth/g4dae">https://bitbucket.org/simoncblyth/g4dae</a></li>
+</ul>
+</div>
+<p class="small"><strong>Many apps/libs can view/edit DAE/COLLADA files</strong></p>
+<ul class="small simple">
+<li>Meshlab, Blender, Sketchup, ...</li>
+<li>macOS: Finder/Quickview/Preview/Xcode</li>
+<li>threejs, pycollada, SceneKit, ...</li>
+<li>OpenGL, WebGL, pyopengl, glumpy</li>
+</ul>
+<p class="small"><strong>Triangle Visualization Advantage</strong></p>
+<ul class="small simple">
+<li>GPUs evolved to rasterize trianglated geometry</li>
+<li>Developed pyopengl/pycollada renderer<ul>
+<li>entire geometry in single OpenGL draw call</li>
+<li><span class="r">shockingly fast on mobile GPU</span></li>
+</ul>
+</li>
+</ul>
+<p class="small"><strong>CUDA/OpenGL interoperation</strong></p>
+<ul class="small simple">
+<li>share GPU buffers between compute and visualization</li>
+<li>visualize steps of millions of photons within geometry</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="daya-bay-chroma-photon-propagation-1">
+<h1><tt class="docutils literal">Daya Bay Chroma Photon Propagation (1)</tt></h1>
+<p style="margin-bottom:14cm;" /><p class="tiny"><tt class="docutils literal">(g4daeview.py) Chroma GPU photon propagation at 12 nanoseconds.&nbsp; The photons are generated by Geant4
+simulation of a 100 GeV muon travelling from right to left.
+Photon colors indicate reemission (green), absorption(red),
+specular reflection (magenta), scattering(blue), no history (white).</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="daya-bay-chroma-photon-propagation-2">
+<h1><tt class="docutils literal">Daya Bay Chroma Photon Propagation (2)</tt></h1>
+<p style="margin-bottom:14cm;" /><p class="tiny"><tt class="docutils literal">(g4daeview.py) Chroma GPU photon propagation at 14 nanoseconds.
+The interface provides interactive control of the propagation time
+allowing any stage of the propagation to be viewed by
+scrubbing time backwards/forwards. The speed of this visualization
+is achieved by interoperation of CUDA kernels and OpenGL shaders accessing
+the same GPU resident photon propagation data.</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="daya-bay-chroma-photon-propagation-3">
+<h1><tt class="docutils literal">Daya Bay Chroma Photon Propagation (3)</tt></h1>
+<p style="margin-bottom:14cm;" /><p class="tiny"><tt class="docutils literal">(g4daeview.py) Initial photon positions of a Geant4 simulated muon that crosses
+between the Dayabay Near hall ADs. Colors represent photon wavelengths.
+Optical photons: collected in G4 StackAction, serialized, sent over ZeroMQ, deserialized,
+presented using OpenGL GLSL shaders.</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-history-chroma-g4dae-nvidia-optix-opticks">
+<h1><span class="small">Opticks History : Chroma + G4DAE -&gt; NVIDIA OptiX + &quot;Opticks&quot;</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title">GGeoview OptiX raycast</p>
+<img alt="../optix/raycast/optix-raycast-gui-001.png" class="align-right" src="../optix/raycast/optix-raycast-gui-001.png" style="width: 550px;" />
+<p class="tiny last"><a class="reference external" href="https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/">https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/</a></p>
+</div>
+<p class="small"><strong>Why switch to NVIDIA OptiX ?</strong></p>
+<ul class="small simple">
+<li>OptiX : transparent multi-GPU with no effort</li>
+<li>NVIDIA supported package</li>
+<li>NVIDIA expertise on keeping GPUs busy</li>
+<li>Chroma implemented with python/numpy/pycuda<ul>
+<li>C++ impl. needed for easy Geant4 integration</li>
+</ul>
+</li>
+</ul>
+<p class="small">DBNS geometry raycast comparison using mobile GPU</p>
+<ul class="small simple">
+<li>NVIDIA OptiX 5 : <span class="red">interactive ~30 fps</span> raycasting</li>
+<li>Chroma : 1.8s per frame</li>
+</ul>
+<p class="small">Performance improvement ~50x</p>
+<ul class="small simple">
+<li><span class="r">Opticks + NVIDIA OptiX 8 + Ada RTX 5000 : ~300 fps with JUNO (much bigger geometry)</span></li>
+</ul>
+<p class="small"><strong>&quot;Opticks&quot; started as synthesis:</strong></p>
+<ul class="small simple">
+<li>Chroma : high level propagation loop structure</li>
+<li>Geant4 : simulation details</li>
+<li>Graphics : performance techniques</li>
+</ul>
+<p class="small">Package name &quot;Opticks&quot;, taken from world changing publication:</p>
+<ol class="small arabic simple" start="1704">
+<li><strong>Sir Isaac Newton FRS</strong> <span class="b">&quot;Opticks: or, A Treatise of the Reflexions, Refractions, Inflexions and Colours of Light.&quot;</span></li>
+</ol>
 
         <!--  s5talk  -->
         <br/>

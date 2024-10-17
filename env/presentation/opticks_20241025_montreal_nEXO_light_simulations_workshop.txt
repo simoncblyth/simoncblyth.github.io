@@ -1,53 +1,22 @@
 .. meta::
-   :name: opticks_20241021_krakow_chep2024.txt
-   :title: Opticks : GPU ray trace accelerated optical photon simulation
-   :description: (2024 October 21) JUNO, OptiX, Opticks
-   :note0: 15+3 min 
+   :name: opticks_20241025_montreal_nEXO_light_simulations_workshop.txt
+   :title: nEXO + Opticks : GPU ray trace accelerated optical photon simulation with NVIDIA OptiX ?
+   :description: (2024 October 25) JUNO, OptiX, Opticks, nEXO
+   :note0: 30 min 
 
 .. include:: my_s5defs.txt
 
-.. comment
-
-   * https://agenda.infn.it/event/37867/contributions/228492/attachments/121669/177463/Neutrino2024_R1.pdf
-
-   NEXT CRAB
-
-   N.K. Byrnes et al 2023 JINST 18 P08006
 
 
-   Opticks : GPU ray trace accelerated optical photon simulation
-
-   Opticks is an open source project that accelerates optical photon simulation 
-   by integrating NVIDIA GPU ray tracing, accessed via the NVIDIA OptiX API, with
-   Geant4 toolkit based simulations. 
-   Optical photon simulation times of *14 seconds per 100 million photons* 
-   have been measured within a fully analytic JUNO GPU geometry 
-   auto-translated from the Geant4 geometry when using a single NVIDIA GPU from
-   the first RTX generation. 
-   Optical physics processes of scattering, absorption, scintillator reemission 
-   and boundary processes are implemented in CUDA based on Geant4.  
-   Wavelength-dependent material and surface
-   properties as well as inverse cumulative distribution functions for reemission
-   are interleaved into GPU textures providing fast interpolated property lookup
-   or wavelength generation. In this work we describe the *application of Opticks 
-   to JUNO simulation including new Opticks features that improve performance for 
-   complex CSG shapes and torus solids* 
-
-   * (14s/?s) per 100M with (1st/3rd) Gen RTX
-   * complex CSG shapes : listnode
-   * torus : integrated triangles
-
-
-
-:i:`Opticks : GPU ray trace accelerated optical photon simulation`
-==========================================================================================
+:i:`nEXO + Opticks ? NVIDIA OptiX accelerated optical photon simulation ?`
+==============================================================================================
 
 .. raw:: html
 
     <div class="mytitle">
     <header>
     <h1 style="background-color:lightgrey;text-align:center;"> 
-        <i>Opticks</i> :<br/> GPU ray trace accelerated optical photon simulation 
+        <i>nEXO + Opticks ?</i><br/> NVIDIA OptiX accelerated optical photon simulation ? 
         <h2 style="background-color:lightgrey;text-align:center">
             Open source, https://bitbucket.org/simoncblyth/opticks 
         </h2>
@@ -57,7 +26,7 @@
     <!--img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="juno/JUNO_logo.png"  /-->
     <div class="mycredit">
        <h2 style="background-color:lightgrey">
-          Simon C Blyth, IHEP, CAS &mdash; CHEP, Krakow, Poland &mdash; 21 October 2024
+          Simon C Blyth, IHEP, CAS &mdash; nEXO Light Simulations Workshop, Montreal &mdash; 25 October 2024
        </h2>
     </div>
 
@@ -79,8 +48,8 @@
 
 
 
-Outline
----------
+Outline (1) : Current Opticks Description
+-------------------------------------------
 
 .. image:: newtons-opticks.png 
    :width: 299px
@@ -95,28 +64,28 @@ Outline
 
     * Optical Photon Simulation : Context and Problem
 
-      * p2: (JUNO) Optical Photon Simulation Problem...
-      * p3: Optical photons limit many simulations => lots of interest in Opticks
-      * p4: Optical Photon Simulation ≈ Ray Traced Image Rendering
-      * p5: NVIDIA RTX Generations : :b:`RT performance : ~2x every ~2 years`
-      * p6: NVIDIA OptiX : Ray Tracing Engine
+      * p3: (JUNO) Optical Photon Simulation Problem...
+      * p4: Optical photons limit many simulations => lots of interest in Opticks
+      * p5: Optical Photon Simulation ≈ Ray Traced Image Rendering
+      * p6: NVIDIA RTX Generations : :b:`RT performance : ~2x every ~2 years`
+      * p7: NVIDIA OptiX : Ray Tracing Engine
 
     * Opticks : Solution to Optical Photon Simulation Problem
  
-      * p7: Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
-      * p8: Geometry Model Translation : Geant4 => CSGFoundry => NVIDIA OptiX 
-      * p9: Full JUNO, Opticks, OptiX 7.5/8.0
-      * p10: :r:`Integrated Analytic + Triangulated Geometry (NEW)`
-      * p11: :b:`Interactive ray traced visualization via OpenGL/OptiX interop (NEW)`
-      * p13: GuideTube : Torus Triangulated
-      * p14: List-node : avoids deep CSG trees
-      * p15: Pure Optical TorchGenstep scan : 1M to 100M photons
-      * p17: :b:`Optical simulation 4x faster 1st->3rd gen RTX`
-      * p19: How much parallelized speedup actually useful to overall speedup?
+      * p8: Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
+      * p9: Geometry Model Translation : Geant4 => CSGFoundry => NVIDIA OptiX 
+      * p10: Full JUNO, Opticks, OptiX 7.5/8.0
+      * p11: :r:`Integrated Analytic + Triangulated Geometry (NEW)`
+      * p12: :b:`Interactive ray traced visualization via OpenGL/OptiX interop (NEW)`
+      * p14: GuideTube : Torus Triangulated
+      * p15: List-node : avoids deep CSG trees
+      * p16: Pure Optical TorchGenstep scan : 1M to 100M photons
+      * p18: :b:`Optical simulation 4x faster 1st->3rd gen RTX`
+      * p20: How much parallelized speedup actually useful to overall speedup?
 
-    * p20: Summary + Links 
-    * p21: Acknowledgements
-    * p22: NEW Opticks User : Ilker Parmaksiz, NEXT-CRAB0 Prototype
+    * p21: Summary + Links 
+    * p22: Acknowledgements
+    * p23: NEW Opticks User : Ilker Parmaksiz, NEXT-CRAB0 Prototype
 
 
 .. raw:: html
@@ -130,6 +99,52 @@ Outline
 
    Opticks is an open source software package that uses GPU ray tracing 
    to solve the problem of optical photon simulation faced by many experiments. 
+
+
+Outline (2) : Review Early Chroma Investigations
+--------------------------------------------------
+
+.. image:: newtons-opticks.png 
+   :width: 299px
+   :height: 547px 
+   :align: right
+
+
+.. class:: small
+
+   .. raw:: html
+
+       <span>&nbsp;</span>
+
+   * Opticks Early History 
+
+     * p24: pre-History : Chroma investigations
+     * Triangulated Geometry, G4DAE Geometry exporter 
+     * Chroma + G4DAE -> NVIDIA OptiX + "Opticks"
+     * Handling Huge Geometry (eg JUNO) with instancing 
+     * NVIDIA OptiX 5 Ray Tracing Engine 
+     * Triangulated Geometry Problems
+
+   * Fully Analytic CSG 
+
+     * Analytic PMT (12 parts, not 2928 triangles)
+     * GPU Geometry starts from ray-primitive intersection
+     * Torus : much more difficult/expensive than other primitives
+     * Constructive Solid Geometry (CSG) : Which intersect ? 
+     * CSG Problems : deep trees, coincident faces
+     * Opticks Instancing : "Factorizes" Geometry
+
+   * Porting the physics
+
+     * Translate Geant4 Optical Physics to GPU (OptiX/CUDA)
+     * Optical Photon Simulation : Deciding history on way to boundary
+      
+   * Validation of Opticks Simulation by Comparison with Geant4
+   * Performance : Scanning from 1M to 400M Photons
+   * NVIDIA Giveth and NVIDIA Taketh away ...
+
+
+
 
 
 
@@ -1142,6 +1157,317 @@ Acknowledgements
 
    New User : found bugs
 
+
+
+
+
+
+
+
+
+:small:`Opticks pre-History : Chroma investigations for DayaBay Optical Sim`
+------------------------------------------------------------------------------
+
+.. comment
+
+   simulating processes like diffuse and specular reflections, 
+   refraction, Rayleigh scattering and absorption. 
+
+
+.. sidebar:: :small:`Chroma : S.Siebert, A.LaTorre`
+
+    .. class:: small
+
+        Chroma tracks photons thru :red:`triangle-mesh geometry`, 
+        using BVH acceleration structure, authors claim:
+
+        *With a CUDA GPU Chroma has propagated 2.5M photons per second 
+        in a detector with 29k PMTs. This is 200x faster than GEANT4.*
+
+        Issues:
+
+        * :r:`limited to triangle mesh geometry` 
+        * polygonization : can be difficult+approximate 
+        * tri. approx. => cannot precisely match Geant4
+        * pycuda impl. : difficult C++ integration
+
+        Made many efficiency fixes to work on mobile GPU:
+
+        :b:`https://bitbucket.org/simoncblyth/chroma/` 
+
+
+.. class:: small
+
+    :r:`CAVEAT : I LAST USED CHROMA IN 2015`
+
+    * developed "G4DAE" Geant4 exporter of 3D DAE files
+
+      * https://bitbucket.org/simoncblyth/g4dae
+
+    * added DAE import to my Chroma fork
+    * 2013 : bought macbook pro (NVIDIA Geforce 750M GPU)
+
+      * :r:`Last MBP with NVIDIA GPU`
+
+    **Chroma : Disadvantages**
+
+    * No use of ray trace engine, eg NVIDIA OptiX
+    * No use of dedicated ray trace hardware RT cores (RTX)
+    * BYOB : rolls own BVH acceleration structure    
+
+      * expert tuning work needed for new GPU arch ? 
+
+    **Chroma : Fundamental Problem,** :r:`triangles only`
+
+    * :r:`approximate geometry : cannot match Geant4`
+    * best available polygonization, *G4Polyhedron*
+    * some solids (eg *G4Polycone*) yield "cleaved" meshes   
+    * viz. bug for *Geant4*, broken geometry for *Chroma*
+    * *OpenMesh* surgery possible, but not automatic
+
+
+.. s5_talk::
+
+    While working on DYB simulation, I started looking 
+    at photon acceleration with reweighting techniques. 
+    Searching around, The only thing I found was Chroma. 
+
+    Chroma needs triangles, so I developed a Geant4 geometry 
+    exporter following the approach of GDML export but instead exporting 
+    the geometry into a 3D file format called DAE. 
+    This includes all the triangles.
+
+
+:i:`chroma_camera_raycast`
+----------------------------
+
+``(g4daeview.py) Chroma Raycast of Daya Bay geometry (3x3 CUDA kernel lunches, 1.8s for 1.23M pixels, Geforce 750M GPU)``
+
+
+.. s5_talk::
+
+    Chroma was developed on workstations with CPUs and GPUs and much more capable than my mac book pro laptop.  
+    I had to make Chroma operate more efficiently in order to get it to even run at all.  
+    Using interop techniques that enable OpenGL visualization and CUDA compute to share the 
+    same GPU buffers made the vizualization much more efficient 
+
+
+``G4DAE : DYB pool bottom, Chroma raycast`` 
+----------------------------------------------------
+
+
+.. raw:: html
+
+     <p style="margin-bottom:14cm;" />
+
+
+.. class:: normal
+
+    ``(g4daeview.py) Chroma raycast render of triangulated geometry``
+
+
+.. s5_talk::
+
+    With this more closup view, you can see the trianglated approximate geometry. 
+
+
+
+``G4DAE : DYB pool bottom, OpenGL render``
+-------------------------------------------------
+
+
+.. raw:: html
+
+     <p style="margin-bottom:14cm;" />
+
+
+.. class:: normal
+
+    ``(g4daeview.py) OpenGL rasterized render of triangulated geometry``
+
+
+.. s5_talk::
+
+   The same triangless are used by this OpenGL rasterized render, but thats not the 
+   exactly the same geometry that Geant4 would be using.  
+
+
+
+
+Triangulated Geometry : Great for Visualization
+-------------------------------------------------
+
+.. sidebar:: :small:`G4DAE Geometry Exporter`
+
+    .. class:: small
+
+        Exports *Geant4* geometry into **standard** 3D files:
+
+        * standard digital asset exchange (DAE) 
+        * volume tree: solid/physical+logical volumes
+        * vertices, tri. from *G4Polyhedron* 
+        * material/surface props. in *extra* XML elements
+
+        * https://bitbucket.org/simoncblyth/g4dae 
+
+
+.. class:: small
+
+    **Many apps/libs can view/edit DAE/COLLADA files**
+
+    * Meshlab, Blender, Sketchup, ...
+    * macOS: Finder/Quickview/Preview/Xcode
+    * threejs, pycollada, SceneKit, ...
+    * OpenGL, WebGL, pyopengl, glumpy 
+ 
+    **Triangle Visualization Advantage**
+
+    * GPUs evolved to rasterize trianglated geometry 
+    * Developed pyopengl/pycollada renderer 
+
+      * entire geometry in single OpenGL draw call
+      * :r:`shockingly fast on mobile GPU`
+
+    **CUDA/OpenGL interoperation**
+
+    * share GPU buffers between compute and visualization 
+    * visualize steps of millions of photons within geometry   
+
+
+.. s5_talk::
+
+    A great advantage of triangles is the simplicity which allows standard and widely supported
+    3D file formats to be used. 
+
+    I recall the first occasion that I visualized the Dayabay geometry, I was shocked by 
+    the speed and smoothness possible even with my laptop GPU. 
+
+
+``Daya Bay Chroma Photon Propagation (1)``
+--------------------------------------------
+
+.. raw:: html
+
+     <p style="margin-bottom:14cm;" />
+
+.. class:: tiny
+
+   ``(g4daeview.py) Chroma GPU photon propagation at 12 nanoseconds.  The photons are generated by Geant4 
+   simulation of a 100 GeV muon travelling from right to left. 
+   Photon colors indicate reemission (green), absorption(red),
+   specular reflection (magenta), scattering(blue), no history (white).``
+
+
+.. s5_talk::
+
+   I also visualized optical photon propagations using OpenGL shaders.  
+
+
+``Daya Bay Chroma Photon Propagation (2)``
+------------------------------------------
+
+
+.. raw:: html
+
+     <p style="margin-bottom:14cm;" />
+
+.. class:: tiny
+
+   ``(g4daeview.py) Chroma GPU photon propagation at 14 nanoseconds. 
+   The interface provides interactive control of the propagation time 
+   allowing any stage of the propagation to be viewed by 
+   scrubbing time backwards/forwards. The speed of this visualization 
+   is achieved by interoperation of CUDA kernels and OpenGL shaders accessing
+   the same GPU resident photon propagation data.`` 
+
+
+.. s5_talk::
+
+    The propagation visulaization uses a record array with photon histories
+    at different times, so propagation time is an input to the visualization  
+    which you can scrub backwards and forwards. 
+
+
+``Daya Bay Chroma Photon Propagation (3)``
+---------------------------------------------
+
+.. raw:: html
+
+     <p style="margin-bottom:14cm;" />
+
+.. class:: tiny
+
+   ``(g4daeview.py) Initial photon positions of a Geant4 simulated muon that crosses
+   between the Dayabay Near hall ADs. Colors represent photon wavelengths. 
+   Optical photons: collected in G4 StackAction, serialized, sent over ZeroMQ, deserialized, 
+   presented using OpenGL GLSL shaders.`` 
+
+
+.. s5_talk::
+
+   This shows the initial positions of the photons. The photons are being collected 
+   from Geant4 in a separate process and sent over the network via a message queue to
+   the optical simulation and visualization process. 
+    
+   Resorting to using network adds complexity.
+
+
+
+:small:`Opticks History : Chroma + G4DAE -> NVIDIA OptiX + "Opticks"`
+-----------------------------------------------------------------------
+
+.. sidebar:: GGeoview OptiX raycast
+
+    .. image:: ../optix/raycast/optix-raycast-gui-001.png
+       :width: 550px
+       :align: right
+
+    .. class:: tiny
+
+        https://bitbucket.org/simoncblyth/env/src/tip/graphics/ggeoview/
+
+
+.. class:: small
+
+    **Why switch to NVIDIA OptiX ?** 
+
+    * OptiX : transparent multi-GPU with no effort 
+    * NVIDIA supported package
+    * NVIDIA expertise on keeping GPUs busy 
+       
+    * Chroma implemented with python/numpy/pycuda
+
+      * C++ impl. needed for easy Geant4 integration 
+     
+    DBNS geometry raycast comparison using mobile GPU
+
+    * NVIDIA OptiX 5 : :red:`interactive ~30 fps` raycasting
+    * Chroma : 1.8s per frame 
+
+    Performance improvement ~50x
+
+    * :r:`Opticks + NVIDIA OptiX 8 + Ada RTX 5000 : ~300 fps with JUNO (much bigger geometry)`
+
+    **"Opticks" started as synthesis:**
+
+    * Chroma : high level propagation loop structure
+    * Geant4 : simulation details
+    * Graphics : performance techniques
+  
+    Package name "Opticks", taken from world changing publication:
+
+    (1704) **Sir Isaac Newton FRS** :b:`"Opticks: or, A Treatise of the Reflexions, Refractions, Inflexions and Colours of Light."`
+ 
+
+.. s5_talk::
+
+   My struggles with Chroma performance, and realizing that a C++ implemention was needed to 
+   easily integrate with Geant4 : made me look around for alternatives. I found NVIDIA OptiX. 
+   When I compared the performance I got with OptiX to Chroma, I immediately jumped to focus 
+   on OptiX, not Chroma.  Soon after that I picked the name "Opticks" as package name.    
+
+   My experience of cross-language pkgs. 
+   I like python for analysis and debug. But not for control or config. It is too flexible to do that well.  
 
 
 
