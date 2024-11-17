@@ -63,58 +63,21 @@
     https://inspirehep.net/authors/1016076
 
 
-``McGill_nEXO_light_simulation_workshop_202410.png``
-------------------------------------------------------
-
-:small:`Evaluation Estimate : (position started September 2nd 2024)`
-----------------------------------------------------------------------
-
-.. class:: small
-
-    +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
-    |                   |  Review Project                                                               | Est.    |  Note              | 
-    +===================+===============================================================================+=========+====================+
-    |                   |                                                                               |         |                    |
-    |                   |                                                                               |         |                    |
-    |                   |  Mission Completion (50%)                                                     |   5.0   |                    |
-    |                   |                                                                               |         |                    |
-    |   Mission         |                                                                               |         |                    |
-    |   Completed       +-------------------------------------------------------------------------------+---------+--------------------+
-    |   (80%)           |   Academic development, academic exchanges, papers (10%)                      |   5.0   |                    |
-    |                   +-------------------------------------------------------------------------------+---------+--------------------+
-    |                   |   Strive for projects and funding (10%)                                       |   1.0   | [1,HELP NEEDED]    |
-    |                   +-------------------------------------------------------------------------------+---------+--------------------+
-    |                   |   Public services (10%)                                                       |   5.0   |                    |
-    +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
-    |   Professional    |   Scientific research ability, academic organization ability, work initiative |   5.0   |                    |
-    |   Quality         |   and creativity, cooperative spirit                                          |         |                    |
-    +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
 
 
-.. class:: small
-
-    **Funding : very strong potential, no progress yet**
-
-    * Opticks benefits very clear 
-    * principal of Opticks very easy to explain
-    * innovative approach
-    * ray tracing of interest to both science and tech communities 
-
-
-
-Outline 0
-------------
+Outline
+---------
 
 .. class:: normal 
 
     I. Job responsibilities 
     II. Work status this year
 
-      1. Completion of research tasks [50%]
-      2. Personal research results (papers, patents, innovative technology development, awards, etc.) and funding
-      3. Academic exchanges, academic development plans [10% with above, excluding funding[10%]]
-      4. Public services [10%](on duty, graduate student assessment and interview, annual report writing, article review, etc.)
-      5. Other contributions (such as talent introduction, popular science, technology transfer and application, etc.)
+      * Completion of research tasks [50%]
+      * Personal research results (papers, patents, innovative technology development, awards, etc.) and funding
+      * Academic exchanges, academic development plans [10% with above, excluding funding[10%]]
+      * Public services [10%](on duty, graduate student assessment and interview, annual report writing, article review, etc.)
+      *  Other contributions (such as talent introduction, popular science, technology transfer and application, etc.)
  
     III. Existing problems
     IV. Work plan for next year
@@ -180,78 +143,145 @@ Outline 0
 
 
 
-
-Primary Research Goal :i:`1`
-------------------------------
-
-.. raw:: html
-
-     <p style="margin-bottom:0.5cm;" />
-
-.. class:: normal
-
-    ..
-
-        Maximize Opticks benefits to JUNO (and beyond) 
-        from unprecedented leap in optical photon simulation speed
-        and offloading memory demands to GPU 
-
+`(JUNO) Optical Photon Simulation Problem...`
+---------------------------------------------------------
 
 .. raw:: html
 
-     <p style="margin-bottom:-0.5cm;" />
+     <p style="position:fixed;top:100px;left:900px;font-size:40px;background-color:white;border:1px solid black;padding:5px;">
+     Opticks solves this using GPU ray tracing via NVIDIA OptiX 
+     </p>    
 
-.. class:: normal
-        
-    * :b:`simulation unlimited by optical photons => greater understanding => more fruit` 
-       
-      * :r:`JUNO: optimum muon veto => maximum livetime => maximum impact`
+     <p style="margin-bottom:7cm;" />
 
+
+
+
+.. sidebar:: :small:`Huge CPU Memory+Time Expense`
+
+    .. class:: small
+
+         **JUNO Muon Simulation Bottleneck**
+           ~99% CPU time, memory constraints
+
+         **Ray-Geometry intersection Dominates**
+           simulation is not alone in this problem...
+
+         **Optical photons : naturally parallel, simple :**
+           * produced by Cherenkov+Scintillation 
+           * yield only Photomultiplier hits
 
 
 .. s5_talk::
 
+   A muon travelling across the JUNO scintillator yields tens of millions 
+   of optical photons, presenting memory and time challenges. 
 
-    Making simulation become unlimited by optical photons will studies
-    will mean analysis will no longer be scared of simulating muons. 
+   For every step of every photon intersects between rays representing the 
+   photons and the geometry have to be found. 
+   This ray tracing is what limits the simulation. 
 
-    First goal
+   Another problem is the high memory requirements for all the photons
 
-
-Secondary Research Goal :i:`1`
---------------------------------
-
-.. raw:: html
-
-     <p style="margin-bottom:0.5cm;" />
-
-.. class:: normal
-
-     ..
-
-        Maximize GPU benefits to HEP projects able to innovate, such as CEPC 
-
-.. raw:: html
-
-     <p style="margin-bottom:-0.5cm;" />
+   * they cause high failure rates, forcing splitting of events. 
+  
+   These practical problems force analysis to make do with small samples 
+   and limited different configurations.
+   So they limits understanding of detector response.  
+   
+   BUT: the good new is that simulation is not alone in this bottleneck.
 
 
-.. class:: normal
+.. comment
 
-     * :b:`HEP transition to massively parallel future with GPUs`
+   Optical photons are naturally parallel : they can be considered 
+   to be produced only by two processes : Cherenkov and Scintillation and we
+   are interested in photons that hit the PMTs.  
 
-       * :r:`change needed everywhere: data structures, computation, processing` 
-         
-         * :r:`huge opportunity for innovators to impact field` 
+   These characteristics make it straightforward integrate an external optical
+   simulation.
+ 
 
 
-.. s5_talk::
 
-   * :b:`Need to re-imagine the whole branches of the "tree" of future expt`
 
-   * illustrate this with schematic of the Opticks geometry model 
-   * extremely simple design allows use on GPU and CPU 
-   * this is very different to the deep heirarchy of the Geant4 geometry model 
+
+.. comment
+
+
+    Primary Research Goal :i:`1`
+    ------------------------------
+
+    .. raw:: html
+
+         <p style="margin-bottom:0.5cm;" />
+
+    .. class:: normal
+
+        ..
+
+            Maximize Opticks benefits to JUNO (and beyond) 
+            from unprecedented leap in optical photon simulation speed
+            and offloading memory demands to GPU 
+
+
+    .. raw:: html
+
+         <p style="margin-bottom:-0.5cm;" />
+
+    .. class:: normal
+            
+        * :b:`simulation unlimited by optical photons => greater understanding => more fruit` 
+           
+          * :r:`JUNO: optimum muon veto => maximum livetime => maximum impact`
+
+
+
+    .. s5_talk::
+
+
+        Making simulation become unlimited by optical photons will studies
+        will mean analysis will no longer be scared of simulating muons. 
+
+        First goal
+
+
+.. comment
+
+    Secondary Research Goal :i:`1`
+    --------------------------------
+
+    .. raw:: html
+
+         <p style="margin-bottom:0.5cm;" />
+
+    .. class:: normal
+
+         ..
+
+            Maximize GPU benefits to HEP projects able to innovate, such as CEPC 
+
+    .. raw:: html
+
+         <p style="margin-bottom:-0.5cm;" />
+
+
+    .. class:: normal
+
+         * :b:`HEP transition to massively parallel future with GPUs`
+
+           * :r:`change needed everywhere: data structures, computation, processing` 
+             
+             * :r:`huge opportunity for innovators to impact field` 
+
+
+    .. s5_talk::
+
+       * :b:`Need to re-imagine the whole branches of the "tree" of future expt`
+
+       * illustrate this with schematic of the Opticks geometry model 
+       * extremely simple design allows use on GPU and CPU 
+       * this is very different to the deep heirarchy of the Geant4 geometry model 
 
 
 
@@ -262,16 +292,10 @@ II. Work status this year
 
 
 
-
 Outline 1
 -----------
 
 .. class:: small
-
-    I. Job responsibilities 
-
-       * Enable GPU accelerated optical photon simulation in JUNO + other expts
-       * Maximize Opticks+GPU benefits to JUNO and other experiments
 
     II. Work status this year
 
@@ -331,6 +355,168 @@ I. Job responsibilities
 
 * Enable GPU accelerated optical photon simulation in JUNO + other expts
 * Maximize Opticks+GPU benefits to JUNO and other experiments
+
+
+Completion of research tasks
+------------------------------
+
+.. comment
+
+   what to highlight, how to illustrate : cherry pick from presentations
+
+   * full geometry ray trace render 
+
+
+
+:small:`Personal research results (papers, innovative technology development, ..)`
+------------------------------------------------------------------------------------------------------
+
+.. class:: small
+
+    **innovative technology development**
+
+    * extend Opticks CSG and translation to use "listnode"
+
+      * large Geant4 CSG tree => small Opticks tree with "listnode"
+      * enables highly complex analytic GPU 
+      * **Opticks : sole open source GPU CSG implementation** 
+
+    * integrated triangulated GPU detector geometry
+
+      * some geometry (eg Torus) better handled with triangles
+      * user selects solids for triangulation    
+      * enabled full JUNO geometry onto GPU
+
+.. class:: small
+
+    **papers**
+
+    *Opticks: GPU Optical Photon Simulation via NVIDIA OptiX*
+    **CHEP 2023 Proceedings** : Simon C. Blyth, EPJ Web of Conferences 295, 11014 (2024)
+
+    * https://doi.org/10.1051/epjconf/202429511014 
+
+
+
+:small:`Academic Exchanges : nEXO Workshop at McGill + CHEP 2024`
+------------------------------------------------------------------------------
+
+
+.. class:: small
+
+    * 2024 October 25, **nEXO Light Simulation Workshop**,  McGill University, Montreal, Canada : *Invited guest speaker*  
+
+      * demonstrated the performance and precision of Opticks, contrasted with Chroma
+      * :r:`presentation + two days of extensive discussions with nEXO Simulation Group`
+      * tentative plan to try Opticks with LoLX "Light-only Liquid Xenon experiment"
+
+
+    * 2024 October 21, **CHEP 2024**, Krakow, Poland : *Opticks parallel presentation* 
+
+      * presented progress with JUNO+Opticks
+      * :b:`gained attention by demonstrating rapid performance gains with NVIDIA ray tracing` 
+      * prominently reported in plenary simulation summary talk (Giacomo De Pietro)
+
+.. class:: tiny
+
+    https://indico.cern.ch/event/1338689/contributions/6182301/attachments/2954600/5194791/20241025_Track5_Summary.pdf 
+
+.. raw:: html
+
+   <p style="position:fixed;top:350px;left:900px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+     nEXO Light Simulation Workshop, McGill University, Montreal 
+   </p>    
+
+.. comment
+
+    My visit to the CHEP conference in Krakow, Poland enabled me to present progress 
+    with JUNO+Opticks to diverse colleagues from all over the world and 
+    to discuss my work with others from CERN and the US who are also using GPUs 
+    to accelerate simulation. My presentation demonstrated the ongoing strong improvement
+    in ray tracing and simulation performance of NVIDIA RTX GPUs. 
+    My work was prominently included in the summary session for the simulation track. 
+
+    My visit to the nEXO optical photon simulation workshop at McGill University, Montreal, 
+    Canada enabled me to present the case for the nEXO experiment to adopt the Opticks 
+    simulation package to principal investigators, postdocs and students working 
+    on nEXO optical simulations. The performance and precision enabled by Opticks 
+    and demonstrated by my presentation and extensive discussions 
+    was of great interest and resulted in a tentative plan to test Opticks 
+    simulation with the LoLX "Light-only Liquid Xenon experiment" to evaluate 
+    feasibility of adoption of Opticks by the nEXO experiment.   
+
+
+.. comment
+
+    ``McGill_nEXO_light_simulation_workshop_202410.png``
+    ------------------------------------------------------
+
+
+
+:small:`Academic Exchanges : Geant4 Technical Forum, Zhejiang Uni, IHEP EPD` 
+--------------------------------------------------------------------------------------
+
+.. class:: small 
+
+     * 2024 February 15, 60th **Geant4 Technical Forum**, CERN + Online
+    
+       * *Modified GEANT4 processes for JUNO Simulation*, presented by Cécile Jollet 
+       * contributed details of boundary process customization for JUNO PMT Optical Model
+     
+     * 2024 February 27, **Zhejiang University Seminar**, Hangzhou
+
+       * Opticks : Optical Photon Simulation via GPU Ray Tracing from NVIDIA® OptiX™
+       * introductory seminar
+
+     * 2024 April 18, **IHEP EPD Seminar**
+
+       * *The Story of Opticks, applying NVIDIA OptiX GPU ray tracing to Optical Photon Simulation*
+       * Three hour review seminar detailing the history of Opticks development 
+
+        
+
+
+
+
+
+
+
+:small:`Evaluation Estimate : (position started September 2nd 2024)`
+----------------------------------------------------------------------
+
+.. class:: small
+
+    +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
+    |                   |  Review Project                                                               | Est.    |  Note              | 
+    +===================+===============================================================================+=========+====================+
+    |                   |                                                                               |         |                    |
+    |                   |                                                                               |         |                    |
+    |                   |  Mission Completion (50%)                                                     |   5.0   |                    |
+    |                   |                                                                               |         |                    |
+    |   Mission         |                                                                               |         |                    |
+    |   Completed       +-------------------------------------------------------------------------------+---------+--------------------+
+    |   (80%)           |   Academic development, academic exchanges, papers (10%)                      |   5.0   |                    |
+    |                   +-------------------------------------------------------------------------------+---------+--------------------+
+    |                   |   Strive for projects and funding (10%)                                       |   1.0   | [1,HELP NEEDED]    |
+    |                   +-------------------------------------------------------------------------------+---------+--------------------+
+    |                   |   Public services (10%)                                                       |   5.0   |                    |
+    +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
+    |   Professional    |   Scientific research ability, academic organization ability, work initiative |   5.0   |                    |
+    |   Quality         |   and creativity, cooperative spirit                                          |         |                    |
+    +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
+
+
+.. class:: small
+
+    **Funding : very strong potential, no progress yet**
+
+    * Opticks benefits very clear 
+    * principal of Opticks very easy to explain
+    * innovative approach
+    * ray tracing of interest to both science and tech communities 
+
+
+
 
 
 
@@ -445,60 +631,6 @@ Primary Achievement : Opticks
 
     In this section I will explain the optical photon problem 
     and how opticks solves it 
-
-
-
-`JUNO Optical Photon Simulation Problem...`
----------------------------------------------------------
-
-.. raw:: html
-
-     <p style="margin-bottom:7cm;" />
-
-.. sidebar:: :small:`Huge CPU Memory+Time Expense`
-
-    .. class:: small
-
-         **JUNO Muon Simulation Bottleneck**
-           ~99% CPU time, memory constraints
-
-         **Ray-Geometry intersection Dominates**
-           simulation is not alone in this problem...
-
-         **Optical photons : naturally parallel, simple :**
-           * produced by Cherenkov+Scintillation 
-           * yield only Photomultiplier hits
-
-
-.. s5_talk::
-
-   A muon travelling across the JUNO scintillator yields tens of millions 
-   of optical photons, presenting memory and time challenges. 
-
-   For every step of every photon intersects between rays representing the 
-   photons and the geometry have to be found. 
-   This ray tracing is what limits the simulation. 
-
-   Another problem is the high memory requirements for all the photons
-
-   * they cause high failure rates, forcing splitting of events. 
-  
-   These practical problems force analysis to make do with small samples 
-   and limited different configurations.
-   So they limits understanding of detector response.  
-   
-   BUT: the good new is that simulation is not alone in this bottleneck.
-
-
-.. comment
-
-   Optical photons are naturally parallel : they can be considered 
-   to be produced only by two processes : Cherenkov and Scintillation and we
-   are interested in photons that hit the PMTs.  
-
-   These characteristics make it straightforward integrate an external optical
-   simulation.
- 
 
 
 
