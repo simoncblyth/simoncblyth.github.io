@@ -1,0 +1,172 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SOPTIX.rst : triangulated machinery &#8212; Opticks 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">SOPTIX.rst : triangulated machinery</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#structs">Structs</a></li>
+<li><a class="reference internal" href="#tests">tests</a></li>
+<li><a class="reference internal" href="#soptix-sbt-inithitgroup">SOPTIX_SBT::initHitgroup</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/sysrap/SOPTIX.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="soptix-rst-triangulated-machinery">
+<h1>SOPTIX.rst : triangulated machinery<a class="headerlink" href="#soptix-rst-triangulated-machinery" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The SOPTIX,SCUDA,SMesh,SGLFW structs were developed to learn how to
+implement a triangulated geometry workflow with the NVIDIA OptiX 7+ API
+and also to implement interactive OpenGL rendering of the triangulated geometry.</p>
+</div>
+<div class="section" id="structs">
+<h2>Structs<a class="headerlink" href="#structs" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>SOPTIX.h : top level coordinator of triangulated raytrace render</li>
+<li>SOPTIX_Scene.h : holds vectors of SCUDA_MeshGroup SOPTIX_MeshGroup and OptixInstance</li>
+<li>SOPTIX_SBT.h : create sbt from pipeline and scene by uploading the prog and hitgroup records</li>
+<li>SOPTIX_Context.h : OptixDeviceContext + SOPTIX_Properties</li>
+<li>SOPTIX_Properties.h : optixDeviceContextGetProperty results</li>
+<li>SOPTIX_Module.h : Create OptixModule from PTX loaded from file</li>
+<li>SOPTIX_Pipeline.h : Create OptixPipeline from OptixModule</li>
+<li>SOPTIX_Options.h : module and pipeline compile/link options</li>
+<li>SOPTIX_OPT.h : enum strings</li>
+<li>SOPTIX.cu : RG, CH progs for simple triangle renderer</li>
+<li>SOPTIX_Params.h : render control</li>
+<li>SOPTIX_Accel.h : builds acceleration structure GAS or IAS from the buildInputs</li>
+<li>SOPTIX_Binding.h : CPU/GPU SBT records</li>
+<li>SOPTIX_getPRD.h : unpackPointer from optixPayload</li>
+<li>SOPTIX_BuildInput_Mesh.h : create OptixBuildInput via “part” indexing into SCUDA_MeshGroup (Used from SOPTIX_MeshGroup)</li>
+<li>SOPTIX_MeshGroup.h : create SOPTIX_BuildInput_Mesh for each part of SCUDA_MeshGroup, use those to form SOPTIX_Accel gas</li>
+<li>SCUDA_Mesh.h : uploads SMesh tri and holds SCU_Buf</li>
+<li>SCUDA_MeshGroup.h : collect vectors of NP from each SMeshGroup sub, upload together with SCU_BufferView</li>
+<li>SMeshGroup.h : collection of SMesh subs and names</li>
+<li>SMesh.h : holds tri,vtx,nrm NP either from original G4VSolid conversion or concatenation</li>
+<li>SGLFW.h : Light touch OpenGL render loop and key handling</li>
+<li>SGLFW_Keys.h : record of keyboard keys currently held down with modifiers bitfield summarization</li>
+<li>SGLFW_Extras.h : Toggle, GLboolean, bool, GLenum, Attrib, Buffer, VAO</li>
+<li>SGLFW_CUDA.h : Coordinate SCUDA_OutputBuffer and SGLDisplay for display of interop buffers</li>
+<li>SCUDA_OutputBuffer.h : Allows an OpenGL PBO buffer to be accessed from CUDA</li>
+<li>SGLDisplay.h : OpenGL shader pipeline that presents PBO to screen</li>
+<li>SGLFW_Program.h : compile and link OpenGL pipeline using shader sources loaded from directory</li>
+<li>SGLFW_Mesh.h : create OpenGL buffers with SMesh and instance data and render</li>
+<li>SGLFW_Scene.h : manage scene data and OpenGL render pipelines</li>
+</ul>
+</div>
+<div class="section" id="tests">
+<h2>tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>SGLFW_SOPTIX_Scene_test.{sh,cc}</dt>
+<dd><p class="first">interactive raytrace visualization of triangulated geometry:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">o</span><span class="o">/</span><span class="n">sysrap</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">SGLFW_SOPTIX_Scene_test</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</dd>
+<dt>SOPTIX_Scene_test.{sh,cc} SOPTIX_Scene_Encapsulated_test.cc</dt>
+<dd><p class="first">ppm non-interactive raytrace render of triangulated geometry
+both non-encapsulated and encapsulated versions can be built
+and run with the script:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">o</span><span class="o">/</span><span class="n">sysrap</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">SOPTIX_Scene_test</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</dd>
+<dt>SOPTIX_Module_test.{sh,cc}</dt>
+<dd>TODO: CHECK</dd>
+<dt>SOPTIX_Options_test.{sh,cc}</dt>
+<dd>TODO: CHECK</dd>
+<dt>SOPTIX_Pipeline_test.{sh,cc}</dt>
+<dd>TODO: CHECK</dd>
+</dl>
+</div>
+<div class="section" id="soptix-sbt-inithitgroup">
+<h2>SOPTIX_SBT::initHitgroup<a class="headerlink" href="#soptix-sbt-inithitgroup" title="Permalink to this headline">¶</a></h2>
+<p>HMM: with analytic geometry have “boundary” that
+comes from the CSGNode. To do that with triangles
+need to plant the boundary indices into HitgroupData.
+That means need hitgroup records for each sub-SMesh
+(thats equivalent to each CSGPrim)</p>
+<p>Need nested loop like CSGOptiX/SBT.cc SBT::createHitgroup:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GAS</span>
+   <span class="n">BuildInput</span>       <span class="p">(</span><span class="n">actually</span> <span class="mi">1</span><span class="p">:</span><span class="mi">1</span> <span class="k">with</span> <span class="n">GAS</span><span class="p">)</span>
+      <span class="n">sub</span><span class="o">-</span><span class="n">SMesh</span>
+</pre></div>
+</div>
+<p>So need access to scene data to form the SBT</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opticks 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Simon C Blyth.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

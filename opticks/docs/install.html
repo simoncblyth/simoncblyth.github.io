@@ -52,9 +52,8 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#version-requirements">Version Requirements</a><ul>
-<li><a class="reference internal" href="#optix-6-5">OptiX 6.5</a></li>
+<li><a class="reference internal" href="#optix-7-0-or-later">OptiX 7.0 or later</a></li>
 <li><a class="reference internal" href="#opengl-4-1">OpenGL 4.1</a></li>
-<li><a class="reference internal" href="#boost-1-53">Boost 1.53+</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#building-opticks-with-opticks-full">Building Opticks with <strong>opticks-full</strong></a><ul>
@@ -125,9 +124,9 @@
 <h2><a class="toc-backref" href="#id2">Overview of Opticks installation steps</a><a class="headerlink" href="#overview-of-opticks-installation-steps" title="Permalink to this headline">¶</a></h2>
 <p>A high level overview of the sequence of steps to install Opticks are listed below.</p>
 <ol class="arabic simple" start="0">
-<li>install “system” externals : NVIDIA GPU Driver, CUDA, OptiX 6.5
+<li>install “system” externals : NVIDIA GPU Driver, CUDA, OptiX 7.0 or later (see below for how to pick the version)
 following instructions from NVIDIA. Check they are working.</li>
-<li>use git to clone opticks bitbucket repository to your home directory, creating ~/opticks</li>
+<li>use git to clone opticks <strong>bitbucket</strong> (not github, that is often behind) repository to your home directory, creating ~/opticks</li>
 <li>hookup the opticks bash functions to your bash shell<ul>
 <li>cp ~/opticks/example.opticks_config ~/.opticks_config</li>
 <li>ensure that your .bash_profile sources .bashrc</li>
@@ -139,7 +138,7 @@ following instructions from NVIDIA. Check they are working.</li>
 <li>bash -lc “opticks-info”</li>
 </ul>
 </li>
-<li>install the foreign externals OR use preexisting installs of boost,clhep,xercesc,g4<ul>
+<li>install the foreign externals OR use preexisting installs of clhep,xercesc,g4<ul>
 <li>opticks-foreign     # lists them</li>
 <li>opticks-foreign-install    # installs them</li>
 <li>see <a class="reference internal" href="externals.html"><span class="doc">Opticks Externals</span></a> for the difference between <strong>system</strong>, <strong>foreign</strong> and <strong>automated</strong> externals</li>
@@ -149,17 +148,13 @@ following instructions from NVIDIA. Check they are working.</li>
 prefixes of the “system” and “foreign” externals and setting
 the prefix for the opticks install (eg /usr/local/opticks)</li>
 <li>install the “automated” externals and opticks itself with <strong>opticks-full</strong></li>
-<li>create the geocache with <strong>geocache-create</strong>, see <a class="reference internal" href="testing.html"><span class="doc">Opticks Testing, Geocache Creation, Python setup</span></a></li>
 <li>test the opticks build with <strong>opticks-t</strong>, see <a class="reference internal" href="testing.html"><span class="doc">Opticks Testing, Geocache Creation, Python setup</span></a></li>
 </ol>
 </div>
 <div class="section" id="platform-support">
 <h2><a class="toc-backref" href="#id3">Platform Support</a><a class="headerlink" href="#platform-support" title="Permalink to this headline">¶</a></h2>
-<p>A recent Scientific Linux or CentOS Linux are the target platforms for production running of Opticks,
+<p>A recent Scientific Linux or CentOS Linux or Alma Linux are the target platforms for production running of Opticks,
 but I am happy to try to help with installations on any Linux supported by CUDA.</p>
-<p>Initial development was done on macOS (late 2013 MacBook pro : the last Mac laptop with an NVIDIA GPU)
-with occasional ports to keep thinks working on Scientific Linux. But now due to the lack of Macs
-with NVIDIA GPUs development has moved to Linux CentOS 7 and Scientific Linux.</p>
 </div>
 <div class="section" id="get-opticks">
 <h2><a class="toc-backref" href="#id4">Get Opticks</a><a class="headerlink" href="#get-opticks" title="Permalink to this headline">¶</a></h2>
@@ -244,7 +239,11 @@ in the below literal include of <cite>~/opticks/example.opticks_config</cite>.</
 51
 52
 53
-54</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># ~/.opticks_config</span>
+54
+55
+56
+57
+58</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># ~/.opticks_config</span>
 <span class="c1"># ~/.bash_profile &gt; ~/.bashrc &gt; ~/.opticks_config</span>
 <span class="c1"># https://simoncblyth.bitbucket.io/opticks/docs/install.html#bash-shell-setup-with-opticks-config </span>
 
@@ -269,14 +268,18 @@ ofu<span class="o">(){</span> <span class="nb">source</span> <span class="nv">$B
 </span><span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_CUDA_PREFIX</span><span class="o">=</span>/usr/local/cuda
 </span><span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_OPTIX_PREFIX</span><span class="o">=</span>/usr/local/optix
 </span>
-<span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_COMPUTE_CAPABILITY</span><span class="o">=</span><span class="m">70</span>
-</span>
-<span class="c1">## hookup paths to access &quot;foreign&quot; externals, not yet existing dirs just give warnings</span>
-<span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/clhep_2440
-</span><span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/xercesc
-</span><span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/g4_1042
-</span><span class="hll">opticks-prepend-prefix /usr/local/opticks_externals/boost
-</span>
+<span class="hll"><span class="nb">export</span> <span class="nv">OPTICKS_COMPUTE_CAPABILITY</span><span class="o">=</span><span class="m">70</span>     <span class="c1"># NVIDIA TITAN RTX </span>
+</span><span class="c1"># export OPTICKS_COMPUTE_CAPABILITY=80   # NVIDIA A100          (Zepeng) </span>
+<span class="c1"># export OPTICKS_COMPUTE_CAPABILITY=86   # NVIDIA RTX A4000     (Zepeng)</span>
+<span class="hll"><span class="c1"># export OPTICKS_COMPUTE_CAPABILITY=89   # NVIDIA RTX 5000 Ada Generation </span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="c1">## hookup paths to access &quot;foreign&quot; externals, not yet existing dirs just give warnings</span>
+opticks-prepend-prefix /usr/local/opticks_externals/clhep_2440
+opticks-prepend-prefix /usr/local/opticks_externals/xercesc
+opticks-prepend-prefix /usr/local/opticks_externals/g4_1042
+
 <span class="c1">## NB these directory paths are examples, you need to change them to suit your foreign </span>
 <span class="c1">## installs. The paths do however correspond to the defaults used by the </span>
 <span class="c1">## opticks-foreign-install bash function with the directories defined underneath </span>
@@ -356,7 +359,6 @@ its externals requires unix tools including:</p>
 <ul class="simple">
 <li>bash shell</li>
 <li>git</li>
-<li>mercurial (is this still needed?)</li>
 <li>curl</li>
 <li>tar</li>
 <li>zip</li>
@@ -413,19 +415,13 @@ use the newer <em>cmake</em> binary. Check with:</p>
 <div class="section" id="version-requirements">
 <h2><a class="toc-backref" href="#id9">Version Requirements</a><a class="headerlink" href="#version-requirements" title="Permalink to this headline">¶</a></h2>
 <p>For details, see <a class="reference internal" href="externals.html"><span class="doc">Opticks Externals</span></a></p>
-<div class="section" id="optix-6-5">
-<h3>OptiX 6.5<a class="headerlink" href="#optix-6-5" title="Permalink to this headline">¶</a></h3>
-<p>The latest OptiX 7.1 is not yet supported.</p>
+<div class="section" id="optix-7-0-or-later">
+<h3>OptiX 7.0 or later<a class="headerlink" href="#optix-7-0-or-later" title="Permalink to this headline">¶</a></h3>
+<p>OptiX 6.5 and earlier is no longer supported.</p>
 </div>
 <div class="section" id="opengl-4-1">
 <h3>OpenGL 4.1<a class="headerlink" href="#opengl-4-1" title="Permalink to this headline">¶</a></h3>
 <p>Opticks uses GLSL shaders with version 410, corresponding to at least OpenGL 4.1</p>
-</div>
-<div class="section" id="boost-1-53">
-<h3>Boost 1.53+<a class="headerlink" href="#boost-1-53" title="Permalink to this headline">¶</a></h3>
-<p>The recommended minimum boost version is 1.53 as that is what I am using.
-You might be able to survive with an earlier version,
-but anything before 1.41 is known not to work.</p>
 </div>
 </div>
 <div class="section" id="building-opticks-with-opticks-full">
@@ -475,7 +471,6 @@ using opticks-prepend-prefix eg:</p>
 <span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">clhep</span>
 <span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">xercesc</span>
 <span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">g4</span>
-<span class="n">opticks</span><span class="o">-</span><span class="n">prepend</span><span class="o">-</span><span class="n">prefix</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opticks_externals</span><span class="o">/</span><span class="n">boost</span>
 </pre></div>
 </div>
 <p>After that it is necessary to cleaninstall Opticks with:</p>

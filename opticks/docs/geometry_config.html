@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>NPY Orientation : array creation, updating and persisting &#8212; Opticks 0.0.1 documentation</title>
+    <title>geometry_config &#8212; Opticks 0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -27,10 +27,19 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">geometry_config</a><ul>
+<li><a class="reference internal" href="#default-location-for-geometry-config-script">Default location for geometry config script</a></li>
+<li><a class="reference internal" href="#example-of-opticks-geom-geom-sh">Example of ~/.opticks/GEOM/GEOM.sh</a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/npy/orientation.rst.txt"
+      <li><a href="../_sources/docs/geometry_config.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -54,28 +63,50 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="npy-orientation-array-creation-updating-and-persisting">
-<h1>NPY Orientation : array creation, updating and persisting<a class="headerlink" href="#npy-orientation-array-creation-updating-and-persisting" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="../docs/orientation.html"><span class="doc">orientation : Opticks Codebase Orientation for Developers</span></a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/">https://bitbucket.org/simoncblyth/opticks/src/master/npy/</a></li>
-<li><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp">https://bitbucket.org/simoncblyth/opticks/src/master/npy/NPY.cpp</a></li>
-</ul>
-<dl class="docutils">
-<dt>NPY</dt>
-<dd><p class="first">holds simple arrays with metadata, used for both geometry and event data. Provides <strong>.npy</strong> format load/save
-allowing loading the arrays into python:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import sys, numpy as np ; print(np.load(sys.argv[1]))&quot;</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">array</span><span class="o">.</span><span class="n">npy</span>
+  <div class="section" id="geometry-config">
+<h1>geometry_config<a class="headerlink" href="#geometry-config" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="default-location-for-geometry-config-script">
+<h2>Default location for geometry config script<a class="headerlink" href="#default-location-for-geometry-config-script" title="Permalink to this headline">¶</a></h2>
+<p>The below default location is used my many Opticks scripts to
+configure the geometry by setting the GEOM envvar:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$HOME/.opticks/GEOM/GEOM.sh
 </pre></div>
 </div>
-</dd>
-<dt>NNode</dt>
-<dd>basis of the CSG implementation</dd>
-<dt>NCSG</dt>
-<dd>primitive or composite shape holding a tree of NNode, held by ggeo/GParts <span class="xref std std-doc">../ggeo/orientation</span></dd>
-<dt>NCSGData</dt>
-<dd>mechanics of persisting shapes into NPY arrays</dd>
-</dl>
+<p>That location is used by the opticks-t ctests and
+many bash scripts within opticks.</p>
+<p>Clearly when working with multiple geometries it might
+prove move convenient for GEOM.sh to source different
+scripts depending on the GEOM envvar value.</p>
+</div>
+<div class="section" id="example-of-opticks-geom-geom-sh">
+<h2>Example of ~/.opticks/GEOM/GEOM.sh<a class="headerlink" href="#example-of-opticks-geom-geom-sh" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+notes(){ cat &lt;&lt; EON
+~/.opticks/GEOM/GEOM.sh
+=========================
+
+Usage from scripts::
+
+    source $HOME/.opticks/GEOM/GEOM.sh
+
+EON
+}
+
+#geom=V1J009
+#geom=V1J010
+geom=V1J011
+
+#geom=simpleLArTPC
+#geom=xjfcSolid
+#geom=Z36
+#geom=RaindropRockAirWater
+
+export GEOM=$geom
+export ${GEOM}_CFBaseFromGEOM=$HOME/.opticks/GEOM/$GEOM
+export ${GEOM}_GDMLPath=$HOME/.opticks/GEOM/$GEOM/origin.gdml
+</pre></div>
+</div>
+</div>
 </div>
 
 
