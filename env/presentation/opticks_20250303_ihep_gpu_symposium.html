@@ -5779,19 +5779,19 @@ geometry issues. -->
 <li>p8: Geometry Model Translation : Geant4 =&gt; CSGFoundry =&gt; NVIDIA OptiX</li>
 <li>p9: Full JUNO, Opticks, OptiX 7.5/8.0</li>
 <li>p10: <span class="r">NEW : Integrated Analytic + Triangulated Geometry</span></li>
-<li>p11-12: <span class="b">NEW : Interactive ray traced visualization via OpenGL/OptiX interop</span></li>
-<li>p13: GuideTube : Torus Triangulated</li>
-<li>p14: NEW : Optimized Random Number Generation (RNG) : remove states limit</li>
-<li>p15: NEW : Out-of-core optical photon simulation : multi-launch</li>
-<li>p16: Simulating One Billion Photons in under 100 sec</li>
-<li>p17-18: Pure Optical TorchGenstep scan : 1M to 100M photons</li>
-<li>p19: <span class="b">Optical simulation 4x faster 1st-&gt;3rd gen RTX</span></li>
-<li>p20-21: How much parallelized speedup actually useful to overall speedup?</li>
+<li>p11: 2024 : JUNO+Opticks Geom Fixes</li>
+<li>p12-13: <span class="r">NEW : Interactive ray traced visualization via OpenGL/OptiX interop</span></li>
+<li>p14: GuideTube : Torus Triangulated</li>
+<li>p15: <span class="r">NEW : Optimized Random Number Generation (RNG) : no states limit</span></li>
+<li>p16: <span class="r">NEW : Out-of-core optical photon simulation : no VRAM limit</span></li>
+<li>p17: <span class="b">Opticks Unlimited : Simulating One Billion Photons in under 100 sec</span></li>
+<li>p18-19: Pure Optical TorchGenstep scan : 1M to 100M photons</li>
+<li>p20: <span class="b">Optical simulation 4x faster 1st-&gt;3rd gen RTX</span></li>
+<li>p21-22: How much parallelized speedup actually useful to overall speedup?</li>
 </ul>
 </li>
-<li>p22: Summary + Links</li>
-<li>p23: Acknowledgements</li>
-<li>p24: NEW Opticks User : Ilker Parmaksiz, NEXT-CRAB0 Prototype</li>
+<li>p23: Summary + Links</li>
+<li>p24: Acknowledgements, p25-28: Highlighted Opticks Users, p29: GPU compute/RT frameworks</li>
 </ul>
 <hr/>
         <!--  s5talk  -->
@@ -6176,9 +6176,7 @@ simulation. -->
 <li>default : analytic CSG solids</li>
 <li>user can name solids for triangulation<ul>
 <li>avoids issue with toruses + complex solids</li>
-<li>BUT : approximate geometry</li>
 <li>triangulation from G4Polyhedron</li>
-<li>config per-solid NumberOfRotationSteps by envvars</li>
 <li>uses OptiX &quot;built-in&quot; triangle intersection</li>
 </ul>
 </li>
@@ -6187,6 +6185,58 @@ simulation. -->
 <dt><span class="r">NEW FEATURE</span></dt>
 <dd><span class="r">Integration of analytic + triangulated geometry</span></dd>
 </dl>
+<p style="position:fixed;top:25px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+Cutaway ray traced render of JUNO CD
+</p>
+<p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+Mostly Analytic CSG
+</p>
+<p style="position:fixed;top:375px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+Guide Tube Torus Triangulated
+</p>
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+Triangulated geometry is very useful for the JUNO guide tube torus,
+as finding analytic intersects with toruses requires solving quartics
+which is imprecise even in double precision. -->
+</div>
+<div class="slide" id="juno-opticks-geom-fixes">
+<h1><span class="small">2024 : JUNO+Opticks Geom Fixes</span></h1>
+<!-- comment
+
+for targetting seems need to use full page dimension half the actual dimension -->
+<p style="margin-bottom:-10mm;" />
+<p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+WaterPool HBeam Overlaps FIXED with simpler approach
+</p>
+<p style="position:fixed;top:275px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+FastenerAcrylic translated to "list-node"
+</p>
+<p style="position:fixed;top:625px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+Testing triangulated GuideTube + XJ + SJ solids
+</p>
+<p style="margin-bottom:20mm;" /><p style="margin-bottom:-15mm;" /><ul class="small simple">
+<li>Re-implemented WaterPool with hierarchy approach<ul>
+<li>avoid : ~120 overlaps, complex CSG</li>
+<li>enables translation to Opticks/GPU</li>
+</ul>
+</li>
+<li>FastenerAcrylic (590) working using &quot;list-node&quot;<ul>
+<li>discontiguous =&gt; simple + fast</li>
+</ul>
+</li>
+<li>GuideTube (39*2*2 = 156 G4Torus)<ul>
+<li>torus intersect v.expensive on GPU =&gt; <span class="r">triangulate</span></li>
+<li>adjust precision with NumberOfRotationSteps</li>
+</ul>
+</li>
+<li>XJ + SJ solids (less numerous)<ul>
+<li>many concident surfaces, testing <span class="r">triangulated</span></li>
+</ul>
+</li>
+</ul>
 
         <!--  s5talk  -->
         <br/>
@@ -6320,8 +6370,8 @@ List-node avoids deep CSG trees
 
     * eg allows sub hundreds of holes -->
 </div>
-<div class="slide" id="new-optimized-random-number-generation-rng-remove-states-limit">
-<h1><span class="small">NEW : Optimized Random Number Generation (RNG) : remove states limit</span></h1>
+<div class="slide" id="new-optimized-random-number-generation-rng-no-states-limit">
+<h1><span class="small">NEW : Optimized Random Number Generation (RNG) : no states limit</span></h1>
 <div class="sidebar">
 <p class="first sidebar-title"><span class="small">curand XORWOW workaround</span></p>
 <p class="small">XORWOW is default curand generator</p>
@@ -6371,8 +6421,8 @@ List-node avoids deep CSG trees
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="out-of-core-optical-photon-simulation-multi-launch">
-<h1><span class="small">Out-of-core optical photon simulation : multi-launch</span></h1>
+<div class="slide" id="out-of-core-optical-photon-simulation-no-vram-limit">
+<h1><span class="small">Out-of-core optical photon simulation : no VRAM limit</span></h1>
 <!-- comment
 
 Simulation of more photons than can fit within VRAM is implemented
@@ -6445,8 +6495,8 @@ in a total time under 100 seconds.
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="simulating-one-billion-photons-in-under-100-sec">
-<h1>Simulating One Billion Photons in under 100 sec</h1>
+<div class="slide" id="opticks-unlimited-simulating-one-billion-photons-in-under-100-sec">
+<h1><span class="small">Opticks Unlimited : Simulating One Billion Photons in under 100 sec</span></h1>
 <dl class="small docutils">
 <dt>cxs_min.sh</dt>
 <dd>pure optical simulation of 40 torch gensteps from CD center totalling 1 billion photons
@@ -6887,6 +6937,106 @@ with automated geometry translation into GPU optimized form.</blockquote>
 <li>careful comparison : Data, Geant4, Opticks</li>
 <li><span class="r">Opticks 181x over Geant4</span></li>
 </ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="cats-integration-of-geant4-and-opticks">
+<h1><span class="i">CaTS: Integration of Geant4 and Opticks</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="lhcb-rich1-epjc-001-png">
+<h1><span class="i">lhcb_rich1_epjc_001.png</span></h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* they got a speedup of 10x only : due to using not so many photons
+* Opticks needs event joining to avoid overheads reducing performance
+  for few photon events -->
+</div>
+<div class="slide" id="lz-opticks-sam-eriksen-university-of-bristol">
+<h1><span class="small">LZ + Opticks (Sam Eriksen, University of Bristol)</span></h1>
+<p><tt class="docutils literal">had contacts with ~5 LZ people</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="gpu-compute-and-ray-tracing-frameworks">
+<h1>GPU compute and ray tracing frameworks</h1>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="10%" />
+<col width="15%" />
+<col width="20%" />
+<col width="23%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">GPU vendor</th>
+<th class="head">compute framework</th>
+<th class="head">ray trace framework</th>
+<th class="head">hardware RT</th>
+<th class="head">notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>NVIDIA</td>
+<td>CUDA(2007-)</td>
+<td>OptiX(2009-)</td>
+<td>RTX/RT Core (2018-)</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>Apple</td>
+<td>Metal/MPS(2014-)</td>
+<td>Metal/MPS(2020-)</td>
+<td>From M3 (2023-)</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>AMD</td>
+<td>ROCm(2016-)</td>
+<td>RadeonRays, HIP-RT(2022-)</td>
+<td>From Radeon RX 6000 (2020-)</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>Intel</td>
+<td>oneAPI(?2020-)</td>
+<td>Embree?</td>
+<td>From Arc Alchemist (2022-)</td>
+<td>uses SYCL</td>
+</tr>
+<tr><td>Huawei</td>
+<td>?</td>
+<td>mobile only</td>
+<td>mobile only</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>Cross-vendor</td>
+<td>Vulkan
+compute shaders</td>
+<td>Vulkan
+ray trace extension</td>
+<td>NVIDIA/AMD/Intel/?</td>
+<td>Depends on vendor drivers</td>
+</tr>
+<tr><td>&nbsp;</td>
+<td>OpenCL</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dead?</td>
+</tr>
+<tr><td>&nbsp;</td>
+<td>OpenMP</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>new support for GPU offloading</td>
+</tr>
+</tbody>
+</table>
+<p class="small">Other GPU vendors such as Samsung and Qualcomm mostly focussed on mobile.</p>
 
         <!--  s5talk  -->
         <br/>

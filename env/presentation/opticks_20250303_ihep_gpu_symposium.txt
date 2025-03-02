@@ -101,18 +101,18 @@ Outline
       * p8: Geometry Model Translation : Geant4 => CSGFoundry => NVIDIA OptiX 
       * p9: Full JUNO, Opticks, OptiX 7.5/8.0
       * p10: :r:`NEW : Integrated Analytic + Triangulated Geometry`
-      * p11-12: :b:`NEW : Interactive ray traced visualization via OpenGL/OptiX interop`
-      * p13: GuideTube : Torus Triangulated
-      * p14: NEW : Optimized Random Number Generation (RNG) : remove states limit 
-      * p15: NEW : Out-of-core optical photon simulation : multi-launch
-      * p16: Simulating One Billion Photons in under 100 sec 
-      * p17-18: Pure Optical TorchGenstep scan : 1M to 100M photons
-      * p19: :b:`Optical simulation 4x faster 1st->3rd gen RTX`
-      * p20-21: How much parallelized speedup actually useful to overall speedup?
+      * p11: 2024 : JUNO+Opticks Geom Fixes
+      * p12-13: :r:`NEW : Interactive ray traced visualization via OpenGL/OptiX interop`
+      * p14: GuideTube : Torus Triangulated
+      * p15: :r:`NEW : Optimized Random Number Generation (RNG) : no states limit` 
+      * p16: :r:`NEW : Out-of-core optical photon simulation : no VRAM limit`
+      * p17: :b:`Opticks Unlimited : Simulating One Billion Photons in under 100 sec` 
+      * p18-19: Pure Optical TorchGenstep scan : 1M to 100M photons
+      * p20: :b:`Optical simulation 4x faster 1st->3rd gen RTX`
+      * p21-22: How much parallelized speedup actually useful to overall speedup?
 
-    * p22: Summary + Links 
-    * p23: Acknowledgements
-    * p24: NEW Opticks User : Ilker Parmaksiz, NEXT-CRAB0 Prototype
+    * p23: Summary + Links 
+    * p24: Acknowledgements, p25-28: Highlighted Opticks Users, p29: GPU compute/RT frameworks
 
 
 .. raw:: html
@@ -616,7 +616,6 @@ Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
 
 
 
-
 :small:`Analytic + triangulated geometry` 
 ------------------------------------------------------
 
@@ -626,17 +625,108 @@ Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
    * user can name solids for triangulation    
 
      * avoids issue with toruses + complex solids
-     * BUT : approximate geometry 
      * triangulation from G4Polyhedron
-     * config per-solid NumberOfRotationSteps by envvars
      * uses OptiX "built-in" triangle intersection
 
    :r:`NEW FEATURE`
        :r:`Integration of analytic + triangulated geometry`
 
+
+.. raw:: html
+
+
+    <p style="position:fixed;top:25px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Cutaway ray traced render of JUNO CD
+    </p>
+    <p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Mostly Analytic CSG
+    </p>
+    <p style="position:fixed;top:375px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Guide Tube Torus Triangulated
+    </p>
+ 
+
+
 .. s5_talk::
 
-   Integration of analytic + triangulated geometry : NEW FEATURE 
+   * main new feature is geometry generalization : integrating triangulated with analytic 
+   * this allows translation of the full JUNO geometry, by triangulating the guide tube torus
+
+.. comment
+
+   Triangulated geometry is very useful for the JUNO guide tube torus, 
+   as finding analytic intersects with toruses requires solving quartics
+   which is imprecise even in double precision.  
+
+
+
+:small:`2024 : JUNO+Opticks Geom Fixes`
+------------------------------------------
+
+.. comment
+
+    for targetting seems need to use full page dimension half the actual dimension
+
+
+.. raw:: html
+
+    <p style="margin-bottom:-10mm;" />
+    <p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    WaterPool HBeam Overlaps FIXED with simpler approach
+    </p>
+    <p style="position:fixed;top:275px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    FastenerAcrylic translated to "list-node"
+    </p>
+    <p style="position:fixed;top:625px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Testing triangulated GuideTube + XJ + SJ solids
+    </p>
+    <p style="margin-bottom:20mm;" />
+ 
+
+.. raw:: html
+
+    <p style="margin-bottom:-15mm;" />
+
+.. class:: small
+
+   * Re-implemented WaterPool with hierarchy approach 
+
+     * avoid : ~120 overlaps, complex CSG
+     * enables translation to Opticks/GPU
+  
+   * FastenerAcrylic (590) working using "list-node" 
+
+     * discontiguous => simple + fast 
+
+   * GuideTube (39*2*2 = 156 G4Torus) 
+
+     * torus intersect v.expensive on GPU => :r:`triangulate` 
+     * adjust precision with NumberOfRotationSteps  
+
+   * XJ + SJ solids (less numerous) 
+
+     * many concident surfaces, testing :r:`triangulated` 
+
+
+
+.. s5_talk::
+
+    * geometry issues this year were with the Waterpool and the support stick fasteners. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 :i:`cxr_min__eye_1,0,0__zoom_1__tmin_0.5__sSurftube_0V1_0:0:-1.jpg` 
@@ -783,8 +873,8 @@ Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
 
 
 
-:small:`NEW : Optimized Random Number Generation (RNG) : remove states limit`
-----------------------------------------------------------------------------------
+:small:`NEW : Optimized Random Number Generation (RNG) : no states limit`
+---------------------------------------------------------------------------
 
 .. sidebar:: :small:`curand XORWOW workaround`
 
@@ -850,7 +940,7 @@ Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
 
 
 
-:small:`Out-of-core optical photon simulation : multi-launch`
+:small:`Out-of-core optical photon simulation : no VRAM limit`
 ---------------------------------------------------------------
 
 .. comment
@@ -945,8 +1035,8 @@ Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
 
 
 
-Simulating One Billion Photons in under 100 sec
---------------------------------------------------------
+:small:`Opticks Unlimited : Simulating One Billion Photons in under 100 sec`
+-------------------------------------------------------------------------------
 
 
 .. class:: small
@@ -1430,6 +1520,8 @@ Acknowledgements
 
 
 
+
+
 ``Ilker Parmaksiz, NEXT-CRAB0 Prototype``
 ---------------------------------------------
 
@@ -1447,5 +1539,84 @@ Acknowledgements
 
 
 
+
+:i:`CaTS: Integration of Geant4 and Opticks`
+--------------------------------------------------
+
+
+.. s5_talk::
+
+    A recent paper from the Fermilab Geant4 team 
+    reports on the integration
+ 
+
+:i:`lhcb_rich1_epjc_001.png`
+-----------------------------
+
+.. s5_talk::
+
+    The LHCb-RICH (ring-imaging Cherenkov particle id detector) 
+    group from Manchester and RAL evaluated Opticks in an EPJ paper. 
+
+    I helped them via ZOOM calls and they helped me by arranging 
+    a UK HACKATHON with NVIDIA Europe engineers. 
+    Some NVIDIA GPU experts used their profiling tools on Opticks
+    and studied the code. They gave me detailed advice on some better ways 
+    to do things.    
+
+.. comment
+
+    * they got a speedup of 10x only : due to using not so many photons
+    * Opticks needs event joining to avoid overheads reducing performance 
+      for few photon events  
+
+
+
+:small:`LZ + Opticks (Sam Eriksen, University of Bristol)`
+---------------------------------------------------------------------------
+
+``had contacts with ~5 LZ people``
+
+.. s5_talk::
+
+    I assisted the LZ dark matter expt to get their geometry to work with Opticks.   
+    I had contacts with more than 5 people from LZ.
+
+
+
+GPU compute and ray tracing frameworks
+---------------------------------------
+
+
+.. class:: small 
+
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    | GPU vendor    |  compute framework  | ray trace framework         | hardware RT                     | notes                                        |    
+    +===============+=====================+=============================+=================================+==============================================+
+    | NVIDIA        |   CUDA(2007-)       |  OptiX(2009-)               | RTX/RT Core (2018-)             |                                              |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    | Apple         |   Metal/MPS(2014-)  |  Metal/MPS(2020-)           | From M3 (2023-)                 |                                              |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    | AMD           |   ROCm(2016-)       | RadeonRays, HIP-RT(2022-)   | From Radeon RX 6000 (2020-)     |                                              |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    | Intel         |   oneAPI(?2020-)    |  Embree?                    | From Arc Alchemist (2022-)      | uses SYCL                                    |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    | Huawei        |  ?                  |  mobile only                | mobile only                     |                                              |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    | Cross-vendor  | Vulkan              | Vulkan                      | NVIDIA/AMD/Intel/?              |                                              |    
+    |               | compute shaders     | ray trace extension         |                                 | Depends on vendor drivers                    |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    |               |  OpenCL             |                             |                                 |  dead?                                       |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+    |               |  OpenMP             |                             |                                 |  new support for GPU offloading              |    
+    +---------------+---------------------+-----------------------------+---------------------------------+----------------------------------------------+
+
+
+    Other GPU vendors such as Samsung and Qualcomm mostly focussed on mobile. 
+
+
+.. s5_talk::
+
+   Klop
 
 
