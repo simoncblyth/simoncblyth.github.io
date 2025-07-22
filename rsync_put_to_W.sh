@@ -6,7 +6,7 @@ rsync_put_to_W.sh
 This is a workaround for github/bitbucket blockage.
 It is not convenient to get around that blockage
 on machines I do not control such as W.
-So rsync_put_to_W.sh rsyncs from A to W.
+So rsync_put_to_W.sh rsyncs from A to W (or from Z to W).
 
 
 HMM : how dodgy a thing is this ?
