@@ -1,0 +1,1101 @@
+.. meta::
+   :title: Simon C Blyth : IHEP Assessment Report 2025
+   :description: (2025 December 8) JUNO, OptiX, Opticks
+   :note0: 5+2 min 
+   :url: https://indico.ihep.ac.cn/event/24089/timetable/
+
+.. include:: my_s5defs.txt
+
+
+:i:`Simon C. Blyth : IHEP Assessment Report 2025`
+==========================================================================================
+
+.. raw:: html
+
+    <div class="mytitle">
+    <header>
+    <h1 style="background-color:lightgrey;text-align:center;"> 
+        <i>Simon C. Blyth</i> : IHEP Assessment Report 2025 
+        <h2 style="background-color:lightgrey;text-align:center">
+            Open source, https://bitbucket.org/simoncblyth/opticks 
+        </h2>
+    </h1>
+    </header>
+    </div>
+    <!--img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="juno/JUNO_logo.png"  /-->
+    <div class="mycredit">
+       <h2 style="background-color:lightgrey">
+          Simon C Blyth, IHEP, CAS &mdash; IHEP Assessment Report &mdash; 8 December 2025
+       </h2>
+    </div>
+
+.. s5_talk:: 
+
+   This render illustrates the many millions of photons resulting from a 200GeV muon crossing the JUNO scintillator.
+   Finding intersects between rays representing the photons and the detector geometry is the bottleneck for simulation. 
+   Offloading the optical simulation to the GPU can eliminate this bottleneck.   
+   I developed the Opticks package to do exactly that. 
+
+
+Standard Outline
+-----------------
+
+.. class:: normal 
+
+    I. Job responsibilities (**p2**) 
+    II. Work status this year
+
+      * Completion of research tasks [50%] (**p5,6,7,8**)
+      * Personal research results 
+
+        * innovative technology development(**p9**)
+        * papers(**p10**), funding(**p11**)[10%]
+
+      * Academic exchanges [10% with above, excluding funding]
+
+        * McGill NEXO workshop, CHEP 2024 (**p12**)
+        * Geant4 Technical Forum, Domestic seminars + meetings (**p13**)
+
+      * Public "services" (**p14**)[10%]
+
+        * JUNO Geometry, Students, Geant4 Collab, Opticks Users
+ 
+    III. Existing problems (**p15**)
+    IV. Work plan for next year (**p16**) 
+
+
+.. s5_talk::
+
+    Standard Outline
+
+
+**I. Job responsibilities** : Dr Simon C. Blyth
+--------------------------------------------------
+
+.. class:: normal
+
+   **2024/09**-2029/09 : *IHEP Associate Researcher*
+    
+     +-------------------------------------------------------------------------------+
+     |                                                                               |
+     | * :r:`Maximize Opticks benefits to JUNO and other experiments`                |
+     | * Maximize GPU benefits to HEP projects able to innovate, eg CEPC             |
+     |                                                                               |
+     +-------------------------------------------------------------------------------+
+
+.. class:: small 
+
+   2021/02-2024/08 : *Senior Project Scientist JUNO, Visiting Researcher of IHEP* 
+     JUNO+Opticks development 
+
+     * Original development of shared GPU/CPU optimized CSG geometry model 
+     * Enable state-of-the-art NVIDIA OptiX ray tracing of auto-translated detector geometry
+     * Detailed JUNO+Opticks validations reveal steady stream of geometry and physics issues
+ 
+       * fixed many issues, including unphysical PMT Optical Model 
+
+   2018/05-11, 2019/03-12, 2020/04-12 : *Visiting Scientist, CAS Presidents International Fellowship Initiative* 
+     * Generalizing Opticks to enable integration with JUNO simulation.
+     * Enabled fully automated geometry management, via direct geometry translation.
+ 
+   2013/08 - 2017/12 : *Researcher with National Taiwan University, Taipei based at NTU*
+     Original research and development of GPU optical photon simulation framework, Opticks, 
+     yielding unprecedented optical photon propagation performance.
+
+
+.. s5_talk::
+
+   * I joined IHEP 2 months ago, before then I worked as a visitor.  
+   * I aim to maximize Opticks benefits to JUNO and other experiments. 
+
+
+
+`(JUNO) Optical Photon Simulation Problem...`
+---------------------------------------------------------
+
+.. raw:: html
+
+     <p style="position:fixed;top:100px;left:900px;font-size:40px;background-color:white;border:1px solid black;padding:5px;">
+     Opticks solves this using GPU ray tracing via NVIDIA OptiX 
+     </p>    
+
+     <p style="margin-bottom:7cm;" />
+
+
+.. sidebar:: :small:`Huge CPU Memory+Time Expense`
+
+    .. class:: small
+
+         **JUNO Muon Simulation Bottleneck**
+           ~99% CPU time, memory constraints
+
+         **Ray-Geometry intersection Dominates**
+           simulation is not alone in this problem...
+
+         **Optical photons : naturally parallel, simple :**
+           * produced by Cherenkov+Scintillation 
+           * yield only Photomultiplier hits
+
+
+.. s5_talk::
+
+   * Serial optical simulation is hugely expensive.   
+   * Opticks applies massively parallel GPU ray tracing, to solve the optical simulation problem 
+   * For many experiments Opticks can prevent optical photons from limiting simulation 
+
+
+
+Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
+-------------------------------------------------------------
+
+.. class:: small
+
+    *Opticks* enables Geant4 based simulation to offload optical photon simulation to the GPU  
+
+.. raw:: html
+
+    <p style="margin-bottom:13cm;" />
+
+.. class:: normal 
+
+    **NVIDIA GPU ray tracing of billions[1] of rays per second applied to optical simulation**
+
+.. class:: tiny
+
+    [1] Actual performance depends on geometry and its modelling, JUNO optical simulation speedups > 1000x Geant4 have been measured  
+ 
+
+.. s5_talk::
+
+    * This shows how Opticks integrates Geant4 simulations with NVIDIA OptiX GPU ray tracing.  
+    * The most crucial part is the translation of geometry into the form needed on the GPU 
+
+
+
+.. comment 2024 TO MUCH DETAIL : PREFER BIG PICTURE
+
+
+    :small:`II. Work status this year : Completion of research tasks`
+    ----------------------------------------------------------------------
+
+    .. sidebar:: :small:`Opticks Validation => JUNO issues`
+
+        .. class:: small
+
+              **Compare GPU+CPU optical simulation impl**
+         
+              * photon history Opticks:Geant4 chi2 comparison
+              
+                * reveals discrepant photon histories 
+                * usually due to geometry problems
+
+              **many tools + tests to find/investigate issues**
+
+              * interactive standalone tests : fast dev cycle
+              * interactive ray traced geometry rendering
+
+                * 2D slices + 3D   
+
+
+    .. class:: small
+
+        **JUNOSW + Opticks enhancements**
+
+
+        2023/12 - 2024/02 : Opticks **Release Phase**
+           * 1st JUNOSW+Opticks release /cvmfs/opticks.ihep.ac.cn
+           * profiling machinery, CPU/GPU leak finding + fixing
+
+        2024/03-11 : Opticks **Develop Phase** => :r:`Full JUNO Geom` 
+           * :b:`generalized geometry model, add triangulated` 
+           * add interactive visualization, "fly" around detector 
+           * integrate "list-node" reducing CSG tree depth 
+           * developments to handle Geant4 11.2 CUDA 12.4 OptiX 8.0 
+
+             * :r:`profit from 3rd gen NVIDIA RTX GPU ray tracing`  
+          
+        2024/04-11 : Opticks **Validate Phase**
+           * :b:`reveals JUNO geometry issues => reimplement` 
+           * Water pool poor modelling : simplify with heirarchy  
+           * Acrylic sticks fastener : incorrect heirarchy   
+
+        2024/10 : Opticks **Measure Phase** + Conferences
+           * :r:`RTX 3rd gen vs 1st gen : 4x performance improvement`
+           * report performance at CHEP 2024, nEXO optical workshop
+
+        2024/11 : Entering **Release Phase** again
+           * :b:`Now with full JUNO geometry (tri. for Torus.., listnode), Latest OptiX 8.0` 
+
+
+    .. s5_talk::
+
+       * my work cycle has phases : Develop/Validate/Measure/Release
+       * Validation uses a chi2 that compares photon histories between the simulations. 
+       * Deviations usually point to geometry needing to be re-implemented
+
+
+
+
+
+:small:`II. Work status this year  : Completion of research tasks (1)`
+------------------------------------------------------------------------
+
+
+.. class:: normal
+
+   2025 : :r:`Integration + iteration directed by production experience with Opticks + JUNOSW`  
+
+   **Reduced resource simulation using summary "Muon" hits** ``--pmt-hit-type 2``
+
+   * profit with Opticks ``sphotonlite`` (16 bytes), 4x smaller than ``sphoton`` (64 bytes) 
+
+   **Simulation of giga optical photon events with more than 8 billion photons**
+
+   * removed 32-bit limits, 32(16) launches with ``sphoton(sphotonlite)`` [32GB VRAM] 
+
+   **CUDA implementation of PMT hit merging** (``thrust::sort_by_key,reduce_by_key``)
+
+   * merge hits onto same PMT within time buckets (eg: 1 ns) 
+   * hits selected + merged on GPU, :b:`typical 10x reduction in size of hits`
+   * :b:`minimizes overheads + CPU post processing of "Muon" hits` 
+
+   **Preliminary apple-to-apple comparison with 250M photon double muon (exclude init)** 
+
+   * :b:`JUNOSW : 90 minutes,  Opticks+JUNOSW : 30 seconds`  -- :r:`MORE THAN 100x SPEEDUP`
+
+
+
+:small:`II. Work status this year  : Completion of research tasks (2)`
+------------------------------------------------------------------------
+
+.. class:: normal
+
+   **Opticks+ JUNOSW validations reveal JUNO geometry bugs, including:**
+
+   * photon leaking UpperChimney + waterpool PMT orientation
+   * overlap between Water distributor and Hama PMTs close to Chimney
+
+   **Integration of Opticks+JUNOSW with gitlab CI/CD build/test/release**
+
+   * automated daily+dated Opticks+JUNOSW releases onto ``/cvmfs/opticks.ihep.ac.cn``
+
+   **OpticksService : first implementation of HTTP optical server working**
+
+   * :r:`receives gensteps, returns (merged)hits`  (FastAPI + nanobind + opticks/CSGOptiX, :strike:`Geant4`)
+   * :b:`share GPU optical acceleration with multiple clients, increased GPU utilization`
+
+   **OpticksClient : almost test stage** [CPU node : collects gensteps, ``libcurl`` request, response]
+
+   * ``G4CXOpticks`` : same API as monolithic for client use (pluggable backend ``SSimulator``)
+   * uses CMake partial build of Opticks ``-DBUILD_WITH_CUDA=OFF``
+
+
+.. comment
+
+     Below details on visual pages
+
+     * developed ray trace point cloud with normals overlap testing using KDTree
+     * pluggable backend : local GPU OR remote connection to **OpticksService** via libcurl
+
+
+
+
+
+:i:`GEOM_J25_4_0_opticks_Debug_SGLFW_SOPTIX_Scene_test_Chimney_ipc_20250707_135926.png` 
+----------------------------------------------------------------------------------------
+
+``EVT=Chimney_ipc MOI=sChimneyLS:0:-2 ssst.sh``
+
+``B : Geant4``
+
+``Photons escape between Lower and UpperChimney``
+
+
+.. s5_talk::
+
+    Problem in geometry translation
+
+
+
+
+
+
+
+:small:`2025 : JUNO+Opticks validation revealed geometry issues`
+-----------------------------------------------------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:-10mm;" />
+    <p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    348 WP_ATM_LPMT direct inwards not outwards (MR 981)
+    </p>
+    <p style="position:fixed;top:275px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    FastenerAcrylic translated to "list-node"
+    </p>
+    <p style="position:fixed;top:625px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    G4: Photons escape between Lower and UpperChimney
+    </p>
+    <p style="margin-bottom:20mm;" />
+ 
+
+.. raw:: html
+
+    <p style="margin-bottom:-15mm;" />
+
+.. class:: small
+
+   Opticks:Geant4 photon history Chi2 -> finds geometry issues
+
+   * broken Chimney implementation
+
+     * 1M photons up Chimney -> reveal escapes
+
+   * Waterpool 348 wall PMT orientation
+
+     * bug revealed by visualization inspection
+
+   * overlap between Water distributor and Hama PMTs close to Chimney
+
+     * visualization -> suspicion
+     * confirmed by KDTree accelerated overlap finder script
+
+       * ray trace intersects (point clouds with normals)
+       * => detect point cloud overlaps 
+
+
+
+
+:small:`2024 : JUNO+Opticks Geom Fixes`
+------------------------------------------
+
+.. comment
+
+    for targetting seems need to use full page dimension half the actual dimension
+
+
+.. raw:: html
+
+    <p style="margin-bottom:-10mm;" />
+    <p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    WaterPool HBeam Overlaps FIXED with simpler approach
+    </p>
+    <p style="position:fixed;top:275px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    FastenerAcrylic translated to "list-node"
+    </p>
+    <p style="position:fixed;top:625px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Testing triangulated GuideTube + XJ + SJ solids
+    </p>
+    <p style="margin-bottom:20mm;" />
+ 
+
+.. raw:: html
+
+    <p style="margin-bottom:-15mm;" />
+
+.. class:: small
+
+   * Re-implemented WaterPool with hierarchy approach 
+
+     * avoid : ~120 overlaps, complex CSG
+     * enables translation to Opticks/GPU
+  
+   * FastenerAcrylic (590) working using "list-node" 
+
+     * discontiguous => simple + fast 
+
+   * GuideTube (39*2*2 = 156 G4Torus) 
+
+     * torus intersect v.expensive on GPU => :r:`triangulate` 
+     * adjust precision with NumberOfRotationSteps  
+
+   * XJ + SJ solids (less numerous) 
+
+     * many concident surfaces, testing :r:`triangulated` 
+
+
+
+.. s5_talk::
+
+    * geometry issues this year were with the Waterpool and the support stick fasteners. 
+
+
+
+
+
+
+
+
+
+
+:small:`Analytic + triangulated geometry` 
+------------------------------------------------------
+
+.. class:: small
+
+   * default : analytic CSG solids
+   * user can name solids for triangulation    
+
+     * avoids issue with toruses + complex solids
+     * triangulation from G4Polyhedron
+     * uses OptiX "built-in" triangle intersection
+
+   :r:`NEW FEATURE`
+       :r:`Integration of analytic + triangulated geometry`
+
+
+.. raw:: html
+
+
+    <p style="position:fixed;top:25px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Cutaway ray traced render of JUNO CD
+    </p>
+    <p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Mostly Analytic CSG
+    </p>
+    <p style="position:fixed;top:375px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Guide Tube Torus Triangulated
+    </p>
+ 
+
+
+.. s5_talk::
+
+   * main new feature is geometry generalization : integrating triangulated with analytic 
+   * this allows translation of the full JUNO geometry, by triangulating the guide tube torus
+
+.. comment
+
+   Triangulated geometry is very useful for the JUNO guide tube torus, 
+   as finding analytic intersects with toruses requires solving quartics
+   which is imprecise even in double precision.  
+
+
+
+:i:`AB_Substamp_ALL_Etime_vs_Photon_rtx_gen1_gen3.png`
+--------------------------------------------------------
+
+
+.. raw:: html
+
+    <p style="margin-bottom:45mm;" />
+
+    <p style="position:fixed;top:575px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    Updates for CUDA 12.4 enabled 3rd gen RTX tests
+    </p>
+ 
+
+.. class:: tiny
+
+    .. table:: Event Time(s) vs PH(M)
+        :align: right 
+
+        +---------+--------+-----+--------+
+        | PH(M)   |   G1   | G3  | G1/G3  |
+        +=========+========+=====+========+
+        |  1      |  0.47  |0.14 |  3.28  |
+        +---------+--------+-----+--------+
+        | 10      |  0.44  |0.13 |  3.48  |
+        +---------+--------+-----+--------+
+        | 20      |  4.39  |1.10 |  3.99  |
+        +---------+--------+-----+--------+
+        | 30      |  8.87  |2.26 |  3.93  |
+        +---------+--------+-----+--------+
+        | 40      | 13.29  |3.38 |  3.93  |
+        +---------+--------+-----+--------+
+        | 50      | 18.13  |4.49 |  4.03  |
+        +---------+--------+-----+--------+
+        | 60      | 22.64  |5.70 |  3.97  |
+        +---------+--------+-----+--------+
+        | 70      | 27.31  |6.78 |  4.03  |
+        +---------+--------+-----+--------+
+        | 80      | 32.24  |7.99 |  4.03  |
+        +---------+--------+-----+--------+
+        | 90      | 37.92  |9.33 |  4.06  |
+        +---------+--------+-----+--------+
+        | 100     | 41.93  |10.42|  4.03  |
+        +---------+--------+-----+--------+
+
+
+
+.. raw:: html
+
+    <p class="mymidleftbox">Optical simulation 4x faster 1st->3rd gen RTX,  (3rd gen, Ada : 100M photons simulated in 10 seconds) [TMM PMT model]</p>
+    <pre>
+   
+
+.. s5_talk::
+
+    * measured factor of 4 speedup from the 1st to 3rd generation RTX GPUs
+
+
+.. comment
+
+    GPU launch time vs number of photons becomes linear between 10M and 20M photons
+
+    This is with JUNOs unusual PMT optical model where photons bounce around inside PMT 
+    and interference effects in the thin layers of photocathode and anti-reflection coating are 
+    modelled using the transfer matrix method (TMM).
+
+
+
+
+:small:`Personal research results : innovative technology development`
+----------------------------------------------------------------------------
+
+.. class:: normal 
+
+    *Opticks* **Innovative Technology Developments**:
+
+    * integration of state-of-the-art GPU ray tracing with Geant4 
+    * open source analytic CSG implementation developed for GPU
+
+    **2024 : extending these innovations:** 
+
+    * :r:`integrated triangulated + analytic geometry` 
+    * apply "listnode" reducing CSG tree depth for complex solids 
+    * :b:`smoothly interactive ray traced visualization as "fly" around full detector geometries`
+
+      * OpenGL/OptiX/CUDA interop : viz shares GPU buffers with simulation
+      * :r:`viz geometry exactly same as simulated geometry`  
+      * => find issues by visual inspection  
+    
+
+.. class:: huge
+ 
+    .. table::
+        :align: center
+
+        +------------------------------------------+
+        | Most Opticks development is innovative   |  
+        +------------------------------------------+
+
+
+
+.. s5_talk::
+
+   * Most Opticks development is innovative,  
+   * for example interactive ray traced vizualizations enabled me to confirm issues just by visual inspection
+   * possible as vizualization and simulation use the same intersect code
+
+
+.. comment
+
+    * shared analytic CPU/GPU geometry model
+
+.. comment
+
+     The only other project doing something similar is Chroma, 
+     which is triangles only and does not benefit from 
+     state-of-the-art ray tracing. 
+
+     For example this year I implemented an interactive ray trace rendering 
+     application that allows flying around the geometry with state-of-the-art 
+     3rd generation RTX GPUs. This proved very useful to find geometry issues.
+
+
+.. comment
+
+    **Conference Article**
+
+    +-----------------------------------------------------------+
+    | *Opticks: GPU Optical Photon Simulation via NVIDIA OptiX* |
+    | EPJ Web of Conferences 295, 11014 (2024), Simon C. Blyth  |                       
+    +-----------------------------------------------------------+
+
+
+:small:`Personal research results : Conference Proceedings + Journal Articles`
+--------------------------------------------------------------------------------
+
+.. class:: normal 
+
+   **2024 : Conference Proceedings**
+
+.. raw:: html
+
+   <pre class="mypre20">
+   <span class="r">Opticks: GPU Optical Photon Simulation via NVIDIA OptiX</span> 
+   Simon C. Blyth, EPJ Web of Conferences 295, 11014 (2024) (CHEP Proceedings, 8 pages)      
+   https://doi.org/10.1051/epjconf/202429511014 
+   </pre>
+
+   <pre class="mypretiny">
+   https://www.epj-conferences.org/articles/epjconf/abs/2024/05/epjconf_chep2024_11014/epjconf_chep2024_11014.html
+   </pre>
+   <pre class="mypre20">
+   (Retrieved 19 November 2024, [1 May - 18 Nov]) 
+   <span class="b">Abstract Views:251 Article Views: 284</span>
+   </pre>
+
+.. class:: normal
+
+   **2024 : Journal Articles (1 JUNO, 4 Daya Bay) : Listed in Extra Slides**
+
+
+.. s5_talk::
+
+   * my last Opticks proceedings paper has been getting attention
+
+
+
+Funding Supporting my work on Opticks
+-----------------------------------------
+
+.. class:: small 
+
+   +--------------------+----------+-------------+-------------------+-------------------------------------------------------------------------------+
+   |  Period            | Amount   |  Source     | Principal         |                                                                               |
+   |                    |  (RMB)   |             |                   |                                                                               |
+   +====================+==========+=============+===================+===============================================================================+
+   | 2018,2019,2020     | Stipend  |  PIFI       |  Li Weidong       |  Visiting Scientist, CAS Presidents International Fellowship Initiative       |
+   +--------------------+----------+-------------+-------------------+-------------------------------------------------------------------------------+
+   | 2021, 2022         | Stipend  |  MOST       |  Wen Liangjian    |  High-end Foreign Experts Introduction Program                                |
+   +--------------------+----------+-------------+-------------------+-------------------------------------------------------------------------------+
+   | 2023-2024/08       | Stipend  |             |  Wen Liangjian    |                                                                               | 
+   +--------------------+----------+-------------+-------------------+-------------------------------------------------------------------------------+
+   | 2023/01 - 2026/12  |  550k    |  NSFC       |  Deng Ziyan       |  12275293: Research on key technologies for massive optical photon simulation |
+   +--------------------+----------+-------------+-------------------+-------------------------------------------------------------------------------+
+
+.. class:: normal
+
+   **Strong potential for further funding :**
+
+   * :b:`immediate benefits to JUNO and others : make simulation unlimited by photons`
+   * innovative + straightforward to explain
+   * novel visualizations with strong potential for outreach 
+
+   :r:`BUT: as a foreigner : I need lots of help to find and apply for grants` 
+
+
+.. s5_talk::
+
+   * Opticks has strong funding potential, because its innovative and has immediate benefits
+   * but, I need lots of help to find and apply for grants
+
+
+:small:`Academic Exchanges : nEXO Workshop at McGill + CHEP 2024`
+------------------------------------------------------------------------------
+
+
+.. class:: small
+
+    * 2024 October 25, **nEXO Light Simulation Workshop**,  McGill University, Montreal, Canada : *Invited guest speaker*  
+
+      * demonstrated the performance and precision of Opticks, contrasted with Chroma
+      * :r:`presentation + two days of extensive discussions with nEXO Simulation Group`
+      * tentative plan to try Opticks with LoLX "Light-only Liquid Xenon experiment"
+
+
+    * 2024 October 21, **CHEP 2024**, Krakow, Poland : *Opticks parallel presentation* 
+
+      * presented progress with JUNO+Opticks
+      * :b:`gained attention by demonstrating rapid performance gains with NVIDIA ray tracing` 
+      * prominently reported in plenary simulation summary talk (Giacomo De Pietro)
+
+.. class:: tiny
+
+    nEXO : Next Enriched Xenon Observatory :  tonne scale Xenon 136 expt aiming to search for neutrinoless double beta decay 
+
+
+.. comment
+
+    https://indico.cern.ch/event/1338689/contributions/6182301/attachments/2954600/5194791/20241025_Track5_Summary.pdf 
+
+.. raw:: html
+
+   <p style="position:fixed;top:320px;left:260px;font-size:25px;background-color:yellow;border:1px solid black;padding:5px;">
+     Plenary Summary Talk  
+   </p>    
+
+   <p style="position:fixed;top:350px;left:900px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+     nEXO Light Simulation Workshop, McGill University, Montreal 
+   </p>    
+
+   <p style="position:fixed;top:640px;left:670px;font-size:25px;background-color:yellow;border:1px solid black;padding:5px;">
+     Invited Guest Speaker 
+   </p>    
+
+
+.. s5_talk::
+
+   * nEXO invited me to their light simulation workshop in Canada, they are interested to use Opticks. 
+   * in the same week I presented Opticks at CHEP in Poland 
+   * performance improvements grabbed attention, and was reported in the plenary summary
+  
+
+
+
+:small:`Academic Exchanges : Geant4 Technical Forum, Zhejiang Uni, IHEP, JUNO` 
+--------------------------------------------------------------------------------------
+
+
+
+
+.. class:: normal 
+
+     * 2024 February 15, 60th **Geant4 Technical Forum**, CERN + Online
+    
+       * *Modified GEANT4 processes for JUNO Simulation*, presented by Cécile Jollet 
+       * :b:`contributed details of boundary process customization for JUNO PMT Optical Model`
+
+.. raw:: html
+
+     <p style="margin-bottom:7mm;" />
+     
+.. class:: normal 
+
+     * 2024 February 27, **Zhejiang University Seminar**, Hangzhou
+
+       * Opticks : Optical Photon Simulation via GPU Ray Tracing from NVIDIA® OptiX™
+
+.. raw:: html
+
+     <p style="margin-bottom:7mm;" />
+ 
+.. class:: normal 
+
+     * 2024 April 18, **IHEP EPD Seminar**
+
+       * *Story of Opticks, applying NVIDIA OptiX GPU ray tracing to Optical Photon Simulation*
+       * :r:`Three hour review seminar detailing the history of Opticks development` 
+
+.. raw:: html
+
+     <p style="margin-bottom:7mm;" />
+ 
+.. class:: normal 
+
+     * 2024 **Many JUNO Meetings**, IHEP + Kaiping + Online  
+
+       * :b:`Opticks reports at JUNO Collaboration meetings`
+       * reports at JUNO simulation meetings 
+
+.. class:: huge 
+
+     :r:`Many domestic academic exchanges also`
+
+
+.. s5_talk::
+
+    * In addition to international exchanges, I also had many domestic exchanges too
+
+
+:small:`Public "services" : JUNO Geom, Students, Geant4 Collab, Opticks Users` 
+------------------------------------------------------------------------------------------
+
+
+.. sidebar:: :small:`Supported NEXT-CRAB-0 + Opticks`
+
+    .. class:: small 
+
+       Ilker Parmaksiz, Univ of Texas at Arlington (UTA)
+         * :r:`181x speedup cf single-threaded Geant4`
+         * EPJ manuscript under NEXT review  
+
+    .. class:: tiny
+
+        NEXT-CRAB-0
+            High Pressure Gaseous Xenon TPC with direct VUV Camera Readout
+
+
+
+.. class:: small 
+
+   **Found JUNO geometry bugs, re-implemented geometry** 
+
+   * Waterpool and HBeam : many overlaps avoided
+   * Support stick fastener heirarchy corrected 
+
+.. class:: small 
+
+   **Work with JUNO+Opticks students/postdoc**
+ 
+   Yuxiang Hu
+     * integrated PMT lookup model with Opticks
+     * developed event viz
+
+   Albert Zhou 
+     * intro JUNOSW+Opticks 
+
+   Yuhan Ren
+     * advised on PMT angular eff. impl
+   
+   Diwash Ghimire
+     * advised on geometry impl for Acrylic cracks/repairs 
+
+.. class:: small 
+
+    **Opticks updates for latest Geant4 11.2**
+        working with Hans Wentzel, Fermilab Geant4 Group
+
+
+.. class:: tiny
+
+    NEXT : Neutrino Experiment with a Xenon TPC : neutrinoless double beta decay search 
+
+    CRAB : Camera Readout and Barium Tagging
+
+
+.. s5_talk::
+
+   Support activities included 
+
+   * re-implementing parts of the JUNO geometry 
+   * working with students, Geant4 developers and Opticks users 
+   * I helped Ilker from UTA to get the NEXT-CRAB-0 prototype working with Opticks. 
+
+     * He succeeded to demonstrate simulation speedups of 181x Geant4 with an RTX 4090. 
+
+
+
+
+III. Existing problems 
+-------------------------
+
+.. class:: normal 
+
+    1. :b:`Opticks is single developer project`, need to:
+
+       * simplify Opticks usage
+       * train more people
+
+.. raw:: html
+
+     <p style="margin-bottom:7mm;" />
+
+.. class:: normal 
+
+    2. JUNO geometry + model continue to change, eg: 
+
+       * Acrylic support stick fasteners geometry 
+       * Acrylic repairs
+       * PMT angular efficiency
+       * => :r:`work on both JUNOSW and Opticks needed` 
+
+    :r:`Chronic lack of manpower working on Opticks (and JUNO Simulation)`
+
+
+.. s5_talk::
+
+   * Primary problem is too much work that only I can do.  
+   * Its difficult to make progress while JUNO keeps changing and providing more issues. 
+   * Have to swim against the stream of issues just to stay in the same place. 
+
+
+
+:small:`IV. Work plan for next year` 
+-------------------------------------------------------
+
+.. sidebar:: :small:`Investigations after Production`
+
+   .. class:: small
+
+       optimization : improve single-GPU utilization
+         * profile with NVIDIA tools 
+         * try SER : Shader Execution Reordering
+         
+           * **possible 2x on Ada**
+
+       multi-GPU utilization
+         * split work(photons) across GPUs
+         * concurrent launching high energy events
+
+       distributed GPU production  
+         * resource availability ? 
+
+ 
+       :r:`Development guided by production experience`        
+
+
+.. class:: small 
+
+   **Facilitate JUNOSW+Opticks Production Running** 
+
+   * :b:`auto split high energy event depending on GPU VRAM`
+   * auto join low energy events to reduce overheads 
+   * local GPU cluster production optimization
+
+   **Focus shift : easing development + usage, not adding features**
+
+   * ease-of-dev : automated validation/benchmark : CI system
+
+     * :b:`faster cycle : develop-validate-measure-release`
+ 
+   * ease-of-use : examples, documentation, training
+   * Geant4 : develop/propose API for external photon propagation
+ 
+     * :r:`avoid customized Geant4` 
+
+   **CEPC**
+
+   * edit CEPC detector TDR offline software+computing section
+   * see if Opticks can benefit CEPC calorimeter sim.+viz.
+
+
+.. class:: tiny 
+
+   CI : Continuous Integration
+
+
+.. s5_talk::
+
+    * main goal for next year is smooth JUNOSW+Opticks Production Running
+
+
+.. comment
+
+    :small:`Evaluation Estimate : (position started September 2nd 2024)`
+    ----------------------------------------------------------------------
+
+    .. class:: small
+
+        +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
+        |                   |  Review Project                                                               | Est.    |  Note              | 
+        +===================+===============================================================================+=========+====================+
+        |                   |                                                                               |         |                    |
+        |                   |                                                                               |         |                    |
+        |                   |  Mission Completion (50%)                                                     |   5.0   |                    |
+        |                   |                                                                               |         |                    |
+        |   Mission         |                                                                               |         |                    |
+        |   Completed       +-------------------------------------------------------------------------------+---------+--------------------+
+        |   (80%)           |   Academic development, academic exchanges, papers (10%)                      |   5.0   |                    |
+        |                   +-------------------------------------------------------------------------------+---------+--------------------+
+        |                   |   Strive for projects and funding (10%)                                       |   1.0   | [1,HELP NEEDED]    |
+        |                   +-------------------------------------------------------------------------------+---------+--------------------+
+        |                   |   Public services (10%)                                                       |   5.0   |                    |
+        +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
+        |   Professional    |   Scientific research ability, academic organization ability, work initiative |   5.0   |                    |
+        |   Quality         |   and creativity, cooperative spirit                                          |         |                    |
+        +-------------------+-------------------------------------------------------------------------------+---------+--------------------+
+
+
+
+:small:`Summary and Links`
+-------------------------------------------------------------------------------------
+
+.. sidebar:: :small:`Extra Benefits of Adopting Opticks`
+
+   .. class:: small
+
+      * :b:`high performance novel visualization`
+      * detailed photon instrumentation, validation 
+      * comparisons find issues with both simulations:
+       
+        * complex geometry, overlaps, bugs... 
+
+      :r:`=> using Opticks improves CPU simulation too !!`
+
+.. raw:: html
+
+     <p style="margin-bottom:5mm;" />
+
+..
+
+  *Opticks* : state-of-the-art GPU ray traced optical simulation integrated with *Geant4*, 
+  with automated geometry translation into GPU optimized form.   
+
+
+.. raw:: html
+
+     <p style="margin-bottom:15mm;" />
+
+.. class:: normal
+
+  * NVIDIA Ray Trace Performance continues rapid progress (2x each gen., every ~2 yrs) 
+  * **any simulation limited by optical photons can benefit from Opticks**
+  * more photon limited -> more overall speedup (99% -> ~90x)
+
+
+.. table::
+    :align: center
+
+    +--------------------------------------------------+-----------------------------------------+
+    | https://bitbucket.org/simoncblyth/opticks        | day-to-day code repository              |                   
+    +--------------------------------------------------+-----------------------------------------+
+    | https://simoncblyth.bitbucket.io                 | presentations and videos                |
+    +--------------------------------------------------+-----------------------------------------+
+    | https://groups.io/g/opticks                      | forum/mailing list archive              |
+    +--------------------------------------------------+-----------------------------------------+
+    | email: ``opticks+subscribe@groups.io``           | subscribe to mailing list               |
+    +--------------------------------------------------+-----------------------------------------+ 
+    | ``simon.c.blyth@gmail.com``                      | any questions                           |   
+    +--------------------------------------------------+-----------------------------------------+ 
+
+
+.. s5_talk::
+
+    I end with some links : Opticks can make simulation unlimited by optical photons
+
+
+:i:`Extra Slides`
+----------------------
+
+.. raw:: html
+
+    <p style="margin-bottom:70mm;" />
+
+.. class:: huge
+
+   Extra Slides
+
+
+.. s5_talk::
+
+   Klop
+
+:small:`Personal research results : Journal Articles`
+--------------------------------------------------------------------------------
+
+.. class:: normal
+
+    +-----------+----+
+    | Daya Bay  |  4 |
+    +-----------+----+
+    | JUNO      |  1 | 
+    +-----------+----+
+
+
+.. raw:: html
+
+    <pre class="mypretiny">
+    <span class="b">
+    The Design and Technology Development of the JUNO Central Detector</span>
+    JUNO Collaboration
+    Accepted for publication in EPJP 
+    https://arxiv.org/abs/2311.17314
+
+    <span class="r">
+    Measurement of Electron Antineutrino Oscillation Amplitude and Frequency via Neutron Capture on Hydrogen at Daya Bay</span>
+    Daya Bay Collaboration
+    Phys.Rev.Lett.133 (2024) 15, 151801
+    https://doi.org/10.1103/PhysRevLett.133.151801
+    
+    <span class="r">
+    Search for a Sub-eV Sterile Neutrino using Daya Bay’s Full Dataset</span>
+    Daya Bay Collaboration
+    Phys.Rev.Lett.133 (2024) 5, 051801
+    https://doi.org/10.1103/PhysRevLett.133.051801
+  
+    <span class="r">
+    First measurement of the yield of He8 isotopes produced in liquid scintillator by cosmic-ray muons at Daya Bay</span>
+    Daya Bay Collaboration
+    Phys.Rev.D 110 (2024) 1, L011101
+    https://doi.org/10.1103/PhysRevD.110.L011101 
+
+    <span class="r">
+    Charged-current non-standard neutrino interactions at Daya Bay</span>
+    Daya Bay Collaboration
+    JHEP 05 (2024) 204 
+    https://doi.org/10.1007/JHEP05(2024)204
+    </pre>
+
+
+.. comment
+
+    https://juno.ihep.ac.cn/mediawiki/index.php/Publication:JUNO_publications
+
+.. s5_talk::
+
+   Shunted here, as these papers are not relevant to job objectives 
+
+
