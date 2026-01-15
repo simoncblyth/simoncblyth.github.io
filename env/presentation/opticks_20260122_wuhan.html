@@ -8,7 +8,7 @@
 <meta content="opticks_20251219_geometry_simtrace_check" name="title" />
 <meta content="(2025 December 8) JUNO, OptiX, Opticks" name="description" />
 <meta content="5+2 min" name="note0" />
-<title>Opticks Simtrace Geometry Checks</title>
+<title>Opticks+JUNO Status</title>
 <style type="text/css">
 
 /*
@@ -385,13 +385,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">Opticks Simtrace Geometry Checks</span></h1>
+<h1><span class="i">Opticks+JUNO Status</span></h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">Opticks Simtrace Geometry Checks</span></h1>
+<h1 class="title"><span class="i">Opticks+JUNO Status</span></h1>
 
 <!-- comment
 
@@ -6438,7 +6438,7 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 </style><div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey;text-align:center;">
-    Opticks Simtrace Geometry Checks
+    Opticks+JUNO Status
     <h2 style="background-color:lightgrey;text-align:center">
         Open source, https://github.com/simoncblyth/opticks
     </h2>
@@ -6448,7 +6448,7 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <!--img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="juno/JUNO_logo.png"  /-->
 <div class="mycredit">
    <h2 style="background-color:lightgrey">
-      Simon C Blyth, 19 December 2025
+      JUNO Collaboration Meeting, Wuhan, Simon C Blyth, 22 January 2026
    </h2>
 </div>
         <!--  s5talk  -->
@@ -6458,21 +6458,959 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 Klop -->
 
 </div>
+<div class="slide" id="juno-optical-photon-simulation-problem">
+<h1><span class="incremental">(JUNO) Optical Photon Simulation Problem...</span></h1>
+<p style="position:fixed;top:100px;left:900px;font-size:40px;background-color:white;border:1px solid black;padding:5px;">
+Opticks solves this using GPU ray tracing via NVIDIA OptiX
+</p>
+
+<p style="margin-bottom:7cm;" /><div class="sidebar">
+<p class="first sidebar-title"><span class="small">Huge CPU Memory+Time Expense</span></p>
+<dl class="small last docutils">
+<dt><strong>JUNO Muon Simulation Bottleneck</strong></dt>
+<dd>~99% CPU time, memory constraints</dd>
+<dt><strong>Ray-Geometry intersection Dominates</strong></dt>
+<dd>simulation is not alone in this problem...</dd>
+<dt><strong>Optical photons : naturally parallel, simple :</strong></dt>
+<dd><ul class="first last simple">
+<li>produced by Cherenkov+Scintillation</li>
+<li>yield only Photomultiplier hits</li>
+</ul>
+</dd>
+</dl>
+</div>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* Serial optical simulation is hugely expensive.
+* Opticks applies massively parallel GPU ray tracing, to solve the optical simulation problem
+* For many experiments Opticks can prevent optical photons from limiting simulation -->
+</div>
+<div class="slide" id="geant4-opticks-nvidia-optix-hybrid-workflow">
+<h1>Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow</h1>
+<p class="small"><em>Opticks</em> enables Geant4 based simulation to offload optical photon simulation to the GPU</p>
+<p style="margin-bottom:13cm;" /><p class="normal"><strong>NVIDIA GPU ray tracing of billions[1] of rays per second applied to optical simulation</strong></p>
+<p class="tiny">[1] Actual performance depends on geometry and its modelling, JUNO optical simulation speedups &gt; 1000x Geant4 have been measured</p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+Thus crucially requires translation of the geometry into a GPU appropriate form. -->
+<!-- comment
+
+Opticks enables the ray tracing performance of NVIDIA OptiX to be applied to Optical photon simulation,
+by integrating GPU ray tracing with Geant4
+
+* This shows how Opticks integrates Geant4 simulations with NVIDIA OptiX GPU ray tracing.
+* The most crucial part is the translation of geometry into the form needed on the GPU -->
+</div>
+<div class="slide" id="ii-work-status-this-year-completion-of-research-tasks-i">
+<h1><span class="small">II. Work status this year  : Completion of research tasks (I)</span></h1>
+<p class="normal"><span class="r">Integration + iteration directed by production experience with Opticks + JUNOSW</span></p>
+<p class="normal"><strong>Reduced resource simulation using summary &quot;Muon&quot; hits</strong> <tt class="docutils literal"><span class="pre">--pmt-hit-type</span> 2</tt></p>
+<ul class="normal simple">
+<li>Opticks <tt class="docutils literal">sphotonlite</tt> (16 bytes), 4x smaller than <tt class="docutils literal">sphoton</tt> (64 bytes)</li>
+<li><span class="b">reduce overheads for big events</span>, photons per launch ~250M -&gt; ~500M [32 GB VRAM]</li>
+</ul>
+<p class="normal"><strong>Removed 32-bit max photon limits -&gt; simulation of giga optical photon events</strong></p>
+<ul class="normal simple">
+<li>handles monster double+ muon events, tested with &gt; 8 billion photon events</li>
+</ul>
+<p class="normal"><strong>CUDA implementation of PMT hit merging</strong> (<tt class="docutils literal"><span class="pre">thrust::sort_by_key,reduce_by_key</span></tt>)</p>
+<ul class="normal simple">
+<li>merge same PMT hits within time buckets (eg: 1 ns)</li>
+<li>hits selected + merged on GPU</li>
+<li><span class="b">minimize CPU post processing to merge hits + reduce download overheads</span></li>
+</ul>
+<!-- comment
+
+32(16) launches with ``sphoton(sphotonlite)`` [32GB VRAM] -->
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="geom-j25-4-0-opticks-debug-cxr-min-muon-cxs-20250707-112242-png">
+<h1><span class="i">GEOM_J25_4_0_opticks_Debug_cxr_min_muon_cxs_20250707_112242.png</span></h1>
+<p><tt class="docutils literal">EVT=muon_cxs cxr_min.sh #12 : photons from muon crossing JUNO Scintillator</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+This render shows the photons from a muon crossing the JUNO Scintillator.
+Having the geometry translated to the GPU enables high performance visualization
+as well as simulation. The geometry is mostly analytic, not triangulated, just
+like Geant4 : so it is possible for the two optical simulations to match very closely. -->
+</div>
+<div class="slide" id="geom-j25-4-0-opticks-debug-cxr-min-muon-cxs-20250707-112243-png">
+<h1><span class="i">GEOM_J25_4_0_opticks_Debug_cxr_min_muon_cxs_20250707_112243.png</span></h1>
+<p><tt class="docutils literal">EVT=muon_cxs cxr_min.sh #13</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="geom-j25-4-0-opticks-debug-cxr-min-muon-cxs-20250707-112244-png">
+<h1><span class="i">GEOM_J25_4_0_opticks_Debug_cxr_min_muon_cxs_20250707_112244.png</span></h1>
+<p><tt class="docutils literal">EVT=muon_cxs cxr_min.sh #14</tt></p>
+<p style="margin-bottom:4cm;" /><p><tt class="docutils literal">Large counts motivate merging of hits with same (pmtid,timebucket) : adding counts and keeping earliest time</tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="gpu-hit-merging-high-level-parallelization-with-cuda-thrust">
+<h1><span class="small">GPU Hit Merging : High Level Parallelization with CUDA Thrust</span></h1>
+<pre style="mypretiny">
+struct key_functor {   //  <span class="r">Bitwise-OR (pmtid,timebucket) </span>
+  float    timewindow;
+  uint64_t operator()(const sphotonlite& p) const // 16+48 = 64
+  {
+     return (uint64_t(p.identity()) << 48) | uint64_t(p.time/timewindow);
+  }
+};
+</pre><p class="small">Opticks/sysrap <tt class="docutils literal"><span class="pre">SPM::merge_partial_select</span></tt> using CUDA Thrust (higher level C++ way to use CUDA)</p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="20%" />
+<col width="26%" />
+<col width="54%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Thrust method</th>
+<th class="head">Action</th>
+<th class="head">Note</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">copy_if</tt></td>
+<td>photon -&gt; hit</td>
+<td>using flagmask</td>
+</tr>
+<tr><td><tt class="docutils literal">transform</tt></td>
+<td>hit -&gt; key</td>
+<td>bitwise-OR (pmtid, timebucket)</td>
+</tr>
+<tr><td><tt class="docutils literal">sort_by_key</tt></td>
+<td>hit, key -&gt; hit</td>
+<td>hit ordered with same (pmtid,timebucket) contiguous</td>
+</tr>
+<tr><td><tt class="docutils literal">reduce_by_key</tt></td>
+<td>hit, key -&gt; hitmerged</td>
+<td>merge two hit : earlier time, sum hitcount</td>
+</tr>
+</tbody>
+</table>
+<p class="small"><tt class="docutils literal"><span class="pre">https://github.com/simoncblyth/opticks/blob/master/sysrap/SPM.cu</span></tt></p>
+<p class="small"><tt class="docutils literal"><span class="pre">https://github.com/simoncblyth/opticks/blob/master/sysrap/sphotonlite.h</span></tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="gpu-hit-merging-let-opticks-shine-bright-by-not-obscuring-it">
+<h1><span class="small">GPU Hit Merging : Let Opticks Shine Bright [by not obscuring it]</span></h1>
+<p class="small"><strong>Detsim timings for one double muon event, ~150M photons, 28M hit, 6.4M mergedHit, 1ns bucket merge</strong></p>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="18%" />
+<col width="16%" />
+<col width="15%" />
+<col width="51%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">JUNOSW J_Std1,2</th>
+<th class="head">--pmt-hit-type 1</th>
+<th class="head">--pmt-hit-type 2</th>
+<th class="head">Total processing time excluding Initialize</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>--opticks-mode 0</td>
+<td>7112 s  (118min)</td>
+<td>6904 s (115min)</td>
+<td><span class="small">]junoSD_PMT_v2::Initialize → [junoSD_PMT_v2::EndOfEvent</span></td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="12%" />
+<col width="21%" />
+<col width="12%" />
+<col width="16%" />
+<col width="23%" />
+<col width="16%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Opticks+J
+[1]</th>
+<th class="head">(CPUMerge)+Coll.[s]</th>
+<th class="head">Kernel [s]
+PREL→POST</th>
+<th class="head"><dl class="first last docutils">
+<dt>(GPUMerge)+Download</dt>
+<dd>POST→DOWN  [s]</dd>
+</dl>
+</th>
+<th class="head"><dl class="first last docutils">
+<dt>Total (no-init) [s]</dt>
+<dd>HEAD→RESET</dd>
+</dl>
+</th>
+<th class="head"><dl class="first last docutils">
+<dt>Speedup vs</dt>
+<dd>J_Std1,2</dd>
+</dl>
+</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>hit</td>
+<td>　 190.445</td>
+<td>　 22.996</td>
+<td>　 1.949</td>
+<td>　     215.560</td>
+<td>　   x32</td>
+</tr>
+<tr><td>hitmerged</td>
+<td>　     6.712</td>
+<td>　 22.988</td>
+<td>　 0.543</td>
+<td>　       30.400</td>
+<td>　 <span class="r">x233</span></td>
+</tr>
+<tr><td>hitlite</td>
+<td>　 146.471</td>
+<td>　 23.108</td>
+<td>  0.484</td>
+<td>　     170.226</td>
+<td>　   x31</td>
+</tr>
+<tr><td>hitlitemerged</td>
+<td>　     0.403</td>
+<td>　 23.097</td>
+<td>  0.181</td>
+<td>　       23.835</td>
+<td>　 <span class="r">x221</span></td>
+</tr>
+</tbody>
+</table>
+<ul class="normal simple">
+<li><span class="r">huge speedup of hit collection [eg: 146 -&gt; 0.4 seconds] from GPU pre-merging</span></li>
+<li><span class="b">GPU hit merging time more than compensated by reduced download time</span></li>
+</ul>
+<p style="margin-bottom:-7mm;" /><p class="huge"><strong>Opticks+J :</strong> <span class="r">overall speedup &gt; x200  [~2 hrs → ~30 s]</span></p>
+<p style="margin-bottom:-7mm;" /><p class="normal"><strong>[1] : Workstation (Dell Precision 7960), NVIDIA RTX 5000 Ada, 3rd gen. RT cores, 32 GB</strong></p>
+<p class="small"><tt class="docutils literal"><span class="pre">https://code.ihep.ac.cn/blyth/j/-/blob/main/zhenning_double_muon/detsim.sh</span></tt></p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+Previously, much of Opticks performance when using hit merging was hidden by -->
+<!-- comment
+
+* ~no diff in kernel time (same RT), ``photon->photonlite`` helps only ~25%
+
+GPU hit merging, avoids obscuring Opticks performance behind CPU post-processing
+
+GPU hit merging time is more than compensated by reduced download time -->
+</div>
+<div class="slide" id="ii-work-status-this-year-completion-of-research-tasks-ii">
+<h1><span class="small">II. Work status this year  : Completion of research tasks (II)</span></h1>
+<p class="normal"><strong>Opticks+ JUNOSW validations reveal JUNO geometry bugs, including:</strong></p>
+<ul class="normal simple">
+<li>photon leaking UpperChimney + waterpool PMT orientation</li>
+<li>overlap between Water distributor and Hama PMTs close to Chimney</li>
+</ul>
+<p class="normal"><strong>Integration of Opticks+JUNOSW with gitlab CI/CD build/test/release</strong></p>
+<ul class="normal simple">
+<li>automated daily+dated Opticks+JUNOSW releases onto <tt class="docutils literal">/cvmfs/opticks.ihep.ac.cn</tt></li>
+</ul>
+<p class="normal"><strong>OpticksService : first implementation of HTTP optical server working</strong></p>
+<ul class="normal simple">
+<li><span class="r">receives gensteps, returns (merged)hits</span>  (FastAPI + nanobind + opticks/CSGOptiX, <span class="strike">Geant4</span>)</li>
+<li><span class="b">share GPU optical acceleration with multiple clients, increased GPU utilization</span></li>
+</ul>
+<p class="normal"><strong>OpticksClient : almost test stage</strong> [CPU node : collects gensteps, <tt class="docutils literal">libcurl</tt> request, response]</p>
+<ul class="normal simple">
+<li><tt class="docutils literal">G4CXOpticks</tt> : same API as monolithic for client use (pluggable backend <tt class="docutils literal">SSimulator</tt>)</li>
+<li>uses CMake partial build of Opticks <tt class="docutils literal"><span class="pre">-DBUILD_WITH_CUDA=OFF</span></tt></li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="juno-opticks-geom-fixes">
+<h1><span class="small">2025 : JUNO+Opticks Geom Fixes</span></h1>
+<p style="margin-bottom:-10mm;" />
+<p style="position:fixed;top:375px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+348 WP_ATM_LPMT direct inwards not outwards (MR 981)
+</p>
+<p style="position:fixed;top:275px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+G4: Photons escape between Lower and UpperChimney
+</p>
+<p style="position:fixed;top:625px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+Overlap of Water Distributor with Hama PMTs
+</p>
+<p style="margin-bottom:20mm;" /><p style="margin-bottom:-15mm;" /><p class="small">Opticks:Geant4 photon history Chi2, reveals bugs:</p>
+<ul class="small simple">
+<li>broken Chimney implementation<ul>
+<li>1M photons up Chimney -&gt; escapees</li>
+</ul>
+</li>
+<li>Waterpool 348 wall PMT orientation<ul>
+<li>bug revealed by visualization inspection</li>
+</ul>
+</li>
+<li>overlap of water distributor + upper Hama PMTs<ul>
+<li>visualization -&gt; suspicion</li>
+<li>confirmed by KDTree accelerated overlap finder script<ul>
+<li>ray trace intersects (point clouds with normals)</li>
+<li>=&gt; detect point cloud overlaps</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* to help with overlap checking, I developed a way to find overlaps between pairs of ray traced point clouds
+  using KDTree to accelerate finding nearest neighbors in the other point cloud.
+
+  * the bright spots show the overlaps found -->
+</div>
+<div class="slide" id="geant4-opticks-nvidia-optix-hybrid-workflow-4x4">
+<h1><span class="i">Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow 4x4 ?</span></h1>
+<p style="margin-bottom:82mm;" /><p class="huge">Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow 4x4?</p>
+<p style="margin-bottom:36mm;" /><p class="right">Production running via &quot;Monolithic&quot; scaling : <span class="r">inefficient use of scarce GPU resources ?</span></p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+For large MC productions, scaling this way is not practical because
+its an extremely inefficient use the GPUs. They would be idle most
+of the time with a few seconds of compute every few minutes. -->
+</div>
+<div class="slide" id="opticksclients-opticksservice-share-gpus">
+<h1>OpticksClients + OpticksService : Share GPUs</h1>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+Splitting Opticks into into GPU-less clients and server may be able more
+efficient usage of GPUs.
+
+
+GPU-less clients sharing a service via HTTP POST allows increasing GPU utilization. -->
+</div>
+<div class="slide" id="client-png">
+<h1><span class="i">Client.png</span></h1>
+<p style="position:fixed;top:475px;left:30px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+How many clients ? Depends on server, event photon count, network, ...  (Experimentation needed)
+</p>
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+The aim is for large numbers of clients to share the service.
+Actually the more idle the GPUs are in the monolithic approach the
+greater the share factor can be.
+
+I think that even before developing an asynchronous compute service
+it should be possible to reach useful share factors.
+
+And those can be improved by putting in the effort of getting async compute to work,
+and also using multiple GPUs in the server. -->
+</div>
+<div class="slide" id="split-workflow-share-gpus-between-opticksclients">
+<h1>Split Workflow : Share GPUs between OpticksClients</h1>
+<dl class="normal docutils">
+<dt><span class="b">OpticksClient</span> <span class="classifier-delimiter">:</span> <span class="classifier">Detector Simulation Framework (Geant4 etc..) <span class="strike">GPU</span></span></dt>
+<dd><ul class="first last simple">
+<li><em>U4.h</em> : collect gensteps</li>
+<li><em>NP_CURL.h</em> : <strong>HTTP POST</strong> (libcurl)<ul>
+<li>request : genstep array</li>
+<li>response : hits array</li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><span class="b">OpticksService</span> <span class="classifier-delimiter">:</span> <span class="classifier">CSGOptiX + NVIDIA OptiX + <span class="b">GPU</span></span></dt>
+<dd><ul class="first last simple">
+<li><em>FastAPI</em> : <strong>ASGI</strong> python web framework (alt: <em>sanic</em>, <em>aiohttp</em>) <span class="tiny">grandmetric.com/python-rest-frameworks-performance-comparison/</span></li>
+<li><em>nanobind</em> : python &lt;=&gt; C++ (alt: <em>pybind11</em>), <em>uv</em> : <span class="strike">pip</span></li>
+<li><em>CSGFoundry.h</em> : load persisted geometry</li>
+<li><em>CSGOptiXService.h</em> : simulate</li>
+</ul>
+</dd>
+<dt><span class="r">Prototype clients + service under development</span></dt>
+<dd><ul class="first last simple">
+<li><span class="b">scale up to MC production ? ~100/1000 clients ?</span></li>
+<li><span class="b">use multi-GPU to serve more clients ?</span></li>
+</ul>
+</dd>
+</dl>
+<p style="margin-bottom:10mm;" /><dl class="normal docutils">
+<dt><strong>OR</strong> C++ web framework eg:</dt>
+<dd><ul class="first last simple">
+<li><span class="strike">binding</span>, <span class="r">less standard</span></li>
+</ul>
+</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+The service/client are in prototyping stage.
+The GPU-less clients just need a few headers
+for collecting gensteps and POSTing with libcurl
+
+The service currently uses FastAPI, a  python web framework
+as thats simple to start with.
+
+I will also try C++ web frameworks like Drogon,
+as getting async compute to work might be easier
+without the complication of language barriers and binding. -->
+</div>
+<div class="slide" id="personal-research-results-innovative-technology-development">
+<h1><span class="small">Personal research results : innovative technology development</span></h1>
+<p class="normal"><em>Opticks</em> <strong>Innovative Technology Developments</strong>:</p>
+<ul class="normal simple">
+<li>integration of state-of-the-art GPU ray tracing with Geant4</li>
+<li>open source analytic CSG implementation developed for GPU</li>
+</ul>
+<p class="normal"><strong>2025 : extending these innovations:</strong></p>
+<ul class="normal simple">
+<li><span class="r">select + merge hits on GPU</span><ul>
+<li>large resource reduction</li>
+<li>considerable performance gains</li>
+</ul>
+</li>
+<li><span class="b">server/client Opticks</span><ul>
+<li>share GPU acceleration across network</li>
+<li>improve GPU utilization</li>
+</ul>
+</li>
+</ul>
+<table border="1" class="huge docutils align-center">
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>Most Opticks development is innovative</td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* for example interactive ray traced vizualizaddtions enabled me to confirm issues just by visual inspection
+* possible as vizualization and simulation use the same intersect code
+
+
+
+ * shared analytic CPU/GPU geometry model -->
+</div>
+<div class="slide" id="personal-research-results-conference-proceedings">
+<h1><span class="small">2025 : Personal research results : Conference Proceedings</span></h1>
+<!-- comment
+
+font-family: monospace; -->
+<p style="margin-bottom:30mm;" />
+
+<div class="paper-citation" style="border: 1px solid #ccc; padding: 15px; margin: 10px 0; background-color: #f9f9f9; border-radius: 5px;">
+  <div style="margin-bottom: 10px;">
+    <span style="color: #d00; font-weight: bold;">Opticks: GPU ray traced optical photon simulation</span><br>
+    Simon C. Blyth, EPJ Web of Conferences 337, 01093 (2025) (CHEP Proceedings, 8 pages)
+  </div>
+  <div style="margin-bottom: 5px;">
+    <a href="https://doi.org/10.1051/epjconf/202533701093" style="color: #0066cc; text-decoration: none;">https://doi.org/10.1051/epjconf/202533701093</a>
+  </div>
+  <div style="margin-bottom: 5px;">
+    <strong>Published:</strong> 7 October 2025
+  </div>
+  <div>
+    (Retrieved 3 December 2025, [1 Oct 2025 - 30 Nov 2025])<br>
+    <span style="font-weight: bold;">Abstract Views: 139 &nbsp; Article Views: 119</span>
+  </div>
+</div>
+
+<style>
+  .paper-citation {
+    max-width: 800px;
+  }
+  .paper-citation a:hover {
+    text-decoration: underline;
+  }
+</style>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="publications-from-opticks-users">
+<h1><span class="small">2025 : Publications from Opticks Users</span></h1>
+<!-- comment
+
+Advancing Particle Detection in High-Energy Physics through Simulation and Experimentation
+Ilker Parmaksiz, Texas U., Arlington,  PhD Thesis
+May 12, 2025
+
+Performance of an optical TPC Geant4 simulation with opticks GPU-accelerated photon propagation
+NEXT Collaboration,  I.Parmaksiz(Texas U., Arlington) et al. (Feb 18, 2025)
+Published in: Eur.Phys.J.C 85 (2025) 8, 910 -->
+<div class="publications-2025" style="margin: 20px 0; font-family: serif;">
+  <!--div style="font-size: 0.85em; font-style: italic; margin-bottom: 10px;">
+    2025 Publications from Opticks Users
+  </div-->
+  <!--hr style="border: none; border-top: 1px solid #ccc; margin: 10px 0;"-->
+
+  <div class="publication-item" style="border: 1px solid #ddd; padding: 15px; margin: 15px 0; background-color: #fafafa; border-radius: 5px;">
+    <div style="margin-bottom: 8px;">
+      <strong>PhD Thesis</strong><br>
+      <span style="color: #d00; font-weight: bold;">Advancing Particle Detection in High-Energy Physics through Simulation and Experimentation</span><br>
+      Ilker Parmaksiz, University of Texas at Arlington
+    </div>
+    <div style="margin-bottom: 5px;">
+      <strong>Date:</strong> May 12, 2025
+    </div>
+    <div>
+      <a href="https://mavmatrix.uta.edu/physics_dissertations/178/" style="color: #0066cc; text-decoration: none;">View/Download PDF</a>
+    </div>
+  </div>
+
+  <div class="publication-item" style="border: 1px solid #ddd; padding: 15px; margin: 15px 0; background-color: #fafafa; border-radius: 5px;">
+    <div style="margin-bottom: 8px;">
+      <span style="color: #d00; font-weight: bold;">Performance of an optical TPC Geant4 simulation with Opticks GPU-accelerated photon propagation</span><br>
+      NEXT Collaboration, I. Parmaksiz (Texas U., Arlington) et al.
+    </div>
+    <div style="margin-bottom: 5px;">
+      <strong>Date:</strong> February 18, 2025 (arXiv); August 28, 2025 (Published)
+    </div>
+    <div style="margin-bottom: 5px;">
+      <strong>Published in:</strong> Eur. Phys. J. C 85 (2025) 8, 910
+    </div>
+    <div>
+      <a href="https://doi.org/10.1140/epjc/s10052-025-14612-0" style="color: #0066cc; text-decoration: none;">DOI: 10.1140/epjc/s10052-025-14612-0</a> |
+      <a href="https://arxiv.org/abs/2502.13215" style="color: #0066cc; text-decoration: none;">arXiv:2502.13215</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .publications-2025 {
+    max-width: 800px;
+  }
+  .publication-item a:hover {
+    text-decoration: underline;
+  }
+</style>
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="progress-from-eic-opticks-fork-electron-ion-collider">
+<h1><span class="small">2025 : Progress from EIC-Opticks Fork  (Electron-Ion Collider)</span></h1>
+<ul class="small simple">
+<li>Several people from BNL (Gabor Galgoczi  et al.) working on Opticks fork</li>
+<li>Worked with them to fix light leak bug when scatters occur close to boundaries</li>
+<li><span class="r">They aim to make Opticks useful for simulating events with less than millions of photons</span></li>
+</ul>
+<dl class="small docutils">
+<dt><em>Integration of the Opticks framework into Geant4 simulation of optical photons on GPU</em>,</dt>
+<dd>65th Geant4 Technical Forum, Stony Brook University, Gabor Galgoczi</dd>
+</dl>
+<ul class="small simple">
+<li><a class="reference external" href="https://indico.cern.ch/event/1588579/contributions/6695021/">https://indico.cern.ch/event/1588579/contributions/6695021/</a></li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://indico.cern.ch/event/1588579/contributions/6695021/attachments/3159769/5614731/Opticks%202025%20--%20Geant4%20Technical%20forum%20--%20Galgoczi-1.pdf">https://indico.cern.ch/event/1588579/contributions/6695021/attachments/3159769/5614731/Opticks%202025%20--%20Geant4%20Technical%20forum%20--%20Galgoczi-1.pdf</a></p>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="funding-supporting-my-work-on-opticks">
+<h1>Funding Supporting my work on Opticks</h1>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="14%" />
+<col width="7%" />
+<col width="9%" />
+<col width="13%" />
+<col width="56%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Period</th>
+<th class="head"><dl class="first last docutils">
+<dt>Amount</dt>
+<dd>(RMB)</dd>
+</dl>
+</th>
+<th class="head">Source</th>
+<th class="head">Principal</th>
+<th class="head">&nbsp;</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>2018,2019,2020</td>
+<td>Stipend</td>
+<td>PIFI</td>
+<td>Li Weidong</td>
+<td>Visiting Scientist, CAS Presidents International Fellowship Initiative</td>
+</tr>
+<tr><td>2021, 2022</td>
+<td>Stipend</td>
+<td>MOST</td>
+<td>Wen Liangjian</td>
+<td>High-end Foreign Experts Introduction Program</td>
+</tr>
+<tr><td>2023-2024/08</td>
+<td>Stipend</td>
+<td>&nbsp;</td>
+<td>Wen Liangjian</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>2023/01 - 2026/12</td>
+<td>550k</td>
+<td>NSFC</td>
+<td>Deng Ziyan</td>
+<td>12275293: Research on key technologies for massive optical photon simulation</td>
+</tr>
+<tr><td>2024/09 - 2029/09</td>
+<td>Stipend</td>
+<td>&nbsp;</td>
+<td>Wen Liangjian</td>
+<td>IHEP Associate Researcher</td>
+</tr>
+<tr><td>2024/09 - 2029/09</td>
+<td>100k</td>
+<td>IHEP</td>
+<td>Simon C Blyth</td>
+<td>Startup Fund</td>
+</tr>
+</tbody>
+</table>
+<p class="normal"><strong>Strong potential for further funding :</strong></p>
+<ul class="normal simple">
+<li><span class="b">immediate benefits to JUNO and others : make simulation unlimited by photons</span></li>
+<li>innovative + straightforward to explain</li>
+<li>novel visualizations with strong potential for outreach</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="academic-exchanges-gpu-symposium-dirac-workshop-juno-mtg">
+<h1><span class="small">Academic Exchanges : GPU symposium + DIRAC Workshop + JUNO mtg.</span></h1>
+<p style="margin-bottom:17mm;" /><ul class="normal simple">
+<li><strong>2025 January 15</strong>, JUNO Collaboration Meeting, Kaiping, China<ul>
+<li><em>Opticks : GPU ray trace accelerated optical photon simulation</em></li>
+</ul>
+</li>
+</ul>
+<ul class="normal simple">
+<li><strong>2025 March 3</strong>, GPU accelerated HEP applications Symposium, IHEP -- <span class="b">invited presentation</span><ul>
+<li><em>Opticks + JUNO : GPU ray trace accelerated optical photon simulation</em></li>
+</ul>
+</li>
+</ul>
+<ul class="normal simple">
+<li><strong>2025 July 27</strong>, JUNO Collaboration Meeting, Kaiping, China<ul>
+<li><em>Status of JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation</em></li>
+</ul>
+</li>
+</ul>
+<ul class="normal simple">
+<li><strong>2025 September 19</strong>, <strong>The 11th DIRAC Users Workshop</strong>, IHEP  -- <span class="b">invited presentation</span><ul>
+<li><em>Opticks + JUNO : Deploy GPU accelerated MC production ? Can Dirac(X) help ?</em></li>
+</ul>
+</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="public-service-work-with-many-on-juno-geometry-opticks-usage">
+<h1><span class="small">Public Service : Work with Many on JUNO Geometry + Opticks Usage</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Supported Opticks Users</span></p>
+<p class="small">Via email and forum : <a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></p>
+<dl class="small docutils">
+<dt>Ilker Parmaksiz, Univ of Texas at Arlington (UTA)</dt>
+<dd><ul class="first last simple">
+<li><span class="r">181x speedup cf single-threaded Geant4</span> NEXT-CRAB-0 (Xenon TPC)</li>
+<li>EPJ publication + PhD Thesis</li>
+</ul>
+</dd>
+<dt>Gabor Galgoczi et al., BNL, (EIC-Opticks fork)</dt>
+<dd><ul class="first last simple">
+<li>developed workaround for light-leak bug reported by Gabor</li>
+</ul>
+</dd>
+<dt>Zepeng Li, U. Hawaii</dt>
+<dd><ul class="first last simple">
+<li>Opticks setup</li>
+</ul>
+</dd>
+<dt>Nicola Mori, INFN</dt>
+<dd><ul class="first last simple">
+<li>Opticks setup</li>
+</ul>
+</dd>
+</dl>
+<p class="tiny">NEXT : Neutrino Experiment with a Xenon TPC : neutrinoless double beta decay search</p>
+<p class="tiny">CRAB : Camera Readout and Barium Tagging</p>
+<p class="tiny last">EIC : Electron-Ion Collider, BNL</p>
+</div>
+<p class="small"><strong>Work with JUNO+Opticks students/postdocs</strong></p>
+<dl class="small docutils">
+<dt>Zhenning Qu, IHEP</dt>
+<dd><ul class="first last simple">
+<li>Opticks + Atmospheric Muon simulation</li>
+<li><span class="r">Production test at Dongguan GPU cluster</span></li>
+</ul>
+</dd>
+<dt>Peidong Yu, IHEP</dt>
+<dd><ul class="first last simple">
+<li>JUNO geom fixes : Water Distributor, WP Wall PMTs</li>
+</ul>
+</dd>
+<dt>Dingyong Yang, IHEP</dt>
+<dd><ul class="first last simple">
+<li>Opticks testing</li>
+</ul>
+</dd>
+<dt>Haosen Zhang, IHEP</dt>
+<dd><ul class="first last simple">
+<li>Opticks muon testing</li>
+</ul>
+</dd>
+<dt>Jin Chen, IHEP</dt>
+<dd><ul class="first last simple">
+<li>Development of JUNOSW EMF Coils addition</li>
+</ul>
+</dd>
+<dt>Liam Jones, Liverpool + DUYANG Hongyue, SDU</dt>
+<dd><ul class="first last simple">
+<li>Liverpool GPU Cluster preparation for Opticks</li>
+</ul>
+</dd>
+<dt>Jiabin Wang, SDU</dt>
+<dd><ul class="first last simple">
+<li>Opticks usage</li>
+</ul>
+</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="iii-existing-problems">
+<h1>III. Existing problems</h1>
+<ol class="normal arabic simple">
+<li><span class="b">Opticks still single developer project</span>, need to:<ul>
+<li>simplify Opticks usage</li>
+<li>train more people</li>
+</ul>
+</li>
+</ol>
+<p style="margin-bottom:7mm;" /><ol class="normal arabic simple" start="2">
+<li>JUNO geometry continues to change, eg:<ul>
+<li>Water Distributor</li>
+<li>Water Pool PMTs still being added</li>
+<li>EMF coil</li>
+<li>Acrylic repairs</li>
+<li>=&gt; <span class="r">all additions require JUNOSW + Opticks work/validation</span></li>
+</ul>
+</li>
+</ol>
+<p class="normal"><span class="b">Chronic lack of manpower working on Opticks (and JUNO Simulation)</span></p>
+<ul class="normal simple">
+<li>Motivates : <strong>Automated Monitoring of Validation/Performance</strong></li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+* Its difficult to make progress while JUNO keeps changing and providing more issues.
+* Have to swim against the stream of issues just to stay in the same place. -->
+<!-- comment
+
+https://www.tomshardware.com/pc-components/gpus/chinas-latest-gpu-arrives-with-claims-of-cuda-compatibility-and-rt-support-fenghua-no-3-also-boasts-112gb-of-hbm-memory-for-ai
+
+InnoSilicon Fenghua No.3 GPU, claims:
+
+* CUDA compatibility
+* hardware RT
+* 112GB+ of HBM memory
+
+https://www.techpowerup.com/341268/innosilicons-fenghua-no-3-gpu-launches-with-112gb-hbm-memory-and-claims-to-support-cuda -->
+</div>
+<div class="slide" id="iv-work-plan-for-next-year">
+<h1><span class="small">IV. Work plan for next year</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Investigations on the side</span></p>
+<dl class="small last docutils">
+<dt>Server/Client Opticks</dt>
+<dd><ul class="first last simple">
+<li>measure GPU utilization benefit</li>
+</ul>
+</dd>
+<dt>multi-GPU utilization</dt>
+<dd><ul class="first last simple">
+<li>split work(photons) across GPUs</li>
+<li>concurrent launching</li>
+</ul>
+</dd>
+<dt>async progressive launch</dt>
+<dd><ul class="first last simple">
+<li>throughout event, not just end</li>
+</ul>
+</dd>
+<dt>visualization ease-of-use</dt>
+<dd><ul class="first last simple">
+<li>GUI menus, genstep view</li>
+<li>event animation control</li>
+</ul>
+</dd>
+</dl>
+</div>
+<p class="small"><strong>Automated Validation/Performance Monitoring</strong></p>
+<ul class="small simple">
+<li>integrate with gitlab CI/CD</li>
+</ul>
+<p class="small"><strong>Production Optimization</strong></p>
+<ul class="small simple">
+<li>try smarter CPU hit global-&gt;local, not 1-by-1 [eg 6.712 sec -&gt; ?]</li>
+<li>continue iterative productions (<span class="r">primary progress driver</span>)</li>
+<li>improve Release build, remove all Debug functionality</li>
+<li>profile with NVIDIA tools, try Shader Execution Reordering</li>
+<li>test JUNOSW+Opticks under DCI (Dirac)</li>
+</ul>
+<p class="small"><strong>Improve Opticks User Experience</strong></p>
+<ul class="small simple">
+<li>examples, documentation, training, streamline repository</li>
+</ul>
+<p class="small"><strong>Geant4 contact</strong></p>
+<ul class="small simple">
+<li>develop/propose API for external photon propagation</li>
+<li><span class="r">avoid customized Geant4 processes</span></li>
+</ul>
+<p class="small"><strong>Non-NVIDIA GPU Investigation</strong></p>
+<ul class="small simple">
+<li>Contact local GPU vendors, eg InnoSilicon Fenghua No. 3 (claim: CUDA compatible with RT)</li>
+</ul>
+<p class="tiny">CI/CD : Continuous Integration/Continuous Deployment</p>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+:small:`Evaluation Estimate : (position started September 2nd 2024)`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: small
+
+    +- - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - -+- - - - - - - - - - - - - - - - - - - -+
+    |                   |  Review Project                                                               | Est.    |  Note              |
+    +===================+===============================================================================+=========+====================+
+    |                   |                                                                               |         |                    |
+    |                   |                                                                               |         |                    |
+    |                   |  Mission Completion (50%)                                                     |   5.0   |                    |
+    |                   |                                                                               |         |                    |
+    |   Mission         |                                                                               |         |                    |
+    |   Completed       +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - -+- - - - - - - - - - - - - - - - - - - -+
+    |   (80%)           |   Academic development, academic exchanges, papers (10%)                      |   5.0   |                    |
+    |                   +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - -+- - - - - - - - - - - - - - - - - - - -+
+    |                   |   Strive for projects and funding (10%)                                       |   1.0   | [1,HELP NEEDED]    |
+    |                   +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - -+- - - - - - - - - - - - - - - - - - - -+
+    |                   |   Public services (10%)                                                       |   5.0   |                    |
+    +- - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - -+- - - - - - - - - - - - - - - - - - - -+
+    |   Professional    |   Scientific research ability, academic organization ability, work initiative |   5.0   |                    |
+    |   Quality         |   and creativity, cooperative spirit                                          |         |                    |
+    +- - - - - - - - - - - - - - - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+- - - - - - - - -+- - - - - - - - - - - - - - - - - - - -+ -->
+</div>
+<div class="slide" id="summary-and-links">
+<h1><span class="small">Summary and Links</span></h1>
+<div class="sidebar">
+<p class="first sidebar-title"><span class="small">Extra Benefits of Adopting Opticks</span></p>
+<ul class="small simple">
+<li>state-of-the-art GPU Hit merging</li>
+<li><span class="b">high performance novel visualization</span></li>
+<li>detailed photon instrumentation, validation</li>
+<li>comparisons find issues with both simulations:<ul>
+<li>complex geometry, overlaps, bugs...</li>
+</ul>
+</li>
+</ul>
+<p class="small last"><span class="r">=&gt; using Opticks improves CPU simulation too !!</span></p>
+</div>
+<p style="margin-bottom:5mm;" /><!--  -->
+<blockquote>
+<em>Opticks</em> : state-of-the-art GPU ray traced optical simulation integrated with <em>Geant4</em>,
+with automated geometry translation into GPU optimized form. <em>GPU hit merging
+drastically increases hit collection performance.</em></blockquote>
+<p style="margin-bottom:18mm;" /><ul class="normal simple">
+<li>NVIDIA Ray Trace Performance continues rapid progress (2x each gen., every ~2 yrs)</li>
+<li><span class="r">Overall JUNOSW+Opticks performance with GPU hit merging &gt; 200x</span> [3rd gen RTX]</li>
+</ul>
+<table border="1" class="docutils align-center">
+<colgroup>
+<col width="55%" />
+<col width="45%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference external" href="https://github.com/simoncblyth/opticks">https://github.com/simoncblyth/opticks</a></td>
+<td>day-to-day code repository</td>
+</tr>
+<tr><td><a class="reference external" href="https://simoncblyth.github.io">https://simoncblyth.github.io</a></td>
+<td>presentations and videos</td>
+</tr>
+<tr><td><a class="reference external" href="https://groups.io/g/opticks">https://groups.io/g/opticks</a></td>
+<td>forum/mailing list archive</td>
+</tr>
+<tr><td>email: <tt class="docutils literal">opticks+subscribe&#64;groups.io</tt></td>
+<td>subscribe to mailing list</td>
+</tr>
+<tr><td><tt class="docutils literal">simon.c.blyth&#64;gmail.com</tt></td>
+<td>any questions</td>
+</tr>
+</tbody>
+</table>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+I end with some links : Opticks can make simulation unlimited by optical photons -->
+<!-- comment
+
+:i:`Extra Slides`
+- - - - - - - - - - - - - - - - - - - - - -
+
+.. raw:: html
+
+    <p style="margin-bottom:70mm;" />
+
+.. class:: huge
+
+   Extra Slides
+
+
+.. s5_talk::
+
+   Klop -->
+</div>
 <div class="slide" id="loros-simtrace-wide-bottom-view-20251218-100415">
 <h1><span class="i">LOROS : simtrace wide bottom view 20251218_100415</span></h1>
 <p class="small"><tt class="docutils literal">simtrace wide bottom view 20251218_100415</tt></p>
-</div>
-<div class="slide" id="loros-simtrace-localouterreflectororbsubtraction-default-with-the-spurious">
-<h1><span class="i">LOROS : simtrace LocalOuterReflectorOrbSubtraction : default with the spurious</span></h1>
-<p class="small"><tt class="docutils literal">simtrace LocalOuterReflectorOrbSubtraction : default with the spurious</tt></p>
-</div>
-<div class="slide" id="loros-simtrace-localouterreflectororbsubtraction-uncoincide-fixed">
-<h1><span class="i">LOROS : simtrace LocalOuterReflectorOrbSubtraction : uncoincide fixed</span></h1>
-<p class="small"><tt class="docutils literal">simtrace LocalOuterReflectorOrbSubtraction : uncoincide fixed</tt></p>
-</div>
-<div class="slide" id="loros-simtrace-outer-reflector-with-subtracted-cut-tubes-with-spurious-boundary">
-<h1><span class="i">LOROS : simtrace outer reflector with subtracted cut tubes, with spurious boundary</span></h1>
-<p class="small"><tt class="docutils literal">simtrace outer reflector with subtracted cut tubes, with spurious boundary</tt></p>
 </div>
 <div class="slide" id="loros-simtrace-boundary-wide-view-at-top">
 <h1><span class="i">LOROS : simtrace boundary wide view at top</span></h1>
