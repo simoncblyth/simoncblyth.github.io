@@ -125,6 +125,9 @@ Outline
       * EMF Coils implementation from Chen Jing
 
 
+.. s5_talk::
+   
+   I will cover Opticks enhancements mostly driven by muon production tests 
 
 
 
@@ -159,7 +162,11 @@ Outline
 
 .. s5_talk::
 
-   Opticks solves the optical photon simulation problem by offloading to the GPU
+   Simulating many millions or even billions of photons per event
+   is a huge processing and memory bottleneck. This is the optical 
+   photon simulation problem.
+   Opticks solves the optical photon simulation problem by offloading 
+   it to the GPU and harnessing NVIDIA OptiX ray tracing. 
 
 .. comment
 
@@ -193,7 +200,7 @@ Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
  
 .. s5_talk::
 
-   Opticks integrates GPU ray tracing with Geant4 simulation. 
+   Opticks integrates GPU ray tracing with Geant4 simulation, as illustrated here
 
 
 .. comment    
@@ -263,6 +270,10 @@ OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases
 
 .. s5_talk::
 
+
+   Using Opticks just requires a small modification to scripts, plus of course you 
+   currently need access to an NVIDIA GPU 
+
    A very useful recent change development is integration of Opticks+JUNOSW Build, Test and Release
    into the GitLab CI/CD : continuous-integration/continuous-deployment.
 
@@ -318,10 +329,9 @@ OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases
 
 .. s5_talk::
 
-   The extreme numbers of hits resulting from muons crossing the JUNO scintillator, 
-   mean that merging hits together is typically used for data reduction.
-
-
+   The large numbers of hits resulting from muons crossing the JUNO scintillator, 
+   mean that using smaller summary hits and merging hits together is used to 
+   reduce the size of the stored hits.
 
 
 
@@ -356,11 +366,13 @@ OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases
 
 .. s5_talk::
 
-   My work has been directed by production experience in three areas:
+   Production test experience motivated three enhancements:
   
-   * supporting summary hits
-   * removing limits
-   * hit merging on GPU
+   * adding summary hits : reduces global memory usage on GPU and the size of downloads from the GPU
+   * removing photon limits : avoid fails from some monster double muon events, tested this with 8 billion photon events 
+   * hit merging : combines hits onto the same PMT within time buckets, typically of 1 ns
+
+     * this merging has double benefits, reducing download time and avoiding slow CPU merge   
  
 
 
@@ -406,6 +418,7 @@ OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases
 .. s5_talk::
 
    The key to GPU hit merging is this bitwise OR of pmtid and timebucket.
+   The key provides an identity for a timebucket on a PMT. 
 
 
 
@@ -437,6 +450,13 @@ OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases
     +-----------------+------------------------------+-----------------+----------------------+--------------------------------+-----------------------+
     |  hitlitemerged  | |idsp| |fgsp| |thsp| 0.403   |  |idsp| 23.097  |   |emsp| :b:`0.181`  |   |idsp|     |fgsp| 23.835     |  |idsp| :r:`x221`     |
     +-----------------+------------------------------+-----------------+----------------------+--------------------------------+-----------------------+
+
+
+.. comment
+
+   ~/j/zhenning_double_muon/SProf_table.rst  
+         THIS DOCUMENTS THE COMMANDS USED TO GET THESE NUMBERS
+
 
 .. class:: normal
 
@@ -784,7 +804,7 @@ Water Distributer (WD) implementation from Peidong
 .. s5_talk::
 
    The Water Distributer has a complicated shape, and position : that revealed two Opticks translation bugs.
-   also the implementation had to gop through several iterations to fix various issues  
+   also the implementation had to go through several iterations prior to merging  
 
 
 :i:`WDP 89middle`
@@ -810,7 +830,7 @@ Water Distributer (WD) implementation from Peidong
 
 .. s5_talk::
 
-    Upper
+    Ray trace view of the uppermost
 
 
 :i:`WDP 4`
