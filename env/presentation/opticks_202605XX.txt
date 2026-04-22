@@ -1,0 +1,1479 @@
+.. meta::
+   :title: opticks_20251219_geometry_simtrace_check
+   :description: (2025 December 8) JUNO, OptiX, Opticks
+   :note0: 5+2 min 
+   :url:
+   :note1: 
+   :note2:
+
+
+..  com
+
+
+    https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DocumentAddForm?mode=add
+
+    https://juno.ihep.ac.cn/Dev_DocDB/0156/015637/001/opticks_20260122_wuhan.pdf
+
+    https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/ShowDocument?docid=15637
+
+
+    Title:
+    Status of JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation
+     
+    Abstract:
+    Opticks+JUNOSW progress with GPU ray trace accelerated optical photon simulation is reported
+    including a new CUDA Thrust GPU hit merging implementation that avoids Opticks acceleration 
+    from being obscured by slow CPU hit merging. Also a new photon-Lite implementation is described
+    that allows double the number of photons to be simulater per GPU launch.
+    With GPU hit merging the overall simulation speedup compated to standard JUNOSW is measured 
+    to be > 220x with a 3rd generation NVIDIA RTX GPU.
+
+    Also progress on the addition of of Water Distributors, 8-inch MPMT and EMF coils 
+    to the JUNOSW geometry are reported. Opticks 3D and 2D ray traced visualizations of the geometry
+    have proved to be powerful tools for finding geometry issues.  
+
+    Keywords:
+    Opticks Optical Photons GPU NVIDIA OptiX Geant4 raytrace visualization 
+
+
+
+
+.. include:: my_s5defs.txt
+
+
+:i:`Status of JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation`
+==========================================================================================
+
+.. raw:: html
+
+    <div class="mytitle">
+    <header>
+    <h1 style="background-color:lightgrey;text-align:center;"> 
+        Status of <i>JUNOSW + Opticks</i> :<br/> GPU ray trace accelerated optical photon simulation 
+        <h2 style="background-color:lightgrey;text-align:center">
+            Open source, https://github.com/simoncblyth/opticks  
+        </h2>
+    </h1>
+    </header>
+    </div>
+    <!--img style="position:absolute; top:200px; LEFT:100px; WIDTH:200px; " src="juno/JUNO_logo.png"  /-->
+    <div class="mycredit">
+       <h2 style="background-color:lightgrey">
+          Simon C Blyth, IHEP, CAS &mdash; JUNO Collaboration Meeting, Wuhan  &mdash; 22 January 2026 
+       </h2>
+    </div>
+
+.. s5_talk:: 
+
+   Opticks applies GPU ray tracing to optical photon simulation.
+
+
+.. comment
+
+    .. raw:: html 
+
+       <p style="margin-bottom:3mm;" />
+       <hr/>
+
+
+
+
+
+:i:`QScintThree_test_sh_COMP_012_LOGY0_EDGE1`
+----------------------------------------------
+
+
+:i:`QScintThree_test_sh_COMP_012_LOGY1_EDGE1`
+----------------------------------------------
+
+
+
+Outline
+---------
+
+.. image:: newtons-opticks.png 
+   :width: 299px
+   :height: 547px 
+   :align: right
+
+
+
+
+.. class:: normal
+
+    * Introduction
+
+      * Optical Photon Simulation Problem
+      * Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
+      * OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases
+
+.. raw:: html 
+
+   <p style="margin-bottom:1cm;" />
+
+
+.. class:: normal
+
+    * Opticks enhancements
+
+      * GPU Hit Merging, overall speedup > 200x
+      * Giga-photons eg: ~8 billions (``> 0x1<<32``)
+      * Server-Client impl
+
+.. raw:: html 
+
+   <p style="margin-bottom:1cm;" />
+
+.. class:: normal
+
+    * Recent Geometry Additions + Opticks Translations
+
+      * WaterDistributor from Yu Peidong
+      * MPMT 8-inch implementation from Yu Peidong 
+      * EMF Coils implementation from Chen Jing
+
+
+.. s5_talk::
+   
+   I will cover Opticks enhancements mostly driven by muon production tests 
+
+
+
+
+`(JUNO) Optical Photon Simulation Problem...`
+---------------------------------------------------------
+
+.. raw:: html
+
+     <p style="position:fixed;top:100px;left:900px;font-size:40px;background-color:white;border:1px solid black;padding:5px;">
+     Opticks solves this using GPU ray tracing via NVIDIA OptiX 
+     </p>    
+
+     <p style="margin-bottom:7cm;" />
+
+
+.. sidebar:: :small:`Huge CPU Memory+Time Expense`
+
+    .. class:: small
+
+         **JUNO Muon Simulation Bottleneck**
+           ~99% CPU time, memory constraints
+
+         **Ray-Geometry intersection Dominates**
+           simulation is not alone in this problem...
+
+         **Optical photons : naturally parallel, simple :**
+           * produced by Cherenkov+Scintillation 
+           * yield only Photomultiplier hits
+
+
+
+.. s5_talk::
+
+   Simulating many millions or even billions of photons per event
+   is a huge processing and memory bottleneck. This is the optical 
+   photon simulation problem.
+   Opticks solves the optical photon simulation problem by offloading 
+   it to the GPU and harnessing NVIDIA OptiX ray tracing. 
+
+.. comment
+
+   * Serial optical simulation is hugely expensive.   
+   * Opticks applies massively parallel GPU ray tracing, to solve the optical simulation problem 
+   * For many experiments Opticks can prevent optical photons from limiting simulation 
+
+
+
+Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow
+-------------------------------------------------------------
+
+.. class:: small
+
+    *Opticks* enables Geant4 based simulation to offload optical photon simulation to the GPU  
+
+.. raw:: html
+
+    <p style="margin-bottom:13cm;" />
+
+.. class:: normal 
+
+    **NVIDIA GPU ray tracing of billions[1] of rays per second applied to optical simulation**
+
+.. class:: tiny
+
+    [1] Actual performance depends on geometry and its modelling, JUNO optical simulation speedups > 1000x Geant4 have been measured  
+
+
+
+ 
+.. s5_talk::
+
+   Opticks integrates GPU ray tracing with Geant4 simulation, as illustrated here
+
+
+.. comment    
+
+   Thus crucially requires translation of the geometry into a GPU appropriate form.
+
+
+.. comment    
+
+    Opticks enables the ray tracing performance of NVIDIA OptiX to be applied to Optical photon simulation, 
+    by integrating GPU ray tracing with Geant4
+
+    * This shows how Opticks integrates Geant4 simulations with NVIDIA OptiX GPU ray tracing.  
+    * The most crucial part is the translation of geometry into the form needed on the GPU 
+
+
+
+.. comment
+
+   source /cvmfs/opticks.ihep.ac.cn/oj/releases/J25.7.2_Opticks-v0.5.6/el9_amd64_gcc11/2026_01_08/envset.sh
+
+
+OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases
+-----------------------------------------------------
+
+
+.. class:: normal
+
+    **OJ** scripts just like **J**, except: ``source envset.sh`` plus needs to be on GPU node OR cluster: 
+
+.. raw:: html
+
+   <pre class="mypre18">
+   source /cvmfs/opticks.ihep.ac.cn/oj/releases/J25.7.2_Opticks-v0.5.8/el9_amd64_gcc11/2026_01_18/envset.sh
+   </pre>
+
+.. class:: normal
+
+    * Every day + when JUNOSW/Simulation changes => automated OJ build + test + release
+    * :b:`For reproducibility, use dated reference releases` eg **2026_01_18**
+    * ``tut_detsim.py --opticks-mode 1`` is default (optical simulation on GPU)
+    * prior releases mis-named J25.4.0... despite being latest J25.7.1... (:r:`Thanks Jiabin`)
+
+
+    Many optional envvars can control Opticks, eg:
+
+    ``CUDA_VISIBLE_DEVICES``
+         which device to use
+
+
+.. comment
+
+    .. raw:: html
+
+        <pre class="mypre25">l /cvmfs/opticks.ihep.ac.cn/oj/releases/J25.7.2_Opticks-v0.5.6/el9_amd64_gcc11/
+        lrwxrwxrwx. 1 cvmfs cvmfs   3 Jan 15 17:17 Latest -> Thu
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan 15 17:10 Thu
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan 14 17:12 Wed
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan 13 17:12 Tue
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan 12 17:11 Mon
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan 11 17:11 Sun
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan 10 17:12 Sat
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan  9 17:11 Fri
+        lrwxrwxrwx. 1 cvmfs cvmfs  10 Jan  8 17:19 LastRef -> 2026_01_08
+        drwxr-xr-x. 7 cvmfs cvmfs 181 Jan  8 17:12 2026_01_08
+        </pre>
+
+.. s5_talk::
+
+
+   Using Opticks just requires a small modification to scripts, plus of course you 
+   currently need access to an NVIDIA GPU 
+
+   A very useful recent change development is integration of Opticks+JUNOSW Build, Test and Release
+   into the GitLab CI/CD : continuous-integration/continuous-deployment.
+
+
+
+.. comment
+
+    :i:`GEOM_J25_4_0_opticks_Debug_cxr_min_muon_cxs_20250707_112242.png` 
+    ---------------------------------------------------------------------
+
+    ``EVT=muon_cxs cxr_min.sh #12 : photons from muon crossing JUNO Scintillator``
+
+
+    .. s5_talk::
+
+       Klop
+
+
+    .. comment
+
+        This render shows the photons from a muon crossing the JUNO Scintillator.
+        Having the geometry translated to the GPU enables high performance visualization
+        as well as simulation. The geometry is mostly analytic, not triangulated, just
+        like Geant4 : so it is possible for the two optical simulations to match very closely.
+
+
+    :i:`GEOM_J25_4_0_opticks_Debug_cxr_min_muon_cxs_20250707_112243.png` 
+    ---------------------------------------------------------------------
+
+    ``EVT=muon_cxs cxr_min.sh #13``
+
+
+    .. s5_talk::
+
+        Klop
+
+
+
+:i:`GEOM_J25_4_0_opticks_Debug_cxr_min_muon_cxs_20250707_112244.png` 
+---------------------------------------------------------------------
+
+``EVT=muon_cxs cxr_min.sh #14   (snapshot from animation of photon positions)``
+
+
+.. raw:: html
+
+   <p style="margin-bottom:4cm;" />
+
+
+``Large counts motivate merging of hits with same (pmtid,timebucket) : adding counts and keeping earliest time``
+
+
+
+.. s5_talk::
+
+   The large numbers of hits resulting from muons crossing the JUNO scintillator, 
+   mean that using smaller summary hits and merging hits together is used to 
+   reduce the size of the stored hits.
+
+
+
+
+:small:`Opticks Enhancements : directed by OJ muon production experience`
+---------------------------------------------------------------------------
+
+
+.. class:: normal
+
+   * :r:`Thanks to Zhenning for production test iterations`
+
+   **Add Opticks "lite" photons** : used with JUNOSW "Muon" hits ``(--pmt-hit-type 2)``
+
+   * Opticks ``sphotonlite`` (16 bytes), 4x smaller than ``sphoton`` (64 bytes) 
+   * :b:`reduce overheads for big events`, photons per launch ~250M -> ~500M [32 GB VRAM]
+
+   **Removed 32-bit max photon limits -> simulation of giga optical photon events**
+
+   * :b:`handles monster double+ muon events`, tested with > 8 billion photon events
+
+   **Add CUDA implementation of hit merging** (``thrust::sort_by_key,reduce_by_key``)
+
+   * merge hits onto same PMT within time buckets (eg: 1 ns) 
+   * hits selected + merged on GPU
+   * :r:`benefit twice` : reduce download time + avoid slow CPU merge  
+
+.. comment
+
+   32(16) launches with ``sphoton(sphotonlite)`` [32GB VRAM] 
+
+
+.. s5_talk::
+
+   Production test experience motivated three enhancements:
+  
+   * adding summary hits : reduces global memory usage on GPU and the size of downloads from the GPU
+   * removing photon limits : avoid fails from some monster double muon events, tested this with 8 billion photon events 
+   * hit merging : combines hits onto the same PMT within time buckets, typically of 1 ns
+
+     * this merging has double benefits, reducing download time and avoiding slow CPU merge   
+ 
+
+
+:small:`GPU Hit Merging : High Level Parallelization with CUDA Thrust`
+----------------------------------------------------------------------------
+
+
+.. raw:: html
+
+    <pre style="mypretiny">
+    struct key_functor {   //  <span class="r">Bitwise-OR (pmtid,timebucket) </span>
+      float    timewindow;
+      uint64_t operator()(const sphotonlite& p) const // 16+48 = 64
+      {
+         return (uint64_t(p.identity()) << 48) | uint64_t(p.time/timewindow);
+      }  
+    };
+    </pre>
+
+
+.. class:: small
+
+  Opticks/sysrap ``SPM::merge_partial_select`` using CUDA Thrust (higher level C++ way to use CUDA) 
+
+  +--------------------+-------------------------+-----------------------------------------------------+
+  |  Thrust method     |  Action                 |  Note                                               |
+  +====================+=========================+=====================================================+
+  | ``copy_if``        |  photon -> hit          | using flagmask                                      |
+  +--------------------+-------------------------+-----------------------------------------------------+
+  | ``transform``      |  hit -> key             | bitwise-OR (pmtid, timebucket)                      |
+  +--------------------+-------------------------+-----------------------------------------------------+
+  | ``sort_by_key``    | hit, key -> hit         | hit ordered with same (pmtid,timebucket) contiguous |
+  +--------------------+-------------------------+-----------------------------------------------------+
+  | ``reduce_by_key``  | hit, key -> hitmerged   | merge two hit : earlier time, sum hitcount          |
+  +--------------------+-------------------------+-----------------------------------------------------+
+  
+
+  ``https://github.com/simoncblyth/opticks/blob/master/sysrap/SPM.cu``
+
+  ``https://github.com/simoncblyth/opticks/blob/master/sysrap/sphotonlite.h``
+
+
+.. s5_talk::
+
+   The key to GPU hit merging is this bitwise OR of pmtid and timebucket.
+   The key provides an identity for a timebucket on a PMT. 
+
+
+
+
+:small:`GPU Hit Merging : Avoids hiding Opticks performance`
+------------------------------------------------------------------
+
+.. class:: small
+
+    **Detsim timings for one double muon event, ~150M photons, 28M hit, 6.4M mergedHit, 1ns bucket merge**
+
+    +---------------------------+------------------------+----------------------+---------------------------------------------------------------------------+
+    | JUNOSW J_Std1,2           |  --pmt-hit-type 1      |  --pmt-hit-type 2    |     Total processing time excluding Initialize                            |
+    +===========================+========================+======================+===========================================================================+
+    | --opticks-mode 0          |      7112 s  (118min)  |     6904 s (115min)  |  :small:`]junoSD_PMT_v2::Initialize → [junoSD_PMT_v2::EndOfEvent`         |
+    +---------------------------+------------------------+----------------------+---------------------------------------------------------------------------+
+
+.. class:: small
+
+    +-----------------+------------------------------+-----------------+----------------------+--------------------------------+-----------------------+
+    |  Opticks+J      | (CPUMerge)+Coll.[s]          |   Kernel [s]    | (GPUMerge)+Download  |             Total (no-init) [s]|   Speedup vs          |
+    |  [1]            |                              |   PREL→POST     |   POST→DOWN  [s]     |              HEAD→RESET        |    J_Std1,2           |
+    +=================+==============================+=================+======================+================================+=======================+
+    |  hit            | |idsp| 190.445               |  |idsp| 22.996  |   |idsp| 1.949       |   |idsp|     215.560           |  |idsp| |fgsp| x32    |
+    +-----------------+------------------------------+-----------------+----------------------+--------------------------------+-----------------------+
+    |  hitmerged      | |idsp| |fgsp| |thsp| 6.712   |  |idsp| 22.988  |   |idsp| :b:`0.543`  |   |idsp|     |fgsp| 30.400     |  |idsp| :r:`x233`     |
+    +-----------------+------------------------------+-----------------+----------------------+--------------------------------+-----------------------+
+    |  hitlite        | |idsp| 146.471               |  |idsp| 23.108  |   |emsp| 0.484       |   |idsp|     170.226           |  |idsp| |fgsp| x31    |
+    +-----------------+------------------------------+-----------------+----------------------+--------------------------------+-----------------------+
+    |  hitlitemerged  | |idsp| |fgsp| |thsp| 0.403   |  |idsp| 23.097  |   |emsp| :b:`0.181`  |   |idsp|     |fgsp| 23.835     |  |idsp| :r:`x221`     |
+    +-----------------+------------------------------+-----------------+----------------------+--------------------------------+-----------------------+
+
+
+.. comment
+
+   ~/j/zhenning_double_muon/SProf_table.rst  
+         THIS DOCUMENTS THE COMMANDS USED TO GET THESE NUMBERS
+
+
+.. class:: normal
+
+    * :r:`huge speedup of hit collection [eg: 146 -> 0.4 seconds] from GPU pre-merging`
+    * :b:`GPU hit merging time more than compensated by reduced download time` 
+
+
+.. raw:: html
+
+     <p style="margin-bottom:-7mm;" />
+
+.. class:: huge
+
+    **Opticks+J :** :r:`overall speedup > x200  [~2 hrs → ~30 s]`
+
+.. raw:: html
+
+     <p style="margin-bottom:-7mm;" />
+
+.. class:: normal
+
+    **[1] : Workstation (Dell Precision 7960), NVIDIA RTX 5000 Ada, 3rd gen. RT cores, 32 GB**
+
+.. class:: small
+
+    ``https://code.ihep.ac.cn/blyth/j/-/blob/main/zhenning_double_muon/detsim.sh``
+
+
+.. s5_talk::
+
+    These tables compare the timings for simulation of one double muon event with 150M photons.
+
+    Taking a few minutes to merge:
+
+    * is no problem compared to several hours
+    * BUT it swamps 23 seconds of kernel simulation time     
+
+    This was previously hiding Opticks performance.  
+    I avoided this by implementing GPU hit merging.  
+
+    GPU merge time of a fraction of a second is more than made up for by 
+    reduced download time and drastically faster hit collection.
+
+    Overall simulation speedup is more than a factor of 200.  
+
+    Simulations ordinarily taking 2 hours, can be completed in 30 s with Opticks.
+
+
+    * :r:`select + merge hits on GPU`
+ 
+      * large resource reduction
+      * considerable performance gains
+
+
+.. comment
+
+    Previously, much of Opticks performance when using hit merging was hidden by 
+
+
+
+.. comment
+
+   * ~no diff in kernel time (same RT), ``photon->photonlite`` helps only ~25%
+
+    GPU hit merging, avoids obscuring Opticks performance behind CPU post-processing
+
+    GPU hit merging time is more than compensated by reduced download time 
+
+
+
+.. comment
+
+   **Integration of Opticks+JUNOSW with gitlab CI/CD build/test/release**
+
+   * automated daily+dated Opticks+JUNOSW releases onto ``/cvmfs/opticks.ihep.ac.cn``
+
+
+
+
+.. comment
+
+    :small:`Further Progress`
+    ----------------------------
+
+    .. class:: normal
+
+       **Opticks+ JUNOSW validations reveal JUNO geometry bugs, including:**
+
+       * photon leaking UpperChimney + waterpool PMT orientation
+       * overlap between Water distributor and Hama PMTs close to Chimney
+       * MPMT 
+
+       **OpticksService : first implementation of HTTP optical server working**
+
+       * :r:`receives gensteps, returns (merged)hits`  (FastAPI + nanobind + opticks/CSGOptiX, :strike:`Geant4`)
+       * :b:`share GPU optical acceleration with multiple clients, increased GPU utilization`
+
+       **OpticksClient : almost test stage** [CPU node : collects gensteps, ``libcurl`` request, response]
+
+       * ``G4CXOpticks`` : same API as monolithic for client use (pluggable backend ``SSimulator``)
+       * uses CMake partial build of Opticks ``-DBUILD_WITH_CUDA=OFF``
+
+
+    .. s5_talk::
+
+       Other work includes:
+
+       * finding and fixing geometry issues
+       * automated releases onto /cvmfs
+       * development of Opticks-as-a-service.
+
+
+
+
+
+
+Split Workflow : Share GPUs between OpticksClients
+-----------------------------------------------------
+
+.. class:: normal 
+
+    :b:`OpticksClient` : Detector Simulation Framework (Geant4 etc..) :strike:`GPU`
+       * *U4.h* : collect gensteps 
+       * *NP_CURL.h* : **HTTP POST** (libcurl)
+
+         * request : genstep array
+         * response : hits array
+
+    :b:`OpticksService` : CSGOptiX + NVIDIA OptiX + :b:`GPU`
+       * *FastAPI* : **ASGI** python web framework (alt: *sanic*, *aiohttp*) :tiny:`grandmetric.com/python-rest-frameworks-performance-comparison/`
+       * *nanobind* : python <=> C++ (alt: *pybind11*), *uv* : :strike:`pip`
+       * *CSGFoundry.h* : load persisted geometry
+       * *CSGOptiXService.h* : simulate 
+
+    :r:`Prototype clients + service under development`
+       * :b:`scale up to MC production ? ~100/1000 clients ?` 
+       * :b:`use multi-GPU to serve more clients ?`
+
+.. raw:: html
+
+    <p style="margin-bottom:10mm;" />
+
+
+.. class:: normal 
+
+    **OR** C++ web framework eg:
+       * :strike:`binding`, :r:`less standard`
+
+
+.. s5_talk::
+
+   This server-client development is at proto-typing stage
+
+   * share GPU acceleration across network   
+   * improve GPU utilization
+ 
+
+
+
+
+
+
+.. comment
+
+    The service/client are in prototyping stage. 
+    The GPU-less clients just need a few headers
+    for collecting gensteps and POSTing with libcurl
+
+    The service currently uses FastAPI, a  python web framework 
+    as thats simple to start with.
+
+    I will also try C++ web frameworks like Drogon,
+    as getting async compute to work might be easier 
+    without the complication of language barriers and binding.
+
+
+
+
+
+
+:i:`Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow 4x4 ?`
+---------------------------------------------------------------
+
+.. raw:: html
+
+     <p style="margin-bottom:82mm;" />
+
+.. class:: huge
+
+    Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow 4x4?
+
+.. raw:: html
+
+     <p style="margin-bottom:36mm;" />
+
+.. class:: right
+
+    Production running via "Monolithic" scaling : :r:`inefficient use of scarce GPU resources ?`
+
+
+.. s5_talk::
+
+    How best to scale Opticks is an open question ? Monolithic scaling is the obvious way. 
+
+.. comment
+
+    For large MC productions, scaling this way is not practical because
+    its an extremely inefficient use the GPUs. They would be idle most
+    of the time with a few seconds of compute every few minutes.
+
+
+
+
+OpticksClients + OpticksService : Share GPUs
+------------------------------------------------------
+
+
+.. s5_talk::
+
+    Potentially adding flexibility with GPU-less clients communicating
+    with a server over network may increase throughput for some event sizes.  
+
+.. comment
+
+    Splitting Opticks into into GPU-less clients and server may be able more
+    efficient usage of GPUs.
+
+
+    GPU-less clients sharing a service via HTTP POST allows increasing GPU utilization.
+
+
+
+:i:`Client.png`
+----------------
+
+.. raw:: html
+
+    <p style="position:fixed;top:475px;left:30px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+    How many clients ? Depends on server, event photon count, network, ...  (Experimentation needed)
+    </p>
+ 
+
+.. s5_talk::
+
+    How many clients can realistically be used with a server, needs experimentation
+
+.. comment
+
+    The aim is for large numbers of clients to share the service. 
+    Actually the more idle the GPUs are in the monolithic approach the 
+    greater the share factor can be.  
+
+    I think that even before developing an asynchronous compute service 
+    it should be possible to reach useful share factors. 
+
+    And those can be improved by putting in the effort of getting async compute to work, 
+    and also using multiple GPUs in the server.
+
+
+
+
+.. comment
+
+   HERE
+
+
+:i:`Recent Geometry Additions + Translations`
+----------------------------------------------
+
+.. raw:: html 
+
+   <p style="margin-bottom:3cm;" />
+
+
+.. class:: huge
+
+    Recent Geometry Additions + Opticks Translations
+
+    * Water Distributer (WD) implementation from Peidong
+    * MPMT 8-inch PMT implementation from Peidong
+    * EMF Coils implementation from Chen Jing, SJTU
+
+
+
+.. sidebar:: Precise 3D + 2D raytrace:
+
+    * :b:`makes bugs obvious:`
+
+      * overlaps, mis-placement
+
+
+.. s5_talk::
+
+   All added geometry needs effort to translate to GPU 
+
+
+
+Water Distributer (WD) implementation from Peidong
+----------------------------------------------------
+
+.. sidebar:: :small:`Two Opticks Bugs Revealed`
+
+   .. class:: small
+
+       :b:`FIXED:`
+
+       * G4MultiUnion R + T transforms mis-ordered
+       * erroneous imported transform (-1:last/no)
+ 
+         * revealed by many transform solid
+
+       Both bugs manifested as overlarge bbox
+
+       :r:`Thank you Peidong` 
+
+
+.. class:: normal
+
+   Complex shape and position
+
+   * many R+T transforms, multi-union, long way from origin 
+   * tricky position between Water Pool and CD, crossing Tyvek
+
+.. class:: normal
+
+   Multiple JUNOSW issues found and now fixed:
+
+   * overlap between WD and Hama PMTs
+   * pipe poking through Tyvek
+   * pipe segments mis-placed  
+   * maximally coincident pipe cut
+     
+
+.. class:: tiny
+
+   Branches : 
+
+   ``yupd-water-distributor`` 
+
+   ``yupd_bottompipe_adjust`` 
+
+   ``yupd_waterdistributor_heightfix`` 
+
+
+.. s5_talk::
+
+   The Water Distributer has a complicated shape, and position : that revealed two Opticks translation bugs.
+   also the implementation had to go through several iterations prior to merging  
+
+
+:i:`WDP 89middle`
+------------------
+
+.. class:: center
+
+    ``Lower and Upper WD``
+
+
+.. s5_talk::
+
+    Shows the shape
+
+
+:i:`WDP 3`
+-----------
+
+.. class:: small
+ 
+    ``WDP 3 : Uppermost Water Distributor in Water Pool``
+
+
+.. s5_talk::
+
+    Ray trace view of the uppermost
+
+
+:i:`WDP 4`
+-----------
+
+.. class:: small
+ 
+    ``WDP 4 : Water Distributor at top of CD``
+
+
+
+.. s5_talk::
+
+    Top
+
+
+
+:i:`WDP 5`
+-----------
+
+.. class:: small
+ 
+    ``WDP 5 : mid-CD``
+
+
+.. s5_talk::
+
+    Mid
+
+
+
+
+
+:i:`WDP 6`
+-----------
+
+.. class:: small
+ 
+    ``WDP 6 : Water Distributor at bottom of CD``
+
+.. s5_talk::
+
+    Bottom of CD
+
+
+
+
+
+:i:`WDP 7`
+-----------
+
+.. class:: small
+ 
+    ``WDP 7 :  Water Distributor at bottom of pool``
+
+
+.. s5_talk::
+
+    Lowest
+
+
+
+
+
+
+
+:small:`Water Distributer Issues` (:b:`FIXED`)
+----------------------------------------------
+
+.. class:: normal
+
+    3D Raytrace directly reveals (MR1062):
+
+    * clear overlap with PMTs
+    * midview : pipe segments stick thru tyvek
+    * lowervier : again upper segments thru tyvek
+
+
+.. s5_talk::
+
+    Issues
+
+
+
+
+.. comment
+
+    MR1062 clear overlap
+    ----------------------
+
+
+    :i:`LWDS : perspective ray trace : midview : upper pipe segments are sticking thru the tyvek`
+    -----------------------------------------------------------------------------------------------
+
+    .. class:: small
+
+       ``perspective ray trace : midview : upper pipe segments are sticking thru the tyvek``
+
+
+
+    :i:`LWDS : perspective ray trace : lowervier : again upper pipe segments are sticking thru the tyvek`
+    -----------------------------------------------------------------------------------------------------
+
+    .. class:: small
+
+        ``perspective ray trace : lowerview : again upper pipe segments are sticking thru the tyvek``
+
+
+
+
+.. comment
+
+    TOO SMALL 
+
+    :small:`WD Issues : simtrace 2D slices`
+    ----------------------------------------
+
+    .. class:: normal 
+
+       precise view, ray trace within plane 
+
+       * label intersects by boundary/volume
+
+       MR1062 :r:`TOFIX`:
+
+       * pipe sticks thru lower tyvek (pool floor)
+
+
+:i:`LOROS : simtrace boundary wide view at top`
+-------------------------------------------------
+
+.. class:: small
+
+   ``simtrace boundary wide view at top``
+
+
+.. raw:: html
+
+   <p style="margin-bottom:40mm;" />
+   
+.. sidebar:: simtrace 2D slices
+
+     planar raytrace => precise view 
+
+     * label intersects : boundary/volume
+     * :r:`clearly shows overlaps`
+
+
+
+.. s5_talk::
+
+    Planar raytrace gives 2D slice thru the geometry : clearly showing issues
+
+
+
+:i:`LOROS : simtrace wide bottom view 20251218_100415`
+-------------------------------------------------------
+
+.. class:: small
+
+   ``simtrace wide bottom view 20251218_100415``
+
+.. raw:: html
+
+   <p style="margin-bottom:90mm;" />
+   
+.. sidebar:: MR1062 issues visible
+
+     :b:`FIXED`:
+
+     * fake-boundaries within "snake" pipe
+     * multi-coincident pipe cuts
+
+
+
+.. s5_talk::
+
+    Examples of the issues
+
+
+
+
+:i:`LOROS : simtrace primtab : snake thru the dead zone with normals`
+----------------------------------------------------------------------
+
+.. class:: small
+
+    ``simtrace primtab : snake thru the dead zone with normals``
+
+
+.. raw:: html
+
+   <p style="margin-bottom:90mm;" />
+   
+.. sidebar:: With intersect normals
+
+     normals point "outwards", showing:
+
+     * orientation
+     * coincident solids
+
+
+
+.. s5_talk::
+
+    Showing normals for a fraction of intersects is useful for coincident surfaces
+
+
+
+
+:i:`LWDS : Simtrace Split Snake`
+--------------------------------- 
+
+
+.. class:: small
+
+    ``cxt_min.sh : Simtrace Split Snake``
+
+
+.. raw:: html
+
+   <p style="margin-bottom:90mm;" />
+   
+.. sidebar:: Segmented "Snake" pipe
+
+     * avoids multiple issues
+
+.. s5_talk::
+
+   Segmenting the pipe avoids issues crossing the Tyvek
+
+
+
+:i:`LWDS : xz simtrace showing the mis-placed gap`
+----------------------------------------------------
+
+
+.. class:: small
+
+    ``XZ plane simtrace showing the mis-placed gap``
+
+    ``MOI=264.136,-566.442,-20475,1500  # XY:middle-of-pipe Z:middle-of-outer-tyvek``
+
+
+.. raw:: html
+
+   <p style="margin-bottom:40mm;" />
+   
+.. sidebar:: :small:`Precise (MOI) control of ray plane`
+
+     * shoot rays inside pipe
+     * shows mis-placed gaps, overlap
+
+.. s5_talk::
+    
+   Controlling the plane of the slice to within the pipe
+
+
+.. comment
+
+    :i:`LWDS : Legs still not segmented at bottom`
+    -----------------------------------------------
+
+
+    .. class:: small
+
+        ``cxt_min.sh : pipes now segmented avoiding overlap``
+
+
+    .. raw:: html
+
+       <p style="margin-bottom:50mm;" />
+       
+    .. sidebar:: :small:`Peidongs Change`
+
+         * fixed three overlaps
+         * :strike:`one overlap remains` 
+
+           * :r:`MR 1062 now merged`
+
+
+
+:i:`WaterDistributor Overlap Fixed`
+-------------------------------------
+
+.. class:: small
+
+    ``cxt_min.sh : pipes now segmented avoiding overlap``
+
+
+.. raw:: html
+
+   <p style="margin-bottom:50mm;" />
+   
+.. sidebar:: :small:`Peidongs Change`
+
+     * fixed three overlaps
+     * :strike:`one overlap remains` 
+
+       * :r:`MR 1062 now merged`
+
+
+.. s5_talk::
+
+   Three overlaps fixef and this is now merged
+
+
+
+
+
+MPMT 8-inch implementation from Peidong
+--------------------------------------------
+
+.. class:: normal
+
+    Working with Peidong on MR 1063
+
+      * https://code.ihep.ac.cn/JUNO/offline/junosw/-/merge_requests/1063
+      * branch : ``yupd-8inch-pmt``
+
+    * details in talk by Peidong
+    * :r:`changed tubs-minus-torus -> polycone`
+    * torus is computationally terrible, especially in CSG combination
+ 
+      * imprecise intersects even in double precision with Geant4
+
+    * added PMT info serialization for Opticks
+
+
+.. s5_talk::
+
+    First impl used a very expensive way of modelling the neck
+
+
+
+:i:`MPMT 19,20,21,construction`
+---------------------------------
+
+.. class:: normal
+
+     MPMT (branch ``yupd-8inch-pmt``)  
+
+     * tubs-subtract-torus neck : :r:`abombination`
+     * polycone neck
+     * construction of shape
+
+
+.. s5_talk::
+
+    Replacing the torus neck with polycone
+
+
+
+:i:`MPMT : 16`
+---------------
+
+.. class:: small
+
+     ``MPMT in context``
+
+
+.. s5_talk::
+
+    MPMT in context
+
+
+
+:i:`MPMT : 18`
+---------------
+
+.. class:: small
+
+     ``wide view showing added PMTs``
+
+
+
+.. s5_talk::
+
+    Wide view
+
+
+
+.. comment
+
+
+
+    :i:`EMF2 0`
+    ------------
+
+    .. class:: small
+
+       * wide view
+
+
+
+    :i:`EMF2 1`
+    ------------
+
+    .. class:: small
+
+       * possible overlap : NOPE thats just incorrect rotation steps for the triangulation
+
+
+
+
+EMF Coils implementation from Chen Jing, SJTU
+-----------------------------------------------
+
+.. class:: normal
+
+    Working with Chen Jing on MR 1086
+
+      * https://code.ihep.ac.cn/JUNO/offline/junosw/-/merge_requests/1086
+      * branch : ``Chenjing-EMFcoilsgeometry``
+
+    Currently using G4Polycone with phi ranges 
+
+    * details in talk by Chen Jing
+    * Number of solids : +642   (JUNO Total: 344 -> 986)
+    * Number of volumes : +1096  (:r:`quarter of former impl`)
+    * :b:`analytic phicut not yet supported by Opticks`
+
+      * :r:`triangulated geometry works OK`
+      * Many solids => added flexible name matching to Opticks eg: ``^s_EMF``
+
+
+
+.. s5_talk::
+
+   Initial impl had problem of adding 4000 volumes
+
+
+
+
+
+:i:`EMF2 2`
+------------
+
+.. class:: small
+
+   ``ELV=^s_EMF MOI=/tmp/emf2.npy EYE=0,0,-2 UP=0,1,0 cxr_min.sh  ## raytrace``
+
+   ``ELV : select solids``
+
+   ``MOI : pick frame``
+
+
+.. raw:: html
+
+     <p style="margin-bottom:10cm;" />
+
+
+.. class:: small
+
+     ``View along EMF axis : (theta,phi) (56,-54) degrees`` 
+
+
+.. s5_talk::
+
+    Along EMF axis
+
+
+:i:`EMF2 3`
+------------
+
+.. class:: normal
+
+    :i:`EMF2 3` ``View from bottom of pool, with very large volumes excluded`` 
+
+.. s5_talk::
+
+    View at bottom of pool
+
+
+
+
+:i:`EMF X306` 
+--------------
+
+.. class:: normal
+
+    Former EMFcoils impl: 
+ 
+    * many small pieces 
+    * unexplained breaks
+    * +4000 volumes
+
+    * :b:`Converted analytically to Opticks`
+
+      * as no phicuts 
+
+
+.. s5_talk::
+
+    View at bottom of pool
+
+
+
+
+:small:`Plans` 
+-----------------------------------------
+
+.. sidebar:: :small:`Investigations on the side`
+
+   .. class:: small
+
+       Server/Client Opticks
+         * measure GPU utilization benefit  
+
+       multi-GPU utilization
+         * split work(photons) across GPUs
+         * concurrent launching
+
+       async progressive launch 
+         * throughout event, not just end
+
+       visualization ease-of-use
+         * GUI menus, genstep view
+         * event animation control
+
+
+.. class:: small 
+
+
+   **Get Remaining Geometry Changes Merged + Validated**
+
+   * WaterDistributor:DONE, EMFcoils:TODO, 8-inch MPMT:DONE
+   * Validations following all the recent geometry additions
+
+   **Automated Validation/Performance Monitoring**
+
+   * integrate tests using GPU with gitlab CI/CD  
+
+   **Production Optimization**
+
+   * smarter CPU hit global->local, not 1-by-1 [reduce from 6.7 sec per 28M hits]
+   * continue iterative productions (:r:`primary progress driver`)
+   * improve Release build, remove all Debug functionality
+   * profile with NVIDIA tools, try Shader Execution Reordering
+   * test JUNOSW+Opticks under DCI (Dirac)  
+
+   **Improve Opticks User Experience**
+
+   * examples, documentation, training, streamline repository
+
+
+
+.. class:: tiny 
+
+   CI/CD : Continuous Integration/Continuous Deployment
+
+
+.. s5_talk::
+
+    * main goal : smooth JUNOSW+Opticks Production Running
+
+
+.. comment
+
+   **Geant4 contact**
+
+   * develop/propose API for external photon propagation
+   * :r:`avoid customized Geant4 processes` 
+
+   **Non-NVIDIA GPU Investigation**
+
+   * Contact local GPU vendors, eg InnoSilicon Fenghua No. 3 (claim: CUDA compatible with RT)
+
+
+
+:small:`Summary and Links`
+-------------------------------------------------------------------------------------
+
+.. sidebar:: :small:`Extra Benefits of Opticks`
+
+   .. class:: small
+
+      * state-of-the-art GPU Hit merging
+      * :b:`precise 3D + 2D raytraced viz => debug geom`
+      * detailed photon instrumentation, validation 
+      * comparisons find issues with both simulations:
+       
+        * complex geometry, overlaps, bugs... 
+
+      :r:`=> using Opticks improves CPU simulation too !!`
+
+.. raw:: html
+
+     <p style="margin-bottom:5mm;" />
+
+..
+
+  *Opticks* : state-of-the-art GPU ray traced optical simulation integrated with *Geant4*, 
+  with automated geometry translation into GPU optimized form. *GPU hit merging 
+  drastically increases overall speedup when merging.*  
+
+.. raw:: html
+
+     <p style="margin-bottom:18mm;" />
+
+.. class:: normal
+
+  * :r:`Overall JUNOSW+Opticks performance with GPU hit merging > 200x` [3rd gen RTX]  
+  * NVIDIA Ray Trace Performance (2x each gen., every ~2 yrs)
+
+
+.. table::
+    :align: center
+
+    +--------------------------------------------------+-----------------------------------------+
+    | https://github.com/simoncblyth/opticks           | day-to-day code repository              |                   
+    +--------------------------------------------------+-----------------------------------------+
+    | https://simoncblyth.github.io                    | presentations and videos                |
+    +--------------------------------------------------+-----------------------------------------+
+    | https://groups.io/g/opticks                      | forum/mailing list archive              |
+    +--------------------------------------------------+-----------------------------------------+
+    | email: ``opticks+subscribe@groups.io``           | subscribe to mailing list               |
+    +--------------------------------------------------+-----------------------------------------+ 
+    | ``simon.c.blyth@gmail.com``                      | any questions                           | 
+    +--------------------------------------------------+-----------------------------------------+ 
+
+
+.. s5_talk::
+
+    Addition of GPU hit merging avoids obscuring Opticks performance, and prevents
+    optical photons from limiting simulation with more than 200x overall speedup
+    going from hours to seconds. 
+
+
+.. comment
+
+    I end with some links : Opticks can make simulation unlimited by optical photons
+
+
+
+
+
+
