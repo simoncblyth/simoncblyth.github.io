@@ -5,8 +5,8 @@ rsync_put_to_W.sh
 
 This is a workaround for github/bitbucket blockage.
 It is not convenient to get around that blockage
-on machines I do not control such as W.
-So rsync_put_to_W.sh rsyncs from A to W (or from Z to W).
+on machines I am not sudoer on such as W (hostname juno.ihep.ac.cn)
+So rsync_put_to_W.sh rsyncs the git repo from A to W (or from Z to W).
 
 
 HMM : how dodgy a thing is this ?
@@ -14,8 +14,8 @@ HMM : how dodgy a thing is this ?
 
 * as the target machine is for presentation of html its
   probably no big deal, however note that if use
-  git on the remote side it means a git binary version 
-  is having to deal with the raw repo files provide by 
+  git on the remote side it means a git binary version
+  is having to deal with the raw repo files provide by
   another git version
 
 
