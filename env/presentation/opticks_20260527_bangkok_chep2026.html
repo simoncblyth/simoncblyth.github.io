@@ -7503,8 +7503,9 @@ vs std</th>
 </tr>
 </tbody>
 </table>
+<p class="normal">Client build from common Opticks codebase with <tt class="docutils literal">OPTICKS_CONFIG=Client</tt></p>
 <ul class="normal simple">
-<li>Client build from common codebase with <tt class="docutils literal">OPTICKS_CONFIG=Client</tt></li>
+<li><span class="b">OpticksClient use just like OpticksFull(monolithic) - simulate via network to remote GPU</span></li>
 </ul>
 
         <!--  s5talk  -->
@@ -7512,18 +7513,43 @@ vs std</th>
     </div>
 <div class="slide" id="np-curl-h-array-transport-via-http-post">
 <h1>NP_CURL.h : Array transport via HTTP POST</h1>
-<p class="normal"><span class="b">Basis for Opticks Client</span></p>
-<dl class="normal align center docutils">
+<p class="normal"><span class="b">Basis for Opticks Client</span> - using libcurl 7.76.1+ (2021) - default in many Linux distro</p>
+<div class="center docutils container">
+<dl class="docutils">
 <dt><tt class="docutils literal">NP* <span class="pre">NP_CURL::transformRemote(</span> NP* a, size_t index, size_t count )</tt></dt>
-<dd><tt class="docutils literal">HTTP POST array to endpoint, receive array in response</tt></dd>
+<dd><em>HTTP POST array to endpoint, receive array in response, metadata in headers</em></dd>
 </dl>
-<dl class="normal align left docutils">
-<dt><a class="reference external" href="https://github.com/simoncblyth/np/blob/master/NP_CURL.h">https://github.com/simoncblyth/np/blob/master/NP_CURL.h</a></dt>
-<dd>requires libcurl 7.76.1+ (2021) - default in many Linux distro</dd>
-<dt><a class="reference external" href="https://github.com/simoncblyth/np/blob/master/NP.hh">https://github.com/simoncblyth/np/blob/master/NP.hh</a></dt>
-<dd>C++ array with NumPy serialization</dd>
-</dl>
-<p class="normal align left">HTTP headers carry metadata : shape, dtype, number of photons, geometry root digest, ...</p>
+</div>
+<p class="normal align left"><tt class="docutils literal">NP.hh</tt> : C++ array with NumPy serialization (Opticks numerical base), <tt class="docutils literal">NP_CURL.h</tt> headers:</p>
+<table border="1" class="small center-aligned-table docutils align-center">
+<thead valign="bottom">
+<tr><th class="head">HTTP metadata headers</th>
+<th class="head">Note</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>x-opticks-shape</td>
+<td>array shape eg &quot;(10,6,4)&quot; for 10 gensteps</td>
+</tr>
+<tr><td>x-opticks-dtype</td>
+<td>eg &quot;float32&quot;</td>
+</tr>
+<tr><td>x-opticks-index</td>
+<td>eg eventID controlling random number stream offsets</td>
+</tr>
+<tr><td>x-opticks-count</td>
+<td>eg: number of photons in genstep, cost of request</td>
+</tr>
+<tr><td>x-opticks-meta</td>
+<td>general eg geometry root node digest - <span class="b">assert same geometry</span></td>
+</tr>
+</tbody>
+</table>
+<p class="normal align left">HTTP 429, 503 : Too Many Requests, Service Unavailable (temporary downtime)</p>
+<ul class="normal align left simple">
+<li>follows <tt class="docutils literal"><span class="pre">Retry-After:</span> &lt;seconds&gt;</tt> header suggestion</li>
+</ul>
+<p class="tiny"><a class="reference external" href="https://github.com/simoncblyth/np/blob/master/NP_CURL.h">https://github.com/simoncblyth/np/blob/master/NP_CURL.h</a> --  <a class="reference external" href="https://github.com/simoncblyth/np/blob/master/NP.hh">https://github.com/simoncblyth/np/blob/master/NP.hh</a></p>
 
         <!--  s5talk  -->
         <br/>
@@ -7563,41 +7589,45 @@ vs std</th>
 <p class="first sidebar-title"><span class="small">Potential basis for Opticks Server</span></p>
 <ul class="small last simple">
 <li>efficiently bring Opticks to non-GPU nodes</li>
-<li>dynamic batch small requests</li>
-<li><span class="r">profit from multiple GPU, concurrency</span></li>
+<li>no language barrier + binding, no python GIL</li>
+<li>mature Prometheus metrics monitoring</li>
 <li><span class="b">make good use of GPU resources</span></li>
 <li>serve more clients</li>
 <li><strong>backends can work with non-NVIDIA GPUs</strong></li>
 </ul>
 </div>
-<p class="small">Triton : <span class="r">open-source</span>, designed to accelerate AI deployment at scale</p>
+<p class="small">Triton[1] : <span class="r">open-source</span>, designed to accelerate AI deployment at scale</p>
 <ul class="small simple">
+<li>despite &quot;Inference&quot;, &quot;AI&quot; : is flexible async tensor server</li>
 <li><span class="b">NVIDIA maintained open source server software</span></li>
-<li>despite &quot;Inference&quot; in name : flexible async tensor server</li>
 <li>dynamic batching : requests queued and combined in batch</li>
-<li>multi-GPU support</li>
+<li>multi-GPU support, concurrency</li>
 <li>widely used : tech, financial, manufacturing companies</li>
 </ul>
 <p class="small"><span class="r">Wrap Opticks as Custom C++ Triton Backend &quot;model(s)&quot; ?</span></p>
 <p class="small">Make request load like inference : smaller, more uniform</p>
-<ul class="small simple">
-<li>requests during genstep collection<ul>
-<li>=&gt; tunable request load</li>
+<dl class="small docutils">
+<dt>Make requests during genstep collection :</dt>
+<dd><ul class="first last simple">
+<li>=&gt; tunable <tt class="docutils literal">max_slots</tt></li>
 <li><span class="b">decouple compute from physics</span></li>
 </ul>
-</li>
-<li>high GPU utilization =&gt; concurrency</li>
-<li>concurrency needs:<ul>
+</dd>
+<dt>High GPU utilization =&gt; concurrency :</dt>
+<dd><ul class="first last simple">
 <li>async CUDA Opticks</li>
-<li>buffer pool allocator (esp: photons)</li>
+<li>async CUDA memory pools [2]</li>
 </ul>
-</li>
+</dd>
+<dt>Robust Server (MC campaign):</dt>
+<dd><ul class="first last simple">
+<li>static flat VRAM</li>
+<li>backpressure, signal client retry</li>
 </ul>
-<p class="small"><span class="r">Concurrency degree depends:</span></p>
-<ul class="small simple">
-<li>VRAM + allocator + Triton config</li>
-</ul>
-<p class="tiny"><a class="reference external" href="https://developer.nvidia.com/dynamo-triton">https://developer.nvidia.com/dynamo-triton</a></p>
+</dd>
+</dl>
+<p class="tiny">[1] <a class="reference external" href="https://developer.nvidia.com/dynamo-triton">https://developer.nvidia.com/dynamo-triton</a></p>
+<p class="tiny">[2] <tt class="docutils literal">cudaMallocFromPoolAsync</tt></p>
 <!-- comment
 
 https://www.nvidia.com/en-us/ai/dynamo-triton/ -->
