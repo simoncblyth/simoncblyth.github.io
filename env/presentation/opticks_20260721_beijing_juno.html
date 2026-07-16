@@ -10,7 +10,7 @@
 <meta content="(2026 July 21) JUNO, OptiX, Opticks" name="description" />
 <meta content="18 min" name="note0" />
 <meta content="https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=4520" name="docdb" />
-<title>Opticks : GPU Accelerated Optical Photon Simulation for JUNO and Other Experiments</title>
+<title>Monitoring JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation</title>
 <style type="text/css">
 
 /*
@@ -387,13 +387,13 @@ ul.auto-toc {
 
 </div>
 <div id="footer">
-<h1><span class="i">Opticks : GPU Accelerated Optical Photon Simulation for JUNO and Other Experiments</span></h1>
+<h1><span class="i">Monitoring JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation</span></h1>
 
 </div>
 </div>
 <div class="presentation">
 <div class="slide" id="slide0">
-<h1 class="title"><span class="i">Opticks : GPU Accelerated Optical Photon Simulation for JUNO and Other Experiments</span></h1>
+<h1 class="title"><span class="i">Monitoring JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation</span></h1>
 
 <!-- comment
 
@@ -6440,6 +6440,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-position: 922px 0px;
              
           }
+          div.slide#opticks-junosw-oj-monitoring-goal{
+             background-image: url(opticks_monitoring/devcycle/oj_dev_cycle.png);
+             background-size: 358px 700px;
+             background-position: 922px 0px;
+             
+          }
           div.slide#opticks-monitoring-grafana-20260715-155458-png{
              background-image: url(opticks_monitoring/grafana/20260715_155458.png);
              background-size: 1280px 720px;
@@ -6454,6 +6460,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
           }
           div.slide#grafana{
              background-image: url(opticks_monitoring/grafana/dashboard_example.png);
+             background-size: 1280px 720px;
+             background-position: 0px 0px;
+             
+          }
+          div.slide#opticks-monitoring-gitlab-ci-20260716-141838-png{
+             background-image: url(opticks_monitoring/gitlab_ci/20260716_141838.png);
              background-size: 1280px 720px;
              background-position: 0px 0px;
              
@@ -6713,27 +6725,16 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 
 </style><!-- what_to_cover
 
-big picture - opticks_roadmap - issues : dev-cycle, not-enough-GPUs
-
-dev-cycle
-
-DONE : Speeding up dev-cycle with automation/monitoring
-TODO : gitlab-ci screenshot
-DONE : grafana screenshots
+MAYBE : big picture - opticks_roadmap - issues : dev-cycle, not-enough-GPUs
 
 server-client
-
-Preparation for three species LS model
-
-* DONE : wavelength generation
-* DONE : CDF and ICDF plots
-
 
 * TODO : Updates for Blackwell : CUDA OptiX -  optix 9.1 cuda 13.1 -->
 <div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey;text-align:center;">
-    <i>Opticks: </i> GPU Accelerated Optical Photon Simulation for JUNO and Other Experiments
+
+    Monitoring <i>JUNOSW + Opticks</i> : GPU ray trace accelerated optical photon simulation
     <h2 style="background-color:lightgrey;text-align:center">
         Open source, https://github.com/simoncblyth/opticks
     </h2>
@@ -6758,16 +6759,9 @@ Preparation for three species LS model
         <br/>
     <!-- comment
 
-https://www.epj-conferences.org/articles/epjconf/pdf/2024/05/epjconf_chep2024_01007.pdf
-
-uptodate GPU counts and types -->
-<!-- comment
-
-<span>&nbsp;</span> -->
-<!-- comment
-
-* Optical Photon Simulation ≈ Ray Traced Image Rendering
-* NVIDIA RTX PRO 6000 Blackwell -->
+* Opticks Optical simulation directly scales with ray tracing speed
+* Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n
+* Updates for Blackwell : CUDA 13.1 OptiX 9.1 -->
 
 </div>
 <div class="slide" id="outline">
@@ -6777,15 +6771,15 @@ uptodate GPU counts and types -->
 <li>Optical Photon Simulation Context<ul>
 <li>(JUNO) Optical Photon Simulation Problem...</li>
 <li>Four NVIDIA RTX Gen : Ray Tracing : ~2x every ~2 yrs</li>
-<li>Opticks Optical simulation directly scales with ray tracing speed</li>
 <li>NVIDIA OptiX : Ray Tracing Engine -- Accessible GPU Ray Tracing</li>
 <li>Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow</li>
-<li>Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n</li>
 </ul>
 </li>
 <li>Opticks + JUNOSW (OJ) : Testing as Geometry and Models continue to Evolve<ul>
 <li>Opticks+JUNOSW Monitoring</li>
-<li>OJ Grafana Dashboard for cxs_min.sh test</li>
+<li>gitlab-ci in OJ repository</li>
+<li>Opticks Grafana Dashboard</li>
+<li>Goal of Monitoring</li>
 </ul>
 </li>
 <li>Preparations for Three Species LS model<ul>
@@ -6795,7 +6789,6 @@ uptodate GPU counts and types -->
 <li>One billion wavelengths Chi2 check</li>
 </ul>
 </li>
-<li>Updates for Blackwell : CUDA 13.1 OptiX 9.1</li>
 <li>Geant4 + Opticks + NVIDIA OptiX : Production Scaling ?<ul>
 <li>Geant4 + Opticks + NVIDIA OptiX : Monolith x4, x16</li>
 <li>OpticksClients + OpticksService : Share GPUs</li>
@@ -6984,91 +6977,87 @@ Cores</th>
  https://aecmag.com/workstations/review-nvidia-rtx-pro-blackwell-series-gpus
 
  nvidia-rtx-blackwell-gpu-architecture.pdf -->
+<!-- comment
+
+
+:i:`AB_Substamp_ALL_Etime_vs_Photon_rtx_gen1_gen3.png`
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+.. raw:: html
+
+     <p style="margin-bottom:45mm;" />
+
+
+.. class:: tiny
+
+
+    .. table:: Event Time(s) vs PH(M)
+        :align: right
+
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | PH(M)   |   G1   | G3  | G1/G3  |
+        +=========+========+=====+========+
+        |  1      |  0.47  |0.14 |  3.28  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 10      |  0.44  |0.13 |  3.48  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 20      |  4.39  |1.10 |  3.99  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 30      |  8.87  |2.26 |  3.93  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 40      | 13.29  |3.38 |  3.93  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 50      | 18.13  |4.49 |  4.03  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 60      | 22.64  |5.70 |  3.97  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 70      | 27.31  |6.78 |  4.03  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 80      | 32.24  |7.99 |  4.03  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 90      | 37.92  |9.33 |  4.06  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+        | 100     | 41.93  |10.42|  4.03  |
+        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
+
+
+
+
+.. raw:: html
+
+    <p class="mymidleftbox">Optical simulation 4x faster 1st->3rd gen RTX </p>
+
+    <p class="mybotrightbox">3rd gen Ada : 100M ph sim. in 10s [TMM PMT model, Custom CSG]</p>
+
+
+
+
+.. raw:: html
+
+   <p class="floating-info-box">
+      Opticks optical simulation speed directly scales with ray tracing speed.
+   </p>
+
+.. raw:: html
+
+    <p style="margin-bottom:17cm;" />
+
+
+.. class:: tiny
+    :align: right
+
+    TMM : Transfer-Matrix Method |nbsp10| |nbsp10|
+
+
+.. s5_talk::
+
+    The plot shows kernel time vs number of photons for 1st and 3rd generation RTX GPUs.
+    Optical simulation performance is a factor of four faster with the 3rd generation
+    compared to the 1st.
+
+    Opticks optical performance directly scales with ray tracing performance. -->
 </div>
-<div class="slide" id="ab-substamp-all-etime-vs-photon-rtx-gen1-gen3-png">
-<h1><span class="i">AB_Substamp_ALL_Etime_vs_Photon_rtx_gen1_gen3.png</span></h1>
-<p style="margin-bottom:45mm;" /><table border="1" class="tiny docutils align-right">
-<caption>Event Time(s) vs PH(M)</caption>
-<colgroup>
-<col width="30%" />
-<col width="27%" />
-<col width="17%" />
-<col width="27%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">PH(M)</th>
-<th class="head">G1</th>
-<th class="head">G3</th>
-<th class="head">G1/G3</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>1</td>
-<td>0.47</td>
-<td>0.14</td>
-<td>3.28</td>
-</tr>
-<tr><td>10</td>
-<td>0.44</td>
-<td>0.13</td>
-<td>3.48</td>
-</tr>
-<tr><td>20</td>
-<td>4.39</td>
-<td>1.10</td>
-<td>3.99</td>
-</tr>
-<tr><td>30</td>
-<td>8.87</td>
-<td>2.26</td>
-<td>3.93</td>
-</tr>
-<tr><td>40</td>
-<td>13.29</td>
-<td>3.38</td>
-<td>3.93</td>
-</tr>
-<tr><td>50</td>
-<td>18.13</td>
-<td>4.49</td>
-<td>4.03</td>
-</tr>
-<tr><td>60</td>
-<td>22.64</td>
-<td>5.70</td>
-<td>3.97</td>
-</tr>
-<tr><td>70</td>
-<td>27.31</td>
-<td>6.78</td>
-<td>4.03</td>
-</tr>
-<tr><td>80</td>
-<td>32.24</td>
-<td>7.99</td>
-<td>4.03</td>
-</tr>
-<tr><td>90</td>
-<td>37.92</td>
-<td>9.33</td>
-<td>4.06</td>
-</tr>
-<tr><td>100</td>
-<td>41.93</td>
-<td>10.42</td>
-<td>4.03</td>
-</tr>
-</tbody>
-</table>
-<p class="mymidleftbox">Optical simulation 4x faster 1st->3rd gen RTX </p>
-
-<p class="mybotrightbox">3rd gen Ada : 100M ph sim. in 10s [TMM PMT model, Custom CSG]</p><p class="floating-info-box">
-   Opticks optical simulation speed directly scales with ray tracing speed.
-</p><p style="margin-bottom:17cm;" /><p class="tiny align right">TMM : Transfer-Matrix Method &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-
-        <!--  s5talk  -->
-        <br/>
-    </div>
 <div class="slide" id="nvidia-optix-ray-tracing-engine-accessible-gpu-ray-tracing">
 <h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- Accessible GPU Ray Tracing</span></h1>
 <div class="sidebar">
@@ -7130,148 +7119,78 @@ NVIDIA OptiX provides an API that makes GPU ray tracing accessible
 
 * Opticks bridges between Geant4 on the CPU and NVIDIA OptiX GPU ray tracing
 * Thus crucially requires translation of the geometry into a GPU appropriate form. -->
-</div>
-<div class="slide" id="amdahl300">
-<h1><span class="i">amdahl300</span></h1>
 <!-- comment
 
-Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n
 
-Using less resources for each photon means more can be in flight at the same time
-that gives more speedup. -->
-
-        <!--  s5talk  -->
-        <br/>
-    <!-- comment
-
-The speedup of the optical photon simulation can be more than
-1000x Geant4, but the non-optical part of the event is not parallelized.
-Performance depends on the fraction of the compute that can be
-parallelized. Overall speedups of 100x are expected.
-
-The red curve is for a parallel fraction of 0.99
-with a parallelized speedup of 1000x the overall
-speedup is around 90x
-
-The benefits of going much beyond 1000x are small
-for traditional uses of optical photon simulation. -->
-<!-- comment
-
-How much parallelized speedup actually useful to overall speedup?
-
-**Overall speed limited by serial portion**
-
-*P*
-     parallelizable proportion
-*1-P*
-     non-parallelizable portion
-*n*
-     parallel speedup factor
+:i:`amdahl300`
+- - - - - - - - - - - - - -
 
 
-optical photon simulation, P ~ 99% of CPU time
+.. comment
 
-* => limit on overall speedup S(n) is 100x
-* even with parallel speedup factor >> 1000x
-* :b:`speedup beyond 1000x not needed` -->
-<!-- comment
+    Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n
 
-Some novel ideas for how to use ultra fast
-optical simulation need more performance.
-
-**Speculative+novel uses require ultra-extreme speedup**
-
-* GPU integration to generate PDFs
-* "simulation-as-reconstruction" (direct ML fits) -->
-<!-- comment
-
-:small:`Opticks + JUNOSW : Testing as Geometry and Models continue to Evolve`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-.. sidebar:: :small:`Visual Inspection Test Tools:`
-
-    .. class:: small
-
-
-        **1. "Simtrace" 2D ray trace sliced view**
-
-        Planar rays from grid of planar gensteps => intersects
-
-        * present intersects with **pyvista** (:strike:`matplotlib`)
-        * precise control : viewpoint + slice plane
-        * point clouds with normals overlap check (kdtree)
-
-        :b:`"Simtrace" clarity => many geom issues obvious`
-
-
-        **2. OpenGL photon anim + OptiX ray trace geom**
-
-        NEW: **SGLM_InterpolatedView.h**
-
-        * NumPy prep EYE,LOOK,UP "ELU" arrays
-        * Catmull-Rom spline interpolate EYE points
-        * Quaternion SLERP : interpolated orientation
-
-        :b:`=> Natural fly-around anim without careful ELU`
-
-        Profit from : :r:`viz geometry == sim geometry`
-
-
-
-
-
-.. class:: small
-
-    Recent JUNO Simulation Geometry Additions:
-
-    * Water Distributor System
-    * EM Field (EMF) compensation coils
-    * Extra Water Pool 8-inch PMTs
-    * ...
-
-    **Opticks Unit tests : class/struct level "opticks-t"**
-
-    ~221 ctest taking ~90s (geom from latest Opticks+JUNOSW release)
-
-
-    **Integration Tests : JUNOSW vs Opticks+JUNOSW**
-
-    * A: Opticks + JUNOSW : write Opticks SEvt NumPy files
-    * B: U4Recorder + JUNOSW : write Opticks SEvt from Geant4
-    * A-vs-B photon history chi-squared
-
-      * :r:`deviations reveal issues` (typically geometry problems)
-
-    * GPU workstation configured as gitlab CI runner [NEW]
-
-      * Dedicated "OJ" repo for integration test scripts
-
-
-    AIM: :b:`automated scheduled validation`
-
-    * cast results as junit report (available in gitlab CI free-tier)
-    * :r:`automated problem finding` |y|, automated fix |n|
-
-      * fix judgement : change source OR generalize translation
+    Using less resources for each photon means more can be in flight at the same time
+    that gives more speedup.
 
 
 
 .. s5_talk::
 
-   JUNO geometry and model continue to evolve
+    Large optical speedup factors in the thousands are due to GPU parallelism.
+    This shows the overall speedup vs the parallelized speedup for different parallel fractions.
 
-   * making validation and testing an ongoing requirement
-   * one powerful test technique is photon history chi2
+    Overall speedup is limited by the non-parallelized parts of the simulation.
+    That is everything other than the optical photons.
 
-   Recent progress in automated testing is to setup a gitlab CI runner
-   on a GPU workstation to help with promptly finding issues with
-   both the Geant4 geometry and with the translation of it.
+    After the time for the photons is parallelized down to zero
+    you are still left with the rest of the simulation,
+    which determines the overall speedup.
 
-   Opticks ray traced visualization is also very useful for finding
-   and investigating issues. This takes advantage of the performant ray tracing
-   and the fact that the visualized geometry is exactly the same as the
-   simulated geometry. -->
+
+.. comment
+
+    The speedup of the optical photon simulation can be more than
+    1000x Geant4, but the non-optical part of the event is not parallelized.
+    Performance depends on the fraction of the compute that can be
+    parallelized. Overall speedups of 100x are expected.
+
+    The red curve is for a parallel fraction of 0.99
+    with a parallelized speedup of 1000x the overall
+    speedup is around 90x
+
+    The benefits of going much beyond 1000x are small
+    for traditional uses of optical photon simulation.
+
+.. comment
+
+    How much parallelized speedup actually useful to overall speedup?
+
+    **Overall speed limited by serial portion**
+
+    *P*
+         parallelizable proportion
+    *1-P*
+         non-parallelizable portion
+    *n*
+         parallel speedup factor
+
+
+    optical photon simulation, P ~ 99% of CPU time
+
+    * => limit on overall speedup S(n) is 100x
+    * even with parallel speedup factor >> 1000x
+    * :b:`speedup beyond 1000x not needed`
+
+.. comment
+
+    Some novel ideas for how to use ultra fast
+    optical simulation need more performance.
+
+    **Speculative+novel uses require ultra-extreme speedup**
+
+    * GPU integration to generate PDFs
+    * "simulation-as-reconstruction" (direct ML fits) -->
 </div>
 <div class="slide" id="opticks-junosw-oj-monitoring">
 <h1>Opticks+JUNOSW (OJ) Monitoring</h1>
@@ -7302,18 +7221,101 @@ optical simulation need more performance.
         <!--  s5talk  -->
         <br/>
     </div>
-<div class="slide" id="opticks-monitoring-grafana-20260715-155458-png">
-<h1><span class="i">opticks_monitoring_grafana_20260715_155458.png</span></h1>
-<p><tt class="docutils literal">Editing Grafana cxs_min.sh&nbsp; : kernel time vs num_photon</tt></p>
+<div class="slide" id="opticks-monitoring-gitlab-ci-20260716-141838-png">
+<h1><span class="i">opticks_monitoring_gitlab_ci_20260716_141838.png</span></h1>
+<p style="margin-bottom:100mm;" /><div class="sidebar">
+<p class="first sidebar-title">OJ repository</p>
+<dl class="small docutils">
+<dt><tt class="docutils literal"><span class="pre">https://code.ihep.ac.cn/blyth/oj</span></tt></dt>
+<dd>Opticks + JUNOSW test scripts</dd>
+</dl>
+<ul class="small last simple">
+<li>daily testing by GPU Workstation gitlab-runner</li>
+<li><span class="r">report =&gt; summary into SQLite3 DB table</span></li>
+<li>Grafana result visualization</li>
+</ul>
 </div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="opticks-monitoring-grafana-20260715-160444-png">
 <h1><span class="i">opticks_monitoring_grafana_20260715_160444.png</span></h1>
-<p><tt class="docutils literal">Opticks Grafana Dashboard</tt></p>
+<p style="margin-bottom:140mm;" /><dl class="docutils">
+<dt><tt class="docutils literal">Opticks Grafana Dashboard</tt></dt>
+<dd><ul class="first last simple">
+<li><tt class="docutils literal">1. interactive time window</tt></li>
+<li><tt class="docutils literal">2. direct links from <span class="pre">gitlab-ci</span></tt></li>
+</ul>
+</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="opticks-monitoring-grafana-20260715-155458-png">
+<h1><span class="i">opticks_monitoring_grafana_20260715_155458.png</span></h1>
+<p style="margin-bottom:110mm;" /><dl class="docutils">
+<dt><tt class="docutils literal">Web Interface <span class="pre">-&gt;</span> Edit Grafana viz of &quot;cxs_min.sh&quot; - GPU time vs photon</tt></dt>
+<dd><ul class="first last simple">
+<li><tt class="docutils literal">Viz based on SQL queries from SQLite3 DB tables</tt></li>
+<li><tt class="docutils literal">Grafana very popular =&gt; AI very helpful</tt></li>
+</ul>
+</dd>
+</dl>
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
+
+grafana
+- - - - - - - -
+
+``Grafana Dashboard Examples : popular tool => AI helps greatly`` -->
 </div>
-<div class="slide" id="grafana">
-<h1>grafana</h1>
-<p><tt class="docutils literal">Grafana Dashboard Examples : popular tool =&gt; AI helps greatly</tt></p>
-</div>
+<div class="slide" id="opticks-junosw-oj-monitoring-goal">
+<h1>Opticks+JUNOSW (OJ) Monitoring : Goal</h1>
+<p class="normal"><span class="b">Nightly : DETAILED Validation + Performance Monitoring</span></p>
+<p class="normal">Requires, for all important tests:</p>
+<ol class="normal arabic simple">
+<li>expand DB schema to hold <strong>summary results</strong><ul>
+<li>tables : <tt class="docutils literal">~/opticks/sysrap/sreportdb.sql</tt></li>
+</ul>
+</li>
+<li>add reporting stage that writes <strong>summary results</strong> into DB tables<ul>
+<li>python OR C++ using <tt class="docutils literal">~/np/NSQLite.h</tt></li>
+<li>insert into tables : <tt class="docutils literal">~/opticks/sysrap/sreportdb.h</tt></li>
+<li>control script : <tt class="docutils literal">~/opticks/sysrap/tests/sreportdb.sh</tt></li>
+</ul>
+</li>
+<li>add Grafana visualization of results + alerts for deviations<ul>
+<li>use web interface to develop SQL query + configure viz</li>
+</ul>
+</li>
+</ol>
+<ul class="normal simple">
+<li>currently <tt class="docutils literal">cxs_min.sh</tt> added to develop the &quot;pipeline&quot;</li>
+<li>straightforward to incorporate more tests</li>
+<li>trying json &quot;metadata&quot; field - to avoid too many schema changes</li>
+<li>sqlite3 : <tt class="docutils literal">json_extract(metadata, <span class="pre">'$.photon_counts.total')</span></tt></li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
+<div class="slide" id="preparations-for-three-species-ls-model">
+<h1><span class="i">Preparations for Three Species LS model</span></h1>
+<p style="margin-bottom:40mm;" /><p class="huge">Preparations for Three Species LS model</p>
+<ul class="normal simple">
+<li>MC Method : Sampling using Cumulative Distribution Function (CDF)</li>
+<li>Monte Carlo Method : Modelling Scintillator Re-emission</li>
+<li>Scint wavelength generation in triplicate (LAB, bisMSB, PPO)</li>
+<li>One billion wavelengths Chi2 check</li>
+</ul>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="mc-method-sampling-using-cumulative-distribution-function-cdf">
 <h1><span class="small">MC Method : Sampling using Cumulative Distribution Function (CDF)</span></h1>
 <img alt="/env/presentation/normal_pdf_cdf.png" class="align-right" src="/env/presentation/normal_pdf_cdf.png" style="width: 400px;" />
@@ -7343,7 +7345,10 @@ optical simulation need more performance.
 </ul>
 <p class="small"><span class="red">CDF &quot;encodes&quot; shape of PDF in convenient form for sampling</span></p>
 <p class="tiny"><a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_transform_sampling">https://en.wikipedia.org/wiki/Inverse_transform_sampling</a></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="monte-carlo-method-modelling-scintillator-re-emission">
 <h1><span class="small">Monte Carlo Method : Modelling Scintillator Re-emission</span></h1>
 <img alt="/env/presentation/inverted_cdf_GScintillatorLib_py.png" class="align-right" src="/env/presentation/inverted_cdf_GScintillatorLib_py.png" style="width: 500px;" />
@@ -7363,8 +7368,8 @@ re-emitted with different wavelength.</dd>
 <li><em>inverted_CDF(probability)</em> -&gt; GPU &quot;re-emission&quot; texture</li>
 </ul>
 <div class="small"><pre class="mypretiny">
-float uniform_sample_reemit = curand_uniform(&rng);
-if (uniform_sample_reemit < reemission_probability )
+float u_reemit = curand_uniform(&rng);
+if (u_reemit < reemission_probability )
 {
     ...
     p.wavelength = reemission_lookup(curand_uniform(&rng));   <b><span class="alarm"> # re-emission texture lookup  </span></b>
@@ -7377,7 +7382,10 @@ else
     return BREAK;
 }
 </pre></div><p class="tiny"><a class="reference external" href="https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h">https://bitbucket.org/simoncblyth/opticks/src/default/optixrap/cu/propagate.h</a></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="scint-wavelength-generation-in-triplicate-lab-bismsb-ppo">
 <h1><span class="small">Scint wavelength generation in triplicate (LAB, bisMSB, PPO)</span></h1>
 <table border="1" class="small docutils">
@@ -7419,19 +7427,31 @@ else
 <li><span class="b">margins(m) prevent Chi2 spikes from float im-precision at zone boundaries</span></li>
 </ul>
 <p class="small"><tt class="docutils literal">float <span class="pre">qscint_three::wavelength_hd20(int</span> species_idx, float u ) const</tt></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="qscintthree-test-sh-comp-012-logy1-edge1-dpi300">
 <h1><span class="i">QScintThree_test_sh_COMP_012_LOGY1_EDGE1_DPI300</span></h1>
 <p style="margin-bottom:130mm;" /><p class="small"><tt class="docutils literal">1e9 wavelengths - (logscale) G4:Opticks diff not visible - Chi2/ndf &lt; 1.001</tt></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="qscintthree-test-sh-comp-012-logy0-edge1-dpi300">
 <h1><span class="i">QScintThree_test_sh_COMP_012_LOGY0_EDGE1_DPI300</span></h1>
 <p style="margin-bottom:130mm;" /><p class="small"><tt class="docutils literal">1e9 wavelengths - (linear) G4:Opticks diff not visible - Chi2/ndf &lt; 1.001</tt></p>
-</div>
+
+        <!--  s5talk  -->
+        <br/>
+    </div>
 <div class="slide" id="qscintthree-test-sh-comp-012-logy1-edge1-dpi300-boffset1e7">
 <h1><span class="i">QScintThree_test_sh_COMP_012_LOGY1_EDGE1_DPI300_BOFFSET1e7</span></h1>
 <p style="margin-bottom:130mm;" /><p class="small"><tt class="docutils literal">1e9 wavelengths - (lin+offset) G4:Opticks diff not visible - Chi2/ndf &lt; 1.001</tt></p>
-<!-- comment
+
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
 
 
 :i:`EMF2 3`
@@ -7502,14 +7522,29 @@ else
 
    A "Simtrace" uses a planar grid of gensteps producing planar rays
    to yield labelled intersects to provide a 2D slice through the geometry. -->
-</div>
-<div class="slide" id="updates-for-blackwell-rtx-6000-cuda-13-1-optix-9-1">
-<h1>Updates for Blackwell RTX 6000 : CUDA 13.1 OptiX 9.1</h1>
-<ul class="normal simple">
-<li>NVIDIA Blackwell RTX 6000 (March 2025)</li>
-<li>NVIDIA CUDA 13.1 (December 4, 2025) -- &quot;biggest expansion of CUDA since launch in 2006&quot;</li>
-<li>NVIDIA OptiX 9.1 (December 12, 2025)</li>
-</ul>
+<!-- comment
+
+Updates for Blackwell RTX 6000 : CUDA 13.1 OptiX 9.1
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+.. class:: normal
+
+    * NVIDIA Blackwell RTX 6000 (March 2025)
+    * NVIDIA CUDA 13.1 (December 4, 2025) - - "biggest expansion of CUDA since launch in 2006"
+
+      * reorganized thrust headers
+
+    * NVIDIA OptiX 9.1 (December 12, 2025)
+
+      * stricter checks : UNSUPPORTED_PRIMITIVE_TYPE
+
+.. comment
+
+    Ada->Blackwell : current geom Blackwell vs old geom Ada : :r:`not doubled`
+
+    * WIP: apples-to-apples comparison
+
+      * eg: re-create old geometry from past GDML files -->
 </div>
 <div class="slide" id="scaling-opticks">
 <h1><span class="i">Scaling Opticks</span></h1>
