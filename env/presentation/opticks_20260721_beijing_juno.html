@@ -6,10 +6,10 @@
 <meta name="generator" content="Docutils 0.21.2: https://docutils.sourceforge.io/" />
 <meta name="version" content="S5 1.1" />
 <meta content="opticks_20260721_beijing_juno.txt" name="name" />
-<meta content="Opticks: GPU Accelerated Optical Photon Simulation for JUNO and Other Experiments" name="title" />
+<meta content="Monitoring JUNOSW + Opticks: GPU ray trace accelerated optical photon simulation" name="title" />
 <meta content="(2026 July 21) JUNO, OptiX, Opticks" name="description" />
 <meta content="18 min" name="note0" />
-<meta content="https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=4520" name="docdb" />
+<meta content="https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/ShowDocument?docid=16838" name="docdb" />
 <title>Monitoring JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation</title>
 <style type="text/css">
 
@@ -395,6 +395,9 @@ ul.auto-toc {
 <div class="slide" id="slide0">
 <h1 class="title"><span class="i">Monitoring JUNOSW + Opticks : GPU ray trace accelerated optical photon simulation</span></h1>
 
+<!-- comment
+
+https://juno.ihep.ac.cn/cgi-bin/Dev_DocDB/DisplayMeeting?sessionid=4520 -->
 <!-- comment
 
 https://docutils.sourceforge.io/docutils/parsers/rst/include/
@@ -6475,6 +6478,12 @@ Processed by unicode2rstsubs.py, part of Docutils:
              background-size: 410px 217px;
              background-position: 1000px 0px;
              
+          }
+          div.slide#opticks-junosw-oj-summary{
+             background-image: url(opticks_monitoring/grafana/20260715_160444.png),url(qudarap/QScintThree/QScintThree_test_sh_COMP_012_LOGY1_EDGE1_DPI300.png),url(../Documents/Geant4OpticksWorkflow7/Geant4OpticksWorkflow_Clients_and_Service_001.png);
+             background-size: 640px 360px,640px 360px,640px 360px;
+             background-position: 640px 0px,0px 360px,640px 360px;
+               
           } 
 
        </style>
@@ -6751,6 +6760,16 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
   * chop Opticks in two via OPTICKS_CONFIG and WITH_CUDA WITH_CURL
 
 * MAYBE : Updates for Blackwell : CUDA OptiX -  optix 9.1 cuda 13.1 -->
+<!-- abstract
+
+Progress in automated monitoring of Opticks+JUNOSW GPU ray trace accelerated
+optical photon simulation using an SQLite database and Grafana monitoring
+web application is reported. Also CUDA preparations to implement the new
+three species scintillator model on the GPU are described and development
+of an Opticks service and clients are detailed. -->
+<!-- keywords
+
+Opticks Optical Photon Simulation GPU Ray Tracing NVIDIA RTX Grafana Monitoring Server Client Scintillator -->
 <div class="mytitle">
 <header>
 <h1 style="background-color:lightgrey;text-align:center;">
@@ -6781,30 +6800,30 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
     <!-- comment
 
 * Opticks Optical simulation directly scales with ray tracing speed
-* Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n
 * Updates for Blackwell : CUDA 13.1 OptiX 9.1 -->
 
 </div>
 <div class="slide" id="outline">
 <h1><span class="i">Outline</span></h1>
 <img alt="newtons-opticks.png" class="align-right" src="newtons-opticks.png" style="width: 299px; height: 547px;" />
-<p style="margin-bottom:-5mm;" /><ul class="small simple">
+<p style="margin-bottom:-10mm;" /><ul class="small simple">
 <li>[p2] OJ : Opticks+JUNOSW Automated Gitlab-CI/CD Releases</li>
 <li>[p3] Optical Photon Simulation Context<ul>
 <li>(JUNO) Optical Photon Simulation Problem...</li>
 <li>Four NVIDIA RTX Gen : Ray Tracing : ~2x every ~2 yrs</li>
 <li>NVIDIA OptiX : Ray Tracing Engine -- Accessible GPU Ray Tracing</li>
 <li>Geant4 + Opticks + NVIDIA OptiX : Hybrid Workflow</li>
+<li>Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n</li>
 </ul>
 </li>
-<li>[p7] Opticks + JUNOSW (OJ) : Testing as Geometry and Models continue to Evolve<ul>
+<li>[p8] Opticks + JUNOSW (OJ) : Testing as Geometry and Models continue to Evolve<ul>
 <li>Opticks+JUNOSW Monitoring</li>
 <li>gitlab-ci in OJ repository</li>
 <li>Opticks Grafana Dashboard</li>
 <li>Goal of Monitoring</li>
 </ul>
 </li>
-<li>[p12] Preparations for Three Species LS model<ul>
+<li>[p13] Preparations for Three Species LS model<ul>
 <li>MC Method : Sampling using Cumulative Distribution Function (CDF)</li>
 <li>Generation of scintillator wavelengths on device using GPU texture</li>
 <li>Scint wavelength generation in triplicate (LAB, bisMSB, PPO)</li>
@@ -6812,8 +6831,8 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <li>Status of Three Species LS model Preparations</li>
 </ul>
 </li>
-<li>[p20] Opticks Updates for CUDA 13.1 OptiX 9.1</li>
-<li>[p21] Geant4 + Opticks + NVIDIA OptiX : Production Scaling ?<ul>
+<li>[p21] Opticks Updates for CUDA 13.1 OptiX 9.1</li>
+<li>[p22] Geant4 + Opticks + NVIDIA OptiX : Production Scaling ?<ul>
 <li>Geant4 + Opticks + NVIDIA OptiX : Monolith x4, x16</li>
 <li>OpticksClients + OpticksService : Share GPUs</li>
 <li>Opticks &quot;Optical Core&quot; =&gt; Server, &quot;Periphery&quot; =&gt; Client</li>
@@ -6822,7 +6841,7 @@ https://www.techpowerup.com/gpu-specs/quadro-rtx-8000.c3306 -->
 <li>NVIDIA Triton Inference Server (aka Dynamo-Triton)</li>
 </ul>
 </li>
-<li>[p30] Summary + Links</li>
+<li>[p31] Summary + Links</li>
 </ul>
 <!-- comment
 
@@ -6910,42 +6929,6 @@ Opticks solves this using GPU ray tracing via NVIDIA OptiX
 * Serial optical simulation is hugely expensive.
 * Opticks applies massively parallel GPU ray tracing, to solve the optical simulation problem
 * For many experiments Opticks can prevent optical photons from limiting simulation -->
-<!-- comment
-
-:small:`NVIDIA RTX PRO 6000 Blackwell`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-.. class:: small
-
-    Blackwell(4th Gen RTX) vs Ada(3rd Gen RTX):
-
-    * :r:`fourth-gen RT Cores : ray tracing ~doubled`
-    * 96GB GDDR7 : internal bandwidth ~doubled (1792 GB/s)
-    * PCIe 5.0 : external bandwidth ~doubled
-    * fifth-gen Tensor Cores : add FP4 (4-bit float), AI ~doubled
-    * add Multi-Instance GPU (MIG) support
-
-      - virtual "split" into four instances
-
-    * **power doubled** (600W)
-
-
-
-.. raw:: html
-
-     <p style="position:fixed;top:1px;left:700px;font-size:30px;background-color:white;border:1px solid black;padding:5px;">
-     Server Edition
-     </p>
-
-
-
-.. s5_talk::
-
-    NVIDIA RTX Pro 6000 Blackwell is from the 4th RTX generation.
-    Compared to the 3rd generation there has been a doubling
-    of ray tracing performance and also doubling in other areas
-    such as internal and external bandwidth. -->
 </div>
 <div class="slide" id="four-nvidia-rtx-gen-ray-tracing-2x-every-2-yrs">
 <h1>Four NVIDIA RTX Gen : Ray Tracing : <span class="b">~2x every ~2 yrs</span></h1>
@@ -7037,98 +7020,9 @@ Cores</th>
         <br/>
     <!-- comment
 
-* Blackwell memory bandwidth x1.9 Ada (GDDR6->7)
-* Blackwell: supports PCIe 5.0 - doubling host-to-device transfer speed [with PCIe 5.0 motherboards] (Others: 3.0, 4.0, 4.0)
-
- https://www.techpowerup.com/gpu-specs/quadro-rtx-6000.c3307            24 GB, 6,299 USD  672.0 GB/s   4608
- https://www.techpowerup.com/gpu-specs/rtx-a6000.c3686                  48 GB, 4,649 USD  768.0 GB/s  10752
- https://www.techpowerup.com/gpu-specs/rtx-6000-ada-generation.c3933    48 GB, 6,799 USD  960.0 GB/s  18176
- https://www.techpowerup.com/gpu-specs/rtx-pro-6000-blackwell.c4272     96 GB, 8,565 USD  1792  GB/s  24064
-
- https://aecmag.com/workstations/review-nvidia-rtx-pro-blackwell-series-gpus/
- https://aecmag.com/workstations/review-nvidia-rtx-pro-blackwell-series-gpus
-
- nvidia-rtx-blackwell-gpu-architecture.pdf -->
-<!-- comment
-
-
-:i:`AB_Substamp_ALL_Etime_vs_Photon_rtx_gen1_gen3.png`
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-.. raw:: html
-
-     <p style="margin-bottom:45mm;" />
-
-
-.. class:: tiny
-
-
-    .. table:: Event Time(s) vs PH(M)
-        :align: right
-
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | PH(M)   |   G1   | G3  | G1/G3  |
-        +=========+========+=====+========+
-        |  1      |  0.47  |0.14 |  3.28  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 10      |  0.44  |0.13 |  3.48  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 20      |  4.39  |1.10 |  3.99  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 30      |  8.87  |2.26 |  3.93  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 40      | 13.29  |3.38 |  3.93  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 50      | 18.13  |4.49 |  4.03  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 60      | 22.64  |5.70 |  3.97  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 70      | 27.31  |6.78 |  4.03  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 80      | 32.24  |7.99 |  4.03  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 90      | 37.92  |9.33 |  4.06  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-        | 100     | 41.93  |10.42|  4.03  |
-        +- - - - - - - - -+- - - - - - - -+- - - - -+- - - - - - - -+
-
-
-
-
-.. raw:: html
-
-    <p class="mymidleftbox">Optical simulation 4x faster 1st->3rd gen RTX </p>
-
-    <p class="mybotrightbox">3rd gen Ada : 100M ph sim. in 10s [TMM PMT model, Custom CSG]</p>
-
-
-
-
-.. raw:: html
-
-   <p class="floating-info-box">
-      Opticks optical simulation speed directly scales with ray tracing speed.
-   </p>
-
-.. raw:: html
-
-    <p style="margin-bottom:17cm;" />
-
-
-.. class:: tiny
-    :align: right
-
-    TMM : Transfer-Matrix Method |nbsp10| |nbsp10|
-
-
-.. s5_talk::
-
-    The plot shows kernel time vs number of photons for 1st and 3rd generation RTX GPUs.
-    Optical simulation performance is a factor of four faster with the 3rd generation
-    compared to the 1st.
-
-    Opticks optical performance directly scales with ray tracing performance. -->
+This table shows characteristics of four generations of RTX 6000 GPUs
+At each generation, every 2 years or so,  ray tracing performance has approximately doubled.
+Much of these gains are due to the RT cores, which are ray trace dedicated ASICs. -->
 </div>
 <div class="slide" id="nvidia-optix-ray-tracing-engine-accessible-gpu-ray-tracing">
 <h1><span class="small">NVIDIA® OptiX™ Ray Tracing Engine -- Accessible GPU Ray Tracing</span></h1>
@@ -7191,78 +7085,59 @@ NVIDIA OptiX provides an API that makes GPU ray tracing accessible
 
 * Opticks bridges between Geant4 on the CPU and NVIDIA OptiX GPU ray tracing
 * Thus crucially requires translation of the geometry into a GPU appropriate form. -->
+</div>
+<div class="slide" id="amdahl300">
+<h1><span class="i">amdahl300</span></h1>
 <!-- comment
 
+Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n
 
-:i:`amdahl300`
-- - - - - - - - - - - - - -
+Using less resources for each photon means more can be in flight at the same time
+that gives more speedup. -->
 
+        <!--  s5talk  -->
+        <br/>
+    <!-- comment
 
-.. comment
+The speedup of the optical photon simulation can be more than
+1000x Geant4, but the non-optical part of the event is not parallelized.
+Performance depends on the fraction of the compute that can be
+parallelized. Overall speedups of 100x are expected.
 
-    Amdahl 'Law' : Overall Speedup S(p,n) for Parallel Fraction p and Parallized Speedup n
+The red curve is for a parallel fraction of 0.99
+with a parallelized speedup of 1000x the overall
+speedup is around 90x
 
-    Using less resources for each photon means more can be in flight at the same time
-    that gives more speedup.
+The benefits of going much beyond 1000x are small
+for traditional uses of optical photon simulation. -->
+<!-- comment
 
+How much parallelized speedup actually useful to overall speedup?
 
+**Overall speed limited by serial portion**
 
-.. s5_talk::
-
-    Large optical speedup factors in the thousands are due to GPU parallelism.
-    This shows the overall speedup vs the parallelized speedup for different parallel fractions.
-
-    Overall speedup is limited by the non-parallelized parts of the simulation.
-    That is everything other than the optical photons.
-
-    After the time for the photons is parallelized down to zero
-    you are still left with the rest of the simulation,
-    which determines the overall speedup.
-
-
-.. comment
-
-    The speedup of the optical photon simulation can be more than
-    1000x Geant4, but the non-optical part of the event is not parallelized.
-    Performance depends on the fraction of the compute that can be
-    parallelized. Overall speedups of 100x are expected.
-
-    The red curve is for a parallel fraction of 0.99
-    with a parallelized speedup of 1000x the overall
-    speedup is around 90x
-
-    The benefits of going much beyond 1000x are small
-    for traditional uses of optical photon simulation.
-
-.. comment
-
-    How much parallelized speedup actually useful to overall speedup?
-
-    **Overall speed limited by serial portion**
-
-    *P*
-         parallelizable proportion
-    *1-P*
-         non-parallelizable portion
-    *n*
-         parallel speedup factor
+*P*
+     parallelizable proportion
+*1-P*
+     non-parallelizable portion
+*n*
+     parallel speedup factor
 
 
-    optical photon simulation, P ~ 99% of CPU time
+optical photon simulation, P ~ 99% of CPU time
 
-    * => limit on overall speedup S(n) is 100x
-    * even with parallel speedup factor >> 1000x
-    * :b:`speedup beyond 1000x not needed`
+* => limit on overall speedup S(n) is 100x
+* even with parallel speedup factor >> 1000x
+* :b:`speedup beyond 1000x not needed` -->
+<!-- comment
 
-.. comment
+Some novel ideas for how to use ultra fast
+optical simulation need more performance.
 
-    Some novel ideas for how to use ultra fast
-    optical simulation need more performance.
+**Speculative+novel uses require ultra-extreme speedup**
 
-    **Speculative+novel uses require ultra-extreme speedup**
-
-    * GPU integration to generate PDFs
-    * "simulation-as-reconstruction" (direct ML fits) -->
+* GPU integration to generate PDFs
+* "simulation-as-reconstruction" (direct ML fits) -->
 </div>
 <div class="slide" id="opticks-junosw-oj-monitoring">
 <h1>Opticks+JUNOSW (OJ) Monitoring</h1>
@@ -7967,6 +7842,40 @@ Concurrent Opticks Server Ideas
 
     * slice gensteps, do multiple kernel launches -->
 </div>
+<div class="slide" id="opticks-junosw-oj-summary">
+<h1><span class="small">Opticks + JUNOSW (OJ) Summary</span></h1>
+<ul class="small simple">
+<li>Daily OJ releases onto CVMFS ongoing<ul>
+<li><tt class="docutils literal">/cvmfs/opticks.ihep.ac.cn/oj/</tt></li>
+</ul>
+</li>
+<li><span class="b">Daily GPU tests of validity + performance</span><ul>
+<li>GPU workstation gitlab-runner + Grafana Viz</li>
+</ul>
+</li>
+<li>CUDA Prep. for new Three Species LS model ongoing<ul>
+<li><span class="r">1e9 λ : sampling via GPU texture atlas validated</span></li>
+</ul>
+</li>
+<li>Server/Client prototype (Opticks split in two)<ul>
+<li>array transport over HTTP POST (libcurl)</li>
+<li>Server : FastAPI/python/nanobind/CSGOptiX</li>
+<li><span class="b">=&gt; Opticks on non-GPU nodes, improve GPU util.</span></li>
+</ul>
+</li>
+</ul>
+<p style="position:fixed;top:275px;left:650px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+OJ Dashboard - Daily Monitoring Validity + Performance
+</p>
+<p style="position:fixed;top:575px;left:10px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+1e9 λ - Triplicated : G4:OJ Chi2/ndf < 1.001
+</p>
+<p style="position:fixed;top:625px;left:750px;font-size:25px;background-color:white;border:1px solid black;padding:5px;">
+OJ Server/Client Prototype Operational
+</p>
+        <!--  s5talk  -->
+        <br/>
+    </div>
 </div>
 </body>
 </html>
